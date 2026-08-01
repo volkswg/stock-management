@@ -3,6 +3,23 @@ export const GOOGLE_SHEETS_SCOPE =
 export const GOOGLE_SHEETS_API_BASE =
   "https://sheets.googleapis.com/v4/spreadsheets";
 
+export const PURCHASE_SHEET_HEADERS = [
+  "id",
+  "poNumber",
+  "status",
+  "seller",
+  "item",
+  "quantity",
+  "totalPrice",
+  "deliveryFee",
+  "sentToCargoAt",
+  "deliveredAt",
+  "createdAt",
+  "updatedAt",
+  "createdBy",
+  "remark",
+];
+
 export const lastColumnLetter = (columnIndex: number): string => {
   let letter = "";
   let index = columnIndex;

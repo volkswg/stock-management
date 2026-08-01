@@ -2,6 +2,8 @@ import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
 import {
   GOOGLE_SHEETS_API_BASE,
   GOOGLE_SHEETS_SCOPE,
+  PURCHASE_SHEET_HEADERS,
+  lastColumnLetter,
 } from "./const";
 import type {
   GoogleSheetRow,
@@ -153,7 +155,9 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     await this.updateValues(range, values, this.orderDetailsWorksheetName);
   }
 
-  async readPurchaseRows(range = "A:Z"): Promise<GoogleSheetRow[]> {
+  async readPurchaseRows(
+    range = `A:${lastColumnLetter(PURCHASE_SHEET_HEADERS.length - 1)}`,
+  ): Promise<GoogleSheetRow[]> {
     return this.getValues(range, this.purchasesWorksheetName);
   }
 
