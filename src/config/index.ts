@@ -1,4 +1,9 @@
 export type AppConfig = {
+  line: {
+    channelSecret: string;
+    channelAccessToken: string;
+  };
+  publicBaseUrl: string;
   googleSheets: {
     spreadsheetId: string;
     ordersWorksheetName: string;
@@ -13,6 +18,11 @@ export type AppConfig = {
 
 export function getConfig(): AppConfig {
   return {
+    line: {
+      channelSecret: process.env.LINE_CHANNEL_SECRET || "",
+      channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || "",
+    },
+    publicBaseUrl: process.env.PUBLIC_BASE_URL || "",
     googleSheets: {
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || "",
       ordersWorksheetName:
