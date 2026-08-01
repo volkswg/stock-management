@@ -14,8 +14,10 @@ export {
 export type {
   DownloadedMessageContent,
   ILineBotService,
+  LineEvent,
   LineQuickReply,
   LineReplyMessage,
+  LineWebhookPayload,
   MessageQuickReplyAction,
   RichMenuRequest,
 } from "./types";

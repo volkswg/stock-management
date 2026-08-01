@@ -121,3 +121,28 @@ export interface RichMenuRequest {
         };
   }>;
 }
+
+export type LineWebhookPayload = {
+  events?: LineEvent[];
+};
+
+export type LineEvent = {
+  type: string;
+  replyToken?: string;
+  timestamp?: number;
+  webhookEventId?: string;
+  source?: {
+    userId?: string;
+    groupId?: string;
+  };
+  message?: {
+    id: string;
+    type: string;
+    text?: string;
+    contentProvider?: {
+      type: string;
+      originalContentUrl?: string;
+      previewImageUrl?: string;
+    };
+  };
+};
