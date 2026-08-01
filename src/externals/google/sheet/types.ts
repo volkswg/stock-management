@@ -10,33 +10,23 @@ export type GoogleSheetsConfig = {
   serviceAccountPrivateKey: string;
 };
 
-export interface IGoogleSheetsService {
+export interface IGoogleSheet {
   checkConnection(): Promise<void>;
-  getValues(range: string, worksheetName?: string): Promise<GoogleSheetRow[]>;
-  appendValues(
-    range: string,
-    values: GoogleSheetRow[],
-    worksheetName?: string,
-  ): Promise<void>;
-  updateValues(
-    range: string,
-    values: GoogleSheetRow[],
-    worksheetName?: string,
-  ): Promise<void>;
-  clearValues(range: string, worksheetName?: string): Promise<void>;
-  readOrderRows(range?: string): Promise<GoogleSheetRow[]>;
-  appendOrderRows(range: string, values: GoogleSheetRow[]): Promise<void>;
-  updateOrderRows(range: string, values: GoogleSheetRow[]): Promise<void>;
-  readOrderDetailRows(range?: string): Promise<GoogleSheetRow[]>;
-  appendOrderDetailRows(
-    range: string,
-    values: GoogleSheetRow[],
-  ): Promise<void>;
-  updateOrderDetailRows(
-    range: string,
-    values: GoogleSheetRow[],
-  ): Promise<void>;
-  readPurchaseRows(range?: string): Promise<GoogleSheetRow[]>;
-  appendPurchaseRows(range: string, values: GoogleSheetRow[]): Promise<void>;
-  updatePurchaseRows(range: string, values: GoogleSheetRow[]): Promise<void>;
+  read(range: string): Promise<GoogleSheetRow[]>;
+  append(range: string, values: GoogleSheetRow[]): Promise<void>;
+  update(range: string, values: GoogleSheetRow[]): Promise<void>;
+  clear(range: string): Promise<void>;
+}
+
+export interface IGoogleRowsSheet {
+  readRows(range?: string): Promise<GoogleSheetRow[]>;
+  appendRows(range: string, values: GoogleSheetRow[]): Promise<void>;
+  updateRows(range: string, values: GoogleSheetRow[]): Promise<void>;
+}
+
+export interface IGoogleSheetsService {
+  readonly orders: IGoogleRowsSheet;
+  readonly orderDetails: IGoogleRowsSheet;
+  readonly purchases: IGoogleRowsSheet;
+  checkConnection(): Promise<void>;
 }

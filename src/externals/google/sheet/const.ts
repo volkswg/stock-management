@@ -20,6 +20,22 @@ export const PURCHASE_SHEET_HEADERS = [
   "remark",
 ];
 
+export const ORDERS_SHEET_HEADERS = [
+  "id",
+  "status", // draft, paid, shipped, delivered, canceled
+  "seller", // seller
+  // "quantity",
+  "totalPrice",
+  // "deliveryFee",
+  // "sentToCargoAt",
+  // "deliveredAt",
+  "createdAt",
+  "updatedAt",
+  "deletedAt",
+  "createdBy",
+  "remark",
+];
+
 export const lastColumnLetter = (columnIndex: number): string => {
   let letter = "";
   let index = columnIndex;

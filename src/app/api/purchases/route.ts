@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export async function GET(): Promise<NextResponse> {
   try {
     const googleSheets = createGoogleSheetsServiceFromConfig(getConfig());
-    const rows = await googleSheets.readPurchaseRows();
+    const rows = await googleSheets.purchases.readRows();
 
     return NextResponse.json({
       rows,
