@@ -1,5 +1,5 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { readFile } from "node:fs/promises";
+import { extname } from "node:path";
 import {
   LineRichMenuClient,
   type RichMenuRequest,
@@ -285,7 +285,7 @@ async function createRichMenuWithImage({
   imagePath: string;
   richMenu: RichMenuRequest;
 }): Promise<string> {
-  const image = await fs.readFile(imagePath);
+  const image = await readFile(imagePath);
   if (image.byteLength > MAX_RICH_MENU_IMAGE_BYTES) {
     throw new Error(
       `Rich menu image is too large: ${imagePath} is ${formatBytes(
@@ -306,7 +306,7 @@ async function createRichMenuWithImage({
 }
 
 function getImageContentType(imagePath: string): string {
-  const extension = path.extname(imagePath).toLowerCase();
+  const extension = extname(imagePath).toLowerCase();
 
   if (extension === ".jpg" || extension === ".jpeg") return "image/jpeg";
   if (extension === ".png") return "image/png";
