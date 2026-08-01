@@ -133,7 +133,7 @@ export class LineBotService implements ILineBotService {
         Authorization: `Bearer ${this.channelAccessToken}`,
         "Content-Type": contentType,
       },
-      body: image,
+      body: new Uint8Array(image),
     });
 
     await this.verifyLineApiResponseSucceeded(
