@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import {
@@ -39,7 +40,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     eventCount: payload.events?.length || 0,
   });
 
+  const legacyEvents = (payload.events || []).filter(shouldProxyToLegacy);
+
   for (const event of payload.events || []) {
+    if (legacyEvents.includes(event)) {
+      continue;
+    }
+
     try {
       await handleLineEvent({
         event,
@@ -53,7 +60,52 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
   }
 
+  if (legacyEvents.length > 0) {
+    if (!config.line.legacyWebhookUrl) {
+      console.warn("LINE legacy webhook proxy skipped: URL is not configured", {
+        eventCount: legacyEvents.length,
+      });
+    } else {
+      await proxyLegacyLineWebhook({
+        legacyWebhookUrl: config.line.legacyWebhookUrl,
+        channelSecret: config.line.channelSecret,
+        events: legacyEvents,
+      });
+    }
+  }
+
   return NextResponse.json({ ok: true });
+}
+
+async function proxyLegacyLineWebhook({
+  legacyWebhookUrl,
+  channelSecret,
+  events,
+}: {
+  legacyWebhookUrl: string;
+  channelSecret: string;
+  events: LineEvent[];
+}): Promise<void> {
+  const body = JSON.stringify({ events });
+  const signature = crypto
+    .createHmac("sha256", channelSecret)
+    .update(body)
+    .digest("base64");
+  const response = await fetch(legacyWebhookUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-line-signature": signature,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const responseBody = await response.text();
+    throw new Error(
+      `Legacy LINE webhook proxy failed: ${response.status} ${responseBody}`,
+    );
+  }
 }
 
 function parseLineWebhookPayload(rawBody: Buffer): LineWebhookPayload {
@@ -76,4 +128,25 @@ function isLineEvent(value: unknown): value is LineEvent {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function shouldProxyToLegacy(event: LineEvent): boolean {
+  if (event.type !== "message" || !event.message) {
+    return false;
+  }
+
+  if (event.message.type === "image") {
+    return true;
+  }
+
+  if (event.message.type !== "text") {
+    return false;
+  }
+
+  const text = event.message.text?.trim().toLowerCase();
+  if (!text || text === "help" || text === "create:order") {
+    return false;
+  }
+
+  return true;
 }

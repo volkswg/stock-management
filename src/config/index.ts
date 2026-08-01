@@ -2,6 +2,7 @@ export type AppConfig = {
   line: {
     channelSecret: string;
     channelAccessToken: string;
+    legacyWebhookUrl: string;
   };
   publicBaseUrl: string;
   googleSheets: {
@@ -21,6 +22,7 @@ export function getConfig(): AppConfig {
     line: {
       channelSecret: process.env.LINE_CHANNEL_SECRET || "",
       channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || "",
+      legacyWebhookUrl: process.env.LINE_LEGACY_WEBHOOK_URL || "",
     },
     publicBaseUrl: process.env.PUBLIC_BASE_URL || "",
     googleSheets: {
