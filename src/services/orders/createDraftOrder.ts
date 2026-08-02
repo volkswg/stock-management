@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import {
   lastColumnLetter,
   ORDERS_SHEET_HEADERS,
@@ -24,9 +23,10 @@ export async function createDraftOrder({
   googleSheetsService: IGoogleSheetsService;
   createdBy: string;
 }): Promise<DraftOrder> {
+  const id = await getNextOrderRowNumber(googleSheetsService);
   const now = new Date().toISOString();
   const order: DraftOrder = {
-    id: crypto.randomUUID(),
+    id: String(id),
     status: "draft",
     seller: "",
     totalPrice: "",
@@ -56,4 +56,11 @@ export async function createDraftOrder({
 
 function getOrdersAppendRange(): string {
   return `A:${lastColumnLetter(ORDERS_SHEET_HEADERS.length - 1)}`;
+}
+
+async function getNextOrderRowNumber(
+  googleSheetsService: IGoogleSheetsService,
+): Promise<number> {
+  const rows = await googleSheetsService.orders.readRows("A:A");
+  return rows.length + 1;
 }
