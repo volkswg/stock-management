@@ -10,6 +10,7 @@ export type AppConfig = {
     ordersWorksheetName: string;
     orderDetailsWorksheetName: string;
     purchasesWorksheetName: string;
+    userStateWorksheetName: string;
   };
   googleService: {
     accountEmail: string;
@@ -34,6 +35,8 @@ export function getConfig(): AppConfig {
         "order_details",
       purchasesWorksheetName:
         process.env.GOOGLE_SHEETS_PURCHASES_WORKSHEET_NAME || "purchases",
+      userStateWorksheetName:
+        process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME || "user_state",
     },
     googleService: {
       accountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "",

@@ -1,13 +1,19 @@
 import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
 import { GoogleSheetsClient } from "./client";
 import { GOOGLE_SHEETS_SCOPE } from "./const";
-import { OrderDetailsSheet, OrdersSheet, PurchasesSheet } from "./sheets";
+import {
+  OrderDetailsSheet,
+  OrdersSheet,
+  PurchasesSheet,
+  UserStateSheet,
+} from "./sheets";
 import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
   readonly orders: OrdersSheet;
   readonly orderDetails: OrderDetailsSheet;
   readonly purchases: PurchasesSheet;
+  readonly userState: UserStateSheet;
 
   private readonly client: GoogleSheetsClient;
 
@@ -30,6 +36,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       throw new Error("Google Sheets purchases worksheet name is required.");
     }
 
+    if (!config.userStateWorksheetName.trim()) {
+      throw new Error("Google Sheets user state worksheet name is required.");
+    }
+
     const auth = new GoogleServiceAccountAuth({
       serviceAccountEmail: config.serviceAccountEmail,
       serviceAccountPrivateKey: config.serviceAccountPrivateKey,
@@ -45,6 +55,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.client,
       config.purchasesWorksheetName,
     );
+    this.userState = new UserStateSheet(
+      this.client,
+      config.userStateWorksheetName,
+    );
   }
 
   async checkConnection(): Promise<void> {
@@ -52,6 +66,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.orders.checkConnection(),
       this.orderDetails.checkConnection(),
       this.purchases.checkConnection(),
+      this.userState.checkConnection(),
     ]);
   }
 }

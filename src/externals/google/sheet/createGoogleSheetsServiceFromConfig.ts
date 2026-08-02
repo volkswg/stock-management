@@ -9,6 +9,7 @@ export function createGoogleSheetsServiceFromConfig(
     ordersWorksheetName: config.googleSheets.ordersWorksheetName,
     orderDetailsWorksheetName: config.googleSheets.orderDetailsWorksheetName,
     purchasesWorksheetName: config.googleSheets.purchasesWorksheetName,
+    userStateWorksheetName: config.googleSheets.userStateWorksheetName,
     serviceAccountEmail: config.googleService.accountEmail,
     serviceAccountPrivateKey: config.googleService.accountPrivateKey,
   });
