@@ -7,6 +7,10 @@ import {
   type LineWebhookPayload,
 } from "@/externals/line";
 import {
+  createGoogleSheetsServiceFromConfig,
+  type IGoogleSheetsService,
+} from "@/externals/google/sheet";
+import {
   classifyLineTextCommand,
   handleLineEvent,
   LineTextCommand,
@@ -20,6 +24,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     config.line.channelAccessToken,
     config.line.channelSecret,
   );
+  const getGoogleSheetsService = createGoogleSheetsServiceGetter(config);
   const rawBody = Buffer.from(await request.arrayBuffer());
   const signature = request.headers.get("x-line-signature") || undefined;
 
@@ -55,6 +60,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       await handleLineEvent({
         event,
         lineBotService,
+        getGoogleSheetsService,
       });
     } catch (error) {
       console.error("Failed to process LINE event", {
@@ -79,6 +85,17 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+function createGoogleSheetsServiceGetter(
+  config: ReturnType<typeof getConfig>,
+): () => IGoogleSheetsService {
+  let googleSheetsService: IGoogleSheetsService | undefined;
+
+  return () => {
+    googleSheetsService ||= createGoogleSheetsServiceFromConfig(config);
+    return googleSheetsService;
+  };
 }
 
 async function proxyLegacyLineWebhook({

@@ -7,7 +7,11 @@ export {
   PurchasesSheet,
 } from "./sheets";
 export { createGoogleSheetsServiceFromConfig } from "./createGoogleSheetsServiceFromConfig";
-export { PURCHASE_SHEET_HEADERS } from "./const";
+export {
+  lastColumnLetter,
+  ORDERS_SHEET_HEADERS,
+  PURCHASE_SHEET_HEADERS,
+} from "./const";
 export type {
   GoogleSheetCellValue,
   GoogleSheetRow,
