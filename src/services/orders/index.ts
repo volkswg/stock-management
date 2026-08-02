@@ -1,1 +1,1 @@
-export { createDraftOrder, type DraftOrder } from "./createDraftOrder";
+export { createDraftOrder, type Order as DraftOrder } from "./createDraftOrder";

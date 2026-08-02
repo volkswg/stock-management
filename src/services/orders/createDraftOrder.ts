@@ -5,9 +5,9 @@ import {
 import { ORDERS_SHEET_HEADERS } from "@/externals/google/sheet/sheets/orders/const";
 import { USER_STATE_SHEET_HEADERS } from "@/externals/google/sheet/sheets/user-state/const";
 
-export type DraftOrder = {
+export type Order = {
   id: string;
-  status: "draft";
+  status: OrderStatus;
   seller: string;
   totalPrice: string;
   createdAt: string;
@@ -17,19 +17,23 @@ export type DraftOrder = {
   remark: string;
 };
 
-export enum UserStateFlowName {
-  OrderCreate = "OrderCreate",
+export enum OrderStatus {
+  WaitingForBillImage = "waiting_for_bill_image",
+  Paid = "paid",
+  Shipped = "shipped",
+  Delivered = "delivered",
+  Canceled = "canceled",
 }
 
-export enum UserStateState {
-  WaitingForBillImage = "waiting_for_bill_image",
+export enum UserStateFlowName {
+  OrderCreate = "OrderCreate",
 }
 
 type UserState = {
   id: string;
   userId: string;
   flowname: UserStateFlowName;
-  state: UserStateState;
+  state: OrderStatus;
   createdAt: string;
   updatedAt: string;
 };
@@ -40,12 +44,12 @@ export async function createDraftOrder({
 }: {
   googleSheetsService: IGoogleSheetsService;
   createdBy: string;
-}): Promise<DraftOrder> {
+}): Promise<Order> {
   const id = await getNextOrderRowNumber(googleSheetsService);
   const now = new Date().toISOString();
-  const order: DraftOrder = {
+  const order: Order = {
     id: String(id),
-    status: "draft",
+    status: OrderStatus.WaitingForBillImage,
     seller: "",
     totalPrice: "",
     createdAt: now,
@@ -103,7 +107,7 @@ async function createOrderUserState({
     id: String(id),
     userId,
     flowname: UserStateFlowName.OrderCreate,
-    state: UserStateState.WaitingForBillImage,
+    state: OrderStatus.WaitingForBillImage,
     createdAt: now,
     updatedAt: now,
   };
