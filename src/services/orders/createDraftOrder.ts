@@ -1,8 +1,8 @@
 import {
   lastColumnLetter,
-  ORDERS_SHEET_HEADERS,
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
+import { ORDERS_SHEET_HEADERS } from "@/externals/google/sheet/sheets/orders/const";
 
 export type DraftOrder = {
   id: string;

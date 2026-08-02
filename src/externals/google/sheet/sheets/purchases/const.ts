@@ -1,0 +1,16 @@
+export const PURCHASE_SHEET_HEADERS = [
+  "id",
+  "poNumber",
+  "status",
+  "seller",
+  "item",
+  "quantity",
+  "totalPrice",
+  "deliveryFee",
+  "sentToCargoAt",
+  "deliveredAt",
+  "createdAt",
+  "updatedAt",
+  "createdBy",
+  "remark",
+];

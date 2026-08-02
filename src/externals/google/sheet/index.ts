@@ -9,9 +9,9 @@ export {
 export { createGoogleSheetsServiceFromConfig } from "./createGoogleSheetsServiceFromConfig";
 export {
   lastColumnLetter,
-  ORDERS_SHEET_HEADERS,
-  PURCHASE_SHEET_HEADERS,
 } from "./const";
+export { ORDERS_SHEET_HEADERS } from "./sheets/orders/const";
+export { PURCHASE_SHEET_HEADERS } from "./sheets/purchases/const";
 export type {
   GoogleSheetCellValue,
   GoogleSheetRow,

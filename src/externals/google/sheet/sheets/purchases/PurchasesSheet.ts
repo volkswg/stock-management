@@ -1,6 +1,7 @@
-import { PURCHASE_SHEET_HEADERS, lastColumnLetter } from "../../const";
+import { lastColumnLetter } from "../../const";
 import { BaseGoogleSheet } from "../BaseGoogleSheet";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "../../types";
+import { PURCHASE_SHEET_HEADERS } from "./const";
 
 export class PurchasesSheet
   extends BaseGoogleSheet
