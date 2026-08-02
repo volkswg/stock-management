@@ -6,7 +6,11 @@ import {
   type LineEvent,
   type LineWebhookPayload,
 } from "@/externals/line";
-import { handleLineEvent } from "@/services/line";
+import {
+  classifyLineTextCommand,
+  handleLineEvent,
+  LineTextCommand,
+} from "@/services/line";
 
 export const runtime = "nodejs";
 
@@ -143,10 +147,5 @@ function shouldProxyToLegacy(event: LineEvent): boolean {
     return false;
   }
 
-  const text = event.message.text?.trim().toLowerCase();
-  if (!text || text === "help" || text === "create:order") {
-    return false;
-  }
-
-  return true;
+  return classifyLineTextCommand(event.message.text) === LineTextCommand.Legacy;
 }
