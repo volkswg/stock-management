@@ -1,4 +1,5 @@
 import { type LineBotService, type LineEvent } from "@/externals/line";
+import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { classifyLineTextCommand } from "./text";
 import { LineTextCommand } from "./enum";
@@ -10,10 +11,12 @@ export async function handleLineEvent({
   event,
   lineBotService,
   getGoogleSheetsService,
+  getGoogleDriveService,
 }: {
   event: LineEvent;
   lineBotService: LineBotService;
   getGoogleSheetsService: () => IGoogleSheetsService;
+  getGoogleDriveService: () => IGoogleDriveService | undefined;
 }): Promise<void> {
   if (event.type !== "message" || !event.message) {
     return;
@@ -24,6 +27,7 @@ export async function handleLineEvent({
       event,
       lineBotService,
       getGoogleSheetsService,
+      getGoogleDriveService,
     });
     return;
   }

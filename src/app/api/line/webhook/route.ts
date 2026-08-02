@@ -7,6 +7,10 @@ import {
   type LineWebhookPayload,
 } from "@/externals/line";
 import {
+  createGoogleDriveServiceFromConfig,
+  type IGoogleDriveService,
+} from "@/externals/google/drive";
+import {
   createGoogleSheetsServiceFromConfig,
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
@@ -26,6 +30,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     config.line.channelSecret,
   );
   const getGoogleSheetsService = createGoogleSheetsServiceGetter(config);
+  const getGoogleDriveService = createGoogleDriveServiceGetter(config);
   const rawBody = Buffer.from(await request.arrayBuffer());
   const signature = request.headers.get("x-line-signature") || undefined;
 
@@ -65,6 +70,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         event,
         lineBotService,
         getGoogleSheetsService,
+        getGoogleDriveService,
       });
     } catch (error) {
       console.error("Failed to process LINE event", {
@@ -89,6 +95,17 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+function createGoogleDriveServiceGetter(
+  config: ReturnType<typeof getConfig>,
+): () => IGoogleDriveService | undefined {
+  let googleDriveService: IGoogleDriveService | undefined;
+
+  return () => {
+    googleDriveService ||= createGoogleDriveServiceFromConfig(config);
+    return googleDriveService;
+  };
 }
 
 function createGoogleSheetsServiceGetter(
