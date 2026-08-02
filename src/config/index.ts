@@ -12,6 +12,15 @@ export type AppConfig = {
     purchasesWorksheetName: string;
     userStateWorksheetName: string;
   };
+  googleDrive: {
+    folderId: string;
+    makeFilesReadableByLink: boolean;
+  };
+  googleOAuth: {
+    clientId: string;
+    clientSecret: string;
+    refreshToken: string;
+  };
   googleService: {
     accountEmail: string;
     accountPrivateKey: string;
@@ -37,6 +46,16 @@ export function getConfig(): AppConfig {
         process.env.GOOGLE_SHEETS_PURCHASES_WORKSHEET_NAME || "purchases",
       userStateWorksheetName:
         process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME || "user_state",
+    },
+    googleDrive: {
+      folderId: process.env.GOOGLE_DRIVE_FOLDER_ID || "",
+      makeFilesReadableByLink:
+        process.env.GOOGLE_DRIVE_MAKE_FILES_READABLE_BY_LINK === "true",
+    },
+    googleOAuth: {
+      clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || "",
+      refreshToken: process.env.GOOGLE_OAUTH_REFRESH_TOKEN || "",
     },
     googleService: {
       accountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "",
