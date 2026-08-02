@@ -15,6 +15,7 @@ import {
   handleLineEvent,
   LineTextCommand,
 } from "@/services/line";
+import { hasPendingUserState } from "@/services/user-states";
 
 export const runtime = "nodejs";
 
@@ -49,7 +50,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     eventCount: payload.events?.length || 0,
   });
 
-  const legacyEvents = (payload.events || []).filter(shouldProxyToLegacy);
+  const legacyEvents = await collectLegacyEvents({
+    events: payload.events || [],
+    getGoogleSheetsService,
+  });
 
   for (const event of payload.events || []) {
     if (legacyEvents.includes(event)) {
@@ -96,6 +100,24 @@ function createGoogleSheetsServiceGetter(
     googleSheetsService ||= createGoogleSheetsServiceFromConfig(config);
     return googleSheetsService;
   };
+}
+
+async function collectLegacyEvents({
+  events,
+  getGoogleSheetsService,
+}: {
+  events: LineEvent[];
+  getGoogleSheetsService: () => IGoogleSheetsService;
+}): Promise<LineEvent[]> {
+  const legacyEvents: LineEvent[] = [];
+
+  for (const event of events) {
+    if (await shouldProxyToLegacy({ event, getGoogleSheetsService })) {
+      legacyEvents.push(event);
+    }
+  }
+
+  return legacyEvents;
 }
 
 async function proxyLegacyLineWebhook({
@@ -151,13 +173,36 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function shouldProxyToLegacy(event: LineEvent): boolean {
+async function shouldProxyToLegacy({
+  event,
+  getGoogleSheetsService,
+}: {
+  event: LineEvent;
+  getGoogleSheetsService: () => IGoogleSheetsService;
+}): Promise<boolean> {
   if (event.type !== "message" || !event.message) {
     return false;
   }
 
   if (event.message.type === "image") {
-    return true;
+    const lineUserId = event.source?.userId;
+    if (!lineUserId) {
+      return true;
+    }
+
+    try {
+      const hasPendingState = await hasPendingUserState({
+        googleSheetsService: getGoogleSheetsService(),
+        userId: lineUserId,
+      });
+      return !hasPendingState;
+    } catch (error) {
+      console.error("Failed to check LINE pending user state", {
+        webhookEventId: event.webhookEventId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return true;
+    }
   }
 
   if (event.message.type !== "text") {

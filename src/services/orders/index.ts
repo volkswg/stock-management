@@ -1,1 +1,6 @@
-export { createDraftOrder, type Order as DraftOrder } from "./createDraftOrder";
+export {
+  createDraftOrder,
+  OrderStatus,
+  UserStateFlowName,
+  type Order as DraftOrder,
+} from "./createDraftOrder";

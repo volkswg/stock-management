@@ -4,6 +4,7 @@ import { classifyLineTextCommand } from "./text";
 import { LineTextCommand } from "./enum";
 import { handleCreateOrderLineEvent } from "./events/createOrder";
 import { handleHelpLineEvent } from "./events/help";
+import { handleOrderBillImageLineEvent } from "./events/orderBillImage";
 
 export async function handleLineEvent({
   event,
@@ -14,7 +15,20 @@ export async function handleLineEvent({
   lineBotService: LineBotService;
   getGoogleSheetsService: () => IGoogleSheetsService;
 }): Promise<void> {
-  if (event.type !== "message" || event.message?.type !== "text") {
+  if (event.type !== "message" || !event.message) {
+    return;
+  }
+
+  if (event.message.type === "image") {
+    await handleOrderBillImageLineEvent({
+      event,
+      lineBotService,
+      getGoogleSheetsService,
+    });
+    return;
+  }
+
+  if (event.message.type !== "text") {
     return;
   }
 
