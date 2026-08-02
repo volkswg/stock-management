@@ -13,7 +13,7 @@ export function classifyLineTextCommand(
     return LineTextCommand.Help;
   }
 
-  if (normalizedText === "order:create") {
+  if (normalizedText === "create:order") {
     return LineTextCommand.CreateOrder;
   }
 
