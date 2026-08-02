@@ -17,11 +17,19 @@ export type DraftOrder = {
   remark: string;
 };
 
+export enum UserStateFlowName {
+  OrderCreate = "OrderCreate",
+}
+
+export enum UserStateState {
+  WaitingForBillImage = "waiting_for_bill_image",
+}
+
 type UserState = {
   id: string;
   userId: string;
-  flowname: "OrderCreate";
-  state: "draft";
+  flowname: UserStateFlowName;
+  state: UserStateState;
   createdAt: string;
   updatedAt: string;
 };
@@ -94,8 +102,8 @@ async function createOrderUserState({
   const userState: UserState = {
     id: String(id),
     userId,
-    flowname: "OrderCreate",
-    state: "draft",
+    flowname: UserStateFlowName.OrderCreate,
+    state: UserStateState.WaitingForBillImage,
     createdAt: now,
     updatedAt: now,
   };
