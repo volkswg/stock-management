@@ -5,9 +5,9 @@ import {
 } from "@/externals/line";
 
 const ORDER_CREATE_REPLY_TEXT = [
-  "🧾 Create order",
-  "Please send a clear bill image now.",
-  "Make sure the shop name, items, and total are visible.",
+  `🧾 Order Created`,
+  "",
+  "➡️ NEXT STEP: Please upload the bills image.",
 ].join("\n");
 
 export async function handleCreateOrderLineEvent({
