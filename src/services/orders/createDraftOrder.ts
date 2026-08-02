@@ -43,11 +43,11 @@ export async function createDraftOrder({
       order.status,
       order.seller,
       order.totalPrice,
+      order.remark,
       order.createdAt,
       order.updatedAt,
       order.deletedAt,
       order.createdBy,
-      order.remark,
     ],
   ]);
 

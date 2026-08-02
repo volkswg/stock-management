@@ -26,6 +26,7 @@ export const ORDERS_SHEET_HEADERS = [
   "seller", // seller
   // "quantity",
   "totalPrice",
+  "remark",
   // "deliveryFee",
   // "sentToCargoAt",
   // "deliveredAt",
@@ -33,7 +34,6 @@ export const ORDERS_SHEET_HEADERS = [
   "updatedAt",
   "deletedAt",
   "createdBy",
-  "remark",
 ];
 
 export const lastColumnLetter = (columnIndex: number): string => {
