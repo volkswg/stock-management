@@ -8,6 +8,7 @@ export type UserState = {
   id: string;
   userId: string;
   flowname: UserStateFlowName;
+  referenceId: string;
   state: OrderStatus;
   createdAt: string;
   updatedAt: string;
@@ -49,12 +50,13 @@ export async function hasPendingUserState({
 }
 
 function mapUserStateRow(row: GoogleSheetRow): UserState | undefined {
-  const [id, userId, flowname, state, createdAt, updatedAt] = row;
+  const [id, userId, flowname, referenceId, state, createdAt, updatedAt] = row;
 
   if (
     typeof id !== "string" ||
     typeof userId !== "string" ||
     typeof flowname !== "string" ||
+    typeof referenceId !== "string" ||
     typeof state !== "string"
   ) {
     return undefined;
@@ -68,6 +70,7 @@ function mapUserStateRow(row: GoogleSheetRow): UserState | undefined {
     id,
     userId,
     flowname,
+    referenceId,
     state,
     createdAt: typeof createdAt === "string" ? createdAt : "",
     updatedAt: typeof updatedAt === "string" ? updatedAt : "",

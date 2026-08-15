@@ -33,6 +33,7 @@ type UserState = {
   id: string;
   userId: string;
   flowname: UserStateFlowName;
+  referenceId: string;
   state: OrderStatus;
   createdAt: string;
   updatedAt: string;
@@ -76,6 +77,7 @@ export async function createDraftOrder({
   await createOrderUserState({
     googleSheetsService,
     userId: createdBy,
+    referenceId: order.id,
     now,
   });
 
@@ -96,10 +98,12 @@ async function getNextOrderRowNumber(
 async function createOrderUserState({
   googleSheetsService,
   userId,
+  referenceId,
   now,
 }: {
   googleSheetsService: IGoogleSheetsService;
   userId: string;
+  referenceId: string;
   now: string;
 }): Promise<UserState> {
   const id = await getNextUserStateRowNumber(googleSheetsService);
@@ -107,6 +111,7 @@ async function createOrderUserState({
     id: String(id),
     userId,
     flowname: UserStateFlowName.OrderCreate,
+    referenceId,
     state: OrderStatus.WaitingForBillImage,
     createdAt: now,
     updatedAt: now,
@@ -117,6 +122,7 @@ async function createOrderUserState({
       userState.id,
       userState.userId,
       userState.flowname,
+      userState.referenceId,
       userState.state,
       userState.createdAt,
       userState.updatedAt,
