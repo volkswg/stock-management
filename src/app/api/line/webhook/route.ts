@@ -19,7 +19,10 @@ import {
   handleLineEvent,
   LineTextCommand,
 } from "@/services/line";
-import { OrderStatus, UserStateFlowName } from "@/services/orders";
+import {
+  isActiveOrderCreateState,
+  UserStateFlowName,
+} from "@/services/orders";
 import { findLatestUserState } from "@/services/user-states";
 
 export const runtime = "nodejs";
@@ -214,7 +217,7 @@ async function shouldProxyToLegacy({
         userId: lineUserId,
         flowname: UserStateFlowName.OrderCreate,
       });
-      return !isLocallyHandledOrderImageState(latestUserState?.state);
+      return !isActiveOrderCreateState(latestUserState?.state);
     } catch (error) {
       console.error("Failed to check LINE pending user state", {
         webhookEventId: event.webhookEventId,
@@ -229,13 +232,4 @@ async function shouldProxyToLegacy({
   }
 
   return classifyLineTextCommand(event.message.text) === LineTextCommand.Legacy;
-}
-
-function isLocallyHandledOrderImageState(
-  state: OrderStatus | undefined,
-): boolean {
-  return (
-    state === OrderStatus.WaitingForBillImage ||
-    state === OrderStatus.WaitingForProductImage
-  );
 }
