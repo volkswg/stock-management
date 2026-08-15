@@ -6,31 +6,28 @@ import {
 } from "@/externals/line";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
-import {
-  createOrderBill,
-  OrderStatus,
-} from "@/services/orders";
+import { createOrderItem, OrderStatus } from "@/services/orders";
 import type { UserState } from "@/services/user-states";
 
 const GOOGLE_DRIVE_NOT_CONFIGURED_REPLY_TEXT = [
-  "⚠️ Cannot upload bill image",
+  "⚠️ Cannot upload product image",
   "Google Drive is not configured.",
 ].join("\n");
 
-const BILL_IMAGE_UPLOAD_FAILED_REPLY_TEXT = [
-  "❌ Bill image upload failed",
+const PRODUCT_IMAGE_UPLOAD_FAILED_REPLY_TEXT = [
+  "❌ Product image upload failed",
   "",
   "Please try sending the image again.",
-  "Your order is still waiting for a bill image.",
+  "Your order is still waiting for product images.",
 ].join("\n");
 
-const BILL_RECORD_SAVE_FAILED_REPLY_TEXT = [
-  "⚠️ Bill image uploaded, but the order record could not be saved.",
+const PRODUCT_RECORD_SAVE_FAILED_REPLY_TEXT = [
+  "⚠️ Product image uploaded, but the order item could not be saved.",
   "",
   "Please contact support before sending the image again.",
 ].join("\n");
 
-export async function handleOrderBillImageLineEvent({
+export async function handleOrderProductImageLineEvent({
   event,
   lineBotService,
   googleSheetsService,
@@ -45,19 +42,17 @@ export async function handleOrderBillImageLineEvent({
 }): Promise<void> {
   const lineUserId = event.source?.userId;
   const messageId = event.message?.id;
-  if (!lineUserId || !messageId) {
-    return;
-  }
-
-  if (userState.state !== OrderStatus.WaitingForBillImage) {
+  if (
+    !lineUserId ||
+    !messageId ||
+    userState.state !== OrderStatus.WaitingForProductImage
+  ) {
     return;
   }
 
   if (!googleDriveService) {
     await lineBotService.sendReply(event.replyToken, [
-      createTextReplyMessage({
-        text: GOOGLE_DRIVE_NOT_CONFIGURED_REPLY_TEXT,
-      }),
+      createTextReplyMessage({ text: GOOGLE_DRIVE_NOT_CONFIGURED_REPLY_TEXT }),
     ]);
     return;
   }
@@ -66,7 +61,7 @@ export async function handleOrderBillImageLineEvent({
   try {
     const image = await lineBotService.downloadMessageContent(messageId);
     const driveFile = await googleDriveService.uploadImage({
-      fileName: createBillImageFileName({
+      fileName: createProductImageFileName({
         userId: lineUserId,
         messageId,
         contentType: image.contentType,
@@ -76,66 +71,60 @@ export async function handleOrderBillImageLineEvent({
     });
     googleDriveUrl = driveFile.webViewLink;
   } catch (error) {
-    console.error("Order bill image upload failed", {
+    console.error("Order product image upload failed", {
       userId: lineUserId,
       orderId: userState.referenceId,
       messageId,
       error: error instanceof Error ? error.message : String(error),
     });
-
     await lineBotService.sendReply(event.replyToken, [
-      createTextReplyMessage({
-        text: BILL_IMAGE_UPLOAD_FAILED_REPLY_TEXT,
-      }),
+      createTextReplyMessage({ text: PRODUCT_IMAGE_UPLOAD_FAILED_REPLY_TEXT }),
     ]);
     return;
   }
 
   try {
-    await createOrderBill({
+    await createOrderItem({
       googleSheetsService,
       orderId: userState.referenceId,
       imageUrl: googleDriveUrl,
       createdBy: lineUserId,
     });
   } catch (error) {
-    console.error("Order bill record save failed", {
+    console.error("Order item record save failed", {
       userId: lineUserId,
       orderId: userState.referenceId,
       messageId,
       error: error instanceof Error ? error.message : String(error),
     });
-
     await lineBotService.sendReply(event.replyToken, [
-      createTextReplyMessage({
-        text: BILL_RECORD_SAVE_FAILED_REPLY_TEXT,
-      }),
+      createTextReplyMessage({ text: PRODUCT_RECORD_SAVE_FAILED_REPLY_TEXT }),
     ]);
     return;
   }
 
   await lineBotService.sendReply(event.replyToken, [
     createTextReplyMessage({
-      text: createBillImageUploadedReplyText(googleDriveUrl),
+      text: createProductImageUploadedReplyText(googleDriveUrl),
       quickReply: createMessageQuickReply([
         {
-          label: "Complete Bill",
-          text: "order:bill:complete",
+          label: "Complete Products",
+          text: "order:product:complete",
         },
       ]),
     }),
   ]);
 }
 
-function createBillImageUploadedReplyText(googleDriveUrl: string): string {
+function createProductImageUploadedReplyText(googleDriveUrl: string): string {
   return [
-    "✅ Bill image uploaded",
+    "✅ Product image uploaded",
     "Google Drive link:",
     googleDriveUrl,
   ].join("\n");
 }
 
-function createBillImageFileName({
+function createProductImageFileName({
   userId,
   messageId,
   contentType,
@@ -145,7 +134,7 @@ function createBillImageFileName({
   contentType: string;
 }): string {
   return [
-    "order-bill",
+    "order-product",
     sanitizeFileNamePart(userId),
     sanitizeFileNamePart(messageId),
   ].join("-") + getImageFileExtension(contentType);

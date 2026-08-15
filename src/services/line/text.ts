@@ -21,5 +21,9 @@ export function classifyLineTextCommand(
     return LineTextCommand.CompleteBill;
   }
 
+  if (normalizedText === "order:product:complete") {
+    return LineTextCommand.CompleteProducts;
+  }
+
   return LineTextCommand.Legacy;
 }

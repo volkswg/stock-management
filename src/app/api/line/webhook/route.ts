@@ -23,7 +23,10 @@ import {
   isActiveOrderCreateState,
   UserStateFlowName,
 } from "@/services/orders";
-import { findLatestUserState } from "@/services/user-states";
+import {
+  findLatestUserState,
+  type UserState,
+} from "@/services/user-states";
 
 export const runtime = "nodejs";
 
@@ -59,9 +62,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     eventCount: payload.events?.length || 0,
   });
 
+  const resolvedUserStates = new Map<LineEvent, UserState>();
   const legacyEvents = await collectLegacyEvents({
     events: payload.events || [],
     getGoogleSheetsService,
+    resolvedUserStates,
   });
 
   for (const event of payload.events || []) {
@@ -75,6 +80,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         lineBotService,
         getGoogleSheetsService,
         getGoogleDriveService,
+        resolvedUserState: resolvedUserStates.get(event),
       });
     } catch (error) {
       console.error("Failed to process LINE event", {
@@ -126,14 +132,22 @@ function createGoogleSheetsServiceGetter(
 async function collectLegacyEvents({
   events,
   getGoogleSheetsService,
+  resolvedUserStates,
 }: {
   events: LineEvent[];
   getGoogleSheetsService: () => IGoogleSheetsService;
+  resolvedUserStates: Map<LineEvent, UserState>;
 }): Promise<LineEvent[]> {
   const legacyEvents: LineEvent[] = [];
 
   for (const event of events) {
-    if (await shouldProxyToLegacy({ event, getGoogleSheetsService })) {
+    if (
+      await shouldProxyToLegacy({
+        event,
+        getGoogleSheetsService,
+        resolvedUserStates,
+      })
+    ) {
       legacyEvents.push(event);
     }
   }
@@ -197,9 +211,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 async function shouldProxyToLegacy({
   event,
   getGoogleSheetsService,
+  resolvedUserStates,
 }: {
   event: LineEvent;
   getGoogleSheetsService: () => IGoogleSheetsService;
+  resolvedUserStates: Map<LineEvent, UserState>;
 }): Promise<boolean> {
   if (event.type !== "message" || !event.message) {
     return false;
@@ -217,6 +233,9 @@ async function shouldProxyToLegacy({
         userId: lineUserId,
         flowname: UserStateFlowName.OrderCreate,
       });
+      if (latestUserState) {
+        resolvedUserStates.set(event, latestUserState);
+      }
       return !isActiveOrderCreateState(latestUserState?.state);
     } catch (error) {
       console.error("Failed to check LINE pending user state", {

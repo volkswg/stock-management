@@ -2,7 +2,7 @@ import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { OrderStatus } from "./createDraftOrder";
 import { updateOrderCreateState } from "./updateOrderCreateState";
 
-export async function completeOrderBill({
+export async function completeOrderProducts({
   googleSheetsService,
   orderId,
   userStateId,
@@ -18,6 +18,6 @@ export async function completeOrderBill({
     orderId,
     userStateId,
     userStateCreatedAt,
-    state: OrderStatus.WaitingForProductImage,
+    state: OrderStatus.Paid,
   });
 }

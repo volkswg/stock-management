@@ -3,6 +3,7 @@ import { GoogleSheetsClient } from "./client";
 import { GOOGLE_SHEETS_SCOPE } from "./const";
 import {
   OrderBillsSheet,
+  OrderItemsSheet,
   OrdersSheet,
   PurchasesSheet,
   UserStateSheet,
@@ -12,6 +13,7 @@ import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
 export class GoogleSheetsService implements IGoogleSheetsService {
   readonly orders: OrdersSheet;
   readonly orderBills: OrderBillsSheet;
+  readonly orderItems: OrderItemsSheet;
   readonly purchases: PurchasesSheet;
   readonly userState: UserStateSheet;
 
@@ -28,6 +30,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
 
     if (!config.orderBillsWorksheetName.trim()) {
       throw new Error("Google Sheets order bills worksheet name is required.");
+    }
+
+    if (!config.orderItemsWorksheetName.trim()) {
+      throw new Error("Google Sheets order items worksheet name is required.");
     }
 
     if (!config.purchasesWorksheetName.trim()) {
@@ -49,6 +55,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.client,
       config.orderBillsWorksheetName,
     );
+    this.orderItems = new OrderItemsSheet(
+      this.client,
+      config.orderItemsWorksheetName,
+    );
     this.purchases = new PurchasesSheet(
       this.client,
       config.purchasesWorksheetName,
@@ -63,6 +73,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     await Promise.all([
       this.orders.checkConnection(),
       this.orderBills.checkConnection(),
+      this.orderItems.checkConnection(),
       this.purchases.checkConnection(),
       this.userState.checkConnection(),
     ]);

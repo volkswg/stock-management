@@ -5,6 +5,7 @@ export type GoogleSheetsConfig = {
   spreadsheetId: string;
   ordersWorksheetName: string;
   orderBillsWorksheetName: string;
+  orderItemsWorksheetName: string;
   purchasesWorksheetName: string;
   userStateWorksheetName: string;
   serviceAccountEmail: string;
@@ -28,6 +29,7 @@ export interface IGoogleRowsSheet {
 export interface IGoogleSheetsService {
   readonly orders: IGoogleRowsSheet;
   readonly orderBills: IGoogleRowsSheet;
+  readonly orderItems: IGoogleRowsSheet;
   readonly purchases: IGoogleRowsSheet;
   readonly userState: IGoogleRowsSheet;
   checkConnection(): Promise<void>;
