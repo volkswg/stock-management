@@ -14,7 +14,7 @@ import { findLatestUserState } from "@/services/user-states";
 const PRODUCTS_COMPLETED_REPLY_TEXT = [
   "✅ Product upload completed",
   "",
-  "Order status: Paid",
+  "➡️ NEXT STEP: Please send the total price.",
 ].join("\n");
 
 const NO_PENDING_PRODUCTS_REPLY_TEXT = [

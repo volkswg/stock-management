@@ -124,5 +124,8 @@ function formatOrderStep(state: OrderStatus): string {
   if (state === OrderStatus.WaitingForProductImage) {
     return "Waiting for product images";
   }
+  if (state === OrderStatus.WaitingForTotalPrice) {
+    return "Waiting for total price";
+  }
   return state;
 }

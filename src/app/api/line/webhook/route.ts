@@ -20,7 +20,7 @@ import {
   LineTextCommand,
 } from "@/services/line";
 import {
-  isActiveOrderCreateState,
+  isOrderImageUploadState,
   UserStateFlowName,
 } from "@/services/orders";
 import {
@@ -236,7 +236,7 @@ async function shouldProxyToLegacy({
       if (latestUserState) {
         resolvedUserStates.set(event, latestUserState);
       }
-      return !isActiveOrderCreateState(latestUserState?.state);
+      return !isOrderImageUploadState(latestUserState?.state);
     } catch (error) {
       console.error("Failed to check LINE pending user state", {
         webhookEventId: event.webhookEventId,

@@ -18,6 +18,6 @@ export async function completeOrderProducts({
     orderId,
     userStateId,
     userStateCreatedAt,
-    state: OrderStatus.Paid,
+    state: OrderStatus.WaitingForTotalPrice,
   });
 }
