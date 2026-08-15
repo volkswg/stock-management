@@ -2,7 +2,7 @@ import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
 import { GoogleSheetsClient } from "./client";
 import { GOOGLE_SHEETS_SCOPE } from "./const";
 import {
-  OrderDetailsSheet,
+  OrderBillsSheet,
   OrdersSheet,
   PurchasesSheet,
   UserStateSheet,
@@ -11,7 +11,7 @@ import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
   readonly orders: OrdersSheet;
-  readonly orderDetails: OrderDetailsSheet;
+  readonly orderBills: OrderBillsSheet;
   readonly purchases: PurchasesSheet;
   readonly userState: UserStateSheet;
 
@@ -26,10 +26,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       throw new Error("Google Sheets orders worksheet name is required.");
     }
 
-    if (!config.orderDetailsWorksheetName.trim()) {
-      throw new Error(
-        "Google Sheets order details worksheet name is required.",
-      );
+    if (!config.orderBillsWorksheetName.trim()) {
+      throw new Error("Google Sheets order bills worksheet name is required.");
     }
 
     if (!config.purchasesWorksheetName.trim()) {
@@ -47,9 +45,9 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     });
     this.client = new GoogleSheetsClient(auth, config.spreadsheetId);
     this.orders = new OrdersSheet(this.client, config.ordersWorksheetName);
-    this.orderDetails = new OrderDetailsSheet(
+    this.orderBills = new OrderBillsSheet(
       this.client,
-      config.orderDetailsWorksheetName,
+      config.orderBillsWorksheetName,
     );
     this.purchases = new PurchasesSheet(
       this.client,
@@ -64,7 +62,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   async checkConnection(): Promise<void> {
     await Promise.all([
       this.orders.checkConnection(),
-      this.orderDetails.checkConnection(),
+      this.orderBills.checkConnection(),
       this.purchases.checkConnection(),
       this.userState.checkConnection(),
     ]);

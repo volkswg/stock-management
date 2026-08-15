@@ -7,7 +7,7 @@ export function createGoogleSheetsServiceFromConfig(
   return new GoogleSheetsService({
     spreadsheetId: config.googleSheets.spreadsheetId,
     ordersWorksheetName: config.googleSheets.ordersWorksheetName,
-    orderDetailsWorksheetName: config.googleSheets.orderDetailsWorksheetName,
+    orderBillsWorksheetName: config.googleSheets.orderBillsWorksheetName,
     purchasesWorksheetName: config.googleSheets.purchasesWorksheetName,
     userStateWorksheetName: config.googleSheets.userStateWorksheetName,
     serviceAccountEmail: config.googleService.accountEmail,
