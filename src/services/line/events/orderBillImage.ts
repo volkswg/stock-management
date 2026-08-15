@@ -12,6 +12,13 @@ const GOOGLE_DRIVE_NOT_CONFIGURED_REPLY_TEXT = [
   "Google Drive is not configured.",
 ].join("\n");
 
+const BILL_IMAGE_UPLOAD_FAILED_REPLY_TEXT = [
+  "❌ Bill image upload failed",
+  "",
+  "Please try sending the image again.",
+  "Your order is still waiting for a bill image.",
+].join("\n");
+
 export async function handleOrderBillImageLineEvent({
   event,
   lineBotService,
@@ -47,20 +54,38 @@ export async function handleOrderBillImageLineEvent({
     return;
   }
 
-  const image = await lineBotService.downloadMessageContent(messageId);
-  const driveFile = await googleDriveService.uploadImage({
-    fileName: createBillImageFileName({
-      userId: lineUserId,
-      messageId,
+  let googleDriveUrl: string;
+  try {
+    const image = await lineBotService.downloadMessageContent(messageId);
+    const driveFile = await googleDriveService.uploadImage({
+      fileName: createBillImageFileName({
+        userId: lineUserId,
+        messageId,
+        contentType: image.contentType,
+      }),
       contentType: image.contentType,
-    }),
-    contentType: image.contentType,
-    bytes: image.bytes,
-  });
+      bytes: image.bytes,
+    });
+    googleDriveUrl = driveFile.webViewLink;
+  } catch (error) {
+    console.error("Order bill image upload failed", {
+      userId: lineUserId,
+      orderId: pendingUserState.referenceId,
+      messageId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    await lineBotService.sendReply(event.replyToken, [
+      createTextReplyMessage({
+        text: BILL_IMAGE_UPLOAD_FAILED_REPLY_TEXT,
+      }),
+    ]);
+    return;
+  }
 
   await lineBotService.sendReply(event.replyToken, [
     createTextReplyMessage({
-      text: createBillImageUploadedReplyText(driveFile.webViewLink),
+      text: createBillImageUploadedReplyText(googleDriveUrl),
     }),
   ]);
 }
