@@ -5,6 +5,7 @@ import {
 } from "@/externals/line";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
+import { createOrderBill } from "@/services/orders";
 import { findPendingUserState } from "@/services/user-states";
 
 const GOOGLE_DRIVE_NOT_CONFIGURED_REPLY_TEXT = [
@@ -17,6 +18,12 @@ const BILL_IMAGE_UPLOAD_FAILED_REPLY_TEXT = [
   "",
   "Please try sending the image again.",
   "Your order is still waiting for a bill image.",
+].join("\n");
+
+const BILL_RECORD_SAVE_FAILED_REPLY_TEXT = [
+  "⚠️ Bill image uploaded, but the order record could not be saved.",
+  "",
+  "Please contact support before sending the image again.",
 ].join("\n");
 
 export async function handleOrderBillImageLineEvent({
@@ -36,8 +43,9 @@ export async function handleOrderBillImageLineEvent({
     return;
   }
 
+  const googleSheetsService = getGoogleSheetsService();
   const pendingUserState = await findPendingUserState({
-    googleSheetsService: getGoogleSheetsService(),
+    googleSheetsService,
     userId: lineUserId,
   });
   if (!pendingUserState) {
@@ -78,6 +86,29 @@ export async function handleOrderBillImageLineEvent({
     await lineBotService.sendReply(event.replyToken, [
       createTextReplyMessage({
         text: BILL_IMAGE_UPLOAD_FAILED_REPLY_TEXT,
+      }),
+    ]);
+    return;
+  }
+
+  try {
+    await createOrderBill({
+      googleSheetsService,
+      orderId: pendingUserState.referenceId,
+      imageUrl: googleDriveUrl,
+      createdBy: lineUserId,
+    });
+  } catch (error) {
+    console.error("Order bill record save failed", {
+      userId: lineUserId,
+      orderId: pendingUserState.referenceId,
+      messageId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    await lineBotService.sendReply(event.replyToken, [
+      createTextReplyMessage({
+        text: BILL_RECORD_SAVE_FAILED_REPLY_TEXT,
       }),
     ]);
     return;
