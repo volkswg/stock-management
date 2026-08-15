@@ -3,6 +3,7 @@ import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { classifyLineTextCommand } from "./text";
 import { LineTextCommand } from "./enum";
+import { handleCompleteBillLineEvent } from "./events/completeBill";
 import { handleCreateOrderLineEvent } from "./events/createOrder";
 import { handleHelpLineEvent } from "./events/help";
 import { handleOrderBillImageLineEvent } from "./events/orderBillImage";
@@ -45,6 +46,14 @@ export async function handleLineEvent({
 
     case LineTextCommand.CreateOrder:
       await handleCreateOrderLineEvent({
+        event,
+        lineBotService,
+        getGoogleSheetsService,
+      });
+      return;
+
+    case LineTextCommand.CompleteBill:
+      await handleCompleteBillLineEvent({
         event,
         lineBotService,
         getGoogleSheetsService,

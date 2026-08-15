@@ -1,4 +1,5 @@
 import {
+  createMessageQuickReply,
   createTextReplyMessage,
   type LineBotService,
   type LineEvent,
@@ -117,6 +118,12 @@ export async function handleOrderBillImageLineEvent({
   await lineBotService.sendReply(event.replyToken, [
     createTextReplyMessage({
       text: createBillImageUploadedReplyText(googleDriveUrl),
+      quickReply: createMessageQuickReply([
+        {
+          label: "Complete Bill",
+          text: "order:bill:complete",
+        },
+      ]),
     }),
   ]);
 }

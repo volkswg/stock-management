@@ -17,5 +17,9 @@ export function classifyLineTextCommand(
     return LineTextCommand.CreateOrder;
   }
 
+  if (normalizedText === "order:bill:complete") {
+    return LineTextCommand.CompleteBill;
+  }
+
   return LineTextCommand.Legacy;
 }
