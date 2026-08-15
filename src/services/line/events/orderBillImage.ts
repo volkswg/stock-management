@@ -6,8 +6,12 @@ import {
 } from "@/externals/line";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
-import { createOrderBill } from "@/services/orders";
-import { findPendingUserState } from "@/services/user-states";
+import {
+  createOrderBill,
+  OrderStatus,
+  UserStateFlowName,
+} from "@/services/orders";
+import { findLatestUserState } from "@/services/user-states";
 
 const GOOGLE_DRIVE_NOT_CONFIGURED_REPLY_TEXT = [
   "⚠️ Cannot upload bill image",
@@ -45,11 +49,12 @@ export async function handleOrderBillImageLineEvent({
   }
 
   const googleSheetsService = getGoogleSheetsService();
-  const pendingUserState = await findPendingUserState({
+  const latestUserState = await findLatestUserState({
     googleSheetsService,
     userId: lineUserId,
+    flowname: UserStateFlowName.OrderCreate,
   });
-  if (!pendingUserState) {
+  if (latestUserState?.state !== OrderStatus.WaitingForBillImage) {
     return;
   }
 
@@ -79,7 +84,7 @@ export async function handleOrderBillImageLineEvent({
   } catch (error) {
     console.error("Order bill image upload failed", {
       userId: lineUserId,
-      orderId: pendingUserState.referenceId,
+      orderId: latestUserState.referenceId,
       messageId,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -95,14 +100,14 @@ export async function handleOrderBillImageLineEvent({
   try {
     await createOrderBill({
       googleSheetsService,
-      orderId: pendingUserState.referenceId,
+      orderId: latestUserState.referenceId,
       imageUrl: googleDriveUrl,
       createdBy: lineUserId,
     });
   } catch (error) {
     console.error("Order bill record save failed", {
       userId: lineUserId,
-      orderId: pendingUserState.referenceId,
+      orderId: latestUserState.referenceId,
       messageId,
       error: error instanceof Error ? error.message : String(error),
     });

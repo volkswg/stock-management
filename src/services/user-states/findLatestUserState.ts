@@ -14,12 +14,14 @@ export type UserState = {
   updatedAt: string;
 };
 
-export async function findPendingUserState({
+export async function findLatestUserState({
   googleSheetsService,
   userId,
+  flowname,
 }: {
   googleSheetsService: IGoogleSheetsService;
   userId: string;
+  flowname: UserStateFlowName;
 }): Promise<UserState | undefined> {
   const rows = await googleSheetsService.userState.readRows();
 
@@ -29,24 +31,8 @@ export async function findPendingUserState({
     .reverse()
     .find(
       (userState) =>
-        userState.userId === userId &&
-        userState.flowname === UserStateFlowName.OrderCreate &&
-        userState.state === OrderStatus.WaitingForBillImage,
+        userState.userId === userId && userState.flowname === flowname,
     );
-}
-
-export async function hasPendingUserState({
-  googleSheetsService,
-  userId,
-}: {
-  googleSheetsService: IGoogleSheetsService;
-  userId: string;
-}): Promise<boolean> {
-  const userState = await findPendingUserState({
-    googleSheetsService,
-    userId,
-  });
-  return Boolean(userState);
 }
 
 function mapUserStateRow(row: GoogleSheetRow): UserState | undefined {

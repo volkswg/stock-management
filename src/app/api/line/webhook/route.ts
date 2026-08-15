@@ -19,7 +19,8 @@ import {
   handleLineEvent,
   LineTextCommand,
 } from "@/services/line";
-import { hasPendingUserState } from "@/services/user-states";
+import { OrderStatus, UserStateFlowName } from "@/services/orders";
+import { findLatestUserState } from "@/services/user-states";
 
 export const runtime = "nodejs";
 
@@ -208,11 +209,12 @@ async function shouldProxyToLegacy({
     }
 
     try {
-      const hasPendingState = await hasPendingUserState({
+      const latestUserState = await findLatestUserState({
         googleSheetsService: getGoogleSheetsService(),
         userId: lineUserId,
+        flowname: UserStateFlowName.OrderCreate,
       });
-      return !hasPendingState;
+      return !isLocallyHandledOrderImageState(latestUserState?.state);
     } catch (error) {
       console.error("Failed to check LINE pending user state", {
         webhookEventId: event.webhookEventId,
@@ -227,4 +229,13 @@ async function shouldProxyToLegacy({
   }
 
   return classifyLineTextCommand(event.message.text) === LineTextCommand.Legacy;
+}
+
+function isLocallyHandledOrderImageState(
+  state: OrderStatus | undefined,
+): boolean {
+  return (
+    state === OrderStatus.WaitingForBillImage ||
+    state === OrderStatus.WaitingForProductImage
+  );
 }

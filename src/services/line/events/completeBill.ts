@@ -4,8 +4,12 @@ import {
   type LineEvent,
 } from "@/externals/line";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
-import { completeOrderBill } from "@/services/orders";
-import { findPendingUserState } from "@/services/user-states";
+import {
+  completeOrderBill,
+  OrderStatus,
+  UserStateFlowName,
+} from "@/services/orders";
+import { findLatestUserState } from "@/services/user-states";
 
 const BILL_COMPLETED_REPLY_TEXT = [
   "✅ Bill upload completed",
@@ -40,12 +44,13 @@ export async function handleCompleteBillLineEvent({
   }
 
   const googleSheetsService = getGoogleSheetsService();
-  const pendingUserState = await findPendingUserState({
+  const latestUserState = await findLatestUserState({
     googleSheetsService,
     userId: lineUserId,
+    flowname: UserStateFlowName.OrderCreate,
   });
 
-  if (!pendingUserState) {
+  if (latestUserState?.state !== OrderStatus.WaitingForBillImage) {
     await lineBotService.sendReply(event.replyToken, [
       createTextReplyMessage({ text: NO_PENDING_BILL_REPLY_TEXT }),
     ]);
@@ -55,15 +60,15 @@ export async function handleCompleteBillLineEvent({
   try {
     await completeOrderBill({
       googleSheetsService,
-      orderId: pendingUserState.referenceId,
-      userStateId: pendingUserState.id,
-      userStateCreatedAt: pendingUserState.createdAt,
+      orderId: latestUserState.referenceId,
+      userStateId: latestUserState.id,
+      userStateCreatedAt: latestUserState.createdAt,
     });
   } catch (error) {
     console.error("Order bill completion failed", {
       userId: lineUserId,
-      orderId: pendingUserState.referenceId,
-      userStateId: pendingUserState.id,
+      orderId: latestUserState.referenceId,
+      userStateId: latestUserState.id,
       error: error instanceof Error ? error.message : String(error),
     });
 

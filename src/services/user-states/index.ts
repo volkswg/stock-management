@@ -1,5 +1,4 @@
 export {
-  findPendingUserState,
-  hasPendingUserState,
+  findLatestUserState,
   type UserState,
-} from "./findPendingUserState";
+} from "./findLatestUserState";
