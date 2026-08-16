@@ -4,7 +4,6 @@ import styles from "./orders.module.css";
 export default function OrdersLoading() {
   return (
     <div className={styles.loadingPage} aria-label="Loading orders" aria-busy="true">
-      <div className={styles.loadingSidebar} />
       <main className={styles.loadingMain}>
         <Skeleton active paragraph={{ rows: 1, width: 360 }} title={{ width: 190 }} />
         <Row className={styles.loadingSummary} gutter={[12, 12]}>
