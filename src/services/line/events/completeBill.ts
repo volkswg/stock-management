@@ -9,7 +9,8 @@ import {
   OrderStatus,
   UserStateFlowName,
 } from "@/services/orders";
-import { findLatestUserState } from "@/services/user-states";
+import type { UserState } from "@/services/user-states";
+import { resolveUserState } from "../utils/resolveUserState";
 
 const BILL_COMPLETED_REPLY_TEXT = [
   "✅ Bill upload completed",
@@ -33,10 +34,12 @@ export async function handleCompleteBillLineEvent({
   event,
   lineBotService,
   getGoogleSheetsService,
+  resolvedUserStates,
 }: {
   event: LineEvent;
   lineBotService: LineBotService;
   getGoogleSheetsService: () => IGoogleSheetsService;
+  resolvedUserStates: Map<LineEvent, UserState>;
 }): Promise<void> {
   const lineUserId = event.source?.userId;
   if (!lineUserId) {
@@ -44,10 +47,11 @@ export async function handleCompleteBillLineEvent({
   }
 
   const googleSheetsService = getGoogleSheetsService();
-  const latestUserState = await findLatestUserState({
-    googleSheetsService,
-    userId: lineUserId,
+  const latestUserState = await resolveUserState({
+    event,
     flowname: UserStateFlowName.OrderCreate,
+    getGoogleSheetsService,
+    resolvedUserStates,
   });
 
   if (latestUserState?.state !== OrderStatus.WaitingForBillImage) {

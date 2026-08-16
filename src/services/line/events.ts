@@ -6,10 +6,7 @@ import {
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { OrderStatus, UserStateFlowName } from "@/services/orders";
-import {
-  findLatestUserState,
-  type UserState,
-} from "@/services/user-states";
+import type { UserState } from "@/services/user-states";
 import { classifyLineTextCommand } from "./text";
 import { LineTextCommand } from "./enum";
 import { handleCompleteBillLineEvent } from "./events/completeBill";
@@ -18,19 +15,20 @@ import { handleCreateOrderLineEvent } from "./events/createOrder";
 import { handleOrderBillImageLineEvent } from "./events/orderBillImage";
 import { handleOrderProductImageLineEvent } from "./events/orderProductImage";
 import { handleOrderTotalPriceLineEvent } from "./events/orderTotalPrice";
+import { resolveUserState } from "./utils/resolveUserState";
 
 export async function handleLineEvent({
   event,
   lineBotService,
   getGoogleSheetsService,
   getGoogleDriveService,
-  resolvedUserState,
+  resolvedUserStates,
 }: {
   event: LineEvent;
   lineBotService: LineBotService;
   getGoogleSheetsService: () => IGoogleSheetsService;
   getGoogleDriveService: () => IGoogleDriveService | undefined;
-  resolvedUserState?: UserState;
+  resolvedUserStates: Map<LineEvent, UserState>;
 }): Promise<void> {
   if (event.type !== "message" || !event.message) {
     return;
@@ -43,13 +41,12 @@ export async function handleLineEvent({
     }
 
     const googleSheetsService = getGoogleSheetsService();
-    const latestUserState =
-      resolvedUserState ||
-      (await findLatestUserState({
-        googleSheetsService,
-        userId: lineUserId,
-        flowname: UserStateFlowName.OrderCreate,
-      }));
+    const latestUserState = await resolveUserState({
+      event,
+      flowname: UserStateFlowName.OrderCreate,
+      getGoogleSheetsService,
+      resolvedUserStates,
+    });
 
     if (!latestUserState) {
       return;
@@ -83,13 +80,12 @@ export async function handleLineEvent({
     const lineUserId = event.source?.userId;
     if (lineUserId) {
       const googleSheetsService = getGoogleSheetsService();
-      const latestUserState =
-        resolvedUserState ||
-        (await findLatestUserState({
-          googleSheetsService,
-          userId: lineUserId,
-          flowname: UserStateFlowName.OrderCreate,
-        }));
+      const latestUserState = await resolveUserState({
+        event,
+        flowname: UserStateFlowName.OrderCreate,
+        getGoogleSheetsService,
+        resolvedUserStates,
+      });
 
       if (latestUserState?.state === OrderStatus.WaitingForTotalPrice) {
         await handleOrderTotalPriceLineEvent({
@@ -109,6 +105,7 @@ export async function handleLineEvent({
         event,
         lineBotService,
         getGoogleSheetsService,
+        resolvedUserStates,
       });
       return;
 
@@ -117,6 +114,7 @@ export async function handleLineEvent({
         event,
         lineBotService,
         getGoogleSheetsService,
+        resolvedUserStates,
       });
       return;
 
@@ -125,6 +123,7 @@ export async function handleLineEvent({
         event,
         lineBotService,
         getGoogleSheetsService,
+        resolvedUserStates,
       });
       return;
 

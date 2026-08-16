@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import {
   LineBotService,
-  LineMessageType,
   type LineEvent,
   type LineWebhookPayload,
 } from "@/externals/line";
@@ -16,19 +15,10 @@ import {
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
 import {
-  classifyLineTextCommand,
   handleLineEvent,
-  LineTextCommand,
+  shouldProxyToLegacy,
 } from "@/services/line";
-import {
-  isOrderImageUploadState,
-  OrderStatus,
-  UserStateFlowName,
-} from "@/services/orders";
-import {
-  findLatestUserState,
-  type UserState,
-} from "@/services/user-states";
+import type { UserState } from "@/services/user-states";
 
 export const runtime = "nodejs";
 
@@ -82,7 +72,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         lineBotService,
         getGoogleSheetsService,
         getGoogleDriveService,
-        resolvedUserState: resolvedUserStates.get(event),
+        resolvedUserStates,
       });
     } catch (error) {
       console.error("Failed to process LINE event", {
@@ -208,75 +198,4 @@ function isLineEvent(value: unknown): value is LineEvent {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-async function shouldProxyToLegacy({
-  event,
-  getGoogleSheetsService,
-  resolvedUserStates,
-}: {
-  event: LineEvent;
-  getGoogleSheetsService: () => IGoogleSheetsService;
-  resolvedUserStates: Map<LineEvent, UserState>;
-}): Promise<boolean> {
-  if (event.type !== "message" || !event.message) {
-    return false;
-  }
-
-  if (event.message.type === LineMessageType.Image) {
-    const lineUserId = event.source?.userId;
-    if (!lineUserId) {
-      return true;
-    }
-
-    try {
-      const latestUserState = await findLatestUserState({
-        googleSheetsService: getGoogleSheetsService(),
-        userId: lineUserId,
-        flowname: UserStateFlowName.OrderCreate,
-      });
-      if (latestUserState) {
-        resolvedUserStates.set(event, latestUserState);
-      }
-      return !isOrderImageUploadState(latestUserState?.state);
-    } catch (error) {
-      console.error("Failed to check LINE pending user state", {
-        webhookEventId: event.webhookEventId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return true;
-    }
-  }
-
-  if (event.message.type !== LineMessageType.Text) {
-    return false;
-  }
-
-  const command = classifyLineTextCommand(event.message.text);
-  if (command !== LineTextCommand.Legacy) {
-    return false;
-  }
-
-  const lineUserId = event.source?.userId;
-  if (!lineUserId) {
-    return true;
-  }
-
-  try {
-    const latestUserState = await findLatestUserState({
-      googleSheetsService: getGoogleSheetsService(),
-      userId: lineUserId,
-      flowname: UserStateFlowName.OrderCreate,
-    });
-    if (latestUserState) {
-      resolvedUserStates.set(event, latestUserState);
-    }
-    return latestUserState?.state !== OrderStatus.WaitingForTotalPrice;
-  } catch (error) {
-    console.error("Failed to check LINE text user state", {
-      webhookEventId: event.webhookEventId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return true;
-  }
 }

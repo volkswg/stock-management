@@ -10,10 +10,8 @@ import {
   OrderStatus,
   UserStateFlowName,
 } from "@/services/orders";
-import {
-  findLatestUserState,
-  type UserState,
-} from "@/services/user-states";
+import type { UserState } from "@/services/user-states";
+import { resolveUserState } from "../utils/resolveUserState";
 
 const ORDER_CREATED_REPLY_TEXT = ({
   orderId,
@@ -59,10 +57,12 @@ export async function handleCreateOrderLineEvent({
   event,
   lineBotService,
   getGoogleSheetsService,
+  resolvedUserStates,
 }: {
   event: LineEvent;
   lineBotService: LineBotService;
   getGoogleSheetsService: () => IGoogleSheetsService;
+  resolvedUserStates: Map<LineEvent, UserState>;
 }): Promise<void> {
   const lineUserId = event.source?.userId;
   if (!lineUserId) {
@@ -77,10 +77,11 @@ export async function handleCreateOrderLineEvent({
   const googleSheetsService = getGoogleSheetsService();
   let latestUserState: UserState | undefined;
   try {
-    latestUserState = await findLatestUserState({
-      googleSheetsService,
-      userId: lineUserId,
+    latestUserState = await resolveUserState({
+      event,
       flowname: UserStateFlowName.OrderCreate,
+      getGoogleSheetsService,
+      resolvedUserStates,
     });
   } catch (error) {
     console.error("Order creation state check failed", {
