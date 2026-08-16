@@ -490,7 +490,7 @@ function getGoogleDrivePreviewUrl(imageUrl: string): string {
   return imageUrl;
 }
 
-function getGoogleDriveThumbnailUrl(imageUrl: string, size = "w400"): string {
+function getGoogleDriveThumbnailUrl(imageUrl: string, size = "w1600"): string {
   const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
   if (fileIdMatch?.[1]) {
     return `https://drive.google.com/thumbnail?id=${encodeURIComponent(
