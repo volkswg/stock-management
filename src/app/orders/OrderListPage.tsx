@@ -350,7 +350,7 @@ function ProductImagePreview({
         src={getGoogleDriveThumbnailUrl(image.imageUrl)}
         width={96}
       />
-      <Text>Product image {index + 1}</Text>
+      <Text>Product {index + 1}</Text>
       {image.quoteQuantity ? (
         <Text type="secondary">Qty: {image.quoteQuantity}</Text>
       ) : null}
