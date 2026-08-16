@@ -4,6 +4,7 @@ import {
 } from "@/externals/google/sheet";
 import { ORDERS_SHEET_HEADERS } from "@/externals/google/sheet/sheets/orders/const";
 import { USER_STATE_SHEET_HEADERS } from "@/externals/google/sheet/sheets/user-state/const";
+import { createSortableId } from "./createSortableId";
 
 export type Order = {
   id: string;
@@ -49,10 +50,10 @@ export async function createDraftOrder({
   googleSheetsService: IGoogleSheetsService;
   createdBy: string;
 }): Promise<Order> {
-  const id = await getNextOrderRowNumber(googleSheetsService);
+  const id = createSortableId();
   const now = new Date().toISOString();
   const order: Order = {
-    id: String(id),
+    id,
     status: OrderStatus.WaitingForBillImage,
     seller: "",
     totalPrice: "",
@@ -89,13 +90,6 @@ export async function createDraftOrder({
 
 function getOrdersAppendRange(): string {
   return `A:${lastColumnLetter(ORDERS_SHEET_HEADERS.length - 1)}`;
-}
-
-async function getNextOrderRowNumber(
-  googleSheetsService: IGoogleSheetsService,
-): Promise<number> {
-  const rows = await googleSheetsService.orders.readRows("A:A");
-  return rows.length + 1;
 }
 
 async function createOrderUserState({

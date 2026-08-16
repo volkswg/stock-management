@@ -1,5 +1,6 @@
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { OrderStatus } from "./createDraftOrder";
+import { findOrderRowNumber } from "./findOrderRowNumber";
 
 export async function updateOrderCreateState({
   googleSheetsService,
@@ -14,7 +15,10 @@ export async function updateOrderCreateState({
   userStateCreatedAt: string;
   state: OrderStatus;
 }): Promise<void> {
-  const orderRowNumber = parseSheetRowNumber(orderId, "order");
+  const orderRowNumber = await findOrderRowNumber({
+    googleSheetsService,
+    orderId,
+  });
   const userStateRowNumber = parseSheetRowNumber(userStateId, "user state");
   const now = new Date().toISOString();
 
