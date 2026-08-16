@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  DownloadOutlined,
   InboxOutlined,
   ReloadOutlined,
   SearchOutlined,
@@ -20,6 +21,7 @@ import {
   Space,
   Statistic,
   Table,
+  Tooltip,
   Typography,
   type TableProps,
 } from "antd";
@@ -301,25 +303,36 @@ function ProductImageList({
   return (
     <section className={styles.productImages} aria-label="Product images">
       {images.map((image, index) => (
-        <a
-          className={styles.productImageLink}
-          href={image.imageUrl}
+        <div
+          className={styles.productImage}
           key={image.id}
-          target="_blank"
-          rel="noopener noreferrer"
         >
           <Image
             alt={`Product image ${index + 1}`}
             height={96}
-            preview={false}
+            preview={{
+              actionsRender: (originalNode) => (
+                <>
+                  {originalNode}
+                  <Tooltip title="Save image">
+                    <a
+                      aria-label={`Save product image ${index + 1}`}
+                      className={styles.previewSaveButton}
+                      download
+                      href={`/api/order-images/${encodeURIComponent(image.id)}`}
+                    >
+                      <DownloadOutlined />
+                    </a>
+                  </Tooltip>
+                </>
+              ),
+              src: getGoogleDriveThumbnailUrl(image.imageUrl, "w1600"),
+            }}
             src={getGoogleDriveThumbnailUrl(image.imageUrl)}
             width={96}
           />
           <Text>Product image {index + 1}</Text>
-          {image.createdAt ? (
-            <Text type="secondary">{formatDate(image.createdAt)}</Text>
-          ) : null}
-        </a>
+        </div>
       ))}
     </section>
   );
@@ -354,12 +367,15 @@ function formatDate(value: string): string {
   }).format(date);
 }
 
-function getGoogleDriveThumbnailUrl(imageUrl: string): string {
+function getGoogleDriveThumbnailUrl(
+  imageUrl: string,
+  size = "w400",
+): string {
   const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
   if (fileIdMatch?.[1]) {
     return `https://drive.google.com/thumbnail?id=${encodeURIComponent(
       fileIdMatch[1],
-    )}&sz=w400`;
+    )}&sz=${size}`;
   }
 
   return imageUrl;

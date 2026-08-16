@@ -89,29 +89,45 @@
   padding: 10px 0;
 }
 
-.productImageLink {
+.productImage {
   width: 128px;
   display: grid;
   justify-items: start;
   gap: 5px;
-  color: inherit;
 }
 
-.productImageLink :global(.ant-image),
-.productImageLink :global(.ant-image-img) {
+.productImage :global(.ant-image),
+.productImage :global(.ant-image-img) {
   border-radius: 5px;
 }
 
-.productImageLink :global(.ant-image-img) {
+.productImage :global(.ant-image-img) {
   object-fit: cover;
 }
 
-.productImageLink > span:not(:global(.ant-image)) {
+.productImage > span:not(:global(.ant-image)) {
   max-width: 100%;
   overflow: hidden;
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.previewSaveButton {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 18px;
+}
+
+.previewSaveButton:hover,
+.previewSaveButton:focus-visible {
+  color: #ffffff;
+  background: rgb(255 255 255 / 18%);
+  outline: none;
 }
 
 .pagination {

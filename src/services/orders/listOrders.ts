@@ -19,9 +19,23 @@ export type OrderListItem = {
 
 export type OrderProductImage = {
   id: string;
+  orderId: string;
   imageUrl: string;
   createdAt: string;
 };
+
+export async function findOrderProductImageById({
+  googleSheetsService,
+  imageId,
+}: {
+  googleSheetsService: IGoogleSheetsService;
+  imageId: string;
+}): Promise<OrderProductImage | undefined> {
+  const rows = await googleSheetsService.orderItems.readRows("A:G");
+  return rows
+    .map(mapOrderProductImageRow)
+    .find((image) => image?.id === imageId);
+}
 
 export async function listOrders({
   googleSheetsService,
@@ -86,29 +100,41 @@ function groupProductImagesByOrderId(
   const productImagesByOrderId = new Map<string, OrderProductImage[]>();
 
   for (const row of rows) {
-    const [id, orderId, imageUrl, createdAt, , deletedAt] = row;
-    const normalizedId = toStringValue(id);
-    const normalizedOrderId = toStringValue(orderId);
-    const normalizedImageUrl = toStringValue(imageUrl);
-    if (
-      !normalizedId ||
-      !normalizedOrderId ||
-      !normalizedImageUrl ||
-      toStringValue(deletedAt)
-    ) {
+    const productImage = mapOrderProductImageRow(row);
+    if (!productImage) {
       continue;
     }
 
-    const productImages = productImagesByOrderId.get(normalizedOrderId) ?? [];
-    productImages.push({
-      id: normalizedId,
-      imageUrl: normalizedImageUrl,
-      createdAt: toStringValue(createdAt),
-    });
-    productImagesByOrderId.set(normalizedOrderId, productImages);
+    const productImages = productImagesByOrderId.get(productImage.orderId) ?? [];
+    productImages.push(productImage);
+    productImagesByOrderId.set(productImage.orderId, productImages);
   }
 
   return productImagesByOrderId;
+}
+
+function mapOrderProductImageRow(
+  row: GoogleSheetRow,
+): OrderProductImage | undefined {
+  const [id, orderId, imageUrl, createdAt, , deletedAt] = row;
+  const normalizedId = toStringValue(id);
+  const normalizedOrderId = toStringValue(orderId);
+  const normalizedImageUrl = toStringValue(imageUrl);
+  if (
+    !normalizedId ||
+    !normalizedOrderId ||
+    !normalizedImageUrl ||
+    toStringValue(deletedAt)
+  ) {
+    return undefined;
+  }
+
+  return {
+    id: normalizedId,
+    orderId: normalizedOrderId,
+    imageUrl: normalizedImageUrl,
+    createdAt: toStringValue(createdAt),
+  };
 }
 
 function toStringValue(value: GoogleSheetCellValue | undefined): string {
