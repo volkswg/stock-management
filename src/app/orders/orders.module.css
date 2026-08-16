@@ -59,7 +59,7 @@
 }
 
 .searchInput {
-  width: min(280px, 30vw);
+  width: 100%;
 }
 
 .filterTabs {
@@ -185,14 +185,6 @@
     padding: 30px 20px;
   }
 
-  .listToolbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .searchInput {
-    width: 100%;
-  }
 }
 
 @media (max-width: 480px) {
@@ -209,9 +201,6 @@
     margin-top: 24px;
   }
 
-  .listToolbar {
-    padding: 16px;
-  }
 
   .pagination {
     align-items: flex-start;
