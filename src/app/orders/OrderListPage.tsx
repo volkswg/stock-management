@@ -15,6 +15,7 @@ import {
   Empty,
   Image,
   Input,
+  message,
   Pagination,
   Row,
   Select,
@@ -296,46 +297,161 @@ function ProductImageList({
 }: {
   images: OrderProductImage[];
 }) {
+  const [messageApi, messageContextHolder] = message.useMessage();
+
   if (images.length === 0) {
     return null;
   }
 
   return (
-    <section className={styles.productImages} aria-label="Product images">
-      {images.map((image, index) => (
-        <div
-          className={styles.productImage}
-          key={image.id}
-        >
-          <Image
-            alt={`Product image ${index + 1}`}
-            height={96}
-            preview={{
-              actionsRender: (originalNode) => (
-                <>
-                  {originalNode}
-                  <Tooltip title="Save image">
-                    <a
-                      aria-label={`Save product image ${index + 1}`}
-                      className={styles.previewSaveButton}
-                      download
-                      href={`/api/order-images/${encodeURIComponent(image.id)}`}
-                    >
-                      <DownloadOutlined />
-                    </a>
-                  </Tooltip>
-                </>
-              ),
-              src: getGoogleDriveThumbnailUrl(image.imageUrl, "w1600"),
-            }}
-            src={getGoogleDriveThumbnailUrl(image.imageUrl)}
-            width={96}
+    <>
+      {messageContextHolder}
+      <section className={styles.productImages} aria-label="Product images">
+        {images.map((image, index) => (
+          <ProductImagePreview
+            image={image}
+            index={index}
+            key={image.id}
+            showError={(content) => messageApi.error(content)}
           />
-          <Text>Product image {index + 1}</Text>
-        </div>
-      ))}
-    </section>
+        ))}
+      </section>
+    </>
   );
+}
+
+function ProductImagePreview({
+  image,
+  index,
+  showError,
+}: {
+  image: OrderProductImage;
+  index: number;
+  showError: (content: string) => void;
+}) {
+  const [downloadFile, setDownloadFile] = useState<File>();
+  const [preparing, setPreparing] = useState(false);
+
+  const prepareDownload = async (): Promise<void> => {
+    setPreparing(true);
+    try {
+      setDownloadFile(await loadProductImageFile(image));
+    } catch {
+      showError("Could not prepare the product image.");
+    } finally {
+      setPreparing(false);
+    }
+  };
+
+  return (
+    <div className={styles.productImage}>
+      <Image
+        alt={`Product image ${index + 1}`}
+        height={96}
+        preview={{
+          actionsRender: (originalNode) => (
+            <>
+              {originalNode}
+              <Tooltip title={preparing ? "Preparing image" : "Save image"}>
+                <Button
+                  aria-label={`Save product image ${index + 1}`}
+                  className={styles.previewSaveButton}
+                  disabled={!downloadFile}
+                  icon={<DownloadOutlined />}
+                  loading={preparing}
+                  type="text"
+                  onClick={() => {
+                    if (downloadFile) {
+                      savePreparedProductImage(downloadFile, showError);
+                    }
+                  }}
+                />
+              </Tooltip>
+            </>
+          ),
+          afterOpenChange: (open) => {
+            if (open && !downloadFile && !preparing) {
+              void prepareDownload();
+            }
+          },
+          src: getGoogleDriveThumbnailUrl(image.imageUrl, "w1600"),
+        }}
+        src={getGoogleDriveThumbnailUrl(image.imageUrl)}
+        width={96}
+      />
+      <Text>Product image {index + 1}</Text>
+    </div>
+  );
+}
+
+async function loadProductImageFile(
+  image: OrderProductImage,
+): Promise<File> {
+  const response = await fetch(
+    `/api/order-images/${encodeURIComponent(image.id)}`,
+  );
+  if (!response.ok) {
+    throw new Error("Image download failed.");
+  }
+
+  const blob = await response.blob();
+  const fileName = getDownloadFileName(response, image.id, blob.type);
+  return new File([blob], fileName, { type: blob.type });
+}
+
+function savePreparedProductImage(
+  file: File,
+  showError: (content: string) => void,
+): void {
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    void navigator
+      .share({ files: [file], title: "Product image" })
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          showError("Could not save the product image.");
+        }
+      });
+    return;
+  }
+
+  try {
+    downloadBlob(file, file.name);
+  } catch {
+    showError("Could not save the product image.");
+  }
+}
+
+function getDownloadFileName(
+  response: Response,
+  imageId: string,
+  contentType: string,
+): string {
+  const contentDisposition = response.headers.get("content-disposition");
+  const fileNameMatch = contentDisposition?.match(/filename="([^"]+)"/);
+  return fileNameMatch?.[1] || `product-image-${imageId}${getImageExtension(contentType)}`;
+}
+
+function getImageExtension(contentType: string): string {
+  switch (contentType.split(";")[0].trim().toLowerCase()) {
+    case "image/png":
+      return ".png";
+    case "image/webp":
+      return ".webp";
+    case "image/gif":
+      return ".gif";
+    case "image/jpeg":
+    default:
+      return ".jpg";
+  }
+}
+
+function downloadBlob(blob: Blob, fileName: string): void {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = fileName;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 
 function isInProgress(status: OrderStatus): boolean {
