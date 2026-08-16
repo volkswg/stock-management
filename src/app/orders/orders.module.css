@@ -1,0 +1,241 @@
+.appShell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky !important;
+  top: 0;
+  height: 100vh;
+  padding: 24px 12px 18px;
+  border-right: 1px solid #2d3833;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 4px 38px;
+  color: #f5f7f6;
+}
+
+.brandMark {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: grid;
+  place-items: center;
+  color: #17201c;
+  background: #78d6a3;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.brandText,
+.account span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.brandText strong,
+.account strong {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brandText small,
+.account small {
+  color: #aab5af;
+  font-size: 11px;
+}
+
+.navLabel {
+  display: block;
+  margin: 0 12px 7px;
+  color: #86938c !important;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sidebar :global(.ant-layout-sider-children) {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar :global(.ant-menu) {
+  border-inline-end: 0 !important;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 16px 8px 0;
+  color: #f5f7f6;
+  border-top: 1px solid #344039;
+}
+
+.content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 42px 40px;
+}
+
+.pageHeader {
+  display: grid;
+  justify-items: start;
+}
+
+.eyebrow {
+  margin-bottom: 7px;
+  color: #157347 !important;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0 0 5px !important;
+  font-size: 30px !important;
+}
+
+.summary {
+  margin-top: 30px;
+}
+
+.summary :global(.ant-card) {
+  height: 100%;
+}
+
+.summary :global(.ant-statistic-content) {
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.orderList {
+  margin-top: 22px;
+  overflow: hidden;
+}
+
+.listToolbar {
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e1e5e2;
+}
+
+.listToolbar h2 {
+  margin: 0 !important;
+  font-size: 16px !important;
+}
+
+.filters :global(.ant-input-affix-wrapper) {
+  width: min(280px, 30vw);
+}
+
+.filters :global(.ant-select) {
+  width: 140px;
+}
+
+.orderList :global(.ant-table-placeholder .ant-table-cell) {
+  height: 345px;
+}
+
+.emptyIcon {
+  color: #157347;
+  font-size: 42px;
+}
+
+.pagination {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 18px;
+  border-top: 1px solid #e1e5e2;
+}
+
+.loadingPage {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  background: #f3f5f4;
+}
+
+.loadingSidebar {
+  background: #1b2420;
+}
+
+.loadingMain {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 48px 40px;
+}
+
+.loadingSummary {
+  margin-top: 32px;
+}
+
+.loadingTable {
+  min-height: 470px;
+  margin-top: 22px;
+}
+
+@media (max-width: 768px) {
+  .content,
+  .loadingMain {
+    padding: 30px 20px;
+  }
+
+  .listToolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filters,
+  .filters :global(.ant-space-item),
+  .filters :global(.ant-input-affix-wrapper),
+  .filters :global(.ant-select) {
+    width: 100%;
+  }
+
+  .loadingPage {
+    grid-template-columns: 0 minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .content,
+  .loadingMain {
+    padding: 24px 14px;
+  }
+
+  .pageHeader h1 {
+    font-size: 26px !important;
+  }
+
+  .summary {
+    margin-top: 24px;
+  }
+
+  .listToolbar {
+    padding: 16px;
+  }
+
+  .pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
