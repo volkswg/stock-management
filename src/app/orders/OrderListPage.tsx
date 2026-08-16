@@ -301,6 +301,7 @@ function ProductImagePreview({
 }) {
   const [downloadFile, setDownloadFile] = useState<File>();
   const [preparing, setPreparing] = useState(false);
+  const previewImageUrl = `/api/order-images/${encodeURIComponent(image.id)}`;
 
   const prepareDownload = async (): Promise<void> => {
     setPreparing(true);
@@ -315,40 +316,47 @@ function ProductImagePreview({
 
   return (
     <div className={styles.productImage}>
-      <Image
-        alt={`Product ${index + 1}`}
-        height={96}
-        preview={{
-          actionsRender: (originalNode) => (
-            <>
-              {originalNode}
-              <Tooltip title={preparing ? "Preparing image" : "Save image"}>
-                <Button
-                  aria-label={`Save product image ${index + 1}`}
-                  className={styles.previewSaveButton}
-                  disabled={!downloadFile}
-                  icon={<DownloadOutlined />}
-                  loading={preparing}
-                  type="text"
-                  onClick={() => {
-                    if (downloadFile) {
-                      savePreparedProductImage(downloadFile, showError);
-                    }
-                  }}
-                />
-              </Tooltip>
-            </>
-          ),
-          afterOpenChange: (open) => {
-            if (open && !downloadFile && !preparing) {
-              void prepareDownload();
-            }
-          },
-          src: getGoogleDriveThumbnailUrl(image.imageUrl, "w1600"),
-        }}
-        src={getGoogleDriveThumbnailUrl(image.imageUrl)}
-        width={96}
-      />
+      <a
+        href={previewImageUrl}
+        rel="noopener noreferrer"
+        target="_blank"
+        aria-label={`Open product image ${index + 1}`}
+      >
+        <Image
+          alt={`Product ${index + 1}`}
+          height={96}
+          preview={{
+            actionsRender: (originalNode) => (
+              <>
+                {originalNode}
+                <Tooltip title={preparing ? "Preparing image" : "Save image"}>
+                  <Button
+                    aria-label={`Save product image ${index + 1}`}
+                    className={styles.previewSaveButton}
+                    disabled={!downloadFile}
+                    icon={<DownloadOutlined />}
+                    loading={preparing}
+                    type="text"
+                    onClick={() => {
+                      if (downloadFile) {
+                        savePreparedProductImage(downloadFile, showError);
+                      }
+                    }}
+                  />
+                </Tooltip>
+              </>
+            ),
+            afterOpenChange: (open) => {
+              if (open && !downloadFile && !preparing) {
+                void prepareDownload();
+              }
+            },
+            src: previewImageUrl,
+          }}
+          src={getGoogleDriveThumbnailUrl(image.imageUrl)}
+          width={96}
+        />
+      </a>
       <Text>Product image {index + 1}</Text>
       {image.quoteQuantity ? (
         <Text type="secondary">Qty: {image.quoteQuantity}</Text>

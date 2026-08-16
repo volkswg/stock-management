@@ -39,7 +39,7 @@ export async function GET(
     return new Response(new Uint8Array(file.bytes), {
       headers: {
         "Cache-Control": "private, no-store",
-        "Content-Disposition": `attachment; filename="product-image-${sanitizeFileName(id)}${extension}"`,
+        "Content-Disposition": `inline; filename="product-image-${sanitizeFileName(id)}${extension}"`,
         "Content-Type": file.contentType,
       },
     });
