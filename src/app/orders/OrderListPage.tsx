@@ -212,7 +212,7 @@ export function OrderListPage() {
                   <Empty
                     image={<InboxOutlined className={styles.emptyIcon} />}
                     description={
-                      <Space direction="vertical" size={2}>
+                      <Space orientation="vertical" size={2}>
                         <Text strong>No orders yet</Text>
                         <Text type="secondary">
                           Orders created from LINE will appear here.
