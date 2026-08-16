@@ -95,9 +95,9 @@ export function createPurchaseRichMenu({
 }
 
 export function createOrderRichMenu({
-  publicBaseUrl,
+  newPublicBaseUrl,
 }: {
-  publicBaseUrl: string;
+  newPublicBaseUrl: string;
 }): RichMenuRequest {
   return createThreeActionSubmenu({
     name: "Order Menu",
@@ -110,7 +110,7 @@ export function createOrderRichMenu({
     secondAction: {
       type: "uri",
       label: "List Order",
-      uri: buildOrderListUrl(publicBaseUrl),
+      uri: buildOrderListUrl(newPublicBaseUrl),
     },
   });
 }
@@ -143,6 +143,7 @@ export async function setupSwitchableRichMenus({
   orderImagePath,
   movementImagePath,
   publicBaseUrl,
+  newPublicBaseUrl,
 }: {
   channelAccessToken: string;
   mainImagePath: string;
@@ -150,6 +151,7 @@ export async function setupSwitchableRichMenus({
   orderImagePath: string;
   movementImagePath: string;
   publicBaseUrl: string;
+  newPublicBaseUrl: string;
 }): Promise<{
   mainRichMenuId: string;
   purchaseRichMenuId: string;
@@ -170,7 +172,7 @@ export async function setupSwitchableRichMenus({
   const orderRichMenuId = await createRichMenuWithImage({
     lineRichMenuClient,
     imagePath: orderImagePath,
-    richMenu: createOrderRichMenu({ publicBaseUrl }),
+    richMenu: createOrderRichMenu({ newPublicBaseUrl }),
   });
   const movementRichMenuId = await createRichMenuWithImage({
     lineRichMenuClient,

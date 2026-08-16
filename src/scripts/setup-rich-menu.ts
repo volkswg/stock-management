@@ -5,6 +5,7 @@ import { setupSwitchableRichMenus } from "./rich-menu.ts";
 type RichMenuSetupConfig = {
   channelAccessToken: string;
   publicBaseUrl: string;
+  newPublicBaseUrl: string;
   images: RichMenuImageConfig;
 };
 
@@ -26,6 +27,12 @@ async function main(): Promise<void> {
     throw new Error("PUBLIC_BASE_URL is required for rich menu web links.");
   }
 
+  if (!config.newPublicBaseUrl) {
+    throw new Error(
+      "NEW_PUBLIC_BASE_URL is required for the Order List rich menu link.",
+    );
+  }
+
   const {
     mainRichMenuId,
     purchaseRichMenuId,
@@ -38,6 +45,7 @@ async function main(): Promise<void> {
     orderImagePath: config.images.orderImagePath,
     movementImagePath: config.images.movementImagePath,
     publicBaseUrl: config.publicBaseUrl,
+    newPublicBaseUrl: config.newPublicBaseUrl,
   });
 
   console.log(`Default main rich menu created and enabled: ${mainRichMenuId}`);
@@ -57,6 +65,7 @@ function getRichMenuSetupConfig(): RichMenuSetupConfig {
   return {
     channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || "",
     publicBaseUrl: process.env.PUBLIC_BASE_URL || "",
+    newPublicBaseUrl: process.env.NEW_PUBLIC_BASE_URL || "",
     images: getRichMenuImageConfig(),
   };
 }

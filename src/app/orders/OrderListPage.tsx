@@ -128,16 +128,6 @@ export function OrderListPage() {
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE,
   );
-  const inProgressCount = orders.filter((order) =>
-    isInProgress(order.status),
-  ).length;
-  const completedCount = orders.filter(
-    (order) => order.status === OrderStatus.Complete,
-  ).length;
-  const totalValue = orders.reduce(
-    (total, order) => total + (order.totalPrice ?? 0),
-    0,
-  );
 
   return (
     <ConfigProvider
