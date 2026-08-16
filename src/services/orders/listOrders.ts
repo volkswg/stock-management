@@ -21,6 +21,7 @@ export type OrderProductImage = {
   id: string;
   orderId: string;
   imageUrl: string;
+  quoteQuantity: string;
   createdAt: string;
 };
 
@@ -31,7 +32,7 @@ export async function findOrderProductImageById({
   googleSheetsService: IGoogleSheetsService;
   imageId: string;
 }): Promise<OrderProductImage | undefined> {
-  const rows = await googleSheetsService.orderItems.readRows("A:G");
+  const rows = await googleSheetsService.orderItems.readRows();
   return rows
     .map(mapOrderProductImageRow)
     .find((image) => image?.id === imageId);
@@ -44,7 +45,7 @@ export async function listOrders({
 }): Promise<OrderListItem[]> {
   const [orderRows, orderItemRows] = await Promise.all([
     googleSheetsService.orders.readRows("A:I"),
-    googleSheetsService.orderItems.readRows("A:G"),
+    googleSheetsService.orderItems.readRows(),
   ]);
   const productImagesByOrderId = groupProductImagesByOrderId(orderItemRows);
 
@@ -116,7 +117,15 @@ function groupProductImagesByOrderId(
 function mapOrderProductImageRow(
   row: GoogleSheetRow,
 ): OrderProductImage | undefined {
-  const [id, orderId, imageUrl, createdAt, , deletedAt] = row;
+  const [
+    id,
+    orderId,
+    imageUrl,
+    quoteQuantity,
+    createdAt,
+    ,
+    deletedAt,
+  ] = row;
   const normalizedId = toStringValue(id);
   const normalizedOrderId = toStringValue(orderId);
   const normalizedImageUrl = toStringValue(imageUrl);
@@ -133,6 +142,7 @@ function mapOrderProductImageRow(
     id: normalizedId,
     orderId: normalizedOrderId,
     imageUrl: normalizedImageUrl,
+    quoteQuantity: toStringValue(quoteQuantity),
     createdAt: toStringValue(createdAt),
   };
 }

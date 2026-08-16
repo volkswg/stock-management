@@ -8,6 +8,7 @@ export type OrderItem = {
   id: string;
   orderId: string;
   imageUrl: string;
+  quoteQuantity: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
@@ -18,11 +19,13 @@ export async function createOrderItem({
   googleSheetsService,
   orderId,
   imageUrl,
+  quoteQuantity = "",
   createdBy,
 }: {
   googleSheetsService: IGoogleSheetsService;
   orderId: string;
   imageUrl: string;
+  quoteQuantity?: string;
   createdBy: string;
 }): Promise<OrderItem> {
   const id = await getNextOrderItemRowNumber(googleSheetsService);
@@ -31,6 +34,7 @@ export async function createOrderItem({
     id: String(id),
     orderId,
     imageUrl,
+    quoteQuantity,
     createdAt: now,
     updatedAt: now,
     deletedAt: "",
@@ -42,6 +46,7 @@ export async function createOrderItem({
       orderItem.id,
       orderItem.orderId,
       orderItem.imageUrl,
+      orderItem.quoteQuantity,
       orderItem.createdAt,
       orderItem.updatedAt,
       orderItem.deletedAt,
