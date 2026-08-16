@@ -11,6 +11,7 @@ export {
   createMessageQuickReply,
   createTextReplyMessage,
 } from "./utils/messageBuilder";
+export { LineMessageType } from "./enum";
 export type {
   DownloadedMessageContent,
   ILineBotService,

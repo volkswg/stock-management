@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import {
   LineBotService,
+  LineMessageType,
   type LineEvent,
   type LineWebhookPayload,
 } from "@/externals/line";
@@ -222,7 +223,7 @@ async function shouldProxyToLegacy({
     return false;
   }
 
-  if (event.message.type === "image") {
+  if (event.message.type === LineMessageType.Image) {
     const lineUserId = event.source?.userId;
     if (!lineUserId) {
       return true;
@@ -247,7 +248,7 @@ async function shouldProxyToLegacy({
     }
   }
 
-  if (event.message.type !== "text") {
+  if (event.message.type !== LineMessageType.Text) {
     return false;
   }
 

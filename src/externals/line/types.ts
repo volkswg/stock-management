@@ -1,3 +1,5 @@
+import type { LineMessageType } from "./enum";
+
 export interface ILineBotService {
   sendPush(userId: string, messages: LineReplyMessage[]): Promise<void>;
   sendReply(
@@ -137,7 +139,7 @@ export type LineEvent = {
   };
   message?: {
     id: string;
-    type: string;
+    type: LineMessageType;
     text?: string;
     contentProvider?: {
       type: string;

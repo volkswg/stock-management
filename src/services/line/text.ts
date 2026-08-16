@@ -1,5 +1,4 @@
 import { LineTextCommand } from "@/services/line/enum";
-import { isHelpCommand } from "./help";
 
 export function classifyLineTextCommand(
   text: string | undefined,
@@ -7,10 +6,6 @@ export function classifyLineTextCommand(
   const normalizedText = text?.trim().toLowerCase();
   if (!normalizedText) {
     return undefined;
-  }
-
-  if (isHelpCommand(normalizedText)) {
-    return LineTextCommand.Help;
   }
 
   if (normalizedText === "create:order") {

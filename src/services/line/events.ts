@@ -1,4 +1,8 @@
-import { type LineBotService, type LineEvent } from "@/externals/line";
+import {
+  LineMessageType,
+  type LineBotService,
+  type LineEvent,
+} from "@/externals/line";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { OrderStatus, UserStateFlowName } from "@/services/orders";
@@ -11,7 +15,6 @@ import { LineTextCommand } from "./enum";
 import { handleCompleteBillLineEvent } from "./events/completeBill";
 import { handleCompleteProductsLineEvent } from "./events/completeProducts";
 import { handleCreateOrderLineEvent } from "./events/createOrder";
-import { handleHelpLineEvent } from "./events/help";
 import { handleOrderBillImageLineEvent } from "./events/orderBillImage";
 import { handleOrderProductImageLineEvent } from "./events/orderProductImage";
 import { handleOrderTotalPriceLineEvent } from "./events/orderTotalPrice";
@@ -33,7 +36,7 @@ export async function handleLineEvent({
     return;
   }
 
-  if (event.message.type === "image") {
+  if (event.message.type === LineMessageType.Image) {
     const lineUserId = event.source?.userId;
     if (!lineUserId) {
       return;
@@ -70,7 +73,7 @@ export async function handleLineEvent({
     return;
   }
 
-  if (event.message.type !== "text") {
+  if (event.message.type !== LineMessageType.Text) {
     return;
   }
 
@@ -101,10 +104,6 @@ export async function handleLineEvent({
   }
 
   switch (command) {
-    case LineTextCommand.Help:
-      await handleHelpLineEvent({ event, lineBotService });
-      return;
-
     case LineTextCommand.CreateOrder:
       await handleCreateOrderLineEvent({
         event,
