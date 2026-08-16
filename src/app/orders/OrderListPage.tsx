@@ -170,23 +170,6 @@ export function OrderListPage() {
             </Text>
           </header>
 
-          <Row className={styles.summary} gutter={[12, 12]}>
-            <Col xs={12} lg={6}>
-              <Card><Statistic title="All orders" value={orders.length} /></Card>
-            </Col>
-            <Col xs={12} lg={6}>
-              <Card><Statistic title="In progress" value={inProgressCount} /></Card>
-            </Col>
-            <Col xs={12} lg={6}>
-              <Card><Statistic title="Completed" value={completedCount} /></Card>
-            </Col>
-            <Col xs={12} lg={6}>
-              <Card>
-                <Statistic title="Total value" value={totalValue} prefix="฿" precision={2} />
-              </Card>
-            </Col>
-          </Row>
-
           <Card className={styles.orderList} styles={{ body: { padding: 0 } }}>
             <div className={styles.listToolbar}>
               <div>

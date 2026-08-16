@@ -85,12 +85,11 @@
 .productImages {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 8px;
   padding: 10px 0;
 }
 
 .productImage {
-  width: 128px;
   display: grid;
   justify-items: start;
   gap: 5px;
