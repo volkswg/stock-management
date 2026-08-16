@@ -316,7 +316,7 @@ function ProductImagePreview({
   return (
     <div className={styles.productImage}>
       <Image
-        alt={`Product image ${index + 1}`}
+        alt={`Product ${index + 1}`}
         height={96}
         preview={{
           actionsRender: (originalNode) => (
