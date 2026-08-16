@@ -47,13 +47,10 @@
 }
 
 .listToolbar {
-  min-height: 82px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 20px;
   padding: 18px 22px;
-  border-bottom: 1px solid #e1e5e2;
+  flex-direction: column;
 }
 
 .listToolbar h2 {
@@ -61,12 +58,17 @@
   font-size: 16px !important;
 }
 
-.filters :global(.ant-input-affix-wrapper) {
+.searchInput {
   width: min(280px, 30vw);
 }
 
-.filters :global(.ant-select) {
-  width: 140px;
+.filterTabs {
+  padding: 0 22px;
+}
+
+.filterTabs :global(.ant-tabs-nav) {
+  margin: 0;
+  padding: 0 8px
 }
 
 .orderList :global(.ant-table-placeholder .ant-table-cell) {
@@ -171,10 +173,7 @@
     flex-direction: column;
   }
 
-  .filters,
-  .filters :global(.ant-space-item),
-  .filters :global(.ant-input-affix-wrapper),
-  .filters :global(.ant-select) {
+  .searchInput {
     width: 100%;
   }
 }

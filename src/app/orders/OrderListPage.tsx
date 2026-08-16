@@ -10,18 +10,15 @@ import {
   Alert,
   Button,
   Card,
-  Col,
   ConfigProvider,
   Empty,
   Image,
   Input,
   message,
   Pagination,
-  Row,
-  Select,
   Space,
-  Statistic,
   Table,
+  Tabs,
   Tooltip,
   Typography,
   type TableProps,
@@ -65,10 +62,10 @@ const COLUMNS: TableProps<OrderListItem>["columns"] = [
   },
 ];
 
-const STATUS_OPTIONS = [
-  { label: "All orders", value: "all" },
-  { label: "In progress", value: "in-progress" },
-  { label: "Completed", value: "completed" },
+const STATUS_FILTERS = [
+  { label: "All", key: "all" },
+  { label: "In progress", key: "in-progress" },
+  { label: "Complete", key: "completed" },
 ];
 
 export function OrderListPage() {
@@ -173,14 +170,10 @@ export function OrderListPage() {
           <Card className={styles.orderList} styles={{ body: { padding: 0 } }}>
             <div className={styles.listToolbar}>
               <div>
-                <Title level={2}>Order list</Title>
-                <Text type="secondary">{filteredOrders.length} orders</Text>
-              </div>
-
-              <Space className={styles.filters} wrap>
                 <Input
                   aria-label="Search orders"
                   allowClear
+                  className={styles.searchInput}
                   prefix={<SearchOutlined />}
                   placeholder="Search by order ID or user"
                   value={query}
@@ -189,17 +182,18 @@ export function OrderListPage() {
                     setPage(1);
                   }}
                 />
-                <Select
-                  aria-label="Filter by status"
-                  value={status}
-                  options={STATUS_OPTIONS}
-                  onChange={(value) => {
-                    setStatus(value);
-                    setPage(1);
-                  }}
-                />
-              </Space>
+              </div>
             </div>
+
+            <Tabs
+              activeKey={status}
+              className={styles.filterTabs}
+              items={STATUS_FILTERS}
+              onChange={(value) => {
+                setStatus(value);
+                setPage(1);
+              }}
+            />
 
             <Table<OrderListItem>
               columns={COLUMNS}
@@ -275,11 +269,7 @@ export function OrderListPage() {
   );
 }
 
-function ProductImageList({
-  images,
-}: {
-  images: OrderProductImage[];
-}) {
+function ProductImageList({ images }: { images: OrderProductImage[] }) {
   const [messageApi, messageContextHolder] = message.useMessage();
 
   if (images.length === 0) {
@@ -367,9 +357,7 @@ function ProductImagePreview({
   );
 }
 
-async function loadProductImageFile(
-  image: OrderProductImage,
-): Promise<File> {
+async function loadProductImageFile(image: OrderProductImage): Promise<File> {
   const response = await fetch(
     `/api/order-images/${encodeURIComponent(image.id)}`,
   );
@@ -411,7 +399,10 @@ function getDownloadFileName(
 ): string {
   const contentDisposition = response.headers.get("content-disposition");
   const fileNameMatch = contentDisposition?.match(/filename="([^"]+)"/);
-  return fileNameMatch?.[1] || `product-image-${imageId}${getImageExtension(contentType)}`;
+  return (
+    fileNameMatch?.[1] ||
+    `product-image-${imageId}${getImageExtension(contentType)}`
+  );
 }
 
 function getImageExtension(contentType: string): string {
@@ -466,10 +457,7 @@ function formatDate(value: string): string {
   }).format(date);
 }
 
-function getGoogleDriveThumbnailUrl(
-  imageUrl: string,
-  size = "w400",
-): string {
+function getGoogleDriveThumbnailUrl(imageUrl: string, size = "w400"): string {
   const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
   if (fileIdMatch?.[1]) {
     return `https://drive.google.com/thumbnail?id=${encodeURIComponent(
