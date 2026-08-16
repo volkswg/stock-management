@@ -97,16 +97,27 @@
   gap: 5px;
 }
 
-.productImage :global(.ant-image),
-.productImage :global(.ant-image-img) {
+.productImageTrigger {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
   border-radius: 5px;
+  cursor: pointer;
 }
 
-.productImage :global(.ant-image-img) {
+.productImageTrigger:focus-visible {
+  outline: 2px solid #157347;
+  outline-offset: 2px;
+}
+
+.productImageThumbnail {
+  display: block;
   object-fit: cover;
 }
 
-.productImage > span:not(:global(.ant-image)) {
+.productImage > span {
   max-width: 100%;
   overflow: hidden;
   font-size: 12px;
@@ -114,21 +125,27 @@
   white-space: nowrap;
 }
 
-.previewSaveButton {
-  width: 32px;
-  height: 32px;
-  display: inline-grid;
-  place-items: center;
-  color: #ffffff;
-  border-radius: 4px;
-  font-size: 18px;
+.nativeImagePreview {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background: #101412;
+  border-radius: 5px;
 }
 
-.previewSaveButton:hover,
-.previewSaveButton:focus-visible {
-  color: #ffffff;
-  background: rgb(255 255 255 / 18%);
-  outline: none;
+.nativeImage {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 72vh;
+  object-fit: contain;
+  user-select: auto;
+  -webkit-user-select: auto;
+  -webkit-touch-callout: default;
+  touch-action: auto;
 }
 
 .pagination {

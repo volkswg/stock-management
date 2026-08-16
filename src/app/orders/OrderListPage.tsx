@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- Native images preserve iOS long-press save behavior. */
 
 import {
   DownloadOutlined,
@@ -12,14 +13,13 @@ import {
   Card,
   ConfigProvider,
   Empty,
-  Image,
   Input,
   message,
+  Modal,
   Pagination,
   Space,
   Table,
   Tabs,
-  Tooltip,
   Typography,
   type TableProps,
 } from "antd";
@@ -301,6 +301,7 @@ function ProductImagePreview({
 }) {
   const [downloadFile, setDownloadFile] = useState<File>();
   const [preparing, setPreparing] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const previewImageUrl = getGoogleDrivePreviewUrl(image.imageUrl);
 
   const prepareDownload = async (): Promise<void> => {
@@ -314,46 +315,66 @@ function ProductImagePreview({
     }
   };
 
+  const openPreview = (): void => {
+    setPreviewOpen(true);
+    if (!downloadFile && !preparing) {
+      void prepareDownload();
+    }
+  };
+
   return (
     <div className={styles.productImage}>
-      <Image
-        alt={`Product ${index + 1}`}
-        height={96}
-        preview={{
-          actionsRender: (originalNode) => (
-            <>
-              {originalNode}
-              <Tooltip title={preparing ? "Preparing image" : "Save image"}>
-                <Button
-                  aria-label={`Save product image ${index + 1}`}
-                  className={styles.previewSaveButton}
-                  disabled={!downloadFile}
-                  icon={<DownloadOutlined />}
-                  loading={preparing}
-                  type="text"
-                  onClick={() => {
-                    if (downloadFile) {
-                      savePreparedProductImage(downloadFile, showError);
-                    }
-                  }}
-                />
-              </Tooltip>
-            </>
-          ),
-          afterOpenChange: (open) => {
-            if (open && !downloadFile && !preparing) {
-              void prepareDownload();
-            }
-          },
-          src: previewImageUrl,
-        }}
-        src={getGoogleDriveThumbnailUrl(image.imageUrl)}
-        width={96}
-      />
+      <button
+        aria-label={`Preview product image ${index + 1}`}
+        className={styles.productImageTrigger}
+        type="button"
+        onClick={openPreview}
+      >
+        <img
+          alt={`Product ${index + 1}`}
+          className={styles.productImageThumbnail}
+          height={96}
+          src={getGoogleDriveThumbnailUrl(image.imageUrl)}
+          width={96}
+        />
+      </button>
       <Text>Product {index + 1}</Text>
       {image.quoteQuantity ? (
         <Text type="secondary">Qty: {image.quoteQuantity}</Text>
       ) : null}
+
+      <Modal
+        centered
+        className={styles.nativeImageModal}
+        destroyOnHidden
+        open={previewOpen}
+        title={`Product ${index + 1}`}
+        width="min(980px, calc(100vw - 24px))"
+        footer={
+          <Button
+            disabled={!downloadFile}
+            icon={<DownloadOutlined />}
+            loading={preparing}
+            type="primary"
+            onClick={() => {
+              if (downloadFile) {
+                savePreparedProductImage(downloadFile, showError);
+              }
+            }}
+          >
+            Save image
+          </Button>
+        }
+        onCancel={() => setPreviewOpen(false)}
+      >
+        <div className={styles.nativeImagePreview}>
+          <img
+            alt={`Product ${index + 1}`}
+            className={styles.nativeImage}
+            src={previewImageUrl}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }
