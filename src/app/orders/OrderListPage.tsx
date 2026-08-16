@@ -35,6 +35,13 @@ import styles from "./orders.module.css";
 
 const { Text, Title } = Typography;
 const PAGE_SIZE = 10;
+const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
+  style: "currency",
+  currency: "THB",
+  currencyDisplay: "narrowSymbol",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 const COLUMNS: TableProps<OrderListItem>["columns"] = [
   {
@@ -58,7 +65,7 @@ const COLUMNS: TableProps<OrderListItem>["columns"] = [
     align: "right",
     width: 140,
     render: (value: number | null) =>
-      value === null ? "—" : `฿${value.toFixed(2)}`,
+      value === null ? "—" : THB_FORMATTER.format(value),
   },
 ];
 
