@@ -21,6 +21,7 @@ export enum OrderStatus {
   WaitingForBillImage = "waiting_for_bill_image",
   WaitingForProductImage = "waiting_for_product_image",
   WaitingForTotalPrice = "waiting_for_total_price",
+  Complete = "complete",
   Paid = "paid",
   Shipped = "shipped",
   Delivered = "delivered",

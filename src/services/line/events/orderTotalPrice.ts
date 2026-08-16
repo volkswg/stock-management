@@ -48,7 +48,6 @@ export async function handleOrderTotalPriceLineEvent({
       googleSheetsService,
       orderId: userState.referenceId,
       userStateId: userState.id,
-      userStateCreatedAt: userState.createdAt,
       totalPrice,
     });
   } catch (error) {
@@ -70,7 +69,7 @@ export async function handleOrderTotalPriceLineEvent({
         "✅ Total price saved",
         `Order ID: ${userState.referenceId}`,
         `Total price: ${formatTotalPrice(totalPrice)}`,
-        "Order status: Paid",
+        "Order status: Complete",
       ].join("\n"),
     }),
   ]);
