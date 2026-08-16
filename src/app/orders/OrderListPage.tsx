@@ -461,9 +461,9 @@ function formatDate(value: string): string {
 function getGoogleDrivePreviewUrl(imageUrl: string): string {
   const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
   if (fileIdMatch?.[1]) {
-    return `https://drive.google.com/uc?export=view&id=${encodeURIComponent(
+    return `https://lh3.googleusercontent.com/d/${encodeURIComponent(
       fileIdMatch[1],
-    )}`;
+    )}?authuser=0`;
   }
 
   return imageUrl;
