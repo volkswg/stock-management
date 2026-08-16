@@ -21,6 +21,7 @@ import {
 } from "@/services/line";
 import {
   isOrderImageUploadState,
+  OrderStatus,
   UserStateFlowName,
 } from "@/services/orders";
 import {
@@ -250,5 +251,31 @@ async function shouldProxyToLegacy({
     return false;
   }
 
-  return classifyLineTextCommand(event.message.text) === LineTextCommand.Legacy;
+  const command = classifyLineTextCommand(event.message.text);
+  if (command !== LineTextCommand.Legacy) {
+    return false;
+  }
+
+  const lineUserId = event.source?.userId;
+  if (!lineUserId) {
+    return true;
+  }
+
+  try {
+    const latestUserState = await findLatestUserState({
+      googleSheetsService: getGoogleSheetsService(),
+      userId: lineUserId,
+      flowname: UserStateFlowName.OrderCreate,
+    });
+    if (latestUserState) {
+      resolvedUserStates.set(event, latestUserState);
+    }
+    return latestUserState?.state !== OrderStatus.WaitingForTotalPrice;
+  } catch (error) {
+    console.error("Failed to check LINE text user state", {
+      webhookEventId: event.webhookEventId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return true;
+  }
 }

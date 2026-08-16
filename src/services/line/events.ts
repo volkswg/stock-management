@@ -14,6 +14,7 @@ import { handleCreateOrderLineEvent } from "./events/createOrder";
 import { handleHelpLineEvent } from "./events/help";
 import { handleOrderBillImageLineEvent } from "./events/orderBillImage";
 import { handleOrderProductImageLineEvent } from "./events/orderProductImage";
+import { handleOrderTotalPriceLineEvent } from "./events/orderTotalPrice";
 
 export async function handleLineEvent({
   event,
@@ -74,6 +75,30 @@ export async function handleLineEvent({
   }
 
   const command = classifyLineTextCommand(event.message.text);
+
+  if (command === LineTextCommand.Legacy) {
+    const lineUserId = event.source?.userId;
+    if (lineUserId) {
+      const googleSheetsService = getGoogleSheetsService();
+      const latestUserState =
+        resolvedUserState ||
+        (await findLatestUserState({
+          googleSheetsService,
+          userId: lineUserId,
+          flowname: UserStateFlowName.OrderCreate,
+        }));
+
+      if (latestUserState?.state === OrderStatus.WaitingForTotalPrice) {
+        await handleOrderTotalPriceLineEvent({
+          event,
+          lineBotService,
+          googleSheetsService,
+          userState: latestUserState,
+        });
+        return;
+      }
+    }
+  }
 
   switch (command) {
     case LineTextCommand.Help:
