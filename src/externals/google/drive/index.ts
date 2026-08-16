@@ -8,7 +8,6 @@ export {
 } from "./const";
 export type {
   GoogleDriveConfig,
-  GoogleDriveDownload,
   GoogleDriveFile,
   GoogleDriveUploadImageRequest,
   IGoogleDriveService,

@@ -5,7 +5,6 @@ import {
 } from "./const";
 import type {
   GoogleDriveConfig,
-  GoogleDriveDownload,
   GoogleDriveFile,
   GoogleDriveUploadImageRequest,
   IGoogleDriveService,
@@ -66,29 +65,6 @@ export class GoogleDriveService implements IGoogleDriveService {
     }
 
     return driveFile;
-  }
-
-  async downloadFile(fileId: string): Promise<GoogleDriveDownload> {
-    const accessToken = await this.config.auth.getAccessToken();
-    const response = await fetch(
-      `${GOOGLE_DRIVE_API_BASE}/files/${encodeURIComponent(fileId)}?alt=media&${SHARED_DRIVE_SUPPORT_QUERY}`,
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(
-        `Google Drive download failed: ${response.status} ${errorBody}`,
-      );
-    }
-
-    return {
-      bytes: Buffer.from(await response.arrayBuffer()),
-      contentType: response.headers.get("content-type") || "image/jpeg",
-    };
   }
 
   async makeFileReadableByLink(fileId: string): Promise<void> {

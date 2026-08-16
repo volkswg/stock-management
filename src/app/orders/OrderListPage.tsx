@@ -2,7 +2,6 @@
 /* eslint-disable @next/next/no-img-element -- Native images preserve iOS long-press save behavior. */
 
 import {
-  DownloadOutlined,
   InboxOutlined,
   ReloadOutlined,
   SearchOutlined,
@@ -14,7 +13,6 @@ import {
   ConfigProvider,
   Empty,
   Input,
-  message,
   Modal,
   Pagination,
   Space,
@@ -267,59 +265,31 @@ export function OrderListPage() {
 }
 
 function ProductImageList({ images }: { images: OrderProductImage[] }) {
-  const [messageApi, messageContextHolder] = message.useMessage();
-
   if (images.length === 0) {
     return null;
   }
 
   return (
-    <>
-      {messageContextHolder}
-      <section className={styles.productImages} aria-label="Product images">
-        {images.map((image, index) => (
-          <ProductImagePreview
-            image={image}
-            index={index}
-            key={image.id}
-            showError={(content) => messageApi.error(content)}
-          />
-        ))}
-      </section>
-    </>
+    <section className={styles.productImages} aria-label="Product images">
+      {images.map((image, index) => (
+        <ProductImagePreview image={image} index={index} key={image.id} />
+      ))}
+    </section>
   );
 }
 
 function ProductImagePreview({
   image,
   index,
-  showError,
 }: {
   image: OrderProductImage;
   index: number;
-  showError: (content: string) => void;
 }) {
-  const [downloadFile, setDownloadFile] = useState<File>();
-  const [preparing, setPreparing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewImageUrl = getGoogleDrivePreviewUrl(image.imageUrl);
 
-  const prepareDownload = async (): Promise<void> => {
-    setPreparing(true);
-    try {
-      setDownloadFile(await loadProductImageFile(image));
-    } catch {
-      showError("Could not prepare the product image.");
-    } finally {
-      setPreparing(false);
-    }
-  };
-
   const openPreview = (): void => {
     setPreviewOpen(true);
-    if (!downloadFile && !preparing) {
-      void prepareDownload();
-    }
   };
 
   return (
@@ -347,24 +317,10 @@ function ProductImagePreview({
         centered
         className={styles.nativeImageModal}
         destroyOnHidden
+        footer={null}
         open={previewOpen}
         title={`Product ${index + 1}`}
         width="min(980px, calc(100vw - 24px))"
-        footer={
-          <Button
-            disabled={!downloadFile}
-            icon={<DownloadOutlined />}
-            loading={preparing}
-            type="primary"
-            onClick={() => {
-              if (downloadFile) {
-                savePreparedProductImage(downloadFile, showError);
-              }
-            }}
-          >
-            Save image
-          </Button>
-        }
         onCancel={() => setPreviewOpen(false)}
       >
         <div className={styles.nativeImagePreview}>
@@ -377,77 +333,6 @@ function ProductImagePreview({
       </Modal>
     </div>
   );
-}
-
-async function loadProductImageFile(image: OrderProductImage): Promise<File> {
-  const response = await fetch(
-    `/api/order-images/${encodeURIComponent(image.id)}`,
-  );
-  if (!response.ok) {
-    throw new Error("Image download failed.");
-  }
-
-  const blob = await response.blob();
-  const fileName = getDownloadFileName(response, image.id, blob.type);
-  return new File([blob], fileName, { type: blob.type });
-}
-
-function savePreparedProductImage(
-  file: File,
-  showError: (content: string) => void,
-): void {
-  if (navigator.share && navigator.canShare?.({ files: [file] })) {
-    void navigator
-      .share({ files: [file], title: "Product image" })
-      .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
-          showError("Could not save the product image.");
-        }
-      });
-    return;
-  }
-
-  try {
-    downloadBlob(file, file.name);
-  } catch {
-    showError("Could not save the product image.");
-  }
-}
-
-function getDownloadFileName(
-  response: Response,
-  imageId: string,
-  contentType: string,
-): string {
-  const contentDisposition = response.headers.get("content-disposition");
-  const fileNameMatch = contentDisposition?.match(/filename="([^"]+)"/);
-  return (
-    fileNameMatch?.[1] ||
-    `product-image-${imageId}${getImageExtension(contentType)}`
-  );
-}
-
-function getImageExtension(contentType: string): string {
-  switch (contentType.split(";")[0].trim().toLowerCase()) {
-    case "image/png":
-      return ".png";
-    case "image/webp":
-      return ".webp";
-    case "image/gif":
-      return ".gif";
-    case "image/jpeg":
-    default:
-      return ".jpg";
-  }
-}
-
-function downloadBlob(blob: Blob, fileName: string): void {
-  const objectUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = objectUrl;
-  link.download = fileName;
-  link.click();
-  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 
 function isInProgress(status: OrderStatus): boolean {

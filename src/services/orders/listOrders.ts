@@ -25,19 +25,6 @@ export type OrderProductImage = {
   createdAt: string;
 };
 
-export async function findOrderProductImageById({
-  googleSheetsService,
-  imageId,
-}: {
-  googleSheetsService: IGoogleSheetsService;
-  imageId: string;
-}): Promise<OrderProductImage | undefined> {
-  const rows = await googleSheetsService.orderItems.readRows();
-  return rows
-    .map(mapOrderProductImageRow)
-    .find((image) => image?.id === imageId);
-}
-
 export async function listOrders({
   googleSheetsService,
 }: {
