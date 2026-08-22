@@ -104,22 +104,30 @@
   overflow: hidden;
 }
 
-.quoteEditor {
+.quantityToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0 10px;
+}
+
+.quantityEditor {
   width: 180px;
   display: grid;
   gap: 5px;
 }
 
-.quoteLabel,
-.quoteEditor > :global(.ant-typography) {
+.quantityLabel,
+.quantityEditor > :global(.ant-typography) {
   font-size: 12px;
 }
 
-.quoteControls {
+.quantityControls {
   width: 100%;
 }
 
-.quoteControls :global(.ant-input-number) {
+.quantityControls :global(.ant-input-number) {
   flex: 1;
   min-width: 0;
 }

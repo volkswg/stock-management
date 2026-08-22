@@ -1,6 +1,7 @@
 import type {
   CreatedOrder,
   OrderDetail,
+  OrderItemQuantityType,
   OrderListItem,
   OrderStatus,
 } from "@/services/orders";
@@ -33,10 +34,11 @@ export type UpdateOrderPriceResponse = {
   };
 };
 
-export type UpdateOrderItemQuoteQuantityResponse = {
+export type UpdateOrderItemQuantityResponse = {
   item: {
     id: string;
-    quoteQuantity: string;
+    quantity: string;
+    quantityType: OrderItemQuantityType;
     updatedAt: string;
   };
 };
@@ -169,11 +171,12 @@ export async function updateOrderPrice(
   return body;
 }
 
-export async function updateOrderItemQuoteQuantity(
+export async function updateOrderItemQuantity(
   orderId: string,
   orderItemId: string,
-  quoteQuantity: number,
-): Promise<UpdateOrderItemQuoteQuantityResponse> {
+  quantityType: OrderItemQuantityType,
+  quantity: number,
+): Promise<UpdateOrderItemQuantityResponse> {
   const response = await fetch(
     `/api/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(orderItemId)}`,
     {
@@ -182,7 +185,7 @@ export async function updateOrderItemQuoteQuantity(
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ quoteQuantity }),
+      body: JSON.stringify({ quantity, quantityType }),
     },
   );
 
@@ -190,8 +193,8 @@ export async function updateOrderItemQuoteQuantity(
   if (!response.ok) {
     throw new Error(getErrorMessage(body));
   }
-  if (!isUpdateOrderItemQuoteQuantityResponse(body)) {
-    throw new Error("The quote quantity API returned an invalid response.");
+  if (!isUpdateOrderItemQuantityResponse(body)) {
+    throw new Error("The product quantity API returned an invalid response.");
   }
 
   return body;
@@ -235,14 +238,16 @@ function isUpdateOrderPriceResponse(
   );
 }
 
-function isUpdateOrderItemQuoteQuantityResponse(
+function isUpdateOrderItemQuantityResponse(
   value: unknown,
-): value is UpdateOrderItemQuoteQuantityResponse {
+): value is UpdateOrderItemQuantityResponse {
   return (
     isRecord(value) &&
     isRecord(value.item) &&
     typeof value.item.id === "string" &&
-    typeof value.item.quoteQuantity === "string" &&
+    typeof value.item.quantity === "string" &&
+    (value.item.quantityType === "quote" ||
+      value.item.quantityType === "delivered") &&
     typeof value.item.updatedAt === "string"
   );
 }

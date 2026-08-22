@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { updateOrderItemQuoteQuantity } from "@/services/orders";
+import {
+  OrderItemQuantityType,
+  updateOrderItemQuantity,
+} from "@/services/orders";
 
 export const runtime = "nodejs";
 
@@ -20,20 +23,25 @@ export async function PATCH(
   }
 
   const body = await readJsonBody(request);
-  if (!isRecord(body) || !isValidQuoteQuantity(body.quoteQuantity)) {
+  if (
+    !isRecord(body) ||
+    !isOrderItemQuantityType(body.quantityType) ||
+    !isValidQuantity(body.quantity)
+  ) {
     return NextResponse.json(
-      { error: "Enter a positive whole-number quote quantity." },
+      { error: "Enter a valid quantity type and positive whole number." },
       { status: 400 },
     );
   }
 
   try {
     const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
-    const result = await updateOrderItemQuoteQuantity({
+    const result = await updateOrderItemQuantity({
       googleSheetsService,
       orderId,
       orderItemId,
-      quoteQuantity: body.quoteQuantity,
+      quantity: body.quantity,
+      quantityType: body.quantityType,
     });
     if (result.outcome === "not_found") {
       return NextResponse.json(
@@ -45,18 +53,19 @@ export async function PATCH(
     return NextResponse.json({
       item: {
         id: orderItemId,
-        quoteQuantity: result.quoteQuantity,
+        quantity: result.quantity,
+        quantityType: body.quantityType,
         updatedAt: result.updatedAt,
       },
     });
   } catch (error) {
-    console.error("Failed to update order product quote quantity", {
+    console.error("Failed to update order product quantity", {
       orderId,
       orderItemId,
       error: error instanceof Error ? error.message : String(error),
     });
     return NextResponse.json(
-      { error: "Failed to update the quote quantity." },
+      { error: "Failed to update the product quantity." },
       { status: 500 },
     );
   }
@@ -70,8 +79,14 @@ async function readJsonBody(request: Request): Promise<unknown> {
   }
 }
 
-function isValidQuoteQuantity(value: unknown): value is number {
+function isValidQuantity(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value > 0;
+}
+
+function isOrderItemQuantityType(value: unknown): value is OrderItemQuantityType {
+  return Object.values(OrderItemQuantityType).includes(
+    value as OrderItemQuantityType,
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

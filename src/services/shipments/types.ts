@@ -36,6 +36,7 @@ export type ShipmentRelatedProductImage = {
   id: string;
   imageUrl: string;
   quoteQuantity: string;
+  deliveredQuantity: string;
 };
 
 export type ShipmentListItem = Omit<Shipment, "deletedAt"> & {

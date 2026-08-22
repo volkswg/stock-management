@@ -160,7 +160,16 @@ function groupProductImagesByOrderId(
   >();
 
   for (const row of rows) {
-    const [id, orderId, imageUrl, quoteQuantity, , , deletedAt] = row;
+    const [
+      id,
+      orderId,
+      imageUrl,
+      quoteQuantity,
+      deliveredQuantity,
+      ,
+      ,
+      deletedAt,
+    ] = row;
     const normalizedId = toStringValue(id);
     const normalizedOrderId = toStringValue(orderId);
     const normalizedImageUrl = toStringValue(imageUrl);
@@ -178,6 +187,7 @@ function groupProductImagesByOrderId(
       id: normalizedId,
       imageUrl: normalizedImageUrl,
       quoteQuantity: toStringValue(quoteQuantity),
+      deliveredQuantity: toStringValue(deliveredQuantity),
     });
     productImagesByOrderId.set(normalizedOrderId, images);
   }

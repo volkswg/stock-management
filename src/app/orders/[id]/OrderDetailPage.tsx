@@ -23,6 +23,7 @@ import {
   InputNumber,
   message,
   Modal,
+  Segmented,
   Select,
   Skeleton,
   Space,
@@ -32,7 +33,11 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { OrderStatus, type OrderDetail } from "@/services/orders";
+import {
+  OrderItemQuantityType,
+  OrderStatus,
+  type OrderDetail,
+} from "@/services/orders";
 import {
   createShipmentMaster,
   getShipments,
@@ -40,7 +45,7 @@ import {
 } from "@/app/shipments/api";
 import {
   getOrder,
-  updateOrderItemQuoteQuantity,
+  updateOrderItemQuantity,
   updateOrderPrice,
 } from "../api";
 import { OrderImageGallery } from "../OrderImageGallery";
@@ -134,6 +139,10 @@ function OrderContent({
   order: OrderDetail;
   onOrderChange: Dispatch<SetStateAction<OrderDetail | undefined>>;
 }) {
+  const [quantityType, setQuantityType] = useState<OrderItemQuantityType>(
+    OrderItemQuantityType.Quote,
+  );
+
   return (
     <>
       <header className={styles.pageHeader}>
@@ -239,37 +248,67 @@ function OrderContent({
               ),
               children:
                 order.productImages.length > 0 ? (
-                  <OrderImageGallery
-                    ariaLabel="Product images"
-                    images={order.productImages.map((image, index) => ({
-                      id: image.id,
-                      imageUrl: image.imageUrl,
-                      title: `Product ${index + 1}`,
-                      details: (
-                        <OrderItemQuoteQuantity
-                          initialQuantity={image.quoteQuantity}
-                          itemId={image.id}
-                          orderId={order.id}
-                          onUpdated={(quoteQuantity) =>
-                            onOrderChange((current) =>
-                              current
-                                ? {
-                                    ...current,
-                                    productImages: current.productImages.map(
-                                      (item) =>
-                                        item.id === image.id
-                                          ? { ...item, quoteQuantity }
-                                          : item,
-                                    ),
-                                  }
-                                : current,
-                            )
-                          }
-                        />
-                      ),
-                    }))}
-                    thumbnailSize={128}
-                  />
+                  <>
+                    <div className={styles.quantityToolbar}>
+                      <Text strong>Quantity</Text>
+                      <Segmented<OrderItemQuantityType>
+                        options={[
+                          {
+                            label: "Quote",
+                            value: OrderItemQuantityType.Quote,
+                          },
+                          {
+                            label: "Delivered",
+                            value: OrderItemQuantityType.Delivered,
+                          },
+                        ]}
+                        value={quantityType}
+                        onChange={setQuantityType}
+                      />
+                    </div>
+                    <OrderImageGallery
+                      ariaLabel="Product images"
+                      images={order.productImages.map((image, index) => ({
+                        id: image.id,
+                        imageUrl: image.imageUrl,
+                        title: `Product ${index + 1}`,
+                        details: (
+                          <OrderItemQuantity
+                            deliveredQuantity={image.deliveredQuantity}
+                            key={`${image.id}-${quantityType}`}
+                            itemId={image.id}
+                            orderId={order.id}
+                            quantityType={quantityType}
+                            quoteQuantity={image.quoteQuantity}
+                            onUpdated={(updatedType, quantity) =>
+                              onOrderChange((current) =>
+                                current
+                                  ? {
+                                      ...current,
+                                      productImages: current.productImages.map(
+                                        (item) =>
+                                          item.id === image.id
+                                            ? {
+                                                ...item,
+                                                [
+                                                  updatedType ===
+                                                  OrderItemQuantityType.Quote
+                                                    ? "quoteQuantity"
+                                                    : "deliveredQuantity"
+                                                ]: quantity,
+                                              }
+                                            : item,
+                                      ),
+                                    }
+                                  : current,
+                              )
+                            }
+                          />
+                        ),
+                      }))}
+                      thumbnailSize={128}
+                    />
+                  </>
                 ) : (
                   <ImageEmptyState description="No product images" />
                 ),
@@ -281,18 +320,30 @@ function OrderContent({
   );
 }
 
-function OrderItemQuoteQuantity({
-  initialQuantity,
+function OrderItemQuantity({
+  deliveredQuantity,
   itemId,
   orderId,
+  quantityType,
+  quoteQuantity,
   onUpdated,
 }: {
-  initialQuantity: string;
+  deliveredQuantity: string;
   itemId: string;
   orderId: string;
-  onUpdated: (quoteQuantity: string) => void;
+  quantityType: OrderItemQuantityType;
+  quoteQuantity: string;
+  onUpdated: (quantityType: OrderItemQuantityType, quantity: string) => void;
 }) {
-  const savedQuantity = parseQuoteQuantity(initialQuantity);
+  const quantityLabel =
+    quantityType === OrderItemQuantityType.Quote
+      ? "Quote quantity"
+      : "Delivered quantity";
+  const initialQuantity =
+    quantityType === OrderItemQuantityType.Quote
+      ? quoteQuantity
+      : deliveredQuantity;
+  const savedQuantity = parseQuantity(initialQuantity);
   const [quantity, setQuantity] = useState<number | null>(savedQuantity);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -310,18 +361,19 @@ function OrderItemQuoteQuantity({
     setSaved(false);
     setError(undefined);
     try {
-      const response = await updateOrderItemQuoteQuantity(
+      const response = await updateOrderItemQuantity(
         orderId,
         itemId,
+        quantityType,
         quantity,
       );
-      onUpdated(response.item.quoteQuantity);
+      onUpdated(response.item.quantityType, response.item.quantity);
       setSaved(true);
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Failed to update the quote quantity.",
+          : "Failed to update the product quantity.",
       );
     } finally {
       setSaving(false);
@@ -329,13 +381,13 @@ function OrderItemQuoteQuantity({
   };
 
   return (
-    <div className={styles.quoteEditor}>
-      <Text className={styles.quoteLabel} type="secondary">
-        Quote quantity
+    <div className={styles.quantityEditor}>
+      <Text className={styles.quantityLabel} type="secondary">
+        {quantityLabel}
       </Text>
-      <Space.Compact className={styles.quoteControls}>
+      <Space.Compact className={styles.quantityControls}>
         <InputNumber<number>
-          aria-label="Quote quantity"
+          aria-label={quantityLabel}
           controls={false}
           min={1}
           placeholder="Quantity"
@@ -347,9 +399,9 @@ function OrderItemQuoteQuantity({
           }}
           onPressEnter={() => void saveQuantity()}
         />
-        <Tooltip title="Save quote quantity">
+        <Tooltip title={`Save ${quantityLabel.toLowerCase()}`}>
           <Button
-            aria-label="Save quote quantity"
+            aria-label={`Save ${quantityLabel.toLowerCase()}`}
             disabled={!canSave}
             icon={<SaveOutlined />}
             loading={saving}
@@ -364,7 +416,7 @@ function OrderItemQuoteQuantity({
   );
 }
 
-function parseQuoteQuantity(value: string): number | null {
+function parseQuantity(value: string): number | null {
   if (!value.trim()) return null;
 
   const quantity = Number(value);

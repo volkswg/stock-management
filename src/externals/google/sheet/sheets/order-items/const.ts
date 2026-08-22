@@ -3,6 +3,7 @@ export const ORDER_ITEMS_SHEET_HEADERS = [
   "orderId",
   "imageUrl",
   "quoteQuantity",
+  "deliveredQuantity",
   "createdAt",
   "updatedAt",
   "deletedAt",
