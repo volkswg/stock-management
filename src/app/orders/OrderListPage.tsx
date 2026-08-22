@@ -1,7 +1,7 @@
 "use client";
-/* eslint-disable @next/next/no-img-element -- Native images preserve iOS long-press save behavior. */
 
 import {
+  EyeOutlined,
   InboxOutlined,
   ReloadOutlined,
   SearchOutlined,
@@ -13,11 +13,11 @@ import {
   ConfigProvider,
   Empty,
   Input,
-  Modal,
   Pagination,
   Space,
   Table,
   Tabs,
+  Tooltip,
   Typography,
   type TableProps,
 } from "antd";
@@ -26,9 +26,9 @@ import type { Key } from "react";
 import {
   OrderStatus,
   type OrderListItem,
-  type OrderProductImage,
 } from "@/services/orders";
 import { getOrders } from "./api";
+import { OrderImageGallery } from "./OrderImageGallery";
 import styles from "./orders.module.css";
 
 const { Text, Title } = Typography;
@@ -64,6 +64,22 @@ const COLUMNS: TableProps<OrderListItem>["columns"] = [
     width: 140,
     render: (value: number | null) =>
       value === null ? "—" : THB_FORMATTER.format(value),
+  },
+  {
+    title: "",
+    key: "action",
+    align: "center",
+    width: 56,
+    render: (_, order) => (
+      <Tooltip title="View order">
+        <Button
+          aria-label="View order details"
+          href={`/orders/${encodeURIComponent(order.id)}`}
+          icon={<EyeOutlined />}
+          type="text"
+        />
+      </Tooltip>
+    ),
   },
 ];
 
@@ -200,7 +216,17 @@ export function OrderListPage() {
               expandable={{
                 expandedRowKeys,
                 expandedRowRender: (order) => (
-                  <ProductImageList images={order.productImages} />
+                  <OrderImageGallery
+                    ariaLabel="Product images"
+                    images={order.productImages.map((image, index) => ({
+                      id: image.id,
+                      imageUrl: image.imageUrl,
+                      title: `Product ${index + 1}`,
+                      description: image.quoteQuantity
+                        ? `Qty: ${image.quoteQuantity}`
+                        : undefined,
+                    }))}
+                  />
                 ),
                 onExpandedRowsChange: (keys) => setExpandedRowKeys([...keys]),
                 rowExpandable: (order) => order.productImages.length > 0,
@@ -264,77 +290,6 @@ export function OrderListPage() {
   );
 }
 
-function ProductImageList({ images }: { images: OrderProductImage[] }) {
-  if (images.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className={styles.productImages} aria-label="Product images">
-      {images.map((image, index) => (
-        <ProductImagePreview image={image} index={index} key={image.id} />
-      ))}
-    </section>
-  );
-}
-
-function ProductImagePreview({
-  image,
-  index,
-}: {
-  image: OrderProductImage;
-  index: number;
-}) {
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const previewImageUrl = getGoogleDrivePreviewUrl(image.imageUrl);
-
-  const openPreview = (): void => {
-    setPreviewOpen(true);
-  };
-
-  return (
-    <div className={styles.productImage}>
-      <button
-        aria-label={`Preview product image ${index + 1}`}
-        className={styles.productImageTrigger}
-        type="button"
-        onClick={openPreview}
-      >
-        <img
-          alt={`Product ${index + 1}`}
-          className={styles.productImageThumbnail}
-          height={96}
-          src={getGoogleDriveThumbnailUrl(image.imageUrl)}
-          width={96}
-        />
-      </button>
-      <Text>Product {index + 1}</Text>
-      {image.quoteQuantity ? (
-        <Text type="secondary">Qty: {image.quoteQuantity}</Text>
-      ) : null}
-
-      <Modal
-        centered
-        className={styles.nativeImageModal}
-        destroyOnHidden
-        footer={null}
-        open={previewOpen}
-        title={`Product ${index + 1}`}
-        width="min(980px, calc(100vw - 24px))"
-        onCancel={() => setPreviewOpen(false)}
-      >
-        <div className={styles.nativeImagePreview}>
-          <img
-            alt={`Product ${index + 1}`}
-            className={styles.nativeImage}
-            src={previewImageUrl}
-          />
-        </div>
-      </Modal>
-    </div>
-  );
-}
-
 function isInProgress(status: OrderStatus): boolean {
   return (
     status === OrderStatus.WaitingForBillImage ||
@@ -362,26 +317,4 @@ function formatDate(value: string): string {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
-}
-
-function getGoogleDrivePreviewUrl(imageUrl: string): string {
-  const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
-  if (fileIdMatch?.[1]) {
-    return `https://lh3.googleusercontent.com/d/${encodeURIComponent(
-      fileIdMatch[1],
-    )}?authuser=0`;
-  }
-
-  return imageUrl;
-}
-
-function getGoogleDriveThumbnailUrl(imageUrl: string, size = "w1600"): string {
-  const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
-  if (fileIdMatch?.[1]) {
-    return `https://drive.google.com/thumbnail?id=${encodeURIComponent(
-      fileIdMatch[1],
-    )}&sz=${size}`;
-  }
-
-  return imageUrl;
 }

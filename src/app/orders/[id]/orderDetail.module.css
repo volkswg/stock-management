@@ -1,0 +1,185 @@
+.appShell {
+  min-height: 100vh;
+  background: #f3f5f4;
+}
+
+.content {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 40px 56px;
+}
+
+.backButton {
+  margin-bottom: 18px;
+  margin-left: -12px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: #157347 !important;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0 0 6px !important;
+  font-size: 30px !important;
+}
+
+.pageHeader > :global(.ant-tag) {
+  margin: 5px 0 0;
+  padding: 3px 10px;
+  font-size: 13px;
+}
+
+.orderId {
+  max-width: min(100%, 620px);
+  overflow-wrap: anywhere;
+}
+
+.informationCard {
+  margin-top: 24px;
+}
+
+.informationCard :global(.ant-card-head-title),
+.shipmentCard :global(.ant-card-head-title),
+.sectionHeader h2 {
+  font-size: 17px !important;
+}
+
+.shipmentCard {
+  margin-top: 20px;
+}
+
+.shipmentStatus {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 16px;
+}
+
+.shipmentControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shipmentSelect {
+  width: min(100%, 520px);
+}
+
+.shipmentMenuDivider {
+  margin: 6px 0 !important;
+}
+
+.shipmentError {
+  margin-top: 14px;
+}
+
+.imageCard {
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.imageCollapse :global(.ant-collapse-item) {
+  border-bottom: 1px solid #e1e5e2;
+}
+
+.imageCollapse :global(.ant-collapse-item:last-child) {
+  border-bottom: 0;
+}
+
+.imageCollapse :global(.ant-collapse-header) {
+  min-height: 58px;
+  align-items: center !important;
+  padding: 12px 18px !important;
+}
+
+.imageCollapse :global(.ant-collapse-content-box) {
+  padding: 0 18px 20px !important;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionHeader h2 {
+  margin: 0 !important;
+}
+
+.sectionHeader :global(.ant-tag) {
+  margin: 0;
+}
+
+.imageEmpty {
+  padding: 34px 16px;
+  background: #fff;
+  border: 1px dashed #ced6d1;
+  border-radius: 6px;
+}
+
+.emptyIcon {
+  color: #7d8982;
+  font-size: 42px;
+}
+
+.loading {
+  padding-top: 6px;
+}
+
+.errorAlert {
+  margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 24px 20px 40px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pageHeader > :global(.ant-tag) {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 18px 14px 32px;
+  }
+
+  .pageHeader h1 {
+    font-size: 26px !important;
+  }
+
+  .informationCard {
+    margin-top: 20px;
+  }
+
+  .informationCard :global(.ant-card-body) {
+    padding: 12px;
+  }
+
+  .shipmentControls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shipmentSelect {
+    width: 100%;
+  }
+}

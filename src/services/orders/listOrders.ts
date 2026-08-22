@@ -25,6 +25,17 @@ export type OrderProductImage = {
   createdAt: string;
 };
 
+export type OrderBillImage = {
+  id: string;
+  orderId: string;
+  imageUrl: string;
+  createdAt: string;
+};
+
+export type OrderDetail = OrderListItem & {
+  billImages: OrderBillImage[];
+};
+
 export async function listOrders({
   googleSheetsService,
 }: {
@@ -44,6 +55,39 @@ export async function listOrders({
       productImages: productImagesByOrderId.get(order.id) ?? [],
     }))
     .reverse();
+}
+
+export async function getOrderDetail({
+  googleSheetsService,
+  orderId,
+}: {
+  googleSheetsService: IGoogleSheetsService;
+  orderId: string;
+}): Promise<OrderDetail | undefined> {
+  const [orderRows, orderItemRows, orderBillRows] = await Promise.all([
+    googleSheetsService.orders.readRows("A:I"),
+    googleSheetsService.orderItems.readRows(),
+    googleSheetsService.orderBills.readRows(),
+  ]);
+  const order = orderRows
+    .map(mapOrderRow)
+    .find((candidate) => candidate?.id === orderId);
+
+  if (!order) {
+    return undefined;
+  }
+
+  return {
+    ...order,
+    productImages: orderItemRows
+      .map(mapOrderProductImageRow)
+      .filter(
+        (image): image is OrderProductImage => image?.orderId === orderId,
+      ),
+    billImages: orderBillRows
+      .map(mapOrderBillImageRow)
+      .filter((image): image is OrderBillImage => image?.orderId === orderId),
+  };
 }
 
 function mapOrderRow(row: GoogleSheetRow): OrderListItem | undefined {
@@ -130,6 +174,30 @@ function mapOrderProductImageRow(
     orderId: normalizedOrderId,
     imageUrl: normalizedImageUrl,
     quoteQuantity: toStringValue(quoteQuantity),
+    createdAt: toStringValue(createdAt),
+  };
+}
+
+function mapOrderBillImageRow(
+  row: GoogleSheetRow,
+): OrderBillImage | undefined {
+  const [id, orderId, imageUrl, createdAt, , deletedAt] = row;
+  const normalizedId = toStringValue(id);
+  const normalizedOrderId = toStringValue(orderId);
+  const normalizedImageUrl = toStringValue(imageUrl);
+  if (
+    !normalizedId ||
+    !normalizedOrderId ||
+    !normalizedImageUrl ||
+    toStringValue(deletedAt)
+  ) {
+    return undefined;
+  }
+
+  return {
+    id: normalizedId,
+    orderId: normalizedOrderId,
+    imageUrl: normalizedImageUrl,
     createdAt: toStringValue(createdAt),
   };
 }
