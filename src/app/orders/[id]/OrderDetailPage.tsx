@@ -27,7 +27,10 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import { OrderStatus, type OrderDetail } from "@/services/orders";
-import { getShipments } from "@/app/shipments/api";
+import {
+  createShipmentMaster,
+  getShipments,
+} from "@/app/shipments/api";
 import { getOrder } from "../api";
 import { OrderImageGallery } from "../OrderImageGallery";
 import styles from "./orderDetail.module.css";
@@ -233,7 +236,6 @@ type ShipmentOption = {
   id: string;
   poNumber: string;
   carrier: string;
-  isLocal?: boolean;
 };
 
 type NewShipmentFormValues = {
@@ -248,6 +250,7 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
   const [shipmentsLoading, setShipmentsLoading] = useState(true);
   const [shipmentsError, setShipmentsError] = useState<string>();
   const [shipmentsRequestId, setShipmentsRequestId] = useState(0);
+  const [shipmentCreating, setShipmentCreating] = useState(false);
   const [selectedShipmentId, setSelectedShipmentId] = useState<string>();
   const [linkedShipmentId, setLinkedShipmentId] = useState<string>();
   const [selectOpen, setSelectOpen] = useState(false);
@@ -266,10 +269,7 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
           poNumber: shipment.poNumber,
           carrier: shipment.carrier,
         }));
-        setShipments((current) => [
-          ...current.filter((shipment) => shipment.isLocal),
-          ...remoteShipments,
-        ]);
+        setShipments(remoteShipments);
       })
       .catch((requestError: unknown) => {
         if (!controller.signal.aborted) {
@@ -289,21 +289,35 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
     return () => controller.abort();
   }, [shipmentsRequestId]);
 
-  const createShipment = ({
+  const handleCreateShipment = async ({
     poNumber,
     carrier,
-  }: NewShipmentFormValues): void => {
-    const shipment: ShipmentOption = {
-      id: createTemporaryShipmentId(),
-      poNumber: poNumber.trim(),
-      carrier: carrier?.trim() || "",
-      isLocal: true,
-    };
-    setShipments((current) => [...current, shipment]);
-    setSelectedShipmentId(shipment.id);
-    setCreateModalOpen(false);
-    form.resetFields();
-    messageApi.success("Shipment master created.");
+  }: NewShipmentFormValues): Promise<void> => {
+    setShipmentCreating(true);
+    try {
+      const response = await createShipmentMaster({ poNumber, carrier });
+      const shipment: ShipmentOption = {
+        id: response.shipment.id,
+        poNumber: response.shipment.poNumber,
+        carrier: response.shipment.carrier,
+      };
+      setShipments((current) => [
+        shipment,
+        ...current.filter((item) => item.id !== shipment.id),
+      ]);
+      setSelectedShipmentId(shipment.id);
+      setCreateModalOpen(false);
+      form.resetFields();
+      messageApi.success("Shipment master created.");
+    } catch (createError) {
+      messageApi.error(
+        createError instanceof Error
+          ? createError.message
+          : "Failed to create shipment.",
+      );
+    } finally {
+      setShipmentCreating(false);
+    }
   };
 
   const linkOrder = (): void => {
@@ -409,7 +423,11 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
       </Card>
 
       <Modal
+        cancelButtonProps={{ disabled: shipmentCreating }}
+        closable={!shipmentCreating}
+        confirmLoading={shipmentCreating}
         destroyOnHidden
+        maskClosable={!shipmentCreating}
         okText="Create shipment"
         open={createModalOpen}
         title="Create shipment master"
@@ -423,7 +441,7 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
           form={form}
           layout="vertical"
           name={`create-shipment-${orderId}`}
-          onFinish={createShipment}
+          onFinish={handleCreateShipment}
         >
           <Form.Item
             label="PO number"
@@ -441,16 +459,6 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
       </Modal>
     </>
   );
-}
-
-function createTemporaryShipmentId(): string {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return `local-${crypto.randomUUID()}`;
-  }
-  return `local-${Date.now()}`;
 }
 
 function createTemporaryPoNumber(): string {

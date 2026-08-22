@@ -4,7 +4,7 @@ import {
 } from "@/externals/google/sheet";
 import { ORDERS_SHEET_HEADERS } from "@/externals/google/sheet/sheets/orders/const";
 import { USER_STATE_SHEET_HEADERS } from "@/externals/google/sheet/sheets/user-state/const";
-import { createSortableId } from "./createSortableId";
+import { createSortableId } from "../utils/createSortableId";
 
 export type Order = {
   id: string;
