@@ -10,6 +10,9 @@ export function createGoogleSheetsServiceFromConfig(
     orderBillsWorksheetName: config.googleSheets.orderBillsWorksheetName,
     orderItemsWorksheetName: config.googleSheets.orderItemsWorksheetName,
     purchasesWorksheetName: config.googleSheets.purchasesWorksheetName,
+    shipmentOrdersWorksheetName:
+      config.googleSheets.shipmentOrdersWorksheetName,
+    shipmentsWorksheetName: config.googleSheets.shipmentsWorksheetName,
     userStateWorksheetName: config.googleSheets.userStateWorksheetName,
     serviceAccountEmail: config.googleService.accountEmail,
     serviceAccountPrivateKey: config.googleService.accountPrivateKey,

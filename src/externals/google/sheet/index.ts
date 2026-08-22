@@ -6,6 +6,8 @@ export {
   OrderItemsSheet,
   OrdersSheet,
   PurchasesSheet,
+  ShipmentOrdersSheet,
+  ShipmentsSheet,
   UserStateSheet,
 } from "./sheets";
 export { createGoogleSheetsServiceFromConfig } from "./createGoogleSheetsServiceFromConfig";
@@ -16,6 +18,8 @@ export { ORDERS_SHEET_HEADERS } from "./sheets/orders/const";
 export { ORDER_BILLS_SHEET_HEADERS } from "./sheets/order-bills/const";
 export { ORDER_ITEMS_SHEET_HEADERS } from "./sheets/order-items/const";
 export { PURCHASE_SHEET_HEADERS } from "./sheets/purchases/const";
+export { SHIPMENT_ORDERS_SHEET_HEADERS } from "./sheets/shipment-orders/const";
+export { SHIPMENTS_SHEET_HEADERS } from "./sheets/shipments/const";
 export { USER_STATE_SHEET_HEADERS } from "./sheets/user-state/const";
 export type {
   GoogleSheetCellValue,

@@ -11,6 +11,8 @@ export type AppConfig = {
     orderBillsWorksheetName: string;
     orderItemsWorksheetName: string;
     purchasesWorksheetName: string;
+    shipmentOrdersWorksheetName: string;
+    shipmentsWorksheetName: string;
     userStateWorksheetName: string;
   };
   googleDrive: {
@@ -46,6 +48,11 @@ export function getConfig(): AppConfig {
         process.env.GOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME || "order_items",
       purchasesWorksheetName:
         process.env.GOOGLE_SHEETS_PURCHASES_WORKSHEET_NAME || "purchases",
+      shipmentOrdersWorksheetName:
+        process.env.GOOGLE_SHEETS_SHIPMENT_ORDERS_WORKSHEET_NAME ||
+        "shipment_orders",
+      shipmentsWorksheetName:
+        process.env.GOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME || "shipments",
       userStateWorksheetName:
         process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME || "user_state",
     },

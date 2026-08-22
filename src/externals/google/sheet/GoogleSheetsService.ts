@@ -6,6 +6,8 @@ import {
   OrderItemsSheet,
   OrdersSheet,
   PurchasesSheet,
+  ShipmentOrdersSheet,
+  ShipmentsSheet,
   UserStateSheet,
 } from "./sheets";
 import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
@@ -15,6 +17,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly orderBills: OrderBillsSheet;
   readonly orderItems: OrderItemsSheet;
   readonly purchases: PurchasesSheet;
+  readonly shipmentOrders: ShipmentOrdersSheet;
+  readonly shipments: ShipmentsSheet;
   readonly userState: UserStateSheet;
 
   private readonly client: GoogleSheetsClient;
@@ -40,6 +44,16 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       throw new Error("Google Sheets purchases worksheet name is required.");
     }
 
+    if (!config.shipmentOrdersWorksheetName.trim()) {
+      throw new Error(
+        "Google Sheets shipment orders worksheet name is required.",
+      );
+    }
+
+    if (!config.shipmentsWorksheetName.trim()) {
+      throw new Error("Google Sheets shipments worksheet name is required.");
+    }
+
     if (!config.userStateWorksheetName.trim()) {
       throw new Error("Google Sheets user state worksheet name is required.");
     }
@@ -63,6 +77,14 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.client,
       config.purchasesWorksheetName,
     );
+    this.shipmentOrders = new ShipmentOrdersSheet(
+      this.client,
+      config.shipmentOrdersWorksheetName,
+    );
+    this.shipments = new ShipmentsSheet(
+      this.client,
+      config.shipmentsWorksheetName,
+    );
     this.userState = new UserStateSheet(
       this.client,
       config.userStateWorksheetName,
@@ -75,6 +97,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.orderBills.checkConnection(),
       this.orderItems.checkConnection(),
       this.purchases.checkConnection(),
+      this.shipmentOrders.checkConnection(),
+      this.shipments.checkConnection(),
       this.userState.checkConnection(),
     ]);
   }
