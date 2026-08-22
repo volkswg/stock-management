@@ -112,6 +112,10 @@
   padding: 2px 0 10px;
 }
 
+.quantityMode {
+  flex: 0 0 auto;
+}
+
 .quantityEditor {
   width: 180px;
   display: grid;
@@ -130,6 +134,19 @@
 .quantityControls :global(.ant-input-number) {
   flex: 1;
   min-width: 0;
+}
+
+.itemQuantityComparison {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.itemQuantityComparison > :global(.ant-typography),
+.itemQuantityComparison > :global(.ant-tag) {
+  margin: 0;
+  font-size: 11px;
 }
 
 .imageCollapse :global(.ant-collapse-item) {

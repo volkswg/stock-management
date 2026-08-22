@@ -252,6 +252,7 @@ function OrderContent({
                     <div className={styles.quantityToolbar}>
                       <Text strong>Quantity</Text>
                       <Segmented<OrderItemQuantityType>
+                        className={styles.quantityMode}
                         options={[
                           {
                             label: "Quote",
@@ -344,6 +345,10 @@ function OrderItemQuantity({
       ? quoteQuantity
       : deliveredQuantity;
   const savedQuantity = parseQuantity(initialQuantity);
+  const comparison = getItemQuantityComparison({
+    deliveredQuantity,
+    quoteQuantity,
+  });
   const [quantity, setQuantity] = useState<number | null>(savedQuantity);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -410,6 +415,17 @@ function OrderItemQuantity({
           />
         </Tooltip>
       </Space.Compact>
+      {comparison ? (
+        <div className={styles.itemQuantityComparison}>
+          <Text strong>
+            {comparison.delivered} / {comparison.quote}
+          </Text>
+          <Text type="secondary">delivered / quote</Text>
+          <Tag color={getQuantityDifferenceColor(comparison.difference)}>
+            {formatQuantityDifference(comparison.difference)}
+          </Tag>
+        </div>
+      ) : null}
       {saved ? <Text type="success">Saved</Text> : null}
       {error ? <Text type="danger">{error}</Text> : null}
     </div>
@@ -421,6 +437,30 @@ function parseQuantity(value: string): number | null {
 
   const quantity = Number(value);
   return Number.isInteger(quantity) && quantity > 0 ? quantity : null;
+}
+
+function getItemQuantityComparison({
+  deliveredQuantity,
+  quoteQuantity,
+}: {
+  deliveredQuantity: string;
+  quoteQuantity: string;
+}): { delivered: number; quote: number; difference: number } | undefined {
+  const delivered = parseQuantity(deliveredQuantity);
+  const quote = parseQuantity(quoteQuantity);
+  if (delivered === null || quote === null) return undefined;
+
+  return { delivered, quote, difference: delivered - quote };
+}
+
+function formatQuantityDifference(difference: number): string {
+  if (difference === 0) return "Matched";
+  return difference > 0 ? `+${difference}` : String(difference);
+}
+
+function getQuantityDifferenceColor(difference: number): string {
+  if (difference === 0) return "success";
+  return difference > 0 ? "processing" : "warning";
 }
 
 function OrderTotalPrice({
