@@ -30,6 +30,7 @@ import { OrderStatus, type OrderDetail } from "@/services/orders";
 import {
   createShipmentMaster,
   getShipments,
+  linkOrderToShipment,
 } from "@/app/shipments/api";
 import { getOrder } from "../api";
 import { OrderImageGallery } from "../OrderImageGallery";
@@ -168,7 +169,10 @@ function OrderContent({ order }: { order: OrderDetail }) {
         />
       </Card>
 
-      <ShipmentLinkCard orderId={order.id} />
+      <ShipmentLinkCard
+        currentShipmentId={order.shipmentId ?? undefined}
+        orderId={order.id}
+      />
 
       <Card className={styles.imageCard} styles={{ body: { padding: 0 } }}>
         <Collapse
@@ -243,7 +247,13 @@ type NewShipmentFormValues = {
   carrier?: string;
 };
 
-function ShipmentLinkCard({ orderId }: { orderId: string }) {
+function ShipmentLinkCard({
+  currentShipmentId,
+  orderId,
+}: {
+  currentShipmentId?: string;
+  orderId: string;
+}) {
   const [form] = Form.useForm<NewShipmentFormValues>();
   const [messageApi, messageContextHolder] = message.useMessage();
   const [shipments, setShipments] = useState<ShipmentOption[]>([]);
@@ -251,8 +261,11 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
   const [shipmentsError, setShipmentsError] = useState<string>();
   const [shipmentsRequestId, setShipmentsRequestId] = useState(0);
   const [shipmentCreating, setShipmentCreating] = useState(false);
-  const [selectedShipmentId, setSelectedShipmentId] = useState<string>();
-  const [linkedShipmentId, setLinkedShipmentId] = useState<string>();
+  const [shipmentLinking, setShipmentLinking] = useState(false);
+  const [selectedShipmentId, setSelectedShipmentId] =
+    useState<string | undefined>(currentShipmentId);
+  const [linkedShipmentId, setLinkedShipmentId] =
+    useState<string | undefined>(currentShipmentId);
   const [selectOpen, setSelectOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const linkedShipment = shipments.find(
@@ -320,12 +333,24 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
     }
   };
 
-  const linkOrder = (): void => {
+  const handleLinkOrder = async (): Promise<void> => {
     if (!selectedShipmentId) {
       return;
     }
-    setLinkedShipmentId(selectedShipmentId);
-    messageApi.success("Order linked to shipment.");
+    setShipmentLinking(true);
+    try {
+      await linkOrderToShipment(selectedShipmentId, orderId);
+      setLinkedShipmentId(selectedShipmentId);
+      messageApi.success("Order linked to shipment.");
+    } catch (linkError) {
+      messageApi.error(
+        linkError instanceof Error
+          ? linkError.message
+          : "Failed to link order to shipment.",
+      );
+    } finally {
+      setShipmentLinking(false);
+    }
   };
 
   const openCreateShipmentModal = (): void => {
@@ -346,7 +371,7 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
           <Text strong>
             {linkedShipment
               ? formatShipmentLabel(linkedShipment)
-              : "Not linked"}
+              : linkedShipmentId || "Not linked"}
           </Text>
         </div>
 
@@ -392,8 +417,9 @@ function ShipmentLinkCard({ orderId }: { orderId: string }) {
               !selectedShipmentId || selectedShipmentId === linkedShipmentId
             }
             icon={<LinkOutlined />}
+            loading={shipmentLinking}
             type="primary"
-            onClick={linkOrder}
+            onClick={handleLinkOrder}
           >
             Link order
           </Button>

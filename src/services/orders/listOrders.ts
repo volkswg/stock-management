@@ -34,6 +34,7 @@ export type OrderBillImage = {
 
 export type OrderDetail = OrderListItem & {
   billImages: OrderBillImage[];
+  shipmentId: string | null;
 };
 
 export async function listOrders({
@@ -64,11 +65,13 @@ export async function getOrderDetail({
   googleSheetsService: IGoogleSheetsService;
   orderId: string;
 }): Promise<OrderDetail | undefined> {
-  const [orderRows, orderItemRows, orderBillRows] = await Promise.all([
-    googleSheetsService.orders.readRows("A:I"),
-    googleSheetsService.orderItems.readRows(),
-    googleSheetsService.orderBills.readRows(),
-  ]);
+  const [orderRows, orderItemRows, orderBillRows, shipmentOrderRows] =
+    await Promise.all([
+      googleSheetsService.orders.readRows("A:I"),
+      googleSheetsService.orderItems.readRows(),
+      googleSheetsService.orderBills.readRows(),
+      googleSheetsService.shipmentOrders.readRows(),
+    ]);
   const order = orderRows
     .map(mapOrderRow)
     .find((candidate) => candidate?.id === orderId);
@@ -87,7 +90,24 @@ export async function getOrderDetail({
     billImages: orderBillRows
       .map(mapOrderBillImageRow)
       .filter((image): image is OrderBillImage => image?.orderId === orderId),
+    shipmentId: findShipmentIdForOrder(shipmentOrderRows, orderId),
   };
+}
+
+function findShipmentIdForOrder(
+  rows: GoogleSheetRow[],
+  orderId: string,
+): string | null {
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    const [, shipmentId, linkedOrderId, , , deletedAt] = rows[index];
+    if (
+      toStringValue(linkedOrderId) === orderId &&
+      !toStringValue(deletedAt)
+    ) {
+      return toStringValue(shipmentId) || null;
+    }
+  }
+  return null;
 }
 
 function mapOrderRow(row: GoogleSheetRow): OrderListItem | undefined {
