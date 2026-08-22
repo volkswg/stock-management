@@ -51,6 +51,20 @@
   margin-top: 24px;
 }
 
+.priceEditor {
+  display: grid;
+  gap: 6px;
+}
+
+.priceControls {
+  width: min(100%, 340px);
+}
+
+.priceControls :global(.ant-input-number) {
+  flex: 1;
+  min-width: 0;
+}
+
 .informationCard :global(.ant-card-head-title),
 .shipmentCard :global(.ant-card-head-title),
 .sectionHeader h2 {

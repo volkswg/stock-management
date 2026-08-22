@@ -8,7 +8,7 @@ import { OrderStatus } from "./createDraftOrder";
 
 export type CreatedOrder = {
   id: string;
-  status: OrderStatus.Draft;
+  status: OrderStatus.Complete | OrderStatus.WaitingForTotalPrice;
   seller: string;
   totalPrice: number | null;
   remark: string;
@@ -32,11 +32,15 @@ export async function createOrder({
   createdBy: string;
 }): Promise<CreatedOrder> {
   const now = new Date().toISOString();
+  const normalizedTotalPrice = totalPrice ?? null;
   const order: CreatedOrder = {
     id: createSortableId(),
-    status: OrderStatus.Draft,
+    status:
+      normalizedTotalPrice === null
+        ? OrderStatus.WaitingForTotalPrice
+        : OrderStatus.Complete,
     seller: seller?.trim() || "",
-    totalPrice: totalPrice ?? null,
+    totalPrice: normalizedTotalPrice,
     remark: remark?.trim() || "",
     createdAt: now,
     updatedAt: now,

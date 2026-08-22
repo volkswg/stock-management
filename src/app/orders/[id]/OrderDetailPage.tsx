@@ -2,6 +2,7 @@
 
 import {
   ArrowLeftOutlined,
+  CheckOutlined,
   FileImageOutlined,
   LinkOutlined,
   PlusOutlined,
@@ -18,10 +19,12 @@ import {
   Empty,
   Form,
   Input,
+  InputNumber,
   message,
   Modal,
   Select,
   Skeleton,
+  Space,
   Tag,
   Typography,
 } from "antd";
@@ -32,7 +35,7 @@ import {
   getShipments,
   linkOrderToShipment,
 } from "@/app/shipments/api";
-import { getOrder } from "../api";
+import { getOrder, updateOrderPrice } from "../api";
 import { OrderImageGallery } from "../OrderImageGallery";
 import styles from "./orderDetail.module.css";
 
@@ -108,14 +111,22 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
               }}
             />
           ) : null}
-          {!loading && !error && order ? <OrderContent order={order} /> : null}
+          {!loading && !error && order ? (
+            <OrderContent order={order} onOrderChange={setOrder} />
+          ) : null}
         </main>
       </div>
     </ConfigProvider>
   );
 }
 
-function OrderContent({ order }: { order: OrderDetail }) {
+function OrderContent({
+  order,
+  onOrderChange,
+}: {
+  order: OrderDetail;
+  onOrderChange: (order: OrderDetail) => void;
+}) {
   return (
     <>
       <header className={styles.pageHeader}>
@@ -144,10 +155,19 @@ function OrderContent({ order }: { order: OrderDetail }) {
             {
               key: "totalPrice",
               label: "Total",
-              children:
-                order.totalPrice === null
-                  ? "—"
-                  : THB_FORMATTER.format(order.totalPrice),
+              children: (
+                <OrderTotalPrice
+                  order={order}
+                  onUpdated={({ status, totalPrice, updatedAt }) =>
+                    onOrderChange({
+                      ...order,
+                      status,
+                      totalPrice,
+                      updatedAt,
+                    })
+                  }
+                />
+              ),
             },
             {
               key: "createdAt",
@@ -233,6 +253,75 @@ function OrderContent({ order }: { order: OrderDetail }) {
         />
       </Card>
     </>
+  );
+}
+
+function OrderTotalPrice({
+  order,
+  onUpdated,
+}: {
+  order: OrderDetail;
+  onUpdated: (update: {
+    status: OrderStatus.Complete;
+    totalPrice: number;
+    updatedAt: string;
+  }) => void;
+}) {
+  const [price, setPrice] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>();
+
+  if (order.status !== OrderStatus.WaitingForTotalPrice) {
+    return order.totalPrice === null
+      ? "—"
+      : THB_FORMATTER.format(order.totalPrice);
+  }
+
+  const savePrice = async (): Promise<void> => {
+    if (price === null) return;
+
+    setSaving(true);
+    setError(undefined);
+    try {
+      const response = await updateOrderPrice(order.id, price);
+      onUpdated(response.order);
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to update the price.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.priceEditor}>
+      <Space.Compact className={styles.priceControls}>
+        <InputNumber<number>
+          aria-label="Total price"
+          controls={false}
+          min={0}
+          placeholder="Total price"
+          precision={2}
+          prefix="฿"
+          value={price}
+          onChange={(value) => setPrice(value)}
+          onPressEnter={() => void savePrice()}
+        />
+        <Button
+          disabled={price === null}
+          icon={<CheckOutlined />}
+          loading={saving}
+          type="primary"
+          onClick={() => void savePrice()}
+        >
+          Save price
+        </Button>
+      </Space.Compact>
+      {error ? <Text type="danger">{error}</Text> : null}
+    </div>
   );
 }
 

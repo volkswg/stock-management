@@ -2,6 +2,7 @@ import type {
   CreatedOrder,
   OrderDetail,
   OrderListItem,
+  OrderStatus,
 } from "@/services/orders";
 
 export type OrdersResponse = {
@@ -21,6 +22,15 @@ export type CreateOrderInput = {
 
 export type CreateOrderResponse = {
   order: CreatedOrder;
+};
+
+export type UpdateOrderPriceResponse = {
+  order: {
+    id: string;
+    status: OrderStatus.Complete;
+    totalPrice: number;
+    updatedAt: string;
+  };
 };
 
 export type OrderImageType = "bill" | "product";
@@ -127,6 +137,30 @@ export async function uploadOrderImage(
   return body;
 }
 
+export async function updateOrderPrice(
+  orderId: string,
+  totalPrice: number,
+): Promise<UpdateOrderPriceResponse> {
+  const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+    method: "PATCH",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ totalPrice }),
+  });
+
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body));
+  }
+  if (!isUpdateOrderPriceResponse(body)) {
+    throw new Error("The order price API returned an invalid response.");
+  }
+
+  return body;
+}
+
 function isOrdersResponse(value: unknown): value is OrdersResponse {
   if (!isRecord(value)) {
     return false;
@@ -149,6 +183,19 @@ function isUploadOrderImageResponse(
     isRecord(value) &&
     (value.imageType === "bill" || value.imageType === "product") &&
     isRecord(value.record)
+  );
+}
+
+function isUpdateOrderPriceResponse(
+  value: unknown,
+): value is UpdateOrderPriceResponse {
+  return (
+    isRecord(value) &&
+    isRecord(value.order) &&
+    typeof value.order.id === "string" &&
+    value.order.status === "complete" &&
+    typeof value.order.totalPrice === "number" &&
+    typeof value.order.updatedAt === "string"
   );
 }
 

@@ -10,6 +10,10 @@ export { createOrderItem, type OrderItem } from "./createOrderItem";
 export { completeOrderBill } from "./completeOrderBill";
 export { completeOrderProducts } from "./completeOrderProducts";
 export { completeOrderTotalPrice } from "./completeOrderTotalPrice";
+export {
+  completeWebOrderPrice,
+  type CompleteWebOrderPriceResult,
+} from "./completeWebOrderPrice";
 export { isActiveOrderCreateState } from "./isActiveOrderCreateState";
 export { isOrderImageUploadState } from "./isOrderImageUploadState";
 export { orderExists } from "./orderExists";
