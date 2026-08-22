@@ -5,10 +5,15 @@ import { createShipment, listShipments } from "@/services/shipments";
 
 export const runtime = "nodejs";
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: Request): Promise<NextResponse> {
   try {
+    const includeOrders =
+      new URL(request.url).searchParams.get("includeOrders") !== "false";
     const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
-    const shipments = await listShipments({ googleSheetsService });
+    const shipments = await listShipments({
+      googleSheetsService,
+      includeOrders,
+    });
 
     return NextResponse.json({ shipments, total: shipments.length });
   } catch (error) {

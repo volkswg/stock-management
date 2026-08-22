@@ -1,3 +1,5 @@
+import type { OrderStatus } from "../orders/createDraftOrder";
+
 export enum ShipmentStatus {
   Draft = "draft",
   ReadyToShip = "ready_to_ship",
@@ -21,4 +23,21 @@ export type Shipment = {
   createdBy: string;
 };
 
-export type ShipmentListItem = Omit<Shipment, "deletedAt">;
+export type ShipmentRelatedOrder = {
+  id: string;
+  status: OrderStatus;
+  seller: string;
+  totalPrice: number | null;
+  createdAt: string;
+  productImages: ShipmentRelatedProductImage[];
+};
+
+export type ShipmentRelatedProductImage = {
+  id: string;
+  imageUrl: string;
+  quoteQuantity: string;
+};
+
+export type ShipmentListItem = Omit<Shipment, "deletedAt"> & {
+  orders: ShipmentRelatedOrder[];
+};

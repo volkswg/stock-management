@@ -5,6 +5,7 @@ import {
   InboxOutlined,
   ReloadOutlined,
   SearchOutlined,
+  TruckOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
@@ -171,11 +172,16 @@ export function OrderListPage() {
       <div className={styles.appShell}>
         <main className={styles.content}>
           <header className={styles.pageHeader}>
-            <Text className={styles.eyebrow}>Order management</Text>
-            <Title level={1}>Orders</Title>
-            <Text type="secondary">
-              Track incoming orders from creation through completion.
-            </Text>
+            <div>
+              <Text className={styles.eyebrow}>Order management</Text>
+              <Title level={1}>Orders</Title>
+              <Text type="secondary">
+                Track incoming orders from creation through completion.
+              </Text>
+            </div>
+            <Button href="/shipments" icon={<TruckOutlined />}>
+              Shipments
+            </Button>
           </header>
 
           <Card className={styles.orderList} styles={{ body: { padding: 0 } }}>

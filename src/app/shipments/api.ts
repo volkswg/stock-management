@@ -24,11 +24,14 @@ export type LinkOrderToShipmentResponse = {
 };
 
 export async function getShipments({
+  includeOrders = true,
   signal,
 }: {
+  includeOrders?: boolean;
   signal?: AbortSignal;
 } = {}): Promise<ShipmentsResponse> {
-  const response = await fetch("/api/shipments", {
+  const query = includeOrders ? "" : "?includeOrders=false";
+  const response = await fetch(`/api/shipments${query}`, {
     method: "GET",
     headers: { Accept: "application/json" },
     cache: "no-store",

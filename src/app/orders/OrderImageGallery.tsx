@@ -17,10 +17,12 @@ export type OrderGalleryImage = {
 export function OrderImageGallery({
   ariaLabel,
   images,
+  showLabels = true,
   thumbnailSize = 96,
 }: {
   ariaLabel: string;
   images: OrderGalleryImage[];
+  showLabels?: boolean;
   thumbnailSize?: number;
 }) {
   if (images.length === 0) {
@@ -28,11 +30,17 @@ export function OrderImageGallery({
   }
 
   return (
-    <section className={styles.productImages} aria-label={ariaLabel}>
+    <section
+      className={`${styles.productImages} ${
+        showLabels ? "" : styles.productImagesCompact
+      }`}
+      aria-label={ariaLabel}
+    >
       {images.map((image) => (
         <OrderImagePreview
           image={image}
           key={image.id}
+          showLabels={showLabels}
           thumbnailSize={thumbnailSize}
         />
       ))}
@@ -42,9 +50,11 @@ export function OrderImageGallery({
 
 function OrderImagePreview({
   image,
+  showLabels,
   thumbnailSize,
 }: {
   image: OrderGalleryImage;
+  showLabels: boolean;
   thumbnailSize: number;
 }) {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -65,8 +75,8 @@ function OrderImagePreview({
           width={thumbnailSize}
         />
       </button>
-      <Text>{image.title}</Text>
-      {image.description ? (
+      {showLabels ? <Text>{image.title}</Text> : null}
+      {showLabels && image.description ? (
         <Text type="secondary">{image.description}</Text>
       ) : null}
 

@@ -10,4 +10,6 @@ export {
   ShipmentStatus,
   type Shipment,
   type ShipmentListItem,
+  type ShipmentRelatedOrder,
+  type ShipmentRelatedProductImage,
 } from "./types";

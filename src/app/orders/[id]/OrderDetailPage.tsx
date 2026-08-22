@@ -275,7 +275,7 @@ function ShipmentLinkCard({
   useEffect(() => {
     const controller = new AbortController();
 
-    getShipments({ signal: controller.signal })
+    getShipments({ includeOrders: false, signal: controller.signal })
       .then((response) => {
         const remoteShipments = response.shipments.map((shipment) => ({
           id: shipment.id,
