@@ -7,6 +7,7 @@ import {
   LinkOutlined,
   PlusOutlined,
   ReloadOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
@@ -26,16 +27,22 @@ import {
   Skeleton,
   Space,
   Tag,
+  Tooltip,
   Typography,
 } from "antd";
 import { useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { OrderStatus, type OrderDetail } from "@/services/orders";
 import {
   createShipmentMaster,
   getShipments,
   linkOrderToShipment,
 } from "@/app/shipments/api";
-import { getOrder, updateOrderPrice } from "../api";
+import {
+  getOrder,
+  updateOrderItemQuoteQuantity,
+  updateOrderPrice,
+} from "../api";
 import { OrderImageGallery } from "../OrderImageGallery";
 import styles from "./orderDetail.module.css";
 
@@ -125,7 +132,7 @@ function OrderContent({
   onOrderChange,
 }: {
   order: OrderDetail;
-  onOrderChange: (order: OrderDetail) => void;
+  onOrderChange: Dispatch<SetStateAction<OrderDetail | undefined>>;
 }) {
   return (
     <>
@@ -159,12 +166,11 @@ function OrderContent({
                 <OrderTotalPrice
                   order={order}
                   onUpdated={({ status, totalPrice, updatedAt }) =>
-                    onOrderChange({
-                      ...order,
-                      status,
-                      totalPrice,
-                      updatedAt,
-                    })
+                    onOrderChange((current) =>
+                      current
+                        ? { ...current, status, totalPrice, updatedAt }
+                        : current,
+                    )
                   }
                 />
               ),
@@ -239,9 +245,28 @@ function OrderContent({
                       id: image.id,
                       imageUrl: image.imageUrl,
                       title: `Product ${index + 1}`,
-                      description: image.quoteQuantity
-                        ? `Qty: ${image.quoteQuantity}`
-                        : undefined,
+                      details: (
+                        <OrderItemQuoteQuantity
+                          initialQuantity={image.quoteQuantity}
+                          itemId={image.id}
+                          orderId={order.id}
+                          onUpdated={(quoteQuantity) =>
+                            onOrderChange((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    productImages: current.productImages.map(
+                                      (item) =>
+                                        item.id === image.id
+                                          ? { ...item, quoteQuantity }
+                                          : item,
+                                    ),
+                                  }
+                                : current,
+                            )
+                          }
+                        />
+                      ),
                     }))}
                     thumbnailSize={128}
                   />
@@ -254,6 +279,96 @@ function OrderContent({
       </Card>
     </>
   );
+}
+
+function OrderItemQuoteQuantity({
+  initialQuantity,
+  itemId,
+  orderId,
+  onUpdated,
+}: {
+  initialQuantity: string;
+  itemId: string;
+  orderId: string;
+  onUpdated: (quoteQuantity: string) => void;
+}) {
+  const savedQuantity = parseQuoteQuantity(initialQuantity);
+  const [quantity, setQuantity] = useState<number | null>(savedQuantity);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string>();
+  const canSave =
+    quantity !== null &&
+    Number.isInteger(quantity) &&
+    quantity > 0 &&
+    quantity !== savedQuantity;
+
+  const saveQuantity = async (): Promise<void> => {
+    if (!canSave || quantity === null) return;
+
+    setSaving(true);
+    setSaved(false);
+    setError(undefined);
+    try {
+      const response = await updateOrderItemQuoteQuantity(
+        orderId,
+        itemId,
+        quantity,
+      );
+      onUpdated(response.item.quoteQuantity);
+      setSaved(true);
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to update the quote quantity.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.quoteEditor}>
+      <Text className={styles.quoteLabel} type="secondary">
+        Quote quantity
+      </Text>
+      <Space.Compact className={styles.quoteControls}>
+        <InputNumber<number>
+          aria-label="Quote quantity"
+          controls={false}
+          min={1}
+          placeholder="Quantity"
+          precision={0}
+          value={quantity}
+          onChange={(value) => {
+            setQuantity(value);
+            setSaved(false);
+          }}
+          onPressEnter={() => void saveQuantity()}
+        />
+        <Tooltip title="Save quote quantity">
+          <Button
+            aria-label="Save quote quantity"
+            disabled={!canSave}
+            icon={<SaveOutlined />}
+            loading={saving}
+            type="primary"
+            onClick={() => void saveQuantity()}
+          />
+        </Tooltip>
+      </Space.Compact>
+      {saved ? <Text type="success">Saved</Text> : null}
+      {error ? <Text type="danger">{error}</Text> : null}
+    </div>
+  );
+}
+
+function parseQuoteQuantity(value: string): number | null {
+  if (!value.trim()) return null;
+
+  const quantity = Number(value);
+  return Number.isInteger(quantity) && quantity > 0 ? quantity : null;
 }
 
 function OrderTotalPrice({

@@ -104,6 +104,26 @@
   overflow: hidden;
 }
 
+.quoteEditor {
+  width: 180px;
+  display: grid;
+  gap: 5px;
+}
+
+.quoteLabel,
+.quoteEditor > :global(.ant-typography) {
+  font-size: 12px;
+}
+
+.quoteControls {
+  width: 100%;
+}
+
+.quoteControls :global(.ant-input-number) {
+  flex: 1;
+  min-width: 0;
+}
+
 .imageCollapse :global(.ant-collapse-item) {
   border-bottom: 1px solid #e1e5e2;
 }

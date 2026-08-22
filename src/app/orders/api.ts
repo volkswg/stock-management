@@ -33,6 +33,14 @@ export type UpdateOrderPriceResponse = {
   };
 };
 
+export type UpdateOrderItemQuoteQuantityResponse = {
+  item: {
+    id: string;
+    quoteQuantity: string;
+    updatedAt: string;
+  };
+};
+
 export type OrderImageType = "bill" | "product";
 
 export type UploadOrderImageResponse = {
@@ -161,6 +169,34 @@ export async function updateOrderPrice(
   return body;
 }
 
+export async function updateOrderItemQuoteQuantity(
+  orderId: string,
+  orderItemId: string,
+  quoteQuantity: number,
+): Promise<UpdateOrderItemQuoteQuantityResponse> {
+  const response = await fetch(
+    `/api/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(orderItemId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ quoteQuantity }),
+    },
+  );
+
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body));
+  }
+  if (!isUpdateOrderItemQuoteQuantityResponse(body)) {
+    throw new Error("The quote quantity API returned an invalid response.");
+  }
+
+  return body;
+}
+
 function isOrdersResponse(value: unknown): value is OrdersResponse {
   if (!isRecord(value)) {
     return false;
@@ -196,6 +232,18 @@ function isUpdateOrderPriceResponse(
     value.order.status === "complete" &&
     typeof value.order.totalPrice === "number" &&
     typeof value.order.updatedAt === "string"
+  );
+}
+
+function isUpdateOrderItemQuoteQuantityResponse(
+  value: unknown,
+): value is UpdateOrderItemQuoteQuantityResponse {
+  return (
+    isRecord(value) &&
+    isRecord(value.item) &&
+    typeof value.item.id === "string" &&
+    typeof value.item.quoteQuantity === "string" &&
+    typeof value.item.updatedAt === "string"
   );
 }
 

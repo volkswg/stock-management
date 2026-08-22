@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- Native images preserve iOS long-press save behavior. */
 
 import { Modal, Typography } from "antd";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import styles from "./orders.module.css";
 
 const { Text } = Typography;
@@ -12,6 +12,7 @@ export type OrderGalleryImage = {
   imageUrl: string;
   title: string;
   description?: string;
+  details?: ReactNode;
 };
 
 export function OrderImageGallery({
@@ -79,6 +80,7 @@ function OrderImagePreview({
       {showLabels && image.description ? (
         <Text type="secondary">{image.description}</Text>
       ) : null}
+      {showLabels && image.details ? image.details : null}
 
       <Modal
         centered

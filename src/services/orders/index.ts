@@ -18,6 +18,10 @@ export { isActiveOrderCreateState } from "./isActiveOrderCreateState";
 export { isOrderImageUploadState } from "./isOrderImageUploadState";
 export { orderExists } from "./orderExists";
 export {
+  updateOrderItemQuoteQuantity,
+  type UpdateOrderItemQuoteQuantityResult,
+} from "./updateOrderItemQuoteQuantity";
+export {
   getOrderDetail,
   listOrders,
   type OrderBillImage,
