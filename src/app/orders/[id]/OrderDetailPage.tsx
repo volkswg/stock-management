@@ -38,6 +38,7 @@ import {
   OrderStatus,
   type OrderDetail,
 } from "@/services/orders";
+import { ShipmentStatus } from "@/services/shipments";
 import {
   createShipmentMaster,
   getShipments,
@@ -573,7 +574,15 @@ function ShipmentLinkCard({
   useEffect(() => {
     const controller = new AbortController();
 
-    getShipments({ includeOrders: false, signal: controller.signal })
+    getShipments({
+      excludeStatuses: [
+        ShipmentStatus.Shipping,
+        ShipmentStatus.Delivered,
+        ShipmentStatus.Canceled,
+      ],
+      includeOrders: false,
+      signal: controller.signal,
+    })
       .then((response) => {
         const remoteShipments = response.shipments.map((shipment) => ({
           id: shipment.id,

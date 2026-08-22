@@ -1,18 +1,31 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { createShipment, listShipments } from "@/services/shipments";
+import {
+  createShipment,
+  listShipments,
+  ShipmentStatus,
+} from "@/services/shipments";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request): Promise<NextResponse> {
+  const searchParams = new URL(request.url).searchParams;
+  const excludeStatuses = parseExcludedStatuses(searchParams);
+  if (!excludeStatuses) {
+    return NextResponse.json(
+      { error: "excludeStatuses contains an invalid shipment status." },
+      { status: 400 },
+    );
+  }
+
   try {
-    const includeOrders =
-      new URL(request.url).searchParams.get("includeOrders") !== "false";
+    const includeOrders = searchParams.get("includeOrders") !== "false";
     const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
     const shipments = await listShipments({
       googleSheetsService,
       includeOrders,
+      excludeStatuses,
     });
 
     return NextResponse.json({ shipments, total: shipments.length });
@@ -26,6 +39,25 @@ export async function GET(request: Request): Promise<NextResponse> {
       { status: 500 },
     );
   }
+}
+
+function parseExcludedStatuses(
+  searchParams: URLSearchParams,
+): ShipmentStatus[] | undefined {
+  const value = searchParams.get("excludeStatuses");
+  if (!value?.trim()) return [];
+
+  const statuses = value
+    .split(",")
+    .map((status) => status.trim())
+    .filter(Boolean);
+  if (!statuses.every(isShipmentStatus)) return undefined;
+
+  return [...new Set(statuses)];
+}
+
+function isShipmentStatus(value: string): value is ShipmentStatus {
+  return Object.values(ShipmentStatus).includes(value as ShipmentStatus);
 }
 
 export async function POST(request: Request): Promise<NextResponse> {

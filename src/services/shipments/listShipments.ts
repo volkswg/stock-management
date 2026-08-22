@@ -15,9 +15,11 @@ type ShipmentRow = Omit<ShipmentListItem, "orders">;
 type RelatedOrderRow = Omit<ShipmentRelatedOrder, "productImages">;
 
 export async function listShipments({
+  excludeStatuses = [],
   googleSheetsService,
   includeOrders = true,
 }: {
+  excludeStatuses?: readonly ShipmentStatus[];
   googleSheetsService: IGoogleSheetsService;
   includeOrders?: boolean;
 }): Promise<ShipmentListItem[]> {
@@ -36,6 +38,7 @@ export async function listShipments({
     ]);
   const orderIdsByShipmentId = groupOrderIdsByShipmentId(shipmentOrderRows);
   const productImagesByOrderId = groupProductImagesByOrderId(orderItemRows);
+  const excludedStatusSet = new Set(excludeStatuses);
   const ordersById = new Map<string, ShipmentRelatedOrder>();
   for (const row of orderRows) {
     const order = mapRelatedOrderRow(row);
@@ -50,6 +53,7 @@ export async function listShipments({
   return shipmentRows
     .map(mapShipmentRow)
     .filter((shipment): shipment is ShipmentRow => Boolean(shipment))
+    .filter((shipment) => !excludedStatusSet.has(shipment.status))
     .map((shipment) => ({
       ...shipment,
       orders: (orderIdsByShipmentId.get(shipment.id) ?? [])

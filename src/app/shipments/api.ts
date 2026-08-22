@@ -2,6 +2,7 @@ import type {
   Shipment,
   ShipmentListItem,
   ShipmentOrder,
+  ShipmentStatus,
 } from "@/services/shipments";
 
 export type ShipmentsResponse = {
@@ -24,13 +25,20 @@ export type LinkOrderToShipmentResponse = {
 };
 
 export async function getShipments({
+  excludeStatuses = [],
   includeOrders = true,
   signal,
 }: {
+  excludeStatuses?: readonly ShipmentStatus[];
   includeOrders?: boolean;
   signal?: AbortSignal;
 } = {}): Promise<ShipmentsResponse> {
-  const query = includeOrders ? "" : "?includeOrders=false";
+  const searchParams = new URLSearchParams();
+  if (!includeOrders) searchParams.set("includeOrders", "false");
+  if (excludeStatuses.length > 0) {
+    searchParams.set("excludeStatuses", excludeStatuses.join(","));
+  }
+  const query = searchParams.size > 0 ? `?${searchParams.toString()}` : "";
   const response = await fetch(`/api/shipments${query}`, {
     method: "GET",
     headers: { Accept: "application/json" },
