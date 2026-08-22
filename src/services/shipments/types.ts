@@ -3,7 +3,7 @@ import type { OrderStatus } from "../orders/createDraftOrder";
 export enum ShipmentStatus {
   Draft = "draft",
   ReadyToShip = "ready_to_ship",
-  Shipped = "shipped",
+  Shipping = "shipping",
   Delivered = "delivered",
   Canceled = "canceled",
 }

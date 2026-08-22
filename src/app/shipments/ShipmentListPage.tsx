@@ -171,7 +171,7 @@ const RELATED_ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
 const STATUS_FILTERS = [
   { label: "All", key: "all" },
   { label: "Preparing", key: "preparing" },
-  { label: "Shipped", key: ShipmentStatus.Shipped },
+  { label: "Shipping", key: ShipmentStatus.Shipping },
   { label: "Delivered", key: ShipmentStatus.Delivered },
   { label: "Canceled", key: ShipmentStatus.Canceled },
 ];
@@ -428,7 +428,7 @@ function getStatusColor(status: ShipmentStatus): string {
   switch (status) {
     case ShipmentStatus.ReadyToShip:
       return "warning";
-    case ShipmentStatus.Shipped:
+    case ShipmentStatus.Shipping:
       return "processing";
     case ShipmentStatus.Delivered:
       return "success";
