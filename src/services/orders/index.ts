@@ -12,6 +12,7 @@ export { completeOrderProducts } from "./completeOrderProducts";
 export { completeOrderTotalPrice } from "./completeOrderTotalPrice";
 export { isActiveOrderCreateState } from "./isActiveOrderCreateState";
 export { isOrderImageUploadState } from "./isOrderImageUploadState";
+export { orderExists } from "./orderExists";
 export {
   getOrderDetail,
   listOrders,

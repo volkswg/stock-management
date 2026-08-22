@@ -26,21 +26,16 @@ export async function createOrder({
   createdBy,
 }: {
   googleSheetsService: IGoogleSheetsService;
-  seller: string;
+  seller?: string;
   totalPrice?: number | null;
   remark?: string;
   createdBy: string;
 }): Promise<CreatedOrder> {
-  const normalizedSeller = seller.trim();
-  if (!normalizedSeller) {
-    throw new Error("Order seller is required.");
-  }
-
   const now = new Date().toISOString();
   const order: CreatedOrder = {
     id: createSortableId(),
     status: OrderStatus.Draft,
-    seller: normalizedSeller,
+    seller: seller?.trim() || "",
     totalPrice: totalPrice ?? null,
     remark: remark?.trim() || "",
     createdAt: now,

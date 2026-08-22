@@ -28,7 +28,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const input = parseCreateOrderInput(body);
   if (!input) {
     return NextResponse.json(
-      { error: "Enter a valid seller, total price, and remark." },
+      { error: "Enter valid order details." },
       { status: 400 },
     );
   }
@@ -56,7 +56,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 }
 
 type CreateOrderInput = {
-  seller: string;
+  seller?: string;
   totalPrice?: number | null;
   remark?: string;
 };
@@ -78,9 +78,8 @@ function parseCreateOrderInput(value: unknown): CreateOrderInput | undefined {
   const totalPrice = value.totalPrice;
   const remark = value.remark;
   if (
-    typeof seller !== "string" ||
-    !seller.trim() ||
-    seller.length > 100 ||
+    (seller !== undefined && typeof seller !== "string") ||
+    (typeof seller === "string" && seller.trim().length > 100) ||
     (totalPrice !== undefined &&
       totalPrice !== null &&
       (typeof totalPrice !== "number" ||
@@ -93,7 +92,7 @@ function parseCreateOrderInput(value: unknown): CreateOrderInput | undefined {
   }
 
   return {
-    seller: seller.trim(),
+    seller: typeof seller === "string" ? seller.trim() : undefined,
     totalPrice:
       typeof totalPrice === "number" || totalPrice === null
         ? totalPrice

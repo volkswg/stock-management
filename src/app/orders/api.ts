@@ -14,13 +14,20 @@ export type OrderResponse = {
 };
 
 export type CreateOrderInput = {
-  seller: string;
+  seller?: string;
   totalPrice?: number | null;
   remark?: string;
 };
 
 export type CreateOrderResponse = {
   order: CreatedOrder;
+};
+
+export type OrderImageType = "bill" | "product";
+
+export type UploadOrderImageResponse = {
+  imageType: OrderImageType;
+  record: Record<string, unknown>;
 };
 
 export async function getOrders({
@@ -91,6 +98,35 @@ export async function createOrder(
   return body;
 }
 
+export async function uploadOrderImage(
+  orderId: string,
+  image: File,
+  imageType: OrderImageType,
+): Promise<UploadOrderImageResponse> {
+  const formData = new FormData();
+  formData.set("image", image);
+  formData.set("imageType", imageType);
+
+  const response = await fetch(
+    `/api/orders/${encodeURIComponent(orderId)}/images`,
+    {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: formData,
+    },
+  );
+
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body));
+  }
+  if (!isUploadOrderImageResponse(body)) {
+    throw new Error("The image upload API returned an invalid response.");
+  }
+
+  return body;
+}
+
 function isOrdersResponse(value: unknown): value is OrdersResponse {
   if (!isRecord(value)) {
     return false;
@@ -104,6 +140,16 @@ function isOrderResponse(value: unknown): value is OrderResponse {
 
 function isCreateOrderResponse(value: unknown): value is CreateOrderResponse {
   return isRecord(value) && isRecord(value.order);
+}
+
+function isUploadOrderImageResponse(
+  value: unknown,
+): value is UploadOrderImageResponse {
+  return (
+    isRecord(value) &&
+    (value.imageType === "bill" || value.imageType === "product") &&
+    isRecord(value.record)
+  );
 }
 
 function getErrorMessage(value: unknown): string {
