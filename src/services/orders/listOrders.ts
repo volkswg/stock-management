@@ -23,6 +23,7 @@ export type OrderProductImage = {
   imageUrl: string;
   quoteQuantity: string;
   deliveredQuantity: string;
+  productCode: string;
   createdAt: string;
 };
 
@@ -175,6 +176,7 @@ function mapOrderProductImageRow(
     imageUrl,
     quoteQuantity,
     deliveredQuantity,
+    productCode,
     createdAt,
     ,
     deletedAt,
@@ -197,6 +199,7 @@ function mapOrderProductImageRow(
     imageUrl: normalizedImageUrl,
     quoteQuantity: toStringValue(quoteQuantity),
     deliveredQuantity: toStringValue(deliveredQuantity),
+    productCode: toStringValue(productCode),
     createdAt: toStringValue(createdAt),
   };
 }

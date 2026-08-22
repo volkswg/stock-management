@@ -18,9 +18,9 @@ export async function updateOrderItemQuantity({
   quantity: number;
   quantityType: OrderItemQuantityType;
 }): Promise<UpdateOrderItemQuantityResult> {
-  const rows = await googleSheetsService.orderItems.readRows("A2:I");
+  const rows = await googleSheetsService.orderItems.readRows("A2:J");
   const rowIndex = rows.findIndex(
-    ([id, linkedOrderId, , , , , , deletedAt]) =>
+    ([id, linkedOrderId, , , , , , , deletedAt]) =>
       String(id ?? "").trim() === orderItemId &&
       String(linkedOrderId ?? "").trim() === orderId &&
       !String(deletedAt ?? "").trim(),
@@ -29,13 +29,20 @@ export async function updateOrderItemQuantity({
     return { outcome: "not_found" };
   }
 
-  const [, , , currentQuoteQuantity, currentDeliveredQuantity, createdAt] =
-    rows[rowIndex];
+  const [
+    ,
+    ,
+    ,
+    currentQuoteQuantity,
+    currentDeliveredQuantity,
+    currentProductCode,
+    createdAt,
+  ] = rows[rowIndex];
   const normalizedQuantity = String(quantity);
   const updatedAt = new Date().toISOString();
   const sheetRowNumber = rowIndex + 2;
   await googleSheetsService.orderItems.updateRows(
-    `D${sheetRowNumber}:G${sheetRowNumber}`,
+    `D${sheetRowNumber}:H${sheetRowNumber}`,
     [
       [
         quantityType === OrderItemQuantityType.Quote
@@ -44,6 +51,7 @@ export async function updateOrderItemQuantity({
         quantityType === OrderItemQuantityType.Delivered
           ? normalizedQuantity
           : currentDeliveredQuantity ?? "",
+        currentProductCode ?? "",
         createdAt ?? "",
         updatedAt,
       ],

@@ -166,6 +166,7 @@ function groupProductImagesByOrderId(
       imageUrl,
       quoteQuantity,
       deliveredQuantity,
+      productCode,
       ,
       ,
       deletedAt,
@@ -188,6 +189,7 @@ function groupProductImagesByOrderId(
       imageUrl: normalizedImageUrl,
       quoteQuantity: toStringValue(quoteQuantity),
       deliveredQuantity: toStringValue(deliveredQuantity),
+      productCode: toStringValue(productCode),
     });
     productImagesByOrderId.set(normalizedOrderId, images);
   }
