@@ -19,6 +19,7 @@ export type Order = {
 };
 
 export enum OrderStatus {
+  Draft = "draft",
   WaitingForBillImage = "waiting_for_bill_image",
   WaitingForProductImage = "waiting_for_product_image",
   WaitingForTotalPrice = "waiting_for_total_price",

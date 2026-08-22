@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { listOrders } from "@/services/orders";
+import { createOrder, listOrders } from "@/services/orders";
 
 export const runtime = "nodejs";
 
@@ -21,4 +21,87 @@ export async function GET(): Promise<NextResponse> {
       { status: 500 },
     );
   }
+}
+
+export async function POST(request: Request): Promise<NextResponse> {
+  const body = await readJsonBody(request);
+  const input = parseCreateOrderInput(body);
+  if (!input) {
+    return NextResponse.json(
+      { error: "Enter a valid seller, total price, and remark." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const order = await createOrder({
+      googleSheetsService,
+      seller: input.seller,
+      totalPrice: input.totalPrice,
+      remark: input.remark,
+      createdBy: "web",
+    });
+
+    return NextResponse.json({ order }, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create order", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json(
+      { error: "Failed to create order." },
+      { status: 500 },
+    );
+  }
+}
+
+type CreateOrderInput = {
+  seller: string;
+  totalPrice?: number | null;
+  remark?: string;
+};
+
+async function readJsonBody(request: Request): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    return undefined;
+  }
+}
+
+function parseCreateOrderInput(value: unknown): CreateOrderInput | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const seller = value.seller;
+  const totalPrice = value.totalPrice;
+  const remark = value.remark;
+  if (
+    typeof seller !== "string" ||
+    !seller.trim() ||
+    seller.length > 100 ||
+    (totalPrice !== undefined &&
+      totalPrice !== null &&
+      (typeof totalPrice !== "number" ||
+        !Number.isFinite(totalPrice) ||
+        totalPrice < 0)) ||
+    (remark !== undefined && typeof remark !== "string") ||
+    (typeof remark === "string" && remark.length > 1000)
+  ) {
+    return undefined;
+  }
+
+  return {
+    seller: seller.trim(),
+    totalPrice:
+      typeof totalPrice === "number" || totalPrice === null
+        ? totalPrice
+        : undefined,
+    remark: typeof remark === "string" ? remark.trim() : undefined,
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

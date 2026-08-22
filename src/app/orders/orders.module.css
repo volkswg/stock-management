@@ -31,6 +31,10 @@
   font-size: 30px !important;
 }
 
+.pageActions {
+  justify-content: flex-end;
+}
+
 .summary {
   margin-top: 30px;
 }
@@ -210,8 +214,9 @@
     flex-direction: column;
   }
 
-  .pageHeader > :global(.ant-btn) {
+  .pageActions {
     align-self: flex-start;
+    justify-content: flex-start;
   }
 
   .summary {

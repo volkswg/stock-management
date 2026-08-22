@@ -1,4 +1,8 @@
-import type { OrderDetail, OrderListItem } from "@/services/orders";
+import type {
+  CreatedOrder,
+  OrderDetail,
+  OrderListItem,
+} from "@/services/orders";
 
 export type OrdersResponse = {
   orders: OrderListItem[];
@@ -7,6 +11,16 @@ export type OrdersResponse = {
 
 export type OrderResponse = {
   order: OrderDetail;
+};
+
+export type CreateOrderInput = {
+  seller: string;
+  totalPrice?: number | null;
+  remark?: string;
+};
+
+export type CreateOrderResponse = {
+  order: CreatedOrder;
 };
 
 export async function getOrders({
@@ -54,6 +68,29 @@ export async function getOrder(
   return body;
 }
 
+export async function createOrder(
+  input: CreateOrderInput,
+): Promise<CreateOrderResponse> {
+  const response = await fetch("/api/orders", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body));
+  }
+  if (!isCreateOrderResponse(body)) {
+    throw new Error("The order API returned an invalid response.");
+  }
+
+  return body;
+}
+
 function isOrdersResponse(value: unknown): value is OrdersResponse {
   if (!isRecord(value)) {
     return false;
@@ -62,6 +99,10 @@ function isOrdersResponse(value: unknown): value is OrdersResponse {
 }
 
 function isOrderResponse(value: unknown): value is OrderResponse {
+  return isRecord(value) && isRecord(value.order);
+}
+
+function isCreateOrderResponse(value: unknown): value is CreateOrderResponse {
   return isRecord(value) && isRecord(value.order);
 }
 

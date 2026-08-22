@@ -3,6 +3,7 @@
 import {
   EyeOutlined,
   InboxOutlined,
+  PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
   TruckOutlined,
@@ -179,9 +180,18 @@ export function OrderListPage() {
                 Track incoming orders from creation through completion.
               </Text>
             </div>
-            <Button href="/shipments" icon={<TruckOutlined />}>
-              Shipments
-            </Button>
+            <Space className={styles.pageActions} wrap>
+              <Button
+                href="/orders/create"
+                icon={<PlusOutlined />}
+                type="primary"
+              >
+                Create order
+              </Button>
+              <Button href="/shipments" icon={<TruckOutlined />}>
+                Shipments
+              </Button>
+            </Space>
           </header>
 
           <Card className={styles.orderList} styles={{ body: { padding: 0 } }}>
@@ -259,7 +269,7 @@ export function OrderListPage() {
                 className={styles.errorAlert}
                 type="error"
                 showIcon
-                message="Orders could not be loaded"
+                title="Orders could not be loaded"
                 description={error}
                 action={
                   <Button
@@ -298,6 +308,7 @@ export function OrderListPage() {
 
 function isInProgress(status: OrderStatus): boolean {
   return (
+    status === OrderStatus.Draft ||
     status === OrderStatus.WaitingForBillImage ||
     status === OrderStatus.WaitingForProductImage ||
     status === OrderStatus.WaitingForTotalPrice

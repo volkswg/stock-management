@@ -262,10 +262,12 @@ function ShipmentLinkCard({
   const [shipmentsRequestId, setShipmentsRequestId] = useState(0);
   const [shipmentCreating, setShipmentCreating] = useState(false);
   const [shipmentLinking, setShipmentLinking] = useState(false);
-  const [selectedShipmentId, setSelectedShipmentId] =
-    useState<string | undefined>(currentShipmentId);
-  const [linkedShipmentId, setLinkedShipmentId] =
-    useState<string | undefined>(currentShipmentId);
+  const [selectedShipmentId, setSelectedShipmentId] = useState<
+    string | undefined
+  >(currentShipmentId);
+  const [linkedShipmentId, setLinkedShipmentId] = useState<string | undefined>(
+    currentShipmentId,
+  );
   const [selectOpen, setSelectOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const linkedShipment = shipments.find(
@@ -453,7 +455,7 @@ function ShipmentLinkCard({
         closable={!shipmentCreating}
         confirmLoading={shipmentCreating}
         destroyOnHidden
-        maskClosable={!shipmentCreating}
+        mask={{ closable: !shipmentCreating }}
         okText="Create shipment"
         open={createModalOpen}
         title="Create shipment master"
@@ -473,7 +475,11 @@ function ShipmentLinkCard({
             label="PO number"
             name="poNumber"
             rules={[
-              { required: true, whitespace: true, message: "Enter a PO number." },
+              {
+                required: true,
+                whitespace: true,
+                message: "Enter a PO number.",
+              },
             ]}
           >
             <Input autoFocus maxLength={100} placeholder="PO number" />
@@ -513,13 +519,7 @@ function formatShipmentLabel(shipment: ShipmentOption): string {
     : shipment.poNumber;
 }
 
-function ImageSectionLabel({
-  count,
-  title,
-}: {
-  count: number;
-  title: string;
-}) {
+function ImageSectionLabel({ count, title }: { count: number; title: string }) {
   return (
     <div className={styles.sectionHeader}>
       <Title level={2}>{title}</Title>

@@ -4,6 +4,7 @@ export {
   UserStateFlowName,
   type Order as DraftOrder,
 } from "./createDraftOrder";
+export { createOrder, type CreatedOrder } from "./createOrder";
 export { createOrderBill, type OrderBill } from "./createOrderBill";
 export { createOrderItem, type OrderItem } from "./createOrderItem";
 export { completeOrderBill } from "./completeOrderBill";
