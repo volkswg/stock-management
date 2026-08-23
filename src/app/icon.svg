@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="geometricPrecision">
+  <title>Stock Management</title>
+  <rect width="64" height="64" rx="6" fill="#157347"/>
+  <path d="M30.5 9.8Q32 9 33.5 9.8l17 9.4Q52 20 52 21.7v20.6q0 1.7-1.5 2.5l-17 9.4Q32 55 30.5 54.2l-17-9.4Q12 44 12 42.3V21.7q0-1.7 1.5-2.5l17-9.4Z" fill="#fff"/>
+  <path d="M13.5 19.2 32 29.5l18.5-10.3M32 29.5v24.7" fill="none" stroke="#157347" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
