@@ -19,7 +19,6 @@ import {
   Space,
   Table,
   Tabs,
-  Tooltip,
   Typography,
   type TableProps,
 } from "antd";
