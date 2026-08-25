@@ -25,10 +25,7 @@ import {
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import type { Key } from "react";
-import {
-  OrderStatus,
-  type OrderListItem,
-} from "@/services/orders";
+import { OrderStatus, type OrderListItem } from "@/services/orders";
 import { getOrders } from "./api";
 import { OrderImageGallery } from "./OrderImageGallery";
 import styles from "./orders.module.css";
@@ -73,14 +70,12 @@ const COLUMNS: TableProps<OrderListItem>["columns"] = [
     align: "center",
     width: 56,
     render: (_, order) => (
-      <Tooltip title="View order">
-        <Button
-          aria-label="View order details"
-          href={`/orders/${encodeURIComponent(order.id)}`}
-          icon={<EyeOutlined />}
-          type="text"
-        />
-      </Tooltip>
+      <Button
+        aria-label="View order details"
+        href={`/orders/${encodeURIComponent(order.id)}`}
+        icon={<EyeOutlined />}
+        type="text"
+      />
     ),
   },
 ];
