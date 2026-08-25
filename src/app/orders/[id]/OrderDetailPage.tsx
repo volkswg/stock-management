@@ -150,9 +150,6 @@ function OrderContent({
         <div>
           <Text className={styles.eyebrow}>Order management</Text>
           <Title level={1}>Order details</Title>
-          <Text className={styles.orderId} copyable={{ text: order.id }}>
-            {order.id}
-          </Text>
         </div>
         <Tag color={getStatusColor(order.status)}>
           {formatStatus(order.status)}

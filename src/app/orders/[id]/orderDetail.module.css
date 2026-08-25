@@ -42,11 +42,6 @@
   font-size: 13px;
 }
 
-.orderId {
-  max-width: min(100%, 620px);
-  overflow-wrap: anywhere;
-}
-
 .informationCard {
   margin-top: 24px;
 }
