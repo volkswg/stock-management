@@ -63,6 +63,17 @@ export async function listShipments({
     .reverse();
 }
 
+export async function getShipmentDetail({
+  googleSheetsService,
+  shipmentId,
+}: {
+  googleSheetsService: IGoogleSheetsService;
+  shipmentId: string;
+}): Promise<ShipmentListItem | undefined> {
+  const shipments = await listShipments({ googleSheetsService });
+  return shipments.find((shipment) => shipment.id === shipmentId);
+}
+
 function mapShipmentRow(row: GoogleSheetRow): ShipmentRow | undefined {
   const [
     id,

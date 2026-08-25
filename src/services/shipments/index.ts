@@ -5,7 +5,7 @@ export {
   type LinkOrderToShipmentResult,
   type ShipmentOrder,
 } from "./linkOrderToShipment";
-export { listShipments } from "./listShipments";
+export { getShipmentDetail, listShipments } from "./listShipments";
 export {
   ShipmentStatus,
   type Shipment,

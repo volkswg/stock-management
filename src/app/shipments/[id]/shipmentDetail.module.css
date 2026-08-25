@@ -1,0 +1,108 @@
+.appShell {
+  min-height: 100vh;
+  background: #f3f5f4;
+}
+
+.content {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 40px 56px;
+}
+
+.backButton {
+  margin-bottom: 18px;
+  margin-left: -12px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: #157347 !important;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0 0 6px !important;
+  overflow-wrap: anywhere;
+  font-size: 30px !important;
+}
+
+.pageHeader > :global(.ant-tag) {
+  margin: 5px 0 0;
+  padding: 3px 10px;
+  font-size: 13px;
+}
+
+.informationCard,
+.ordersCard {
+  margin-top: 20px;
+}
+
+.informationCard {
+  margin-top: 24px;
+}
+
+.informationCard :global(.ant-card-head-title),
+.ordersCard :global(.ant-card-head-title) {
+  font-size: 17px;
+}
+
+.ordersCard {
+  overflow: hidden;
+}
+
+.ordersCard :global(.ant-card-head-title .ant-tag) {
+  margin: 0;
+}
+
+.ordersCard :global(.ant-table-placeholder .ant-table-cell) {
+  height: 230px;
+}
+
+.emptyIcon {
+  color: #7d8982;
+  font-size: 42px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 24px 20px 40px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pageHeader > :global(.ant-tag) {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 18px 14px 32px;
+  }
+
+  .pageHeader h1 {
+    font-size: 26px !important;
+  }
+
+  .informationCard {
+    margin-top: 20px;
+  }
+
+  .informationCard :global(.ant-card-body) {
+    padding: 12px;
+  }
+}

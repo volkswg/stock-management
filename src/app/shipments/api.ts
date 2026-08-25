@@ -19,6 +19,10 @@ export type ShipmentResponse = {
   shipment: Shipment;
 };
 
+export type ShipmentDetailResponse = {
+  shipment: ShipmentListItem;
+};
+
 export type LinkOrderToShipmentResponse = {
   shipmentOrder: ShipmentOrder;
   created: boolean;
@@ -52,6 +56,31 @@ export async function getShipments({
   }
   if (!isShipmentsResponse(body)) {
     throw new Error("The shipments API returned an invalid response.");
+  }
+
+  return body;
+}
+
+export async function getShipment(
+  shipmentId: string,
+  { signal }: { signal?: AbortSignal } = {},
+): Promise<ShipmentDetailResponse> {
+  const response = await fetch(
+    `/api/shipments/${encodeURIComponent(shipmentId)}`,
+    {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      signal,
+    },
+  );
+
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body));
+  }
+  if (!isShipmentDetailResponse(body)) {
+    throw new Error("The shipment API returned an invalid response.");
   }
 
   return body;
@@ -117,6 +146,16 @@ function isShipmentsResponse(value: unknown): value is ShipmentsResponse {
 
 function isShipmentResponse(value: unknown): value is ShipmentResponse {
   return isRecord(value) && isRecord(value.shipment);
+}
+
+function isShipmentDetailResponse(
+  value: unknown,
+): value is ShipmentDetailResponse {
+  return (
+    isRecord(value) &&
+    isRecord(value.shipment) &&
+    Array.isArray(value.shipment.orders)
+  );
 }
 
 function isLinkOrderToShipmentResponse(

@@ -19,7 +19,6 @@ import {
   Table,
   Tabs,
   Tag,
-  Tooltip,
   Typography,
   type TableProps,
 } from "antd";
@@ -92,6 +91,20 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     width: 180,
     render: (value: string) => formatDate(value),
   },
+  {
+    title: "",
+    key: "action",
+    align: "center",
+    width: 56,
+    render: (_, shipment) => (
+      <Button
+        aria-label={`View shipment ${shipment.poNumber}`}
+        href={`/shipments/${encodeURIComponent(shipment.id)}`}
+        icon={<EyeOutlined />}
+        type="text"
+      />
+    ),
+  },
 ];
 
 const RELATED_ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
@@ -156,14 +169,12 @@ const RELATED_ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
     align: "center",
     width: 56,
     render: (_, order) => (
-      <Tooltip title="View order">
-        <Button
-          aria-label="View order details"
-          href={`/orders/${encodeURIComponent(order.id)}`}
-          icon={<EyeOutlined />}
-          type="text"
-        />
-      </Tooltip>
+      <Button
+        aria-label="View order details"
+        href={`/orders/${encodeURIComponent(order.id)}`}
+        icon={<EyeOutlined />}
+        type="text"
+      />
     ),
   },
 ];
@@ -306,7 +317,7 @@ export function ShipmentListPage() {
               loading={loading}
               pagination={false}
               rowKey="id"
-              scroll={{ x: 1010 }}
+              scroll={{ x: 1066 }}
               expandable={{
                 expandedRowKeys,
                 expandedRowRender: (shipment) => (
