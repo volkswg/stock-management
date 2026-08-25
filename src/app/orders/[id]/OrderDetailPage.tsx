@@ -38,7 +38,7 @@ import {
   OrderStatus,
   type OrderDetail,
 } from "@/services/orders";
-import { ShipmentStatus } from "@/services/shipments";
+import { ShipmentStatus, type Shipment } from "@/services/shipments";
 import {
   createShipmentMaster,
   getShipments,
@@ -206,7 +206,9 @@ function OrderContent({
       </Card>
 
       <ShipmentLinkCard
+        key={`${order.id}:${order.shipmentId ?? ""}`}
         currentShipmentId={order.shipmentId ?? undefined}
+        currentShipment={order.shipment ?? undefined}
         orderId={order.id}
       />
 
@@ -537,6 +539,7 @@ type ShipmentOption = {
   id: string;
   poNumber: string;
   carrier: string;
+  status: ShipmentStatus;
 };
 
 type NewShipmentFormValues = {
@@ -545,9 +548,11 @@ type NewShipmentFormValues = {
 };
 
 function ShipmentLinkCard({
+  currentShipment,
   currentShipmentId,
   orderId,
 }: {
+  currentShipment?: Shipment;
   currentShipmentId?: string;
   orderId: string;
 }) {
@@ -588,8 +593,18 @@ function ShipmentLinkCard({
           id: shipment.id,
           poNumber: shipment.poNumber,
           carrier: shipment.carrier,
+          status: shipment.status,
         }));
-        setShipments(remoteShipments);
+        setShipments(
+          currentShipment
+            ? [
+                mapShipmentToOption(currentShipment),
+                ...remoteShipments.filter(
+                  (shipment) => shipment.id !== currentShipment.id,
+                ),
+              ]
+            : remoteShipments,
+        );
       })
       .catch((requestError: unknown) => {
         if (!controller.signal.aborted) {
@@ -607,7 +622,7 @@ function ShipmentLinkCard({
       });
 
     return () => controller.abort();
-  }, [shipmentsRequestId]);
+  }, [currentShipment, shipmentsRequestId]);
 
   const handleCreateShipment = async ({
     poNumber,
@@ -620,6 +635,7 @@ function ShipmentLinkCard({
         id: response.shipment.id,
         poNumber: response.shipment.poNumber,
         carrier: response.shipment.carrier,
+        status: response.shipment.status,
       };
       setShipments((current) => [
         shipment,
@@ -822,6 +838,15 @@ function formatShipmentLabel(shipment: ShipmentOption): string {
   return shipment.carrier
     ? `${shipment.poNumber} · ${shipment.carrier}`
     : shipment.poNumber;
+}
+
+function mapShipmentToOption(shipment: Shipment): ShipmentOption {
+  return {
+    id: shipment.id,
+    poNumber: shipment.poNumber,
+    carrier: shipment.carrier,
+    status: shipment.status,
+  };
 }
 
 function ImageSectionLabel({ count, title }: { count: number; title: string }) {

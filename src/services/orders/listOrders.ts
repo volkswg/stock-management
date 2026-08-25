@@ -3,6 +3,7 @@ import type {
   GoogleSheetRow,
   IGoogleSheetsService,
 } from "@/externals/google/sheet";
+import { ShipmentStatus, type Shipment } from "@/services/shipments";
 import { OrderStatus } from "./createDraftOrder";
 
 export type OrderListItem = {
@@ -37,6 +38,7 @@ export type OrderBillImage = {
 export type OrderDetail = OrderListItem & {
   billImages: OrderBillImage[];
   shipmentId: string | null;
+  shipment: Shipment | null;
 };
 
 export async function listOrders({
@@ -67,12 +69,19 @@ export async function getOrderDetail({
   googleSheetsService: IGoogleSheetsService;
   orderId: string;
 }): Promise<OrderDetail | undefined> {
-  const [orderRows, orderItemRows, orderBillRows, shipmentOrderRows] =
+  const [
+    orderRows,
+    orderItemRows,
+    orderBillRows,
+    shipmentOrderRows,
+    shipmentRows,
+  ] =
     await Promise.all([
       googleSheetsService.orders.readRows("A:I"),
       googleSheetsService.orderItems.readRows(),
       googleSheetsService.orderBills.readRows(),
       googleSheetsService.shipmentOrders.readRows(),
+      googleSheetsService.shipments.readRows(),
     ]);
   const order = orderRows
     .map(mapOrderRow)
@@ -81,6 +90,8 @@ export async function getOrderDetail({
   if (!order) {
     return undefined;
   }
+
+  const shipmentId = findShipmentIdForOrder(shipmentOrderRows, orderId);
 
   return {
     ...order,
@@ -92,7 +103,12 @@ export async function getOrderDetail({
     billImages: orderBillRows
       .map(mapOrderBillImageRow)
       .filter((image): image is OrderBillImage => image?.orderId === orderId),
-    shipmentId: findShipmentIdForOrder(shipmentOrderRows, orderId),
+    shipmentId,
+    shipment: shipmentId
+      ? (shipmentRows
+          .map(mapShipmentRow)
+          .find((shipment) => shipment?.id === shipmentId) ?? null)
+      : null,
   };
 }
 
@@ -228,6 +244,49 @@ function mapOrderBillImageRow(
   };
 }
 
+function mapShipmentRow(row: GoogleSheetRow): Shipment | undefined {
+  const [
+    id,
+    status,
+    carrier,
+    poNumber,
+    shippingFee,
+    remark,
+    shippedAt,
+    deliveredAt,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    createdBy,
+  ] = row;
+  const normalizedId = toStringValue(id);
+  const normalizedStatus = toStringValue(status);
+  const normalizedPoNumber = toStringValue(poNumber);
+  if (
+    !normalizedId ||
+    !isShipmentStatus(normalizedStatus) ||
+    !normalizedPoNumber ||
+    toStringValue(deletedAt)
+  ) {
+    return undefined;
+  }
+
+  return {
+    id: normalizedId,
+    status: normalizedStatus,
+    carrier: toStringValue(carrier),
+    poNumber: normalizedPoNumber,
+    shippingFee: toPrice(shippingFee),
+    remark: toStringValue(remark),
+    shippedAt: toStringValue(shippedAt),
+    deliveredAt: toStringValue(deliveredAt),
+    deletedAt: toStringValue(deletedAt),
+    createdAt: toStringValue(createdAt),
+    updatedAt: toStringValue(updatedAt),
+    createdBy: toStringValue(createdBy),
+  };
+}
+
 function toStringValue(value: GoogleSheetCellValue | undefined): string {
   if (typeof value === "string") {
     return value.trim();
@@ -252,4 +311,8 @@ function toPrice(value: GoogleSheetCellValue | undefined): number | null {
 
 function isOrderStatus(value: string): value is OrderStatus {
   return Object.values(OrderStatus).includes(value as OrderStatus);
+}
+
+function isShipmentStatus(value: string): value is ShipmentStatus {
+  return Object.values(ShipmentStatus).includes(value as ShipmentStatus);
 }
