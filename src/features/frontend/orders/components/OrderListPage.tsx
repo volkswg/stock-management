@@ -25,7 +25,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import type { Key } from "react";
 import { OrderStatus, type OrderListItem } from "@/services/orders";
-import { getOrders } from "./api";
+import { getOrders } from "../../../../app/orders/api";
 import { OrderImageGallery } from "./OrderImageGallery";
 import styles from "./orders.module.css";
 

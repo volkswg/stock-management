@@ -31,7 +31,7 @@ import {
   type ShipmentListItem,
   type ShipmentRelatedOrder,
 } from "@/services/shipments";
-import { OrderImageGallery } from "../orders/OrderImageGallery";
+import { OrderImageGallery } from "../../features/frontend/orders/components/OrderImageGallery";
 import { getShipments } from "./api";
 import styles from "./shipments.module.css";
 

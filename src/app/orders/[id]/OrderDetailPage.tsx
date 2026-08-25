@@ -49,7 +49,7 @@ import {
   updateOrderItemQuantity,
   updateOrderPrice,
 } from "../api";
-import { OrderImageGallery } from "../OrderImageGallery";
+import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
 import styles from "./orderDetail.module.css";
 
 const { Text, Title } = Typography;

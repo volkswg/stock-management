@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OrderListPage } from "./OrderListPage";
+import { OrderListPage } from "../../features/frontend/orders/components/OrderListPage";
 
 export const metadata: Metadata = {
   title: "Orders | Stock Management",
