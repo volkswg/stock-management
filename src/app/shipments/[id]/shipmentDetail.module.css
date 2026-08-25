@@ -43,13 +43,48 @@
   font-size: 13px;
 }
 
+.shipmentProgress {
+  width: 100%;
+  margin-top: 24px;
+}
+
+.shipmentProgress :global(.ant-steps) {
+  width: 100%;
+  display: flex;
+}
+
+.shipmentProgress :global(.ant-steps-item) {
+  min-width: 0;
+}
+
+.shipmentProgress :global(.ant-steps-item-title) {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.shipmentProgress
+  :global(.ant-steps.ant-steps-panel .ant-steps-item-finish) {
+  background: #e8f5ee;
+  border-color: #8fc9aa;
+}
+
+.shipmentProgress
+  :global(.ant-steps.ant-steps-panel .ant-steps-item-finish
+    .ant-steps-item-title) {
+  color: #146c43;
+}
+
+.shipmentProgress
+  :global(.ant-steps.ant-steps-panel .ant-steps-item-finish
+    .ant-steps-panel-arrow
+    path) {
+  fill: #e8f5ee;
+  stroke: #8fc9aa;
+}
+
 .informationCard,
 .ordersCard {
   margin-top: 20px;
-}
-
-.informationCard {
-  margin-top: 24px;
 }
 
 .informationCard :global(.ant-card-head-title),

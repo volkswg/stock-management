@@ -15,6 +15,7 @@ import {
   Empty,
   Skeleton,
   Space,
+  Steps,
   Table,
   Tag,
   Typography,
@@ -201,6 +202,9 @@ export function ShipmentDetailPage({ shipmentId }: { shipmentId: string }) {
 }
 
 function ShipmentContent({ shipment }: { shipment: ShipmentListItem }) {
+  const currentStep = getShipmentStep(shipment);
+  const stepTitles = ["Draft", "Ready to ship", "Shipping", "Delivered"];
+
   return (
     <>
       <header className={styles.pageHeader}>
@@ -215,6 +219,24 @@ function ShipmentContent({ shipment }: { shipment: ShipmentListItem }) {
           {formatStatus(shipment.status)}
         </Tag>
       </header>
+
+      <nav aria-label="Shipment progress" className={styles.shipmentProgress}>
+        <Steps
+          current={currentStep}
+          items={stepTitles.map((title, index) => ({
+            title:
+              shipment.status === ShipmentStatus.Canceled &&
+              index === currentStep
+                ? "Canceled"
+                : title,
+          }))}
+          status={
+            shipment.status === ShipmentStatus.Canceled ? "error" : "process"
+          }
+          size="small"
+          type="panel"
+        />
+      </nav>
 
       <Card className={styles.informationCard} title="Shipment information">
         <Descriptions
@@ -322,6 +344,21 @@ function getShipmentStatusColor(status: ShipmentStatus): string {
       return "error";
     default:
       return "default";
+  }
+}
+
+function getShipmentStep(shipment: ShipmentListItem): number {
+  switch (shipment.status) {
+    case ShipmentStatus.ReadyToShip:
+      return 1;
+    case ShipmentStatus.Shipping:
+      return 2;
+    case ShipmentStatus.Delivered:
+      return 3;
+    case ShipmentStatus.Canceled:
+      return shipment.shippedAt ? 2 : 1;
+    default:
+      return 0;
   }
 }
 
