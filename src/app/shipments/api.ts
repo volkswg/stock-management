@@ -3,6 +3,7 @@ import type {
   ShipmentListItem,
   ShipmentOrder,
   ShipmentStatus,
+  ShipmentStatusUpdate,
 } from "@/services/shipments";
 
 export type ShipmentsResponse = {
@@ -21,6 +22,10 @@ export type ShipmentResponse = {
 
 export type ShipmentDetailResponse = {
   shipment: ShipmentListItem;
+};
+
+export type UpdateShipmentStatusResponse = {
+  shipment: ShipmentStatusUpdate;
 };
 
 export type LinkOrderToShipmentResponse = {
@@ -80,6 +85,34 @@ export async function getShipment(
     throw new Error(getErrorMessage(body));
   }
   if (!isShipmentDetailResponse(body)) {
+    throw new Error("The shipment API returned an invalid response.");
+  }
+
+  return body;
+}
+
+export async function advanceShipmentStatus(
+  shipmentId: string,
+  status: ShipmentStatus,
+  deliveryFee?: number,
+): Promise<UpdateShipmentStatusResponse> {
+  const response = await fetch(
+    `/api/shipments/${encodeURIComponent(shipmentId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status, deliveryFee }),
+    },
+  );
+
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body));
+  }
+  if (!isUpdateShipmentStatusResponse(body)) {
     throw new Error("The shipment API returned an invalid response.");
   }
 
@@ -155,6 +188,17 @@ function isShipmentDetailResponse(
     isRecord(value) &&
     isRecord(value.shipment) &&
     Array.isArray(value.shipment.orders)
+  );
+}
+
+function isUpdateShipmentStatusResponse(
+  value: unknown,
+): value is UpdateShipmentStatusResponse {
+  return (
+    isRecord(value) &&
+    isRecord(value.shipment) &&
+    typeof value.shipment.status === "string" &&
+    typeof value.shipment.updatedAt === "string"
   );
 }
 

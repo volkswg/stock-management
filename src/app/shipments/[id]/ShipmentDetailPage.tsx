@@ -2,6 +2,8 @@
 
 import {
   ArrowLeftOutlined,
+  ArrowRightOutlined,
+  CheckOutlined,
   EyeOutlined,
   ReloadOutlined,
   TruckOutlined,
@@ -13,6 +15,10 @@ import {
   ConfigProvider,
   Descriptions,
   Empty,
+  Form,
+  InputNumber,
+  message,
+  Modal,
   Skeleton,
   Space,
   Steps,
@@ -22,6 +28,7 @@ import {
   type TableProps,
 } from "antd";
 import { useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { OrderStatus } from "@/services/orders";
 import {
   ShipmentStatus,
@@ -29,7 +36,7 @@ import {
   type ShipmentRelatedOrder,
 } from "@/services/shipments";
 import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
-import { getShipment } from "../api";
+import { advanceShipmentStatus, getShipment } from "../api";
 import styles from "./shipmentDetail.module.css";
 
 const { Text, Title } = Typography;
@@ -40,6 +47,10 @@ const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+
+type DeliveryFeeFormValues = {
+  deliveryFee: number;
+};
 
 const ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
   {
@@ -193,7 +204,10 @@ export function ShipmentDetailPage({ shipmentId }: { shipmentId: string }) {
             />
           ) : null}
           {!loading && !error && shipment ? (
-            <ShipmentContent shipment={shipment} />
+            <ShipmentContent
+              shipment={shipment}
+              onShipmentChange={setShipment}
+            />
           ) : null}
         </main>
       </div>
@@ -201,12 +215,69 @@ export function ShipmentDetailPage({ shipmentId }: { shipmentId: string }) {
   );
 }
 
-function ShipmentContent({ shipment }: { shipment: ShipmentListItem }) {
+function ShipmentContent({
+  shipment,
+  onShipmentChange,
+}: {
+  shipment: ShipmentListItem;
+  onShipmentChange: Dispatch<SetStateAction<ShipmentListItem | undefined>>;
+}) {
+  const [deliveryFeeForm] = Form.useForm<DeliveryFeeFormValues>();
+  const [messageApi, messageContextHolder] = message.useMessage();
+  const [statusUpdating, setStatusUpdating] = useState(false);
+  const [deliveryFeeModalOpen, setDeliveryFeeModalOpen] = useState(false);
   const currentStep = getShipmentStep(shipment);
+  const nextStatus = getNextShipmentStatus(shipment.status);
   const stepTitles = ["Draft", "Ready to ship", "Shipping", "Delivered"];
+
+  const handleStatusUpdate = async (
+    status: ShipmentStatus,
+    deliveryFee?: number,
+  ) => {
+    setStatusUpdating(true);
+    try {
+      const response = await advanceShipmentStatus(
+        shipment.id,
+        status,
+        deliveryFee,
+      );
+      onShipmentChange((current) =>
+        current ? { ...current, ...response.shipment } : current,
+      );
+      setDeliveryFeeModalOpen(false);
+      deliveryFeeForm.resetFields();
+      messageApi.success(
+        `Shipment status updated to ${formatStatus(status).toLowerCase()}.`,
+      );
+    } catch (updateError: unknown) {
+      messageApi.error(
+        updateError instanceof Error
+          ? updateError.message
+          : "Failed to update shipment status.",
+      );
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
+  const handleAdvance = () => {
+    if (!nextStatus) {
+      return;
+    }
+    if (nextStatus === ShipmentStatus.Delivered) {
+      deliveryFeeForm.setFieldValue(
+        "deliveryFee",
+        shipment.shippingFee ?? undefined,
+      );
+      setDeliveryFeeModalOpen(true);
+      return;
+    }
+    void handleStatusUpdate(nextStatus);
+  };
 
   return (
     <>
+      {messageContextHolder}
       <header className={styles.pageHeader}>
         <div>
           <Text className={styles.eyebrow}>Shipment management</Text>
@@ -215,9 +286,27 @@ function ShipmentContent({ shipment }: { shipment: ShipmentListItem }) {
             {shipment.carrier || "Carrier not assigned"}
           </Text>
         </div>
-        <Tag color={getShipmentStatusColor(shipment.status)}>
-          {formatStatus(shipment.status)}
-        </Tag>
+        <Space className={styles.statusActions} size={10} wrap>
+          <Tag color={getShipmentStatusColor(shipment.status)}>
+            {formatStatus(shipment.status)}
+          </Tag>
+          {nextStatus ? (
+            <Button
+              icon={
+                nextStatus === ShipmentStatus.Delivered ? (
+                  <CheckOutlined />
+                ) : (
+                  <ArrowRightOutlined />
+                )
+              }
+              loading={statusUpdating}
+              onClick={handleAdvance}
+              type="primary"
+            >
+              {getShipmentActionLabel(nextStatus)}
+            </Button>
+          ) : null}
+        </Space>
       </header>
 
       <nav aria-label="Shipment progress" className={styles.shipmentProgress}>
@@ -250,7 +339,7 @@ function ShipmentContent({ shipment }: { shipment: ShipmentListItem }) {
             },
             {
               key: "shippingFee",
-              label: "Shipping fee",
+              label: "Delivery fee",
               children:
                 shipment.shippingFee === null
                   ? "—"
@@ -317,6 +406,45 @@ function ShipmentContent({ shipment }: { shipment: ShipmentListItem }) {
           scroll={{ x: 966 }}
         />
       </Card>
+
+      <Modal
+        cancelButtonProps={{ disabled: statusUpdating }}
+        closable={!statusUpdating}
+        keyboard={!statusUpdating}
+        maskClosable={!statusUpdating}
+        okButtonProps={{ loading: statusUpdating }}
+        okText="Mark delivered"
+        open={deliveryFeeModalOpen}
+        title="Complete delivery"
+        onCancel={() => {
+          setDeliveryFeeModalOpen(false);
+          deliveryFeeForm.resetFields();
+        }}
+        onOk={() => deliveryFeeForm.submit()}
+      >
+        <Form<DeliveryFeeFormValues>
+          form={deliveryFeeForm}
+          layout="vertical"
+          onFinish={({ deliveryFee }) =>
+            void handleStatusUpdate(ShipmentStatus.Delivered, deliveryFee)
+          }
+        >
+          <Form.Item
+            label="Delivery fee"
+            name="deliveryFee"
+            rules={[{ required: true, message: "Enter the delivery fee." }]}
+          >
+            <InputNumber<number>
+              className={styles.deliveryFeeInput}
+              max={1_000_000_000}
+              min={0}
+              placeholder="0.00"
+              precision={2}
+              prefix="฿"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 }
@@ -359,6 +487,34 @@ function getShipmentStep(shipment: ShipmentListItem): number {
       return shipment.shippedAt ? 2 : 1;
     default:
       return 0;
+  }
+}
+
+function getNextShipmentStatus(
+  status: ShipmentStatus,
+): ShipmentStatus | undefined {
+  switch (status) {
+    case ShipmentStatus.Draft:
+      return ShipmentStatus.ReadyToShip;
+    case ShipmentStatus.ReadyToShip:
+      return ShipmentStatus.Shipping;
+    case ShipmentStatus.Shipping:
+      return ShipmentStatus.Delivered;
+    default:
+      return undefined;
+  }
+}
+
+function getShipmentActionLabel(status: ShipmentStatus): string {
+  switch (status) {
+    case ShipmentStatus.ReadyToShip:
+      return "Mark ready to ship";
+    case ShipmentStatus.Shipping:
+      return "Start shipping";
+    case ShipmentStatus.Delivered:
+      return "Mark delivered";
+    default:
+      return "Update status";
   }
 }
 

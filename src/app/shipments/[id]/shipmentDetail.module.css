@@ -37,8 +37,12 @@
   font-size: 30px !important;
 }
 
-.pageHeader > :global(.ant-tag) {
-  margin: 5px 0 0;
+.statusActions {
+  justify-content: flex-end;
+}
+
+.statusActions :global(.ant-tag) {
+  margin: 0;
   padding: 3px 10px;
   font-size: 13px;
 }
@@ -109,6 +113,10 @@
   font-size: 42px;
 }
 
+.deliveryFeeInput {
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .content {
     padding: 24px 20px 40px;
@@ -119,8 +127,8 @@
     gap: 12px;
   }
 
-  .pageHeader > :global(.ant-tag) {
-    margin-top: 0;
+  .statusActions {
+    justify-content: flex-start;
   }
 }
 
