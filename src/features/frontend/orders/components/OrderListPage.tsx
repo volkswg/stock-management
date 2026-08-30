@@ -19,6 +19,7 @@ import {
   Space,
   Table,
   Tabs,
+  Tag,
   Typography,
   type TableProps,
 } from "antd";
@@ -53,6 +54,17 @@ const COLUMNS: TableProps<OrderListItem>["columns"] = [
     key: "createdAt",
     width: 170,
     render: (value: string) => formatDate(value),
+  },
+  {
+    title: "Shipment",
+    dataIndex: "shipmentId",
+    key: "shipmentId",
+    width: 130,
+    render: (shipmentId: string | null) => (
+      <Tag color={shipmentId ? "success" : "default"}>
+        {shipmentId ? "Linked" : "Not linked"}
+      </Tag>
+    ),
   },
   {
     title: "Total",
@@ -222,7 +234,7 @@ export function OrderListPage() {
               rowKey="id"
               loading={loading}
               pagination={false}
-              scroll={{ x: 620 }}
+              scroll={{ x: 750 }}
               expandable={{
                 expandedRowKeys,
                 expandedRowRender: (order) => (

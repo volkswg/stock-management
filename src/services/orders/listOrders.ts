@@ -15,6 +15,7 @@ export type OrderListItem = {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  shipmentId: string | null;
   productImages: OrderProductImage[];
 };
 
@@ -37,7 +38,6 @@ export type OrderBillImage = {
 
 export type OrderDetail = OrderListItem & {
   billImages: OrderBillImage[];
-  shipmentId: string | null;
   shipment: Shipment | null;
 };
 
@@ -46,17 +46,20 @@ export async function listOrders({
 }: {
   googleSheetsService: IGoogleSheetsService;
 }): Promise<OrderListItem[]> {
-  const [orderRows, orderItemRows] = await Promise.all([
+  const [orderRows, orderItemRows, shipmentOrderRows] = await Promise.all([
     googleSheetsService.orders.readRows("A:I"),
     googleSheetsService.orderItems.readRows(),
+    googleSheetsService.shipmentOrders.readRows(),
   ]);
   const productImagesByOrderId = groupProductImagesByOrderId(orderItemRows);
+  const shipmentIdsByOrderId = groupShipmentIdsByOrderId(shipmentOrderRows);
 
   return orderRows
     .map(mapOrderRow)
     .filter((order): order is OrderListItem => Boolean(order))
     .map((order) => ({
       ...order,
+      shipmentId: shipmentIdsByOrderId.get(order.id) ?? null,
       productImages: productImagesByOrderId.get(order.id) ?? [],
     }))
     .reverse();
@@ -128,6 +131,28 @@ function findShipmentIdForOrder(
   return null;
 }
 
+function groupShipmentIdsByOrderId(
+  rows: GoogleSheetRow[],
+): Map<string, string> {
+  const shipmentIdsByOrderId = new Map<string, string>();
+
+  for (const row of rows) {
+    const [, shipmentId, orderId, , , deletedAt] = row;
+    const normalizedShipmentId = toStringValue(shipmentId);
+    const normalizedOrderId = toStringValue(orderId);
+    if (
+      !normalizedShipmentId ||
+      !normalizedOrderId ||
+      toStringValue(deletedAt)
+    ) {
+      continue;
+    }
+    shipmentIdsByOrderId.set(normalizedOrderId, normalizedShipmentId);
+  }
+
+  return shipmentIdsByOrderId;
+}
+
 function mapOrderRow(row: GoogleSheetRow): OrderListItem | undefined {
   const [
     id,
@@ -160,6 +185,7 @@ function mapOrderRow(row: GoogleSheetRow): OrderListItem | undefined {
     createdAt: toStringValue(createdAt),
     updatedAt: toStringValue(updatedAt),
     createdBy: toStringValue(createdBy),
+    shipmentId: null,
     productImages: [],
   };
 }
