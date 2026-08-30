@@ -6,12 +6,13 @@ import type {
 import { OrderStatus } from "../orders/createDraftOrder";
 import {
   ShipmentStatus,
+  type ShipmentCostSummary,
   type ShipmentListItem,
   type ShipmentRelatedOrder,
   type ShipmentRelatedProductImage,
 } from "./types";
 
-type ShipmentRow = Omit<ShipmentListItem, "orders">;
+type ShipmentRow = Omit<ShipmentListItem, "costSummary" | "orders">;
 type RelatedOrderRow = Omit<ShipmentRelatedOrder, "productImages">;
 
 export async function listShipments({
@@ -54,12 +55,20 @@ export async function listShipments({
     .map(mapShipmentRow)
     .filter((shipment): shipment is ShipmentRow => Boolean(shipment))
     .filter((shipment) => !excludedStatusSet.has(shipment.status))
-    .map((shipment) => ({
-      ...shipment,
-      orders: (orderIdsByShipmentId.get(shipment.id) ?? [])
+    .map((shipment) => {
+      const orders = (orderIdsByShipmentId.get(shipment.id) ?? [])
         .map((orderId) => ordersById.get(orderId))
-        .filter((order): order is ShipmentRelatedOrder => Boolean(order)),
-    }))
+        .filter((order): order is ShipmentRelatedOrder => Boolean(order));
+
+      return {
+        ...shipment,
+        costSummary: calculateShipmentCostSummary(
+          shipment.shippingFee,
+          orders,
+        ),
+        orders,
+      };
+    })
     .reverse();
 }
 
@@ -141,6 +150,48 @@ function groupOrderIdsByShipmentId(
   }
 
   return orderIdsByShipmentId;
+}
+
+function calculateShipmentCostSummary(
+  shippingFee: number | null,
+  orders: ShipmentRelatedOrder[],
+): ShipmentCostSummary | null {
+  if (
+    shippingFee === null ||
+    orders.length === 0 ||
+    orders.some((order) => order.totalPrice === null)
+  ) {
+    return null;
+  }
+
+  const quantities = orders.flatMap((order) =>
+    order.productImages.map((product) =>
+      toPositiveNumber(product.quoteQuantity),
+    ),
+  );
+  if (
+    quantities.length === 0 ||
+    quantities.some((quantity) => quantity === null)
+  ) {
+    return null;
+  }
+
+  const totalOrderPrice = orders.reduce(
+    (total, order) => total + (order.totalPrice ?? 0),
+    0,
+  );
+  const totalQuantity = quantities.reduce<number>(
+    (total, quantity) => total + (quantity ?? 0),
+    0,
+  );
+
+  return {
+    totalOrderPrice,
+    shippingFee,
+    totalQuantity,
+    averageLandedCostPerUnit:
+      (totalOrderPrice + shippingFee) / totalQuantity,
+  };
 }
 
 function mapRelatedOrderRow(
@@ -232,6 +283,11 @@ function toNumber(value: GoogleSheetCellValue | undefined): number | null {
 
   const number = Number(value.replace(/,/g, ""));
   return Number.isFinite(number) ? number : null;
+}
+
+function toPositiveNumber(value: string): number | null {
+  const number = Number(value.replace(/,/g, ""));
+  return Number.isFinite(number) && number > 0 ? number : null;
 }
 
 function isShipmentStatus(value: string): value is ShipmentStatus {

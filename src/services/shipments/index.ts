@@ -14,6 +14,7 @@ export {
 export {
   ShipmentStatus,
   type Shipment,
+  type ShipmentCostSummary,
   type ShipmentListItem,
   type ShipmentRelatedOrder,
   type ShipmentRelatedProductImage,
