@@ -23,6 +23,11 @@ export {
   type UpdateOrderItemQuantityResult,
 } from "./updateOrderItemQuantity";
 export {
+  updateOrderDetails,
+  type OrderDetailsUpdate,
+  type UpdateOrderDetailsResult,
+} from "./updateOrderDetails";
+export {
   getOrderDetail,
   listOrders,
   type OrderBillImage,

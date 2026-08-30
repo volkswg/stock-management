@@ -51,6 +51,19 @@
   gap: 6px;
 }
 
+.fieldDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.remarkValue {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .priceControls {
   width: min(100%, 340px);
 }
@@ -58,6 +71,21 @@
 .priceControls :global(.ant-input-number) {
   flex: 1;
   min-width: 0;
+}
+
+.remarkEditor {
+  display: grid;
+  gap: 8px;
+}
+
+.remarkEditor :global(.ant-input-textarea-show-count) {
+  margin-bottom: 16px;
+}
+
+.remarkActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .informationCard :global(.ant-card-head-title),

@@ -2,7 +2,8 @@
 
 import {
   ArrowLeftOutlined,
-  CheckOutlined,
+  CloseOutlined,
+  EditOutlined,
   FileImageOutlined,
   LinkOutlined,
   PlusOutlined,
@@ -47,7 +48,8 @@ import {
 import {
   getOrder,
   updateOrderItemQuantity,
-  updateOrderPrice,
+  updateOrderDetails,
+  type UpdateOrderDetailsResponse,
 } from "../api";
 import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
 import styles from "./orderDetail.module.css";
@@ -143,6 +145,20 @@ function OrderContent({
   const [quantityType, setQuantityType] = useState<OrderItemQuantityType>(
     OrderItemQuantityType.Quote,
   );
+  const handleDetailsUpdated = (
+    update: UpdateOrderDetailsResponse["order"],
+  ) =>
+    onOrderChange((current) =>
+      current
+        ? {
+            ...current,
+            status: update.status,
+            totalPrice: update.totalPrice,
+            remark: update.remark,
+            updatedAt: update.updatedAt,
+          }
+        : current,
+    );
 
   return (
     <>
@@ -172,13 +188,7 @@ function OrderContent({
               children: (
                 <OrderTotalPrice
                   order={order}
-                  onUpdated={({ status, totalPrice, updatedAt }) =>
-                    onOrderChange((current) =>
-                      current
-                        ? { ...current, status, totalPrice, updatedAt }
-                        : current,
-                    )
-                  }
+                  onUpdated={handleDetailsUpdated}
                 />
               ),
             },
@@ -195,7 +205,12 @@ function OrderContent({
             {
               key: "remark",
               label: "Remark",
-              children: order.remark || "—",
+              children: (
+                <OrderRemark
+                  order={order}
+                  onUpdated={handleDetailsUpdated}
+                />
+              ),
               span: 2,
             },
           ]}
@@ -468,21 +483,12 @@ function OrderTotalPrice({
   onUpdated,
 }: {
   order: OrderDetail;
-  onUpdated: (update: {
-    status: OrderStatus.Complete;
-    totalPrice: number;
-    updatedAt: string;
-  }) => void;
+  onUpdated: (update: UpdateOrderDetailsResponse["order"]) => void;
 }) {
-  const [price, setPrice] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | null>(order.totalPrice);
+  const [editing, setEditing] = useState(order.totalPrice === null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>();
-
-  if (order.status !== OrderStatus.WaitingForTotalPrice) {
-    return order.totalPrice === null
-      ? "—"
-      : THB_FORMATTER.format(order.totalPrice);
-  }
 
   const savePrice = async (): Promise<void> => {
     if (price === null) return;
@@ -490,7 +496,11 @@ function OrderTotalPrice({
     setSaving(true);
     setError(undefined);
     try {
-      const response = await updateOrderPrice(order.id, price);
+      const response = await updateOrderDetails(order.id, {
+        totalPrice: price,
+      });
+      setPrice(response.order.totalPrice);
+      setEditing(false);
       onUpdated(response.order);
     } catch (saveError) {
       setError(
@@ -502,6 +512,20 @@ function OrderTotalPrice({
       setSaving(false);
     }
   };
+
+  if (!editing && order.totalPrice !== null) {
+    return (
+      <div className={styles.fieldDisplay}>
+        <Text>{THB_FORMATTER.format(order.totalPrice)}</Text>
+        <Button
+          aria-label="Edit total price"
+          icon={<EditOutlined />}
+          type="text"
+          onClick={() => setEditing(true)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.priceEditor}>
@@ -518,15 +542,109 @@ function OrderTotalPrice({
           onPressEnter={() => void savePrice()}
         />
         <Button
-          disabled={price === null}
-          icon={<CheckOutlined />}
+          aria-label="Save total price"
+          disabled={price === null || price === order.totalPrice}
+          icon={<SaveOutlined />}
           loading={saving}
           type="primary"
           onClick={() => void savePrice()}
-        >
-          Save price
-        </Button>
+        />
+        {order.totalPrice !== null ? (
+          <Button
+            aria-label="Cancel total price edit"
+            disabled={saving}
+            icon={<CloseOutlined />}
+            onClick={() => {
+              setPrice(order.totalPrice);
+              setError(undefined);
+              setEditing(false);
+            }}
+          />
+        ) : null}
       </Space.Compact>
+      {error ? <Text type="danger">{error}</Text> : null}
+    </div>
+  );
+}
+
+function OrderRemark({
+  order,
+  onUpdated,
+}: {
+  order: OrderDetail;
+  onUpdated: (update: UpdateOrderDetailsResponse["order"]) => void;
+}) {
+  const [remark, setRemark] = useState(order.remark);
+  const [editing, setEditing] = useState(!order.remark);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>();
+
+  const saveRemark = async (): Promise<void> => {
+    setSaving(true);
+    setError(undefined);
+    try {
+      const response = await updateOrderDetails(order.id, { remark });
+      setRemark(response.order.remark);
+      setEditing(!response.order.remark);
+      onUpdated(response.order);
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to update the remark.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!editing && order.remark) {
+    return (
+      <div className={styles.fieldDisplay}>
+        <Text className={styles.remarkValue}>{order.remark}</Text>
+        <Button
+          aria-label="Edit remark"
+          icon={<EditOutlined />}
+          type="text"
+          onClick={() => setEditing(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.remarkEditor}>
+      <Input.TextArea
+        aria-label="Order remark"
+        autoSize={{ minRows: 2, maxRows: 6 }}
+        maxLength={1000}
+        placeholder="Order remark"
+        showCount
+        value={remark}
+        onChange={(event) => setRemark(event.target.value)}
+      />
+      <div className={styles.remarkActions}>
+        <Button
+          aria-label="Save remark"
+          disabled={remark.trim() === order.remark}
+          icon={<SaveOutlined />}
+          loading={saving}
+          type="primary"
+          onClick={() => void saveRemark()}
+        />
+        {order.remark ? (
+          <Button
+            aria-label="Cancel remark edit"
+            disabled={saving}
+            icon={<CloseOutlined />}
+            onClick={() => {
+              setRemark(order.remark);
+              setError(undefined);
+              setEditing(false);
+            }}
+          />
+        ) : null}
+      </div>
       {error ? <Text type="danger">{error}</Text> : null}
     </div>
   );

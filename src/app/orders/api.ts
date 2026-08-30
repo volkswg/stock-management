@@ -25,11 +25,17 @@ export type CreateOrderResponse = {
   order: CreatedOrder;
 };
 
-export type UpdateOrderPriceResponse = {
+export type UpdateOrderDetailsInput = {
+  totalPrice?: number;
+  remark?: string;
+};
+
+export type UpdateOrderDetailsResponse = {
   order: {
     id: string;
-    status: OrderStatus.Complete;
-    totalPrice: number;
+    status: OrderStatus;
+    totalPrice: number | null;
+    remark: string;
     updatedAt: string;
   };
 };
@@ -147,25 +153,25 @@ export async function uploadOrderImage(
   return body;
 }
 
-export async function updateOrderPrice(
+export async function updateOrderDetails(
   orderId: string,
-  totalPrice: number,
-): Promise<UpdateOrderPriceResponse> {
+  input: UpdateOrderDetailsInput,
+): Promise<UpdateOrderDetailsResponse> {
   const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
     method: "PATCH",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ totalPrice }),
+    body: JSON.stringify(input),
   });
 
   const body: unknown = await response.json();
   if (!response.ok) {
     throw new Error(getErrorMessage(body));
   }
-  if (!isUpdateOrderPriceResponse(body)) {
-    throw new Error("The order price API returned an invalid response.");
+  if (!isUpdateOrderDetailsResponse(body)) {
+    throw new Error("The order details API returned an invalid response.");
   }
 
   return body;
@@ -225,15 +231,17 @@ function isUploadOrderImageResponse(
   );
 }
 
-function isUpdateOrderPriceResponse(
+function isUpdateOrderDetailsResponse(
   value: unknown,
-): value is UpdateOrderPriceResponse {
+): value is UpdateOrderDetailsResponse {
   return (
     isRecord(value) &&
     isRecord(value.order) &&
     typeof value.order.id === "string" &&
-    value.order.status === "complete" &&
-    typeof value.order.totalPrice === "number" &&
+    typeof value.order.status === "string" &&
+    (value.order.totalPrice === null ||
+      typeof value.order.totalPrice === "number") &&
+    typeof value.order.remark === "string" &&
     typeof value.order.updatedAt === "string"
   );
 }

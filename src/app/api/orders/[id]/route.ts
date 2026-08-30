@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { completeWebOrderPrice, getOrderDetail } from "@/services/orders";
+import { getOrderDetail, updateOrderDetails } from "@/services/orders";
 
 export const runtime = "nodejs";
 
@@ -52,29 +52,28 @@ export async function PATCH(
   }
 
   const body = await readJsonBody(request);
-  if (!isRecord(body) || !isValidPrice(body.totalPrice)) {
+  const input = parseOrderUpdate(body);
+  if (!input) {
     return NextResponse.json(
-      { error: "Enter a valid non-negative total price." },
+      { error: "Enter a valid total price or remark." },
       { status: 400 },
     );
   }
 
   try {
     const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
-    const result = await completeWebOrderPrice({
+    const result = await updateOrderDetails({
       googleSheetsService,
       orderId,
-      totalPrice: body.totalPrice,
+      remark: input.remark,
+      totalPrice: input.totalPrice,
     });
     if (result.outcome === "not_found") {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
     }
     if (result.outcome === "invalid_status") {
       return NextResponse.json(
-        {
-          error:
-            "Only web orders waiting for a total price can be completed here.",
-        },
+        { error: "Order has an invalid status." },
         { status: 409 },
       );
     }
@@ -82,18 +81,16 @@ export async function PATCH(
     return NextResponse.json({
       order: {
         id: orderId,
-        status: result.status,
-        totalPrice: result.totalPrice,
-        updatedAt: result.updatedAt,
+        ...result.order,
       },
     });
   } catch (error) {
-    console.error("Failed to complete web order price", {
+    console.error("Failed to update order details", {
       orderId,
       error: error instanceof Error ? error.message : String(error),
     });
     return NextResponse.json(
-      { error: "Failed to update the order price." },
+      { error: "Failed to update the order details." },
       { status: 500 },
     );
   }
@@ -107,8 +104,32 @@ async function readJsonBody(request: Request): Promise<unknown> {
   }
 }
 
-function isValidPrice(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+function parseOrderUpdate(value: unknown): {
+  totalPrice?: number;
+  remark?: string;
+} | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const totalPrice = value.totalPrice;
+  const remark = value.remark;
+  if (
+    (totalPrice !== undefined &&
+      (typeof totalPrice !== "number" ||
+        !Number.isFinite(totalPrice) ||
+        totalPrice < 0)) ||
+    (remark !== undefined &&
+      (typeof remark !== "string" || remark.length > 1000)) ||
+    (totalPrice === undefined && remark === undefined)
+  ) {
+    return undefined;
+  }
+
+  return {
+    totalPrice: typeof totalPrice === "number" ? totalPrice : undefined,
+    remark: typeof remark === "string" ? remark : undefined,
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
