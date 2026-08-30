@@ -87,16 +87,26 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
       value === null ? "—" : THB_FORMATTER.format(value),
   },
   {
-    title: "Avg. landed/unit",
-    key: "averageLandedCostPerUnit",
+    title: "Quote avg./unit",
+    key: "quoteAverageLandedCostPerUnit",
     align: "right",
     width: 170,
-    render: (_, shipment) =>
-      shipment.costSummary === null
-        ? "—"
-        : THB_FORMATTER.format(
-            shipment.costSummary.averageLandedCostPerUnit,
-          ),
+    render: (_, shipment) => {
+      const average =
+        shipment.costSummary?.quote?.averageLandedCostPerUnit;
+      return average === undefined ? "—" : THB_FORMATTER.format(average);
+    },
+  },
+  {
+    title: "Delivered avg./unit",
+    key: "deliveredAverageLandedCostPerUnit",
+    align: "right",
+    width: 170,
+    render: (_, shipment) => {
+      const average =
+        shipment.costSummary?.delivered?.averageLandedCostPerUnit;
+      return average === undefined ? "—" : THB_FORMATTER.format(average);
+    },
   },
   {
     title: "Created",
@@ -365,7 +375,7 @@ export function ShipmentListPage() {
               loading={loading}
               pagination={false}
               rowKey="id"
-              scroll={{ x: 1236 }}
+              scroll={{ x: 1406 }}
               expandable={{
                 expandedRowKeys,
                 expandedRowRender: (shipment) => (

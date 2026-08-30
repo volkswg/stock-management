@@ -16,6 +16,7 @@ export {
   type Shipment,
   type ShipmentCostSummary,
   type ShipmentListItem,
+  type ShipmentQuantityCost,
   type ShipmentRelatedOrder,
   type ShipmentRelatedProductImage,
 } from "./types";

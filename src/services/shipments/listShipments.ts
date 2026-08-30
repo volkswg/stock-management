@@ -8,6 +8,7 @@ import {
   ShipmentStatus,
   type ShipmentCostSummary,
   type ShipmentListItem,
+  type ShipmentQuantityCost,
   type ShipmentRelatedOrder,
   type ShipmentRelatedProductImage,
 } from "./types";
@@ -164,9 +165,32 @@ function calculateShipmentCostSummary(
     return null;
   }
 
+  const totalOrderPrice = orders.reduce(
+    (total, order) => total + (order.totalPrice ?? 0),
+    0,
+  );
+  const landedTotal = totalOrderPrice + shippingFee;
+
+  return {
+    totalOrderPrice,
+    shippingFee,
+    quote: calculateQuantityCost(orders, "quoteQuantity", landedTotal),
+    delivered: calculateQuantityCost(
+      orders,
+      "deliveredQuantity",
+      landedTotal,
+    ),
+  };
+}
+
+function calculateQuantityCost(
+  orders: ShipmentRelatedOrder[],
+  quantityField: "quoteQuantity" | "deliveredQuantity",
+  landedTotal: number,
+): ShipmentQuantityCost | null {
   const quantities = orders.flatMap((order) =>
     order.productImages.map((product) =>
-      toPositiveNumber(product.quoteQuantity),
+      toPositiveNumber(product[quantityField]),
     ),
   );
   if (
@@ -176,21 +200,13 @@ function calculateShipmentCostSummary(
     return null;
   }
 
-  const totalOrderPrice = orders.reduce(
-    (total, order) => total + (order.totalPrice ?? 0),
-    0,
-  );
   const totalQuantity = quantities.reduce<number>(
     (total, quantity) => total + (quantity ?? 0),
     0,
   );
-
   return {
-    totalOrderPrice,
-    shippingFee,
     totalQuantity,
-    averageLandedCostPerUnit:
-      (totalOrderPrice + shippingFee) / totalQuantity,
+    averageLandedCostPerUnit: landedTotal / totalQuantity,
   };
 }
 

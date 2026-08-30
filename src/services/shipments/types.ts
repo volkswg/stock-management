@@ -40,11 +40,16 @@ export type ShipmentRelatedProductImage = {
   productCode: string;
 };
 
+export type ShipmentQuantityCost = {
+  totalQuantity: number;
+  averageLandedCostPerUnit: number;
+};
+
 export type ShipmentCostSummary = {
   totalOrderPrice: number;
   shippingFee: number;
-  totalQuantity: number;
-  averageLandedCostPerUnit: number;
+  quote: ShipmentQuantityCost | null;
+  delivered: ShipmentQuantityCost | null;
 };
 
 export type ShipmentListItem = Omit<Shipment, "deletedAt"> & {
