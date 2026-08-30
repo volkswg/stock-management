@@ -46,12 +46,21 @@
 }
 
 .listToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   padding: 18px 22px;
 }
 
 .searchInput {
   width: 100%;
   max-width: 520px;
+}
+
+.expandActions {
+  justify-content: flex-end;
 }
 
 .filterTabs {
@@ -100,6 +109,15 @@
   .content,
   .loadingMain {
     padding: 28px 20px 40px;
+  }
+
+  .searchInput {
+    max-width: none;
+  }
+
+  .expandActions {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 

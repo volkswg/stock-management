@@ -3,6 +3,8 @@
 import {
   ArrowLeftOutlined,
   EyeOutlined,
+  MinusSquareOutlined,
+  PlusSquareOutlined,
   ReloadOutlined,
   SearchOutlined,
   TruckOutlined,
@@ -247,6 +249,15 @@ export function ShipmentListPage() {
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE,
   );
+  const expandableShipmentIds = filteredShipments
+    .filter((shipment) => shipment.orders.length > 0)
+    .map((shipment) => shipment.id);
+  const allExpandableRowsExpanded =
+    expandableShipmentIds.length > 0 &&
+    expandableShipmentIds.every((id) => expandedRowKeys.includes(id));
+  const hasExpandedRows = expandableShipmentIds.some((id) =>
+    expandedRowKeys.includes(id),
+  );
 
   return (
     <ConfigProvider
@@ -299,6 +310,31 @@ export function ShipmentListPage() {
                   setPage(1);
                 }}
               />
+              <Space className={styles.expandActions} wrap>
+                <Button
+                  disabled={loading || allExpandableRowsExpanded}
+                  icon={<PlusSquareOutlined />}
+                  onClick={() =>
+                    setExpandedRowKeys((current) => [
+                      ...new Set([...current, ...expandableShipmentIds]),
+                    ])
+                  }
+                >
+                  Expand all
+                </Button>
+                <Button
+                  disabled={loading || !hasExpandedRows}
+                  icon={<MinusSquareOutlined />}
+                  onClick={() => {
+                    const filteredIdSet = new Set(expandableShipmentIds);
+                    setExpandedRowKeys((current) =>
+                      current.filter((key) => !filteredIdSet.has(String(key))),
+                    );
+                  }}
+                >
+                  Collapse all
+                </Button>
+              </Space>
             </div>
 
             <Tabs
