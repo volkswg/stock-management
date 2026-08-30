@@ -5,6 +5,7 @@ import {
   isRecord,
   isUpdatableStatus,
   isValidDeliveryFee,
+  isValidPoNumber,
   readJsonBody,
 } from "@/features/backend/shipments/utils";
 import {
@@ -82,6 +83,17 @@ export async function PATCH(
     deliveryFee = body.deliveryFee;
   }
 
+  let poNumber: string | undefined;
+  if (body.status === ShipmentStatus.Shipping) {
+    if (!isValidPoNumber(body.poNumber)) {
+      return NextResponse.json(
+        { error: "PO number confirmation is required." },
+        { status: 400 },
+      );
+    }
+    poNumber = body.poNumber.trim();
+  }
+
   try {
     const googleSheetsService = createGoogleSheetsServiceFromConfig(
       getConfig(),
@@ -89,6 +101,7 @@ export async function PATCH(
     const result = await updateShipmentStatus({
       deliveryFee,
       googleSheetsService,
+      poNumber,
       shipmentId,
       status: body.status,
     });
@@ -108,6 +121,12 @@ export async function PATCH(
     if (result.outcome === "invalid_delivery_fee") {
       return NextResponse.json(
         { error: "Delivery fee must be a non-negative number." },
+        { status: 400 },
+      );
+    }
+    if (result.outcome === "invalid_po_number") {
+      return NextResponse.json(
+        { error: "Enter a valid PO number before starting shipping." },
         { status: 400 },
       );
     }

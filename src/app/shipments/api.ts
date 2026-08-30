@@ -28,6 +28,12 @@ export type UpdateShipmentStatusResponse = {
   shipment: ShipmentStatusUpdate;
 };
 
+export type AdvanceShipmentStatusInput = {
+  status: ShipmentStatus;
+  deliveryFee?: number;
+  poNumber?: string;
+};
+
 export type LinkOrderToShipmentResponse = {
   shipmentOrder: ShipmentOrder;
   created: boolean;
@@ -93,8 +99,7 @@ export async function getShipment(
 
 export async function advanceShipmentStatus(
   shipmentId: string,
-  status: ShipmentStatus,
-  deliveryFee?: number,
+  input: AdvanceShipmentStatusInput,
 ): Promise<UpdateShipmentStatusResponse> {
   const response = await fetch(
     `/api/shipments/${encodeURIComponent(shipmentId)}`,
@@ -104,7 +109,7 @@ export async function advanceShipmentStatus(
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status, deliveryFee }),
+      body: JSON.stringify(input),
     },
   );
 

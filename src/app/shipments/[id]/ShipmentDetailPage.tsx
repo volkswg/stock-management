@@ -16,6 +16,7 @@ import {
   Descriptions,
   Empty,
   Form,
+  Input,
   InputNumber,
   message,
   Modal,
@@ -50,6 +51,15 @@ const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
 
 type DeliveryFeeFormValues = {
   deliveryFee: number;
+};
+
+type PoConfirmationFormValues = {
+  poNumber: string;
+};
+
+type StatusConfirmation = {
+  deliveryFee?: number;
+  poNumber?: string;
 };
 
 const ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
@@ -223,29 +233,32 @@ function ShipmentContent({
   onShipmentChange: Dispatch<SetStateAction<ShipmentListItem | undefined>>;
 }) {
   const [deliveryFeeForm] = Form.useForm<DeliveryFeeFormValues>();
+  const [poConfirmationForm] = Form.useForm<PoConfirmationFormValues>();
   const [messageApi, messageContextHolder] = message.useMessage();
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [deliveryFeeModalOpen, setDeliveryFeeModalOpen] = useState(false);
+  const [poConfirmationModalOpen, setPoConfirmationModalOpen] = useState(false);
   const currentStep = getShipmentStep(shipment);
   const nextStatus = getNextShipmentStatus(shipment.status);
   const stepTitles = ["Draft", "Ready to ship", "Shipping", "Delivered"];
 
   const handleStatusUpdate = async (
     status: ShipmentStatus,
-    deliveryFee?: number,
+    confirmation: StatusConfirmation = {},
   ) => {
     setStatusUpdating(true);
     try {
-      const response = await advanceShipmentStatus(
-        shipment.id,
+      const response = await advanceShipmentStatus(shipment.id, {
+        ...confirmation,
         status,
-        deliveryFee,
-      );
+      });
       onShipmentChange((current) =>
         current ? { ...current, ...response.shipment } : current,
       );
       setDeliveryFeeModalOpen(false);
+      setPoConfirmationModalOpen(false);
       deliveryFeeForm.resetFields();
+      poConfirmationForm.resetFields();
       messageApi.success(
         `Shipment status updated to ${formatStatus(status).toLowerCase()}.`,
       );
@@ -270,6 +283,11 @@ function ShipmentContent({
         shipment.shippingFee ?? undefined,
       );
       setDeliveryFeeModalOpen(true);
+      return;
+    }
+    if (nextStatus === ShipmentStatus.Shipping) {
+      poConfirmationForm.setFieldValue("poNumber", shipment.poNumber);
+      setPoConfirmationModalOpen(true);
       return;
     }
     void handleStatusUpdate(nextStatus);
@@ -426,7 +444,7 @@ function ShipmentContent({
           form={deliveryFeeForm}
           layout="vertical"
           onFinish={({ deliveryFee }) =>
-            void handleStatusUpdate(ShipmentStatus.Delivered, deliveryFee)
+            void handleStatusUpdate(ShipmentStatus.Delivered, { deliveryFee })
           }
         >
           <Form.Item
@@ -442,6 +460,48 @@ function ShipmentContent({
               precision={2}
               prefix="฿"
             />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        cancelButtonProps={{ disabled: statusUpdating }}
+        closable={!statusUpdating}
+        keyboard={!statusUpdating}
+        maskClosable={!statusUpdating}
+        okButtonProps={{ loading: statusUpdating }}
+        okText="Start shipping"
+        open={poConfirmationModalOpen}
+        title="Confirm PO number"
+        onCancel={() => {
+          setPoConfirmationModalOpen(false);
+          poConfirmationForm.resetFields();
+        }}
+        onOk={() => poConfirmationForm.submit()}
+      >
+        <Form<PoConfirmationFormValues>
+          form={poConfirmationForm}
+          layout="vertical"
+          onFinish={({ poNumber }) =>
+            void handleStatusUpdate(ShipmentStatus.Shipping, { poNumber })
+          }
+        >
+          <Form.Item
+            label="PO number"
+            name="poNumber"
+            rules={[
+              {
+                required: true,
+                whitespace: true,
+                message: "Enter the PO number.",
+              },
+              {
+                max: 100,
+                message: "PO number must be 100 characters or fewer.",
+              },
+            ]}
+          >
+            <Input autoComplete="off" placeholder="Enter PO number" />
           </Form.Item>
         </Form>
       </Modal>

@@ -25,6 +25,12 @@ export function isValidDeliveryFee(value: unknown): value is number {
   );
 }
 
+export function isValidPoNumber(value: unknown): value is string {
+  return (
+    typeof value === "string" && Boolean(value.trim()) && value.length <= 100
+  );
+}
+
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

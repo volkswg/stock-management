@@ -3,6 +3,7 @@ import { ShipmentStatus } from "./types";
 
 export type ShipmentStatusUpdate = {
   status: ShipmentStatus;
+  poNumber: string;
   shippingFee: number | null;
   shippedAt: string;
   deliveredAt: string;
@@ -13,16 +14,19 @@ export type UpdateShipmentStatusResult =
   | { outcome: "updated"; shipment: ShipmentStatusUpdate }
   | { outcome: "not_found" }
   | { outcome: "invalid_transition" }
-  | { outcome: "invalid_delivery_fee" };
+  | { outcome: "invalid_delivery_fee" }
+  | { outcome: "invalid_po_number" };
 
 export async function updateShipmentStatus({
   deliveryFee,
   googleSheetsService,
+  poNumber,
   shipmentId,
   status,
 }: {
   deliveryFee?: number;
   googleSheetsService: IGoogleSheetsService;
+  poNumber?: string;
   shipmentId: string;
   status: ShipmentStatus;
 }): Promise<UpdateShipmentStatusResult> {
@@ -50,7 +54,7 @@ export async function updateShipmentStatus({
     ,
     currentStatus,
     carrier,
-    poNumber,
+    currentPoNumber,
     currentShippingFee,
     remark,
     currentShippedAt,
@@ -60,8 +64,18 @@ export async function updateShipmentStatus({
   if (!isValidTransition(String(currentStatus ?? "").trim(), status)) {
     return { outcome: "invalid_transition" };
   }
+  if (
+    status === ShipmentStatus.Shipping &&
+    (!poNumber?.trim() || poNumber.length > 100)
+  ) {
+    return { outcome: "invalid_po_number" };
+  }
 
   const now = new Date().toISOString();
+  const updatedPoNumber =
+    status === ShipmentStatus.Shipping
+      ? (poNumber?.trim() ?? "")
+      : String(currentPoNumber ?? "").trim();
   const shippingFee =
     status === ShipmentStatus.Delivered
       ? (deliveryFee ?? null)
@@ -82,7 +96,7 @@ export async function updateShipmentStatus({
       [
         status,
         carrier ?? "",
-        poNumber ?? "",
+        updatedPoNumber,
         shippingFee,
         remark ?? "",
         shippedAt,
@@ -97,6 +111,7 @@ export async function updateShipmentStatus({
     outcome: "updated",
     shipment: {
       status,
+      poNumber: updatedPoNumber,
       shippingFee,
       shippedAt,
       deliveredAt,
