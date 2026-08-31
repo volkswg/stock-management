@@ -17,6 +17,7 @@ import {
   salesReceiptPaymentToRow,
   salesReceiptToRow,
 } from "./rowMappers";
+import { getLoyverseReceiptsForSalesDate } from "./getLoyverseReceiptsForSalesDate";
 
 export type SyncLoyverseDailySalesResult =
   | {
@@ -48,14 +49,9 @@ export async function syncLoyverseDailySales({
     return { outcome: "already_synced" };
   }
 
-  const range = createBangkokDateRange(salesDate);
-  if (!range) {
-    throw new Error("A valid date in YYYY-MM-DD format is required.");
-  }
-
-  const receipts = await account.service.getReceipts({
-    createdAtMin: range.start,
-    createdAtMax: range.end,
+  const receipts = await getLoyverseReceiptsForSalesDate({
+    loyverseService: account.service,
+    salesDate,
     storeId: account.storeId,
   });
   const syncedAt = new Date().toISOString();
@@ -193,33 +189,4 @@ async function appendIfNotEmpty(
   if (rows.length > 0) {
     await sheet.appendRows(range, rows);
   }
-}
-
-function createBangkokDateRange(
-  date: string,
-): { start: string; end: string } | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-
-  const start = new Date(`${date}T00:00:00+07:00`);
-  if (Number.isNaN(start.getTime()) || getBangkokDate(start) !== date) {
-    return null;
-  }
-
-  return {
-    start: start.toISOString(),
-    end: new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1).toISOString(),
-  };
-}
-
-function getBangkokDate(date: Date): string {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "Asia/Bangkok",
-    year: "numeric",
-  }).formatToParts(date);
-  const year = parts.find((part) => part.type === "year")?.value || "";
-  const month = parts.find((part) => part.type === "month")?.value || "";
-  const day = parts.find((part) => part.type === "day")?.value || "";
-  return `${year}-${month}-${day}`;
 }

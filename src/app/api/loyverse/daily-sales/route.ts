@@ -5,6 +5,10 @@ import {
   createLoyverseAccountsFromConfig,
   type LoyverseReceipt,
 } from "@/externals/loyverse";
+import {
+  getLoyverseReceiptsForSalesDate,
+  isValidBangkokSalesDate,
+} from "@/services/sales";
 
 export const runtime = "nodejs";
 
@@ -34,17 +38,16 @@ export async function GET(request: Request): Promise<NextResponse> {
     }
 
     const date = searchParams.get("date")?.trim() || getBangkokDate();
-    const range = createBangkokDateRange(date);
-    if (!range) {
+    if (!isValidBangkokSalesDate(date)) {
       return NextResponse.json(
         { ok: false, error: "A valid date in YYYY-MM-DD format is required." },
         { status: 400 },
       );
     }
 
-    const receipts = await account.service.getReceipts({
-      createdAtMin: range.start,
-      createdAtMax: range.end,
+    const receipts = await getLoyverseReceiptsForSalesDate({
+      loyverseService: account.service,
+      salesDate: date,
       storeId: account.storeId,
     });
     const report = aggregateSalesByItem(receipts);
@@ -71,22 +74,6 @@ export async function GET(request: Request): Promise<NextResponse> {
 
 function getBangkokDate(): string {
   return getBangkokDateForDate(new Date());
-}
-
-function createBangkokDateRange(
-  date: string,
-): { start: string; end: string } | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-
-  const start = new Date(`${date}T00:00:00+07:00`);
-  if (Number.isNaN(start.getTime()) || getBangkokDateForDate(start) !== date) {
-    return null;
-  }
-
-  return {
-    start: start.toISOString(),
-    end: new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1).toISOString(),
-  };
 }
 
 function getBangkokDateForDate(date: Date): string {
@@ -118,7 +105,7 @@ function createHourlyGrossSales(receipts: LoyverseReceipt[]): {
 
   for (const receipt of receipts) {
     if (receipt.cancelled_at || receipt.receipt_type !== "SALE") continue;
-    const hour = Number(hourFormatter.format(new Date(receipt.created_at)));
+    const hour = Number(hourFormatter.format(new Date(receipt.receipt_date)));
     if (!Number.isInteger(hour) || !values[hour]) continue;
     values[hour].grossSales += (receipt.line_items || []).reduce(
       (sum, item) => sum + toNumber(item.gross_total_money),

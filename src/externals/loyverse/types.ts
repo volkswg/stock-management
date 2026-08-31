@@ -12,6 +12,8 @@ export interface LoyverseReceiptQuery {
   source?: string;
   createdAtMin?: string;
   createdAtMax?: string;
+  receiptDateMin?: string;
+  receiptDateMax?: string;
   updatedAtMin?: string;
   updatedAtMax?: string;
 }

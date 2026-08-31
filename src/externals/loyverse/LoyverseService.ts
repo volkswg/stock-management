@@ -16,6 +16,12 @@ type ReceiptPage = {
   cursor?: string | null;
 };
 
+const RECEIPT_UPLOAD_LOOKAHEAD = {
+  days: 1,
+  hours: 0,
+  minutes: 0,
+};
+
 export class LoyverseService implements ILoyverseService {
   private readonly accessToken: string;
   private readonly baseUrl: string;
@@ -41,11 +47,12 @@ export class LoyverseService implements ILoyverseService {
     query: LoyverseReceiptQuery = {},
   ): Promise<LoyverseReceipt[]> {
     const receipts: LoyverseReceipt[] = [];
+    const requestQuery = createReceiptRequestQuery(query);
     const seenCursors = new Set<string>();
     let cursor = "";
 
     do {
-      const parameters = createReceiptQueryParameters(query);
+      const parameters = createReceiptQueryParameters(requestQuery);
       parameters.set("limit", String(LOYVERSE_MAX_PAGE_SIZE));
       if (cursor) parameters.set("cursor", cursor);
 
@@ -62,7 +69,7 @@ export class LoyverseService implements ILoyverseService {
       cursor = nextCursor;
     } while (cursor);
 
-    return receipts;
+    return filterReceiptsByReceiptDate(receipts, query);
   }
 
   async getSalesByItem(
@@ -279,6 +286,71 @@ function createReceiptQueryParameters(
   setParameter(parameters, "updated_at_min", query.updatedAtMin);
   setParameter(parameters, "updated_at_max", query.updatedAtMax);
   return parameters;
+}
+
+function createReceiptRequestQuery(
+  query: LoyverseReceiptQuery,
+): LoyverseReceiptQuery {
+  const requestQuery = { ...query };
+
+  if (query.receiptDateMin && !requestQuery.createdAtMin) {
+    requestQuery.createdAtMin = query.receiptDateMin;
+  }
+  if (query.receiptDateMax && !requestQuery.createdAtMax) {
+    requestQuery.createdAtMax = addMilliseconds(
+      query.receiptDateMax,
+      durationToMilliseconds(RECEIPT_UPLOAD_LOOKAHEAD),
+    );
+  }
+
+  return requestQuery;
+}
+
+function filterReceiptsByReceiptDate(
+  receipts: LoyverseReceipt[],
+  query: LoyverseReceiptQuery,
+): LoyverseReceipt[] {
+  if (!query.receiptDateMin && !query.receiptDateMax) return receipts;
+
+  const minimum = query.receiptDateMin
+    ? parseTimestamp(query.receiptDateMin)
+    : Number.NEGATIVE_INFINITY;
+  const maximum = query.receiptDateMax
+    ? parseTimestamp(query.receiptDateMax)
+    : Number.POSITIVE_INFINITY;
+
+  return receipts.filter((receipt) => {
+    const receiptDate = new Date(receipt.receipt_date).getTime();
+    return (
+      Number.isFinite(receiptDate) &&
+      receiptDate >= minimum &&
+      receiptDate <= maximum
+    );
+  });
+}
+
+function addMilliseconds(value: string, milliseconds: number): string {
+  return new Date(parseTimestamp(value) + milliseconds).toISOString();
+}
+
+function durationToMilliseconds({
+  days,
+  hours,
+  minutes,
+}: {
+  days: number;
+  hours: number;
+  minutes: number;
+}): number {
+  return ((days * 24 + hours) * 60 + minutes) * 60 * 1000;
+}
+
+function parseTimestamp(value: string): number {
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) {
+    throw new Error(`Invalid Loyverse receipt date filter: ${value}`);
+  }
+  return timestamp;
 }
 
 function setParameter(
