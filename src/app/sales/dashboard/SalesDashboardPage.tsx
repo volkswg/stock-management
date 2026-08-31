@@ -445,6 +445,12 @@ export function SalesDashboardPage() {
                   </Card>
                   <Card>
                     <Statistic
+                      title="Items sold"
+                      value={formatNumber(dashboard.report.totals.itemsSold)}
+                    />
+                  </Card>
+                  <Card>
+                    <Statistic
                       title="Receipts"
                       value={formatNumber(dashboard.report.receiptCount)}
                     />
