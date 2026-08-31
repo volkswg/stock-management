@@ -1,0 +1,171 @@
+.appShell {
+  min-height: 100vh;
+  background: #f3f5f4;
+}
+
+.content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 42px 40px 64px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: #157347 !important;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0 0 5px !important;
+  font-size: 30px !important;
+}
+
+.pageActions {
+  justify-content: flex-end;
+}
+
+.filterCard {
+  margin-top: 26px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #66716b;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.errorAlert {
+  margin-top: 16px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.summaryGrid :global(.ant-card) {
+  height: 100%;
+}
+
+.summaryGrid :global(.ant-statistic-content) {
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.chartCard,
+.tableCard,
+.emptyCard {
+  margin-top: 18px;
+}
+
+.hourlyChart {
+  min-height: 230px;
+  display: grid;
+  grid-template-columns: repeat(24, minmax(22px, 1fr));
+  gap: 7px;
+  align-items: end;
+  overflow-x: auto;
+  padding: 8px 2px 0;
+}
+
+.hourColumn {
+  min-width: 22px;
+  display: grid;
+  grid-template-rows: 180px 22px;
+  gap: 7px;
+  justify-items: center;
+}
+
+.hourBarTrack {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: end;
+  background: #eef2ef;
+  border: 1px solid #e1e5e2;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.hourBar {
+  width: 100%;
+  background: #157347;
+  border-radius: 4px 4px 0 0;
+}
+
+.hourColumn span {
+  color: #66716b;
+  font-size: 11px;
+}
+
+.variantText {
+  font-size: 12px;
+}
+
+.emptyCard {
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyIcon {
+  color: #157347;
+  font-size: 42px;
+}
+
+@media (max-width: 900px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 30px 20px 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 24px 14px 36px;
+  }
+
+  .pageHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pageHeader h1 {
+    font-size: 26px !important;
+  }
+
+  .pageActions {
+    align-self: flex-start;
+    justify-content: flex-start;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}

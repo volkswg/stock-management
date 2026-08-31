@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { isRecord } from "@/features/backend/shared/utils";
 import {
-  isRecord,
   isUpdatableStatus,
   isValidDeliveryFee,
   isValidPoNumber,

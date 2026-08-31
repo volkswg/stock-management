@@ -1,3 +1,12 @@
+import { isRecord } from "@/features/backend/shared/utils";
+
+export type LoyverseAccountConfig = {
+  id: string;
+  shopName: string;
+  accessToken: string;
+  storeId?: string;
+};
+
 export type AppConfig = {
   line: {
     channelSecret: string;
@@ -5,6 +14,9 @@ export type AppConfig = {
     legacyWebhookUrl: string;
   };
   publicBaseUrl: string;
+  loyverse: {
+    accounts: LoyverseAccountConfig[];
+  };
   googleSheets: {
     spreadsheetId: string;
     ordersWorksheetName: string;
@@ -38,6 +50,9 @@ export function getConfig(): AppConfig {
       legacyWebhookUrl: process.env.LINE_LEGACY_WEBHOOK_URL || "",
     },
     publicBaseUrl: process.env.PUBLIC_BASE_URL || "",
+    loyverse: {
+      accounts: parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON),
+    },
     googleSheets: {
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || "",
       ordersWorksheetName:
@@ -77,4 +92,43 @@ export function getConfig(): AppConfig {
 
 function normalizePrivateKey(value: string): string {
   return value.replace(/\\n/g, "\n");
+}
+
+function parseLoyverseAccounts(
+  value: string | undefined,
+): LoyverseAccountConfig[] {
+  if (!value?.trim()) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error("LOYVERSE_ACCOUNTS_JSON must be valid JSON.");
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error("LOYVERSE_ACCOUNTS_JSON must be a JSON array.");
+  }
+
+  const accounts = parsed.map((entry, index) => {
+    const account = isRecord(entry) ? entry : {};
+    const id = toTrimmedString(account.id);
+    const shopName = toTrimmedString(account.shopName);
+    const accessToken = toTrimmedString(account.accessToken);
+    const storeId = toTrimmedString(account.storeId) || undefined;
+    if (!id || !shopName || !accessToken) {
+      throw new Error(
+        `LOYVERSE_ACCOUNTS_JSON entry ${index + 1} requires id, shopName, and accessToken.`,
+      );
+    }
+    return { id, shopName, accessToken, storeId };
+  });
+
+  if (new Set(accounts.map((account) => account.id)).size !== accounts.length) {
+    throw new Error("LOYVERSE_ACCOUNTS_JSON account ids must be unique.");
+  }
+  return accounts;
+}
+
+function toTrimmedString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
 }
