@@ -81,6 +81,7 @@ type DashboardResponse = {
     paymentsByType: PaymentRow[];
     totals: {
       itemsSold: number;
+      itemsRefunded: number;
       grossSales: number;
       netSales: number;
     };
@@ -445,8 +446,11 @@ export function SalesDashboardPage() {
                   </Card>
                   <Card>
                     <Statistic
-                      title="Items sold"
-                      value={formatNumber(dashboard.report.totals.itemsSold)}
+                      title="Net items sold"
+                      value={formatNumber(
+                        dashboard.report.totals.itemsSold -
+                          dashboard.report.totals.itemsRefunded,
+                      )}
                     />
                   </Card>
                   <Card>
