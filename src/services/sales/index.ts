@@ -1,8 +1,11 @@
 export {
   getGoogleSheetsDailySales,
+  getGoogleSheetsSalesDashboard,
   type GoogleSheetsDailySalesItemRow,
   type GoogleSheetsDailySalesPaymentRow,
   type GoogleSheetsDailySalesReport,
+  type GoogleSheetsSalesDashboardDay,
+  type GoogleSheetsSalesDashboardReport,
 } from "./getGoogleSheetsDailySales";
 export {
   getLoyverseReceiptsForSalesDate,

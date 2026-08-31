@@ -4,6 +4,7 @@ import {
   ArrowLeftOutlined,
   BarChartOutlined,
   CalendarOutlined,
+  DashboardOutlined,
   DatabaseOutlined,
   LeftOutlined,
   ReloadOutlined,
@@ -298,6 +299,9 @@ export function SalesDailySalesPage() {
               </Button>
               <Button href="/sales" icon={<DatabaseOutlined />}>
                 Sync status
+              </Button>
+              <Button href="/sales/dashboard" icon={<DashboardOutlined />}>
+                Dashboard
               </Button>
               <Button
                 icon={<ReloadOutlined />}

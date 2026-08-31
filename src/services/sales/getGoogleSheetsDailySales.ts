@@ -7,6 +7,7 @@ import {
   SALES_RECEIPT_HEADERS,
   SALES_RECEIPT_ITEM_HEADERS,
   SALES_RECEIPT_PAYMENT_HEADERS,
+  SALES_RECEIPT_SYNC_HEADERS,
 } from "@/externals/google/sheet";
 
 export type GoogleSheetsDailySalesItemRow = {
@@ -47,6 +48,26 @@ export type GoogleSheetsDailySalesReport = {
   hourlyGrossSales: Array<{ hour: string; grossSales: number }>;
 };
 
+export type GoogleSheetsSalesDashboardDay = {
+  salesDate: string;
+  syncedShopCount: number;
+  receiptCount: number;
+  itemsSold: number;
+  grossSales: number;
+  netSales: number;
+};
+
+export type GoogleSheetsSalesDashboardReport = {
+  syncedDays: number;
+  dailySales: GoogleSheetsSalesDashboardDay[];
+  shopSeries: Array<{
+    accountId: string;
+    shopName: string;
+    dailySales: GoogleSheetsSalesDashboardDay[];
+  }>;
+  report: GoogleSheetsDailySalesReport;
+};
+
 type SheetRecord = Record<string, GoogleSheetCellValue>;
 type RowsSheet = IGoogleSheetsService["salesReceipts"];
 
@@ -74,6 +95,137 @@ export async function getGoogleSheetsDailySales({
       toString(receipt.accountId) === accountId &&
       !toString(receipt.cancelledAt),
   );
+  return createSalesReport(receipts, itemRecords, paymentRecords);
+}
+
+export async function getGoogleSheetsSalesDashboard({
+  accountIds,
+  fromDate,
+  googleSheetsService,
+  toDate,
+}: {
+  accountIds?: string[];
+  fromDate: string;
+  googleSheetsService: IGoogleSheetsService;
+  toDate: string;
+}): Promise<GoogleSheetsSalesDashboardReport> {
+  const [receiptRecords, itemRecords, paymentRecords, syncRecords] =
+    await Promise.all([
+      readRecords(googleSheetsService.salesReceipts, SALES_RECEIPT_HEADERS),
+      readRecords(
+        googleSheetsService.salesReceiptItems,
+        SALES_RECEIPT_ITEM_HEADERS,
+      ),
+      readRecords(
+        googleSheetsService.salesReceiptPayments,
+        SALES_RECEIPT_PAYMENT_HEADERS,
+      ),
+      readRecords(
+        googleSheetsService.salesReceiptSyncs,
+        SALES_RECEIPT_SYNC_HEADERS,
+      ),
+    ]);
+  const completeSyncs = syncRecords.filter((sync) => {
+    const salesDate = toString(sync.salesDate);
+    return (
+      toString(sync.status).toLowerCase() === "complete" &&
+      salesDate >= fromDate &&
+      salesDate <= toDate &&
+      (!accountIds?.length || accountIds.includes(toString(sync.accountId)))
+    );
+  });
+  const syncedKeys = new Set(
+    completeSyncs.map(
+      (sync) => `${toString(sync.accountId)}:${toString(sync.salesDate)}`,
+    ),
+  );
+  const receipts = receiptRecords.filter(
+    (receipt) =>
+      syncedKeys.has(
+        `${toString(receipt.accountId)}:${toString(receipt.salesDate)}`,
+      ) && !toString(receipt.cancelledAt),
+  );
+  const dailySales = createDashboardDays(
+    completeSyncs,
+    receipts,
+    itemRecords,
+    paymentRecords,
+  );
+  const shopSeries = [
+    ...new Map(
+      completeSyncs.map((sync) => [
+        toString(sync.accountId),
+        toString(sync.shopName) || toString(sync.accountId),
+      ]),
+    ),
+  ].map(([seriesAccountId, shopName]) => {
+    const shopSyncs = completeSyncs.filter(
+      (sync) => toString(sync.accountId) === seriesAccountId,
+    );
+    const shopReceipts = receipts.filter(
+      (receipt) => toString(receipt.accountId) === seriesAccountId,
+    );
+    return {
+      accountId: seriesAccountId,
+      shopName,
+      dailySales: createDashboardDays(
+        shopSyncs,
+        shopReceipts,
+        itemRecords,
+        paymentRecords,
+      ),
+    };
+  });
+
+  return {
+    syncedDays: dailySales.length,
+    dailySales,
+    shopSeries,
+    report: createSalesReport(receipts, itemRecords, paymentRecords),
+  };
+}
+
+function createDashboardDays(
+  syncRecords: SheetRecord[],
+  receipts: SheetRecord[],
+  itemRecords: SheetRecord[],
+  paymentRecords: SheetRecord[],
+): GoogleSheetsSalesDashboardDay[] {
+  const syncedDates = [
+    ...new Set(syncRecords.map((sync) => toString(sync.salesDate))),
+  ]
+    .filter(Boolean)
+    .sort();
+
+  return syncedDates.map((salesDate) => {
+    const dailyReceipts = receipts.filter(
+      (receipt) => toString(receipt.salesDate) === salesDate,
+    );
+    const dailyReport = createSalesReport(
+      dailyReceipts,
+      itemRecords,
+      paymentRecords,
+    );
+    return {
+      salesDate,
+      syncedShopCount: new Set(
+        syncRecords
+          .filter((sync) => toString(sync.salesDate) === salesDate)
+          .map((sync) => toString(sync.accountId)),
+      ).size,
+      receiptCount: dailyReport.receiptCount,
+      itemsSold: dailyReport.totals.itemsSold,
+      grossSales: dailyReport.totals.grossSales,
+      netSales: dailyReport.totals.netSales,
+    };
+  });
+}
+
+function createSalesReport(
+  receipts: SheetRecord[],
+  itemRecords: SheetRecord[],
+  paymentRecords: SheetRecord[],
+): GoogleSheetsDailySalesReport {
   const receiptsById = new Map(
     receipts.map((receipt) => [toString(receipt.id), receipt]),
   );
