@@ -13,8 +13,8 @@ import {
   Card,
   Col,
   ConfigProvider,
+  DatePicker,
   Empty,
-  Input,
   Row,
   Select,
   Space,
@@ -25,6 +25,7 @@ import {
   Typography,
   type TableProps,
 } from "antd";
+import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./loyverseDailySales.module.css";
 
@@ -362,12 +363,14 @@ export function LoyverseDailySalesPage() {
               </Col>
               <Col xs={24} sm={12} md={7} lg={5}>
                 <Text className={styles.fieldLabel}>Date</Text>
-                <Input
+                <DatePicker
+                  allowClear={false}
                   aria-label="Sales date"
-                  prefix={<CalendarOutlined />}
-                  type="date"
-                  value={date}
-                  onChange={(event) => setDate(event.target.value)}
+                  className={styles.fullWidth}
+                  format="YYYY-MM-DD"
+                  suffixIcon={<CalendarOutlined />}
+                  value={date ? dayjs(date, "YYYY-MM-DD") : null}
+                  onChange={(_, value) => setDate(getPickerValue(value))}
                 />
               </Col>
               <Col xs={24} sm={12} md={7} lg={5}>
@@ -520,6 +523,10 @@ function formatMoney(value: number): string {
 
 function formatNumber(value: number): string {
   return NUMBER_FORMATTER.format(value);
+}
+
+function getPickerValue(value: string | string[] | null): string {
+  return Array.isArray(value) ? value[0] || "" : value || "";
 }
 
 function getErrorMessage(error: unknown): string {
