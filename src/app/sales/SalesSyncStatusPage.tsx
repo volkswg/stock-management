@@ -2,13 +2,16 @@
 
 import {
   ArrowLeftOutlined,
+  BarChartOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
+  Badge,
   Button,
+  Calendar,
   Card,
   Col,
   ConfigProvider,
@@ -19,10 +22,7 @@ import {
   Space,
   Spin,
   Statistic,
-  Table,
-  Tag,
   Typography,
-  type TableProps,
 } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -112,65 +112,18 @@ export function SalesSyncStatusPage() {
     };
   }, [loadStatus, requestId]);
 
-  const columns = useMemo<TableProps<SalesSyncStatusRow>["columns"]>(
-    () => [
-      {
-        title: "Sales date",
-        dataIndex: "salesDate",
-        key: "salesDate",
-        width: 150,
-        render: (value: string) => <Text strong>{value}</Text>,
-      },
-      {
-        title: "Shop",
-        key: "shopName",
-        width: 220,
-        render: (_, row) => row.shopName || row.accountId,
-      },
-      {
-        title: "Status",
-        dataIndex: "status",
-        key: "status",
-        width: 130,
-        render: (value: string) => (
-          <Tag color={value.toLowerCase() === "completed" ? "success" : "blue"}>
-            {value || "Synced"}
-          </Tag>
-        ),
-      },
-      {
-        title: "Receipts",
-        dataIndex: "receiptCount",
-        key: "receiptCount",
-        align: "right",
-        width: 120,
-        render: formatNumber,
-      },
-      {
-        title: "Items",
-        dataIndex: "itemCount",
-        key: "itemCount",
-        align: "right",
-        width: 120,
-        render: formatNumber,
-      },
-      {
-        title: "Payments",
-        dataIndex: "paymentCount",
-        key: "paymentCount",
-        align: "right",
-        width: 120,
-        render: formatNumber,
-      },
-      {
-        title: "Synced at",
-        dataIndex: "syncedAt",
-        key: "syncedAt",
-        width: 190,
-        render: formatDateTime,
-      },
-    ],
-    [],
+  const rowsByDate = useMemo(
+    () =>
+      (status?.rows || []).reduce<Map<string, SalesSyncStatusRow[]>>(
+        (result, row) => {
+          const rows = result.get(row.salesDate) || [];
+          rows.push(row);
+          result.set(row.salesDate, rows);
+          return result;
+        },
+        new Map(),
+      ),
+    [status?.rows],
   );
 
   return (
@@ -182,12 +135,6 @@ export function SalesSyncStatusPage() {
           colorBorderSecondary: "#e1e5e2",
           borderRadius: 6,
           fontFamily: "Arial, Helvetica, sans-serif",
-        },
-        components: {
-          Table: {
-            headerBg: "#f7f8f7",
-            headerColor: "#66716b",
-          },
         },
       }}
     >
@@ -204,6 +151,9 @@ export function SalesSyncStatusPage() {
             <Space className={styles.pageActions} wrap>
               <Button href="/" icon={<ArrowLeftOutlined />}>
                 Home
+              </Button>
+              <Button href="/sales/daily-sales" icon={<BarChartOutlined />}>
+                Daily sales
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -300,22 +250,53 @@ export function SalesSyncStatusPage() {
                   </Card>
                 </section>
 
-                <Card className={styles.tableCard} title="Sync status">
-                  <Table<SalesSyncStatusRow>
-                    columns={columns}
-                    dataSource={status.rows}
-                    rowKey="id"
-                    pagination={{ pageSize: 15, showSizeChanger: false }}
-                    scroll={{ x: 1050 }}
-                    locale={{
-                      emptyText: (
-                        <Empty
-                          image={Empty.PRESENTED_IMAGE_SIMPLE}
-                          description="No synced sales found for this month"
-                        />
-                      ),
-                    }}
-                  />
+                <Card
+                  className={styles.calendarCard}
+                  title="Sync calendar"
+                  extra={<Badge status="success" text="Synced" />}
+                >
+                  <div className={styles.calendarViewport}>
+                    <Calendar
+                      className={styles.calendar}
+                      value={dayjs(`${month}-01`, "YYYY-MM-DD")}
+                      cellRender={(current, info) => {
+                        if (info.type !== "date") return info.originNode;
+
+                        const rows = rowsByDate.get(
+                          current.format("YYYY-MM-DD"),
+                        );
+                        if (!rows?.length) return null;
+
+                        return (
+                          <ul className={styles.calendarEntries}>
+                            {rows.map((row) => (
+                              <li className={styles.calendarEntry} key={row.id}>
+                                <div className={styles.calendarEntryHeader}>
+                                  <Badge
+                                    status={
+                                      row.status === "complete"
+                                        ? "success"
+                                        : "processing"
+                                    }
+                                  />
+                                  <span className={styles.calendarShop}>
+                                    {row.shopName || row.accountId}
+                                  </span>
+                                </div>
+                                <span className={styles.calendarCounts}>
+                                  {formatNumber(row.receiptCount)} receipts /{" "}
+                                  {formatNumber(row.itemCount)} items
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        );
+                      }}
+                      onPanelChange={(value, mode) => {
+                        if (mode === "month") setMonth(value.format("YYYY-MM"));
+                      }}
+                    />
+                  </div>
                 </Card>
               </>
             ) : (

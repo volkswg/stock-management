@@ -72,9 +72,58 @@
   font-weight: 700;
 }
 
-.tableCard,
+.calendarCard,
 .emptyCard {
   margin-top: 18px;
+}
+
+.calendarViewport {
+  overflow-x: auto;
+}
+
+.calendar {
+  min-width: 760px;
+}
+
+.calendarEntries {
+  display: grid;
+  gap: 5px;
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendarEntry {
+  min-width: 0;
+  padding: 5px 6px;
+  background: #f0f7f3;
+  border-left: 2px solid #157347;
+  border-radius: 3px;
+}
+
+.calendarEntryHeader {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.calendarShop {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendarCounts {
+  display: block;
+  margin-top: 2px;
+  color: #66716b;
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: normal;
 }
 
 .emptyCard {

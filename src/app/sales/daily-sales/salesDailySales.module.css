@@ -57,11 +57,6 @@
   flex: 1;
 }
 
-.syncHint {
-  display: block;
-  margin-top: 10px;
-}
-
 .errorAlert {
   margin-top: 16px;
 }
@@ -123,7 +118,8 @@
   border-radius: 4px 4px 0 0;
 }
 
-.hourColumn span {
+.hourColumn span,
+.variantText {
   color: #66716b;
   font-size: 11px;
 }
@@ -137,11 +133,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.emptyIcon {
-  color: #157347;
-  font-size: 42px;
 }
 
 @media (max-width: 900px) {

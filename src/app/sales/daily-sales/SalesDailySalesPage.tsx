@@ -4,10 +4,10 @@ import {
   ArrowLeftOutlined,
   BarChartOutlined,
   CalendarOutlined,
+  DatabaseOutlined,
   LeftOutlined,
   ReloadOutlined,
   RightOutlined,
-  ShopOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import {
@@ -30,20 +30,17 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./loyverseDailySales.module.css";
+import styles from "./salesDailySales.module.css";
 
 const { Text, Title } = Typography;
 
-type LoyverseAccount = {
-  id: string;
-  shopName: string;
-};
+type SalesAccount = { id: string; shopName: string };
 
 type SalesByItemRow = {
-  itemId: string | null;
-  variantId: string | null;
+  itemId: string;
+  variantId: string;
   itemName: string;
-  variantName: string | null;
+  variantName: string;
   sku: string;
   itemsSold: number;
   grossSales: number;
@@ -51,10 +48,8 @@ type SalesByItemRow = {
   refunds: number;
   discounts: number;
   netSales: number;
-  costOfGoods: number;
   grossProfit: number;
   marginPercent: number;
-  taxes: number;
 };
 
 type SalesByPaymentTypeRow = {
@@ -66,49 +61,24 @@ type SalesByPaymentTypeRow = {
   netPayments: number;
 };
 
-type SalesByItemReport = {
-  receiptCount: number;
-  rows: SalesByItemRow[];
-  paymentsByType: SalesByPaymentTypeRow[];
-  totals: {
-    itemsSold: number;
-    grossSales: number;
-    itemsRefunded: number;
-    refunds: number;
-    discounts: number;
-    netSales: number;
-    costOfGoods: number;
-    grossProfit: number;
-    taxes: number;
-  };
-};
-
-type HourlyGrossSalesRow = {
-  hour: string;
-  grossSales: number;
-};
-
 type DailySalesResponse = {
   ok: boolean;
-  source: "loyverse";
+  source: "google_sheets";
   date: string;
-  account: LoyverseAccount;
-  hourlyGrossSales: HourlyGrossSalesRow[];
-  report: SalesByItemReport;
-};
-
-type AccountsResponse = {
-  ok: boolean;
-  accounts: LoyverseAccount[];
-};
-
-type SalesSyncStatusResponse = {
-  ok: boolean;
-  rows: Array<{
-    salesDate: string;
-    accountId: string;
-    status: string;
-  }>;
+  account: SalesAccount;
+  accounts: SalesAccount[];
+  isSynced: boolean;
+  hourlyGrossSales: Array<{ hour: string; grossSales: number }>;
+  report: {
+    receiptCount: number;
+    rows: SalesByItemRow[];
+    paymentsByType: SalesByPaymentTypeRow[];
+    totals: {
+      itemsSold: number;
+      grossSales: number;
+      netSales: number;
+    };
+  };
 };
 
 const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
@@ -118,159 +88,51 @@ const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
-
 const NUMBER_FORMATTER = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 2,
 });
 
-export function LoyverseDailySalesPage() {
-  const [accounts, setAccounts] = useState<LoyverseAccount[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState("");
-  const [date, setDate] = useState("");
+export function SalesDailySalesPage() {
+  const [accountId, setAccountId] = useState("");
+  const [date, setDate] = useState(getBangkokDate);
   const [sales, setSales] = useState<DailySalesResponse>();
-  const [syncStatus, setSyncStatus] = useState<SalesSyncStatusResponse>();
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
   const [requestId, setRequestId] = useState(0);
-  const [syncStatusRequestId, setSyncStatusRequestId] = useState(0);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const searchParams = new URLSearchParams(window.location.search);
-    const requestedAccountId = searchParams.get("account")?.trim() || "";
-    const requestedDate = searchParams.get("date")?.trim() || "";
-
-    fetchJson<AccountsResponse>("/api/loyverse/accounts", controller.signal)
-      .then((response) => {
-        setAccounts(response.accounts);
-        if (/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) {
-          setDate((current) => current || requestedDate);
-        }
-        setSelectedAccountId(
-          (current) =>
-            current ||
-            response.accounts.find(
-              (account) => account.id === requestedAccountId,
-            )?.id ||
-            response.accounts[0]?.id ||
-            "",
-        );
-      })
-      .catch((requestError: unknown) => {
-        if (!controller.signal.aborted) {
-          setError(getErrorMessage(requestError));
-          setLoading(false);
-        }
-      });
-
-    return () => controller.abort();
-  }, []);
 
   const loadSales = useCallback(
     (signal?: AbortSignal) => {
       setLoading(true);
       setError(undefined);
 
-      const query = new URLSearchParams();
-      if (selectedAccountId) query.set("account", selectedAccountId);
-      if (date) query.set("date", date);
-      const path = `/api/loyverse/daily-sales${query.size ? `?${query.toString()}` : ""}`;
-
-      fetchJson<DailySalesResponse>(path, signal)
+      const query = new URLSearchParams({ date });
+      if (accountId) query.set("account", accountId);
+      fetchJson<DailySalesResponse>(
+        `/api/sales/daily-sales?${query.toString()}`,
+        signal,
+      )
         .then((response) => {
           setSales(response);
-          setDate((current) => current || response.date);
-          setSelectedAccountId((current) => current || response.account.id);
+          setAccountId(response.account.id);
         })
         .catch((requestError: unknown) => {
-          if (!signal?.aborted) {
-            setError(getErrorMessage(requestError));
-          }
+          if (!signal?.aborted) setError(getErrorMessage(requestError));
         })
         .finally(() => {
-          if (!signal?.aborted) {
-            setLoading(false);
-          }
+          if (!signal?.aborted) setLoading(false);
         });
     },
-    [date, selectedAccountId],
+    [accountId, date],
   );
 
   useEffect(() => {
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => {
-      loadSales(controller.signal);
-    }, 0);
-
+    const timeoutId = window.setTimeout(() => loadSales(controller.signal), 0);
     return () => {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
   }, [loadSales, requestId]);
-
-  useEffect(() => {
-    if (!date || !selectedAccountId) {
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => {
-      const query = new URLSearchParams({
-        account: selectedAccountId,
-        month: date.slice(0, 7),
-      });
-      fetchJson<SalesSyncStatusResponse>(
-        `/api/sales/sync-status?${query.toString()}`,
-        controller.signal,
-      )
-        .then(setSyncStatus)
-        .catch((requestError: unknown) => {
-          if (!controller.signal.aborted) {
-            setError(getErrorMessage(requestError));
-          }
-        });
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [date, selectedAccountId, syncStatusRequestId]);
-
-  const handleAccountFilterChange = (value: string): void => {
-    setNotice(undefined);
-    setSelectedAccountId(value);
-  };
-
-  const handleDateFilterChange = (value: string): void => {
-    setNotice(undefined);
-    setDate(value);
-  };
-
-  const handleSync = async (): Promise<void> => {
-    if (!date || !selectedAccountId || isSyncDisabled) {
-      return;
-    }
-
-    setSyncing(true);
-    setError(undefined);
-    setNotice(undefined);
-
-    try {
-      await fetchJson("/api/loyverse/daily-sales/sync", undefined, {
-        account: selectedAccountId,
-        date,
-      });
-      setNotice("Sales synced to Google Sheets.");
-      setSyncStatusRequestId((value) => value + 1);
-    } catch (requestError) {
-      setError(getErrorMessage(requestError));
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   const itemColumns = useMemo<TableProps<SalesByItemRow>["columns"]>(
     () => [
@@ -292,7 +154,7 @@ export function LoyverseDailySalesPage() {
         dataIndex: "itemsSold",
         key: "itemsSold",
         align: "right",
-        width: 110,
+        width: 100,
         render: formatNumber,
       },
       {
@@ -300,7 +162,7 @@ export function LoyverseDailySalesPage() {
         dataIndex: "itemsRefunded",
         key: "itemsRefunded",
         align: "right",
-        width: 120,
+        width: 115,
         render: formatNumber,
       },
       {
@@ -308,7 +170,7 @@ export function LoyverseDailySalesPage() {
         dataIndex: "grossSales",
         key: "grossSales",
         align: "right",
-        width: 140,
+        width: 135,
         render: formatMoney,
       },
       {
@@ -316,7 +178,7 @@ export function LoyverseDailySalesPage() {
         dataIndex: "discounts",
         key: "discounts",
         align: "right",
-        width: 140,
+        width: 135,
         render: formatMoney,
       },
       {
@@ -324,7 +186,7 @@ export function LoyverseDailySalesPage() {
         dataIndex: "netSales",
         key: "netSales",
         align: "right",
-        width: 140,
+        width: 135,
         render: formatMoney,
       },
       {
@@ -332,7 +194,7 @@ export function LoyverseDailySalesPage() {
         dataIndex: "grossProfit",
         key: "grossProfit",
         align: "right",
-        width: 140,
+        width: 135,
         render: formatMoney,
       },
       {
@@ -340,14 +202,16 @@ export function LoyverseDailySalesPage() {
         dataIndex: "marginPercent",
         key: "marginPercent",
         align: "right",
-        width: 110,
+        width: 100,
         render: (value: number) => `${formatNumber(value)}%`,
       },
     ],
     [],
   );
 
-  const paymentColumns = useMemo<TableProps<SalesByPaymentTypeRow>["columns"]>(
+  const paymentColumns = useMemo<
+    TableProps<SalesByPaymentTypeRow>["columns"]
+  >(
     () => [
       {
         title: "Payment type",
@@ -392,27 +256,16 @@ export function LoyverseDailySalesPage() {
     1,
     ...(sales?.hourlyGrossSales.map((row) => row.grossSales) || []),
   );
-  const isSelectedDateSynced = Boolean(
-    syncStatus?.rows.some(
-      (row) =>
-        row.salesDate === date &&
-        row.accountId === selectedAccountId &&
-        row.status === "complete",
-    ),
+  const showSyncSuggestion = Boolean(
+    sales &&
+      sales.date === date &&
+      sales.account.id === accountId &&
+      !sales.isSynced,
   );
-  const isTodayBeforeCutoff =
-    date === getBangkokDate(new Date()) && isBeforeBangkokSyncCutoff();
-  const syncDisabledReason = !date
-    ? "Select a date before syncing."
-    : !selectedAccountId
-      ? "Select a Loyverse shop before syncing."
-      : isSelectedDateSynced
-        ? "This date is already synced."
-        : isTodayBeforeCutoff
-          ? "Today's sales can be synced after 20:30 Bangkok time."
-          : "";
-  const isSyncDisabled =
-    loading || syncing || Boolean(syncDisabledReason);
+  const loyverseSyncPath = `/loyverse/daily-sales?${new URLSearchParams({
+    account: accountId,
+    date,
+  }).toString()}`;
 
   return (
     <ConfigProvider
@@ -425,10 +278,7 @@ export function LoyverseDailySalesPage() {
           fontFamily: "Arial, Helvetica, sans-serif",
         },
         components: {
-          Table: {
-            headerBg: "#f7f8f7",
-            headerColor: "#66716b",
-          },
+          Table: { headerBg: "#f7f8f7", headerColor: "#66716b" },
         },
       }}
     >
@@ -436,15 +286,18 @@ export function LoyverseDailySalesPage() {
         <main className={styles.content}>
           <header className={styles.pageHeader}>
             <div>
-              <Text className={styles.eyebrow}>Loyverse</Text>
+              <Text className={styles.eyebrow}>Sales</Text>
               <Title level={1}>Daily sales</Title>
               <Text type="secondary">
-                Sales pulled directly from Loyverse for the Bangkok business day.
+                Synced sales loaded exclusively from Google Sheets.
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
               <Button href="/" icon={<ArrowLeftOutlined />}>
                 Home
+              </Button>
+              <Button href="/sales" icon={<DatabaseOutlined />}>
+                Sync status
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -461,17 +314,16 @@ export function LoyverseDailySalesPage() {
               <Col xs={24} md={10} lg={8}>
                 <Text className={styles.fieldLabel}>Shop</Text>
                 <Select
-                  aria-label="Loyverse shop"
+                  aria-label="Sales shop"
                   className={styles.fullWidth}
-                  disabled={accounts.length === 0}
-                  loading={loading && accounts.length === 0}
-                  options={accounts.map((account) => ({
+                  loading={loading && !sales}
+                  options={(sales?.accounts || []).map((account) => ({
                     label: account.shopName,
                     value: account.id,
                   }))}
                   placeholder="Select shop"
-                  value={selectedAccountId || undefined}
-                  onChange={handleAccountFilterChange}
+                  value={accountId || undefined}
+                  onChange={setAccountId}
                 />
               </Col>
               <Col xs={24} sm={12} md={7} lg={5}>
@@ -479,12 +331,9 @@ export function LoyverseDailySalesPage() {
                 <Space.Compact block>
                   <Button
                     aria-label="Previous date"
-                    disabled={!date}
                     icon={<LeftOutlined />}
                     title="Previous date"
-                    onClick={() =>
-                      handleDateFilterChange(shiftDate(date, -1))
-                    }
+                    onClick={() => setDate(shiftDate(date, -1))}
                   />
                   <DatePicker
                     allowClear={false}
@@ -492,19 +341,14 @@ export function LoyverseDailySalesPage() {
                     className={styles.datePicker}
                     format="YYYY-MM-DD"
                     suffixIcon={<CalendarOutlined />}
-                    value={date ? dayjs(date, "YYYY-MM-DD") : null}
-                    onChange={(_, value) =>
-                      handleDateFilterChange(getPickerValue(value))
-                    }
+                    value={dayjs(date, "YYYY-MM-DD")}
+                    onChange={(_, value) => setDate(getPickerValue(value))}
                   />
                   <Button
                     aria-label="Next date"
-                    disabled={!date}
                     icon={<RightOutlined />}
                     title="Next date"
-                    onClick={() =>
-                      handleDateFilterChange(shiftDate(date, 1))
-                    }
+                    onClick={() => setDate(shiftDate(date, 1))}
                   />
                 </Space.Compact>
               </Col>
@@ -519,46 +363,35 @@ export function LoyverseDailySalesPage() {
                   Load sales
                 </Button>
               </Col>
-              <Col xs={24} sm={12} md={7} lg={5}>
-                <Button
-                  block
-                  disabled={isSyncDisabled}
-                  icon={<SyncOutlined />}
-                  loading={syncing}
-                  title={syncDisabledReason || "Sync selected day"}
-                  onClick={handleSync}
-                >
-                  Sync
-                </Button>
-              </Col>
             </Row>
-            {syncDisabledReason ? (
-              <Text className={styles.syncHint} type="secondary">
-                {syncDisabledReason}
-              </Text>
-            ) : null}
           </Card>
-
-          {notice ? (
-            <Alert
-              className={styles.errorAlert}
-              type="success"
-              showIcon
-              message={notice}
-            />
-          ) : null}
 
           {error ? (
             <Alert
               className={styles.errorAlert}
               type="error"
               showIcon
-              title="Loyverse sales could not be loaded"
+              title="Stored sales could not be loaded"
               description={error}
             />
           ) : null}
 
-          <Spin spinning={loading} description="Loading Loyverse sales...">
+          {showSyncSuggestion ? (
+            <Alert
+              action={
+                <Button href={loyverseSyncPath} icon={<SyncOutlined />}>
+                  Open Loyverse sync
+                </Button>
+              }
+              className={styles.errorAlert}
+              type="warning"
+              showIcon
+              title="This day has not been synced"
+              description="Open the Loyverse daily-sales page to review and sync this shop and date."
+            />
+          ) : null}
+
+          <Spin spinning={loading} description="Loading stored sales...">
             {sales ? (
               <>
                 <section className={styles.summaryGrid}>
@@ -627,7 +460,7 @@ export function LoyverseDailySalesPage() {
                       emptyText: (
                         <Empty
                           image={Empty.PRESENTED_IMAGE_SIMPLE}
-                          description="No item sales for this date"
+                          description="No synced item sales for this date"
                         />
                       ),
                     }}
@@ -645,7 +478,7 @@ export function LoyverseDailySalesPage() {
                       emptyText: (
                         <Empty
                           image={Empty.PRESENTED_IMAGE_SIMPLE}
-                          description="No payments for this date"
+                          description="No synced payments for this date"
                         />
                       ),
                     }}
@@ -654,10 +487,7 @@ export function LoyverseDailySalesPage() {
               </>
             ) : (
               <Card className={styles.emptyCard}>
-                <Empty
-                  image={<ShopOutlined className={styles.emptyIcon} />}
-                  description="No Loyverse sales loaded"
-                />
+                <Empty description="No stored sales loaded" />
               </Card>
             )}
           </Spin>
@@ -667,52 +497,22 @@ export function LoyverseDailySalesPage() {
   );
 }
 
-async function fetchJson<T>(
-  path: string,
-  signal?: AbortSignal,
-  requestBody?: unknown,
-): Promise<T> {
-  const response = await fetch(path, {
-    body: requestBody === undefined ? undefined : JSON.stringify(requestBody),
-    headers:
-      requestBody === undefined
-        ? undefined
-        : { "Content-Type": "application/json" },
-    method: requestBody === undefined ? "GET" : "POST",
-    signal,
-  });
-  const responseBody = (await response.json().catch(() => ({}))) as {
-    error?: string;
-  };
+async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(path, { signal });
+  const body = (await response.json().catch(() => ({}))) as { error?: string };
   if (!response.ok) {
-    throw new Error(
-      responseBody.error || `Request failed with status ${response.status}.`,
-    );
+    throw new Error(body.error || `Request failed with status ${response.status}.`);
   }
-  return responseBody as T;
+  return body as T;
 }
 
-function isBeforeBangkokSyncCutoff(): boolean {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    hour12: false,
-    minute: "2-digit",
-    timeZone: "Asia/Bangkok",
-  }).formatToParts(new Date());
-  const hour = Number(parts.find((part) => part.type === "hour")?.value || 0);
-  const minute = Number(
-    parts.find((part) => part.type === "minute")?.value || 0,
-  );
-  return hour * 60 + minute < 20 * 60 + 30;
-}
-
-function getBangkokDate(date: Date): string {
+function getBangkokDate(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "2-digit",
     timeZone: "Asia/Bangkok",
     year: "numeric",
-  }).formatToParts(date);
+  }).formatToParts(new Date());
   const year = parts.find((part) => part.type === "year")?.value || "";
   const month = parts.find((part) => part.type === "month")?.value || "";
   const day = parts.find((part) => part.type === "day")?.value || "";
