@@ -1,0 +1,112 @@
+.appShell {
+  min-height: 100vh;
+  background: #f3f5f4;
+}
+
+.content {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.pageHeader h1 {
+  margin: 2px 0 4px !important;
+  font-size: 30px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  color: #157347;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageActions {
+  justify-content: flex-end;
+}
+
+.alert,
+.filterCard,
+.summaryGrid {
+  margin-bottom: 16px;
+}
+
+.filterCard :global(.ant-card-body) {
+  padding: 16px;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) minmax(200px, 320px);
+  gap: 16px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #46504a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dateControl,
+.fullWidth {
+  width: 100%;
+}
+
+.datePicker {
+  width: 100%;
+}
+
+.summaryGrid :global(.ant-card-body) {
+  padding: 18px 20px;
+}
+
+.tableCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.employeeCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.completedIcon {
+  color: #157347;
+  font-size: 18px;
+}
+
+.leaveIcon {
+  color: #ad6800;
+  font-size: 18px;
+}
+
+@media (max-width: 767px) {
+  .content {
+    padding: 20px 16px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+  }
+
+  .pageActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}

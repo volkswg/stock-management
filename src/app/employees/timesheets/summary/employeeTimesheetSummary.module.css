@@ -1,0 +1,161 @@
+.appShell {
+  min-height: 100vh;
+  background: #f3f5f4;
+}
+
+.content {
+  width: min(1500px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.pageHeader h1 {
+  margin: 2px 0 4px !important;
+  font-size: 30px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  color: #157347;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageActions {
+  justify-content: flex-end;
+}
+
+.alert,
+.filterCard,
+.summaryGrid {
+  margin-bottom: 16px;
+}
+
+.filterCard :global(.ant-card-body) {
+  padding: 16px;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) minmax(200px, 320px);
+  gap: 16px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #46504a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.monthControl,
+.fullWidth {
+  width: 100%;
+}
+
+.monthPicker {
+  width: 100%;
+}
+
+.summaryGrid :global(.ant-card-body) {
+  padding: 18px 20px;
+}
+
+.calendarCard :global(.ant-card-body) {
+  padding: 12px 16px 16px;
+}
+
+.calendarViewport {
+  overflow-x: auto;
+}
+
+.calendar {
+  min-width: 820px;
+}
+
+.calendar :global(.ant-picker-calendar-date) {
+  min-height: 112px;
+}
+
+.calendarEntries {
+  display: grid;
+  gap: 4px;
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workEntry,
+.leaveEntry,
+.moreEntry {
+  overflow: hidden;
+  padding: 2px 5px;
+  border-left: 3px solid;
+  border-radius: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workEntry {
+  color: #0d5132;
+  background: #edf7f1;
+  border-color: #157347;
+}
+
+.leaveEntry {
+  color: #754b00;
+  background: #fff7e6;
+  border-color: #d48806;
+}
+
+.moreEntry {
+  color: #66716b;
+  background: #f1f3f2;
+  border-color: #a8b0ab;
+}
+
+.dayCard {
+  margin-top: 16px;
+}
+
+.dayCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.employeeCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+@media (max-width: 767px) {
+  .content {
+    padding: 20px 16px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+  }
+
+  .pageActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}
