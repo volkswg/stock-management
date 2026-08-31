@@ -186,7 +186,7 @@ export function LoyverseDailySalesPage() {
         key: "itemName",
         width: 280,
         render: (_, row) => (
-          <Space direction="vertical" size={0}>
+          <Space orientation="vertical" size={0}>
             <Text strong>{row.itemName || "Unknown item"}</Text>
             <Text className={styles.variantText} type="secondary">
               {row.variantName || row.sku || "No variant"}
@@ -394,7 +394,7 @@ export function LoyverseDailySalesPage() {
             />
           ) : null}
 
-          <Spin spinning={loading} tip="Loading Loyverse sales...">
+          <Spin spinning={loading} description="Loading Loyverse sales...">
             {sales ? (
               <>
                 <section className={styles.summaryGrid}>

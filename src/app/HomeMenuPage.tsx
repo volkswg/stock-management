@@ -3,6 +3,7 @@
 import {
   ArrowRightOutlined,
   BarChartOutlined,
+  ShopOutlined,
   ShoppingCartOutlined,
   TruckOutlined,
 } from "@ant-design/icons";
@@ -41,6 +42,18 @@ const MENU_ITEMS: Array<{
   },
 ];
 
+const LOYVERSE_ITEMS: Array<{
+  href: string;
+  icon: ReactNode;
+  title: string;
+}> = [
+  {
+    href: "/loyverse/daily-sales",
+    icon: <ShopOutlined />,
+    title: "Daily sales",
+  },
+];
+
 export function HomeMenuPage() {
   return (
     <ConfigProvider
@@ -69,6 +82,31 @@ export function HomeMenuPage() {
             </Title>
             <Row gutter={[16, 16]}>
               {MENU_ITEMS.map((item) => (
+                <Col key={item.href} xs={24} sm={12} lg={8}>
+                  <a
+                    aria-label={`Open ${item.title.toLowerCase()}`}
+                    className={styles.menuLink}
+                    href={item.href}
+                  >
+                    <Card className={styles.menuCard} hoverable>
+                      <Space className={styles.menuCardContent} size={14}>
+                        <span className={styles.menuIcon}>{item.icon}</span>
+                        <Title level={3}>{item.title}</Title>
+                        <ArrowRightOutlined className={styles.menuArrow} />
+                      </Space>
+                    </Card>
+                  </a>
+                </Col>
+              ))}
+            </Row>
+          </section>
+
+          <section aria-labelledby="loyverse-title" className={styles.menuSection}>
+            <Title id="loyverse-title" level={2}>
+              Loyverse
+            </Title>
+            <Row gutter={[16, 16]}>
+              {LOYVERSE_ITEMS.map((item) => (
                 <Col key={item.href} xs={24} sm={12} lg={8}>
                   <a
                     aria-label={`Open ${item.title.toLowerCase()}`}
