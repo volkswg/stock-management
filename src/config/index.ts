@@ -23,6 +23,10 @@ export type AppConfig = {
     orderBillsWorksheetName: string;
     orderItemsWorksheetName: string;
     purchasesWorksheetName: string;
+    salesReceiptItemsWorksheetName: string;
+    salesReceiptPaymentsWorksheetName: string;
+    salesReceiptsWorksheetName: string;
+    salesReceiptSyncsWorksheetName: string;
     shipmentOrdersWorksheetName: string;
     shipmentsWorksheetName: string;
     userStateWorksheetName: string;
@@ -63,6 +67,18 @@ export function getConfig(): AppConfig {
         process.env.GOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME || "order_items",
       purchasesWorksheetName:
         process.env.GOOGLE_SHEETS_PURCHASES_WORKSHEET_NAME || "purchases",
+      salesReceiptItemsWorksheetName:
+        process.env.GOOGLE_SHEETS_SALES_RECEIPT_ITEMS_WORKSHEET_NAME ||
+        "sales_receipt_items",
+      salesReceiptPaymentsWorksheetName:
+        process.env.GOOGLE_SHEETS_SALES_RECEIPT_PAYMENTS_WORKSHEET_NAME ||
+        "sales_receipt_payments",
+      salesReceiptsWorksheetName:
+        process.env.GOOGLE_SHEETS_SALES_RECEIPTS_WORKSHEET_NAME ||
+        "sales_receipts",
+      salesReceiptSyncsWorksheetName:
+        process.env.GOOGLE_SHEETS_SALES_RECEIPT_SYNCS_WORKSHEET_NAME ||
+        "sales_receipt_syncs",
       shipmentOrdersWorksheetName:
         process.env.GOOGLE_SHEETS_SHIPMENT_ORDERS_WORKSHEET_NAME ||
         "shipment_orders",

@@ -6,6 +6,10 @@ import {
   OrderItemsSheet,
   OrdersSheet,
   PurchasesSheet,
+  SalesReceiptItemsSheet,
+  SalesReceiptPaymentsSheet,
+  SalesReceiptsSheet,
+  SalesReceiptSyncsSheet,
   ShipmentOrdersSheet,
   ShipmentsSheet,
   UserStateSheet,
@@ -17,6 +21,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly orderBills: OrderBillsSheet;
   readonly orderItems: OrderItemsSheet;
   readonly purchases: PurchasesSheet;
+  readonly salesReceiptItems: SalesReceiptItemsSheet;
+  readonly salesReceiptPayments: SalesReceiptPaymentsSheet;
+  readonly salesReceipts: SalesReceiptsSheet;
+  readonly salesReceiptSyncs: SalesReceiptSyncsSheet;
   readonly shipmentOrders: ShipmentOrdersSheet;
   readonly shipments: ShipmentsSheet;
   readonly userState: UserStateSheet;
@@ -42,6 +50,15 @@ export class GoogleSheetsService implements IGoogleSheetsService {
 
     if (!config.purchasesWorksheetName.trim()) {
       throw new Error("Google Sheets purchases worksheet name is required.");
+    }
+
+    if (
+      !config.salesReceiptsWorksheetName.trim() ||
+      !config.salesReceiptItemsWorksheetName.trim() ||
+      !config.salesReceiptPaymentsWorksheetName.trim() ||
+      !config.salesReceiptSyncsWorksheetName.trim()
+    ) {
+      throw new Error("Google Sheets sales worksheet names are required.");
     }
 
     if (!config.shipmentOrdersWorksheetName.trim()) {
@@ -77,6 +94,22 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.client,
       config.purchasesWorksheetName,
     );
+    this.salesReceipts = new SalesReceiptsSheet(
+      this.client,
+      config.salesReceiptsWorksheetName,
+    );
+    this.salesReceiptItems = new SalesReceiptItemsSheet(
+      this.client,
+      config.salesReceiptItemsWorksheetName,
+    );
+    this.salesReceiptPayments = new SalesReceiptPaymentsSheet(
+      this.client,
+      config.salesReceiptPaymentsWorksheetName,
+    );
+    this.salesReceiptSyncs = new SalesReceiptSyncsSheet(
+      this.client,
+      config.salesReceiptSyncsWorksheetName,
+    );
     this.shipmentOrders = new ShipmentOrdersSheet(
       this.client,
       config.shipmentOrdersWorksheetName,
@@ -97,6 +130,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.orderBills.checkConnection(),
       this.orderItems.checkConnection(),
       this.purchases.checkConnection(),
+      this.salesReceiptItems.checkConnection(),
+      this.salesReceiptPayments.checkConnection(),
+      this.salesReceipts.checkConnection(),
+      this.salesReceiptSyncs.checkConnection(),
       this.shipmentOrders.checkConnection(),
       this.shipments.checkConnection(),
       this.userState.checkConnection(),

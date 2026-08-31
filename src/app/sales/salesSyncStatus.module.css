@@ -1,0 +1,121 @@
+.appShell {
+  min-height: 100vh;
+  background: #f3f5f4;
+}
+
+.content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 42px 40px 64px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: #157347 !important;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageHeader h1 {
+  margin: 0 0 5px !important;
+  font-size: 30px !important;
+}
+
+.pageActions {
+  justify-content: flex-end;
+}
+
+.filterCard {
+  margin-top: 26px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #66716b;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.errorAlert {
+  margin-top: 16px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.summaryGrid :global(.ant-card) {
+  height: 100%;
+}
+
+.summaryGrid :global(.ant-statistic-content) {
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.tableCard,
+.emptyCard {
+  margin-top: 18px;
+}
+
+.emptyCard {
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 30px 20px 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 24px 14px 36px;
+  }
+
+  .pageHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pageHeader h1 {
+    font-size: 26px !important;
+  }
+
+  .pageActions {
+    align-self: flex-start;
+    justify-content: flex-start;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
