@@ -26,7 +26,7 @@ import {
   type TableProps,
 } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./loyverseDialySales.module.css";
+import styles from "./loyverseDailySales.module.css";
 
 const { Text, Title } = Typography;
 
@@ -110,7 +110,7 @@ const NUMBER_FORMATTER = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 2,
 });
 
-export function LoyverseDialySalesPage() {
+export function LoyverseDailySalesPage() {
   const [accounts, setAccounts] = useState<LoyverseAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState("");
   const [date, setDate] = useState("");

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LoyverseDialySalesPage } from "./LoyverseDialySalesPage";
+import { LoyverseDailySalesPage } from "./LoyverseDailySalesPage";
 
 export const metadata: Metadata = {
   title: "Loyverse Daily Sales | Stock Management",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <LoyverseDialySalesPage />;
+  return <LoyverseDailySalesPage />;
 }
