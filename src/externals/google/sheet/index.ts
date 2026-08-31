@@ -2,6 +2,8 @@ export { GoogleSheetsClient } from "./client";
 export { GoogleSheetsService } from "./GoogleSheetsService";
 export {
   BaseGoogleSheet,
+  EmployeesSheet,
+  EmployeeTimesheetsSheet,
   OrderBillsSheet,
   OrderItemsSheet,
   OrdersSheet,
@@ -18,6 +20,8 @@ export { createGoogleSheetsServiceFromConfig } from "./createGoogleSheetsService
 export {
   lastColumnLetter,
 } from "./const";
+export { EMPLOYEE_HEADERS } from "./sheets/employees/const";
+export { EMPLOYEE_TIMESHEET_HEADERS } from "./sheets/employee-timesheets/const";
 export { ORDERS_SHEET_HEADERS } from "./sheets/orders/const";
 export { ORDER_BILLS_SHEET_HEADERS } from "./sheets/order-bills/const";
 export { ORDER_ITEMS_SHEET_HEADERS } from "./sheets/order-items/const";

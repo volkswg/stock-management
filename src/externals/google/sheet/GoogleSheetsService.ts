@@ -2,6 +2,8 @@ import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
 import { GoogleSheetsClient } from "./client";
 import { GOOGLE_SHEETS_SCOPE } from "./const";
 import {
+  EmployeesSheet,
+  EmployeeTimesheetsSheet,
   OrderBillsSheet,
   OrderItemsSheet,
   OrdersSheet,
@@ -17,6 +19,8 @@ import {
 import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
+  readonly employees: EmployeesSheet;
+  readonly employeeTimesheets: EmployeeTimesheetsSheet;
   readonly orders: OrdersSheet;
   readonly orderBills: OrderBillsSheet;
   readonly orderItems: OrderItemsSheet;
@@ -34,6 +38,13 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   constructor(config: GoogleSheetsConfig) {
     if (!config.spreadsheetId.trim()) {
       throw new Error("Google Sheets spreadsheet id is required.");
+    }
+
+    if (
+      !config.employeesWorksheetName.trim() ||
+      !config.employeeTimesheetsWorksheetName.trim()
+    ) {
+      throw new Error("Google Sheets employee worksheet names are required.");
     }
 
     if (!config.ordersWorksheetName.trim()) {
@@ -81,6 +92,14 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       scopes: [GOOGLE_SHEETS_SCOPE],
     });
     this.client = new GoogleSheetsClient(auth, config.spreadsheetId);
+    this.employees = new EmployeesSheet(
+      this.client,
+      config.employeesWorksheetName,
+    );
+    this.employeeTimesheets = new EmployeeTimesheetsSheet(
+      this.client,
+      config.employeeTimesheetsWorksheetName,
+    );
     this.orders = new OrdersSheet(this.client, config.ordersWorksheetName);
     this.orderBills = new OrderBillsSheet(
       this.client,
@@ -126,6 +145,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
 
   async checkConnection(): Promise<void> {
     await Promise.all([
+      this.employees.checkConnection(),
+      this.employeeTimesheets.checkConnection(),
       this.orders.checkConnection(),
       this.orderBills.checkConnection(),
       this.orderItems.checkConnection(),

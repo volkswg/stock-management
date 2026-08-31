@@ -3,6 +3,8 @@ export type GoogleSheetRow = GoogleSheetCellValue[];
 
 export type GoogleSheetsConfig = {
   spreadsheetId: string;
+  employeesWorksheetName: string;
+  employeeTimesheetsWorksheetName: string;
   ordersWorksheetName: string;
   orderBillsWorksheetName: string;
   orderItemsWorksheetName: string;
@@ -33,6 +35,8 @@ export interface IGoogleRowsSheet {
 }
 
 export interface IGoogleSheetsService {
+  readonly employees: IGoogleRowsSheet;
+  readonly employeeTimesheets: IGoogleRowsSheet;
   readonly orders: IGoogleRowsSheet;
   readonly orderBills: IGoogleRowsSheet;
   readonly orderItems: IGoogleRowsSheet;
