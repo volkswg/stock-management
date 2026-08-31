@@ -6,6 +6,7 @@ import {
   CalendarOutlined,
   ReloadOutlined,
   ShopOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
@@ -99,6 +100,15 @@ type AccountsResponse = {
   accounts: LoyverseAccount[];
 };
 
+type SalesSyncStatusResponse = {
+  ok: boolean;
+  rows: Array<{
+    salesDate: string;
+    accountId: string;
+    status: string;
+  }>;
+};
+
 const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
   style: "currency",
   currency: "THB",
@@ -116,9 +126,13 @@ export function LoyverseDailySalesPage() {
   const [selectedAccountId, setSelectedAccountId] = useState("");
   const [date, setDate] = useState("");
   const [sales, setSales] = useState<DailySalesResponse>();
+  const [syncStatus, setSyncStatus] = useState<SalesSyncStatusResponse>();
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string>();
+  const [notice, setNotice] = useState<string>();
   const [requestId, setRequestId] = useState(0);
+  const [syncStatusRequestId, setSyncStatusRequestId] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -179,6 +193,58 @@ export function LoyverseDailySalesPage() {
       controller.abort();
     };
   }, [loadSales, requestId]);
+
+  useEffect(() => {
+    if (!date || !selectedAccountId) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      const query = new URLSearchParams({
+        account: selectedAccountId,
+        month: date.slice(0, 7),
+      });
+      fetchJson<SalesSyncStatusResponse>(
+        `/api/sales/sync-status?${query.toString()}`,
+        controller.signal,
+      )
+        .then(setSyncStatus)
+        .catch((requestError: unknown) => {
+          if (!controller.signal.aborted) {
+            setError(getErrorMessage(requestError));
+          }
+        });
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [date, selectedAccountId, syncStatusRequestId]);
+
+  const handleSync = async (): Promise<void> => {
+    if (!date || !selectedAccountId || isSyncDisabled) {
+      return;
+    }
+
+    setSyncing(true);
+    setError(undefined);
+    setNotice(undefined);
+
+    try {
+      await fetchJson("/api/loyverse/daily-sales/sync", undefined, {
+        account: selectedAccountId,
+        date,
+      });
+      setNotice("Sales synced to Google Sheets.");
+      setSyncStatusRequestId((value) => value + 1);
+    } catch (requestError) {
+      setError(getErrorMessage(requestError));
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const itemColumns = useMemo<TableProps<SalesByItemRow>["columns"]>(
     () => [
@@ -300,6 +366,27 @@ export function LoyverseDailySalesPage() {
     1,
     ...(sales?.hourlyGrossSales.map((row) => row.grossSales) || []),
   );
+  const isSelectedDateSynced = Boolean(
+    syncStatus?.rows.some(
+      (row) =>
+        row.salesDate === date &&
+        row.accountId === selectedAccountId &&
+        row.status === "complete",
+    ),
+  );
+  const isTodayBeforeCutoff =
+    date === getBangkokDate(new Date()) && isBeforeBangkokSyncCutoff();
+  const syncDisabledReason = !date
+    ? "Select a date before syncing."
+    : !selectedAccountId
+      ? "Select a Loyverse shop before syncing."
+      : isSelectedDateSynced
+        ? "This date is already synced."
+        : isTodayBeforeCutoff
+          ? "Today's sales can be synced after 20:30 Bangkok time."
+          : "";
+  const isSyncDisabled =
+    loading || syncing || Boolean(syncDisabledReason);
 
   return (
     <ConfigProvider
@@ -384,8 +471,34 @@ export function LoyverseDailySalesPage() {
                   Load sales
                 </Button>
               </Col>
+              <Col xs={24} sm={12} md={7} lg={5}>
+                <Button
+                  block
+                  disabled={isSyncDisabled}
+                  icon={<SyncOutlined />}
+                  loading={syncing}
+                  title={syncDisabledReason || "Sync selected day"}
+                  onClick={handleSync}
+                >
+                  Sync
+                </Button>
+              </Col>
             </Row>
+            {syncDisabledReason ? (
+              <Text className={styles.syncHint} type="secondary">
+                {syncDisabledReason}
+              </Text>
+            ) : null}
           </Card>
+
+          {notice ? (
+            <Alert
+              className={styles.errorAlert}
+              type="success"
+              showIcon
+              message={notice}
+            />
+          ) : null}
 
           {error ? (
             <Alert
@@ -506,15 +619,56 @@ export function LoyverseDailySalesPage() {
   );
 }
 
-async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(path, { signal });
-  const body = (await response.json().catch(() => ({}))) as {
+async function fetchJson<T>(
+  path: string,
+  signal?: AbortSignal,
+  requestBody?: unknown,
+): Promise<T> {
+  const response = await fetch(path, {
+    body: requestBody === undefined ? undefined : JSON.stringify(requestBody),
+    headers:
+      requestBody === undefined
+        ? undefined
+        : { "Content-Type": "application/json" },
+    method: requestBody === undefined ? "GET" : "POST",
+    signal,
+  });
+  const responseBody = (await response.json().catch(() => ({}))) as {
     error?: string;
   };
   if (!response.ok) {
-    throw new Error(body.error || `Request failed with status ${response.status}.`);
+    throw new Error(
+      responseBody.error || `Request failed with status ${response.status}.`,
+    );
   }
-  return body as T;
+  return responseBody as T;
+}
+
+function isBeforeBangkokSyncCutoff(): boolean {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    timeZone: "Asia/Bangkok",
+  }).formatToParts(new Date());
+  const hour = Number(parts.find((part) => part.type === "hour")?.value || 0);
+  const minute = Number(
+    parts.find((part) => part.type === "minute")?.value || 0,
+  );
+  return hour * 60 + minute < 20 * 60 + 30;
+}
+
+function getBangkokDate(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value || "";
+  const month = parts.find((part) => part.type === "month")?.value || "";
+  const day = parts.find((part) => part.type === "day")?.value || "";
+  return `${year}-${month}-${day}`;
 }
 
 function formatMoney(value: number): string {
