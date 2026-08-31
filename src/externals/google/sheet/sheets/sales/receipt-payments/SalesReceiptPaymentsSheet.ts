@@ -1,11 +1,15 @@
-import type { GoogleSheetRow, IGoogleRowsSheet } from "../../types";
-import { BaseGoogleSheet } from "../BaseGoogleSheet";
+import { lastColumnLetter } from "../../../const";
+import type { GoogleSheetRow, IGoogleRowsSheet } from "../../../types";
+import { BaseGoogleSheet } from "../../BaseGoogleSheet";
+import { SALES_RECEIPT_PAYMENT_HEADERS } from "./const";
 
 export class SalesReceiptPaymentsSheet
   extends BaseGoogleSheet
   implements IGoogleRowsSheet
 {
-  async readRows(range = "A:J"): Promise<GoogleSheetRow[]> {
+  async readRows(
+    range = `A:${lastColumnLetter(SALES_RECEIPT_PAYMENT_HEADERS.length - 1)}`,
+  ): Promise<GoogleSheetRow[]> {
     return this.read(range);
   }
 
