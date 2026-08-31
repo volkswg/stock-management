@@ -1,0 +1,104 @@
+.appShell {
+  min-height: 100vh;
+  background: #f3f5f4;
+}
+
+.content {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.pageHeader h1 {
+  margin: 2px 0 4px !important;
+  font-size: 30px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  color: #157347;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pageActions {
+  justify-content: flex-end;
+}
+
+.alert {
+  margin-bottom: 16px;
+}
+
+.summaryGrid {
+  margin-bottom: 16px;
+}
+
+.summaryGrid :global(.ant-card-body) {
+  padding: 18px 20px;
+}
+
+.employeeTableCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 440px) 180px;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #e1e5e2;
+}
+
+.employeeCell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.employeeCell :global(.ant-typography) {
+  margin: 0;
+}
+
+.employeeCell :global(.ant-typography-copy) {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.employeeCell:hover :global(.ant-typography-copy),
+.employeeCell:focus-within :global(.ant-typography-copy) {
+  opacity: 1;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .content {
+    padding: 20px 16px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+  }
+
+  .pageActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}
