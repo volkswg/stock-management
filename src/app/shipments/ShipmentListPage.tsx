@@ -51,14 +51,14 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     title: "PO number",
     dataIndex: "poNumber",
     key: "poNumber",
-    width: 230,
+    width: 150,
     render: (value: string) => <Text strong>{value}</Text>,
   },
   {
     title: "Status",
     dataIndex: "status",
     key: "status",
-    width: 170,
+    width: 100,
     render: (status: ShipmentStatus) => (
       <Tag color={getStatusColor(status)}>{formatStatus(status)}</Tag>
     ),
@@ -67,14 +67,14 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     title: "Carrier",
     dataIndex: "carrier",
     key: "carrier",
-    width: 190,
+    width: 100,
     render: (value: string) => value || "—",
   },
   {
     title: "Orders",
     key: "orders",
     align: "right",
-    width: 90,
+    width: 60,
     render: (_, shipment) => shipment.orders.length,
   },
   {
@@ -82,7 +82,7 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     dataIndex: "shippingFee",
     key: "shippingFee",
     align: "right",
-    width: 150,
+    width: 100,
     render: (value: number | null) =>
       value === null ? "—" : THB_FORMATTER.format(value),
   },
@@ -375,7 +375,7 @@ export function ShipmentListPage() {
               loading={loading}
               pagination={false}
               rowKey="id"
-              scroll={{ x: 1406 }}
+              scroll={{ x: 1000 }}
               expandable={{
                 expandedRowKeys,
                 expandedRowRender: (shipment) => (
