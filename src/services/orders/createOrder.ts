@@ -20,12 +20,14 @@ export type CreatedOrder = {
 
 export async function createOrder({
   googleSheetsService,
+  id,
   seller,
   totalPrice,
   remark,
   createdBy,
 }: {
   googleSheetsService: IGoogleSheetsService;
+  id?: string;
   seller?: string;
   totalPrice?: number | null;
   remark?: string;
@@ -34,7 +36,7 @@ export async function createOrder({
   const now = new Date().toISOString();
   const normalizedTotalPrice = totalPrice ?? null;
   const order: CreatedOrder = {
-    id: createSortableId(),
+    id: id?.trim() || createSortableId(),
     status:
       normalizedTotalPrice === null
         ? OrderStatus.WaitingForTotalPrice

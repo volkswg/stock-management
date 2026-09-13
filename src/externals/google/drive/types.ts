@@ -2,6 +2,7 @@ import type { IGoogleAccessTokenProvider } from "../auth/types";
 
 export interface IGoogleDriveService {
   uploadImage(input: GoogleDriveUploadImageRequest): Promise<GoogleDriveFile>;
+  deleteFile(fileId: string): Promise<void>;
   makeFileReadableByLink(fileId: string): Promise<void>;
   checkConnection(): Promise<void>;
 }

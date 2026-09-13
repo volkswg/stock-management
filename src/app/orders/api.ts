@@ -19,6 +19,8 @@ export type CreateOrderInput = {
   seller?: string;
   totalPrice?: number | null;
   remark?: string;
+  billImages: File[];
+  productImages: File[];
 };
 
 export type CreateOrderResponse = {
@@ -104,13 +106,23 @@ export async function getOrder(
 export async function createOrder(
   input: CreateOrderInput,
 ): Promise<CreateOrderResponse> {
-  const response = await fetch("/api/orders", {
+  const formData = new FormData();
+  if (input.seller !== undefined) formData.set("seller", input.seller);
+  if (input.totalPrice !== undefined && input.totalPrice !== null) {
+    formData.set("totalPrice", String(input.totalPrice));
+  }
+  if (input.remark !== undefined) formData.set("remark", input.remark);
+  for (const image of input.billImages) {
+    formData.append("billImages", image);
+  }
+  for (const image of input.productImages) {
+    formData.append("productImages", image);
+  }
+
+  const response = await fetch("/api/orders/with-images", {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(input),
+    headers: { Accept: "application/json" },
+    body: formData,
   });
 
   const body: unknown = await response.json();

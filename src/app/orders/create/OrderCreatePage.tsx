@@ -21,7 +21,7 @@ import {
 } from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createOrder, uploadOrderImage } from "../api";
+import { createOrder } from "../api";
 import styles from "./orderCreate.module.css";
 
 const { Text, Title } = Typography;
@@ -42,7 +42,6 @@ export function OrderCreatePage() {
   const [messageApi, messageContextHolder] = message.useMessage();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
-  const [createdOrderId, setCreatedOrderId] = useState<string>();
   const [billImageFiles, setBillImageFiles] = useState<UploadFile[]>([]);
   const [productImageFiles, setProductImageFiles] = useState<UploadFile[]>([]);
   const [billImageError, setBillImageError] = useState<string>();
@@ -67,28 +66,20 @@ export function OrderCreatePage() {
     setError(undefined);
     setBillImageError(undefined);
     setProductImageError(undefined);
-    let newOrderId: string | undefined;
     try {
-      const response = await createOrder(values);
-      newOrderId = response.order.id;
-      setCreatedOrderId(newOrderId);
-
-      for (const image of billImages) {
-        await uploadOrderImage(newOrderId, image, "bill");
-      }
-      for (const image of productImages) {
-        await uploadOrderImage(newOrderId, image, "product");
-      }
+      const response = await createOrder({
+        ...values,
+        billImages,
+        productImages,
+      });
 
       messageApi.success("Order created.");
-      router.push(`/orders/${encodeURIComponent(newOrderId)}`);
+      router.push(`/orders/${encodeURIComponent(response.order.id)}`);
     } catch (submitError) {
       setError(
-        newOrderId
-          ? "The order was created, but one or more images could not be uploaded."
-          : submitError instanceof Error
-            ? submitError.message
-            : "Failed to create order.",
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to create order.",
       );
     } finally {
       setSubmitting(false);
@@ -128,22 +119,8 @@ export function OrderCreatePage() {
             {error ? (
               <Alert
                 className={styles.errorAlert}
-                title={
-                  createdOrderId
-                    ? "Image upload failed"
-                    : "Order could not be created"
-                }
+                title="Order could not be created"
                 description={error}
-                action={
-                  createdOrderId ? (
-                    <Button
-                      href={`/orders/${encodeURIComponent(createdOrderId)}`}
-                      size="small"
-                    >
-                      Open order
-                    </Button>
-                  ) : undefined
-                }
                 showIcon
                 type="error"
               />
@@ -151,7 +128,7 @@ export function OrderCreatePage() {
 
             <Form<OrderFormValues>
               form={form}
-              disabled={Boolean(createdOrderId)}
+              disabled={submitting}
               layout="vertical"
               name="create-order"
               requiredMark="optional"
@@ -171,7 +148,7 @@ export function OrderCreatePage() {
               </Form.Item>
 
               <ImageUploadField
-                disabled={submitting || Boolean(createdOrderId)}
+                disabled={submitting}
                 error={billImageError}
                 files={billImageFiles}
                 label="Bill images"
@@ -185,7 +162,7 @@ export function OrderCreatePage() {
               />
 
               <ImageUploadField
-                disabled={submitting || Boolean(createdOrderId)}
+                disabled={submitting}
                 error={productImageError}
                 files={productImageFiles}
                 label="Product images"
@@ -244,7 +221,6 @@ export function OrderCreatePage() {
                     Cancel
                   </Button>
                   <Button
-                    disabled={Boolean(createdOrderId)}
                     htmlType="submit"
                     icon={<PlusOutlined />}
                     loading={submitting}

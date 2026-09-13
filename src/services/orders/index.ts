@@ -5,6 +5,11 @@ export {
   type Order as DraftOrder,
 } from "./createDraftOrder";
 export { createOrder, type CreatedOrder } from "./createOrder";
+export {
+  createOrderWithImages,
+  type OrderImageType,
+  type OrderImageUpload,
+} from "./createOrderWithImages";
 export { createOrderBill, type OrderBill } from "./createOrderBill";
 export { createOrderItem, type OrderItem } from "./createOrderItem";
 export { completeOrderBill } from "./completeOrderBill";

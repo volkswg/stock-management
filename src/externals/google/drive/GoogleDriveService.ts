@@ -61,10 +61,43 @@ export class GoogleDriveService implements IGoogleDriveService {
 
     const driveFile = (await response.json()) as GoogleDriveFile;
     if (this.config.makeFilesReadableByLink) {
-      await this.makeFileReadableByLink(driveFile.id);
+      try {
+        await this.makeFileReadableByLink(driveFile.id);
+      } catch (error) {
+        try {
+          await this.deleteFile(driveFile.id);
+        } catch (cleanupError) {
+          console.error("Failed to clean up Google Drive file", {
+            fileId: driveFile.id,
+            error:
+              cleanupError instanceof Error
+                ? cleanupError.message
+                : String(cleanupError),
+          });
+        }
+        throw error;
+      }
     }
 
     return driveFile;
+  }
+
+  async deleteFile(fileId: string): Promise<void> {
+    const accessToken = await this.config.auth.getAccessToken();
+    const response = await fetch(
+      `${GOOGLE_DRIVE_API_BASE}/files/${encodeURIComponent(fileId)}?${SHARED_DRIVE_SUPPORT_QUERY}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(
+        `Google Drive file deletion failed: ${response.status} ${errorBody}`,
+      );
+    }
   }
 
   async makeFileReadableByLink(fileId: string): Promise<void> {
