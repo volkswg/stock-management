@@ -10,7 +10,9 @@ export type GoogleSheetsConfig = {
   orderItemsWorksheetName: string;
   purchasesWorksheetName: string;
   salesReceiptItemsWorksheetName: string;
+  salesProfitCostOverridesWorksheetName: string;
   salesReceiptPaymentsWorksheetName: string;
+  salesProfitExpensesWorksheetName: string;
   salesReceiptsWorksheetName: string;
   salesReceiptSyncsWorksheetName: string;
   shipmentOrdersWorksheetName: string;
@@ -22,6 +24,7 @@ export type GoogleSheetsConfig = {
 
 export interface IGoogleSheet {
   checkConnection(): Promise<void>;
+  ensureExists(): Promise<void>;
   read(range: string): Promise<GoogleSheetRow[]>;
   append(range: string, values: GoogleSheetRow[]): Promise<void>;
   update(range: string, values: GoogleSheetRow[]): Promise<void>;
@@ -29,6 +32,7 @@ export interface IGoogleSheet {
 }
 
 export interface IGoogleRowsSheet {
+  ensureExists?(): Promise<void>;
   readRows(range?: string): Promise<GoogleSheetRow[]>;
   appendRows(range: string, values: GoogleSheetRow[]): Promise<void>;
   updateRows(range: string, values: GoogleSheetRow[]): Promise<void>;
@@ -42,7 +46,9 @@ export interface IGoogleSheetsService {
   readonly orderItems: IGoogleRowsSheet;
   readonly purchases: IGoogleRowsSheet;
   readonly salesReceiptItems: IGoogleRowsSheet;
+  readonly salesProfitCostOverrides: IGoogleRowsSheet;
   readonly salesReceiptPayments: IGoogleRowsSheet;
+  readonly salesProfitExpenses: IGoogleRowsSheet;
   readonly salesReceipts: IGoogleRowsSheet;
   readonly salesReceiptSyncs: IGoogleRowsSheet;
   readonly shipmentOrders: IGoogleRowsSheet;

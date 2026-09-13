@@ -6,6 +6,10 @@ type GoogleSheetsValuesResponse = {
   values?: GoogleSheetRow[];
 };
 
+type GoogleSpreadsheetResponse = {
+  sheets?: Array<{ properties?: { title?: string } }>;
+};
+
 export class GoogleSheetsClient {
   constructor(
     private readonly auth: GoogleServiceAccountAuth,
@@ -66,6 +70,24 @@ export class GoogleSheetsClient {
         body: JSON.stringify({}),
       },
     );
+  }
+
+  async ensureWorksheet(worksheetName: string): Promise<void> {
+    const spreadsheet = await this.request<GoogleSpreadsheetResponse>(
+      "?fields=sheets.properties.title",
+      { method: "GET" },
+    );
+    const exists = spreadsheet.sheets?.some(
+      (sheet) => sheet.properties?.title === worksheetName,
+    );
+    if (exists) return;
+
+    await this.request(":batchUpdate", {
+      method: "POST",
+      body: JSON.stringify({
+        requests: [{ addSheet: { properties: { title: worksheetName } } }],
+      }),
+    });
   }
 
   private async request<T = unknown>(

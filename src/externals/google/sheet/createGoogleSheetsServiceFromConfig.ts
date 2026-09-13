@@ -15,8 +15,12 @@ export function createGoogleSheetsServiceFromConfig(
     purchasesWorksheetName: config.googleSheets.purchasesWorksheetName,
     salesReceiptItemsWorksheetName:
       config.googleSheets.salesReceiptItemsWorksheetName,
+    salesProfitCostOverridesWorksheetName:
+      config.googleSheets.salesProfitCostOverridesWorksheetName,
     salesReceiptPaymentsWorksheetName:
       config.googleSheets.salesReceiptPaymentsWorksheetName,
+    salesProfitExpensesWorksheetName:
+      config.googleSheets.salesProfitExpensesWorksheetName,
     salesReceiptsWorksheetName: config.googleSheets.salesReceiptsWorksheetName,
     salesReceiptSyncsWorksheetName:
       config.googleSheets.salesReceiptSyncsWorksheetName,

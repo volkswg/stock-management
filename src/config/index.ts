@@ -26,7 +26,9 @@ export type AppConfig = {
     orderItemsWorksheetName: string;
     purchasesWorksheetName: string;
     salesReceiptItemsWorksheetName: string;
+    salesProfitCostOverridesWorksheetName: string;
     salesReceiptPaymentsWorksheetName: string;
+    salesProfitExpensesWorksheetName: string;
     salesReceiptsWorksheetName: string;
     salesReceiptSyncsWorksheetName: string;
     shipmentOrdersWorksheetName: string;
@@ -62,37 +64,49 @@ export function getConfig(): AppConfig {
     googleSheets: {
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || "",
       employeesWorksheetName:
-        process.env.GOOGLE_SHEETS_EMPLOYEES_WORKSHEET_NAME || "employees",
+        process.env.GOOGLE_SHEETS_EMPLOYEES_WORKSHEET_NAME?.trim() ||
+        "employees",
       employeeTimesheetsWorksheetName:
-        process.env.GOOGLE_SHEETS_EMPLOYEE_TIMESHEETS_WORKSHEET_NAME ||
+        process.env.GOOGLE_SHEETS_EMPLOYEE_TIMESHEETS_WORKSHEET_NAME?.trim() ||
         "employee_timesheets",
       ordersWorksheetName:
-        process.env.GOOGLE_SHEETS_ORDERS_WORKSHEET_NAME || "orders",
+        process.env.GOOGLE_SHEETS_ORDERS_WORKSHEET_NAME?.trim() || "orders",
       orderBillsWorksheetName:
-        process.env.GOOGLE_SHEETS_ORDER_BILLS_WORKSHEET_NAME || "order_bills",
+        process.env.GOOGLE_SHEETS_ORDER_BILLS_WORKSHEET_NAME?.trim() ||
+        "order_bills",
       orderItemsWorksheetName:
-        process.env.GOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME || "order_items",
+        process.env.GOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME?.trim() ||
+        "order_items",
       purchasesWorksheetName:
-        process.env.GOOGLE_SHEETS_PURCHASES_WORKSHEET_NAME || "purchases",
+        process.env.GOOGLE_SHEETS_PURCHASES_WORKSHEET_NAME?.trim() ||
+        "purchases",
       salesReceiptItemsWorksheetName:
-        process.env.GOOGLE_SHEETS_SALES_RECEIPT_ITEMS_WORKSHEET_NAME ||
+        process.env.GOOGLE_SHEETS_SALES_RECEIPT_ITEMS_WORKSHEET_NAME?.trim() ||
         "sales_receipt_items",
+      salesProfitCostOverridesWorksheetName:
+        process.env.GOOGLE_SHEETS_SALES_PROFIT_COST_OVERRIDES_WORKSHEET_NAME?.trim() ||
+        "sales_profit_cost_overrides",
       salesReceiptPaymentsWorksheetName:
-        process.env.GOOGLE_SHEETS_SALES_RECEIPT_PAYMENTS_WORKSHEET_NAME ||
+        process.env.GOOGLE_SHEETS_SALES_RECEIPT_PAYMENTS_WORKSHEET_NAME?.trim() ||
         "sales_receipt_payments",
+      salesProfitExpensesWorksheetName:
+        process.env.GOOGLE_SHEETS_SALES_PROFIT_EXPENSES_WORKSHEET_NAME?.trim() ||
+        "sales_profit_expenses",
       salesReceiptsWorksheetName:
-        process.env.GOOGLE_SHEETS_SALES_RECEIPTS_WORKSHEET_NAME ||
+        process.env.GOOGLE_SHEETS_SALES_RECEIPTS_WORKSHEET_NAME?.trim() ||
         "sales_receipts",
       salesReceiptSyncsWorksheetName:
-        process.env.GOOGLE_SHEETS_SALES_RECEIPT_SYNCS_WORKSHEET_NAME ||
+        process.env.GOOGLE_SHEETS_SALES_RECEIPT_SYNCS_WORKSHEET_NAME?.trim() ||
         "sales_receipt_syncs",
       shipmentOrdersWorksheetName:
-        process.env.GOOGLE_SHEETS_SHIPMENT_ORDERS_WORKSHEET_NAME ||
+        process.env.GOOGLE_SHEETS_SHIPMENT_ORDERS_WORKSHEET_NAME?.trim() ||
         "shipment_orders",
       shipmentsWorksheetName:
-        process.env.GOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME || "shipments",
+        process.env.GOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME?.trim() ||
+        "shipments",
       userStateWorksheetName:
-        process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME || "user_state",
+        process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME?.trim() ||
+        "user_state",
     },
     googleDrive: {
       folderId: process.env.GOOGLE_DRIVE_FOLDER_ID || "",

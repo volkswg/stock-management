@@ -9,7 +9,9 @@ export {
   OrdersSheet,
   PurchasesSheet,
   SalesReceiptItemsSheet,
+  SalesProfitCostOverridesSheet,
   SalesReceiptPaymentsSheet,
+  SalesProfitExpensesSheet,
   SalesReceiptsSheet,
   SalesReceiptSyncsSheet,
   ShipmentOrdersSheet,
@@ -27,7 +29,9 @@ export { ORDER_BILLS_SHEET_HEADERS } from "./sheets/order-bills/const";
 export { ORDER_ITEMS_SHEET_HEADERS } from "./sheets/order-items/const";
 export { PURCHASE_SHEET_HEADERS } from "./sheets/purchases/const";
 export { SALES_RECEIPT_ITEM_HEADERS } from "./sheets/sales/receipt-items/const";
+export { SALES_PROFIT_COST_OVERRIDE_HEADERS } from "./sheets/sales/profit-cost-overrides/const";
 export { SALES_RECEIPT_PAYMENT_HEADERS } from "./sheets/sales/receipt-payments/const";
+export { SALES_PROFIT_EXPENSE_HEADERS } from "./sheets/sales/profit-expenses/const";
 export { SALES_RECEIPT_SYNC_HEADERS } from "./sheets/sales/receipt-syncs/const";
 export { SALES_RECEIPT_HEADERS } from "./sheets/sales/receipts/const";
 export { SHIPMENT_ORDERS_SHEET_HEADERS } from "./sheets/shipment-orders/const";

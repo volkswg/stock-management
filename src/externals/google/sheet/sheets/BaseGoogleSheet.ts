@@ -11,6 +11,10 @@ export abstract class BaseGoogleSheet implements IGoogleSheet {
     await this.read("A1:A1");
   }
 
+  async ensureExists(): Promise<void> {
+    await this.client.ensureWorksheet(this.worksheetName);
+  }
+
   async read(range: string): Promise<GoogleSheetRow[]> {
     return this.client.getValues(this.worksheetName, range);
   }
