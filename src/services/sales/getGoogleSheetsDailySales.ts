@@ -9,6 +9,8 @@ import {
   SALES_RECEIPT_PAYMENT_HEADERS,
   SALES_RECEIPT_SYNC_HEADERS,
 } from "@/externals/google/sheet";
+import type { SalesProfitExpense } from "./manageSalesProfitExpenses";
+import type { SalesProfitCostOverride } from "./manageSalesProfitCostOverrides";
 
 export type GoogleSheetsDailySalesItemRow = {
   itemId: string;
@@ -66,6 +68,45 @@ export type GoogleSheetsSalesDashboardReport = {
     dailySales: GoogleSheetsSalesDashboardDay[];
   }>;
   report: GoogleSheetsDailySalesReport;
+};
+
+export type GoogleSheetsProfitSummaryMetrics = {
+  netItems: number;
+  netSales: number;
+  averageSellingPrice: number;
+  averageItemCost: number;
+  unitGrossProfit: number;
+  grossProfit: number;
+  expenses: number;
+  netProfit: number;
+};
+
+export type GoogleSheetsProfitSummaryShop = GoogleSheetsProfitSummaryMetrics & {
+  accountId: string;
+  shopName: string;
+  syncedAverageItemCost: number;
+  hasItemCostOverride: boolean;
+  itemCostOverrideNote: string;
+  expenseNote: string;
+};
+
+export type GoogleSheetsProfitSummarySharedExpense = Pick<
+  SalesProfitExpense,
+  "id" | "amount" | "category" | "name" | "note"
+>;
+
+export type GoogleSheetsProfitSummaryMonth = GoogleSheetsProfitSummaryMetrics & {
+  month: string;
+  shops: GoogleSheetsProfitSummaryShop[];
+  shopExpenses: number;
+  sharedExpenseTotal: number;
+  sharedExpenses: GoogleSheetsProfitSummarySharedExpense[];
+};
+
+export type GoogleSheetsProfitSummary = {
+  year: string;
+  months: GoogleSheetsProfitSummaryMonth[];
+  totals: GoogleSheetsProfitSummaryMetrics;
 };
 
 type SheetRecord = Record<string, GoogleSheetCellValue>;
@@ -182,6 +223,176 @@ export async function getGoogleSheetsSalesDashboard({
     dailySales,
     shopSeries,
     report: createSalesReport(receipts, itemRecords, paymentRecords),
+  };
+}
+
+export async function getGoogleSheetsProfitSummary({
+  accounts,
+  costOverrides,
+  expenses,
+  googleSheetsService,
+  year,
+}: {
+  accounts: Array<{ id: string; shopName: string }>;
+  costOverrides: SalesProfitCostOverride[];
+  expenses: SalesProfitExpense[];
+  googleSheetsService: IGoogleSheetsService;
+  year: string;
+}): Promise<GoogleSheetsProfitSummary> {
+  const [receiptRecords, itemRecords, syncRecords] = await Promise.all([
+    readRecords(googleSheetsService.salesReceipts, SALES_RECEIPT_HEADERS),
+    readRecords(googleSheetsService.salesReceiptItems, SALES_RECEIPT_ITEM_HEADERS),
+    readRecords(googleSheetsService.salesReceiptSyncs, SALES_RECEIPT_SYNC_HEADERS),
+  ]);
+  const accountById = new Map(
+    accounts.map((account) => [account.id, account.shopName]),
+  );
+  const completeSyncs = syncRecords.filter((sync) => {
+    const salesDate = toString(sync.salesDate);
+    return (
+      toString(sync.status).toLowerCase() === "complete" &&
+      salesDate.startsWith(`${year}-`) &&
+      accountById.has(toString(sync.accountId))
+    );
+  });
+  const syncedKeys = new Set(
+    completeSyncs.map(
+      (sync) => `${toString(sync.accountId)}:${toString(sync.salesDate)}`,
+    ),
+  );
+  const receipts = receiptRecords.filter(
+    (receipt) =>
+      syncedKeys.has(
+        `${toString(receipt.accountId)}:${toString(receipt.salesDate)}`,
+      ) && !toString(receipt.cancelledAt),
+  );
+  const shopExpenses = expenses.filter((expense) => expense.scope === "SHOP");
+  const sharedExpenses = expenses.filter(
+    (expense) => expense.scope === "SHARED",
+  );
+  const expensesByShopKey = new Map<string, SalesProfitExpense[]>();
+  for (const expense of shopExpenses) {
+    const key = `${expense.month}:${expense.accountId}`;
+    expensesByShopKey.set(key, [
+      ...(expensesByShopKey.get(key) || []),
+      expense,
+    ]);
+  }
+  const costOverrideByKey = new Map(
+    costOverrides.map((override) => [
+      `${override.month}:${override.accountId}`,
+      override,
+    ]),
+  );
+  const groupKeys = new Set(
+    completeSyncs.map(
+      (sync) =>
+        `${toString(sync.salesDate).slice(0, 7)}:${toString(sync.accountId)}`,
+    ),
+  );
+  for (const expense of shopExpenses) {
+    if (accountById.has(expense.accountId)) {
+      groupKeys.add(`${expense.month}:${expense.accountId}`);
+    }
+  }
+  for (const override of costOverrides) {
+    if (accountById.has(override.accountId)) {
+      groupKeys.add(`${override.month}:${override.accountId}`);
+    }
+  }
+
+  const shops = [...groupKeys]
+    .map((key) => {
+      const separatorIndex = key.indexOf(":");
+      const month = key.slice(0, separatorIndex);
+      const accountId = key.slice(separatorIndex + 1);
+      const groupReceipts = receipts.filter(
+        (receipt) =>
+          toString(receipt.accountId) === accountId &&
+          toString(receipt.salesDate).startsWith(`${month}-`),
+      );
+      const report = createSalesReport(groupReceipts, itemRecords, []);
+      const netItems = normalizeNumber(
+        report.totals.itemsSold - report.totals.itemsRefunded,
+      );
+      const netSales = report.totals.netSales;
+      const totalItemCost = report.totals.costOfGoods;
+      const averageSellingPrice = safeAverage(netSales, netItems);
+      const syncedAverageItemCost = safeAverage(totalItemCost, netItems);
+      const costOverride = costOverrideByKey.get(key);
+      const averageItemCost =
+        costOverride?.averageItemCost ?? syncedAverageItemCost;
+      const grossProfit = normalizeNumber(
+        netSales - averageItemCost * netItems,
+      );
+      const groupExpenses = expensesByShopKey.get(key) || [];
+      const expenseAmount = normalizeNumber(
+        groupExpenses.reduce((total, expense) => total + expense.amount, 0),
+      );
+      return {
+        month,
+        accountId,
+        shopName: accountById.get(accountId) || accountId,
+        netItems,
+        netSales,
+        averageSellingPrice,
+        averageItemCost,
+        syncedAverageItemCost,
+        hasItemCostOverride: Boolean(costOverride),
+        itemCostOverrideNote: costOverride?.note || "",
+        unitGrossProfit: normalizeNumber(
+          averageSellingPrice - averageItemCost,
+        ),
+        grossProfit,
+        expenses: expenseAmount,
+        netProfit: normalizeNumber(grossProfit - expenseAmount),
+        expenseNote: groupExpenses
+          .map((expense) => expense.note)
+          .filter(Boolean)
+          .join("; "),
+      };
+    })
+    .sort((left, right) =>
+      `${left.month}:${left.shopName}`.localeCompare(
+        `${right.month}:${right.shopName}`,
+      ),
+    );
+  const monthKeys = [
+    ...new Set([
+      ...shops.map((shop) => shop.month),
+      ...sharedExpenses.map((expense) => expense.month),
+    ]),
+  ].sort();
+  const months = monthKeys.map((month) => {
+    const monthShops = shops
+      .filter((shop) => shop.month === month)
+      .map<GoogleSheetsProfitSummaryShop>((shop) => ({
+        accountId: shop.accountId,
+        shopName: shop.shopName,
+        netItems: shop.netItems,
+        netSales: shop.netSales,
+        averageSellingPrice: shop.averageSellingPrice,
+        averageItemCost: shop.averageItemCost,
+        syncedAverageItemCost: shop.syncedAverageItemCost,
+        hasItemCostOverride: shop.hasItemCostOverride,
+        itemCostOverrideNote: shop.itemCostOverrideNote,
+        unitGrossProfit: shop.unitGrossProfit,
+        grossProfit: shop.grossProfit,
+        expenses: shop.expenses,
+        netProfit: shop.netProfit,
+        expenseNote: shop.expenseNote,
+      }));
+    return createProfitSummaryMonth(
+      month,
+      monthShops,
+      sharedExpenses.filter((expense) => expense.month === month),
+    );
+  });
+
+  return {
+    year,
+    months,
+    totals: aggregateProfitRows(months),
   };
 }
 
@@ -415,6 +626,90 @@ function aggregateTotals(
   return Object.fromEntries(
     Object.entries(totals).map(([key, value]) => [key, normalizeNumber(value)]),
   ) as GoogleSheetsDailySalesReport["totals"];
+}
+
+function createProfitSummaryMonth(
+  month: string,
+  shops: GoogleSheetsProfitSummaryShop[],
+  sharedExpenses: SalesProfitExpense[],
+): GoogleSheetsProfitSummaryMonth {
+  const shopTotals = aggregateProfitRows(shops);
+  const sharedExpenseTotal = normalizeNumber(
+    sharedExpenses.reduce((total, expense) => total + expense.amount, 0),
+  );
+  const expenses = normalizeNumber(shopTotals.expenses + sharedExpenseTotal);
+  return {
+    month,
+    shops,
+    ...shopTotals,
+    expenses,
+    netProfit: normalizeNumber(shopTotals.grossProfit - expenses),
+    shopExpenses: shopTotals.expenses,
+    sharedExpenseTotal,
+    sharedExpenses: sharedExpenses
+      .map(({ id, amount, category, name, note }) => ({
+        id,
+        amount,
+        category,
+        name,
+        note,
+      }))
+      .sort((left, right) => left.name.localeCompare(right.name)),
+  };
+}
+
+function aggregateProfitRows(
+  rows: Array<
+    Pick<
+      GoogleSheetsProfitSummaryShop,
+      | "netItems"
+      | "netSales"
+      | "averageItemCost"
+      | "grossProfit"
+      | "expenses"
+      | "netProfit"
+    >
+  >,
+): GoogleSheetsProfitSummaryMetrics {
+  const totals = rows.reduce(
+    (result, row) => ({
+      netItems: result.netItems + row.netItems,
+      netSales: result.netSales + row.netSales,
+      totalItemCost:
+        result.totalItemCost + row.averageItemCost * row.netItems,
+      grossProfit: result.grossProfit + row.grossProfit,
+      expenses: result.expenses + row.expenses,
+      netProfit: result.netProfit + row.netProfit,
+    }),
+    {
+      netItems: 0,
+      netSales: 0,
+      totalItemCost: 0,
+      grossProfit: 0,
+      expenses: 0,
+      netProfit: 0,
+    },
+  );
+  const netItems = normalizeNumber(totals.netItems);
+  const netSales = normalizeNumber(totals.netSales);
+  const averageSellingPrice = safeAverage(netSales, netItems);
+  const averageItemCost = safeAverage(totals.totalItemCost, netItems);
+  return {
+    netItems,
+    netSales,
+    averageSellingPrice,
+    averageItemCost,
+    unitGrossProfit: normalizeNumber(
+      averageSellingPrice - averageItemCost,
+    ),
+    grossProfit: normalizeNumber(totals.grossProfit),
+    expenses: normalizeNumber(totals.expenses),
+    netProfit: normalizeNumber(totals.netProfit),
+  };
+}
+
+function safeAverage(total: number, quantity: number): number {
+  return quantity === 0 ? 0 : normalizeNumber(total / quantity);
 }
 
 function aggregateHourlySales(

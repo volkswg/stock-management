@@ -6,6 +6,7 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   DashboardOutlined,
+  FundOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
@@ -158,6 +159,9 @@ export function SalesSyncStatusPage() {
               </Button>
               <Button href="/sales/dashboard" icon={<DashboardOutlined />}>
                 Dashboard
+              </Button>
+              <Button href="/sales/profit-summary" icon={<FundOutlined />}>
+                Profit summary
               </Button>
               <Button
                 icon={<ReloadOutlined />}
