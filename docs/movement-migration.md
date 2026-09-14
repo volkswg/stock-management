@@ -31,12 +31,13 @@ header exist. Existing movement columns stay in the same order, including
 ## Persisted state
 
 `user_state` keeps its existing columns A–G and adds `context` in column H.
-Each user has one row with `flowname = MovementCreate`. Accepted transitions
-update its current milestone and context instead of appending a history log.
+Each user with an active movement has one row with
+`flowname = MovementCreate`. Accepted transitions update its current milestone
+and context instead of appending a history log.
 The JSON context contains the master/item IDs, user ID, selected shop, quantity,
 note, image URL, current step, and last processed LINE event ID. When the flow
-reaches `complete`, the milestone remains in column E and context is cleared.
-Starting the next movement reuses the same row. OrderCreate rows are left intact.
+reaches `complete`, its `MovementCreate` row is deleted. Starting the next
+movement creates a new temporary row. OrderCreate rows are left intact.
 
 The steps are `shop`, `quantity`, `product_image`, `close_bag`, `bag_closed`, and
 `complete`. An unfinished flow has no in-memory timeout. `resume:movement`

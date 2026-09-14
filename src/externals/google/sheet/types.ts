@@ -38,6 +38,7 @@ export interface IGoogleRowsSheet {
   readRows(range?: string): Promise<GoogleSheetRow[]>;
   appendRows(range: string, values: GoogleSheetRow[]): Promise<void>;
   updateRows(range: string, values: GoogleSheetRow[]): Promise<void>;
+  deleteRow?(rowNumber: number): Promise<void>;
 }
 
 export interface IGoogleSheetsService {

@@ -7,7 +7,7 @@ type GoogleSheetsValuesResponse = {
 };
 
 type GoogleSpreadsheetResponse = {
-  sheets?: Array<{ properties?: { title?: string } }>;
+  sheets?: Array<{ properties?: { sheetId?: number; title?: string } }>;
 };
 
 export class GoogleSheetsClient {
@@ -70,6 +70,40 @@ export class GoogleSheetsClient {
         body: JSON.stringify({}),
       },
     );
+  }
+
+  async deleteRow(worksheetName: string, rowNumber: number): Promise<void> {
+    if (!Number.isInteger(rowNumber) || rowNumber < 2) {
+      throw new Error("Only data rows can be deleted from Google Sheets.");
+    }
+
+    const spreadsheet = await this.request<GoogleSpreadsheetResponse>(
+      "?fields=sheets.properties(sheetId,title)",
+      { method: "GET" },
+    );
+    const worksheet = spreadsheet.sheets?.find(
+      (sheet) => sheet.properties?.title === worksheetName,
+    );
+    const sheetId = worksheet?.properties?.sheetId;
+    if (sheetId === undefined) {
+      throw new Error(`Google Sheets worksheet not found: ${worksheetName}`);
+    }
+
+    await this.request(":batchUpdate", {
+      method: "POST",
+      body: JSON.stringify({
+        requests: [{
+          deleteDimension: {
+            range: {
+              sheetId,
+              dimension: "ROWS",
+              startIndex: rowNumber - 1,
+              endIndex: rowNumber,
+            },
+          },
+        }],
+      }),
+    });
   }
 
   async ensureWorksheet(worksheetName: string): Promise<void> {

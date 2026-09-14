@@ -43,7 +43,10 @@ export async function readMovementSession(sheets: IGoogleSheetsService, userId: 
   if (!row) return { processed: false };
 
   if (!String(row[7] || "").trim()) {
-    if (row[4] === "complete") return { processed: false };
+    if (row[4] === "complete") {
+      await deleteMovementStateRows(sheets.userState, rows, userId);
+      return { processed: false };
+    }
     throw new Error("Movement user state is missing its active context.");
   }
 
@@ -75,6 +78,11 @@ export async function saveMovementState(sheets: IGoogleSheetsService, state: Mov
   }
 
   const existingRow = existingRowIndex === -1 ? undefined : rows[existingRowIndex];
+  if (state.step === "complete") {
+    await deleteMovementStateRows(sheets.userState, rows, state.userId);
+    return;
+  }
+
   const isSameMovement = existingRow?.[3] === state.masterId;
   const now = new Date().toISOString();
   const values: GoogleSheetRow = [
@@ -85,7 +93,7 @@ export async function saveMovementState(sheets: IGoogleSheetsService, state: Mov
     state.step,
     isSameMovement ? existingRow?.[5] || state.startedAt : state.startedAt,
     now,
-    state.step === "complete" ? "" : JSON.stringify(state),
+    JSON.stringify(state),
   ];
 
   if (existingRowIndex === -1) {
@@ -131,6 +139,28 @@ export async function resumeLegacyMovement(sheets: IGoogleSheetsService, userId:
     step: items.length ? "bag_closed" : "shop",
     startedAt: String(master[6] || master[2]), shop: "", quantity: "", remark: "", imageUrl: "", lastEventId: "",
   };
+}
+
+async function deleteMovementStateRows(
+  sheet: IGoogleRowsSheet,
+  rows: GoogleSheetRow[],
+  userId: string,
+): Promise<void> {
+  const rowNumbers: number[] = [];
+  for (let index = 1; index < rows.length; index += 1) {
+    if (rows[index]?.[1] === userId && rows[index]?.[2] === MOVEMENT_FLOW) {
+      rowNumbers.push(index + 1);
+    }
+  }
+  if (!rowNumbers.length) return;
+
+  const deleteRow = sheet.deleteRow?.bind(sheet);
+  if (!deleteRow) {
+    throw new Error("Google Sheets user state row deletion is unavailable.");
+  }
+  for (const rowNumber of rowNumbers.reverse()) {
+    await deleteRow(rowNumber);
+  }
 }
 
 function isStep(value: unknown): value is MovementStep {

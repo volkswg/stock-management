@@ -17,4 +17,8 @@ export class UserStateSheet extends BaseGoogleSheet implements IGoogleRowsSheet 
   async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {
     await this.update(range, values);
   }
+
+  async deleteRow(rowNumber: number): Promise<void> {
+    await this.client.deleteRow(this.worksheetName, rowNumber);
+  }
 }
