@@ -35,7 +35,7 @@ export async function handleMovementEvent({
     if (state.step === "complete") {
       await summary(line, event, sheets, state, publicBaseUrl);
     } else {
-      // Repair the master if a previous checkpoint succeeded but its sync failed.
+      // Repair the master if the current state saved but its master sync failed.
       await saveMaster(sheets, state);
       await prompt(line, event, state);
     }
@@ -149,7 +149,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
       await reply(line, event, "Product image upload failed. No movement item was saved. Please send the image again.");
       return;
     }
-    // Persist the upload URL before writing the item so a Sheets retry can reuse it.
+    // Persist the upload URL before writing the item so a retry can reuse it.
     await saveMovementState(sheets, { ...state, imageUrl });
   }
   if (!existing) {

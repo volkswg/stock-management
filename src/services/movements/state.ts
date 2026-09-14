@@ -36,12 +36,20 @@ export async function ensureHeader(sheet: IGoogleRowsSheet, headers: string[], e
 export async function readMovementSession(sheets: IGoogleSheetsService, userId: string, eventId: string): Promise<{ state?: MovementState; processed: boolean }> {
   await ensureHeader(sheets.userState, USER_STATE_SHEET_HEADERS, "H");
   const rows = await sheets.userState.readRows("A:H");
-  const history = rows.filter((row) => row[1] === userId && row[2] === MOVEMENT_FLOW);
-  const row = history.at(-1);
+  const row = rows
+    .slice()
+    .reverse()
+    .find((candidate) => candidate[1] === userId && candidate[2] === MOVEMENT_FLOW);
   if (!row) return { processed: false };
+
+  if (!String(row[7] || "").trim()) {
+    if (row[4] === "complete") return { processed: false };
+    throw new Error("Movement user state is missing its active context.");
+  }
+
   let context: unknown;
   try {
-    context = JSON.parse(String(row[7] || ""));
+    context = JSON.parse(String(row[7]));
   } catch {
     throw new Error("Movement user state contains invalid context.");
   }
@@ -51,25 +59,42 @@ export async function readMovementSession(sheets: IGoogleSheetsService, userId: 
   ) {
     throw new Error("Movement user state is incomplete. Please resume the movement.");
   }
-  const processed = history.some((checkpoint) => {
-    try {
-      const saved: unknown = JSON.parse(String(checkpoint[7] || ""));
-      return isRecord(saved) && saved.lastEventId === eventId;
-    } catch {
-      return false;
-    }
-  });
-  return { state: context as MovementState, processed };
+  const state = context as MovementState;
+  return { state, processed: state.lastEventId === eventId };
 }
 
 export async function saveMovementState(sheets: IGoogleSheetsService, state: MovementState): Promise<void> {
-  // Append a checkpoint; never overwrite the existing order-create state rows.
   await ensureHeader(sheets.userState, USER_STATE_SHEET_HEADERS, "H");
-  await sheets.userState.appendRows("A:H", [[
-    `${state.masterId}:${state.itemId}:${state.step}:${state.lastEventId}`,
-    state.userId, MOVEMENT_FLOW, state.masterId, state.step,
-    state.startedAt, new Date().toISOString(), JSON.stringify(state),
-  ]]);
+  const rows = await sheets.userState.readRows("A:H");
+  let existingRowIndex = -1;
+  for (let index = rows.length - 1; index > 0; index -= 1) {
+    if (rows[index]?.[1] === state.userId && rows[index]?.[2] === MOVEMENT_FLOW) {
+      existingRowIndex = index;
+      break;
+    }
+  }
+
+  const existingRow = existingRowIndex === -1 ? undefined : rows[existingRowIndex];
+  const isSameMovement = existingRow?.[3] === state.masterId;
+  const now = new Date().toISOString();
+  const values: GoogleSheetRow = [
+    existingRow?.[0] || String(rows.length + 1),
+    state.userId,
+    MOVEMENT_FLOW,
+    state.masterId,
+    state.step,
+    isSameMovement ? existingRow?.[5] || state.startedAt : state.startedAt,
+    now,
+    state.step === "complete" ? "" : JSON.stringify(state),
+  ];
+
+  if (existingRowIndex === -1) {
+    await sheets.userState.appendRows("A:H", [values]);
+    return;
+  }
+
+  const rowNumber = existingRowIndex + 1;
+  await sheets.userState.updateRows(`A${rowNumber}:H${rowNumber}`, [values]);
 }
 
 export async function movementItems(sheets: IGoogleSheetsService, masterId: string): Promise<GoogleSheetRow[]> {

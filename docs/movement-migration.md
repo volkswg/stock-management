@@ -31,10 +31,12 @@ header exist. Existing movement columns stay in the same order, including
 ## Persisted state
 
 `user_state` keeps its existing columns A–G and adds `context` in column H.
-Rows with `flowname = MovementCreate` are appended at each accepted transition.
+Each user has one row with `flowname = MovementCreate`. Accepted transitions
+update its current milestone and context instead of appending a history log.
 The JSON context contains the master/item IDs, user ID, selected shop, quantity,
-note, image URL, current step, and last processed LINE event ID. The latest
-movement row for a user is authoritative. OrderCreate rows are left intact.
+note, image URL, current step, and last processed LINE event ID. When the flow
+reaches `complete`, the milestone remains in column E and context is cleared.
+Starting the next movement reuses the same row. OrderCreate rows are left intact.
 
 The steps are `shop`, `quantity`, `product_image`, `close_bag`, `bag_closed`, and
 `complete`. An unfinished flow has no in-memory timeout. `resume:movement`
@@ -47,8 +49,8 @@ and `summary` / `movement summary`. Explicitly creating a new movement starts a
 new active draft; earlier unfinished masters remain available for later resume.
 
 Images upload to Drive before an item is written. A saved upload URL is reused
-on retry, stable item IDs avoid duplicating an already saved item, and processed
-event IDs prevent an old replay from advancing a newer draft. Sheet failures
+on retry, stable item IDs avoid duplicating an already saved item, and the last
+event ID protects the current transition from an immediate redelivery. Sheet failures
 return HTTP 503 rather than forwarding the message to the legacy purchase flow.
 Enable LINE webhook redelivery for automatic retries; otherwise users can retry
 their last action. Drive and Sheets are separate services, so a failure before
