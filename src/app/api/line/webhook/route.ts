@@ -18,6 +18,7 @@ import {
   handleLineEvent,
   shouldProxyToLegacy,
 } from "@/services/line";
+import { handleMovementEvent } from "@/services/movements/createMovement";
 import type { UserState } from "@/services/user-states";
 
 export const runtime = "nodejs";
@@ -55,24 +56,36 @@ export async function POST(request: Request): Promise<NextResponse> {
   });
 
   const resolvedUserStates = new Map<LineEvent, UserState>();
-  const legacyEvents = await collectLegacyEvents({
-    events: payload.events || [],
-    getGoogleSheetsService,
-    resolvedUserStates,
-  });
-
+  const legacyEvents: LineEvent[] = [];
+  let movementFailed = false;
   for (const event of payload.events || []) {
-    if (legacyEvents.includes(event)) {
-      continue;
+    // Route and handle sequentially: earlier events may advance a Sheets checkpoint.
+    try {
+      if (await handleMovementEvent({
+        event,
+        sheets: getGoogleSheetsService(),
+        drive: getGoogleDriveService,
+        line: lineBotService,
+        publicBaseUrl: config.movementPublicBaseUrl ||
+          (config.line.legacyWebhookUrl ? new URL(config.line.legacyWebhookUrl).origin : ""),
+      })) continue;
+    } catch (error) {
+      console.error("Failed to process movement event", {
+        webhookEventId: event.webhookEventId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      movementFailed = true;
+      // Do not route a possibly active movement to the legacy purchase flow.
+      break;
     }
 
+    if (await shouldProxyToLegacy({ event, getGoogleSheetsService, resolvedUserStates })) {
+      legacyEvents.push(event);
+      continue;
+    }
     try {
       await handleLineEvent({
-        event,
-        lineBotService,
-        getGoogleSheetsService,
-        getGoogleDriveService,
-        resolvedUserStates,
+        event, lineBotService, getGoogleSheetsService, getGoogleDriveService, resolvedUserStates,
       });
     } catch (error) {
       console.error("Failed to process LINE event", {
@@ -96,6 +109,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
   }
 
+  if (movementFailed) {
+    return NextResponse.json({ error: "Movement processing failed. Please retry." }, { status: 503 });
+  }
   return NextResponse.json({ ok: true });
 }
 
@@ -119,32 +135,6 @@ function createGoogleSheetsServiceGetter(
     googleSheetsService ||= createGoogleSheetsServiceFromConfig(config);
     return googleSheetsService;
   };
-}
-
-async function collectLegacyEvents({
-  events,
-  getGoogleSheetsService,
-  resolvedUserStates,
-}: {
-  events: LineEvent[];
-  getGoogleSheetsService: () => IGoogleSheetsService;
-  resolvedUserStates: Map<LineEvent, UserState>;
-}): Promise<LineEvent[]> {
-  const legacyEvents: LineEvent[] = [];
-
-  for (const event of events) {
-    if (
-      await shouldProxyToLegacy({
-        event,
-        getGoogleSheetsService,
-        resolvedUserStates,
-      })
-    ) {
-      legacyEvents.push(event);
-    }
-  }
-
-  return legacyEvents;
 }
 
 async function proxyLegacyLineWebhook({

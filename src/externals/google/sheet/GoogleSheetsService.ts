@@ -18,6 +18,7 @@ import {
   ShipmentsSheet,
   UserStateSheet,
 } from "./sheets";
+import { MovementSheet } from "./sheets/movements/MovementSheet";
 import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
@@ -35,6 +36,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly salesReceiptSyncs: SalesReceiptSyncsSheet;
   readonly shipmentOrders: ShipmentOrdersSheet;
   readonly shipments: ShipmentsSheet;
+  readonly movementMasters: MovementSheet;
+  readonly movementDetails: MovementSheet;
   readonly userState: UserStateSheet;
 
   private readonly client: GoogleSheetsClient;
@@ -103,6 +106,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.client,
       config.shipmentsWorksheetName,
     );
+    this.movementMasters = new MovementSheet(this.client, config.movementMasterWorksheetName);
+    this.movementDetails = new MovementSheet(this.client, config.movementDetailWorksheetName);
     this.userState = new UserStateSheet(
       this.client,
       config.userStateWorksheetName,

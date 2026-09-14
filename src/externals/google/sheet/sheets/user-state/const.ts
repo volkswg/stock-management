@@ -6,4 +6,5 @@ export const USER_STATE_SHEET_HEADERS = [
   "state",
   "createdAt",
   "updatedAt",
+  "context",
 ];

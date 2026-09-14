@@ -14,6 +14,7 @@ export type AppConfig = {
     legacyWebhookUrl: string;
   };
   publicBaseUrl: string;
+  movementPublicBaseUrl: string;
   loyverse: {
     accounts: LoyverseAccountConfig[];
   };
@@ -33,6 +34,8 @@ export type AppConfig = {
     salesReceiptSyncsWorksheetName: string;
     shipmentOrdersWorksheetName: string;
     shipmentsWorksheetName: string;
+    movementMasterWorksheetName: string;
+    movementDetailWorksheetName: string;
     userStateWorksheetName: string;
   };
   googleDrive: {
@@ -58,6 +61,7 @@ export function getConfig(): AppConfig {
       legacyWebhookUrl: process.env.LINE_LEGACY_WEBHOOK_URL || "",
     },
     publicBaseUrl: process.env.PUBLIC_BASE_URL || "",
+    movementPublicBaseUrl: process.env.MOVEMENT_PUBLIC_BASE_URL?.trim() || "",
     loyverse: {
       accounts: parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON),
     },
@@ -104,6 +108,10 @@ export function getConfig(): AppConfig {
       shipmentsWorksheetName:
         process.env.GOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME?.trim() ||
         "shipments",
+      movementMasterWorksheetName:
+        process.env.GOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME?.trim() || "movements",
+      movementDetailWorksheetName:
+        process.env.GOOGLE_SHEETS_MOVEMENT_DETAIL_WORKSHEET_NAME?.trim() || "movement_details",
       userStateWorksheetName:
         process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME?.trim() ||
         "user_state",

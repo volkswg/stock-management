@@ -27,6 +27,8 @@ export function createGoogleSheetsServiceFromConfig(
     shipmentOrdersWorksheetName:
       config.googleSheets.shipmentOrdersWorksheetName,
     shipmentsWorksheetName: config.googleSheets.shipmentsWorksheetName,
+    movementMasterWorksheetName: config.googleSheets.movementMasterWorksheetName,
+    movementDetailWorksheetName: config.googleSheets.movementDetailWorksheetName,
     userStateWorksheetName: config.googleSheets.userStateWorksheetName,
     serviceAccountEmail: config.googleService.accountEmail,
     serviceAccountPrivateKey: config.googleService.accountPrivateKey,
