@@ -51,6 +51,14 @@ export type UpdateOrderItemQuantityResponse = {
   };
 };
 
+export type UpdateOrderItemProductCodeResponse = {
+  item: {
+    id: string;
+    productCode: string;
+    updatedAt: string;
+  };
+};
+
 export type OrderImageType = "bill" | "product";
 
 export type UploadOrderImageResponse = {
@@ -218,6 +226,34 @@ export async function updateOrderItemQuantity(
   return body;
 }
 
+export async function updateOrderItemProductCode(
+  orderId: string,
+  orderItemId: string,
+  productCode: string,
+): Promise<UpdateOrderItemProductCodeResponse> {
+  const response = await fetch(
+    `/api/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(orderItemId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ productCode }),
+    },
+  );
+
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(getErrorMessage(body));
+  }
+  if (!isUpdateOrderItemProductCodeResponse(body)) {
+    throw new Error("The product code API returned an invalid response.");
+  }
+
+  return body;
+}
+
 function isOrdersResponse(value: unknown): value is OrdersResponse {
   if (!isRecord(value)) {
     return false;
@@ -268,6 +304,18 @@ function isUpdateOrderItemQuantityResponse(
     typeof value.item.quantity === "string" &&
     (value.item.quantityType === "quote" ||
       value.item.quantityType === "delivered") &&
+    typeof value.item.updatedAt === "string"
+  );
+}
+
+function isUpdateOrderItemProductCodeResponse(
+  value: unknown,
+): value is UpdateOrderItemProductCodeResponse {
+  return (
+    isRecord(value) &&
+    isRecord(value.item) &&
+    typeof value.item.id === "string" &&
+    typeof value.item.productCode === "string" &&
     typeof value.item.updatedAt === "string"
   );
 }

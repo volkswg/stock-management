@@ -47,6 +47,7 @@ import {
 } from "@/app/shipments/api";
 import {
   getOrder,
+  updateOrderItemProductCode,
   updateOrderItemQuantity,
   updateOrderDetails,
   type UpdateOrderDetailsResponse,
@@ -287,39 +288,61 @@ function OrderContent({
                       images={order.productImages.map((image, index) => ({
                         id: image.id,
                         imageUrl: image.imageUrl,
-                        title: `Product ${index + 1}`,
+                        title: image.productCode || `Product ${index + 1}`,
                         details: (
-                          <OrderItemQuantity
-                            deliveredQuantity={image.deliveredQuantity}
-                            key={`${image.id}-${quantityType}`}
-                            itemId={image.id}
-                            orderId={order.id}
-                            quantityType={quantityType}
-                            quoteQuantity={image.quoteQuantity}
-                            onUpdated={(updatedType, quantity) =>
-                              onOrderChange((current) =>
-                                current
-                                  ? {
-                                      ...current,
-                                      productImages: current.productImages.map(
-                                        (item) =>
-                                          item.id === image.id
-                                            ? {
-                                                ...item,
-                                                [
-                                                  updatedType ===
-                                                  OrderItemQuantityType.Quote
-                                                    ? "quoteQuantity"
-                                                    : "deliveredQuantity"
-                                                ]: quantity,
-                                              }
-                                            : item,
-                                      ),
-                                    }
-                                  : current,
-                              )
-                            }
-                          />
+                          <div className={styles.itemEditors}>
+                            <OrderItemProductCode
+                              itemId={image.id}
+                              orderId={order.id}
+                              productCode={image.productCode}
+                              onUpdated={(productCode) =>
+                                onOrderChange((current) =>
+                                  current
+                                    ? {
+                                        ...current,
+                                        productImages: current.productImages.map(
+                                          (item) =>
+                                            item.id === image.id
+                                              ? { ...item, productCode }
+                                              : item,
+                                        ),
+                                      }
+                                    : current,
+                                )
+                              }
+                            />
+                            <OrderItemQuantity
+                              deliveredQuantity={image.deliveredQuantity}
+                              key={`${image.id}-${quantityType}`}
+                              itemId={image.id}
+                              orderId={order.id}
+                              quantityType={quantityType}
+                              quoteQuantity={image.quoteQuantity}
+                              onUpdated={(updatedType, quantity) =>
+                                onOrderChange((current) =>
+                                  current
+                                    ? {
+                                        ...current,
+                                        productImages: current.productImages.map(
+                                          (item) =>
+                                            item.id === image.id
+                                              ? {
+                                                  ...item,
+                                                  [
+                                                    updatedType ===
+                                                    OrderItemQuantityType.Quote
+                                                      ? "quoteQuantity"
+                                                      : "deliveredQuantity"
+                                                  ]: quantity,
+                                                }
+                                              : item,
+                                        ),
+                                      }
+                                    : current,
+                                )
+                              }
+                            />
+                          </div>
                         ),
                       }))}
                       thumbnailSize={128}
@@ -333,6 +356,84 @@ function OrderContent({
         />
       </Card>
     </>
+  );
+}
+
+function OrderItemProductCode({
+  itemId,
+  orderId,
+  productCode: savedProductCode,
+  onUpdated,
+}: {
+  itemId: string;
+  orderId: string;
+  productCode: string;
+  onUpdated: (productCode: string) => void;
+}) {
+  const [productCode, setProductCode] = useState(savedProductCode);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string>();
+  const normalizedProductCode = productCode.trim();
+  const canSave = normalizedProductCode !== savedProductCode;
+
+  const saveProductCode = async (): Promise<void> => {
+    if (!canSave) return;
+
+    setSaving(true);
+    setSaved(false);
+    setError(undefined);
+    try {
+      const response = await updateOrderItemProductCode(
+        orderId,
+        itemId,
+        normalizedProductCode,
+      );
+      setProductCode(response.item.productCode);
+      onUpdated(response.item.productCode);
+      setSaved(true);
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to update the product code.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.productCodeEditor}>
+      <Text className={styles.quantityLabel} type="secondary">
+        Product code
+      </Text>
+      <Space.Compact className={styles.quantityControls}>
+        <Input
+          aria-label="Product code"
+          maxLength={100}
+          placeholder="Product code"
+          value={productCode}
+          onChange={(event) => {
+            setProductCode(event.target.value);
+            setSaved(false);
+          }}
+          onPressEnter={() => void saveProductCode()}
+        />
+        <Tooltip title="Save product code">
+          <Button
+            aria-label="Save product code"
+            disabled={!canSave}
+            icon={<SaveOutlined />}
+            loading={saving}
+            type="primary"
+            onClick={() => void saveProductCode()}
+          />
+        </Tooltip>
+      </Space.Compact>
+      {saved ? <Text type="success">Saved</Text> : null}
+      {error ? <Text type="danger">{error}</Text> : null}
+    </div>
   );
 }
 

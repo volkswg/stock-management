@@ -139,14 +139,22 @@
   flex: 0 0 auto;
 }
 
-.quantityEditor {
+.itemEditors {
+  width: 200px;
+  display: grid;
+  gap: 12px;
+}
+
+.quantityEditor,
+.productCodeEditor {
   width: 180px;
   display: grid;
   gap: 5px;
 }
 
 .quantityLabel,
-.quantityEditor > :global(.ant-typography) {
+.quantityEditor > :global(.ant-typography),
+.productCodeEditor > :global(.ant-typography) {
   font-size: 12px;
 }
 
@@ -155,6 +163,11 @@
 }
 
 .quantityControls :global(.ant-input-number) {
+  flex: 1;
+  min-width: 0;
+}
+
+.quantityControls :global(.ant-input) {
   flex: 1;
   min-width: 0;
 }

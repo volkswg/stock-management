@@ -28,6 +28,10 @@ export {
   type UpdateOrderItemQuantityResult,
 } from "./updateOrderItemQuantity";
 export {
+  updateOrderItemProductCode,
+  type UpdateOrderItemProductCodeResult,
+} from "./updateOrderItemProductCode";
+export {
   updateOrderDetails,
   type OrderDetailsUpdate,
   type UpdateOrderDetailsResult,

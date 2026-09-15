@@ -3,6 +3,7 @@ import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   OrderItemQuantityType,
+  updateOrderItemProductCode,
   updateOrderItemQuantity,
 } from "@/services/orders";
 
@@ -23,6 +24,52 @@ export async function PATCH(
   }
 
   const body = await readJsonBody(request);
+  if (isRecord(body) && "productCode" in body) {
+    if (!isValidProductCode(body.productCode)) {
+      return NextResponse.json(
+        { error: "Product code must be 100 characters or fewer." },
+        { status: 400 },
+      );
+    }
+
+    try {
+      const googleSheetsService = createGoogleSheetsServiceFromConfig(
+        getConfig(),
+      );
+      const productCode = body.productCode.trim();
+      const result = await updateOrderItemProductCode({
+        googleSheetsService,
+        orderId,
+        orderItemId,
+        productCode,
+      });
+      if (result.outcome === "not_found") {
+        return NextResponse.json(
+          { error: "Order product not found." },
+          { status: 404 },
+        );
+      }
+
+      return NextResponse.json({
+        item: {
+          id: orderItemId,
+          productCode: result.productCode,
+          updatedAt: result.updatedAt,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to update order product code", {
+        orderId,
+        orderItemId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return NextResponse.json(
+        { error: "Failed to update the product code." },
+        { status: 500 },
+      );
+    }
+  }
+
   if (
     !isRecord(body) ||
     !isOrderItemQuantityType(body.quantityType) ||
@@ -81,6 +128,10 @@ async function readJsonBody(request: Request): Promise<unknown> {
 
 function isValidQuantity(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value > 0;
+}
+
+function isValidProductCode(value: unknown): value is string {
+  return typeof value === "string" && value.length <= 100;
 }
 
 function isOrderItemQuantityType(value: unknown): value is OrderItemQuantityType {
