@@ -544,7 +544,7 @@ export function LoyverseDailySalesPage() {
               className={styles.errorAlert}
               type="success"
               showIcon
-              message={notice}
+              title={notice}
             />
           ) : null}
 

@@ -381,7 +381,7 @@ export function EmployeesPage() {
             <Alert
               closable
               className={styles.alert}
-              message={error}
+              title={error}
               showIcon
               type="error"
               onClose={() => setError(undefined)}
@@ -391,7 +391,7 @@ export function EmployeesPage() {
             <Alert
               closable
               className={styles.alert}
-              message={notice}
+              title={notice}
               showIcon
               type="success"
               onClose={() => setNotice(undefined)}

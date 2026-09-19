@@ -261,7 +261,7 @@ export function EmployeeTimesheetSummaryPage() {
             <Alert
               closable
               className={styles.alert}
-              message={error}
+              title={error}
               showIcon
               type="error"
               onClose={() => setError(undefined)}

@@ -980,7 +980,7 @@ function ShipmentLinkCard({
               </Button>
             }
             className={styles.shipmentError}
-            message={shipmentsError}
+            title={shipmentsError}
             showIcon
             type="error"
           />
@@ -1111,7 +1111,7 @@ function OrderDetailError({
       }
       className={styles.errorAlert}
       description={message}
-      message="Order could not be loaded"
+      title="Order could not be loaded"
       showIcon
       type="error"
     />
