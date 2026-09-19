@@ -5,8 +5,10 @@ import {
   ArrowRightOutlined,
   CheckOutlined,
   EyeOutlined,
+  LinkOutlined,
   ReloadOutlined,
   TruckOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
@@ -26,7 +28,9 @@ import {
   Table,
   Tag,
   Typography,
+  Upload,
   type TableProps,
+  type UploadFile,
 } from "antd";
 import { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
@@ -60,6 +64,7 @@ type PoConfirmationFormValues = {
 type StatusConfirmation = {
   deliveryFee?: number;
   poNumber?: string;
+  shippingBill?: File;
 };
 
 const ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
@@ -238,6 +243,7 @@ function ShipmentContent({
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [deliveryFeeModalOpen, setDeliveryFeeModalOpen] = useState(false);
   const [poConfirmationModalOpen, setPoConfirmationModalOpen] = useState(false);
+  const [shippingBillFiles, setShippingBillFiles] = useState<UploadFile[]>([]);
   const currentStep = getShipmentStep(shipment);
   const nextStatus = getNextShipmentStatus(shipment.status);
   const stepTitles = ["Draft", "Ready to ship", "Shipping", "Delivered"];
@@ -259,6 +265,7 @@ function ShipmentContent({
       setPoConfirmationModalOpen(false);
       deliveryFeeForm.resetFields();
       poConfirmationForm.resetFields();
+      setShippingBillFiles([]);
       messageApi.success(
         `Shipment status updated to ${formatStatus(status).toLowerCase()}.`,
       );
@@ -394,6 +401,24 @@ function ShipmentContent({
               children: shipment.remark || "—",
               span: 2,
             },
+            {
+              key: "shippingBill",
+              label: "Shipping bill",
+              children: shipment.shippingBillUrl ? (
+                <Button
+                  href={shipment.shippingBillUrl}
+                  icon={<LinkOutlined />}
+                  rel="noreferrer"
+                  target="_blank"
+                  type="link"
+                >
+                  View shipping bill
+                </Button>
+              ) : (
+                "—"
+              ),
+              span: 2,
+            },
           ]}
         />
       </Card>
@@ -472,10 +497,11 @@ function ShipmentContent({
         okButtonProps={{ loading: statusUpdating }}
         okText="Start shipping"
         open={poConfirmationModalOpen}
-        title="Confirm PO number"
+        title="Start shipping"
         onCancel={() => {
           setPoConfirmationModalOpen(false);
           poConfirmationForm.resetFields();
+          setShippingBillFiles([]);
         }}
         onOk={() => poConfirmationForm.submit()}
       >
@@ -483,7 +509,10 @@ function ShipmentContent({
           form={poConfirmationForm}
           layout="vertical"
           onFinish={({ poNumber }) =>
-            void handleStatusUpdate(ShipmentStatus.Shipping, { poNumber })
+            void handleStatusUpdate(ShipmentStatus.Shipping, {
+              poNumber,
+              shippingBill: shippingBillFiles[0]?.originFileObj,
+            })
           }
         >
           <Form.Item
@@ -502,6 +531,22 @@ function ShipmentContent({
             ]}
           >
             <Input autoComplete="off" placeholder="Enter PO number" />
+          </Form.Item>
+          <Form.Item
+            extra="Optional. PDF, JPEG, PNG, or WebP up to 10 MB."
+            label="Shipping bill"
+          >
+            <Upload
+              accept="application/pdf,image/jpeg,image/png,image/webp"
+              beforeUpload={() => false}
+              fileList={shippingBillFiles}
+              maxCount={1}
+              onChange={({ fileList }) =>
+                setShippingBillFiles(fileList.slice(-1))
+              }
+            >
+              <Button icon={<UploadOutlined />}>Choose file</Button>
+            </Upload>
           </Form.Item>
         </Form>
       </Modal>

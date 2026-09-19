@@ -36,6 +36,7 @@ export async function createShipment({
     updatedAt: now,
     deletedAt: "",
     createdBy,
+    shippingBillUrl: "",
   };
 
   await googleSheetsService.shipments.appendRows(getShipmentsAppendRange(), [
@@ -52,6 +53,7 @@ export async function createShipment({
       shipment.updatedAt,
       shipment.deletedAt,
       shipment.createdBy,
+      shipment.shippingBillUrl,
     ],
   ]);
 

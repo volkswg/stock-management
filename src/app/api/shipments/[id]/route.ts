@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
+import {
+  createGoogleDriveServiceFromConfig,
+  type IGoogleDriveService,
+} from "@/externals/google/drive";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { isRecord } from "@/features/backend/shared/utils";
 import {
@@ -15,6 +19,14 @@ import {
 } from "@/services/shipments";
 
 export const runtime = "nodejs";
+
+const ALLOWED_SHIPPING_BILL_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+const MAX_SHIPPING_BILL_SIZE_BYTES = 10 * 1024 * 1024;
 
 export async function GET(
   _request: Request,
@@ -64,7 +76,7 @@ export async function PATCH(
 ): Promise<NextResponse> {
   const { id } = await params;
   const shipmentId = id.trim();
-  const body = await readJsonBody(request);
+  const body = await readShipmentUpdateBody(request);
   if (!shipmentId || !isRecord(body) || !isUpdatableStatus(body.status)) {
     return NextResponse.json(
       { error: "Shipment ID and a valid next status are required." },
@@ -84,6 +96,7 @@ export async function PATCH(
   }
 
   let poNumber: string | undefined;
+  let shippingBill: File | undefined;
   if (body.status === ShipmentStatus.Shipping) {
     if (!isValidPoNumber(body.poNumber)) {
       return NextResponse.json(
@@ -92,20 +105,53 @@ export async function PATCH(
       );
     }
     poNumber = body.poNumber.trim();
+    if (body.shippingBill !== undefined) {
+      if (!isValidShippingBill(body.shippingBill)) {
+        return NextResponse.json(
+          { error: "Select a PDF, JPEG, PNG, or WebP file up to 10 MB." },
+          { status: 400 },
+        );
+      }
+      shippingBill = body.shippingBill;
+    }
   }
 
+  let googleDriveService: IGoogleDriveService | undefined;
+  let uploadedFileId: string | undefined;
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(
-      getConfig(),
-    );
+    const config = getConfig();
+    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    let shippingBillUrl: string | undefined;
+    if (shippingBill) {
+      googleDriveService = createGoogleDriveServiceFromConfig(config);
+      if (!googleDriveService) {
+        return NextResponse.json(
+          { error: "Google Drive is not configured." },
+          { status: 503 },
+        );
+      }
+      const driveFile = await googleDriveService.uploadImage({
+        fileName: createShippingBillFileName(shipmentId, shippingBill),
+        contentType: shippingBill.type,
+        bytes: Buffer.from(await shippingBill.arrayBuffer()),
+      });
+      uploadedFileId = driveFile.id;
+      shippingBillUrl = driveFile.webViewLink;
+    }
+
     const result = await updateShipmentStatus({
       deliveryFee,
       googleSheetsService,
       poNumber,
+      shippingBillUrl,
       shipmentId,
       status: body.status,
     });
 
+    if (result.outcome !== "updated") {
+      await cleanUpUploadedFile(googleDriveService, uploadedFileId);
+      uploadedFileId = undefined;
+    }
     if (result.outcome === "not_found") {
       return NextResponse.json(
         { error: "Shipment was not found." },
@@ -133,6 +179,7 @@ export async function PATCH(
 
     return NextResponse.json({ shipment: result.shipment });
   } catch (error) {
+    await cleanUpUploadedFile(googleDriveService, uploadedFileId);
     console.error("Failed to update shipment status", {
       error: error instanceof Error ? error.message : String(error),
       shipmentId,
@@ -141,5 +188,63 @@ export async function PATCH(
       { error: "Failed to update shipment status." },
       { status: 500 },
     );
+  }
+}
+
+async function readShipmentUpdateBody(request: Request): Promise<unknown> {
+  if (!request.headers.get("content-type")?.includes("multipart/form-data")) {
+    return readJsonBody(request);
+  }
+
+  try {
+    const formData = await request.formData();
+    const shippingBill = formData.get("shippingBill");
+    return {
+      status: formData.get("status"),
+      poNumber: formData.get("poNumber"),
+      shippingBill:
+        shippingBill instanceof File && shippingBill.size > 0
+          ? shippingBill
+          : undefined,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function isValidShippingBill(value: unknown): value is File {
+  return (
+    value instanceof File &&
+    value.size > 0 &&
+    value.size <= MAX_SHIPPING_BILL_SIZE_BYTES &&
+    ALLOWED_SHIPPING_BILL_TYPES.has(value.type)
+  );
+}
+
+function createShippingBillFileName(shipmentId: string, file: File): string {
+  const extension =
+    file.type === "application/pdf"
+      ? ".pdf"
+      : file.type === "image/png"
+        ? ".png"
+        : file.type === "image/webp"
+          ? ".webp"
+          : ".jpg";
+  const safeShipmentId = shipmentId.replace(/[^a-zA-Z0-9_-]/g, "_");
+  return `shipment-bill-${safeShipmentId}-${Date.now()}${extension}`;
+}
+
+async function cleanUpUploadedFile(
+  googleDriveService: IGoogleDriveService | undefined,
+  fileId: string | undefined,
+): Promise<void> {
+  if (!googleDriveService || !fileId) return;
+  try {
+    await googleDriveService.deleteFile(fileId);
+  } catch (error) {
+    console.error("Failed to clean up shipment bill upload", {
+      fileId,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }

@@ -8,6 +8,7 @@ export type ShipmentStatusUpdate = {
   shippedAt: string;
   deliveredAt: string;
   updatedAt: string;
+  shippingBillUrl: string;
 };
 
 export type UpdateShipmentStatusResult =
@@ -21,12 +22,14 @@ export async function updateShipmentStatus({
   deliveryFee,
   googleSheetsService,
   poNumber,
+  shippingBillUrl,
   shipmentId,
   status,
 }: {
   deliveryFee?: number;
   googleSheetsService: IGoogleSheetsService;
   poNumber?: string;
+  shippingBillUrl?: string;
   shipmentId: string;
   status: ShipmentStatus;
 }): Promise<UpdateShipmentStatusResult> {
@@ -40,7 +43,10 @@ export async function updateShipmentStatus({
     return { outcome: "invalid_delivery_fee" };
   }
 
-  const rows = await googleSheetsService.shipments.readRows("A2:L");
+  await googleSheetsService.shipments.updateRows("M1", [
+    ["shippingBillUrl"],
+  ]);
+  const rows = await googleSheetsService.shipments.readRows("A2:M");
   const rowIndex = rows.findIndex(
     ([id, , , , , , , , , , deletedAt]) =>
       String(id ?? "").trim() === shipmentId &&
@@ -60,6 +66,10 @@ export async function updateShipmentStatus({
     currentShippedAt,
     currentDeliveredAt,
     createdAt,
+    ,
+    deletedAt,
+    createdBy,
+    currentShippingBillUrl,
   ] = rows[rowIndex];
   if (!isValidTransition(String(currentStatus ?? "").trim(), status)) {
     return { outcome: "invalid_transition" };
@@ -88,10 +98,14 @@ export async function updateShipmentStatus({
     status === ShipmentStatus.Delivered
       ? now
       : String(currentDeliveredAt ?? "").trim();
+  const updatedShippingBillUrl =
+    status === ShipmentStatus.Shipping
+      ? shippingBillUrl?.trim() || ""
+      : String(currentShippingBillUrl ?? "").trim();
   const sheetRowNumber = rowIndex + 2;
 
   await googleSheetsService.shipments.updateRows(
-    `B${sheetRowNumber}:J${sheetRowNumber}`,
+    `B${sheetRowNumber}:M${sheetRowNumber}`,
     [
       [
         status,
@@ -103,6 +117,9 @@ export async function updateShipmentStatus({
         deliveredAt,
         createdAt ?? "",
         now,
+        deletedAt ?? "",
+        createdBy ?? "",
+        updatedShippingBillUrl,
       ],
     ],
   );
@@ -116,6 +133,7 @@ export async function updateShipmentStatus({
       shippedAt,
       deliveredAt,
       updatedAt: now,
+      shippingBillUrl: updatedShippingBillUrl,
     },
   };
 }

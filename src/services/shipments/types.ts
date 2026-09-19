@@ -21,6 +21,7 @@ export type Shipment = {
   updatedAt: string;
   deletedAt: string;
   createdBy: string;
+  shippingBillUrl: string;
 };
 
 export type ShipmentRelatedOrder = {

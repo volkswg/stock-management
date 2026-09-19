@@ -11,4 +11,5 @@ export const SHIPMENTS_SHEET_HEADERS = [
   "updatedAt",
   "deletedAt",
   "createdBy",
+  "shippingBillUrl",
 ] as const;

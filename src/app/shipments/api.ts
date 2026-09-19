@@ -32,6 +32,7 @@ export type AdvanceShipmentStatusInput = {
   status: ShipmentStatus;
   deliveryFee?: number;
   poNumber?: string;
+  shippingBill?: File;
 };
 
 export type LinkOrderToShipmentResponse = {
@@ -101,15 +102,20 @@ export async function advanceShipmentStatus(
   shipmentId: string,
   input: AdvanceShipmentStatusInput,
 ): Promise<UpdateShipmentStatusResponse> {
+  const requestBody = input.shippingBill
+    ? createShipmentStatusFormData(input)
+    : JSON.stringify(input);
   const response = await fetch(
     `/api/shipments/${encodeURIComponent(shipmentId)}`,
     {
       method: "PATCH",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(input),
+      headers: input.shippingBill
+        ? { Accept: "application/json" }
+        : {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+      body: requestBody,
     },
   );
 
@@ -122,6 +128,20 @@ export async function advanceShipmentStatus(
   }
 
   return body;
+}
+
+function createShipmentStatusFormData(
+  input: AdvanceShipmentStatusInput,
+): FormData {
+  const formData = new FormData();
+  formData.set("status", input.status);
+  if (input.poNumber !== undefined) {
+    formData.set("poNumber", input.poNumber);
+  }
+  if (input.shippingBill) {
+    formData.set("shippingBill", input.shippingBill);
+  }
+  return formData;
 }
 
 export async function createShipmentMaster(
@@ -203,7 +223,8 @@ function isUpdateShipmentStatusResponse(
     isRecord(value) &&
     isRecord(value.shipment) &&
     typeof value.shipment.status === "string" &&
-    typeof value.shipment.updatedAt === "string"
+    typeof value.shipment.updatedAt === "string" &&
+    typeof value.shipment.shippingBillUrl === "string"
   );
 }
 

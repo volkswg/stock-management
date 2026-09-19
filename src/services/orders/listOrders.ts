@@ -284,6 +284,7 @@ function mapShipmentRow(row: GoogleSheetRow): Shipment | undefined {
     updatedAt,
     deletedAt,
     createdBy,
+    shippingBillUrl,
   ] = row;
   const normalizedId = toStringValue(id);
   const normalizedStatus = toStringValue(status);
@@ -310,6 +311,7 @@ function mapShipmentRow(row: GoogleSheetRow): Shipment | undefined {
     createdAt: toStringValue(createdAt),
     updatedAt: toStringValue(updatedAt),
     createdBy: toStringValue(createdBy),
+    shippingBillUrl: toStringValue(shippingBillUrl),
   };
 }
 
