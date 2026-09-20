@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { MovementDetailPage } from "./MovementDetailPage";
 
 export const metadata: Metadata = {
@@ -11,5 +12,9 @@ export default async function MovementPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  return <MovementDetailPage movementMasterId={(await params).id} />;
+  return (
+    <Suspense fallback={null}>
+      <MovementDetailPage movementMasterId={(await params).id} />
+    </Suspense>
+  );
 }

@@ -27,6 +27,7 @@ import {
   Typography,
   Upload,
 } from "antd";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductMovementRecord } from "@/services/movements";
 import {
@@ -46,8 +47,10 @@ const { Paragraph, Text, Title } = Typography;
 const { TextArea } = Input;
 
 export function MovementDetailPage({ movementMasterId }: { movementMasterId: string }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [records, setRecords] = useState<ProductMovementRecord[]>([]);
-  const [activeShop, setActiveShop] = useState("");
   const [packedIds, setPackedIds] = useState<Set<string>>(new Set());
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
   const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
@@ -64,7 +67,6 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     getMovement(movementMasterId, controller.signal)
       .then((nextRecords) => {
         setRecords(nextRecords);
-        setActiveShop(nextRecords[0]?.shopName || "");
       })
       .catch((requestError: unknown) => {
         if (!controller.signal.aborted) setError(errorMessage(requestError));
@@ -77,11 +79,35 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
 
   const recordsByShop = useMemo(() => groupByShop(records), [records]);
   const shops = Object.keys(recordsByShop);
-  const currentShop = activeShop || shops[0] || "";
+  const selectedShop = searchParams.get("shop")?.trim() || "";
+  const currentShop =
+    shops.find(
+      (shop) => shop.toLocaleLowerCase() === selectedShop.toLocaleLowerCase(),
+    ) ||
+    shops[0] ||
+    "";
   const currentRecords = recordsByShop[currentShop] || [];
   const totalQuantity = sumQuantity(records);
   const isDelivered =
     records.length > 0 && records.every((record) => record.status === "delivered");
+
+  useEffect(() => {
+    if (!currentShop || selectedShop === currentShop) return;
+
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    nextSearchParams.set("shop", currentShop);
+    router.replace(`${pathname}?${nextSearchParams.toString()}`, {
+      scroll: false,
+    });
+  }, [currentShop, pathname, router, searchParams, selectedShop]);
+
+  function selectShop(shop: string) {
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    nextSearchParams.set("shop", shop);
+    router.replace(`${pathname}?${nextSearchParams.toString()}`, {
+      scroll: false,
+    });
+  }
 
   async function markDelivered() {
     setDelivering(true);
@@ -173,7 +199,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                 className={styles.shopTabs}
                 options={shops.map((shop) => ({ label: `${shop} (${sumQuantity(recordsByShop[shop])})`, value: shop }))}
                 value={currentShop}
-                onChange={setActiveShop}
+                onChange={selectShop}
               />
               <Row className={styles.summaryGrid} gutter={[16, 16]}>
                 <Col xs={8}><Card><Statistic title="Shop" value={currentShop || "—"} /></Card></Col>
@@ -218,10 +244,6 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
   const [editing, setEditing] = useState(false);
   const [quantity, setQuantity] = useState(record.quantity);
   const [remark, setRemark] = useState(record.remark);
-  useEffect(() => {
-    setQuantity(record.quantity);
-    setRemark(record.remark);
-  }, [record.quantity, record.remark]);
   const nextQuantity = quantity.trim();
   const nextRemark = remark.trim();
   const changed = nextQuantity !== record.quantity || nextRemark !== record.remark;
@@ -258,7 +280,7 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
             <div className={styles.editForm}>
               <label><span>Amount</span><Input disabled={saving} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></label>
               <label><span>Note</span><TextArea autoSize={{ minRows: 2, maxRows: 4 }} disabled={saving} value={remark} onChange={(event) => setRemark(event.target.value)} /></label>
-              <Space><Button disabled={saving} onClick={cancel}>Cancel</Button><Button disabled={!nextQuantity || !changed} loading={saving} type="primary" onClick={() => void onSave({ movementId: record.movementId, quantity: nextQuantity, remark: nextRemark }).then(() => setEditing(false)).catch(() => undefined)}>Save</Button></Space>
+              <Space><Button disabled={saving} onClick={cancel}>Cancel</Button><Button disabled={!nextQuantity || !changed} loading={saving} type="primary" onClick={() => void onSave({ movementId: record.movementId, quantity: nextQuantity, remark: nextRemark }).then(() => { setQuantity(nextQuantity); setRemark(nextRemark); setEditing(false); }).catch(() => undefined)}>Save</Button></Space>
             </div>
           ) : record.remark ? <Paragraph className={styles.remark}>{record.remark}</Paragraph> : null}
           {message ? <Text type="secondary">{message}</Text> : null}
