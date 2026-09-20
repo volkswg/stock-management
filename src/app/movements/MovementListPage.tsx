@@ -317,7 +317,17 @@ function CalendarCell({ date, period, summary, onSelect }: {
       type="button"
       onClick={() => summary && onSelect(summary)}
     >
-      <span className={styles.cellHeader}><strong>{date.date()}</strong>{summary ? <Badge color="#157347" count={summary.movementMasters.length} /> : null}</span>
+      <span className={styles.cellHeader}>
+        <strong>{date.date()}</strong>
+        {summary ? (
+          <Badge
+            color="#157347"
+            count={summary.movementMasters.length}
+            overflowCount={99}
+            title={`${summary.movementMasters.length} movements`}
+          />
+        ) : null}
+      </span>
       {summary ? (
         <span
           aria-label={`${summary.quantity} total. ${formatShopTotals(summary.shopQuantities)}`}

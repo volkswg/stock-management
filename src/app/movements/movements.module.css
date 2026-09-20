@@ -25,7 +25,8 @@
 .activeCell { cursor: pointer; }
 .activeCell:hover { border-color: #157347; background: #f0f7f3; }
 .mutedCell { background: #f7f8f7; color: #8a948e; }
-.cellHeader { display: flex; align-items: center; justify-content: space-between; }
+.cellHeader { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 3px; }
+.cellHeader :global(.ant-badge) { flex: none; }
 .cellSummary { min-width: 0; display: grid; align-content: start; gap: 3px; overflow: hidden; color: #68736d; font-size: 12px; }
 .shopQuantity { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 2px 6px; border-radius: 4px; background: #edf6f1; color: #157347; }
 .shopQuantity > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -55,7 +56,7 @@
   .calendarCard :global(.ant-picker-calendar-date-content) { height: 78px !important; }
   .calendarCard :global(.ant-picker-content th) { padding: 6px 0; font-size: 11px; }
   .calendarCell { height: 78px; gap: 4px; padding: 5px; }
-  .cellHeader :global(.ant-badge) { display: none; }
+  .cellHeader :global(.ant-badge-count) { min-width: 16px; height: 16px; padding: 0 4px; font-size: 9px; line-height: 16px; }
   .cellSummary { gap: 2px; font-size: 10px; }
   .shopQuantity { gap: 2px; padding: 1px 3px; }
 }
