@@ -12,7 +12,7 @@
 .summaryGrid :global(.ant-card), .summaryGrid :global(.ant-card-body) { height: 100%; }
 .summaryGrid :global(.ant-card-body) { padding: 18px 20px; }
 .alert { margin-bottom: 16px; }
-.tableCard :global(.ant-card-body), .calendarCard :global(.ant-card-body), .weekCard :global(.ant-card-body) { padding: 0; }
+.tableCard :global(.ant-card-body), .calendarCard :global(.ant-card-body) { padding: 0; }
 .clickableRow { cursor: pointer; }
 .clickableRow:focus { outline: 2px solid #157347; outline-offset: -2px; }
 .calendarCard { overflow: hidden; }
@@ -31,16 +31,6 @@
 .shopQuantity { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 2px 6px; border-radius: 4px; background: #edf6f1; color: #157347; }
 .shopQuantity > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shopQuantity strong { flex: none; color: inherit; font-size: inherit; }
-.weekCard { overflow-x: auto; }
-.weekGrid { min-width: 1470px; display: grid; grid-template-columns: repeat(7, minmax(210px, 1fr)); }
-.weekDay { min-height: 320px; padding: 14px; border-right: 1px solid #e1e5e2; }
-.weekDay:last-child { border-right: 0; }
-.weekHeader { margin: -14px -14px 14px; padding: 12px 14px; border-bottom: 1px solid #e1e5e2; background: #f7f8f7; }
-.weekHeader h4 { margin: 2px 0 0 !important; }
-.weekSummary { width: 100%; display: grid; gap: 8px; padding: 12px; border: 1px solid #d9e4dd; border-radius: 6px; background: #f5faf7; color: #1f2923; cursor: pointer; font: inherit; text-align: left; }
-.weekSummary > strong { color: #157347; }
-.weekMovement { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 8px; border-top: 1px solid #d9e4dd; font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }
-.weekMovement :global(.ant-tag) { margin: 0; }
 .emptyIcon { color: #157347; font-size: 44px; }
 .pickerList { width: 100%; }
 .pickerDescriptions { margin-top: 14px; }

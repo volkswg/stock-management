@@ -45,7 +45,6 @@ import {
 import styles from "./movements.module.css";
 
 const { Text, Title } = Typography;
-type DisplayType = "month" | "week";
 type ViewMode = "calendar" | "table";
 type DailySummary = {
   date: string;
@@ -59,7 +58,6 @@ export function MovementListPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [records, setRecords] = useState<ProductMovementMasterRecord[]>([]);
-  const [displayType, setDisplayType] = useState<DisplayType>("month");
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [selectedDay, setSelectedDay] = useState<DailySummary>();
   const [loading, setLoading] = useState(true);
@@ -106,16 +104,7 @@ export function MovementListPage() {
   const shopTotals = summarizeShops(records);
 
   function setPeriod(value: Dayjs) {
-    router.push(
-      `/movements?${displayType === "week" ? weekQuery(value) : monthQuery(value)}`,
-    );
-  }
-
-  function setDisplay(next: DisplayType) {
-    setDisplayType(next);
-    router.push(
-      `/movements?${next === "week" ? weekQuery(period) : monthQuery(period)}`,
-    );
+    router.push(`/movements?${monthQuery(value)}`);
   }
 
   const columns: TableProps<ProductMovementMasterRecord>["columns"] = [
@@ -175,44 +164,35 @@ export function MovementListPage() {
           <Card className={styles.toolbarCard}>
             <div className={styles.toolbar}>
               <div className={styles.periodControl}>
-                <Text strong>{displayType === "week" ? "Week" : "Month"}</Text>
+                <Text strong>Month</Text>
                 <Space.Compact>
                   <Button
-                    aria-label={`Previous ${displayType}`}
+                    aria-label="Previous month"
                     icon={<LeftOutlined />}
-                    onClick={() => setPeriod(period.subtract(1, displayType))}
+                    onClick={() => setPeriod(period.subtract(1, "month"))}
                   />
                   <DatePicker
                     allowClear={false}
-                    format={displayType === "week" ? weekLabel : "YYYY-MM"}
-                    picker={displayType}
+                    format="YYYY-MM"
+                    picker="month"
                     value={period}
                     onChange={(value) => setPeriod(value || dayjs())}
                   />
-                  <Tooltip title={`Current ${displayType}`}>
+                  <Tooltip title="Current month">
                     <Button
-                      aria-label={`Current ${displayType}`}
+                      aria-label="Current month"
                       icon={<CalendarOutlined />}
                       onClick={() => setPeriod(getCurrentBangkokDate())}
                     />
                   </Tooltip>
                   <Button
-                    aria-label={`Next ${displayType}`}
+                    aria-label="Next month"
                     icon={<RightOutlined />}
-                    onClick={() => setPeriod(period.add(1, displayType))}
+                    onClick={() => setPeriod(period.add(1, "month"))}
                   />
                 </Space.Compact>
               </div>
               <Space wrap>
-                <Segmented<DisplayType>
-                  aria-label="Calendar period"
-                  options={[
-                    { label: "Month", value: "month" },
-                    { label: "Week", value: "week" },
-                  ]}
-                  value={displayType}
-                  onChange={setDisplay}
-                />
                 <Segmented<ViewMode>
                   aria-label="Movement view"
                   options={[
@@ -268,8 +248,6 @@ export function MovementListPage() {
                 )}
               />
             </Card>
-          ) : displayType === "week" ? (
-            <WeekView period={period} summaries={summaryByDate} onSelect={setSelectedDay} />
           ) : (
             <Card className={styles.calendarCard}>
               <Calendar
@@ -347,36 +325,6 @@ function CalendarCell({ date, period, summary, onSelect }: {
   );
 }
 
-function WeekView({ period, summaries, onSelect }: {
-  period: Dayjs;
-  summaries: Map<string, DailySummary>;
-  onSelect: (summary: DailySummary) => void;
-}) {
-  const start = period.startOf("week");
-  return (
-    <Card className={styles.weekCard}>
-      <div className={styles.weekGrid}>
-        {Array.from({ length: 7 }, (_, index) => start.add(index, "day")).map((date) => {
-          const summary = summaries.get(date.format("YYYY-MM-DD"));
-          return (
-            <article className={styles.weekDay} key={date.format("YYYY-MM-DD")}>
-              <div className={styles.weekHeader}><Text type="secondary">{date.format("ddd")}</Text><Title level={4}>{date.format("MMM D")}</Title></div>
-              {summary ? (
-                <button className={styles.weekSummary} type="button" onClick={() => onSelect(summary)}>
-                  <Badge color="#157347" count={summary.movementMasters.length} />
-                  <strong>Qty {summary.quantity}</strong>
-                  <span>{formatShopTotals(summary.shopQuantities)}</span>
-                  {summary.movementMasters.map((movement) => <span className={styles.weekMovement} key={movement.id}>{movement.id}{statusTag(movement.status)}</span>)}
-                </button>
-              ) : <Text type="secondary">No movements</Text>}
-            </article>
-          );
-        })}
-      </div>
-    </Card>
-  );
-}
-
 function MovementPicker({ summary, onClose, onOpen }: {
   summary?: DailySummary;
   onClose: () => void;
@@ -435,16 +383,6 @@ function validDate(value: string | null): string | undefined {
 
 function monthQuery(date: Dayjs): string {
   return new URLSearchParams({ fromDate: date.startOf("month").format("YYYY-MM-DD"), toDate: date.endOf("month").format("YYYY-MM-DD") }).toString();
-}
-
-function weekQuery(date: Dayjs): string {
-  const start = date.startOf("week");
-  return new URLSearchParams({ fromDate: start.format("YYYY-MM-DD"), toDate: start.add(6, "day").format("YYYY-MM-DD") }).toString();
-}
-
-function weekLabel(value: Dayjs): string {
-  const start = value.startOf("week");
-  return `${start.format("YYYY-MM-DD")} – ${start.add(6, "day").format("YYYY-MM-DD")}`;
 }
 
 function statusTag(status: ProductMovementMasterRecord["status"]) {
