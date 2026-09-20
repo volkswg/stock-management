@@ -82,6 +82,65 @@
   height: 345px;
 }
 
+.mobileOrderList {
+  display: none;
+}
+
+.mobileOrderCard :global(.ant-card-head) {
+  min-height: 50px;
+  padding: 0 16px;
+}
+
+.mobileOrderCard :global(.ant-card-head-title) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mobileOrderCard :global(.ant-card-extra) {
+  max-width: 50%;
+  margin-left: 10px;
+}
+
+.mobileOrderCard :global(.ant-card-extra .ant-tag) {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileOrderCard :global(.ant-card-body) {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.mobileOrderDetails :global(.ant-descriptions-item-label) {
+  width: 88px;
+  color: #66716b;
+}
+
+.mobileOrderProducts {
+  min-width: 0;
+  padding-top: 14px;
+  border-top: 1px solid #e1e5e2;
+}
+
+.mobileOrderSectionLabel {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mobileOrderNoProducts {
+  padding: 12px;
+  border: 1px dashed #d5dbd7;
+  border-radius: 5px;
+  text-align: center;
+}
+
 .emptyIcon {
   color: #157347;
   font-size: 42px;
@@ -218,6 +277,15 @@
     padding: 30px 20px;
   }
 
+  .desktopOrderTable {
+    display: none;
+  }
+
+  .mobileOrderList {
+    display: grid;
+    gap: 12px;
+    padding: 0 14px 16px;
+  }
 }
 
 @media (max-width: 480px) {

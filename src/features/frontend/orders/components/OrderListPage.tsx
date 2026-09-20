@@ -28,17 +28,16 @@ import type { Key } from "react";
 import { OrderStatus, type OrderListItem } from "@/services/orders";
 import { getOrders } from "../../../../app/orders/api";
 import { OrderImageGallery } from "./OrderImageGallery";
+import { OrderMobileCard } from "./OrderMobileCard";
+import {
+  formatOrderDate,
+  formatOrderStatus,
+  formatOrderTotal,
+} from "./orderListFormat";
 import styles from "./orders.module.css";
 
 const { Text, Title } = Typography;
 const PAGE_SIZE = 10;
-const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
-  style: "currency",
-  currency: "THB",
-  currencyDisplay: "narrowSymbol",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 
 const COLUMNS: TableProps<OrderListItem>["columns"] = [
   {
@@ -46,14 +45,14 @@ const COLUMNS: TableProps<OrderListItem>["columns"] = [
     dataIndex: "status",
     key: "status",
     width: 190,
-    render: (status: OrderStatus) => formatStatus(status),
+    render: (status: OrderStatus) => formatOrderStatus(status),
   },
   {
     title: "Created",
     dataIndex: "createdAt",
     key: "createdAt",
     width: 170,
-    render: (value: string) => formatDate(value),
+    render: (value: string) => formatOrderDate(value),
   },
   {
     title: "Shipment",
@@ -72,8 +71,7 @@ const COLUMNS: TableProps<OrderListItem>["columns"] = [
     key: "totalPrice",
     align: "right",
     width: 140,
-    render: (value: number | null) =>
-      value === null ? "—" : THB_FORMATTER.format(value),
+    render: (value: number | null) => formatOrderTotal(value),
   },
   {
     title: "",
@@ -228,47 +226,51 @@ export function OrderListPage() {
               }}
             />
 
-            <Table<OrderListItem>
-              columns={COLUMNS}
-              dataSource={visibleOrders}
-              rowKey="id"
-              loading={loading}
-              pagination={false}
-              scroll={{ x: 750 }}
-              expandable={{
-                expandedRowKeys,
-                expandedRowRender: (order) => (
-                  <OrderImageGallery
-                    ariaLabel="Product images"
-                    images={order.productImages.map((image, index) => ({
-                      id: image.id,
-                      imageUrl: image.imageUrl,
-                      title: `Product ${index + 1}`,
-                      description: image.quoteQuantity
-                        ? `Qty: ${image.quoteQuantity}`
-                        : undefined,
-                    }))}
-                  />
-                ),
-                onExpandedRowsChange: (keys) => setExpandedRowKeys([...keys]),
-                rowExpandable: (order) => order.productImages.length > 0,
-              }}
-              locale={{
-                emptyText: (
-                  <Empty
-                    image={<InboxOutlined className={styles.emptyIcon} />}
-                    description={
-                      <Space orientation="vertical" size={2}>
-                        <Text strong>No orders yet</Text>
-                        <Text type="secondary">
-                          Orders created from LINE will appear here.
-                        </Text>
-                      </Space>
-                    }
-                  />
-                ),
-              }}
-            />
+            <div className={styles.desktopOrderTable}>
+              <Table<OrderListItem>
+                columns={COLUMNS}
+                dataSource={visibleOrders}
+                rowKey="id"
+                loading={loading}
+                pagination={false}
+                scroll={{ x: 750 }}
+                expandable={{
+                  expandedRowKeys,
+                  expandedRowRender: (order) => (
+                    <OrderImageGallery
+                      ariaLabel="Product images"
+                      images={order.productImages.map((image, index) => ({
+                        id: image.id,
+                        imageUrl: image.imageUrl,
+                        title: `Product ${index + 1}`,
+                        description: image.quoteQuantity
+                          ? `Qty: ${image.quoteQuantity}`
+                          : undefined,
+                      }))}
+                    />
+                  ),
+                  onExpandedRowsChange: (keys) => setExpandedRowKeys([...keys]),
+                  rowExpandable: (order) => order.productImages.length > 0,
+                }}
+                locale={{
+                  emptyText: <OrderEmptyState />,
+                }}
+              />
+            </div>
+
+            <div className={styles.mobileOrderList}>
+              {loading ? (
+                Array.from({ length: 3 }, (_, index) => (
+                  <Card loading key={index} />
+                ))
+              ) : visibleOrders.length > 0 ? (
+                visibleOrders.map((order) => (
+                  <OrderMobileCard key={order.id} order={order} />
+                ))
+              ) : (
+                <OrderEmptyState />
+              )}
+            </div>
 
             {error ? (
               <Alert
@@ -321,23 +323,18 @@ function isInProgress(status: OrderStatus): boolean {
   );
 }
 
-function formatStatus(status: OrderStatus): string {
-  return status
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-function formatDate(value: string): string {
-  if (!value) {
-    return "—";
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
+function OrderEmptyState() {
+  return (
+    <Empty
+      image={<InboxOutlined className={styles.emptyIcon} />}
+      description={
+        <Space orientation="vertical" size={2}>
+          <Text strong>No orders yet</Text>
+          <Text type="secondary">
+            Orders created from LINE will appear here.
+          </Text>
+        </Space>
+      }
+    />
+  );
 }

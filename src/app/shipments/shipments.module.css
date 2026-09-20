@@ -76,6 +76,103 @@
   height: 345px;
 }
 
+.mobileShipmentList {
+  display: none;
+}
+
+.mobileShipmentCard :global(.ant-card-head) {
+  min-height: 50px;
+  padding: 0 16px;
+}
+
+.mobileShipmentCard :global(.ant-card-head-title) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mobileShipmentCard :global(.ant-card-extra) {
+  max-width: 50%;
+  margin-left: 10px;
+}
+
+.mobileShipmentCard :global(.ant-card-extra .ant-tag) {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileShipmentCard :global(.ant-card-body) {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.mobileShipmentDetails :global(.ant-descriptions-item-label) {
+  width: 126px;
+  color: #66716b;
+}
+
+.mobileRelatedOrders {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #e1e5e2;
+}
+
+.mobileShipmentSectionLabel {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mobileRelatedOrdersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobileRelatedOrdersHeader :global(.ant-btn) {
+  flex: none;
+}
+
+.mobileRelatedOrder {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e1e5e2;
+  border-radius: 5px;
+  background: #f7f8f7;
+}
+
+.mobileRelatedOrderHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+.mobileRelatedOrderHeader :global(.ant-tag) {
+  flex: none;
+  margin: 0;
+}
+
+.mobileRelatedOrder :global(.ant-descriptions-item-label) {
+  width: 70px;
+  color: #66716b;
+}
+
+.mobileShipmentNoOrders {
+  padding: 12px;
+  border: 1px dashed #d5dbd7;
+  border-radius: 5px;
+  text-align: center;
+}
+
 .relatedOrders {
   padding: 8px 0;
 }
@@ -118,6 +215,16 @@
   .expandActions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .desktopShipmentTable {
+    display: none;
+  }
+
+  .mobileShipmentList {
+    display: grid;
+    gap: 12px;
+    padding: 0 14px 16px;
   }
 }
 

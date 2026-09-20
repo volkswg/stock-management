@@ -34,17 +34,18 @@ import {
 } from "@/services/shipments";
 import { OrderImageGallery } from "../../features/frontend/orders/components/OrderImageGallery";
 import { getShipments } from "./api";
+import { ShipmentMobileCard } from "./ShipmentMobileCard";
+import {
+  formatShipmentCurrency,
+  formatShipmentDate,
+  formatShipmentStatus,
+  getShipmentOrderStatusColor,
+  getShipmentStatusColor,
+} from "./shipmentListFormat";
 import styles from "./shipments.module.css";
 
 const { Text, Title } = Typography;
 const PAGE_SIZE = 10;
-const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
-  style: "currency",
-  currency: "THB",
-  currencyDisplay: "narrowSymbol",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 
 const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
   {
@@ -60,7 +61,9 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     key: "status",
     width: 100,
     render: (status: ShipmentStatus) => (
-      <Tag color={getStatusColor(status)}>{formatStatus(status)}</Tag>
+      <Tag color={getShipmentStatusColor(status)}>
+        {formatShipmentStatus(status)}
+      </Tag>
     ),
   },
   {
@@ -83,8 +86,7 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     key: "shippingFee",
     align: "right",
     width: 100,
-    render: (value: number | null) =>
-      value === null ? "—" : THB_FORMATTER.format(value),
+    render: (value: number | null) => formatShipmentCurrency(value),
   },
   {
     title: "Quote avg./unit",
@@ -94,7 +96,7 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     render: (_, shipment) => {
       const average =
         shipment.costSummary?.quote?.averageLandedCostPerUnit;
-      return average === undefined ? "—" : THB_FORMATTER.format(average);
+      return formatShipmentCurrency(average);
     },
   },
   {
@@ -105,7 +107,7 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     render: (_, shipment) => {
       const average =
         shipment.costSummary?.delivered?.averageLandedCostPerUnit;
-      return average === undefined ? "—" : THB_FORMATTER.format(average);
+      return formatShipmentCurrency(average);
     },
   },
   {
@@ -113,7 +115,7 @@ const COLUMNS: TableProps<ShipmentListItem>["columns"] = [
     dataIndex: "createdAt",
     key: "createdAt",
     width: 180,
-    render: (value: string) => formatDate(value),
+    render: (value: string) => formatShipmentDate(value),
   },
   {
     title: "",
@@ -138,7 +140,9 @@ const RELATED_ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
     key: "status",
     width: 190,
     render: (status: OrderStatus) => (
-      <Tag color={getOrderStatusColor(status)}>{formatStatus(status)}</Tag>
+      <Tag color={getShipmentOrderStatusColor(status)}>
+        {formatShipmentStatus(status)}
+      </Tag>
     ),
   },
   {
@@ -177,15 +181,14 @@ const RELATED_ORDER_COLUMNS: TableProps<ShipmentRelatedOrder>["columns"] = [
     key: "totalPrice",
     align: "right",
     width: 150,
-    render: (value: number | null) =>
-      value === null ? "—" : THB_FORMATTER.format(value),
+    render: (value: number | null) => formatShipmentCurrency(value),
   },
   {
     title: "Created",
     dataIndex: "createdAt",
     key: "createdAt",
     width: 180,
-    render: (value: string) => formatDate(value),
+    render: (value: string) => formatShipmentDate(value),
   },
   {
     title: "",
@@ -369,46 +372,57 @@ export function ShipmentListPage() {
               }}
             />
 
-            <Table<ShipmentListItem>
-              columns={COLUMNS}
-              dataSource={visibleShipments}
-              loading={loading}
-              pagination={false}
-              rowKey="id"
-              scroll={{ x: 1000 }}
-              expandable={{
-                expandedRowKeys,
-                expandedRowRender: (shipment) => (
-                  <RelatedOrdersTable
-                    orders={shipment.orders}
-                    poNumber={shipment.poNumber}
-                  />
-                ),
-                onExpandedRowsChange: (keys) => setExpandedRowKeys([...keys]),
-                rowExpandable: (shipment) => shipment.orders.length > 0,
-              }}
-              locale={{
-                emptyText: (
-                  <Empty
-                    description={
-                      <Space orientation="vertical" size={2}>
-                        <Text strong>
-                          {shipments.length === 0
-                            ? "No shipments yet"
-                            : "No matching shipments"}
-                        </Text>
-                        <Text type="secondary">
-                          {shipments.length === 0
-                            ? "Created shipment masters will appear here."
-                            : "Adjust the search or status filter."}
-                        </Text>
-                      </Space>
+            <div className={styles.desktopShipmentTable}>
+              <Table<ShipmentListItem>
+                columns={COLUMNS}
+                dataSource={visibleShipments}
+                loading={loading}
+                pagination={false}
+                rowKey="id"
+                scroll={{ x: 1000 }}
+                expandable={{
+                  expandedRowKeys,
+                  expandedRowRender: (shipment) => (
+                    <RelatedOrdersTable
+                      orders={shipment.orders}
+                      poNumber={shipment.poNumber}
+                    />
+                  ),
+                  onExpandedRowsChange: (keys) => setExpandedRowKeys([...keys]),
+                  rowExpandable: (shipment) => shipment.orders.length > 0,
+                }}
+                locale={{
+                  emptyText: <ShipmentEmptyState hasShipments={shipments.length > 0} />,
+                }}
+              />
+            </div>
+
+            <div className={styles.mobileShipmentList}>
+              {loading ? (
+                Array.from({ length: 3 }, (_, index) => (
+                  <Card loading key={index} />
+                ))
+              ) : visibleShipments.length > 0 ? (
+                visibleShipments.map((shipment) => (
+                  <ShipmentMobileCard
+                    key={shipment.id}
+                    ordersExpanded={expandedRowKeys.includes(shipment.id)}
+                    shipment={shipment}
+                    onOrdersExpandedChange={(expanded) =>
+                      setExpandedRowKeys((current) =>
+                        expanded
+                          ? [...new Set([...current, shipment.id])]
+                          : current.filter(
+                              (key) => String(key) !== shipment.id,
+                            ),
+                      )
                     }
-                    image={<TruckOutlined className={styles.emptyIcon} />}
                   />
-                ),
-              }}
-            />
+                ))
+              ) : (
+                <ShipmentEmptyState hasShipments={shipments.length > 0} />
+              )}
+            </div>
 
             {error ? (
               <Alert
@@ -426,8 +440,8 @@ export function ShipmentListPage() {
                 }
                 className={styles.errorAlert}
                 description={error}
-                message="Shipments could not be loaded"
                 showIcon
+                title="Shipments could not be loaded"
                 type="error"
               />
             ) : null}
@@ -493,53 +507,22 @@ function matchesStatusFilter(
   return shipmentStatus === filter;
 }
 
-function getStatusColor(status: ShipmentStatus): string {
-  switch (status) {
-    case ShipmentStatus.ReadyToShip:
-      return "warning";
-    case ShipmentStatus.Shipping:
-      return "processing";
-    case ShipmentStatus.Delivered:
-      return "success";
-    case ShipmentStatus.Canceled:
-      return "error";
-    default:
-      return "default";
-  }
-}
-
-function getOrderStatusColor(status: OrderStatus): string {
-  switch (status) {
-    case OrderStatus.Complete:
-    case OrderStatus.Delivered:
-      return "success";
-    case OrderStatus.Canceled:
-      return "error";
-    case OrderStatus.Paid:
-    case OrderStatus.Shipped:
-      return "processing";
-    default:
-      return "warning";
-  }
-}
-
-function formatStatus(status: string): string {
-  return status
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-function formatDate(value: string): string {
-  if (!value) {
-    return "—";
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
+function ShipmentEmptyState({ hasShipments }: { hasShipments: boolean }) {
+  return (
+    <Empty
+      description={
+        <Space orientation="vertical" size={2}>
+          <Text strong>
+            {hasShipments ? "No matching shipments" : "No shipments yet"}
+          </Text>
+          <Text type="secondary">
+            {hasShipments
+              ? "Adjust the search or status filter."
+              : "Created shipment masters will appear here."}
+          </Text>
+        </Space>
+      }
+      image={<TruckOutlined className={styles.emptyIcon} />}
+    />
+  );
 }
