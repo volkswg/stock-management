@@ -147,6 +147,27 @@
   border-radius: 5px;
 }
 
+.nativeImagePreviewLayout {
+  display: grid;
+  gap: 14px;
+}
+
+.nativeImageControls {
+  display: grid;
+  grid-template-columns: 120px minmax(36px, auto) 120px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nativeImageNavigationButton {
+  width: 120px;
+}
+
+.nativeImageControls > :nth-child(2) {
+  justify-self: center;
+}
+
 .nativeImage {
   display: block;
   width: auto;
@@ -221,6 +242,15 @@
 
   .summary {
     margin-top: 24px;
+  }
+
+  .nativeImageControls {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .nativeImageNavigationButton {
+    width: 100%;
   }
 
 
