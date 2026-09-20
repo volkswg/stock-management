@@ -5,6 +5,7 @@ import {
   BarChartOutlined,
   ShopOutlined,
   ShoppingCartOutlined,
+  SwapOutlined,
   TeamOutlined,
   TruckOutlined,
 } from "@ant-design/icons";
@@ -35,6 +36,11 @@ const MENU_ITEMS: Array<{
     href: "/shipments",
     icon: <TruckOutlined />,
     title: "Shipments",
+  },
+  {
+    href: "/movements",
+    icon: <SwapOutlined />,
+    title: "Movements",
   },
   {
     href: "/sales",

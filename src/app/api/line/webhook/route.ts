@@ -66,7 +66,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         sheets: getGoogleSheetsService(),
         drive: getGoogleDriveService,
         line: lineBotService,
-        publicBaseUrl: config.movementPublicBaseUrl ||
+        publicBaseUrl: config.movementPublicBaseUrl || config.publicBaseUrl ||
           (config.line.legacyWebhookUrl ? new URL(config.line.legacyWebhookUrl).origin : ""),
       })) continue;
     } catch (error) {

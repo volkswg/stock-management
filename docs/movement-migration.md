@@ -1,9 +1,8 @@
-# Movement creation migration
+# Movement migration
 
-LINE movement creation is handled by `stock-management` at
-`POST /api/line/webhook`. The `purchase-line-webhook` app retains its movement
-list/detail pages and editing APIs, but no longer creates movements or holds
-movement drafts in memory.
+Movement creation and management are handled by `stock-management`. LINE
+creation uses `POST /api/line/webhook`; the movement summary and detail pages
+are available at `/movements`, backed by the native `/api/movements` routes.
 
 ## Configuration and rollout
 
@@ -13,9 +12,9 @@ movement drafts in memory.
 2. The movement tabs default to `movements` and `movement_details`. Override
    them with `GOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME` and
    `GOOGLE_SHEETS_MOVEMENT_DETAIL_WORKSHEET_NAME` if the legacy app uses other names.
-3. Set `MOVEMENT_PUBLIC_BASE_URL` to the public base URL of the app serving
-   `/movements`. When omitted, summary links use the origin of
-   `LINE_LEGACY_WEBHOOK_URL`. Without either setting, summaries are text-only.
+3. Set `MOVEMENT_PUBLIC_BASE_URL` to the public base URL of stock-management.
+   When omitted, summary links use `PUBLIC_BASE_URL`, then the origin of
+   `LINE_LEGACY_WEBHOOK_URL`. Without any of these settings, summaries are text-only.
 4. Deploy stock-management and point the LINE channel webhook to its
    `/api/line/webhook` route before deploying the legacy handler removal.
    Keep `LINE_LEGACY_WEBHOOK_URL` configured for remaining purchase commands.
@@ -73,6 +72,6 @@ For a manual integration check, start a movement, choose NJ, send a quantity,
 restart stock-management, and send `resume:movement`. It should ask for the
 product image and retain the quantity. Upload two items, close the bag, add a
 YY item, then request the summary. Verify totals and the new rows in Sheets;
-open the legacy detail page and check Packed, Stock counted, and Delivered.
+open the stock-management detail page and check Packed, Stock counted, and Delivered.
 Also verify a Drive failure leaves the draft waiting for an image and inserts
 no item, and that normal order creation still works after the movement completes.
