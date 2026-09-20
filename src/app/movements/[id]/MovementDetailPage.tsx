@@ -219,8 +219,8 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
             </Space>
           </header>
 
-          {error ? <Alert className={styles.alert} message={error} showIcon type="error" /> : null}
-          {notice ? <Alert className={styles.alert} message={notice} showIcon type="success" closable onClose={() => setNotice(undefined)} /> : null}
+          {error ? <Alert className={styles.alert} title={error} showIcon type="error" /> : null}
+          {notice ? <Alert className={styles.alert} title={notice} showIcon type="success" closable={{ onClose: () => setNotice(undefined) }} /> : null}
           {loading ? <Card><Skeleton active paragraph={{ rows: 9 }} /></Card> : records.length === 0 ? <Card><Empty description="No movement items" /></Card> : (
             <>
               <Segmented

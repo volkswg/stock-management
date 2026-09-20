@@ -212,7 +212,7 @@ export function MovementListPage() {
             <SummaryCard title="Shop totals" value={formatShopTotals(shopTotals)} />
           </Row>
 
-          {error ? <Alert className={styles.alert} message={error} showIcon type="error" /> : null}
+          {error ? <Alert className={styles.alert} title={error} showIcon type="error" /> : null}
           {loading ? (
             <Card><Skeleton active paragraph={{ rows: 8 }} /></Card>
           ) : records.length === 0 ? (
@@ -332,7 +332,7 @@ function MovementPicker({ summary, onClose, onOpen }: {
 }) {
   return (
     <Modal footer={null} open={Boolean(summary)} title={summary ? `Movements on ${summary.date}` : "Movements"} width={680} onCancel={onClose}>
-      <Space className={styles.pickerList} direction="vertical" size={12}>
+      <Space className={styles.pickerList} orientation="vertical" size={12}>
         {summary?.movementMasters.map((movement) => (
           <Card key={movement.id} size="small" title={<Space><Text strong>{movement.id}</Text>{statusTag(movement.status)}</Space>} extra={<Button onClick={() => onOpen(movement.id)} type="primary">Open</Button>}>
             <Row gutter={[12, 12]}><Col span={12}><Statistic title="Items" value={movement.itemCount} /></Col><Col span={12}><Statistic title="Quantity" value={toNumber(movement.totalQuantity)} /></Col></Row>
