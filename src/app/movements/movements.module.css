@@ -16,17 +16,20 @@
 .clickableRow { cursor: pointer; }
 .clickableRow:focus { outline: 2px solid #157347; outline-offset: -2px; }
 .calendarCard { overflow: hidden; }
+.calendarCard :global(.ant-picker-content) { width: 100%; table-layout: fixed; }
 .calendarCard :global(.ant-picker-calendar-date) { margin: 0 !important; padding: 0 !important; border: 0 !important; }
 .calendarCard :global(.ant-picker-cell) { padding: 0 !important; }
-.calendarCard :global(.ant-picker-calendar-date-content) { height: auto !important; }
-.calendarCell { width: 100%; min-height: 108px; display: grid; align-content: start; gap: 8px; padding: 9px; border: 1px solid #e1e5e2; background: white; color: #1f2923; font: inherit; text-align: left; }
+.calendarCard :global(.ant-picker-calendar-date-content) { height: 108px !important; }
+.calendarCell { width: 100%; height: 108px; display: grid; grid-template-rows: auto minmax(0, 1fr); align-content: start; gap: 8px; overflow: hidden; padding: 9px; border: 1px solid #e1e5e2; background: white; color: #1f2923; font: inherit; text-align: left; }
 .calendarCell:disabled { color: inherit; }
 .activeCell { cursor: pointer; }
 .activeCell:hover { border-color: #157347; background: #f0f7f3; }
 .mutedCell { background: #f7f8f7; color: #8a948e; }
 .cellHeader { display: flex; align-items: center; justify-content: space-between; }
-.cellSummary { display: grid; gap: 4px; color: #68736d; font-size: 12px; }
-.cellSummary strong { color: #157347; font-size: 13px; }
+.cellSummary { min-width: 0; display: grid; align-content: start; gap: 3px; overflow: hidden; color: #68736d; font-size: 12px; }
+.shopQuantity { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 2px 6px; border-radius: 4px; background: #edf6f1; color: #157347; }
+.shopQuantity > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shopQuantity strong { flex: none; color: inherit; font-size: inherit; }
 .weekCard { overflow-x: auto; }
 .weekGrid { min-width: 1470px; display: grid; grid-template-columns: repeat(7, minmax(210px, 1fr)); }
 .weekDay { min-height: 320px; padding: 14px; border-right: 1px solid #e1e5e2; }
@@ -49,7 +52,10 @@
 @media (max-width: 480px) {
   .content { padding: 22px 14px 32px; }
   .pageHeader h1 { font-size: 26px !important; }
-  .calendarCell { min-height: 76px; padding: 5px; }
-  .cellSummary { font-size: 10px; overflow: hidden; }
-  .cellSummary strong { font-size: 11px; }
+  .calendarCard :global(.ant-picker-calendar-date-content) { height: 78px !important; }
+  .calendarCard :global(.ant-picker-content th) { padding: 6px 0; font-size: 11px; }
+  .calendarCell { height: 78px; gap: 4px; padding: 5px; }
+  .cellHeader :global(.ant-badge) { display: none; }
+  .cellSummary { gap: 2px; font-size: 10px; }
+  .shopQuantity { gap: 2px; padding: 1px 3px; }
 }

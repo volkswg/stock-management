@@ -318,7 +318,21 @@ function CalendarCell({ date, period, summary, onSelect }: {
       onClick={() => summary && onSelect(summary)}
     >
       <span className={styles.cellHeader}><strong>{date.date()}</strong>{summary ? <Badge color="#157347" count={summary.movementMasters.length} /> : null}</span>
-      {summary ? <span className={styles.cellSummary}><strong>Qty {summary.quantity}</strong><span>{formatShopTotals(summary.shopQuantities)}</span></span> : null}
+      {summary ? (
+        <span
+          aria-label={`${summary.quantity} total. ${formatShopTotals(summary.shopQuantities)}`}
+          className={styles.cellSummary}
+        >
+          {Object.entries(summary.shopQuantities)
+            .sort(([left], [right]) => left.localeCompare(right))
+            .map(([shop, quantity]) => (
+              <span className={styles.shopQuantity} key={shop}>
+                <span>{shop}</span>
+                <strong>{quantity}</strong>
+              </span>
+            ))}
+        </span>
+      ) : null}
     </button>
   );
 }
