@@ -4,6 +4,7 @@ import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
   MoreOutlined,
+  ReloadOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import {
@@ -58,6 +59,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
   const [notice, setNotice] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [delivering, setDelivering] = useState(false);
 
   useEffect(() => {
@@ -107,6 +109,18 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     router.replace(`${pathname}?${nextSearchParams.toString()}`, {
       scroll: false,
     });
+  }
+
+  async function refreshMovement() {
+    setRefreshing(true);
+    setError(undefined);
+    try {
+      setRecords(await getMovement(movementMasterId));
+    } catch (requestError) {
+      setError(errorMessage(requestError));
+    } finally {
+      setRefreshing(false);
+    }
   }
 
   async function markDelivered() {
@@ -177,17 +191,32 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                 <Tag color={isDelivered ? "green" : "default"}>{isDelivered ? "Delivered" : "Created"}</Tag>
               </Space>
             </div>
-            <Popconfirm
-              disabled={isDelivered}
-              title="Mark this movement as delivered?"
-              description="All movement items will be marked delivered."
-              okText="Mark delivered"
-              onConfirm={markDelivered}
-            >
-              <Button disabled={isDelivered} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
-                {isDelivered ? "Delivered" : "Mark delivered"}
+            <Space className={styles.pageActions} wrap>
+              <Button
+                disabled={
+                  loading ||
+                  delivering ||
+                  savingIds.size > 0 ||
+                  uploadingIds.size > 0
+                }
+                icon={<ReloadOutlined />}
+                loading={refreshing}
+                onClick={() => void refreshMovement()}
+              >
+                Refresh
               </Button>
-            </Popconfirm>
+              <Popconfirm
+                disabled={isDelivered}
+                title="Mark this movement as delivered?"
+                description="All movement items will be marked delivered."
+                okText="Mark delivered"
+                onConfirm={markDelivered}
+              >
+                <Button disabled={isDelivered} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
+                  {isDelivered ? "Delivered" : "Mark delivered"}
+                </Button>
+              </Popconfirm>
+            </Space>
           </header>
 
           {error ? <Alert className={styles.alert} message={error} showIcon type="error" /> : null}

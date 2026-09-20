@@ -4,6 +4,7 @@
 .pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
 .eyebrow { display: block; margin-bottom: 7px; color: #157347 !important; font-size: 12px; font-weight: 700; text-transform: uppercase; }
 .pageHeader h1 { margin: 0 0 5px !important; font-size: 30px !important; overflow-wrap: anywhere; }
+.pageActions { justify-content: flex-end; }
 .alert { margin-bottom: 16px; }
 .shopTabs { max-width: 100%; margin-bottom: 16px; overflow-x: auto; }
 .summaryGrid { margin-bottom: 16px; }
@@ -25,6 +26,7 @@
 @media (max-width: 768px) {
   .content { padding: 28px 20px 40px; }
   .pageHeader { flex-direction: column; }
+  .pageActions { justify-content: flex-start; }
 }
 @media (max-width: 480px) {
   .content { padding: 22px 14px 32px; }
