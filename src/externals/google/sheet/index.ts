@@ -7,7 +7,6 @@ export {
   OrderBillsSheet,
   OrderItemsSheet,
   OrdersSheet,
-  PurchasesSheet,
   SalesReceiptItemsSheet,
   SalesProfitCostOverridesSheet,
   SalesReceiptPaymentsSheet,
@@ -27,7 +26,6 @@ export { EMPLOYEE_TIMESHEET_HEADERS } from "./sheets/employee-timesheets/const";
 export { ORDERS_SHEET_HEADERS } from "./sheets/orders/const";
 export { ORDER_BILLS_SHEET_HEADERS } from "./sheets/order-bills/const";
 export { ORDER_ITEMS_SHEET_HEADERS } from "./sheets/order-items/const";
-export { PURCHASE_SHEET_HEADERS } from "./sheets/purchases/const";
 export { SALES_RECEIPT_ITEM_HEADERS } from "./sheets/sales/receipt-items/const";
 export { SALES_PROFIT_COST_OVERRIDE_HEADERS } from "./sheets/sales/profit-cost-overrides/const";
 export { SALES_RECEIPT_PAYMENT_HEADERS } from "./sheets/sales/receipt-payments/const";

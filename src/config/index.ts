@@ -25,7 +25,6 @@ export type AppConfig = {
     ordersWorksheetName: string;
     orderBillsWorksheetName: string;
     orderItemsWorksheetName: string;
-    purchasesWorksheetName: string;
     salesReceiptItemsWorksheetName: string;
     salesProfitCostOverridesWorksheetName: string;
     salesReceiptPaymentsWorksheetName: string;
@@ -81,9 +80,6 @@ export function getConfig(): AppConfig {
       orderItemsWorksheetName:
         process.env.GOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME?.trim() ||
         "order_items",
-      purchasesWorksheetName:
-        process.env.GOOGLE_SHEETS_PURCHASES_WORKSHEET_NAME?.trim() ||
-        "purchases",
       salesReceiptItemsWorksheetName:
         process.env.GOOGLE_SHEETS_SALES_RECEIPT_ITEMS_WORKSHEET_NAME?.trim() ||
         "sales_receipt_items",

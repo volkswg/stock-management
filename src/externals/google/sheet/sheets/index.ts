@@ -4,7 +4,6 @@ export { EmployeeTimesheetsSheet } from "./employee-timesheets/EmployeeTimesheet
 export { OrderBillsSheet } from "./order-bills/OrderBillsSheet";
 export { OrderItemsSheet } from "./order-items/OrderItemsSheet";
 export { OrdersSheet } from "./orders/OrdersSheet";
-export { PurchasesSheet } from "./purchases/PurchasesSheet";
 export { SalesReceiptItemsSheet } from "./sales/receipt-items/SalesReceiptItemsSheet";
 export { SalesProfitCostOverridesSheet } from "./sales/profit-cost-overrides/SalesProfitCostOverridesSheet";
 export { SalesReceiptPaymentsSheet } from "./sales/receipt-payments/SalesReceiptPaymentsSheet";

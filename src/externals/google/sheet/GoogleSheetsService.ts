@@ -7,7 +7,6 @@ import {
   OrderBillsSheet,
   OrderItemsSheet,
   OrdersSheet,
-  PurchasesSheet,
   SalesReceiptItemsSheet,
   SalesProfitCostOverridesSheet,
   SalesReceiptPaymentsSheet,
@@ -27,7 +26,6 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly orders: OrdersSheet;
   readonly orderBills: OrderBillsSheet;
   readonly orderItems: OrderItemsSheet;
-  readonly purchases: PurchasesSheet;
   readonly salesReceiptItems: SalesReceiptItemsSheet;
   readonly salesProfitCostOverrides: SalesProfitCostOverridesSheet;
   readonly salesReceiptPayments: SalesReceiptPaymentsSheet;
@@ -69,10 +67,6 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     this.orderItems = new OrderItemsSheet(
       this.client,
       config.orderItemsWorksheetName,
-    );
-    this.purchases = new PurchasesSheet(
-      this.client,
-      config.purchasesWorksheetName,
     );
     this.salesReceipts = new SalesReceiptsSheet(
       this.client,
@@ -121,7 +115,6 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.orders.checkConnection(),
       this.orderBills.checkConnection(),
       this.orderItems.checkConnection(),
-      this.purchases.checkConnection(),
       this.salesReceiptItems.checkConnection(),
       this.salesProfitCostOverrides.checkConnection(),
       this.salesReceiptPayments.checkConnection(),

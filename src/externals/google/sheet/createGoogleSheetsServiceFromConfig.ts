@@ -12,7 +12,6 @@ export function createGoogleSheetsServiceFromConfig(
     ordersWorksheetName: config.googleSheets.ordersWorksheetName,
     orderBillsWorksheetName: config.googleSheets.orderBillsWorksheetName,
     orderItemsWorksheetName: config.googleSheets.orderItemsWorksheetName,
-    purchasesWorksheetName: config.googleSheets.purchasesWorksheetName,
     salesReceiptItemsWorksheetName:
       config.googleSheets.salesReceiptItemsWorksheetName,
     salesProfitCostOverridesWorksheetName:
