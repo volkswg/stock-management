@@ -55,9 +55,10 @@
 
 .listToolbar {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 18px 22px;
-  flex-direction: column;
 }
 
 .listToolbar h2 {
@@ -66,7 +67,12 @@
 }
 
 .searchInput {
-  width: 100%;
+  width: min(100%, 520px);
+}
+
+.shipmentFilter {
+  width: 160px;
+  flex: 0 0 auto;
 }
 
 .filterTabs {
@@ -285,6 +291,16 @@
     display: grid;
     gap: 12px;
     padding: 0 14px 16px;
+  }
+
+  .listToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchInput,
+  .shipmentFilter {
+    width: 100%;
   }
 }
 
