@@ -14,7 +14,6 @@ import {
   Card,
   Col,
   ConfigProvider,
-  DatePicker,
   Empty,
   Row,
   Select,
@@ -27,19 +26,12 @@ import {
   Typography,
   type TableProps,
 } from "antd";
-import dayjs from "dayjs";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DesktopDateRange } from "./DesktopDateRange";
+import { MobileDateRange } from "./MobileDateRange";
 import styles from "./salesDashboard.module.css";
 
 const { Text, Title } = Typography;
-const { RangePicker } = DatePicker;
 
 type SalesAccount = { id: string; shopName: string };
 type DailySalesRow = {
@@ -155,6 +147,20 @@ export function SalesDashboardPage() {
       narrowScreen.removeEventListener("change", updateDateInput);
     };
   }, []);
+
+  const updateNativeDate = useCallback(
+    (position: "from" | "to", value: string) => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
+
+      setRange(([fromDate, toDate]) => {
+        if (position === "from") {
+          return [value, value > toDate ? value : toDate];
+        }
+        return [value < fromDate ? value : fromDate, value];
+      });
+    },
+    [],
+  );
 
   const loadDashboard = useCallback(
     (signal?: AbortSignal) => {
@@ -416,60 +422,12 @@ export function SalesDashboardPage() {
               <Col xs={24} md={9} lg={7}>
                 <Text className={styles.fieldLabel}>Date range</Text>
                 {useNativeDateRange ? (
-                  <div
-                    aria-label="Dashboard date range"
-                    className={styles.nativeDateRange}
-                    role="group"
-                  >
-                    <label className={styles.nativeDateField}>
-                      <span>From</span>
-                      <input
-                        aria-label="Dashboard start date"
-                        className={styles.nativeDateInput}
-                        max={range[1]}
-                        required
-                        type="date"
-                        value={range[0]}
-                        onChange={(event) =>
-                          setNativeRangeDate(
-                            "from",
-                            event.currentTarget.value,
-                            setRange,
-                          )
-                        }
-                      />
-                    </label>
-                    <label className={styles.nativeDateField}>
-                      <span>To</span>
-                      <input
-                        aria-label="Dashboard end date"
-                        className={styles.nativeDateInput}
-                        min={range[0]}
-                        required
-                        type="date"
-                        value={range[1]}
-                        onChange={(event) =>
-                          setNativeRangeDate(
-                            "to",
-                            event.currentTarget.value,
-                            setRange,
-                          )
-                        }
-                      />
-                    </label>
-                  </div>
-                ) : (
-                  <RangePicker
-                    allowClear={false}
-                    aria-label="Dashboard date range"
-                    className={styles.fullWidth}
-                    format="YYYY-MM-DD"
-                    value={[
-                      dayjs(range[0], "YYYY-MM-DD"),
-                      dayjs(range[1], "YYYY-MM-DD"),
-                    ]}
-                    onChange={(_, values) => setRange(getRangeValues(values))}
+                  <MobileDateRange
+                    range={range}
+                    onDateChange={updateNativeDate}
                   />
+                ) : (
+                  <DesktopDateRange range={range} onChange={setRange} />
                 )}
               </Col>
               <Col xs={24} sm={12} md={6} lg={4}>
@@ -709,25 +667,6 @@ function getBangkokDate(): string {
   const month = parts.find((part) => part.type === "month")?.value || "";
   const day = parts.find((part) => part.type === "day")?.value || "";
   return `${year}-${month}-${day}`;
-}
-
-function getRangeValues(values: string[]): [string, string] {
-  return [values[0] || "", values[1] || ""];
-}
-
-function setNativeRangeDate(
-  position: "from" | "to",
-  value: string,
-  setRange: Dispatch<SetStateAction<[string, string]>>,
-): void {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
-
-  setRange(([fromDate, toDate]) => {
-    if (position === "from") {
-      return [value, value > toDate ? value : toDate];
-    }
-    return [value < fromDate ? value : fromDate, value];
-  });
 }
 
 function createLineChart(series: ChartSeries[]) {
