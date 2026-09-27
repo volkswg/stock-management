@@ -9,7 +9,7 @@ export const MASTER_HEADERS = [
 export const DETAIL_HEADERS = [
   "id", "movementMasterId", "shopName", "quantity", "remark",
   "fromLocation", "toLocation", "productImageUrl", "purchaseDetailId",
-  "status", "createdAt", "updatedAt", "stockCounted",
+  "status", "createdAt", "updatedAt", "stockCounted", "isNewArrival",
 ];
 export type MovementStep = "shop" | "quantity" | "product_image" | "close_bag" | "bag_closed" | "complete";
 export type MovementState = {
@@ -106,8 +106,8 @@ export async function saveMovementState(sheets: IGoogleSheetsService, state: Mov
 }
 
 export async function movementItems(sheets: IGoogleSheetsService, masterId: string): Promise<GoogleSheetRow[]> {
-  await ensureHeader(sheets.movementDetails, DETAIL_HEADERS, "M");
-  return (await sheets.movementDetails.readRows("A2:M")).filter((row) => row[1] === masterId && row[0]);
+  await ensureHeader(sheets.movementDetails, DETAIL_HEADERS, "N");
+  return (await sheets.movementDetails.readRows("A2:N")).filter((row) => row[1] === masterId && row[0]);
 }
 
 export async function saveMaster(sheets: IGoogleSheetsService, state: MovementState, complete = false): Promise<void> {

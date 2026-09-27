@@ -16,6 +16,7 @@ export async function PATCH(
   const quantity = optionalString(body?.quantity);
   const remark = optionalString(body?.remark);
   const stockCounted = optionalBoolean(body?.stockCounted);
+  const isNewArrival = optionalBoolean(body?.isNewArrival);
 
   if (!movementMasterId || !movementId || !body) {
     return badRequest("Movement and item IDs are required.");
@@ -23,8 +24,18 @@ export async function PATCH(
   if (body.stockCounted !== undefined && stockCounted === undefined) {
     return badRequest("Stock counted must be true or false.");
   }
-  if (quantity === undefined && remark === undefined && stockCounted === undefined) {
-    return badRequest("Quantity, note, or stock counted is required.");
+  if (body.isNewArrival !== undefined && isNewArrival === undefined) {
+    return badRequest("New arrival must be true or false.");
+  }
+  if (
+    quantity === undefined &&
+    remark === undefined &&
+    stockCounted === undefined &&
+    isNewArrival === undefined
+  ) {
+    return badRequest(
+      "Quantity, note, stock counted, or new arrival is required.",
+    );
   }
   if (body.quantity !== undefined && !quantity) {
     return badRequest("Quantity is required.");
@@ -38,6 +49,7 @@ export async function PATCH(
       quantity,
       remark,
       stockCounted,
+      isNewArrival,
     });
     if (!records) {
       return NextResponse.json(

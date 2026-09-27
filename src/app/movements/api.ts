@@ -46,19 +46,21 @@ export function saveMovementItem({
   quantity,
   remark,
   stockCounted,
+  isNewArrival,
 }: {
   movementMasterId: string;
   movementId: string;
   quantity?: string;
   remark?: string;
   stockCounted?: boolean;
+  isNewArrival?: boolean;
 }): Promise<{ records: ProductMovementRecord[] }> {
   return request(
     `/api/movements/${encodeURIComponent(movementMasterId)}/items/${encodeURIComponent(movementId)}`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quantity, remark, stockCounted }),
+      body: JSON.stringify({ quantity, remark, stockCounted, isNewArrival }),
     },
   );
 }

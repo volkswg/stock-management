@@ -154,9 +154,9 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
   }
   if (!existing) {
     const now = new Date(event.timestamp || Date.now()).toISOString();
-    await sheets.movementDetails.appendRows("A:M", [[
+    await sheets.movementDetails.appendRows("A:N", [[
       state.itemId, state.masterId, state.shop, state.quantity, state.remark,
-      "Home", state.shop, imageUrl, "", "created", now, now, false,
+      "Home", state.shop, imageUrl, "", "created", now, now, false, false,
     ]]);
   }
   await saveMaster(sheets, state);

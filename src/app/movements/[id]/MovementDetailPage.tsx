@@ -147,6 +147,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     quantity?: string;
     remark?: string;
     stockCounted?: boolean;
+    isNewArrival?: boolean;
   }) {
     setSavingIds((current) => new Set(current).add(input.movementId));
     setMessages((current) => ({ ...current, [input.movementId]: "Saving changes…" }));
@@ -247,6 +248,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                     onChecked={(checked) => setPackedIds((current) => checked ? new Set(current).add(record.movementId) : without(current, record.movementId))}
                     onSave={updateItem}
                     onStockCounted={(stockCounted) => updateItem({ movementId: record.movementId, stockCounted })}
+                    onNewArrival={(isNewArrival) => updateItem({ movementId: record.movementId, isNewArrival })}
                     onUpdateImage={(file) => updateImage(record.movementId, file)}
                   />
                 ))}
@@ -259,7 +261,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
   );
 }
 
-function MovementItem({ checked, record, saving, uploading, message, onChecked, onSave, onStockCounted, onUpdateImage }: {
+function MovementItem({ checked, record, saving, uploading, message, onChecked, onSave, onStockCounted, onNewArrival, onUpdateImage }: {
   checked: boolean;
   record: ProductMovementRecord;
   saving: boolean;
@@ -268,6 +270,7 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
   onChecked: (checked: boolean) => void;
   onSave: (input: { movementId: string; quantity: string; remark: string }) => Promise<void>;
   onStockCounted: (value: boolean) => Promise<void>;
+  onNewArrival: (value: boolean) => Promise<void>;
   onUpdateImage: (file: File) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
@@ -289,6 +292,9 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
         <Checkbox checked={checked} onChange={(event) => onChecked(event.target.checked)}>Packed</Checkbox>
         <Button aria-pressed={record.stockCounted} loading={saving} size="small" type={record.stockCounted ? "primary" : "default"} onClick={() => void onStockCounted(!record.stockCounted).catch(() => undefined)}>
           {record.stockCounted ? "Stock counted" : "Stock not counted"}
+        </Button>
+        <Button aria-pressed={record.isNewArrival} loading={saving} size="small" type={record.isNewArrival ? "primary" : "default"} onClick={() => void onNewArrival(!record.isNewArrival).catch(() => undefined)}>
+          {record.isNewArrival ? "New arrival" : "Mark new arrival"}
         </Button>
       </div>
       <div className={styles.itemLayout}>

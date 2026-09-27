@@ -20,6 +20,7 @@ export type ProductMovementRecord = {
   createdAt: string;
   updatedAt: string;
   stockCounted: boolean;
+  isNewArrival: boolean;
 };
 
 export type ProductMovementMasterRecord = {
@@ -50,11 +51,11 @@ export async function listMovements({
 }): Promise<ProductMovementMasterRecord[]> {
   await Promise.all([
     ensureHeader(googleSheetsService.movementMasters, MASTER_HEADERS, "H"),
-    ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "M"),
+    ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "N"),
   ]);
   const [masterRows, detailRows] = await Promise.all([
     googleSheetsService.movementMasters.readRows("A2:H"),
-    googleSheetsService.movementDetails.readRows("A2:M"),
+    googleSheetsService.movementDetails.readRows("A2:N"),
   ]);
   const detailsByMaster = new Map<string, ProductMovementRecord[]>();
   for (const row of detailRows) {
@@ -80,9 +81,9 @@ export async function getMovementItems({
   googleSheetsService: IGoogleSheetsService;
   movementMasterId: string;
 }): Promise<ProductMovementRecord[]> {
-  await ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "M");
+  await ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "N");
   const normalizedId = movementMasterId.toUpperCase();
-  return (await googleSheetsService.movementDetails.readRows("A2:M"))
+  return (await googleSheetsService.movementDetails.readRows("A2:N"))
     .map(rowToMovement)
     .filter(
       (record) =>
@@ -98,6 +99,7 @@ export async function updateMovementItem({
   quantity,
   remark,
   stockCounted,
+  isNewArrival,
 }: {
   googleSheetsService: IGoogleSheetsService;
   movementId: string;
@@ -105,9 +107,10 @@ export async function updateMovementItem({
   quantity?: string;
   remark?: string;
   stockCounted?: boolean;
+  isNewArrival?: boolean;
 }): Promise<ProductMovementRecord[] | null> {
-  await ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "M");
-  const rows = await googleSheetsService.movementDetails.readRows("A:M");
+  await ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "N");
+  const rows = await googleSheetsService.movementDetails.readRows("A:N");
   const rowIndex = rows.findIndex(
     (row, index) =>
       index > 0 &&
@@ -121,9 +124,10 @@ export async function updateMovementItem({
   if (quantity !== undefined) nextRow[3] = quantity;
   if (remark !== undefined) nextRow[4] = remark;
   if (stockCounted !== undefined) nextRow[12] = stockCounted;
+  if (isNewArrival !== undefined) nextRow[13] = isNewArrival;
   nextRow[11] = new Date().toISOString();
   await googleSheetsService.movementDetails.updateRows(
-    `A${rowIndex + 1}:M${rowIndex + 1}`,
+    `A${rowIndex + 1}:N${rowIndex + 1}`,
     [nextRow],
   );
   await refreshMovementMaster(googleSheetsService, movementMasterId);
@@ -141,8 +145,8 @@ export async function updateMovementImage({
   movementId: string;
   movementMasterId: string;
 }): Promise<ProductMovementRecord[] | null> {
-  await ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "M");
-  const rows = await googleSheetsService.movementDetails.readRows("A:M");
+  await ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "N");
+  const rows = await googleSheetsService.movementDetails.readRows("A:N");
   const rowIndex = rows.findIndex(
     (row, index) =>
       index > 0 &&
@@ -156,7 +160,7 @@ export async function updateMovementImage({
   nextRow[7] = imageUrl;
   nextRow[11] = new Date().toISOString();
   await googleSheetsService.movementDetails.updateRows(
-    `A${rowIndex + 1}:M${rowIndex + 1}`,
+    `A${rowIndex + 1}:N${rowIndex + 1}`,
     [nextRow],
   );
   await refreshMovementMaster(googleSheetsService, movementMasterId);
@@ -175,11 +179,11 @@ export async function markMovementDelivered({
 } | null> {
   await Promise.all([
     ensureHeader(googleSheetsService.movementMasters, MASTER_HEADERS, "H"),
-    ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "M"),
+    ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "N"),
   ]);
   const [masterRows, detailRows] = await Promise.all([
     googleSheetsService.movementMasters.readRows("A:H"),
-    googleSheetsService.movementDetails.readRows("A:M"),
+    googleSheetsService.movementDetails.readRows("A:N"),
   ]);
   const normalizedId = movementMasterId.toUpperCase();
   const masterIndex = masterRows.findIndex(
@@ -198,7 +202,7 @@ export async function markMovementDelivered({
       nextRow[9] = "delivered";
       nextRow[11] = now;
       return googleSheetsService.movementDetails.updateRows(
-        `A${index + 1}:M${index + 1}`,
+        `A${index + 1}:N${index + 1}`,
         [nextRow],
       );
     }),
@@ -264,6 +268,7 @@ function rowToMovement(row: GoogleSheetRow): ProductMovementRecord {
     createdAt: cell(row[10]),
     updatedAt: cell(row[11]),
     stockCounted: booleanCell(row[12]),
+    isNewArrival: booleanCell(row[13]),
   };
 }
 

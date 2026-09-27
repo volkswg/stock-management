@@ -2,7 +2,7 @@ import type { GoogleSheetRow, IGoogleRowsSheet } from "../../types";
 import { BaseGoogleSheet } from "../BaseGoogleSheet";
 
 export class MovementSheet extends BaseGoogleSheet implements IGoogleRowsSheet {
-  async readRows(range = "A:M"): Promise<GoogleSheetRow[]> {
+  async readRows(range = "A:N"): Promise<GoogleSheetRow[]> {
     return this.read(range);
   }
 
