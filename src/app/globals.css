@@ -42,6 +42,42 @@ a {
   text-decoration: none;
 }
 
+.app-breadcrumb-shell {
+  width: 100%;
+  padding: 12px 40px;
+  border-bottom: 1px solid #e1e5e2;
+  background: #f3f5f4;
+}
+
+.app-breadcrumb {
+  width: 100%;
+  max-width: 1420px;
+  margin: 0 auto;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.app-breadcrumb a {
+  color: #526059;
+}
+
+.app-breadcrumb a:hover,
+.app-breadcrumb a:focus-visible {
+  color: #157347;
+}
+
+@media (max-width: 768px) {
+  .app-breadcrumb-shell {
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-breadcrumb-shell {
+    padding-inline: 14px;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
