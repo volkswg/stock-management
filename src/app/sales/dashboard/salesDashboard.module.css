@@ -52,6 +52,46 @@
   width: 100%;
 }
 
+.nativeDateRange {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.nativeDateField {
+  min-width: 0;
+}
+
+.nativeDateField > span {
+  display: block;
+  margin-bottom: 3px;
+  color: #66716b;
+  font-size: 11px;
+}
+
+.nativeDateInput {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 4px 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  outline: none;
+  background: #ffffff;
+  color: #171717;
+  font: inherit;
+  color-scheme: light;
+}
+
+.nativeDateInput:hover {
+  border-color: #40946d;
+}
+
+.nativeDateInput:focus-visible {
+  border-color: #157347;
+  box-shadow: 0 0 0 2px rgb(21 115 71 / 12%);
+}
+
 .switchControl {
   height: 32px;
   display: flex;
@@ -206,6 +246,10 @@
   }
 
   .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .nativeDateRange {
     grid-template-columns: 1fr;
   }
 }
