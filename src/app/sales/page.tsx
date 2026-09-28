@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { SalesSyncStatusPage } from "./SalesSyncStatusPage";
+import { SalesMenuPage } from "./SalesMenuPage";
 
 export const metadata: Metadata = {
-  title: "Sales Sync Status | Stock Management",
-  description: "Review synced Loyverse sales data from Google Sheets.",
+  title: "Sales | Stock Management",
+  description: "Open sales reports, dashboards, and synchronization tools.",
 };
 
 export default function Page() {
-  return <SalesSyncStatusPage />;
+  return <SalesMenuPage />;
 }

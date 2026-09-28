@@ -151,8 +151,8 @@ export function SalesSyncStatusPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/" icon={<ArrowLeftOutlined />}>
-                Home
+              <Button href="/sales" icon={<ArrowLeftOutlined />}>
+                Sales
               </Button>
               <Button href="/sales/daily-sales" icon={<BarChartOutlined />}>
                 Daily sales

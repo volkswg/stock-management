@@ -5,7 +5,6 @@ import {
   BarChartOutlined,
   CalendarOutlined,
   DashboardOutlined,
-  DatabaseOutlined,
   LeftOutlined,
   ReloadOutlined,
   RightOutlined,
@@ -294,11 +293,8 @@ export function SalesDailySalesPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/" icon={<ArrowLeftOutlined />}>
-                Home
-              </Button>
-              <Button href="/sales" icon={<DatabaseOutlined />}>
-                Sync status
+              <Button href="/sales" icon={<ArrowLeftOutlined />}>
+                Sales
               </Button>
               <Button href="/sales/dashboard" icon={<DashboardOutlined />}>
                 Dashboard

@@ -378,10 +378,10 @@ export function SalesDashboardPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/" icon={<ArrowLeftOutlined />}>
-                Home
+              <Button href="/sales" icon={<ArrowLeftOutlined />}>
+                Sales
               </Button>
-              <Button href="/sales" icon={<DatabaseOutlined />}>
+              <Button href="/sales/sync-status" icon={<DatabaseOutlined />}>
                 Sync status
               </Button>
               <Button href="/sales/daily-sales" icon={<CalendarOutlined />}>
