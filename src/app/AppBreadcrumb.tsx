@@ -19,6 +19,8 @@ const PATH_LABELS: Record<string, string> = {
   "/employees": "Employees",
   "/employees/timesheets": "Timesheets",
   "/employees/timesheets/summary": "Summary",
+  "/timesheets": "Timesheets",
+  "/timesheets/summary": "Summary",
   "/loyverse": "Loyverse",
   "/loyverse/daily-sales": "Daily sales",
 };
@@ -37,6 +39,8 @@ const NAVIGABLE_PATHS = new Set([
   "/employees",
   "/employees/timesheets",
   "/employees/timesheets/summary",
+  "/timesheets",
+  "/timesheets/summary",
   "/loyverse/daily-sales",
 ]);
 

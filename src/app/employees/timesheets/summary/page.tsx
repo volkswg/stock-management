@@ -1,5 +1,5 @@
-import { EmployeeTimesheetSummaryPage } from "./EmployeeTimesheetSummaryPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <EmployeeTimesheetSummaryPage />;
+  redirect("/timesheets/summary");
 }

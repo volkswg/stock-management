@@ -341,15 +341,15 @@ export function EmployeeTimesheetsPage() {
         <main className={styles.content}>
           <header className={styles.pageHeader}>
             <div>
-              <Text className={styles.eyebrow}>Employees</Text>
+              <Text className={styles.eyebrow}>Workforce</Text>
               <Title level={1}>Timesheet tracker</Title>
               <Text type="secondary">
                 Track employee attendance by shop and business date.
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/employees" icon={<ArrowLeftOutlined />}>
-                Employees
+              <Button href="/" icon={<ArrowLeftOutlined />}>
+                Home
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -359,7 +359,7 @@ export function EmployeeTimesheetsPage() {
                 Refresh
               </Button>
               <Button
-                href="/employees/timesheets/summary"
+                href="/timesheets/summary"
                 icon={<CalendarOutlined />}
               >
                 Monthly summary

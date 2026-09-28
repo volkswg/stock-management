@@ -3,7 +3,6 @@
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined,
   EditOutlined,
   PhoneOutlined,
   ReloadOutlined,
@@ -353,12 +352,6 @@ export function EmployeesPage() {
             <Space className={styles.pageActions} wrap>
               <Button href="/" icon={<ArrowLeftOutlined />}>
                 Home
-              </Button>
-              <Button
-                href="/employees/timesheets"
-                icon={<ClockCircleOutlined />}
-              >
-                Timesheets
               </Button>
               <Button
                 icon={<ReloadOutlined />}

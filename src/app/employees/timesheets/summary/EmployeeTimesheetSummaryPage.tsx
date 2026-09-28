@@ -234,7 +234,7 @@ export function EmployeeTimesheetSummaryPage() {
         <main className={styles.content}>
           <header className={styles.pageHeader}>
             <div>
-              <Text className={styles.eyebrow}>Employees</Text>
+              <Text className={styles.eyebrow}>Timesheets</Text>
               <Title level={1}>Monthly timesheet summary</Title>
               <Text type="secondary">
                 Review employee work and leave by business date.
@@ -242,7 +242,7 @@ export function EmployeeTimesheetSummaryPage() {
             </div>
             <Space className={styles.pageActions} wrap>
               <Button
-                href="/employees/timesheets"
+                href="/timesheets"
                 icon={<ArrowLeftOutlined />}
               >
                 Timesheets

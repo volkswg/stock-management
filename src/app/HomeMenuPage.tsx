@@ -2,7 +2,11 @@
 
 import {
   ArrowRightOutlined,
-  BarChartOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  DashboardOutlined,
+  DatabaseOutlined,
+  FundOutlined,
   ShopOutlined,
   ShoppingCartOutlined,
   SwapOutlined,
@@ -22,47 +26,90 @@ import styles from "./page.module.css";
 
 const { Text, Title } = Typography;
 
-const MENU_ITEMS: Array<{
+type MenuItem = {
   href: string;
   icon: ReactNode;
   title: string;
+};
+
+const MENU_GROUPS: Array<{
+  id: string;
+  items: MenuItem[];
+  title: string;
 }> = [
   {
-    href: "/orders",
-    icon: <ShoppingCartOutlined />,
-    title: "Orders",
+    id: "stock-menu",
+    items: [
+      {
+        href: "/orders",
+        icon: <ShoppingCartOutlined />,
+        title: "Orders",
+      },
+      {
+        href: "/shipments",
+        icon: <TruckOutlined />,
+        title: "Shipments",
+      },
+      {
+        href: "/movements",
+        icon: <SwapOutlined />,
+        title: "Movements",
+      },
+    ],
+    title: "Stock",
   },
   {
-    href: "/shipments",
-    icon: <TruckOutlined />,
-    title: "Shipments",
-  },
-  {
-    href: "/movements",
-    icon: <SwapOutlined />,
-    title: "Movements",
-  },
-  {
-    href: "/sales",
-    icon: <BarChartOutlined />,
+    id: "sales-menu",
+    items: [
+      {
+        href: "/sales/sync-status",
+        icon: <DatabaseOutlined />,
+        title: "Sync status",
+      },
+      {
+        href: "/sales/daily-sales",
+        icon: <CalendarOutlined />,
+        title: "Daily sales",
+      },
+      {
+        href: "/sales/dashboard",
+        icon: <DashboardOutlined />,
+        title: "Dashboard",
+      },
+      {
+        href: "/sales/profit-summary",
+        icon: <FundOutlined />,
+        title: "Profit summary",
+      },
+    ],
     title: "Sales",
   },
   {
-    href: "/employees",
-    icon: <TeamOutlined />,
-    title: "Employees",
+    id: "human-resources-menu",
+    items: [
+      {
+        href: "/employees",
+        icon: <TeamOutlined />,
+        title: "Employees",
+      },
+      {
+        href: "/timesheets",
+        icon: <ClockCircleOutlined />,
+        title: "Timesheets",
+      },
+    ],
+    title: "Human resources",
   },
-];
-
-const LOYVERSE_ITEMS: Array<{
-  href: string;
-  icon: ReactNode;
-  title: string;
-}> = [
   {
-    href: "/loyverse/daily-sales",
-    icon: <ShopOutlined />,
-    title: "Daily sales",
+    id: "loyverse-menu",
+    items: [
+      {
+        href: "/loyverse/daily-sales",
+        icon: <ShopOutlined />,
+        title: "Daily sales",
+      },
+    ],
+    title: "Loyverse",
   },
 ];
 
@@ -88,55 +135,36 @@ export function HomeMenuPage() {
             </div>
           </header>
 
-          <section aria-labelledby="menu-title" className={styles.menuSection}>
-            <Title id="menu-title" level={2}>
-              Menu
-            </Title>
-            <Row gutter={[16, 16]}>
-              {MENU_ITEMS.map((item) => (
-                <Col key={item.href} xs={24} sm={12} lg={8}>
-                  <a
-                    aria-label={`Open ${item.title.toLowerCase()}`}
-                    className={styles.menuLink}
-                    href={item.href}
-                  >
-                    <Card className={styles.menuCard} hoverable>
-                      <Space className={styles.menuCardContent} size={14}>
-                        <span className={styles.menuIcon}>{item.icon}</span>
-                        <Title level={3}>{item.title}</Title>
-                        <ArrowRightOutlined className={styles.menuArrow} />
-                      </Space>
-                    </Card>
-                  </a>
-                </Col>
-              ))}
-            </Row>
-          </section>
-
-          <section aria-labelledby="loyverse-title" className={styles.menuSection}>
-            <Title id="loyverse-title" level={2}>
-              Loyverse
-            </Title>
-            <Row gutter={[16, 16]}>
-              {LOYVERSE_ITEMS.map((item) => (
-                <Col key={item.href} xs={24} sm={12} lg={8}>
-                  <a
-                    aria-label={`Open ${item.title.toLowerCase()}`}
-                    className={styles.menuLink}
-                    href={item.href}
-                  >
-                    <Card className={styles.menuCard} hoverable>
-                      <Space className={styles.menuCardContent} size={14}>
-                        <span className={styles.menuIcon}>{item.icon}</span>
-                        <Title level={3}>{item.title}</Title>
-                        <ArrowRightOutlined className={styles.menuArrow} />
-                      </Space>
-                    </Card>
-                  </a>
-                </Col>
-              ))}
-            </Row>
-          </section>
+          {MENU_GROUPS.map((group) => (
+            <section
+              aria-labelledby={group.id}
+              className={styles.menuSection}
+              key={group.id}
+            >
+              <Title id={group.id} level={2}>
+                {group.title}
+              </Title>
+              <Row gutter={[16, 16]}>
+                {group.items.map((item) => (
+                  <Col key={item.href} xs={24} sm={12} lg={6}>
+                    <a
+                      aria-label={`Open ${item.title.toLowerCase()}`}
+                      className={styles.menuLink}
+                      href={item.href}
+                    >
+                      <Card className={styles.menuCard} hoverable>
+                        <Space className={styles.menuCardContent} size={14}>
+                          <span className={styles.menuIcon}>{item.icon}</span>
+                          <Title level={3}>{item.title}</Title>
+                          <ArrowRightOutlined className={styles.menuArrow} />
+                        </Space>
+                      </Card>
+                    </a>
+                  </Col>
+                ))}
+              </Row>
+            </section>
+          ))}
         </main>
       </div>
     </ConfigProvider>
