@@ -1,12 +1,8 @@
 "use client";
 
 import {
-  ArrowLeftOutlined,
-  BarChartOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
-  DashboardOutlined,
-  FundOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
@@ -151,18 +147,6 @@ export function SalesSyncStatusPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/sales" icon={<ArrowLeftOutlined />}>
-                Sales
-              </Button>
-              <Button href="/sales/daily-sales" icon={<BarChartOutlined />}>
-                Daily sales
-              </Button>
-              <Button href="/sales/dashboard" icon={<DashboardOutlined />}>
-                Dashboard
-              </Button>
-              <Button href="/sales/profit-summary" icon={<FundOutlined />}>
-                Profit summary
-              </Button>
               <Button
                 icon={<ReloadOutlined />}
                 loading={loading}
@@ -325,7 +309,9 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
     error?: string;
   };
   if (!response.ok) {
-    throw new Error(body.error || `Request failed with status ${response.status}.`);
+    throw new Error(
+      body.error || `Request failed with status ${response.status}.`,
+    );
   }
   return body as T;
 }

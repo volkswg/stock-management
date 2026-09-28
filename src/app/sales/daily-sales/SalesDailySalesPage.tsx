@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowLeftOutlined,
   BarChartOutlined,
   CalendarOutlined,
   LeftOutlined,
@@ -208,9 +207,7 @@ export function SalesDailySalesPage() {
     [],
   );
 
-  const paymentColumns = useMemo<
-    TableProps<SalesByPaymentTypeRow>["columns"]
-  >(
+  const paymentColumns = useMemo<TableProps<SalesByPaymentTypeRow>["columns"]>(
     () => [
       {
         title: "Payment type",
@@ -257,9 +254,9 @@ export function SalesDailySalesPage() {
   );
   const showSyncSuggestion = Boolean(
     sales &&
-      sales.date === date &&
-      sales.account.id === accountId &&
-      !sales.isSynced,
+    sales.date === date &&
+    sales.account.id === accountId &&
+    !sales.isSynced,
   );
   const loyverseSyncPath = `/loyverse/daily-sales?${new URLSearchParams({
     account: accountId,
@@ -460,11 +457,16 @@ export function SalesDailySalesPage() {
                   />
                 </Card>
 
-                <Card className={styles.tableCard} title="Sales by payment type">
+                <Card
+                  className={styles.tableCard}
+                  title="Sales by payment type"
+                >
                   <Table<SalesByPaymentTypeRow>
                     columns={paymentColumns}
                     dataSource={sales.report.paymentsByType}
-                    rowKey={(row) => row.paymentTypeId || `${row.type}:${row.name}`}
+                    rowKey={(row) =>
+                      row.paymentTypeId || `${row.type}:${row.name}`
+                    }
                     pagination={false}
                     scroll={{ x: 620 }}
                     locale={{
@@ -494,7 +496,9 @@ async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(path, { signal });
   const body = (await response.json().catch(() => ({}))) as { error?: string };
   if (!response.ok) {
-    throw new Error(body.error || `Request failed with status ${response.status}.`);
+    throw new Error(
+      body.error || `Request failed with status ${response.status}.`,
+    );
   }
   return body as T;
 }
