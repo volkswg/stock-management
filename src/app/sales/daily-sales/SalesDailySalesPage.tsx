@@ -4,7 +4,6 @@ import {
   ArrowLeftOutlined,
   BarChartOutlined,
   CalendarOutlined,
-  DashboardOutlined,
   LeftOutlined,
   ReloadOutlined,
   RightOutlined,
@@ -293,12 +292,6 @@ export function SalesDailySalesPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/sales" icon={<ArrowLeftOutlined />}>
-                Sales
-              </Button>
-              <Button href="/sales/dashboard" icon={<DashboardOutlined />}>
-                Dashboard
-              </Button>
               <Button
                 icon={<ReloadOutlined />}
                 loading={loading}
