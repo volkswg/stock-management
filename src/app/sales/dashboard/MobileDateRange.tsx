@@ -22,6 +22,8 @@ export function MobileDateRange({
           required
           type="date"
           value={range[0]}
+          onKeyDown={(event) => event.preventDefault()}
+          onPaste={(event) => event.preventDefault()}
           onChange={(event) =>
             onDateChange("from", event.currentTarget.value)
           }
@@ -36,6 +38,8 @@ export function MobileDateRange({
           required
           type="date"
           value={range[1]}
+          onKeyDown={(event) => event.preventDefault()}
+          onPaste={(event) => event.preventDefault()}
           onChange={(event) => onDateChange("to", event.currentTarget.value)}
         />
       </label>

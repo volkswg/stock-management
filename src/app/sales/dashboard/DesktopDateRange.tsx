@@ -17,6 +17,7 @@ export function DesktopDateRange({
       aria-label="Dashboard date range"
       className={styles.fullWidth}
       format="YYYY-MM-DD"
+      inputReadOnly
       value={[
         dayjs(range[0], "YYYY-MM-DD"),
         dayjs(range[1], "YYYY-MM-DD"),
