@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  ArrowLeftOutlined,
   CalendarOutlined,
-  DashboardOutlined,
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
@@ -239,19 +237,16 @@ export function SalesProfitSummaryPage() {
     setError(undefined);
     setNotice(undefined);
     try {
-      await requestProfitSummary(
-        "/api/sales/profit-summary/cost-overrides",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId: selectedCost.shop.accountId,
-            averageItemCost: values.averageItemCost,
-            month: selectedCost.month,
-            note: values.note || "",
-          }),
-        },
-      );
+      await requestProfitSummary("/api/sales/profit-summary/cost-overrides", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId: selectedCost.shop.accountId,
+          averageItemCost: values.averageItemCost,
+          month: selectedCost.month,
+          note: values.note || "",
+        }),
+      });
       setNotice(
         `Average item cost saved for ${
           selectedCost.shop.shopName
@@ -273,17 +268,14 @@ export function SalesProfitSummaryPage() {
     setError(undefined);
     setNotice(undefined);
     try {
-      await requestProfitSummary(
-        "/api/sales/profit-summary/cost-overrides",
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId: selectedCost.shop.accountId,
-            month: selectedCost.month,
-          }),
-        },
-      );
+      await requestProfitSummary("/api/sales/profit-summary/cost-overrides", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId: selectedCost.shop.accountId,
+          month: selectedCost.month,
+        }),
+      });
       setNotice(
         `Using synced item cost for ${
           selectedCost.shop.shopName
@@ -317,9 +309,7 @@ export function SalesProfitSummaryPage() {
         }),
       });
       setNotice(
-        `Shared expense saved for ${formatMonth(
-          selectedSharedExpense.month,
-        )}.`,
+        `Shared expense saved for ${formatMonth(selectedSharedExpense.month)}.`,
       );
       setSharedExpenseModalOpen(false);
       sharedExpenseForm.resetFields();
@@ -497,12 +487,6 @@ export function SalesProfitSummaryPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/sales" icon={<ArrowLeftOutlined />}>
-                Sales
-              </Button>
-              <Button href="/sales/dashboard" icon={<DashboardOutlined />}>
-                Dashboard
-              </Button>
               <Button
                 icon={<ReloadOutlined />}
                 loading={loading}
@@ -515,22 +499,20 @@ export function SalesProfitSummaryPage() {
 
           {error ? (
             <Alert
-              closable
               className={styles.alert}
-              message={error}
+              title={error}
               showIcon
               type="error"
-              onClose={() => setError(undefined)}
+              closable={{ onClose: () => setError(undefined) }}
             />
           ) : null}
           {notice ? (
             <Alert
-              closable
               className={styles.alert}
-              message={notice}
+              title={notice}
               showIcon
               type="success"
-              onClose={() => setNotice(undefined)}
+              closable={{ onClose: () => setNotice(undefined) }}
             />
           ) : null}
           {(summary?.totals?.netItems || 0) !== 0 &&
@@ -563,7 +545,10 @@ export function SalesProfitSummaryPage() {
           <Row className={styles.summaryGrid} gutter={[12, 12]}>
             <Col xs={12} lg={6}>
               <Card>
-                <Statistic title="Net sales" value={formatMoney(totals?.netSales || 0)} />
+                <Statistic
+                  title="Net sales"
+                  value={formatMoney(totals?.netSales || 0)}
+                />
               </Card>
             </Col>
             <Col xs={12} lg={6}>
@@ -576,7 +561,10 @@ export function SalesProfitSummaryPage() {
             </Col>
             <Col xs={12} lg={6}>
               <Card>
-                <Statistic title="Expenses" value={formatMoney(totals?.expenses || 0)} />
+                <Statistic
+                  title="Expenses"
+                  value={formatMoney(totals?.expenses || 0)}
+                />
               </Card>
             </Col>
             <Col xs={12} lg={6}>
@@ -626,7 +614,9 @@ export function SalesProfitSummaryPage() {
                       <Table
                         columns={createSharedExpenseColumns(monthRow.month)}
                         dataSource={monthRow.sharedExpenses}
-                        locale={{ emptyText: "No shared expenses for this month." }}
+                        locale={{
+                          emptyText: "No shared expenses for this month.",
+                        }}
                         pagination={false}
                         rowKey="id"
                         scroll={{ x: 760 }}
@@ -737,7 +727,11 @@ export function SalesProfitSummaryPage() {
             name="amount"
             rules={[
               { required: true, message: "Enter the expense amount." },
-              { type: "number", min: 0, message: "Expense cannot be negative." },
+              {
+                type: "number",
+                min: 0,
+                message: "Expense cannot be negative.",
+              },
             ]}
           >
             <InputNumber
@@ -757,9 +751,7 @@ export function SalesProfitSummaryPage() {
       <Modal
         destroyOnHidden
         open={costModalOpen}
-        title={`Average item cost for ${
-          selectedCost?.shop.shopName || "shop"
-        }`}
+        title={`Average item cost for ${selectedCost?.shop.shopName || "shop"}`}
         okText="Save item cost"
         confirmLoading={submitting}
         onCancel={() => {
@@ -820,12 +812,10 @@ export function SalesProfitSummaryPage() {
   );
 }
 
-function createMetricColumns<T extends ProfitMetrics>(
-  options?: {
-    averageItemCostWidth?: number;
-    renderAverageItemCost?: (value: number, row: T) => ReactNode;
-  },
-): ColumnsType<T> {
+function createMetricColumns<T extends ProfitMetrics>(options?: {
+  averageItemCostWidth?: number;
+  renderAverageItemCost?: (value: number, row: T) => ReactNode;
+}): ColumnsType<T> {
   return [
     {
       title: "Net items",
