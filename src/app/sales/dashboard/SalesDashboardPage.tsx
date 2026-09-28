@@ -1,11 +1,7 @@
 "use client";
 
 import {
-  ArrowLeftOutlined,
   BarChartOutlined,
-  CalendarOutlined,
-  DatabaseOutlined,
-  FundOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
@@ -378,18 +374,6 @@ export function SalesDashboardPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
-              <Button href="/sales" icon={<ArrowLeftOutlined />}>
-                Sales
-              </Button>
-              <Button href="/sales/sync-status" icon={<DatabaseOutlined />}>
-                Sync status
-              </Button>
-              <Button href="/sales/daily-sales" icon={<CalendarOutlined />}>
-                Daily sales
-              </Button>
-              <Button href="/sales/profit-summary" icon={<FundOutlined />}>
-                Profit summary
-              </Button>
               <Button
                 icon={<ReloadOutlined />}
                 loading={loading}
