@@ -67,6 +67,7 @@ type SummaryResponse = {
 
 type CalendarEntry = {
   employeeId: string;
+  shopId: string;
   status: EmployeeTimesheet["status"];
   timesheetId: string;
   workdayType: EmployeeTimesheet["workdayType"];
@@ -145,6 +146,7 @@ export function TimesheetCalendarPage() {
       if (!existing || timesheet.status === "leave") {
         dateEntries.set(timesheet.employeeId, {
           employeeId: timesheet.employeeId,
+          shopId: timesheet.shopId,
           status: timesheet.status,
           timesheetId: timesheet.id,
           workdayType: timesheet.workdayType,
@@ -472,6 +474,8 @@ export function TimesheetCalendarPage() {
                               onClick={(event) => event.stopPropagation()}
                             >
                               {getEmployeeName(entry.employeeId, employeeById)}
+                              {" · "}
+                              {shopById.get(entry.shopId)?.name || entry.shopId}
                               {entry.status === "work" && entry.workdayType === "half"
                                 ? " · Half day"
                                 : ""}
