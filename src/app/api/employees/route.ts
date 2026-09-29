@@ -45,6 +45,19 @@ export async function POST(request: Request): Promise<NextResponse> {
         compensationEffectiveFrom:
           input.compensationEffectiveFrom || input.hiredDate,
         compensationType: input.compensationType || "monthly",
+        commissionType: input.commissionType || "none",
+        commissionBucketSales:
+          input.commissionType === "sales_bucket"
+            ? input.commissionBucketSales ?? 10_000
+            : 0,
+        commissionBucketAmount:
+          input.commissionType === "sales_bucket"
+            ? input.commissionBucketAmount ?? 70
+            : 0,
+        commissionRoundupThreshold:
+          input.commissionType === "sales_bucket"
+            ? input.commissionRoundupThreshold ?? 8_000
+            : 0,
       },
     });
     return NextResponse.json({ ok: true, employee }, { status: 201 });
@@ -70,6 +83,10 @@ export function parseEmployeeInput(
   commission?: number;
   compensationEffectiveFrom?: string;
   compensationType?: "daily" | "monthly";
+  commissionType?: "none" | "sales_bucket";
+  commissionBucketSales?: number;
+  commissionBucketAmount?: number;
+  commissionRoundupThreshold?: number;
 } | null {
   if (!isRecord(value)) return null;
   const name = readOptionalString(value.name, 100);
@@ -82,6 +99,17 @@ export function parseEmployeeInput(
     value.compensationEffectiveFrom,
   );
   const compensationType = value.compensationType;
+  const commissionType = value.commissionType;
+  const commissionBucketSales = readOptionalMoney(value.commissionBucketSales);
+  const commissionBucketAmount = readOptionalMoney(
+    value.commissionBucketAmount,
+  );
+  const commissionRoundupThreshold = readOptionalMoney(
+    value.commissionRoundupThreshold,
+  );
+  const effectiveBucketSales = commissionBucketSales ?? 10_000;
+  const effectiveBucketAmount = commissionBucketAmount ?? 70;
+  const effectiveRoundupThreshold = commissionRoundupThreshold ?? 8_000;
   const status = value.status;
   if (
     name === null ||
@@ -97,6 +125,17 @@ export function parseEmployeeInput(
     (compensationType !== undefined &&
       compensationType !== "daily" &&
       compensationType !== "monthly") ||
+    (commissionType !== undefined &&
+      commissionType !== "none" &&
+      commissionType !== "sales_bucket") ||
+    commissionBucketSales === null ||
+    commissionBucketAmount === null ||
+    commissionRoundupThreshold === null ||
+    (commissionType === "sales_bucket" &&
+      (effectiveBucketSales <= 0 ||
+        effectiveBucketAmount <= 0 ||
+        effectiveRoundupThreshold <= 0 ||
+        effectiveRoundupThreshold >= effectiveBucketSales)) ||
     (status !== undefined && status !== "active" && status !== "inactive") ||
     (!partial && (name === undefined || hiredDate === undefined))
   ) {
@@ -112,6 +151,10 @@ export function parseEmployeeInput(
     commission?: number;
     compensationEffectiveFrom?: string;
     compensationType?: "daily" | "monthly";
+    commissionType?: "none" | "sales_bucket";
+    commissionBucketSales?: number;
+    commissionBucketAmount?: number;
+    commissionRoundupThreshold?: number;
   } = {};
   if (name !== undefined) result.name = name;
   if (phone !== undefined) result.phone = phone;
@@ -124,6 +167,18 @@ export function parseEmployeeInput(
   }
   if (compensationType === "daily" || compensationType === "monthly") {
     result.compensationType = compensationType;
+  }
+  if (commissionType === "none" || commissionType === "sales_bucket") {
+    result.commissionType = commissionType;
+  }
+  if (commissionBucketSales !== undefined) {
+    result.commissionBucketSales = commissionBucketSales;
+  }
+  if (commissionBucketAmount !== undefined) {
+    result.commissionBucketAmount = commissionBucketAmount;
+  }
+  if (commissionRoundupThreshold !== undefined) {
+    result.commissionRoundupThreshold = commissionRoundupThreshold;
   }
   if (status === "active" || status === "inactive") result.status = status;
   return result;

@@ -8,6 +8,7 @@ import {
 
 export type EmployeeStatus = "active" | "inactive";
 export type EmployeeCompensationType = "daily" | "monthly";
+export type EmployeeCommissionType = "none" | "sales_bucket";
 
 export type Employee = {
   id: string;
@@ -31,6 +32,10 @@ export type EmployeeCompensation = {
   updatedBy: string;
   effectiveFrom: string;
   compensationType: EmployeeCompensationType;
+  commissionType: EmployeeCommissionType;
+  commissionBucketSales: number;
+  commissionBucketAmount: number;
+  commissionRoundupThreshold: number;
 };
 
 export type EmployeeInput = {
@@ -43,6 +48,10 @@ export type EmployeeInput = {
   commission: number;
   compensationEffectiveFrom: string;
   compensationType: EmployeeCompensationType;
+  commissionType: EmployeeCommissionType;
+  commissionBucketSales: number;
+  commissionBucketAmount: number;
+  commissionRoundupThreshold: number;
 };
 
 export async function listEmployees({
@@ -123,6 +132,10 @@ export async function createEmployee({
     commission: input.commission,
     effectiveFrom: input.compensationEffectiveFrom,
     compensationType: input.compensationType,
+    commissionType: input.commissionType,
+    commissionBucketSales: input.commissionBucketSales,
+    commissionBucketAmount: input.commissionBucketAmount,
+    commissionRoundupThreshold: input.commissionRoundupThreshold,
     googleSheetsService,
     updatedBy: createdBy,
   });
@@ -152,6 +165,10 @@ export async function updateEmployee({
     commission,
     compensationEffectiveFrom,
     compensationType,
+    commissionType,
+    commissionBucketSales,
+    commissionBucketAmount,
+    commissionRoundupThreshold,
     ...employeeInput
   } = input;
   const employee: Employee = {
@@ -171,7 +188,11 @@ export async function updateEmployee({
   if (
     baseSalary === undefined &&
     commission === undefined &&
-    compensationType === undefined
+    compensationType === undefined &&
+    commissionType === undefined &&
+    commissionBucketSales === undefined &&
+    commissionBucketAmount === undefined &&
+    commissionRoundupThreshold === undefined
   ) {
     return employee;
   }
@@ -184,11 +205,45 @@ export async function updateEmployee({
   const nextCommission = commission ?? currentCompensation?.commission ?? 0;
   const nextCompensationType =
     compensationType ?? currentCompensation?.compensationType ?? "monthly";
+  const nextCommissionType =
+    commissionType ?? currentCompensation?.commissionType ?? "none";
+  const currentBucketSales =
+    currentCompensation?.commissionType === "sales_bucket" &&
+    currentCompensation.commissionBucketSales > 0
+      ? currentCompensation.commissionBucketSales
+      : 10_000;
+  const nextCommissionBucketSales =
+    nextCommissionType === "sales_bucket"
+      ? commissionBucketSales ?? currentBucketSales
+      : 0;
+  const currentBucketAmount =
+    currentCompensation?.commissionType === "sales_bucket" &&
+    currentCompensation.commissionBucketAmount > 0
+      ? currentCompensation.commissionBucketAmount
+      : 70;
+  const nextCommissionBucketAmount =
+    nextCommissionType === "sales_bucket"
+      ? commissionBucketAmount ?? currentBucketAmount
+      : 0;
+  const currentRoundupThreshold =
+    currentCompensation?.commissionType === "sales_bucket" &&
+    currentCompensation.commissionRoundupThreshold > 0
+      ? currentCompensation.commissionRoundupThreshold
+      : 8_000;
+  const nextCommissionRoundupThreshold =
+    nextCommissionType === "sales_bucket"
+      ? commissionRoundupThreshold ?? currentRoundupThreshold
+      : 0;
   if (
     currentCompensation &&
     nextBaseSalary === currentCompensation.baseSalary &&
     nextCommission === currentCompensation.commission &&
-    nextCompensationType === currentCompensation.compensationType
+    nextCompensationType === currentCompensation.compensationType &&
+    nextCommissionType === currentCompensation.commissionType &&
+    nextCommissionBucketSales === currentCompensation.commissionBucketSales &&
+    nextCommissionBucketAmount === currentCompensation.commissionBucketAmount &&
+    nextCommissionRoundupThreshold ===
+      currentCompensation.commissionRoundupThreshold
   ) {
     return { ...employee, compensation: currentCompensation };
   }
@@ -198,6 +253,10 @@ export async function updateEmployee({
     commission: nextCommission,
     effectiveFrom: compensationEffectiveFrom || getBangkokDate(),
     compensationType: nextCompensationType,
+    commissionType: nextCommissionType,
+    commissionBucketSales: nextCommissionBucketSales,
+    commissionBucketAmount: nextCommissionBucketAmount,
+    commissionRoundupThreshold: nextCommissionRoundupThreshold,
     googleSheetsService,
     updatedBy: "web",
   });
@@ -236,9 +295,9 @@ async function ensureEmployeeCompensationHeaders(
   googleSheetsService: IGoogleSheetsService,
 ): Promise<void> {
   await googleSheetsService.employeeCompensations.ensureExists?.();
-  const rows = await googleSheetsService.employeeCompensations.readRows("A1:H1");
+  const rows = await googleSheetsService.employeeCompensations.readRows("A1:L1");
   if (rows[0]?.join("|") !== EMPLOYEE_COMPENSATION_HEADERS.join("|")) {
-    await googleSheetsService.employeeCompensations.updateRows("A1:H1", [
+    await googleSheetsService.employeeCompensations.updateRows("A1:L1", [
       EMPLOYEE_COMPENSATION_HEADERS,
     ]);
   }
@@ -250,6 +309,10 @@ async function appendEmployeeCompensation({
   commission,
   effectiveFrom,
   compensationType,
+  commissionType,
+  commissionBucketSales,
+  commissionBucketAmount,
+  commissionRoundupThreshold,
   googleSheetsService,
   updatedBy,
 }: {
@@ -258,6 +321,10 @@ async function appendEmployeeCompensation({
   commission: number;
   effectiveFrom: string;
   compensationType: EmployeeCompensationType;
+  commissionType: EmployeeCommissionType;
+  commissionBucketSales: number;
+  commissionBucketAmount: number;
+  commissionRoundupThreshold: number;
   googleSheetsService: IGoogleSheetsService;
   updatedBy: string;
 }): Promise<EmployeeCompensation> {
@@ -272,8 +339,12 @@ async function appendEmployeeCompensation({
     updatedBy,
     effectiveFrom,
     compensationType,
+    commissionType,
+    commissionBucketSales,
+    commissionBucketAmount,
+    commissionRoundupThreshold,
   };
-  await googleSheetsService.employeeCompensations.appendRows("A:H", [
+  await googleSheetsService.employeeCompensations.appendRows("A:L", [
     compensationToRow(compensation),
   ]);
   return compensation;
@@ -316,6 +387,13 @@ function mapEmployeeCompensationRow(
     effectiveFrom:
       toStringValue(row[6]) || toStringValue(row[3]).slice(0, 10),
     compensationType: toStringValue(row[7]) === "daily" ? "daily" : "monthly",
+    commissionType:
+      toStringValue(row[8]) === "sales_bucket"
+        ? "sales_bucket"
+        : "none",
+    commissionBucketSales: toMoney(row[9]),
+    commissionBucketAmount: toMoney(row[10]),
+    commissionRoundupThreshold: toMoney(row[11]),
   };
 }
 
@@ -331,6 +409,10 @@ function compensationToRow(
     compensation.updatedBy,
     compensation.effectiveFrom,
     compensation.compensationType,
+    compensation.commissionType,
+    compensation.commissionBucketSales,
+    compensation.commissionBucketAmount,
+    compensation.commissionRoundupThreshold,
   ];
 }
 

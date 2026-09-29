@@ -6,6 +6,7 @@ export {
   type Employee,
   type EmployeeCompensation,
   type EmployeeCompensationType,
+  type EmployeeCommissionType,
   type EmployeeInput,
   type EmployeeStatus,
 } from "./manageEmployees";
@@ -23,4 +24,5 @@ export {
 export {
   calculateEmployeePayroll,
   type EmployeePayroll,
+  type EmployeePayrollDailyCommission,
 } from "./calculateEmployeePayroll";

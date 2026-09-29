@@ -12,6 +12,8 @@
 .tableCard :global(.ant-card-body) { padding: 0; }
 .employeeCell, .moneyCell { display: flex; flex-direction: column; gap: 2px; }
 .moneyCell { align-items: flex-end; }
+.dailyBreakdown { display: grid; gap: 10px; padding: 6px 8px 10px; }
+.dailyBreakdown :global(.ant-table-wrapper) { min-width: 0; }
 @media (max-width: 767px) {
   .content { padding: 20px 16px; }
   .pageHeader { flex-direction: column; }

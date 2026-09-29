@@ -7,4 +7,8 @@ export const EMPLOYEE_COMPENSATION_HEADERS = [
   "updatedBy",
   "effectiveFrom",
   "compensationType",
+  "commissionType",
+  "commissionBucketSales",
+  "commissionBucketAmount",
+  "commissionRoundupThreshold",
 ];

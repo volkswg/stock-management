@@ -25,6 +25,17 @@ import styles from "./payroll.module.css";
 
 const { Text, Title } = Typography;
 
+type DailyCommissionRecord = {
+  date: string;
+  shopId: string;
+  shopName: string;
+  attendanceUnits: number;
+  netSales: number;
+  commissionType: "none" | "sales_bucket";
+  bucketCount: number;
+  commission: number;
+};
+
 type PayrollRecord = {
   employeeId: string;
   employeeName: string;
@@ -32,10 +43,16 @@ type PayrollRecord = {
   effectiveFrom: string;
   baseSalary: number;
   commission: number;
+  commissionType: "none" | "sales_bucket";
+  commissionBucketSales: number;
+  commissionBucketAmount: number;
+  commissionRoundupThreshold: number;
+  commissionSales: number;
   workedDays: number;
   leaveDays: number;
   basePay: number;
   totalPay: number;
+  dailyCommissions: DailyCommissionRecord[];
 };
 
 type PayrollResponse = {
@@ -44,6 +61,63 @@ type PayrollResponse = {
   payroll?: PayrollRecord[];
   error?: string;
 };
+
+const dailyCommissionColumns: ColumnsType<DailyCommissionRecord> = [
+  {
+    title: "Date",
+    dataIndex: "date",
+    width: 130,
+    render: formatDate,
+  },
+  {
+    title: "Selected shop",
+    key: "shop",
+    width: 240,
+    render: (_, record) => (
+      <div className={styles.employeeCell}>
+        <Text>{record.shopName || record.shopId}</Text>
+        {record.shopName && record.shopName !== record.shopId ? (
+          <Text type="secondary">{record.shopId}</Text>
+        ) : null}
+      </div>
+    ),
+  },
+  {
+    title: "Attendance",
+    dataIndex: "attendanceUnits",
+    width: 120,
+    render: (units: number) => (
+      <Tag color={units === 0.5 ? "gold" : "green"}>
+        {units === 0.5 ? "Half day" : "Full day"}
+      </Tag>
+    ),
+  },
+  {
+    title: "Shop net sales",
+    dataIndex: "netSales",
+    width: 160,
+    align: "right",
+    render: formatMoney,
+  },
+  {
+    title: "Bucket result",
+    key: "bucketResult",
+    width: 150,
+    align: "right",
+    render: (_, record) => {
+      if (record.commissionType !== "sales_bucket") return "Not eligible";
+      if (record.bucketCount === 0) return "Below first bucket";
+      return `${record.bucketCount} ${record.bucketCount === 1 ? "bucket" : "buckets"}`;
+    },
+  },
+  {
+    title: "Daily commission",
+    dataIndex: "commission",
+    width: 160,
+    align: "right",
+    render: (value: number) => <Text strong>{formatMoney(value)}</Text>,
+  },
+];
 
 export function PayrollPage() {
   const [month, setMonth] = useState(getBangkokMonth());
@@ -153,6 +227,36 @@ export function PayrollPage() {
       render: formatMoney,
     },
     {
+      title: "Eligible sales",
+      dataIndex: "commissionSales",
+      width: 145,
+      align: "right",
+      render: (value: number, record) =>
+        record.commissionType === "sales_bucket"
+          ? formatMoney(value)
+          : "-",
+    },
+    {
+      title: "Commission rule",
+      key: "commissionRule",
+      width: 190,
+      align: "right",
+      render: (_, record) =>
+        record.commissionType === "sales_bucket" ? (
+          <div className={styles.moneyCell}>
+            <Text>
+              {formatMoney(record.commissionBucketAmount)} /{" "}
+              {formatMoney(record.commissionBucketSales)}
+            </Text>
+            <Text type="secondary">
+              Round at {formatMoney(record.commissionRoundupThreshold)}
+            </Text>
+          </div>
+        ) : (
+          "None"
+        ),
+    },
+    {
       title: "Commission",
       dataIndex: "commission",
       width: 140,
@@ -241,7 +345,7 @@ export function PayrollPage() {
           <Alert
             className={styles.ruleAlert}
             title="Calculation rules"
-            description="Monthly: full base salary. Daily: base rate × recorded workday units. A half day counts as 0.5. Commission is added once for the month."
+            description="Monthly: full base salary. Daily: base rate × workday units. Commission: synced net sales for the selected shop and work date earn one configured amount per full sales bucket; a remainder at the round-up threshold earns the next bucket. Sales below the first full bucket earn no commission. A half day counts as 0.5."
             showIcon
             type="info"
           />
@@ -254,19 +358,46 @@ export function PayrollPage() {
               locale={{ emptyText: "No employees found for this payroll month." }}
               pagination={false}
               rowKey="employeeId"
-              scroll={{ x: 1095 }}
+              scroll={{ x: 1430 }}
+              expandable={{
+                expandRowByClick: true,
+                expandedRowRender: (record) => (
+                  <div className={styles.dailyBreakdown}>
+                    <Text strong>Daily sales and commission</Text>
+                    <Table
+                      columns={dailyCommissionColumns}
+                      dataSource={record.dailyCommissions}
+                      locale={{ emptyText: "No worked days recorded." }}
+                      pagination={false}
+                      rowKey={(dailyRecord) =>
+                        `${dailyRecord.date}:${dailyRecord.shopId}`
+                      }
+                      scroll={{ x: 960 }}
+                      size="small"
+                    />
+                  </div>
+                ),
+                rowExpandable: (record) => record.dailyCommissions.length > 0,
+              }}
               summary={(records) => (
                 <Table.Summary.Row>
-                  <Table.Summary.Cell index={0} colSpan={4}>
+                  <Table.Summary.Cell index={0} />
+                  <Table.Summary.Cell index={1} colSpan={4}>
                     <Text strong>Total</Text>
                   </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={4}>
+                  <Table.Summary.Cell align="right" index={5}>
                     <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.basePay, 0))}</Text>
                   </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={5}>
+                  <Table.Summary.Cell align="right" index={6}>
+                    <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.commissionSales, 0))}</Text>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell align="right" index={7}>
+                    <Text type="secondary">-</Text>
+                  </Table.Summary.Cell>
+                  <Table.Summary.Cell align="right" index={8}>
                     <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.commission, 0))}</Text>
                   </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={6}>
+                  <Table.Summary.Cell align="right" index={9}>
                     <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.totalPay, 0))}</Text>
                   </Table.Summary.Cell>
                 </Table.Summary.Row>
@@ -311,4 +442,16 @@ function formatMoney(value: number): string {
     currency: "THB",
     minimumFractionDigits: 2,
   }).format(value);
+}
+
+function formatDate(value: string): string {
+  if (!value) return "-";
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
 }

@@ -59,6 +59,10 @@ type Employee = {
     updatedBy: string;
     effectiveFrom: string;
     compensationType: "daily" | "monthly";
+    commissionType: "none" | "sales_bucket";
+    commissionBucketSales: number;
+    commissionBucketAmount: number;
+    commissionRoundupThreshold: number;
   } | null;
 };
 
@@ -69,7 +73,10 @@ type EmployeeFormValues = {
   hiredDate: Dayjs;
   terminatedDate?: Dayjs;
   baseSalary: number;
-  commission: number;
+  commissionType: "none" | "sales_bucket";
+  commissionBucketSales: number;
+  commissionBucketAmount: number;
+  commissionRoundupThreshold: number;
   compensationEffectiveFrom: Dayjs;
   compensationType: "daily" | "monthly";
 };
@@ -84,6 +91,7 @@ type EmployeesResponse = {
 export function EmployeesPage() {
   const [form] = Form.useForm<EmployeeFormValues>();
   const formStatus = Form.useWatch("status", form);
+  const formCommissionType = Form.useWatch("commissionType", form);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -144,7 +152,10 @@ export function EmployeesPage() {
       hiredDate: dayjs(getBangkokDate()),
       terminatedDate: undefined,
       baseSalary: 0,
-      commission: 0,
+      commissionType: "none",
+      commissionBucketSales: 10_000,
+      commissionBucketAmount: 70,
+      commissionRoundupThreshold: 8_000,
       compensationEffectiveFrom: dayjs(getBangkokDate()),
       compensationType: "monthly",
     });
@@ -162,7 +173,13 @@ export function EmployeesPage() {
         ? dayjs(employee.terminatedDate)
         : undefined,
       baseSalary: employee.compensation?.baseSalary || 0,
-      commission: employee.compensation?.commission || 0,
+      commissionType: employee.compensation?.commissionType || "none",
+      commissionBucketSales:
+        employee.compensation?.commissionBucketSales || 10_000,
+      commissionBucketAmount:
+        employee.compensation?.commissionBucketAmount || 70,
+      commissionRoundupThreshold:
+        employee.compensation?.commissionRoundupThreshold || 8_000,
       compensationEffectiveFrom: dayjs(getBangkokDate()),
       compensationType: employee.compensation?.compensationType || "monthly",
     });
@@ -183,7 +200,20 @@ export function EmployeesPage() {
           ? values.terminatedDate.format("YYYY-MM-DD")
           : "",
       baseSalary: values.baseSalary || 0,
-      commission: values.commission || 0,
+      commission: 0,
+      commissionType: values.commissionType,
+      commissionBucketSales:
+        values.commissionType === "sales_bucket"
+          ? values.commissionBucketSales
+          : 0,
+      commissionBucketAmount:
+        values.commissionType === "sales_bucket"
+          ? values.commissionBucketAmount
+          : 0,
+      commissionRoundupThreshold:
+        values.commissionType === "sales_bucket"
+          ? values.commissionRoundupThreshold
+          : 0,
       compensationEffectiveFrom:
         values.compensationEffectiveFrom.format("YYYY-MM-DD"),
       compensationType: values.compensationType,
@@ -321,9 +351,24 @@ export function EmployeesPage() {
     {
       title: "Commission",
       key: "commission",
-      width: 140,
+      width: 220,
       align: "right",
-      render: (_, employee) => formatMoney(employee.compensation?.commission),
+      render: (_, employee) =>
+        employee.compensation?.commissionType === "sales_bucket" ? (
+          <div className={styles.employeeCell}>
+            <Tag color="cyan">Sales buckets</Tag>
+            <Text>
+              {formatMoney(employee.compensation.commissionBucketAmount)} per{" "}
+              {formatMoney(employee.compensation.commissionBucketSales)}
+            </Text>
+            <Text type="secondary">
+              Round at{" "}
+              {formatMoney(employee.compensation.commissionRoundupThreshold)}
+            </Text>
+          </div>
+        ) : (
+          <Text type="secondary">None</Text>
+        ),
     },
     {
       title: "Hired",
@@ -512,7 +557,7 @@ export function EmployeesPage() {
               locale={{ emptyText: "No employees found." }}
               pagination={{ pageSize: 20, showSizeChanger: false }}
               rowKey="id"
-              scroll={{ x: 1440 }}
+              scroll={{ x: 1520 }}
               size="middle"
             />
           </Card>
@@ -580,18 +625,104 @@ export function EmployeesPage() {
             <Col xs={24} sm={12}>
               <Form.Item
                 label="Commission"
-                name="commission"
-                rules={[{ required: true, message: "Enter the commission." }]}
+                name="commissionType"
+                rules={[
+                  {
+                    required: true,
+                    message: "Select commission eligibility.",
+                  },
+                ]}
               >
-                <InputNumber
-                  addonBefore="฿"
-                  className={styles.fullWidth}
-                  min={0}
-                  precision={2}
+                <Select
+                  options={[
+                    { label: "None", value: "none" },
+                    {
+                      label: "Sales buckets",
+                      value: "sales_bucket",
+                    },
+                  ]}
                 />
               </Form.Item>
             </Col>
           </Row>
+          {formCommissionType === "sales_bucket" ? (
+            <Row gutter={12}>
+              <Col xs={24} sm={8}>
+                <Form.Item
+                  label="Sales bucket"
+                  name="commissionBucketSales"
+                  rules={[
+                    { required: true, message: "Enter the bucket sales." },
+                  ]}
+                >
+                  <InputNumber
+                    addonBefore="฿"
+                    className={styles.fullWidth}
+                    min={0.01}
+                    precision={2}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Form.Item
+                  label="Commission per bucket"
+                  name="commissionBucketAmount"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Enter the bucket commission.",
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    addonBefore="฿"
+                    className={styles.fullWidth}
+                    min={0.01}
+                    precision={2}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Form.Item
+                  dependencies={["commissionBucketSales"]}
+                  label="Round-up threshold"
+                  name="commissionRoundupThreshold"
+                  rules={[
+                    { required: true, message: "Enter the round-up threshold." },
+                    ({ getFieldValue }) => ({
+                      validator(_, value: unknown) {
+                        const bucketSales = getFieldValue(
+                          "commissionBucketSales",
+                        ) as unknown;
+                        if (
+                          value === undefined ||
+                          bucketSales === undefined ||
+                          (typeof value === "number" &&
+                            typeof bucketSales === "number" &&
+                            value > 0 &&
+                            value < bucketSales)
+                        ) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(
+                          new Error(
+                            "Must be greater than 0 and below the sales bucket.",
+                          ),
+                        );
+                      },
+                    }),
+                  ]}
+                >
+                  <InputNumber
+                    addonBefore="฿"
+                    className={styles.fullWidth}
+                    min={0.01}
+                    precision={2}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          ) : null}
           <Form.Item
             label="Compensation effective from"
             name="compensationEffectiveFrom"
