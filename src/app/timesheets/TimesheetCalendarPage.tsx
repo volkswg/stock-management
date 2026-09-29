@@ -17,6 +17,7 @@ import {
   ConfigProvider,
   DatePicker,
   Form,
+  message,
   Modal,
   Row,
   Select,
@@ -81,6 +82,7 @@ type AddTimesheetFormValues = {
 
 export function TimesheetCalendarPage() {
   const [form] = Form.useForm<AddTimesheetFormValues>();
+  const [messageApi, messageContextHolder] = message.useMessage();
   const today = getBangkokDate();
   const [month, setMonth] = useState(() => today.slice(0, 7));
   const [selectedDate, setSelectedDate] = useState(today);
@@ -92,13 +94,10 @@ export function TimesheetCalendarPage() {
   const [submitting, setSubmitting] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addStatus, setAddStatus] = useState<"work" | "leave">("work");
-  const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
 
   const loadSummary = useCallback(
     async (signal?: AbortSignal) => {
       setLoading(true);
-      setError(undefined);
       const query = new URLSearchParams({ month });
       if (shopId) query.set("shopId", shopId);
       try {
@@ -110,12 +109,14 @@ export function TimesheetCalendarPage() {
         setShops(response.shops || []);
         setTimesheets(response.timesheets || []);
       } catch (requestError) {
-        if (!signal?.aborted) setError(getErrorMessage(requestError));
+        if (!signal?.aborted) {
+          messageApi.error(getErrorMessage(requestError));
+        }
       } finally {
         if (!signal?.aborted) setLoading(false);
       }
     },
-    [month, shopId],
+    [messageApi, month, shopId],
   );
 
   useEffect(() => {
@@ -202,8 +203,6 @@ export function TimesheetCalendarPage() {
 
   const addTimesheet = async (values: AddTimesheetFormValues) => {
     setSubmitting(true);
-    setError(undefined);
-    setNotice(undefined);
     try {
       await requestSummary("/api/employees/timesheets", {
         method: "POST",
@@ -217,7 +216,7 @@ export function TimesheetCalendarPage() {
         }),
       });
       const employee = employeeById.get(values.employeeId);
-      setNotice(
+      messageApi.success(
         addStatus === "work"
           ? `${employee?.name || "Employee"} work recorded.`
           : `Leave recorded for ${employee?.name || "employee"}.`,
@@ -226,7 +225,7 @@ export function TimesheetCalendarPage() {
       form.resetFields();
       await loadSummary();
     } catch (requestError) {
-      setError(getErrorMessage(requestError));
+      messageApi.error(getErrorMessage(requestError));
     } finally {
       setSubmitting(false);
     }
@@ -291,6 +290,7 @@ export function TimesheetCalendarPage() {
         },
       }}
     >
+      {messageContextHolder}
       <div className={styles.appShell}>
         <main className={styles.content}>
           <header className={styles.pageHeader}>
@@ -317,27 +317,6 @@ export function TimesheetCalendarPage() {
               </Button>
             </Space>
           </header>
-
-          {error ? (
-            <Alert
-              closable
-              className={styles.alert}
-              title={error}
-              showIcon
-              type="error"
-              onClose={() => setError(undefined)}
-            />
-          ) : null}
-          {notice ? (
-            <Alert
-              closable
-              className={styles.alert}
-              title={notice}
-              showIcon
-              type="success"
-              onClose={() => setNotice(undefined)}
-            />
-          ) : null}
 
           <Card className={styles.filterCard}>
             <div className={styles.filters}>
@@ -422,7 +401,7 @@ export function TimesheetCalendarPage() {
             </Col>
           </Row>
 
-          <Spin spinning={loading} tip="Loading monthly summary...">
+          <Spin spinning={loading} description="Loading monthly summary...">
             <Card
               className={styles.calendarCard}
               title="Attendance calendar"
