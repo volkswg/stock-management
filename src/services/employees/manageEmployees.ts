@@ -71,6 +71,26 @@ export async function listEmployees({
     });
 }
 
+export async function listEmployeeCompensations({
+  googleSheetsService,
+}: {
+  googleSheetsService: IGoogleSheetsService;
+}): Promise<EmployeeCompensation[]> {
+  await ensureEmployeeCompensationHeaders(googleSheetsService);
+  const rows = await googleSheetsService.employeeCompensations.readRows();
+  return rows
+    .map(mapEmployeeCompensationRow)
+    .filter(
+      (compensation): compensation is EmployeeCompensation =>
+        Boolean(compensation),
+    )
+    .sort((left, right) =>
+      left.effectiveFrom === right.effectiveFrom
+        ? left.createdAt.localeCompare(right.createdAt)
+        : left.effectiveFrom.localeCompare(right.effectiveFrom),
+    );
+}
+
 export async function createEmployee({
   createdBy,
   googleSheetsService,

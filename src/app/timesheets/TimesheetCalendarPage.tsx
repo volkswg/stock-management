@@ -54,6 +54,7 @@ type EmployeeTimesheet = {
   isOpen: boolean;
   createdAt: string;
   updatedAt: string;
+  workdayType: "full" | "half" | null;
 };
 
 type SummaryResponse = {
@@ -68,11 +69,13 @@ type CalendarEntry = {
   employeeId: string;
   status: EmployeeTimesheet["status"];
   timesheetId: string;
+  workdayType: EmployeeTimesheet["workdayType"];
 };
 
 type AddTimesheetFormValues = {
   employeeId: string;
   shopId: string;
+  workdayType: "full" | "half";
 };
 
 export function TimesheetCalendarPage() {
@@ -144,6 +147,7 @@ export function TimesheetCalendarPage() {
           employeeId: timesheet.employeeId,
           status: timesheet.status,
           timesheetId: timesheet.id,
+          workdayType: timesheet.workdayType,
         });
       }
       result.set(date, dateEntries);
@@ -160,7 +164,9 @@ export function TimesheetCalendarPage() {
     );
   }, [employeeById, timesheets]);
   const employeeDays = Array.from(entriesByDate.values()).flat();
-  const workDays = employeeDays.filter((entry) => entry.status === "work").length;
+  const workDays = employeeDays
+    .filter((entry) => entry.status === "work")
+    .reduce((total, entry) => total + (entry.workdayType === "half" ? 0.5 : 1), 0);
   const leaveDays = employeeDays.length - workDays;
   const recordedEmployees = new Set(
     employeeDays.map((entry) => entry.employeeId),
@@ -171,10 +177,7 @@ export function TimesheetCalendarPage() {
   const unavailableEmployeeIds = new Set(
     (addStatus === "leave"
       ? selectedRows
-      : [
-          ...timesheets.filter((timesheet) => timesheet.isOpen),
-          ...selectedRows.filter((timesheet) => timesheet.status === "leave"),
-        ]
+      : selectedRows.filter((timesheet) => timesheet.status === "leave")
     ).map((timesheet) => timesheet.employeeId),
   );
   const availableEmployees = employees.filter(
@@ -188,7 +191,10 @@ export function TimesheetCalendarPage() {
     setSelectedDate(date);
     setAddStatus("work");
     form.resetFields();
-    form.setFieldsValue({ shopId: shopId || shops[0]?.id });
+    form.setFieldsValue({
+      shopId: shopId || shops[0]?.id,
+      workdayType: "full",
+    });
     setAddModalOpen(true);
   };
 
@@ -205,12 +211,13 @@ export function TimesheetCalendarPage() {
           employeeId: values.employeeId,
           shopId: values.shopId,
           status: addStatus,
+          workdayType: addStatus === "work" ? values.workdayType : undefined,
         }),
       });
       const employee = employeeById.get(values.employeeId);
       setNotice(
         addStatus === "work"
-          ? `${employee?.name || "Employee"} clocked in.`
+          ? `${employee?.name || "Employee"} work recorded.`
           : `Leave recorded for ${employee?.name || "employee"}.`,
       );
       setAddModalOpen(false);
@@ -263,26 +270,10 @@ export function TimesheetCalendarPage() {
       width: 130,
       render: (_, timesheet) =>
         timesheet.status === "leave"
-          ? "All day"
-          : timesheet.isOpen
-            ? "Clocked in"
-            : "Completed",
-    },
-    {
-      title: "Clock in",
-      dataIndex: "createdAt",
-      width: 120,
-      render: (value: string, timesheet) =>
-        timesheet.status === "work" ? formatTime(value) : "-",
-    },
-    {
-      title: "Clock out",
-      dataIndex: "updatedAt",
-      width: 120,
-      render: (value: string, timesheet) =>
-        timesheet.status === "work" && !timesheet.isOpen
-          ? formatTime(value)
-          : "-",
+          ? "Leave"
+          : timesheet.workdayType === "half"
+            ? "Half day"
+            : "Full day",
     },
   ];
 
@@ -481,6 +472,9 @@ export function TimesheetCalendarPage() {
                               onClick={(event) => event.stopPropagation()}
                             >
                               {getEmployeeName(entry.employeeId, employeeById)}
+                              {entry.status === "work" && entry.workdayType === "half"
+                                ? " · Half day"
+                                : ""}
                             </a>
                           </li>
                         ))}
@@ -542,7 +536,7 @@ export function TimesheetCalendarPage() {
         destroyOnHidden
         open={addModalOpen}
         title={`Add timesheet — ${dayjs(selectedDate).format("DD MMMM YYYY")}`}
-        okText={addStatus === "work" ? "Clock in" : "Record leave"}
+        okText={addStatus === "work" ? "Add work" : "Record leave"}
         confirmLoading={submitting}
         onCancel={() => {
           setAddModalOpen(false);
@@ -586,6 +580,20 @@ export function TimesheetCalendarPage() {
               notFoundContent="No active employees available."
             />
           </Form.Item>
+          {addStatus === "work" ? (
+            <Form.Item
+              label="Workday"
+              name="workdayType"
+              rules={[{ required: true, message: "Select full or half day." }]}
+            >
+              <Select
+                options={[
+                  { label: "Full day", value: "full" },
+                  { label: "Half day", value: "half" },
+                ]}
+              />
+            </Form.Item>
+          ) : null}
           <Form.Item
             label="Shop"
             name="shopId"
@@ -602,7 +610,7 @@ export function TimesheetCalendarPage() {
           <Alert
             title={
               addStatus === "work"
-                ? "The current Bangkok time will be used as the clock-in time."
+                ? "The selected employee will be recorded as working on this date."
                 : "Leave will be recorded for the selected date."
             }
             showIcon
@@ -656,17 +664,6 @@ function getBangkokDate(value: string | Date = new Date()): string {
 function getPickerValue(value: string | string[] | null): string {
   if (value === null) return "";
   return Array.isArray(value) ? value[0] || "" : value;
-}
-
-function formatTime(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    hourCycle: "h23",
-    minute: "2-digit",
-    timeZone: "Asia/Bangkok",
-  }).format(date);
 }
 
 function getErrorMessage(error: unknown): string {

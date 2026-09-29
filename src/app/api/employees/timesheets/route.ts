@@ -5,7 +5,6 @@ import { isRecord } from "@/features/backend/shared/utils";
 import {
   addEmployeeLeave,
   clockInEmployee,
-  EmployeeAlreadyClockedInError,
   listEmployeeTimesheets,
   listEmployees,
   EmployeeTimesheetDateConflictError,
@@ -67,12 +66,16 @@ export async function POST(request: Request): Promise<NextResponse> {
   const shopId = isRecord(body) ? readString(body.shopId) : "";
   const date = isRecord(body) ? readString(body.date) : "";
   const status = isRecord(body) ? readString(body.status) : "";
+  const workdayType = isRecord(body) ? readString(body.workdayType) : "";
   if (
     !employeeId ||
     !shopId ||
     !isValidDate(date) ||
     (status !== EmployeeTimesheetStatus.Work &&
-      status !== EmployeeTimesheetStatus.Leave)
+      status !== EmployeeTimesheetStatus.Leave) ||
+    (status === EmployeeTimesheetStatus.Work &&
+      workdayType !== "full" &&
+      workdayType !== "half")
   ) {
     return NextResponse.json(
       {
@@ -88,6 +91,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       { status: 400 },
     );
   }
+  const normalizedWorkdayType = workdayType === "half" ? "half" : "full";
 
   try {
     const config = getConfig();
@@ -125,13 +129,11 @@ export async function POST(request: Request): Promise<NextResponse> {
             employeeId,
             googleSheetsService,
             shopId,
+            workdayType: normalizedWorkdayType,
           });
     return NextResponse.json({ ok: true, timesheet }, { status: 201 });
   } catch (error) {
-    if (
-      error instanceof EmployeeAlreadyClockedInError ||
-      error instanceof EmployeeTimesheetDateConflictError
-    ) {
+    if (error instanceof EmployeeTimesheetDateConflictError) {
       return NextResponse.json(
         { ok: false, error: error.message },
         { status: 409 },

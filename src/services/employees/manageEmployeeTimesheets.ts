@@ -10,6 +10,8 @@ export enum EmployeeTimesheetStatus {
   Leave = "leave",
 }
 
+export type EmployeeWorkdayType = "full" | "half";
+
 export type EmployeeTimesheet = {
   id: string;
   employeeId: string;
@@ -18,9 +20,9 @@ export type EmployeeTimesheet = {
   isOpen: boolean;
   createdAt: string;
   updatedAt: string;
+  workdayType: EmployeeWorkdayType | null;
 };
 
-export class EmployeeAlreadyClockedInError extends Error {}
 export class EmployeeTimesheetDateConflictError extends Error {}
 
 export async function listEmployeeTimesheets({
@@ -70,25 +72,19 @@ export async function clockInEmployee({
   employeeId,
   googleSheetsService,
   shopId,
+  workdayType,
 }: {
   date: string;
   employeeId: string;
   googleSheetsService: IGoogleSheetsService;
   shopId: string;
+  workdayType: EmployeeWorkdayType;
 }): Promise<EmployeeTimesheet> {
   await ensureTimesheetHeaders(googleSheetsService);
   const rows = await googleSheetsService.employeeTimesheets.readRows();
   const timesheets = rows
     .map(mapTimesheetRow)
     .filter((timesheet): timesheet is EmployeeTimesheet => Boolean(timesheet));
-  const hasOpenTimesheet = timesheets.some(
-    (timesheet) => timesheet.employeeId === employeeId && timesheet.isOpen,
-  );
-  if (hasOpenTimesheet) {
-    throw new EmployeeAlreadyClockedInError(
-      "Employee already has an active timesheet.",
-    );
-  }
   const hasLeave = timesheets.some(
     (timesheet) =>
       timesheet.employeeId === employeeId &&
@@ -110,8 +106,9 @@ export async function clockInEmployee({
     isOpen: true,
     createdAt: now,
     updatedAt: now,
+    workdayType,
   };
-  await googleSheetsService.employeeTimesheets.appendRows("A:F", [
+  await googleSheetsService.employeeTimesheets.appendRows("A:G", [
     timesheetToRow(timesheet),
   ]);
   return timesheet;
@@ -152,8 +149,9 @@ export async function addEmployeeLeave({
     isOpen: false,
     createdAt: now,
     updatedAt: now,
+    workdayType: null,
   };
-  await googleSheetsService.employeeTimesheets.appendRows("A:F", [
+  await googleSheetsService.employeeTimesheets.appendRows("A:G", [
     timesheetToRow(timesheet),
   ]);
   return timesheet;
@@ -187,7 +185,7 @@ export async function clockOutEmployee({
     ),
   };
   await googleSheetsService.employeeTimesheets.updateRows(
-    `A${rowIndex + 1}:F${rowIndex + 1}`,
+    `A${rowIndex + 1}:G${rowIndex + 1}`,
     [timesheetToRow(timesheet)],
   );
   return timesheet;
@@ -196,9 +194,9 @@ export async function clockOutEmployee({
 async function ensureTimesheetHeaders(
   googleSheetsService: IGoogleSheetsService,
 ): Promise<void> {
-  const rows = await googleSheetsService.employeeTimesheets.readRows("A1:F1");
+  const rows = await googleSheetsService.employeeTimesheets.readRows("A1:G1");
   if (rows[0]?.join("|") !== EMPLOYEE_TIMESHEET_HEADERS.join("|")) {
-    await googleSheetsService.employeeTimesheets.updateRows("A1:F1", [
+    await googleSheetsService.employeeTimesheets.updateRows("A1:G1", [
       EMPLOYEE_TIMESHEET_HEADERS,
     ]);
   }
@@ -228,6 +226,12 @@ function mapTimesheetRow(row: GoogleSheetRow): EmployeeTimesheet | null {
           (!updatedAt || updatedAt === createdAt))),
     createdAt,
     updatedAt,
+    workdayType:
+      rawStatus === EmployeeTimesheetStatus.Leave
+        ? null
+        : toStringValue(row[6]) === "half"
+          ? "half"
+          : "full",
   };
 }
 
@@ -239,6 +243,7 @@ function timesheetToRow(timesheet: EmployeeTimesheet): GoogleSheetRow {
     timesheet.status,
     timesheet.createdAt,
     timesheet.updatedAt,
+    timesheet.workdayType || "",
   ];
 }
 

@@ -4,10 +4,8 @@ import {
   ArrowLeftOutlined,
   CalendarOutlined,
   CarryOutOutlined,
-  CheckCircleOutlined,
   LeftOutlined,
-  LoginOutlined,
-  LogoutOutlined,
+  PlusOutlined,
   ReloadOutlined,
   RightOutlined,
 } from "@ant-design/icons";
@@ -20,7 +18,6 @@ import {
   DatePicker,
   Form,
   Modal,
-  Popconfirm,
   Row,
   Select,
   Space,
@@ -57,6 +54,7 @@ type EmployeeTimesheet = {
   isOpen: boolean;
   createdAt: string;
   updatedAt: string;
+  workdayType: "full" | "half" | null;
 };
 
 type TimesheetResponse = {
@@ -71,6 +69,7 @@ type TimesheetFormValues = {
   date: Dayjs;
   employeeId: string;
   shopId: string;
+  workdayType: "full" | "half";
 };
 
 export function TimesheetTrackerPage({
@@ -91,7 +90,6 @@ export function TimesheetTrackerPage({
   const [timesheets, setTimesheets] = useState<EmployeeTimesheet[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [clockingOutId, setClockingOutId] = useState<string>();
   const [modalStatus, setModalStatus] = useState<"work" | "leave">("work");
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState<string>();
@@ -146,7 +144,7 @@ export function TimesheetTrackerPage({
           .filter((timesheet) =>
             modalStatus === "leave"
               ? true
-              : timesheet.isOpen || timesheet.status === "leave",
+              : timesheet.status === "leave",
           )
           .map((timesheet) => timesheet.employeeId),
       ),
@@ -157,17 +155,14 @@ export function TimesheetTrackerPage({
       employee.status === "active" &&
       !unavailableEmployeeIds.has(employee.id),
   );
-  const activeShifts = timesheets.filter(
-    (timesheet) => timesheet.status === "work" && timesheet.isOpen,
-  ).length;
   const workShifts = timesheets.filter(
     (timesheet) => timesheet.status === "work",
   ).length;
   const leaveCount = timesheets.length - workShifts;
-  const completedMinutes = timesheets.reduce(
+  const workdayUnits = timesheets.reduce(
     (total, timesheet) =>
-      timesheet.status === "work" && !timesheet.isOpen
-        ? total + getDurationMinutes(timesheet.createdAt, timesheet.updatedAt)
+      timesheet.status === "work"
+        ? total + (timesheet.workdayType === "half" ? 0.5 : 1)
         : total,
     0,
   );
@@ -178,6 +173,7 @@ export function TimesheetTrackerPage({
       date: dayjs(date),
       employeeId: undefined,
       shopId: shopId || shops[0]?.id,
+      workdayType: "full",
     });
     setModalOpen(true);
   };
@@ -196,12 +192,14 @@ export function TimesheetTrackerPage({
           employeeId: values.employeeId,
           shopId: values.shopId,
           status: modalStatus,
+          workdayType:
+            modalStatus === "work" ? values.workdayType : undefined,
         }),
       });
       const employee = employeeById.get(values.employeeId);
       setNotice(
         modalStatus === "work"
-          ? `${employee?.name || "Employee"} clocked in.`
+          ? `${employee?.name || "Employee"} work recorded.`
           : `Leave recorded for ${employee?.name || "employee"}.`,
       );
       setModalOpen(false);
@@ -215,25 +213,6 @@ export function TimesheetTrackerPage({
       setError(getErrorMessage(requestError));
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const clockOut = async (timesheet: EmployeeTimesheet) => {
-    setClockingOutId(timesheet.id);
-    setError(undefined);
-    setNotice(undefined);
-    try {
-      await requestTimesheets(
-        `/api/employees/timesheets/${encodeURIComponent(timesheet.id)}`,
-        { method: "PATCH" },
-      );
-      const employee = employeeById.get(timesheet.employeeId);
-      setNotice(`${employee?.name || "Employee"} clocked out.`);
-      await loadTimesheets();
-    } catch (requestError) {
-      setError(getErrorMessage(requestError));
-    } finally {
-      setClockingOutId(undefined);
     }
   };
 
@@ -257,40 +236,6 @@ export function TimesheetTrackerPage({
       render: (value: string) => shopById.get(value)?.name || value,
     },
     {
-      title: "Clock in",
-      key: "clockIn",
-      width: 145,
-      render: (_, timesheet) =>
-        timesheet.status === "work"
-          ? formatDateTime(timesheet.createdAt)
-          : "-",
-    },
-    {
-      title: "Clock out",
-      key: "clockOut",
-      width: 145,
-      render: (_, timesheet) =>
-        timesheet.status === "work" && !timesheet.isOpen
-          ? formatDateTime(timesheet.updatedAt)
-          : "-",
-    },
-    {
-      title: "Duration",
-      key: "duration",
-      width: 115,
-      render: (_, timesheet) =>
-        timesheet.status === "leave"
-          ? "-"
-          : formatDuration(
-              getDurationMinutes(
-                timesheet.createdAt,
-                timesheet.isOpen
-                  ? new Date().toISOString()
-                  : timesheet.updatedAt,
-              ),
-            ),
-    },
-    {
       title: "Status",
       dataIndex: "status",
       width: 120,
@@ -301,34 +246,15 @@ export function TimesheetTrackerPage({
       ),
     },
     {
-      title: "Actions",
-      key: "actions",
-      fixed: "right",
-      width: 82,
+      title: "Attendance",
+      key: "attendance",
+      width: 130,
       render: (_, timesheet) =>
-        timesheet.status === "work" && timesheet.isOpen ? (
-          <Popconfirm
-            title="Clock out employee?"
-            description="The current time will be saved as the clock-out time."
-            okText="Clock out"
-            onConfirm={() => clockOut(timesheet)}
-          >
-            <Tooltip title="Clock out">
-              <Button
-                aria-label={`Clock out ${
-                  employeeById.get(timesheet.employeeId)?.name ||
-                  timesheet.employeeId
-                }`}
-                icon={<LogoutOutlined />}
-                loading={clockingOutId === timesheet.id}
-              />
-            </Tooltip>
-          </Popconfirm>
-        ) : timesheet.status === "work" ? (
-          <CheckCircleOutlined className={styles.completedIcon} />
-        ) : (
-          <CarryOutOutlined className={styles.leaveIcon} />
-        ),
+        timesheet.status === "leave"
+          ? "Leave"
+          : timesheet.workdayType === "half"
+            ? "Half day"
+            : "Full day",
     },
   ];
 
@@ -376,11 +302,11 @@ export function TimesheetTrackerPage({
               <Tooltip title={shops.length ? "" : "No shops are configured."}>
                 <Button
                   disabled={shops.length === 0}
-                  icon={<LoginOutlined />}
+                  icon={<PlusOutlined />}
                   type="primary"
                   onClick={() => openTimesheetModal("work")}
                 >
-                  Clock in
+                  Add work
                 </Button>
               </Tooltip>
               <Tooltip title={shops.length ? "" : "No shops are configured."}>
@@ -474,29 +400,19 @@ export function TimesheetTrackerPage({
           </Card>
 
           <Row className={styles.summaryGrid} gutter={[12, 12]}>
-            <Col xs={12} lg={6}>
+            <Col xs={24} sm={8}>
               <Card>
                 <Statistic title="Work records" value={workShifts} />
               </Card>
             </Col>
-            <Col xs={12} lg={6}>
+            <Col xs={24} sm={8}>
               <Card>
-                <Statistic title="Clocked in" value={activeShifts} />
+                <Statistic title="Workday units" value={workdayUnits} />
               </Card>
             </Col>
-            <Col xs={12} lg={6}>
+            <Col xs={24} sm={8}>
               <Card>
                 <Statistic title="Leave" value={leaveCount} />
-              </Card>
-            </Col>
-            <Col xs={12} lg={6}>
-              <Card>
-                <Statistic
-                  title="Completed hours"
-                  precision={1}
-                  suffix="h"
-                  value={completedMinutes / 60}
-                />
               </Card>
             </Col>
           </Row>
@@ -512,7 +428,7 @@ export function TimesheetTrackerPage({
               rowClassName={(timesheet) =>
                 timesheet.id === selectedTimesheetId ? styles.selectedRow : ""
               }
-              scroll={{ x: 1050 }}
+              scroll={{ x: 630 }}
             />
           </Card>
         </main>
@@ -521,8 +437,8 @@ export function TimesheetTrackerPage({
       <Modal
         destroyOnHidden
         open={modalOpen}
-        title={modalStatus === "work" ? "Clock in employee" : "Record leave"}
-        okText={modalStatus === "work" ? "Clock in" : "Record leave"}
+        title={modalStatus === "work" ? "Add work record" : "Record leave"}
+        okText={modalStatus === "work" ? "Add work" : "Record leave"}
         confirmLoading={submitting}
         onCancel={() => {
           setModalOpen(false);
@@ -537,7 +453,7 @@ export function TimesheetTrackerPage({
           onFinish={(values) => void addTimesheet(values)}
         >
           <Form.Item
-            label={modalStatus === "work" ? "Clock-in date" : "Leave date"}
+            label={modalStatus === "work" ? "Work date" : "Leave date"}
             name="date"
             rules={[{ required: true, message: "Select a date." }]}
           >
@@ -549,6 +465,20 @@ export function TimesheetTrackerPage({
               format="YYYY-MM-DD"
             />
           </Form.Item>
+          {modalStatus === "work" ? (
+            <Form.Item
+              label="Workday"
+              name="workdayType"
+              rules={[{ required: true, message: "Select full or half day." }]}
+            >
+              <Select
+                options={[
+                  { label: "Full day", value: "full" },
+                  { label: "Half day", value: "half" },
+                ]}
+              />
+            </Form.Item>
+          ) : null}
           <Form.Item
             label="Employee"
             name="employeeId"
@@ -581,7 +511,7 @@ export function TimesheetTrackerPage({
           <Alert
             title={
               modalStatus === "work"
-                ? "The current Bangkok time will be used with the selected date."
+                ? "The employee will be recorded as working on the selected date."
                 : "Leave will be recorded for the selected business date."
             }
             showIcon
@@ -630,33 +560,6 @@ function isValidDate(value: string): boolean {
 function getPickerValue(value: string | string[] | null): string {
   if (value === null) return getBangkokDate();
   return Array.isArray(value) ? value[0] || getBangkokDate() : value;
-}
-
-function formatDateTime(value: string): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    hour: "2-digit",
-    hour12: false,
-    minute: "2-digit",
-    month: "short",
-    timeZone: "Asia/Bangkok",
-  }).format(date);
-}
-
-function getDurationMinutes(start: string, end: string): number {
-  const startTime = new Date(start).getTime();
-  const endTime = new Date(end).getTime();
-  if (!Number.isFinite(startTime) || !Number.isFinite(endTime)) return 0;
-  return Math.max(0, Math.round((endTime - startTime) / 60_000));
-}
-
-function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const remainder = minutes % 60;
-  return hours ? `${hours}h ${remainder}m` : `${remainder}m`;
 }
 
 function getErrorMessage(error: unknown): string {

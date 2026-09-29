@@ -5,4 +5,5 @@ export const EMPLOYEE_TIMESHEET_HEADERS = [
   "status",
   "createdAt",
   "updatedAt",
+  "workdayType",
 ];

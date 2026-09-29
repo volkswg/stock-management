@@ -1,5 +1,6 @@
 export {
   createEmployee,
+  listEmployeeCompensations,
   listEmployees,
   updateEmployee,
   type Employee,
@@ -12,10 +13,14 @@ export {
   addEmployeeLeave,
   clockInEmployee,
   clockOutEmployee,
-  EmployeeAlreadyClockedInError,
   EmployeeTimesheetDateConflictError,
   EmployeeTimesheetStatus,
   listEmployeeTimesheets,
   listEmployeeTimesheetsForMonth,
   type EmployeeTimesheet,
+  type EmployeeWorkdayType,
 } from "./manageEmployeeTimesheets";
+export {
+  calculateEmployeePayroll,
+  type EmployeePayroll,
+} from "./calculateEmployeePayroll";
