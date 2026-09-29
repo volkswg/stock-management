@@ -6,6 +6,8 @@ export function createGoogleSheetsServiceFromConfig(
 ): GoogleSheetsService {
   return new GoogleSheetsService({
     spreadsheetId: config.googleSheets.spreadsheetId,
+    employeeCompensationsWorksheetName:
+      config.googleSheets.employeeCompensationsWorksheetName,
     employeesWorksheetName: config.googleSheets.employeesWorksheetName,
     employeeTimesheetsWorksheetName:
       config.googleSheets.employeeTimesheetsWorksheetName,

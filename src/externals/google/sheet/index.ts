@@ -2,6 +2,7 @@ export { GoogleSheetsClient } from "./client";
 export { GoogleSheetsService } from "./GoogleSheetsService";
 export {
   BaseGoogleSheet,
+  EmployeeCompensationsSheet,
   EmployeesSheet,
   EmployeeTimesheetsSheet,
   OrderBillsSheet,
@@ -22,6 +23,7 @@ export {
   lastColumnLetter,
 } from "./const";
 export { EMPLOYEE_HEADERS } from "./sheets/employees/const";
+export { EMPLOYEE_COMPENSATION_HEADERS } from "./sheets/employee-compensations/const";
 export { EMPLOYEE_TIMESHEET_HEADERS } from "./sheets/employee-timesheets/const";
 export { ORDERS_SHEET_HEADERS } from "./sheets/orders/const";
 export { ORDER_BILLS_SHEET_HEADERS } from "./sheets/order-bills/const";

@@ -3,6 +3,8 @@ export {
   listEmployees,
   updateEmployee,
   type Employee,
+  type EmployeeCompensation,
+  type EmployeeCompensationType,
   type EmployeeInput,
   type EmployeeStatus,
 } from "./manageEmployees";

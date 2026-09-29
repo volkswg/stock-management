@@ -2,6 +2,7 @@ import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
 import { GoogleSheetsClient } from "./client";
 import { GOOGLE_SHEETS_SCOPE } from "./const";
 import {
+  EmployeeCompensationsSheet,
   EmployeesSheet,
   EmployeeTimesheetsSheet,
   OrderBillsSheet,
@@ -21,6 +22,7 @@ import { MovementSheet } from "./sheets/movements/MovementSheet";
 import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
+  readonly employeeCompensations: EmployeeCompensationsSheet;
   readonly employees: EmployeesSheet;
   readonly employeeTimesheets: EmployeeTimesheetsSheet;
   readonly orders: OrdersSheet;
@@ -51,6 +53,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       scopes: [GOOGLE_SHEETS_SCOPE],
     });
     this.client = new GoogleSheetsClient(auth, config.spreadsheetId);
+    this.employeeCompensations = new EmployeeCompensationsSheet(
+      this.client,
+      config.employeeCompensationsWorksheetName,
+    );
     this.employees = new EmployeesSheet(
       this.client,
       config.employeesWorksheetName,

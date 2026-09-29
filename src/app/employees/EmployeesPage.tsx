@@ -19,6 +19,7 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Modal,
   Popconfirm,
   Row,
@@ -49,6 +50,16 @@ type Employee = {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  compensation: {
+    employeeId: string;
+    baseSalary: number;
+    commission: number;
+    createdAt: string;
+    updatedAt: string;
+    updatedBy: string;
+    effectiveFrom: string;
+    compensationType: "daily" | "monthly";
+  } | null;
 };
 
 type EmployeeFormValues = {
@@ -57,6 +68,10 @@ type EmployeeFormValues = {
   status: EmployeeStatus;
   hiredDate: Dayjs;
   terminatedDate?: Dayjs;
+  baseSalary: number;
+  commission: number;
+  compensationEffectiveFrom: Dayjs;
+  compensationType: "daily" | "monthly";
 };
 
 type EmployeesResponse = {
@@ -128,6 +143,10 @@ export function EmployeesPage() {
       status: "active",
       hiredDate: dayjs(getBangkokDate()),
       terminatedDate: undefined,
+      baseSalary: 0,
+      commission: 0,
+      compensationEffectiveFrom: dayjs(getBangkokDate()),
+      compensationType: "monthly",
     });
     setModalOpen(true);
   };
@@ -142,6 +161,10 @@ export function EmployeesPage() {
       terminatedDate: employee.terminatedDate
         ? dayjs(employee.terminatedDate)
         : undefined,
+      baseSalary: employee.compensation?.baseSalary || 0,
+      commission: employee.compensation?.commission || 0,
+      compensationEffectiveFrom: dayjs(getBangkokDate()),
+      compensationType: employee.compensation?.compensationType || "monthly",
     });
     setModalOpen(true);
   };
@@ -159,6 +182,11 @@ export function EmployeesPage() {
         values.status === "inactive" && values.terminatedDate
           ? values.terminatedDate.format("YYYY-MM-DD")
           : "",
+      baseSalary: values.baseSalary || 0,
+      commission: values.commission || 0,
+      compensationEffectiveFrom:
+        values.compensationEffectiveFrom.format("YYYY-MM-DD"),
+      compensationType: values.compensationType,
     };
 
     try {
@@ -252,6 +280,50 @@ export function EmployeesPage() {
           {status === "active" ? "Active" : "Inactive"}
         </Tag>
       ),
+    },
+    {
+      title: "Pay type",
+      key: "compensationType",
+      width: 110,
+      render: (_, employee) =>
+        employee.compensation ? (
+          <Tag
+            color={
+              employee.compensation.compensationType === "daily"
+                ? "blue"
+                : "purple"
+            }
+          >
+            {employee.compensation.compensationType === "daily"
+              ? "Daily"
+              : "Monthly"}
+          </Tag>
+        ) : (
+          <Text type="secondary">-</Text>
+        ),
+    },
+    {
+      title: "Base salary",
+      key: "baseSalary",
+      width: 140,
+      align: "right",
+      render: (_, employee) => (
+        <div className={styles.employeeCell}>
+          <Text>{formatMoney(employee.compensation?.baseSalary)}</Text>
+          {employee.compensation ? (
+            <Text type="secondary">
+              From {formatDate(employee.compensation.effectiveFrom)}
+            </Text>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      title: "Commission",
+      key: "commission",
+      width: 140,
+      align: "right",
+      render: (_, employee) => formatMoney(employee.compensation?.commission),
     },
     {
       title: "Hired",
@@ -440,7 +512,7 @@ export function EmployeesPage() {
               locale={{ emptyText: "No employees found." }}
               pagination={{ pageSize: 20, showSizeChanger: false }}
               rowKey="id"
-              scroll={{ x: 1050 }}
+              scroll={{ x: 1440 }}
               size="middle"
             />
           </Card>
@@ -477,6 +549,62 @@ export function EmployeesPage() {
           </Form.Item>
           <Form.Item label="Phone" name="phone" rules={[{ max: 30 }]}>
             <Input autoComplete="tel" inputMode="tel" />
+          </Form.Item>
+          <Form.Item
+            label="Compensation type"
+            name="compensationType"
+            rules={[{ required: true, message: "Select a compensation type." }]}
+          >
+            <Select
+              options={[
+                { label: "Daily", value: "daily" },
+                { label: "Monthly", value: "monthly" },
+              ]}
+            />
+          </Form.Item>
+          <Row gutter={12}>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                label="Base salary"
+                name="baseSalary"
+                rules={[{ required: true, message: "Enter the base salary." }]}
+              >
+                <InputNumber
+                  addonBefore="฿"
+                  className={styles.fullWidth}
+                  min={0}
+                  precision={2}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                label="Commission"
+                name="commission"
+                rules={[{ required: true, message: "Enter the commission." }]}
+              >
+                <InputNumber
+                  addonBefore="฿"
+                  className={styles.fullWidth}
+                  min={0}
+                  precision={2}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item
+            label="Compensation effective from"
+            name="compensationEffectiveFrom"
+            extra="A new history row is saved when the pay type, salary, or commission changes."
+            rules={[{ required: true, message: "Select an effective date." }]}
+          >
+            <DatePicker
+              className={styles.fullWidth}
+              disabledDate={(date) =>
+                date.isAfter(dayjs(getBangkokDate()), "day")
+              }
+              format="YYYY-MM-DD"
+            />
           </Form.Item>
           <Row gutter={12}>
             <Col xs={24} sm={12}>
@@ -539,6 +667,15 @@ function formatDate(value: string): string {
 
 function formatDateTime(value: string): string {
   return value ? dayjs(value).format("DD MMM YYYY, HH:mm") : "-";
+}
+
+function formatMoney(value: number | undefined): string {
+  if (value === undefined) return "-";
+  return new Intl.NumberFormat("en-TH", {
+    style: "currency",
+    currency: "THB",
+    minimumFractionDigits: 2,
+  }).format(value);
 }
 
 function getErrorMessage(error: unknown): string {

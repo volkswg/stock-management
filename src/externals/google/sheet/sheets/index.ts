@@ -1,4 +1,5 @@
 export { BaseGoogleSheet } from "./BaseGoogleSheet";
+export { EmployeeCompensationsSheet } from "./employee-compensations/EmployeeCompensationsSheet";
 export { EmployeesSheet } from "./employees/EmployeesSheet";
 export { EmployeeTimesheetsSheet } from "./employee-timesheets/EmployeeTimesheetsSheet";
 export { OrderBillsSheet } from "./order-bills/OrderBillsSheet";

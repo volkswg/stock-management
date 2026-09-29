@@ -40,6 +40,11 @@ export async function POST(request: Request): Promise<NextResponse> {
         status: input.status,
         hiredDate: input.hiredDate,
         terminatedDate: input.terminatedDate || "",
+        baseSalary: input.baseSalary ?? 0,
+        commission: input.commission ?? 0,
+        compensationEffectiveFrom:
+          input.compensationEffectiveFrom || input.hiredDate,
+        compensationType: input.compensationType || "monthly",
       },
     });
     return NextResponse.json({ ok: true, employee }, { status: 201 });
@@ -61,12 +66,22 @@ export function parseEmployeeInput(
   status?: "active" | "inactive";
   hiredDate?: string;
   terminatedDate?: string;
+  baseSalary?: number;
+  commission?: number;
+  compensationEffectiveFrom?: string;
+  compensationType?: "daily" | "monthly";
 } | null {
   if (!isRecord(value)) return null;
   const name = readOptionalString(value.name, 100);
   const phone = readOptionalString(value.phone, 30);
   const hiredDate = readOptionalDate(value.hiredDate);
   const terminatedDate = readOptionalDate(value.terminatedDate, true);
+  const baseSalary = readOptionalMoney(value.baseSalary);
+  const commission = readOptionalMoney(value.commission);
+  const compensationEffectiveFrom = readOptionalDate(
+    value.compensationEffectiveFrom,
+  );
+  const compensationType = value.compensationType;
   const status = value.status;
   if (
     name === null ||
@@ -74,6 +89,14 @@ export function parseEmployeeInput(
     phone === null ||
     hiredDate === null ||
     terminatedDate === null ||
+    baseSalary === null ||
+    commission === null ||
+    compensationEffectiveFrom === null ||
+    (compensationEffectiveFrom !== undefined &&
+      compensationEffectiveFrom > getBangkokDate()) ||
+    (compensationType !== undefined &&
+      compensationType !== "daily" &&
+      compensationType !== "monthly") ||
     (status !== undefined && status !== "active" && status !== "inactive") ||
     (!partial && (name === undefined || hiredDate === undefined))
   ) {
@@ -85,13 +108,41 @@ export function parseEmployeeInput(
     status?: "active" | "inactive";
     hiredDate?: string;
     terminatedDate?: string;
+    baseSalary?: number;
+    commission?: number;
+    compensationEffectiveFrom?: string;
+    compensationType?: "daily" | "monthly";
   } = {};
   if (name !== undefined) result.name = name;
   if (phone !== undefined) result.phone = phone;
   if (hiredDate !== undefined) result.hiredDate = hiredDate;
   if (terminatedDate !== undefined) result.terminatedDate = terminatedDate;
+  if (baseSalary !== undefined) result.baseSalary = baseSalary;
+  if (commission !== undefined) result.commission = commission;
+  if (compensationEffectiveFrom !== undefined) {
+    result.compensationEffectiveFrom = compensationEffectiveFrom;
+  }
+  if (compensationType === "daily" || compensationType === "monthly") {
+    result.compensationType = compensationType;
+  }
   if (status === "active" || status === "inactive") result.status = status;
   return result;
+}
+
+function readOptionalMoney(value: unknown): number | undefined | null {
+  if (value === undefined) return undefined;
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (value < 0 || value > 1_000_000_000) return null;
+  return Math.round(value * 100) / 100;
+}
+
+function getBangkokDate(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Bangkok",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 async function readJsonBody(request: Request): Promise<unknown> {

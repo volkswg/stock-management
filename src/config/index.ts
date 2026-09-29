@@ -20,6 +20,7 @@ export type AppConfig = {
   };
   googleSheets: {
     spreadsheetId: string;
+    employeeCompensationsWorksheetName: string;
     employeesWorksheetName: string;
     employeeTimesheetsWorksheetName: string;
     ordersWorksheetName: string;
@@ -66,6 +67,9 @@ export function getConfig(): AppConfig {
     },
     googleSheets: {
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || "",
+      employeeCompensationsWorksheetName:
+        process.env.GOOGLE_SHEETS_EMPLOYEE_COMPENSATIONS_WORKSHEET_NAME?.trim() ||
+        "employee_compensations",
       employeesWorksheetName:
         process.env.GOOGLE_SHEETS_EMPLOYEES_WORKSHEET_NAME?.trim() ||
         "employees",

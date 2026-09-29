@@ -3,6 +3,7 @@ export type GoogleSheetRow = GoogleSheetCellValue[];
 
 export type GoogleSheetsConfig = {
   spreadsheetId: string;
+  employeeCompensationsWorksheetName: string;
   employeesWorksheetName: string;
   employeeTimesheetsWorksheetName: string;
   ordersWorksheetName: string;
@@ -41,6 +42,7 @@ export interface IGoogleRowsSheet {
 }
 
 export interface IGoogleSheetsService {
+  readonly employeeCompensations: IGoogleRowsSheet;
   readonly employees: IGoogleRowsSheet;
   readonly employeeTimesheets: IGoogleRowsSheet;
   readonly orders: IGoogleRowsSheet;
