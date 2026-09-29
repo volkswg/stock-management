@@ -1,0 +1,38 @@
+.appShell { min-height: 100vh; background: #f3f5f4; }
+.content { width: min(1600px, 100%); margin: 0 auto; padding: 32px; }
+.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.pageHeader h1 { margin: 2px 0 4px !important; font-size: 30px !important; line-height: 1.2 !important; }
+.eyebrow { color: #157347; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.filterCard, .ruleAlert, .summaryGrid { margin-bottom: 16px; }
+.filterCard :global(.ant-card-body) { padding: 16px; }
+.monthField { display: grid; width: min(320px, 100%); gap: 6px; color: #46504a; font-size: 13px; font-weight: 600; }
+.summaryGrid :global(.ant-card), .summaryGrid :global(.ant-card-body) { height: 100%; }
+.summaryGrid :global(.ant-card-body) { padding: 16px; }
+.tableCard :global(.ant-card-body) { padding: 0; }
+.shopCell, .numberCell { display: flex; flex-direction: column; gap: 2px; }
+.numberCell { align-items: flex-end; }
+.fullWidth { width: 100%; }
+.mobileList { display: none; }
+@media (max-width: 767px) {
+  .content { padding: 20px 16px; }
+  .pageHeader { flex-direction: column; }
+  .pageActions { width: 100%; }
+  .pageActions :global(.ant-btn) { width: 100%; }
+  .filterCard :global(.ant-card-body) { padding: 14px; }
+  .summaryGrid :global(.ant-card-body) { padding: 12px; }
+  .summaryGrid :global(.ant-statistic-title) { min-height: 42px; }
+  .summaryGrid :global(.ant-statistic-content) { font-size: 21px; }
+  .desktopTable { display: none; }
+  .mobileList { display: grid; min-height: 80px; gap: 14px; }
+  .mobileShopCard :global(.ant-card-head) { min-height: 52px; padding: 0 16px; }
+  .mobileShopCard :global(.ant-card-head-title) { overflow: hidden; text-overflow: ellipsis; }
+  .mobileShopCard :global(.ant-card-extra) { margin-inline-start: 8px; }
+  .mobileShopCard :global(.ant-card-body) { display: grid; gap: 16px; padding: 16px; }
+  .mobileAccountId { overflow-wrap: anywhere; }
+  .mobileMetrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #e1e5e2; border-radius: 6px; }
+  .mobileMetric { display: flex; min-width: 0; flex-direction: column; gap: 2px; padding: 12px; border-bottom: 1px solid #e1e5e2; }
+  .mobileMetric:nth-child(odd) { border-right: 1px solid #e1e5e2; }
+  .mobileMetric:nth-last-child(-n + 2) { border-bottom: 0; }
+  .mobileMetric :global(.ant-typography) { margin: 0; overflow-wrap: anywhere; }
+  .mobileField { display: grid; gap: 6px; color: #46504a; font-size: 13px; font-weight: 600; }
+}

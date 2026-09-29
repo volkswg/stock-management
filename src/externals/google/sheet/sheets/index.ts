@@ -13,4 +13,5 @@ export { SalesReceiptsSheet } from "./sales/receipts/SalesReceiptsSheet";
 export { SalesReceiptSyncsSheet } from "./sales/receipt-syncs/SalesReceiptSyncsSheet";
 export { ShipmentOrdersSheet } from "./shipment-orders/ShipmentOrdersSheet";
 export { ShipmentsSheet } from "./shipments/ShipmentsSheet";
+export { StockCountsSheet } from "./stock-counts/StockCountsSheet";
 export { UserStateSheet } from "./user-state/UserStateSheet";

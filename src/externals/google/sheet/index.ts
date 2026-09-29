@@ -16,6 +16,7 @@ export {
   SalesReceiptSyncsSheet,
   ShipmentOrdersSheet,
   ShipmentsSheet,
+  StockCountsSheet,
   UserStateSheet,
 } from "./sheets";
 export { createGoogleSheetsServiceFromConfig } from "./createGoogleSheetsServiceFromConfig";
@@ -36,6 +37,7 @@ export { SALES_RECEIPT_SYNC_HEADERS } from "./sheets/sales/receipt-syncs/const";
 export { SALES_RECEIPT_HEADERS } from "./sheets/sales/receipts/const";
 export { SHIPMENT_ORDERS_SHEET_HEADERS } from "./sheets/shipment-orders/const";
 export { SHIPMENTS_SHEET_HEADERS } from "./sheets/shipments/const";
+export { STOCK_COUNT_HEADERS } from "./sheets/stock-counts/const";
 export { USER_STATE_SHEET_HEADERS } from "./sheets/user-state/const";
 export type {
   GoogleSheetCellValue,

@@ -55,6 +55,7 @@ export type GoogleSheetsSalesDashboardDay = {
   syncedShopCount: number;
   receiptCount: number;
   itemsSold: number;
+  itemsRefunded: number;
   grossSales: number;
   netSales: number;
 };
@@ -426,6 +427,7 @@ function createDashboardDays(
       ).size,
       receiptCount: dailyReport.receiptCount,
       itemsSold: dailyReport.totals.itemsSold,
+      itemsRefunded: dailyReport.totals.itemsRefunded,
       grossSales: dailyReport.totals.grossSales,
       netSales: dailyReport.totals.netSales,
     };

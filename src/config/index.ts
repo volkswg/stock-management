@@ -34,6 +34,7 @@ export type AppConfig = {
     salesReceiptSyncsWorksheetName: string;
     shipmentOrdersWorksheetName: string;
     shipmentsWorksheetName: string;
+    stockCountsWorksheetName: string;
     movementMasterWorksheetName: string;
     movementDetailWorksheetName: string;
     userStateWorksheetName: string;
@@ -108,6 +109,9 @@ export function getConfig(): AppConfig {
       shipmentsWorksheetName:
         process.env.GOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME?.trim() ||
         "shipments",
+      stockCountsWorksheetName:
+        process.env.GOOGLE_SHEETS_STOCK_COUNTS_WORKSHEET_NAME?.trim() ||
+        "stock_counts",
       movementMasterWorksheetName:
         process.env.GOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME?.trim() || "movements",
       movementDetailWorksheetName:

@@ -16,6 +16,7 @@ import {
   SalesReceiptSyncsSheet,
   ShipmentOrdersSheet,
   ShipmentsSheet,
+  StockCountsSheet,
   UserStateSheet,
 } from "./sheets";
 import { MovementSheet } from "./sheets/movements/MovementSheet";
@@ -36,6 +37,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly salesReceiptSyncs: SalesReceiptSyncsSheet;
   readonly shipmentOrders: ShipmentOrdersSheet;
   readonly shipments: ShipmentsSheet;
+  readonly stockCounts: StockCountsSheet;
   readonly movementMasters: MovementSheet;
   readonly movementDetails: MovementSheet;
   readonly userState: UserStateSheet;
@@ -105,6 +107,10 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     this.shipments = new ShipmentsSheet(
       this.client,
       config.shipmentsWorksheetName,
+    );
+    this.stockCounts = new StockCountsSheet(
+      this.client,
+      config.stockCountsWorksheetName,
     );
     this.movementMasters = new MovementSheet(this.client, config.movementMasterWorksheetName);
     this.movementDetails = new MovementSheet(this.client, config.movementDetailWorksheetName);

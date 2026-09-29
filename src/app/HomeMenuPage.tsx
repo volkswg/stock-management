@@ -2,6 +2,7 @@
 
 import {
   ArrowRightOutlined,
+  AuditOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
   DashboardOutlined,
@@ -55,6 +56,11 @@ const MENU_GROUPS: Array<{
         href: "/movements",
         icon: <SwapOutlined />,
         title: "Movements",
+      },
+      {
+        href: "/stock-counts",
+        icon: <AuditOutlined />,
+        title: "Monthly stock count",
       },
     ],
     title: "Stock",
