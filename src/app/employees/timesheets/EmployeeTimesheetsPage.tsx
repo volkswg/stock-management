@@ -359,10 +359,10 @@ export function EmployeeTimesheetsPage() {
                 Refresh
               </Button>
               <Button
-                href="/timesheets/summary"
+                href="/timesheets"
                 icon={<CalendarOutlined />}
               >
-                Monthly summary
+                Calendar view
               </Button>
               <Tooltip title={shops.length ? "" : "No shops are configured."}>
                 <Button

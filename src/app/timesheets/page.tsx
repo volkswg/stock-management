@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { EmployeeTimesheetsPage } from "../employees/timesheets/EmployeeTimesheetsPage";
+import { EmployeeTimesheetSummaryPage } from "../employees/timesheets/summary/EmployeeTimesheetSummaryPage";
 
 export const metadata: Metadata = {
   title: "Timesheets | Stock Management",
-  description: "Track employee attendance, working time, and leave.",
+  description: "Review employee attendance and leave in a monthly calendar.",
 };
 
 export default function Page() {
-  return <EmployeeTimesheetsPage />;
+  return <EmployeeTimesheetSummaryPage />;
 }

@@ -16,6 +16,8 @@ import {
   Col,
   ConfigProvider,
   DatePicker,
+  Form,
+  Modal,
   Row,
   Select,
   Space,
@@ -67,7 +69,13 @@ type CalendarEntry = {
   status: EmployeeTimesheet["status"];
 };
 
+type AddTimesheetFormValues = {
+  employeeId: string;
+  shopId: string;
+};
+
 export function EmployeeTimesheetSummaryPage() {
+  const [form] = Form.useForm<AddTimesheetFormValues>();
   const today = getBangkokDate();
   const [month, setMonth] = useState(() => today.slice(0, 7));
   const [selectedDate, setSelectedDate] = useState(today);
@@ -76,7 +84,11 @@ export function EmployeeTimesheetSummaryPage() {
   const [shops, setShops] = useState<Shop[]>([]);
   const [timesheets, setTimesheets] = useState<EmployeeTimesheet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addStatus, setAddStatus] = useState<"work" | "leave">("work");
   const [error, setError] = useState<string>();
+  const [notice, setNotice] = useState<string>();
 
   const loadSummary = useCallback(
     async (signal?: AbortSignal) => {
@@ -154,6 +166,60 @@ export function EmployeeTimesheetSummaryPage() {
   const selectedRows = timesheets.filter(
     (timesheet) => getBangkokDate(timesheet.createdAt) === selectedDate,
   );
+  const unavailableEmployeeIds = new Set(
+    (addStatus === "leave"
+      ? selectedRows
+      : [
+          ...timesheets.filter((timesheet) => timesheet.isOpen),
+          ...selectedRows.filter((timesheet) => timesheet.status === "leave"),
+        ]
+    ).map((timesheet) => timesheet.employeeId),
+  );
+  const availableEmployees = employees.filter(
+    (employee) =>
+      employee.status === "active" &&
+      !unavailableEmployeeIds.has(employee.id),
+  );
+
+  const openAddTimesheet = (date: string) => {
+    if (date > today) return;
+    setSelectedDate(date);
+    setAddStatus("work");
+    form.resetFields();
+    form.setFieldsValue({ shopId: shopId || shops[0]?.id });
+    setAddModalOpen(true);
+  };
+
+  const addTimesheet = async (values: AddTimesheetFormValues) => {
+    setSubmitting(true);
+    setError(undefined);
+    setNotice(undefined);
+    try {
+      await requestSummary("/api/employees/timesheets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: selectedDate,
+          employeeId: values.employeeId,
+          shopId: values.shopId,
+          status: addStatus,
+        }),
+      });
+      const employee = employeeById.get(values.employeeId);
+      setNotice(
+        addStatus === "work"
+          ? `${employee?.name || "Employee"} clocked in.`
+          : `Leave recorded for ${employee?.name || "employee"}.`,
+      );
+      setAddModalOpen(false);
+      form.resetFields();
+      await loadSummary();
+    } catch (requestError) {
+      setError(getErrorMessage(requestError));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const updateMonth = (value: string) => {
     if (!value) return;
@@ -242,10 +308,10 @@ export function EmployeeTimesheetSummaryPage() {
             </div>
             <Space className={styles.pageActions} wrap>
               <Button
-                href="/timesheets"
+                href="/timesheets/tracker"
                 icon={<ArrowLeftOutlined />}
               >
-                Timesheets
+                Timesheet tracker
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -265,6 +331,16 @@ export function EmployeeTimesheetSummaryPage() {
               showIcon
               type="error"
               onClose={() => setError(undefined)}
+            />
+          ) : null}
+          {notice ? (
+            <Alert
+              closable
+              className={styles.alert}
+              title={notice}
+              showIcon
+              type="success"
+              onClose={() => setNotice(undefined)}
             />
           ) : null}
 
@@ -362,9 +438,15 @@ export function EmployeeTimesheetSummaryPage() {
                 </Space>
               }
             >
+              <Text className={styles.calendarInstruction} type="secondary">
+                Select a date up to today to add a work or leave entry.
+              </Text>
               <div className={styles.calendarViewport}>
                 <Calendar
                   className={styles.calendar}
+                  disabledDate={(value) =>
+                    value.format("YYYY-MM-DD") > today
+                  }
                   headerRender={() => null}
                   value={dayjs(selectedDate)}
                   cellRender={(current, info) => {
@@ -403,8 +485,11 @@ export function EmployeeTimesheetSummaryPage() {
                   onSelect={(value, info) => {
                     if (info.source !== "date") return;
                     const valueMonth = value.format("YYYY-MM");
-                    if (valueMonth !== month) updateMonth(valueMonth);
-                    setSelectedDate(value.format("YYYY-MM-DD"));
+                    if (valueMonth !== month) {
+                      updateMonth(valueMonth);
+                      return;
+                    }
+                    openAddTimesheet(value.format("YYYY-MM-DD"));
                   }}
                 />
               </div>
@@ -430,6 +515,79 @@ export function EmployeeTimesheetSummaryPage() {
           </Card>
         </main>
       </div>
+
+      <Modal
+        destroyOnHidden
+        open={addModalOpen}
+        title={`Add timesheet — ${dayjs(selectedDate).format("DD MMMM YYYY")}`}
+        okText={addStatus === "work" ? "Clock in" : "Record leave"}
+        confirmLoading={submitting}
+        onCancel={() => {
+          setAddModalOpen(false);
+          form.resetFields();
+        }}
+        onOk={() => form.submit()}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          requiredMark="optional"
+          onFinish={(values) => void addTimesheet(values)}
+        >
+          <Form.Item label="Entry type">
+            <Select
+              aria-label="Timesheet entry type"
+              options={[
+                { label: "Work", value: "work" },
+                { label: "Leave", value: "leave" },
+              ]}
+              value={addStatus}
+              onChange={(value: "work" | "leave") => {
+                setAddStatus(value);
+                form.setFieldValue("employeeId", undefined);
+              }}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Employee"
+            name="employeeId"
+            rules={[{ required: true, message: "Select an employee." }]}
+          >
+            <Select
+              showSearch
+              optionFilterProp="label"
+              options={availableEmployees.map((employee) => ({
+                label: employee.name,
+                value: employee.id,
+              }))}
+              placeholder="Select employee"
+              notFoundContent="No active employees available."
+            />
+          </Form.Item>
+          <Form.Item
+            label="Shop"
+            name="shopId"
+            rules={[{ required: true, message: "Select a shop." }]}
+          >
+            <Select
+              options={shops.map((shop) => ({
+                label: shop.name,
+                value: shop.id,
+              }))}
+              placeholder="Select shop"
+            />
+          </Form.Item>
+          <Alert
+            title={
+              addStatus === "work"
+                ? "The current Bangkok time will be used as the clock-in time."
+                : "Leave will be recorded for the selected date."
+            }
+            showIcon
+            type="info"
+          />
+        </Form>
+      </Modal>
     </ConfigProvider>
   );
 }

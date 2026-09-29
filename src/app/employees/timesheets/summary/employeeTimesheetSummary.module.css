@@ -80,12 +80,28 @@
   overflow-x: auto;
 }
 
+.calendarInstruction {
+  display: block;
+  margin-bottom: 10px;
+}
+
 .calendar {
   min-width: 820px;
 }
 
 .calendar :global(.ant-picker-calendar-date) {
   min-height: 112px;
+}
+
+.calendar
+  :global(.ant-picker-cell:not(.ant-picker-cell-disabled) .ant-picker-calendar-date) {
+  cursor: pointer;
+}
+
+.calendar
+  :global(.ant-picker-cell:not(.ant-picker-cell-disabled) .ant-picker-calendar-date:hover) {
+  border-color: #157347;
+  background: #f0f7f3;
 }
 
 .calendarEntries {
