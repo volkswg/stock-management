@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EmployeeTimesheetsPage } from "../../employees/timesheets/EmployeeTimesheetsPage";
+import { TimesheetTrackerPage } from "./TimesheetTrackerPage";
 
 export const metadata: Metadata = {
   title: "Timesheet Tracker | Stock Management",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <EmployeeTimesheetsPage />;
+  return <TimesheetTrackerPage />;
 }

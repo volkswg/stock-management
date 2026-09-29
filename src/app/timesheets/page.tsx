@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EmployeeTimesheetSummaryPage } from "../employees/timesheets/summary/EmployeeTimesheetSummaryPage";
+import { TimesheetCalendarPage } from "./TimesheetCalendarPage";
 
 export const metadata: Metadata = {
   title: "Timesheets | Stock Management",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <EmployeeTimesheetSummaryPage />;
+  return <TimesheetCalendarPage />;
 }

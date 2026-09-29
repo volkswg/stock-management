@@ -31,7 +31,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./employeeTimesheetSummary.module.css";
+import styles from "./timesheetCalendar.module.css";
 
 const { Text, Title } = Typography;
 
@@ -74,7 +74,7 @@ type AddTimesheetFormValues = {
   shopId: string;
 };
 
-export function EmployeeTimesheetSummaryPage() {
+export function TimesheetCalendarPage() {
   const [form] = Form.useForm<AddTimesheetFormValues>();
   const today = getBangkokDate();
   const [month, setMonth] = useState(() => today.slice(0, 7));

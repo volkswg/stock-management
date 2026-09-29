@@ -33,7 +33,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./employeeTimesheets.module.css";
+import styles from "./timesheetTracker.module.css";
 
 const { Text, Title } = Typography;
 
@@ -73,7 +73,7 @@ type TimesheetFormValues = {
   shopId: string;
 };
 
-export function EmployeeTimesheetsPage() {
+export function TimesheetTrackerPage() {
   const [form] = Form.useForm<TimesheetFormValues>();
   const [date, setDate] = useState(getBangkokDate);
   const [shopId, setShopId] = useState("");
