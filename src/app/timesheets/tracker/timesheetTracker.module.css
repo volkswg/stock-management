@@ -77,6 +77,14 @@
   padding: 0;
 }
 
+.selectedRow > td {
+  background: #e7f4ec !important;
+}
+
+.selectedRow:hover > td {
+  background: #dceee4 !important;
+}
+
 .employeeCell {
   display: flex;
   flex-direction: column;

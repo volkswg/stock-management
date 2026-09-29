@@ -6,6 +6,23 @@ export const metadata: Metadata = {
   description: "Track employee attendance, working time, and leave.",
 };
 
-export default function Page() {
-  return <TimesheetTrackerPage />;
+type PageProps = {
+  searchParams: Promise<{
+    date?: string | string[];
+    timesheetId?: string | string[];
+  }>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+  return (
+    <TimesheetTrackerPage
+      initialDate={firstValue(params.date)}
+      selectedTimesheetId={firstValue(params.timesheetId)}
+    />
+  );
+}
+
+function firstValue(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] || "" : value || "";
 }

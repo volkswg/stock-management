@@ -73,9 +73,18 @@ type TimesheetFormValues = {
   shopId: string;
 };
 
-export function TimesheetTrackerPage() {
+export function TimesheetTrackerPage({
+  initialDate,
+  selectedTimesheetId,
+}: {
+  initialDate: string;
+  selectedTimesheetId: string;
+}) {
   const [form] = Form.useForm<TimesheetFormValues>();
-  const [date, setDate] = useState(getBangkokDate);
+  const [date, setDate] = useState(() => {
+    const today = getBangkokDate();
+    return isValidDate(initialDate) && initialDate <= today ? initialDate : today;
+  });
   const [shopId, setShopId] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shops, setShops] = useState<Shop[]>([]);
@@ -500,6 +509,9 @@ export function TimesheetTrackerPage() {
               locale={{ emptyText: "No timesheets for this date." }}
               pagination={{ pageSize: 20, showSizeChanger: false }}
               rowKey="id"
+              rowClassName={(timesheet) =>
+                timesheet.id === selectedTimesheetId ? styles.selectedRow : ""
+              }
               scroll={{ x: 1050 }}
             />
           </Card>
@@ -602,6 +614,17 @@ function getBangkokDate(): string {
     timeZone: "Asia/Bangkok",
     year: "numeric",
   }).format(new Date());
+}
+
+function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
 }
 
 function getPickerValue(value: string | string[] | null): string {

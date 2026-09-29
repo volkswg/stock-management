@@ -144,12 +144,44 @@
   border-color: #a8b0ab;
 }
 
+.calendarEntryLink {
+  display: block;
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendarEntryLink:hover,
+.calendarEntryLink:focus-visible {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.calendarEntryLink:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 1px;
+}
+
 .dayCard {
   margin-top: 16px;
 }
 
 .dayCard :global(.ant-card-body) {
   padding: 0;
+}
+
+.clickableRecord {
+  cursor: pointer;
+}
+
+.clickableRecord:hover > td {
+  background: #f0f7f3 !important;
+}
+
+.clickableRecord:focus-visible {
+  outline: 2px solid #157347;
+  outline-offset: -2px;
 }
 
 .employeeCell {

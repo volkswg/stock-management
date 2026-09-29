@@ -11,8 +11,10 @@
 .summaryGrid :global(.ant-card), .summaryGrid :global(.ant-card-body) { height: 100%; }
 .summaryGrid :global(.ant-card-body) { padding: 16px 18px; }
 .itemGrid { display: grid; gap: 12px; }
-.itemCard :global(.ant-card-body) { padding: 16px; }
-.packed { background: #eff8f3; border-color: #a9d7bc; }
+.itemCard { transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.itemCard :global(.ant-card-body) { padding: 16px; background: transparent; }
+.itemCard.packed { background: #e8f6ed !important; border-color: #75bf91 !important; box-shadow: 0 0 0 1px rgb(117 191 145 / 22%); }
+.itemCard.packed :global(.ant-card-body) { background: #e8f6ed; }
 .itemChecks { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
 .itemLayout { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: start; gap: 16px; }
 .imageColumn { width: 150px; display: grid; gap: 8px; }

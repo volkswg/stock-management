@@ -67,6 +67,7 @@ type SummaryResponse = {
 type CalendarEntry = {
   employeeId: string;
   status: EmployeeTimesheet["status"];
+  timesheetId: string;
 };
 
 type AddTimesheetFormValues = {
@@ -142,6 +143,7 @@ export function TimesheetCalendarPage() {
         dateEntries.set(timesheet.employeeId, {
           employeeId: timesheet.employeeId,
           status: timesheet.status,
+          timesheetId: timesheet.id,
         });
       }
       result.set(date, dateEntries);
@@ -471,7 +473,15 @@ export function TimesheetCalendarPage() {
                             }
                             key={entry.employeeId}
                           >
-                            {getEmployeeName(entry.employeeId, employeeById)}
+                            <a
+                              className={styles.calendarEntryLink}
+                              href={`/timesheets/tracker?date=${current.format(
+                                "YYYY-MM-DD",
+                              )}&timesheetId=${encodeURIComponent(entry.timesheetId)}`}
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {getEmployeeName(entry.employeeId, employeeById)}
+                            </a>
                           </li>
                         ))}
                         {entries.length > visibleEntries.length ? (
@@ -509,8 +519,20 @@ export function TimesheetCalendarPage() {
               locale={{ emptyText: "No work or leave recorded for this date." }}
               pagination={false}
               rowKey="id"
+              rowClassName={styles.clickableRecord}
               scroll={{ x: 850 }}
               size="middle"
+              onRow={(timesheet) => ({
+                onClick: () => openTimesheetRecord(timesheet),
+                onKeyDown: (event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openTimesheetRecord(timesheet);
+                  }
+                },
+                role: "link",
+                tabIndex: 0,
+              })}
             />
           </Card>
         </main>
@@ -611,6 +633,13 @@ function getEmployeeName(
   employees: Map<string, Employee>,
 ): string {
   return employees.get(employeeId)?.name || employeeId;
+}
+
+function openTimesheetRecord(timesheet: EmployeeTimesheet): void {
+  const date = getBangkokDate(timesheet.createdAt);
+  window.location.href = `/timesheets/tracker?date=${date}&timesheetId=${encodeURIComponent(
+    timesheet.id,
+  )}`;
 }
 
 function getBangkokDate(value: string | Date = new Date()): string {

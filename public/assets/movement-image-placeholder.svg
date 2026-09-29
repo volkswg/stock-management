@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title description">
+  <title id="title">Product image unavailable</title>
+  <desc id="description">A placeholder showing a simple landscape icon</desc>
+  <rect width="600" height="600" fill="#e9eeeb"/>
+  <rect x="120" y="145" width="360" height="310" rx="24" fill="none" stroke="#9aa8a0" stroke-width="24"/>
+  <circle cx="225" cy="245" r="42" fill="#9aa8a0"/>
+  <path d="M145 410 255 300l72 72 55-55 73 93" fill="none" stroke="#9aa8a0" stroke-linecap="round" stroke-linejoin="round" stroke-width="28"/>
+</svg>

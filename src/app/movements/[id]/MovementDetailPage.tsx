@@ -46,6 +46,7 @@ import styles from "./movementDetail.module.css";
 
 const { Paragraph, Text, Title } = Typography;
 const { TextArea } = Input;
+const MOVEMENT_IMAGE_PLACEHOLDER = "/assets/movement-image-placeholder.svg";
 
 export function MovementDetailPage({ movementMasterId }: { movementMasterId: string }) {
   const pathname = usePathname();
@@ -299,7 +300,13 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
       </div>
       <div className={styles.itemLayout}>
         <div className={styles.imageColumn}>
-          <Image alt={`Movement product ${record.movementId}`} className={styles.productImage} src={movementImageUrl(record.productImageUrl, 900)} preview={{ src: movementImageUrl(record.productImageUrl, 1600) }} />
+          <Image
+            alt={`Movement product ${record.movementId}`}
+            className={styles.productImage}
+            fallback={MOVEMENT_IMAGE_PLACEHOLDER}
+            src={movementImageUrl(record.productImageUrl, 900) || MOVEMENT_IMAGE_PLACEHOLDER}
+            preview={{ src: movementImageUrl(record.productImageUrl, 1600) || MOVEMENT_IMAGE_PLACEHOLDER }}
+          />
           {editing ? <Upload accept="image/*" beforeUpload={(file) => { void onUpdateImage(file as File); return false; }} showUploadList={false}><Button block icon={<UploadOutlined />} loading={uploading} size="small">Update image</Button></Upload> : null}
         </div>
         <div className={styles.itemBody}>
