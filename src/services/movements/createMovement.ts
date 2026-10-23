@@ -13,6 +13,7 @@ import {
   movementItems, resumeLegacyMovement, saveMaster,
   saveMovementState, type MovementState,
 } from "./state";
+import { MovementStartCommandEnum } from "@/features/backend/line/enum";
 
 const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinished", "resume:movement"]];
 
@@ -50,11 +51,11 @@ export async function handleMovementEvent({
       await reply(line, event, "Please complete your pending order before creating a movement.");
       return;
     }
-    if (command === "create:movement") {
+    if (command === MovementStartCommandEnum.CreateMovement) {
       await reply(line, event, "📦 Stock movement\nMove products from Home to a shop.\n\nTap Create New to start, or Resume Unfinished to continue.", START_CHOICES);
       return;
     }
-    if (command === "resume:movement") {
+    if (command === MovementStartCommandEnum.ResumeMovement) {
       const resumed = state && state.step !== "complete" ? state : await resumeLegacyMovement(sheets, userId);
       if (!resumed) {
         await reply(line, event, "No unfinished movement was found.", START_CHOICES.slice(0, 1));

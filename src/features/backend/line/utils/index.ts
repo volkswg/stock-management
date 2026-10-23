@@ -2,6 +2,7 @@ import { LineMessageType, type LineEvent, type LineWebhookPayload } from "@/exte
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { readMovementSession } from "@/services/movements/state";
 import { isRecord } from "@/features/backend/shared/utils";
+import { MovementStartCommandEnum, EventKindEnum } from "@/features/backend/line/enum";
 
 export const isLineEvent = (value: unknown): value is LineEvent => {
   return isRecord(value) && typeof value.type === "string";
@@ -23,14 +24,8 @@ export const parseLineWebhookPayload = (
   };
 };
 
-const MOVEMENT_START_COMMANDS = [
-  "create:movement",
-  "create:new-movement",
-  "resume:movement",
-];
-
 export type MovementEventClassification = {
-  kind: "movement";
+  kind: EventKindEnum.Movement;
   event: LineEvent & {
     message: NonNullable<LineEvent["message"]>;
     source: NonNullable<LineEvent["source"]> & { userId: string };
@@ -40,10 +35,10 @@ export type MovementEventClassification = {
 
 export type LineEventClassification =
   | MovementEventClassification
-  | { kind: "order" };
+  | { kind: EventKindEnum.Order };
 
-export function isMovementStartCommand(command: string): boolean {
-  return MOVEMENT_START_COMMANDS.includes(command);
+export function isMovementStartCommand(command: string): command is MovementStartCommandEnum {
+  return Object.values(MovementStartCommandEnum).some((value) => value === command);
 }
 
 export async function classifyLineEvent({
@@ -61,7 +56,7 @@ export async function classifyLineEvent({
     !userId ||
     (message.type !== LineMessageType.Text && message.type !== LineMessageType.Image)
   ) {
-    return { kind: "order" };
+    return { kind: EventKindEnum.Order };
   }
 
   const session = await readMovementSession(
@@ -78,12 +73,12 @@ export async function classifyLineEvent({
     (session.state && session.state.step !== "complete")
   ) {
     return {
-      kind: "movement",
+      kind: EventKindEnum.Movement,
       event: { ...event, message, source: { ...event.source, userId } },
       session,
     };
   }
 
   // The existing order handler also provides general guidance for other events.
-  return { kind: "order" };
+  return { kind: EventKindEnum.Order };
 }
