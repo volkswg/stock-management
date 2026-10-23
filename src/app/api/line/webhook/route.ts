@@ -16,6 +16,7 @@ import {
 import { handleLineEvent } from "@/services/line";
 import { handleMovementEvent } from "@/services/movements/createMovement";
 import type { UserState } from "@/services/user-states";
+import { parseLineWebhookPayload } from "@/features/backend/line/utils";
 
 export const runtime = "nodejs";
 
@@ -56,13 +57,16 @@ export async function POST(request: Request): Promise<NextResponse> {
   for (const event of payload.events || []) {
     // Route and handle sequentially: earlier events may advance a Sheets checkpoint.
     try {
-      if (await handleMovementEvent({
-        event,
-        sheets: getGoogleSheetsService(),
-        drive: getGoogleDriveService,
-        line: lineBotService,
-        publicBaseUrl: config.movementPublicBaseUrl || config.publicBaseUrl,
-      })) continue;
+      if (
+        await handleMovementEvent({
+          event,
+          sheets: getGoogleSheetsService(),
+          drive: getGoogleDriveService,
+          line: lineBotService,
+          publicBaseUrl: config.movementPublicBaseUrl || config.publicBaseUrl,
+        })
+      )
+        continue;
     } catch (error) {
       console.error("Failed to process movement event", {
         webhookEventId: event.webhookEventId,
@@ -75,7 +79,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     try {
       await handleLineEvent({
-        event, lineBotService, getGoogleSheetsService, getGoogleDriveService, resolvedUserStates,
+        event,
+        lineBotService,
+        getGoogleSheetsService,
+        getGoogleDriveService,
+        resolvedUserStates,
       });
     } catch (error) {
       console.error("Failed to process LINE event", {
@@ -86,7 +94,10 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   if (movementFailed) {
-    return NextResponse.json({ error: "Movement processing failed. Please retry." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Movement processing failed. Please retry." },
+      { status: 503 },
+    );
   }
   return NextResponse.json({ ok: true });
 }
@@ -111,26 +122,4 @@ function createGoogleSheetsServiceGetter(
     googleSheetsService ||= createGoogleSheetsServiceFromConfig(config);
     return googleSheetsService;
   };
-}
-
-function parseLineWebhookPayload(rawBody: Buffer): LineWebhookPayload {
-  const payload = JSON.parse(rawBody.toString("utf8")) as unknown;
-
-  if (!isRecord(payload)) {
-    return {};
-  }
-
-  return {
-    events: Array.isArray(payload.events)
-      ? payload.events.filter(isLineEvent)
-      : undefined,
-  };
-}
-
-function isLineEvent(value: unknown): value is LineEvent {
-  return isRecord(value) && typeof value.type === "string";
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
