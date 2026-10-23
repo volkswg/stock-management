@@ -192,8 +192,8 @@ async function prompt(line: ILineBotService, event: LineEvent, state: MovementSt
   switch (state.step) {
     case "shop": return reply(line, event, prefix + "Please choose shop.", [["NJ", "NJ"], ["YY", "YY"]]);
     case "quantity": return reply(line, event, prefix + "Please send quantity.");
-    case "product_image": return reply(line, event, prefix + `✅ Quantity: ${state.quantity}.\n ➡️ Please upload product image.`);
-    case "close_bag": return reply(line, event, prefix + `➡️ Send another quantity for ${state.shop}\n ➡️ Tap Close Bag.`, [["Close Bag", "close bag"]]);
+    case "product_image": return reply(line, event, prefix + `✅ Quantity: ${state.quantity}.\n➡️ Please upload product image.`);
+    case "close_bag": return reply(line, event, prefix + `➡️ Send another quantity for ${state.shop}\n➡️ Tap Close Bag.`, [["Close Bag", "close bag"]]);
     case "bag_closed": return reply(line, event, prefix + "Choose another shop or view summary.", [["Another Shop", "another shop"], ["Summary", "summary"]]);
     case "complete": return reply(line, event, prefix + "Movement completed.", START_CHOICES);
   }
