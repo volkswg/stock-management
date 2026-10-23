@@ -49,7 +49,7 @@ export async function handleMovementEvent({
       return true;
     }
     if (command === "create:movement") {
-      await reply(line, event, "Create a new movement or resume your unfinished movement?", START_CHOICES);
+      await reply(line, event, "📦 Stock movement\nMove products from Home to a shop.\n\nTap Create New to start, or Resume Unfinished to continue.", START_CHOICES);
       return true;
     }
     if (command === "resume:movement") {
@@ -58,7 +58,7 @@ export async function handleMovementEvent({
         await reply(line, event, "No unfinished movement was found.", START_CHOICES.slice(0, 1));
       } else {
         await saveMovementState(sheets, { ...resumed, lastEventId: eventId });
-        await prompt(line, event, resumed, `Resumed movement ${resumed.masterId}.\n`);
+        await prompt(line, event, resumed, `↩️ Movement resumed\nRef: ${resumed.masterId}\n\n`);
       }
       return true;
     }
@@ -70,7 +70,7 @@ export async function handleMovementEvent({
     };
     await saveMovementState(sheets, next);
     await saveMaster(sheets, next);
-    await prompt(line, event, next, `Movement ${masterId} created.\n`);
+    await prompt(line, event, next, `📦 New movement started\nRef: ${masterId}\n\n`);
     return true;
   }
 
@@ -105,7 +105,7 @@ export async function handleMovementEvent({
     } else {
       const parsed = parseQuantity(text);
       if (!parsed) {
-        await prompt(line, event, state, "Send a quantity greater than 0 (for example: 12 or ขาว 5 / ดำ 5).\n");
+        await prompt(line, event, state, "⚠️ Quantity not accepted. Send a number greater than 0.\n\n");
         return true;
       }
       next = { ...next, ...parsed, step: "product_image", imageUrl: "" };
@@ -136,7 +136,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
   let imageUrl = state.imageUrl;
   if (!existing && !imageUrl) {
     if (!drive) {
-      await reply(line, event, "Google Drive is not configured. Your movement is saved; please try the image again after configuration.");
+      await reply(line, event, `⚠️ Photo upload is unavailable\nShop: ${state.shop} | Quantity: ${state.quantity}\nYour progress is saved, but this item is not saved yet.\n\nAsk an administrator to configure Google Drive, then resend the photo.`);
       return;
     }
     try {
@@ -146,7 +146,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
       if (!file.webViewLink?.trim()) throw new Error("Google Drive returned no image URL.");
       imageUrl = file.webViewLink;
     } catch {
-      await reply(line, event, "Product image upload failed. No movement item was saved. Please send the image again.");
+      await reply(line, event, `⚠️ Photo upload failed\nShop: ${state.shop} | Quantity: ${state.quantity}\nThis item is not saved yet. Your entered quantity is kept.\n\n➡️ Send the product photo again to save this item.`);
       return;
     }
     // Persist the upload URL before writing the item so a retry can reuse it.
@@ -165,7 +165,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
     quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
   };
   await saveMovementState(sheets, next);
-  await prompt(line, event, next, `✅ Product image saved for ${state.shop}.\n✅ Quantity: ${state.quantity}.\n`);
+  await prompt(line, event, next, `✅ Item saved\nRoute: Home → ${state.shop}\nQuantity: ${state.quantity}\nPhoto: saved${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n`);
 }
 
 async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleSheetsService, state: MovementState, publicBaseUrl: string): Promise<void> {
@@ -175,14 +175,16 @@ async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleS
     const shop = String(row[2]);
     quantities.set(shop, (quantities.get(shop) || 0) + Number(row[3] || 0));
   }
-  const text = Array.from(quantities, ([shop, quantity]) => `${shop}: ${quantity}`).join(", ");
+  const totalQuantity = Array.from(quantities.values()).reduce((total, quantity) => total + quantity, 0);
+  const shopTotals = Array.from(quantities, ([shop, quantity]) => `• Home → ${shop}: ${quantity}`).join("\n");
+  const text = `✅ Movement completed\nRef: ${state.masterId}\n\n${shopTotals || "No items saved."}\n\nItems saved: ${rows.length}\nTotal quantity: ${totalQuantity}`;
   if (!publicBaseUrl) {
-    await reply(line, event, `Movement ${state.masterId} completed.\nItems: ${rows.length}\n${text}`);
+    await reply(line, event, text);
     return;
   }
-  await line.sendReply(event.replyToken, [{
+  await line.sendReply(event.replyToken, [{ type: "text", text }, {
     type: "template", altText: `Movement summary ${state.masterId}`,
-    template: { type: "buttons", title: "Movement completed", text: (text || "No items saved").slice(0, 60),
+    template: { type: "buttons", title: "Movement completed", text: "View saved items, quantities and product photos.",
       actions: [{ type: "uri", label: "Open detail", uri: `${publicBaseUrl.replace(/\/$/, "")}/movements/${encodeURIComponent(state.masterId)}` }],
     },
   }]);
@@ -190,12 +192,12 @@ async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleS
 
 async function prompt(line: ILineBotService, event: LineEvent, state: MovementState, prefix = ""): Promise<void> {
   switch (state.step) {
-    case "shop": return reply(line, event, prefix + "Please choose shop.", [["NJ", "NJ"], ["YY", "YY"]]);
-    case "quantity": return reply(line, event, prefix + "Please send quantity.");
-    case "product_image": return reply(line, event, prefix + `✅ Quantity: ${state.quantity}.\n➡️ Please upload product image.`);
-    case "close_bag": return reply(line, event, prefix + `➡️ Send another quantity for ${state.shop}\n➡️ Tap Close Bag.`, [["Close Bag", "close bag"]]);
-    case "bag_closed": return reply(line, event, prefix + "Choose another shop or view summary.", [["Another Shop", "another shop"], ["Summary", "summary"]]);
-    case "complete": return reply(line, event, prefix + "Movement completed.", START_CHOICES);
+    case "shop": return reply(line, event, prefix + "📍 Choose destination shop\nFrom: Home\n\n➡️ Tap NJ or YY.", [["NJ", "NJ"], ["YY", "YY"]]);
+    case "quantity": return reply(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send the quantity for one product photo.\nExample: 12\n\nFor a breakdown, put each quantity on a new line:\nขาว 5\nดำ 5\nThe quantities will be added together.`);
+    case "product_image": return reply(line, event, prefix + `📍 Home → ${state.shop}\nQuantity entered: ${state.quantity}${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n⏳ Item not saved yet.\n➡️ Send a product photo to save this item.`);
+    case "close_bag": return reply(line, event, prefix + `Next for ${state.shop}:\n• Add another item: send its quantity, then its photo.\n• Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
+    case "bag_closed": return reply(line, event, prefix + `✅ Bag closed for ${state.shop}\n\n➡️ Another Shop: choose a shop and add more items.\n➡️ Summary: finish this movement and view totals.`, [["Another Shop", "another shop"], ["Summary", "summary"]]);
+    case "complete": return reply(line, event, prefix + "✅ Movement completed\nAll saved items are included.\n\n➡️ Tap Create New to start another movement.", START_CHOICES);
   }
 }
 
