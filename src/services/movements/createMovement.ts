@@ -6,30 +6,32 @@ import type { ILineBotService, LineReplyMessage } from "@/externals/line/types";
 import { findLatestUserState } from "@/services/user-states";
 import { isActiveOrderCreateState, UserStateFlowName } from "@/services/orders";
 import {
-  movementItems, readMovementSession, resumeLegacyMovement, saveMaster,
+  isMovementStartCommand,
+  type MovementEventClassification,
+} from "@/features/backend/line/utils";
+import {
+  movementItems, resumeLegacyMovement, saveMaster,
   saveMovementState, type MovementState,
 } from "./state";
 
-const START_COMMANDS = ["create:movement", "create:new-movement", "resume:movement"];
 const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinished", "resume:movement"]];
 
-// Called before legacy routing. Every message resolves its state from Sheets.
+// Routing has already resolved the movement session for this event.
 export async function handleMovementEvent({
-  event, sheets, drive, line, publicBaseUrl,
+  event, session, sheets, drive, line, publicBaseUrl,
 }: {
-  event: LineEvent;
+  event: MovementEventClassification["event"];
+  session: MovementEventClassification["session"];
   sheets: IGoogleSheetsService;
   drive: () => IGoogleDriveService | undefined;
   line: ILineBotService;
   publicBaseUrl: string;
-}): Promise<boolean> {
-  if (event.type !== "message" || !event.message || !event.source?.userId) return false;
-  if (event.message.type !== LineMessageType.Text && event.message.type !== LineMessageType.Image) return false;
+}): Promise<void> {
   const userId = event.source.userId;
   const text = event.message.text?.trim() || "";
   const command = text.toLowerCase();
   const eventId = event.webhookEventId || event.message.id;
-  const { state, processed } = await readMovementSession(sheets, userId, eventId);
+  const { state, processed } = session;
 
   if (state && processed) {
     if (state.step === "complete") {
@@ -39,18 +41,18 @@ export async function handleMovementEvent({
       await saveMaster(sheets, state);
       await prompt(line, event, state);
     }
-    return true;
+    return;
   }
 
-  if (START_COMMANDS.includes(command)) {
+  if (isMovementStartCommand(command)) {
     const orderState = await findLatestUserState({ googleSheetsService: sheets, userId, flowname: UserStateFlowName.OrderCreate });
     if (orderState && isActiveOrderCreateState(orderState.state)) {
       await reply(line, event, "Please complete your pending order before creating a movement.");
-      return true;
+      return;
     }
     if (command === "create:movement") {
       await reply(line, event, "📦 Stock movement\nMove products from Home to a shop.\n\nTap Create New to start, or Resume Unfinished to continue.", START_CHOICES);
-      return true;
+      return;
     }
     if (command === "resume:movement") {
       const resumed = state && state.step !== "complete" ? state : await resumeLegacyMovement(sheets, userId);
@@ -60,7 +62,7 @@ export async function handleMovementEvent({
         await saveMovementState(sheets, { ...resumed, lastEventId: eventId });
         await prompt(line, event, resumed, `↩️ Movement resumed\nRef: ${resumed.masterId}\n\n`);
       }
-      return true;
+      return;
     }
     const masterId = `MOVE-${eventKey(eventId)}`;
     const next: MovementState = {
@@ -71,24 +73,24 @@ export async function handleMovementEvent({
     await saveMovementState(sheets, next);
     await saveMaster(sheets, next);
     await prompt(line, event, next, `📦 New movement started\nRef: ${masterId}\n\n`);
-    return true;
+    return;
   }
 
   if (!state || state.step === "complete") {
-    return false;
+    return;
   }
   if (command === "create:order" || command === "create:purchase-order") {
     await prompt(line, event, state, "Please complete your movement before starting an order.\n");
-    return true;
+    return;
   }
 
   if (event.message.type === LineMessageType.Image) {
     if (state.step !== "product_image") {
       await prompt(line, event, state);
-      return true;
+      return;
     }
     await saveImage({ state, event, eventId, sheets, drive: drive(), line });
-    return true;
+    return;
   }
 
   let next: MovementState = { ...state, lastEventId: eventId };
@@ -96,7 +98,7 @@ export async function handleMovementEvent({
     const shop = text.toUpperCase();
     if (shop !== "NJ" && shop !== "YY") {
       await prompt(line, event, state);
-      return true;
+      return;
     }
     next = { ...next, shop, step: "quantity" };
   } else if (state.step === "quantity" || state.step === "close_bag") {
@@ -106,7 +108,7 @@ export async function handleMovementEvent({
       const parsed = parseQuantity(text);
       if (!parsed) {
         await prompt(line, event, state, "⚠️ Quantity not accepted. Send a number greater than 0.\n\n");
-        return true;
+        return;
       }
       next = { ...next, ...parsed, step: "product_image", imageUrl: "" };
     }
@@ -117,14 +119,13 @@ export async function handleMovementEvent({
     next.step = "complete";
     await saveMovementState(sheets, next);
     await summary(line, event, sheets, next, publicBaseUrl);
-    return true;
+    return;
   } else {
     await prompt(line, event, state);
-    return true;
+    return;
   }
   await saveMovementState(sheets, next);
   await prompt(line, event, next);
-  return true;
 }
 
 async function saveImage({ state, event, eventId, sheets, drive, line }: {

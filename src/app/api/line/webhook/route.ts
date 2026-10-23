@@ -16,7 +16,10 @@ import {
 import { handleLineEvent } from "@/services/line";
 import { handleMovementEvent } from "@/services/movements/createMovement";
 import type { UserState } from "@/services/user-states";
-import { parseLineWebhookPayload } from "@/features/backend/line/utils";
+import {
+  classifyLineEvent,
+  parseLineWebhookPayload,
+} from "@/features/backend/line/utils";
 
 export const runtime = "nodejs";
 
@@ -57,16 +60,21 @@ export async function POST(request: Request): Promise<NextResponse> {
   for (const event of payload.events || []) {
     // Route and handle sequentially: earlier events may advance a Sheets checkpoint.
     try {
-      if (
+      const classification = await classifyLineEvent({
+        event,
+        getGoogleSheetsService,
+      });
+      if (classification.kind === "movement") {
         await handleMovementEvent({
-          event,
+          event: classification.event,
+          session: classification.session,
           sheets: getGoogleSheetsService(),
           drive: getGoogleDriveService,
           line: lineBotService,
           publicBaseUrl: config.movementPublicBaseUrl || config.publicBaseUrl,
-        })
-      )
+        });
         continue;
+      }
     } catch (error) {
       console.error("Failed to process movement event", {
         webhookEventId: event.webhookEventId,
