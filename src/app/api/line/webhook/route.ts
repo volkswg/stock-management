@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import {
@@ -14,10 +13,7 @@ import {
   createGoogleSheetsServiceFromConfig,
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
-import {
-  handleLineEvent,
-  shouldProxyToLegacy,
-} from "@/services/line";
+import { handleLineEvent } from "@/services/line";
 import { handleMovementEvent } from "@/services/movements/createMovement";
 import type { UserState } from "@/services/user-states";
 
@@ -56,7 +52,6 @@ export async function POST(request: Request): Promise<NextResponse> {
   });
 
   const resolvedUserStates = new Map<LineEvent, UserState>();
-  const legacyEvents: LineEvent[] = [];
   let movementFailed = false;
   for (const event of payload.events || []) {
     // Route and handle sequentially: earlier events may advance a Sheets checkpoint.
@@ -66,8 +61,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         sheets: getGoogleSheetsService(),
         drive: getGoogleDriveService,
         line: lineBotService,
-        publicBaseUrl: config.movementPublicBaseUrl || config.publicBaseUrl ||
-          (config.line.legacyWebhookUrl ? new URL(config.line.legacyWebhookUrl).origin : ""),
+        publicBaseUrl: config.movementPublicBaseUrl || config.publicBaseUrl,
       })) continue;
     } catch (error) {
       console.error("Failed to process movement event", {
@@ -75,14 +69,10 @@ export async function POST(request: Request): Promise<NextResponse> {
         error: error instanceof Error ? error.message : String(error),
       });
       movementFailed = true;
-      // Do not route a possibly active movement to the legacy purchase flow.
+      // Stop the batch so later events cannot advance a failed movement.
       break;
     }
 
-    if (await shouldProxyToLegacy({ event, getGoogleSheetsService, resolvedUserStates })) {
-      legacyEvents.push(event);
-      continue;
-    }
     try {
       await handleLineEvent({
         event, lineBotService, getGoogleSheetsService, getGoogleDriveService, resolvedUserStates,
@@ -91,20 +81,6 @@ export async function POST(request: Request): Promise<NextResponse> {
       console.error("Failed to process LINE event", {
         webhookEventId: event.webhookEventId,
         error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
-  if (legacyEvents.length > 0) {
-    if (!config.line.legacyWebhookUrl) {
-      console.warn("LINE legacy webhook proxy skipped: URL is not configured", {
-        eventCount: legacyEvents.length,
-      });
-    } else {
-      await proxyLegacyLineWebhook({
-        legacyWebhookUrl: config.line.legacyWebhookUrl,
-        channelSecret: config.line.channelSecret,
-        events: legacyEvents,
       });
     }
   }
@@ -135,37 +111,6 @@ function createGoogleSheetsServiceGetter(
     googleSheetsService ||= createGoogleSheetsServiceFromConfig(config);
     return googleSheetsService;
   };
-}
-
-async function proxyLegacyLineWebhook({
-  legacyWebhookUrl,
-  channelSecret,
-  events,
-}: {
-  legacyWebhookUrl: string;
-  channelSecret: string;
-  events: LineEvent[];
-}): Promise<void> {
-  const body = JSON.stringify({ events });
-  const signature = crypto
-    .createHmac("sha256", channelSecret)
-    .update(body)
-    .digest("base64");
-  const response = await fetch(legacyWebhookUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-line-signature": signature,
-    },
-    body,
-  });
-
-  if (!response.ok) {
-    const responseBody = await response.text();
-    throw new Error(
-      `Legacy LINE webhook proxy failed: ${response.status} ${responseBody}`,
-    );
-  }
 }
 
 function parseLineWebhookPayload(rawBody: Buffer): LineWebhookPayload {

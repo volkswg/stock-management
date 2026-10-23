@@ -1,4 +1,5 @@
 import {
+  createTextReplyMessage,
   LineMessageType,
   type LineBotService,
   type LineEvent,
@@ -16,6 +17,16 @@ import { handleOrderBillImageLineEvent } from "./events/orderBillImage";
 import { handleOrderProductImageLineEvent } from "./events/orderProductImage";
 import { handleOrderTotalPriceLineEvent } from "./events/orderTotalPrice";
 import { resolveUserState } from "./utils/resolveUserState";
+
+const START_FLOW_REPLY_TEXT = [
+  "Choose an action to continue:",
+  "",
+  "🧾 New order: send create:order",
+  "📦 Stock movement: send create:movement",
+  "↩️ Resume movement: send resume:movement",
+  "",
+  "For orders, send photos when asked for bill or product images.",
+].join("\n");
 
 export async function handleLineEvent({
   event,
@@ -49,6 +60,9 @@ export async function handleLineEvent({
     });
 
     if (!latestUserState) {
+      await lineBotService.sendReply(event.replyToken, [
+        createTextReplyMessage({ text: START_FLOW_REPLY_TEXT }),
+      ]);
       return;
     }
 
@@ -66,6 +80,14 @@ export async function handleLineEvent({
       latestUserState.state === OrderStatus.WaitingForProductImage
     ) {
       await handleOrderProductImageLineEvent(imageHandlerInput);
+    } else {
+      await lineBotService.sendReply(event.replyToken, [
+        createTextReplyMessage({
+          text: latestUserState.state === OrderStatus.WaitingForTotalPrice
+            ? "➡️ Send the order total price as a number.\nExample: 1,250.50"
+            : START_FLOW_REPLY_TEXT,
+        }),
+      ]);
     }
     return;
   }
@@ -76,7 +98,7 @@ export async function handleLineEvent({
 
   const command = classifyLineTextCommand(event.message.text);
 
-  if (command === LineTextCommand.Legacy) {
+  if (command === LineTextCommand.Unknown) {
     const lineUserId = event.source?.userId;
     if (lineUserId) {
       const googleSheetsService = getGoogleSheetsService();
@@ -127,9 +149,11 @@ export async function handleLineEvent({
       });
       return;
 
-    case LineTextCommand.Legacy:
+    case LineTextCommand.Unknown:
     default:
-      // Handle legacy commands or unrecognized commands here if needed
+      await lineBotService.sendReply(event.replyToken, [
+        createTextReplyMessage({ text: START_FLOW_REPLY_TEXT }),
+      ]);
       return;
   }
 }

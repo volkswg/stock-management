@@ -20,5 +20,5 @@ export function classifyLineTextCommand(
     return LineTextCommand.CompleteProducts;
   }
 
-  return LineTextCommand.Legacy;
+  return LineTextCommand.Unknown;
 }

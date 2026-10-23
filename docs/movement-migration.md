@@ -13,11 +13,12 @@ are available at `/movements`, backed by the native `/api/movements` routes.
    them with `GOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME` and
    `GOOGLE_SHEETS_MOVEMENT_DETAIL_WORKSHEET_NAME` if the legacy app uses other names.
 3. Set `MOVEMENT_PUBLIC_BASE_URL` to the public base URL of stock-management.
-   When omitted, summary links use `PUBLIC_BASE_URL`, then the origin of
-   `LINE_LEGACY_WEBHOOK_URL`. Without any of these settings, summaries are text-only.
+   When omitted, summary links use `PUBLIC_BASE_URL`. Without either setting,
+   summaries are text-only.
 4. Deploy stock-management and point the LINE channel webhook to its
-   `/api/line/webhook` route before deploying the legacy handler removal.
-   Keep `LINE_LEGACY_WEBHOOK_URL` configured for remaining purchase commands.
+   `/api/line/webhook` route. Orders and movements are handled locally; no
+   events are forwarded to the legacy webhook. Unrecognized text and photos
+   outside an active flow receive local guidance.
 5. Complete any partially entered legacy items before switching. Only the old
    master and saved item rows can be recovered; shop/quantity values held solely
    in the old process's memory cannot be imported.
@@ -51,7 +52,7 @@ new active draft; earlier unfinished masters remain available for later resume.
 Images upload to Drive before an item is written. A saved upload URL is reused
 on retry, stable item IDs avoid duplicating an already saved item, and the last
 event ID protects the current transition from an immediate redelivery. Sheet failures
-return HTTP 503 rather than forwarding the message to the legacy purchase flow.
+return HTTP 503 so LINE can retry the local movement handler.
 Enable LINE webhook redelivery for automatic retries; otherwise users can retry
 their last action. Drive and Sheets are separate services, so a failure before
 the upload URL checkpoint can still leave an orphaned Drive file. Sheets does
