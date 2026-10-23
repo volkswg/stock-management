@@ -165,7 +165,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
     quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
   };
   await saveMovementState(sheets, next);
-  await prompt(line, event, next, `Product image saved for ${state.shop}. Quantity: ${state.quantity}.\n`);
+  await prompt(line, event, next, `✅ Product image saved for ${state.shop}.\n✅ Quantity: ${state.quantity}.\n`);
 }
 
 async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleSheetsService, state: MovementState, publicBaseUrl: string): Promise<void> {
@@ -192,8 +192,8 @@ async function prompt(line: ILineBotService, event: LineEvent, state: MovementSt
   switch (state.step) {
     case "shop": return reply(line, event, prefix + "Please choose shop.", [["NJ", "NJ"], ["YY", "YY"]]);
     case "quantity": return reply(line, event, prefix + "Please send quantity.");
-    case "product_image": return reply(line, event, prefix + `Quantity: ${state.quantity}. Please upload product image.`);
-    case "close_bag": return reply(line, event, prefix + `Send another quantity for ${state.shop}, or tap Close Bag.`, [["Close Bag", "close bag"]]);
+    case "product_image": return reply(line, event, prefix + `✅ Quantity: ${state.quantity}.\n ➡️ Please upload product image.`);
+    case "close_bag": return reply(line, event, prefix + `➡️ Send another quantity for ${state.shop}\n ➡️ Tap Close Bag.`, [["Close Bag", "close bag"]]);
     case "bag_closed": return reply(line, event, prefix + "Choose another shop or view summary.", [["Another Shop", "another shop"], ["Summary", "summary"]]);
     case "complete": return reply(line, event, prefix + "Movement completed.", START_CHOICES);
   }
