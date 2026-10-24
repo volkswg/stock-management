@@ -2,7 +2,7 @@ import { createSortableId } from "@/services/utils/createSortableId";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { LineMessageType, type LineEvent } from "@/externals/line";
-import type { ILineBotService, LineReplyMessage } from "@/externals/line/types";
+import type { ILineBotService } from "@/externals/line/types";
 import { findLatestUserState } from "@/services/user-states";
 import { isActiveOrderCreateState, UserStateFlowName } from "@/services/orders";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/services/movements/state";
 import { MovementStartCommandEnum } from "@/features/backend/line/enum";
 import { parseQuantity } from "./utils";
+import { replyText } from "../reply";
 
 const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinished", "resume:movement"]];
 
@@ -49,17 +50,17 @@ export async function handleMovementEvent({
   if (isMovementStartCommand(command)) {
     const orderState = await findLatestUserState({ googleSheetsService: sheets, userId, flowname: UserStateFlowName.OrderCreate });
     if (orderState && isActiveOrderCreateState(orderState.state)) {
-      await reply(line, event, "Please complete your pending order before creating a movement.");
+      await replyText(line, event, "Please complete your pending order before creating a movement.");
       return;
     }
     if (command === MovementStartCommandEnum.CreateMovement) {
-      await reply(line, event, "📦 Stock movement\nMove products from Home to a shop.\n\nTap Create New to start, or Resume Unfinished to continue.", START_CHOICES);
+      await replyText(line, event, "📦 Stock movement\nMove products from Home to a shop.\n\nTap Create New to start, or Resume Unfinished to continue.", START_CHOICES);
       return;
     }
     if (command === MovementStartCommandEnum.ResumeMovement) {
       const resumed = state && state.step !== "complete" ? state : await resumeLegacyMovement(sheets, userId);
       if (!resumed) {
-        await reply(line, event, "No unfinished movement was found.", START_CHOICES.slice(0, 1));
+        await replyText(line, event, "No unfinished movement was found.", START_CHOICES.slice(0, 1));
       } else {
         await saveMovementState(sheets, { ...resumed, lastEventId: eventId });
         await prompt(line, event, resumed, `↩️ Movement resumed\nRef: ${resumed.masterId}\n\n`);
@@ -139,7 +140,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
   let imageUrl = state.imageUrl;
   if (!existing && !imageUrl) {
     if (!drive) {
-      await reply(line, event, `⚠️ Photo upload is unavailable\nShop: ${state.shop} | Quantity: ${state.quantity}\nYour progress is saved, but this item is not saved yet.\n\nAsk an administrator to configure Google Drive, then resend the photo.`);
+      await replyText(line, event, `⚠️ Photo upload is unavailable\nShop: ${state.shop} | Quantity: ${state.quantity}\nYour progress is saved, but this item is not saved yet.\n\nAsk an administrator to configure Google Drive, then resend the photo.`);
       return;
     }
     try {
@@ -149,7 +150,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
       if (!file.webViewLink?.trim()) throw new Error("Google Drive returned no image URL.");
       imageUrl = file.webViewLink;
     } catch {
-      await reply(line, event, `⚠️ Photo upload failed\nShop: ${state.shop} | Quantity: ${state.quantity}\nThis item is not saved yet. Your entered quantity is kept.\n\n➡️ Send the product photo again to save this item.`);
+      await replyText(line, event, `⚠️ Photo upload failed\nShop: ${state.shop} | Quantity: ${state.quantity}\nThis item is not saved yet. Your entered quantity is kept.\n\n➡️ Send the product photo again to save this item.`);
       return;
     }
     // Persist the upload URL before writing the item so a retry can reuse it.
@@ -182,7 +183,7 @@ async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleS
   const shopTotals = Array.from(quantities, ([shop, quantity]) => `• Home → ${shop}: ${quantity}`).join("\n");
   const text = `✅ Movement completed\nRef: ${state.masterId}\n\n${shopTotals || "No items saved."}\n\nItems saved: ${rows.length}\nTotal quantity: ${totalQuantity}`;
   if (!publicBaseUrl) {
-    await reply(line, event, text);
+    await replyText(line, event, text);
     return;
   }
   await line.sendReply(event.replyToken, [{ type: "text", text }, {
@@ -195,18 +196,11 @@ async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleS
 
 async function prompt(line: ILineBotService, event: LineEvent, state: MovementState, prefix = ""): Promise<void> {
   switch (state.step) {
-    case "shop": return reply(line, event, prefix + "📍 Choose destination shop\nFrom: Home\n\n➡️ Tap NJ or YY.", [["NJ", "NJ"], ["YY", "YY"]]);
-    case "quantity": return reply(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send the quantity for one product photo.\nExample: 12\n\nFor a breakdown, put each quantity on a new line:\nขาว 5\nดำ 5\nThe quantities will be added together.`);
-    case "product_image": return reply(line, event, prefix + `📍 Home → ${state.shop}\nQuantity entered: ${state.quantity}${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n⏳ Item not saved yet.\n➡️ Send a product photo to save this item.`);
-    case "close_bag": return reply(line, event, prefix + `Next for ${state.shop}:\n• Add another item: send its quantity, then its photo.\n• Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
-    case "bag_closed": return reply(line, event, prefix + `✅ Bag closed for ${state.shop}\n\n➡️ Another Shop: choose a shop and add more items.\n➡️ Summary: finish this movement and view totals.`, [["Another Shop", "another shop"], ["Summary", "summary"]]);
-    case "complete": return reply(line, event, prefix + "✅ Movement completed\nAll saved items are included.\n\n➡️ Tap Create New to start another movement.", START_CHOICES);
+    case "shop": return replyText(line, event, prefix + "📍 Choose destination shop\nFrom: Home\n\n➡️ Tap NJ or YY.", [["NJ", "NJ"], ["YY", "YY"]]);
+    case "quantity": return replyText(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send the quantity for one product photo.\nExample: 12\n\nFor a breakdown, put each quantity on a new line:\nขาว 5\nดำ 5\nThe quantities will be added together.`);
+    case "product_image": return replyText(line, event, prefix + `📍 Home → ${state.shop}\nQuantity entered: ${state.quantity}${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n⏳ Item not saved yet.\n➡️ Send a product photo to save this item.`);
+    case "close_bag": return replyText(line, event, prefix + `Next for ${state.shop}:\n• Add another item: send its quantity, then its photo.\n• Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
+    case "bag_closed": return replyText(line, event, prefix + `✅ Bag closed for ${state.shop}\n\n➡️ Another Shop: choose a shop and add more items.\n➡️ Summary: finish this movement and view totals.`, [["Another Shop", "another shop"], ["Summary", "summary"]]);
+    case "complete": return replyText(line, event, prefix + "✅ Movement completed\nAll saved items are included.\n\n➡️ Tap Create New to start another movement.", START_CHOICES);
   }
 }
-
-async function reply(line: ILineBotService, event: LineEvent, text: string, choices: string[][] = []): Promise<void> {
-  const message: LineReplyMessage = { type: "text", text };
-  if (choices.length) message.quickReply = { items: choices.map(([label, text]) => ({ type: "action", action: { type: "message", label, text } })) };
-  await line.sendReply(event.replyToken, [message]);
-}
-
