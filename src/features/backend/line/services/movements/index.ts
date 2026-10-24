@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createSortableId } from "@/services/utils/createSortableId";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { LineMessageType, type LineEvent } from "@/externals/line";
@@ -12,8 +12,9 @@ import {
 import {
   movementItems, resumeLegacyMovement, saveMaster,
   saveMovementState, type MovementState,
-} from "./state";
+} from "@/services/movements/state";
 import { MovementStartCommandEnum } from "@/features/backend/line/enum";
+import { parseQuantity } from "./utils";
 
 const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinished", "resume:movement"]];
 
@@ -65,9 +66,9 @@ export async function handleMovementEvent({
       }
       return;
     }
-    const masterId = `MOVE-${eventKey(eventId)}`;
+    const masterId = `MOVE-${createSortableId()}`;
     const next: MovementState = {
-      masterId, itemId: `MOVED-${eventKey(eventId)}`, userId, step: "shop",
+      masterId, itemId: `MOVED-${createSortableId()}`, userId, step: "shop",
       startedAt: new Date(event.timestamp || Date.now()).toISOString(), shop: "",
       quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
     };
@@ -114,7 +115,7 @@ export async function handleMovementEvent({
       next = { ...next, ...parsed, step: "product_image", imageUrl: "" };
     }
   } else if (state.step === "bag_closed" && command === "another shop") {
-    next = { ...next, step: "shop", itemId: `MOVED-${eventKey(eventId)}`, shop: "", quantity: "", remark: "", imageUrl: "" };
+    next = { ...next, step: "shop", itemId: `MOVED-${createSortableId()}`, shop: "", quantity: "", remark: "", imageUrl: "" };
   } else if (state.step === "bag_closed" && ["summary", "movement summary"].includes(command)) {
     await saveMaster(sheets, state, true);
     next.step = "complete";
@@ -163,7 +164,7 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
   }
   await saveMaster(sheets, state);
   const next: MovementState = {
-    ...state, itemId: `MOVED-${eventKey(eventId)}-NEXT`, step: "close_bag",
+    ...state, itemId: `MOVED-${createSortableId()}`, step: "close_bag",
     quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
   };
   await saveMovementState(sheets, next);
@@ -209,17 +210,3 @@ async function reply(line: ILineBotService, event: LineEvent, text: string, choi
   await line.sendReply(event.replyToken, [message]);
 }
 
-function parseQuantity(text: string): { quantity: string; remark: string } | undefined {
-  const total = text.split(/\r?\n/)
-    .map((line) => line.match(/\d[\d,]*(?:\.\d+)?/g)?.at(-1))
-    .filter((value): value is string => Boolean(value))
-    .map((value) => Number(value.replace(/,/g, "")))
-    .filter((value) => Number.isFinite(value) && value > 0)
-    .reduce((sum, value) => sum + value, 0);
-  if (!Number.isFinite(total) || total <= 0) return undefined;
-  return { quantity: String(total), remark: /^\d[\d,]*(?:\.\d+)?$/.test(text) ? "" : text };
-}
-
-function eventKey(value: string): string {
-  return createHash("sha256").update(value).digest("hex").slice(0, 24).toUpperCase();
-}

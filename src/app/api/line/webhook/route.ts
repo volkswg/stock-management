@@ -14,7 +14,7 @@ import {
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
 import { handleLineEvent } from "@/services/line";
-import { handleMovementEvent } from "@/services/movements/createMovement";
+import { handleMovementEvent } from "@/features/backend/line/services/movements";
 import type { UserState } from "@/services/user-states";
 import {
   classifyLineEvent,

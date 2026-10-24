@@ -1,5 +1,6 @@
 import type { GoogleSheetRow, IGoogleRowsSheet, IGoogleSheetsService } from "@/externals/google/sheet/types";
 import { USER_STATE_SHEET_HEADERS } from "@/externals/google/sheet/sheets/user-state/const";
+import { createSortableId } from "@/services/utils/createSortableId";
 
 export const MOVEMENT_FLOW = "MovementCreate";
 export const MASTER_HEADERS = [
@@ -135,7 +136,7 @@ export async function resumeLegacyMovement(sheets: IGoogleSheetsService, userId:
   const masterId = String(master[0]);
   const items = await movementItems(sheets, masterId);
   return {
-    masterId, itemId: `${masterId}-RESUME-${Date.now()}`, userId,
+    masterId, itemId: `MOVED-${createSortableId()}`, userId,
     step: items.length ? "bag_closed" : "shop",
     startedAt: String(master[6] || master[2]), shop: "", quantity: "", remark: "", imageUrl: "", lastEventId: "",
   };
