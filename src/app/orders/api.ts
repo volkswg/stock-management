@@ -3,6 +3,8 @@ import type {
   OrderDetail,
   OrderItemQuantityType,
   OrderListItem,
+  OrderBillImage,
+  OrderProductImage,
   OrderStatus,
 } from "@/services/orders";
 
@@ -61,10 +63,9 @@ export type UpdateOrderItemProductCodeResponse = {
 
 export type OrderImageType = "bill" | "product";
 
-export type UploadOrderImageResponse = {
-  imageType: OrderImageType;
-  record: Record<string, unknown>;
-};
+export type UploadOrderImageResponse =
+  | { imageType: "bill"; record: OrderBillImage }
+  | { imageType: "product"; record: OrderProductImage };
 
 export async function getOrders({
   signal,
@@ -272,10 +273,23 @@ function isCreateOrderResponse(value: unknown): value is CreateOrderResponse {
 function isUploadOrderImageResponse(
   value: unknown,
 ): value is UploadOrderImageResponse {
+  if (!isRecord(value) || !isRecord(value.record)) return false;
+  const record = value.record;
+  if (
+    typeof record.id !== "string" ||
+    typeof record.orderId !== "string" ||
+    typeof record.imageUrl !== "string" ||
+    typeof record.createdAt !== "string"
+  ) {
+    return false;
+  }
+
   return (
-    isRecord(value) &&
-    (value.imageType === "bill" || value.imageType === "product") &&
-    isRecord(value.record)
+    value.imageType === "bill" ||
+    (value.imageType === "product" &&
+      typeof record.quoteQuantity === "string" &&
+      typeof record.deliveredQuantity === "string" &&
+      typeof record.productCode === "string")
   );
 }
 

@@ -53,6 +53,7 @@ import {
   type UpdateOrderDetailsResponse,
 } from "../api";
 import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
+import { OrderProductImageUpload } from "@/features/frontend/orders/components/OrderProductImageUpload";
 import styles from "./orderDetail.module.css";
 
 const { Text, Title } = Typography;
@@ -262,95 +263,113 @@ function OrderContent({
                   title="Product images"
                 />
               ),
-              children:
-                order.productImages.length > 0 ? (
-                  <>
-                    <div className={styles.quantityToolbar}>
-                      <Text strong>Quantity</Text>
-                      <Segmented<OrderItemQuantityType>
-                        className={styles.quantityMode}
-                        options={[
-                          {
-                            label: "Quote",
-                            value: OrderItemQuantityType.Quote,
-                          },
-                          {
-                            label: "Delivered",
-                            value: OrderItemQuantityType.Delivered,
-                          },
-                        ]}
-                        value={quantityType}
-                        onChange={setQuantityType}
-                      />
-                    </div>
-                    <OrderImageGallery
-                      ariaLabel="Product images"
-                      images={order.productImages.map((image, index) => ({
-                        id: image.id,
-                        imageUrl: image.imageUrl,
-                        title: image.productCode || `Product ${index + 1}`,
-                        details: (
-                          <div className={styles.itemEditors}>
-                            <OrderItemProductCode
-                              itemId={image.id}
-                              orderId={order.id}
-                              productCode={image.productCode}
-                              onUpdated={(productCode) =>
-                                onOrderChange((current) =>
-                                  current
-                                    ? {
-                                        ...current,
-                                        productImages: current.productImages.map(
-                                          (item) =>
-                                            item.id === image.id
-                                              ? { ...item, productCode }
-                                              : item,
-                                        ),
-                                      }
-                                    : current,
-                                )
+              children: (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <OrderProductImageUpload
+                      orderId={order.id}
+                      onUploaded={(image) =>
+                        onOrderChange((current) =>
+                          current
+                            ? {
+                                ...current,
+                                productImages: [...current.productImages, image],
                               }
-                            />
-                            <OrderItemQuantity
-                              deliveredQuantity={image.deliveredQuantity}
-                              key={`${image.id}-${quantityType}`}
-                              itemId={image.id}
-                              orderId={order.id}
-                              quantityType={quantityType}
-                              quoteQuantity={image.quoteQuantity}
-                              onUpdated={(updatedType, quantity) =>
-                                onOrderChange((current) =>
-                                  current
-                                    ? {
-                                        ...current,
-                                        productImages: current.productImages.map(
-                                          (item) =>
-                                            item.id === image.id
-                                              ? {
-                                                  ...item,
-                                                  [
-                                                    updatedType ===
-                                                    OrderItemQuantityType.Quote
-                                                      ? "quoteQuantity"
-                                                      : "deliveredQuantity"
-                                                  ]: quantity,
-                                                }
-                                              : item,
-                                        ),
-                                      }
-                                    : current,
-                                )
-                              }
-                            />
-                          </div>
-                        ),
-                      }))}
-                      thumbnailSize={128}
+                            : current,
+                        )
+                      }
                     />
-                  </>
-                ) : (
-                  <ImageEmptyState description="No product images" />
-                ),
+                  </div>
+                  {order.productImages.length > 0 ? (
+                    <>
+                      <div className={styles.quantityToolbar}>
+                        <Text strong>Quantity</Text>
+                        <Segmented<OrderItemQuantityType>
+                          className={styles.quantityMode}
+                          options={[
+                            {
+                              label: "Quote",
+                              value: OrderItemQuantityType.Quote,
+                            },
+                            {
+                              label: "Delivered",
+                              value: OrderItemQuantityType.Delivered,
+                            },
+                          ]}
+                          value={quantityType}
+                          onChange={setQuantityType}
+                        />
+                      </div>
+                      <OrderImageGallery
+                        ariaLabel="Product images"
+                        images={order.productImages.map((image, index) => ({
+                          id: image.id,
+                          imageUrl: image.imageUrl,
+                          title: image.productCode || `Product ${index + 1}`,
+                          details: (
+                            <div className={styles.itemEditors}>
+                              <OrderItemProductCode
+                                itemId={image.id}
+                                orderId={order.id}
+                                productCode={image.productCode}
+                                onUpdated={(productCode) =>
+                                  onOrderChange((current) =>
+                                    current
+                                      ? {
+                                          ...current,
+                                          productImages: current.productImages.map(
+                                            (item) =>
+                                              item.id === image.id
+                                                ? { ...item, productCode }
+                                                : item,
+                                          ),
+                                        }
+                                      : current,
+                                  )
+                                }
+                              />
+                              <OrderItemQuantity
+                                deliveredQuantity={image.deliveredQuantity}
+                                key={`${image.id}-${quantityType}`}
+                                itemId={image.id}
+                                orderId={order.id}
+                                quantityType={quantityType}
+                                quoteQuantity={image.quoteQuantity}
+                                onUpdated={(updatedType, quantity) =>
+                                  onOrderChange((current) =>
+                                    current
+                                      ? {
+                                          ...current,
+                                          productImages: current.productImages.map(
+                                            (item) =>
+                                              item.id === image.id
+                                                ? {
+                                                    ...item,
+                                                    [
+                                                      updatedType ===
+                                                      OrderItemQuantityType.Quote
+                                                        ? "quoteQuantity"
+                                                        : "deliveredQuantity"
+                                                    ]: quantity,
+                                                  }
+                                                : item,
+                                          ),
+                                        }
+                                      : current,
+                                  )
+                                }
+                              />
+                            </div>
+                          ),
+                        }))}
+                        thumbnailSize={128}
+                      />
+                    </>
+                  ) : (
+                    <ImageEmptyState description="No product images" />
+                  )}
+                </>
+              ),
             },
           ]}
         />
