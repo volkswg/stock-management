@@ -1,6 +1,6 @@
 import { GOOGLE_SHEETS_API_BASE } from "../const";
 import type { GoogleServiceAccountAuth } from "../../auth/GoogleServiceAccountAuth";
-import type { GoogleSheetRow } from "../types";
+import type { GoogleSheetRangeUpdate, GoogleSheetRow } from "../types";
 
 type GoogleSheetsValuesResponse = {
   values?: GoogleSheetRow[];
@@ -60,6 +60,24 @@ export class GoogleSheetsClient {
         body: JSON.stringify({ values }),
       },
     );
+  }
+
+  async batchUpdateValues(
+    worksheetName: string,
+    updates: GoogleSheetRangeUpdate[],
+  ): Promise<void> {
+    if (updates.length === 0) return;
+    await this.request("/values:batchUpdate", {
+      method: "POST",
+      body: JSON.stringify({
+        valueInputOption: "USER_ENTERED",
+        data: updates.map(({ range, values }) => ({
+          range: `${quoteWorksheetName(worksheetName)}!${range}`,
+          majorDimension: "ROWS",
+          values,
+        })),
+      }),
+    });
   }
 
   async clearValues(worksheetName: string, range: string): Promise<void> {

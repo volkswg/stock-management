@@ -5,6 +5,8 @@ import type {
   OrderListItem,
   OrderBillImage,
   OrderProductImage,
+  OrderProductUpdate,
+  UpdatedOrderProduct,
   OrderStatus,
 } from "@/services/orders";
 
@@ -59,6 +61,10 @@ export type UpdateOrderItemProductCodeResponse = {
     productCode: string;
     updatedAt: string;
   };
+};
+
+export type UpdateOrderProductsResponse = {
+  items: UpdatedOrderProduct[];
 };
 
 export type OrderImageType = "bill" | "product";
@@ -198,6 +204,23 @@ export async function updateOrderDetails(
   return body;
 }
 
+export async function updateOrderProducts(
+  orderId: string,
+  items: OrderProductUpdate[],
+): Promise<UpdateOrderProductsResponse> {
+  const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}/items`, {
+    method: "PATCH",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({ items }),
+  });
+  const body: unknown = await response.json();
+  if (!response.ok) throw new Error(getErrorMessage(body));
+  if (!isUpdateOrderProductsResponse(body)) {
+    throw new Error("The product updates API returned an invalid response.");
+  }
+  return body;
+}
+
 export async function updateOrderItemQuantity(
   orderId: string,
   orderItemId: string,
@@ -268,6 +291,17 @@ function isOrderResponse(value: unknown): value is OrderResponse {
 
 function isCreateOrderResponse(value: unknown): value is CreateOrderResponse {
   return isRecord(value) && isRecord(value.order);
+}
+
+function isUpdateOrderProductsResponse(value: unknown): value is UpdateOrderProductsResponse {
+  return isRecord(value) && Array.isArray(value.items) && value.items.every((item: unknown) =>
+    isRecord(item) &&
+    typeof item.id === "string" &&
+    typeof item.productCode === "string" &&
+    typeof item.quoteQuantity === "string" &&
+    typeof item.deliveredQuantity === "string" &&
+    typeof item.updatedAt === "string",
+  );
 }
 
 function isUploadOrderImageResponse(

@@ -42,6 +42,8 @@ export { USER_STATE_SHEET_HEADERS } from "./sheets/user-state/const";
 export type {
   GoogleSheetCellValue,
   GoogleSheetRow,
+  GoogleSheetRangeUpdate,
+  IGoogleBatchRowsSheet,
   GoogleSheetsConfig,
   IGoogleSheetsService,
 } from "./types";

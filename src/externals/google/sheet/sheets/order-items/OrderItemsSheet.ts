@@ -1,9 +1,9 @@
 import { lastColumnLetter } from "../../const";
-import type { GoogleSheetRow, IGoogleRowsSheet } from "../../types";
+import type { GoogleSheetRangeUpdate, GoogleSheetRow, IGoogleBatchRowsSheet } from "../../types";
 import { BaseGoogleSheet } from "../BaseGoogleSheet";
 import { ORDER_ITEMS_SHEET_HEADERS } from "./const";
 
-export class OrderItemsSheet extends BaseGoogleSheet implements IGoogleRowsSheet {
+export class OrderItemsSheet extends BaseGoogleSheet implements IGoogleBatchRowsSheet {
   async readRows(
     range = `A:${lastColumnLetter(ORDER_ITEMS_SHEET_HEADERS.length - 1)}`,
   ): Promise<GoogleSheetRow[]> {
@@ -16,5 +16,9 @@ export class OrderItemsSheet extends BaseGoogleSheet implements IGoogleRowsSheet
 
   async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {
     await this.update(range, values);
+  }
+
+  async batchUpdateRows(updates: GoogleSheetRangeUpdate[]): Promise<void> {
+    await this.client.batchUpdateValues(this.worksheetName, updates);
   }
 }

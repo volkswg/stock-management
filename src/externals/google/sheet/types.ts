@@ -1,6 +1,11 @@
 export type GoogleSheetCellValue = string | number | boolean | null;
 export type GoogleSheetRow = GoogleSheetCellValue[];
 
+export type GoogleSheetRangeUpdate = {
+  range: string;
+  values: GoogleSheetRow[];
+};
+
 export type GoogleSheetsConfig = {
   spreadsheetId: string;
   employeeCompensationsWorksheetName: string;
@@ -42,13 +47,17 @@ export interface IGoogleRowsSheet {
   deleteRow?(rowNumber: number): Promise<void>;
 }
 
+export interface IGoogleBatchRowsSheet extends IGoogleRowsSheet {
+  batchUpdateRows(updates: GoogleSheetRangeUpdate[]): Promise<void>;
+}
+
 export interface IGoogleSheetsService {
   readonly employeeCompensations: IGoogleRowsSheet;
   readonly employees: IGoogleRowsSheet;
   readonly employeeTimesheets: IGoogleRowsSheet;
   readonly orders: IGoogleRowsSheet;
   readonly orderBills: IGoogleRowsSheet;
-  readonly orderItems: IGoogleRowsSheet;
+  readonly orderItems: IGoogleBatchRowsSheet;
   readonly salesReceiptItems: IGoogleRowsSheet;
   readonly salesProfitCostOverrides: IGoogleRowsSheet;
   readonly salesReceiptPayments: IGoogleRowsSheet;

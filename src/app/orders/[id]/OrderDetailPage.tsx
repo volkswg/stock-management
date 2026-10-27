@@ -29,7 +29,6 @@ import {
   Skeleton,
   Space,
   Tag,
-  Tooltip,
   Typography,
 } from "antd";
 import { useEffect, useState } from "react";
@@ -47,8 +46,7 @@ import {
 } from "@/app/shipments/api";
 import {
   getOrder,
-  updateOrderItemProductCode,
-  updateOrderItemQuantity,
+  updateOrderProducts,
   updateOrderDetails,
   type UpdateOrderDetailsResponse,
 } from "../api";
@@ -137,6 +135,12 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
   );
 }
 
+type ProductImageDraft = {
+  productCode?: string;
+  quoteQuantity?: number | null;
+  deliveredQuantity?: number | null;
+};
+
 function OrderContent({
   order,
   onOrderChange,
@@ -147,6 +151,95 @@ function OrderContent({
   const [quantityType, setQuantityType] = useState<OrderItemQuantityType>(
     OrderItemQuantityType.Quote,
   );
+  const [productDrafts, setProductDrafts] = useState<
+    Record<string, ProductImageDraft>
+  >({});
+  const [savingProducts, setSavingProducts] = useState(false);
+  const [productSaveError, setProductSaveError] = useState<string>();
+  const [productsSaved, setProductsSaved] = useState(false);
+  const productChanges = order.productImages.flatMap((image) => {
+    const draft = productDrafts[image.id];
+    if (!draft) return [];
+    const changes: ProductImageDraft = {};
+    if (
+      draft.productCode !== undefined &&
+      draft.productCode.trim() !== image.productCode
+    ) {
+      changes.productCode = draft.productCode.trim();
+    }
+    for (const field of ["quoteQuantity", "deliveredQuantity"] as const) {
+      if (
+        draft[field] !== undefined &&
+        draft[field] !== parseQuantity(image[field])
+      ) {
+        changes[field] = draft[field];
+      }
+    }
+    return Object.keys(changes).length > 0 ? [{ image, changes }] : [];
+  });
+  const invalidProductChanges = productChanges.some(({ changes }) =>
+    [changes.quoteQuantity, changes.deliveredQuantity].some(
+      (quantity) =>
+        quantity !== undefined &&
+        (quantity === null || !Number.isInteger(quantity) || quantity <= 0),
+    ),
+  );
+
+  const updateProductDraft = (itemId: string, update: ProductImageDraft): void => {
+    setProductDrafts((current) => ({
+      ...current,
+      [itemId]: { ...current[itemId], ...update },
+    }));
+    setProductsSaved(false);
+    setProductSaveError(undefined);
+  };
+
+  const getProductQuantity = (
+    image: OrderDetail["productImages"][number],
+    type: OrderItemQuantityType,
+  ): number | null => {
+    const field = type === OrderItemQuantityType.Quote
+      ? "quoteQuantity" : "deliveredQuantity";
+    const draft = productDrafts[image.id]?.[field];
+    return draft !== undefined ? draft : parseQuantity(image[field]);
+  };
+
+  const saveProducts = async (): Promise<void> => {
+    if (savingProducts || productChanges.length === 0 || invalidProductChanges) return;
+    setSavingProducts(true);
+    setProductsSaved(false);
+    setProductSaveError(undefined);
+    try {
+      const items = productChanges.map(({ image, changes }) => ({
+        id: image.id,
+        ...(changes.productCode !== undefined ? { productCode: changes.productCode } : {}),
+        ...(changes.quoteQuantity !== undefined && changes.quoteQuantity !== null
+          ? { quoteQuantity: changes.quoteQuantity } : {}),
+        ...(changes.deliveredQuantity !== undefined && changes.deliveredQuantity !== null
+          ? { deliveredQuantity: changes.deliveredQuantity } : {}),
+      }));
+      const response = await updateOrderProducts(order.id, items);
+      const updates = new Map(response.items.map((item) => [item.id, item]));
+      onOrderChange((current) => current
+        ? {
+            ...current,
+            productImages: current.productImages.map((item) => {
+              const update = updates.get(item.id);
+              return update ? { ...item, ...update } : item;
+            }),
+          }
+        : current,
+      );
+      setProductDrafts({});
+      setProductsSaved(true);
+    } catch (saveError) {
+      setProductSaveError(
+        saveError instanceof Error ? saveError.message : "Failed to save product changes. Your edits are kept; try saving again.",
+      );
+    } finally {
+      setSavingProducts(false);
+    }
+  };
   const handleDetailsUpdated = (
     update: UpdateOrderDetailsResponse["order"],
   ) =>
@@ -266,20 +359,39 @@ function OrderContent({
               children: (
                 <>
                   <div style={{ marginBottom: 16 }}>
-                    <OrderProductImageUpload
-                      orderId={order.id}
-                      onUploaded={(image) =>
-                        onOrderChange((current) =>
-                          current
-                            ? {
-                                ...current,
-                                productImages: [...current.productImages, image],
-                              }
-                            : current,
-                        )
-                      }
-                    />
+                    <Space wrap>
+                      <OrderProductImageUpload
+                        orderId={order.id}
+                        onUploaded={(image) =>
+                          onOrderChange((current) =>
+                            current
+                              ? {
+                                  ...current,
+                                  productImages: [...current.productImages, image],
+                                }
+                              : current,
+                          )
+                        }
+                      />
+                      <Button
+                        type="primary"
+                        icon={<SaveOutlined />}
+                        loading={savingProducts}
+                        disabled={productChanges.length === 0 || invalidProductChanges}
+                        onClick={() => void saveProducts()}
+                      >
+                        Save product changes
+                      </Button>
+                      {productChanges.length > 0 ? <Text type="secondary">Unsaved changes</Text> : null}
+                    </Space>
                   </div>
+                  {invalidProductChanges ? (
+                    <Alert type="error" showIcon title="Enter positive whole numbers for all changed quantities, including the other quantity tab." style={{ marginBottom: 16 }} />
+                  ) : null}
+                  {productSaveError ? (
+                    <Alert type="error" showIcon title={productSaveError} style={{ marginBottom: 16 }} />
+                  ) : null}
+                  {productsSaved ? <Text type="success">Product changes saved.</Text> : null}
                   {order.productImages.length > 0 ? (
                     <>
                       <div className={styles.quantityToolbar}>
@@ -297,6 +409,7 @@ function OrderContent({
                             },
                           ]}
                           value={quantityType}
+                          disabled={savingProducts}
                           onChange={setQuantityType}
                         />
                       </div>
@@ -309,55 +422,21 @@ function OrderContent({
                           details: (
                             <div className={styles.itemEditors}>
                               <OrderItemProductCode
-                                itemId={image.id}
-                                orderId={order.id}
-                                productCode={image.productCode}
-                                onUpdated={(productCode) =>
-                                  onOrderChange((current) =>
-                                    current
-                                      ? {
-                                          ...current,
-                                          productImages: current.productImages.map(
-                                            (item) =>
-                                              item.id === image.id
-                                                ? { ...item, productCode }
-                                                : item,
-                                          ),
-                                        }
-                                      : current,
-                                  )
-                                }
+                                productCode={productDrafts[image.id]?.productCode ?? image.productCode}
+                                disabled={savingProducts}
+                                onChange={(productCode) => updateProductDraft(image.id, { productCode })}
                               />
                               <OrderItemQuantity
-                                deliveredQuantity={image.deliveredQuantity}
-                                key={`${image.id}-${quantityType}`}
-                                itemId={image.id}
-                                orderId={order.id}
+                                deliveredQuantity={String(getProductQuantity(image, OrderItemQuantityType.Delivered) ?? "")}
+                                quoteQuantity={String(getProductQuantity(image, OrderItemQuantityType.Quote) ?? "")}
+                                quantity={getProductQuantity(image, quantityType)}
                                 quantityType={quantityType}
-                                quoteQuantity={image.quoteQuantity}
-                                onUpdated={(updatedType, quantity) =>
-                                  onOrderChange((current) =>
-                                    current
-                                      ? {
-                                          ...current,
-                                          productImages: current.productImages.map(
-                                            (item) =>
-                                              item.id === image.id
-                                                ? {
-                                                    ...item,
-                                                    [
-                                                      updatedType ===
-                                                      OrderItemQuantityType.Quote
-                                                        ? "quoteQuantity"
-                                                        : "deliveredQuantity"
-                                                    ]: quantity,
-                                                  }
-                                                : item,
-                                          ),
-                                        }
-                                      : current,
-                                  )
-                                }
+                                disabled={savingProducts}
+                                onChange={(quantity) => updateProductDraft(image.id,
+                                  quantityType === OrderItemQuantityType.Quote
+                                    ? { quoteQuantity: quantity }
+                                    : { deliveredQuantity: quantity },
+                                )}
                               />
                             </div>
                           ),
@@ -379,177 +458,66 @@ function OrderContent({
 }
 
 function OrderItemProductCode({
-  itemId,
-  orderId,
-  productCode: savedProductCode,
-  onUpdated,
+  productCode,
+  disabled,
+  onChange,
 }: {
-  itemId: string;
-  orderId: string;
   productCode: string;
-  onUpdated: (productCode: string) => void;
+  disabled: boolean;
+  onChange: (productCode: string) => void;
 }) {
-  const [productCode, setProductCode] = useState(savedProductCode);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string>();
-  const normalizedProductCode = productCode.trim();
-  const canSave = normalizedProductCode !== savedProductCode;
-
-  const saveProductCode = async (): Promise<void> => {
-    if (!canSave) return;
-
-    setSaving(true);
-    setSaved(false);
-    setError(undefined);
-    try {
-      const response = await updateOrderItemProductCode(
-        orderId,
-        itemId,
-        normalizedProductCode,
-      );
-      setProductCode(response.item.productCode);
-      onUpdated(response.item.productCode);
-      setSaved(true);
-    } catch (saveError) {
-      setError(
-        saveError instanceof Error
-          ? saveError.message
-          : "Failed to update the product code.",
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
     <div className={styles.productCodeEditor}>
       <Text className={styles.quantityLabel} type="secondary">
         Product code
       </Text>
-      <Space.Compact className={styles.quantityControls}>
-        <Input
-          aria-label="Product code"
-          maxLength={100}
-          placeholder="Product code"
-          value={productCode}
-          onChange={(event) => {
-            setProductCode(event.target.value);
-            setSaved(false);
-          }}
-          onPressEnter={() => void saveProductCode()}
-        />
-        <Tooltip title="Save product code">
-          <Button
-            aria-label="Save product code"
-            disabled={!canSave}
-            icon={<SaveOutlined />}
-            loading={saving}
-            type="primary"
-            onClick={() => void saveProductCode()}
-          />
-        </Tooltip>
-      </Space.Compact>
-      {saved ? <Text type="success">Saved</Text> : null}
-      {error ? <Text type="danger">{error}</Text> : null}
+      <Input
+        aria-label="Product code"
+        maxLength={100}
+        placeholder="Product code"
+        value={productCode}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+      />
     </div>
   );
 }
 
 function OrderItemQuantity({
   deliveredQuantity,
-  itemId,
-  orderId,
-  quantityType,
   quoteQuantity,
-  onUpdated,
+  quantity,
+  quantityType,
+  disabled,
+  onChange,
 }: {
   deliveredQuantity: string;
-  itemId: string;
-  orderId: string;
-  quantityType: OrderItemQuantityType;
   quoteQuantity: string;
-  onUpdated: (quantityType: OrderItemQuantityType, quantity: string) => void;
+  quantity: number | null;
+  quantityType: OrderItemQuantityType;
+  disabled: boolean;
+  onChange: (quantity: number | null) => void;
 }) {
-  const quantityLabel =
-    quantityType === OrderItemQuantityType.Quote
-      ? "Quote quantity"
-      : "Delivered quantity";
-  const initialQuantity =
-    quantityType === OrderItemQuantityType.Quote
-      ? quoteQuantity
-      : deliveredQuantity;
-  const savedQuantity = parseQuantity(initialQuantity);
-  const comparison = getItemQuantityComparison({
-    deliveredQuantity,
-    quoteQuantity,
-  });
-  const [quantity, setQuantity] = useState<number | null>(savedQuantity);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string>();
-  const canSave =
-    quantity !== null &&
-    Number.isInteger(quantity) &&
-    quantity > 0 &&
-    quantity !== savedQuantity;
-
-  const saveQuantity = async (): Promise<void> => {
-    if (!canSave || quantity === null) return;
-
-    setSaving(true);
-    setSaved(false);
-    setError(undefined);
-    try {
-      const response = await updateOrderItemQuantity(
-        orderId,
-        itemId,
-        quantityType,
-        quantity,
-      );
-      onUpdated(response.item.quantityType, response.item.quantity);
-      setSaved(true);
-    } catch (saveError) {
-      setError(
-        saveError instanceof Error
-          ? saveError.message
-          : "Failed to update the product quantity.",
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
+  const quantityLabel = quantityType === OrderItemQuantityType.Quote
+    ? "Quote quantity" : "Delivered quantity";
+  const comparison = getItemQuantityComparison({ deliveredQuantity, quoteQuantity });
 
   return (
     <div className={styles.quantityEditor}>
       <Text className={styles.quantityLabel} type="secondary">
         {quantityLabel}
       </Text>
-      <Space.Compact className={styles.quantityControls}>
-        <InputNumber<number>
-          aria-label={quantityLabel}
-          controls={false}
-          min={1}
-          placeholder="Quantity"
-          precision={0}
-          value={quantity}
-          onChange={(value) => {
-            setQuantity(value);
-            setSaved(false);
-          }}
-          onPressEnter={() => void saveQuantity()}
-        />
-        <Tooltip title={`Save ${quantityLabel.toLowerCase()}`}>
-          <Button
-            aria-label={`Save ${quantityLabel.toLowerCase()}`}
-            disabled={!canSave}
-            icon={<SaveOutlined />}
-            loading={saving}
-            type="primary"
-            onClick={() => void saveQuantity()}
-          />
-        </Tooltip>
-      </Space.Compact>
+      <InputNumber<number>
+        aria-label={quantityLabel}
+        className={styles.quantityControls}
+        controls={false}
+        min={1}
+        placeholder="Quantity"
+        precision={0}
+        value={quantity}
+        disabled={disabled}
+        onChange={onChange}
+      />
       {comparison ? (
         <div className={styles.itemQuantityComparison}>
           <Text strong>
@@ -561,8 +529,6 @@ function OrderItemQuantity({
           </Tag>
         </div>
       ) : null}
-      {saved ? <Text type="success">Saved</Text> : null}
-      {error ? <Text type="danger">{error}</Text> : null}
     </div>
   );
 }
