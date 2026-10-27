@@ -65,7 +65,6 @@ export async function updateOrderProducts({
     ranges.push({ range: `H${rowNumber}`, values: [[updatedAt]] });
     updatedItems.push(updated);
   }
-  console.log(JSON.stringify(ranges));
 
   await googleSheetsService.orderItems.batchUpdateRows(ranges);
   return { outcome: "updated", items: updatedItems };
