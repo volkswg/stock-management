@@ -275,6 +275,14 @@
   gap: 14px;
 }
 
+.nativeImagePreviewEditable .nativeImagePreview {
+  min-height: 160px;
+}
+
+.nativeImagePreviewEditable .nativeImage {
+  max-height: 50vh;
+}
+
 .nativeImageControls {
   display: grid;
   grid-template-columns: 120px minmax(36px, auto) 120px;

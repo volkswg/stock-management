@@ -32,6 +32,13 @@ export function OrderImageGallery({
     }
 
     function handleKeyDown(event: KeyboardEvent) {
+      if (
+        event.defaultPrevented ||
+        (event.target instanceof HTMLElement &&
+          event.target.closest("input, textarea, select, [contenteditable], [role='spinbutton'], [role='combobox']"))
+      ) {
+        return;
+      }
       if (event.key === "ArrowLeft") {
         setActiveIndex((current) =>
           current === null ? current : Math.max(0, current - 1),
@@ -78,7 +85,9 @@ export function OrderImageGallery({
         centered
         className={styles.nativeImageModal}
         destroyOnHidden
-        footer={null}
+        footer={activeImage?.details ? (
+          <Button onClick={() => setActiveIndex(null)}>Done</Button>
+        ) : null}
         open={Boolean(activeImage)}
         title={
           activeImage
@@ -89,7 +98,7 @@ export function OrderImageGallery({
         onCancel={() => setActiveIndex(null)}
       >
         {activeImage ? (
-          <div className={styles.nativeImagePreviewLayout}>
+          <div className={`${styles.nativeImagePreviewLayout} ${activeImage.details ? styles.nativeImagePreviewEditable : ""}`}>
             <div className={styles.nativeImagePreview}>
               <img
                 alt={activeImage.title}
@@ -97,6 +106,14 @@ export function OrderImageGallery({
                 src={getGoogleDrivePreviewUrl(activeImage.imageUrl)}
               />
             </div>
+            {activeImage.details ? (
+              <div>
+                {activeImage.details}
+                <Text type="secondary">
+                  Edits stay as drafts. Use Save in Product images to save them.
+                </Text>
+              </div>
+            ) : null}
             {images.length > 1 ? (
               <div
                 aria-label="Product image navigation"
