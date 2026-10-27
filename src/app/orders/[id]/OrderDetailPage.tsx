@@ -214,6 +214,25 @@ function OrderContent({
     return draft !== undefined ? draft : parseQuantity(image[field]);
   };
 
+  const quoteQuantities = order.productImages.map((image) =>
+    getProductQuantity(image, OrderItemQuantityType.Quote),
+  );
+  const totalQuoteQuantity = quoteQuantities.length > 0 &&
+    quoteQuantities.every((quantity) =>
+      quantity !== null && Number.isInteger(quantity) && quantity > 0,
+    )
+      ? quoteQuantities.reduce<number>((total, quantity) => total + (quantity ?? 0), 0)
+      : null;
+  const averageQuotePrice = order.totalPrice !== null &&
+    Number.isFinite(order.totalPrice) &&
+    totalQuoteQuantity !== null &&
+    Number.isFinite(totalQuoteQuantity) && totalQuoteQuantity > 0
+      ? order.totalPrice / totalQuoteQuantity
+      : null;
+  const quotePriceIsDraft = productChanges.some(
+    ({ changes }) => changes.quoteQuantity !== undefined,
+  );
+
   const saveProducts = async (): Promise<void> => {
     if (savingProducts || productChanges.length === 0 || invalidProductChanges) return;
     setSavingProducts(true);
@@ -308,6 +327,19 @@ function OrderContent({
                   order={order}
                   onUpdated={handleDetailsUpdated}
                 />
+              ),
+            },
+            {
+              key: "averageQuotePrice",
+              label: "Avg quote price",
+              span: 2,
+              children: averageQuotePrice === null ? (
+                <Text type="secondary">—</Text>
+              ) : (
+                <Space wrap>
+                  <Text>{THB_FORMATTER.format(averageQuotePrice)} / piece</Text>
+                  {quotePriceIsDraft ? <Tag color="warning">Unsaved</Tag> : null}
+                </Space>
               ),
             },
             {
