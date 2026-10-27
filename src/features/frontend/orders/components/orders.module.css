@@ -212,6 +212,16 @@
   cursor: pointer;
 }
 
+.productImageMedia {
+  position: relative;
+}
+
+.productImageActions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
 .productImageNumber {
   position: absolute;
   top: 8px;

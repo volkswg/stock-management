@@ -76,7 +76,7 @@ export function OrderProductImageUpload({
         okButtonProps={{ disabled: files.length === 0 }}
         cancelButtonProps={{ disabled: uploading }}
         closable={!uploading}
-        maskClosable={!uploading}
+        mask={{ closable: !uploading }}
         keyboard={!uploading}
         onOk={() => void uploadImages()}
         onCancel={() => {

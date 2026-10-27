@@ -12,6 +12,7 @@ export type OrderGalleryImage = {
   sequenceNumber?: number;
   description?: string;
   details?: ReactNode;
+  actions?: ReactNode;
 };
 
 export function OrderImageCard({
@@ -29,25 +30,28 @@ export function OrderImageCard({
 }) {
   const content = (
     <div className={styles.productImage}>
-      <button
-        aria-label={`Preview ${image.title.toLowerCase()}`}
-        className={styles.productImageTrigger}
-        type="button"
-        onClick={onPreview}
-      >
-        <img
-          alt={image.title}
-          className={styles.productImageThumbnail}
-          height={thumbnailSize}
-          src={getGoogleDriveThumbnailUrl(image.imageUrl)}
-          width={thumbnailSize}
-        />
-        {image.sequenceNumber !== undefined ? (
-          <span className={styles.productImageNumber}>
-            {image.sequenceNumber}
-          </span>
-        ) : null}
-      </button>
+      <div className={styles.productImageMedia}>
+        <button
+          aria-label={`Preview ${image.title.toLowerCase()}`}
+          className={styles.productImageTrigger}
+          type="button"
+          onClick={onPreview}
+        >
+          <img
+            alt={image.title}
+            className={styles.productImageThumbnail}
+            height={thumbnailSize}
+            src={getGoogleDriveThumbnailUrl(image.imageUrl)}
+            width={thumbnailSize}
+          />
+          {image.sequenceNumber !== undefined ? (
+            <span className={styles.productImageNumber}>
+              {image.sequenceNumber}
+            </span>
+          ) : null}
+        </button>
+        {image.actions ? <div className={styles.productImageActions}>{image.actions}</div> : null}
+      </div>
       {showLabels && image.sequenceNumber === undefined ? (
         <Typography.Text>{image.title}</Typography.Text>
       ) : null}

@@ -161,6 +161,12 @@
   font-size: 12px;
 }
 
+.productDirtyIndicator {
+  display: inline-block;
+  width: 6px;
+  margin-inline-start: 6px;
+}
+
 .quantityControls {
   width: 100%;
 }

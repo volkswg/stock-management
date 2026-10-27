@@ -7,6 +7,7 @@ import type {
   OrderProductImage,
   OrderProductUpdate,
   UpdatedOrderProduct,
+  ReplacedOrderProductImage,
   OrderStatus,
 } from "@/services/orders";
 
@@ -65,6 +66,10 @@ export type UpdateOrderItemProductCodeResponse = {
 
 export type UpdateOrderProductsResponse = {
   items: UpdatedOrderProduct[];
+};
+
+export type ReplaceOrderProductImageResponse = {
+  item: ReplacedOrderProductImage;
 };
 
 export type OrderImageType = "bill" | "product";
@@ -202,6 +207,27 @@ export async function updateOrderDetails(
   }
 
   return body;
+}
+
+export async function replaceOrderProductImage(
+  orderId: string,
+  itemId: string,
+  image: File,
+): Promise<ReplaceOrderProductImageResponse> {
+  const formData = new FormData();
+  formData.set("image", image);
+  const response = await fetch(
+    `/api/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}/image`,
+    { method: "PATCH", headers: { Accept: "application/json" }, body: formData },
+  );
+  const body: unknown = await response.json();
+  if (!response.ok) throw new Error(getErrorMessage(body));
+  if (!isRecord(body) || !isRecord(body.item) ||
+    typeof body.item.id !== "string" || typeof body.item.imageUrl !== "string" ||
+    typeof body.item.updatedAt !== "string") {
+    throw new Error("The image replacement API returned an invalid response.");
+  }
+  return { item: { id: body.item.id, imageUrl: body.item.imageUrl, updatedAt: body.item.updatedAt } };
 }
 
 export async function updateOrderProducts(

@@ -24,6 +24,10 @@ export { isOrderImageUploadState } from "./isOrderImageUploadState";
 export { orderExists } from "./orderExists";
 export { OrderItemQuantityType } from "./OrderItemQuantityType";
 export {
+  replaceOrderProductImage,
+  type ReplacedOrderProductImage,
+} from "./replaceOrderProductImage";
+export {
   updateOrderProducts,
   type OrderProductUpdate,
   type UpdatedOrderProduct,

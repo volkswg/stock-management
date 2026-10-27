@@ -12,6 +12,7 @@ import {
 } from "@ant-design/icons";
 import {
   Alert,
+  Badge,
   Button,
   Card,
   Collapse,
@@ -47,11 +48,13 @@ import {
 import {
   getOrder,
   updateOrderProducts,
+  replaceOrderProductImage,
   updateOrderDetails,
   type UpdateOrderDetailsResponse,
 } from "../api";
 import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
 import { OrderProductImageUpload } from "@/features/frontend/orders/components/OrderProductImageUpload";
+import { OrderProductImageActions } from "@/features/frontend/orders/components/OrderProductImageActions";
 import styles from "./orderDetail.module.css";
 
 const { Text, Title } = Typography;
@@ -183,6 +186,9 @@ function OrderContent({
         quantity !== undefined &&
         (quantity === null || !Number.isInteger(quantity) || quantity <= 0),
     ),
+  );
+  const dirtyProductFields = new Map(
+    productChanges.map(({ image, changes }) => [image.id, changes]),
   );
 
   const updateProductDraft = (itemId: string, update: ProductImageDraft): void => {
@@ -382,7 +388,13 @@ function OrderContent({
                       >
                         Save product changes
                       </Button>
-                      {productChanges.length > 0 ? <Text type="secondary">Unsaved changes</Text> : null}
+                      <Text
+                        type="secondary"
+                        aria-hidden={productChanges.length === 0}
+                        style={{ visibility: productChanges.length > 0 ? "visible" : "hidden" }}
+                      >
+                        Unsaved changes
+                      </Text>
                     </Space>
                   </div>
                   {invalidProductChanges ? (
@@ -391,7 +403,9 @@ function OrderContent({
                   {productSaveError ? (
                     <Alert type="error" showIcon title={productSaveError} style={{ marginBottom: 16 }} />
                   ) : null}
-                  {productsSaved ? <Text type="success">Product changes saved.</Text> : null}
+                  <div role="status" aria-live="polite" style={{ minHeight: 22 }}>
+                    {productsSaved ? <Text type="success">Product changes saved.</Text> : null}
+                  </div>
                   {order.productImages.length > 0 ? (
                     <>
                       <div className={styles.quantityToolbar}>
@@ -400,11 +414,25 @@ function OrderContent({
                           className={styles.quantityMode}
                           options={[
                             {
-                              label: "Quote",
+                              label: (
+                                <span>
+                                  Quote
+                                  <ProductDirtyIndicator dirty={productChanges.some(
+                                    ({ changes }) => changes.quoteQuantity !== undefined,
+                                  )} />
+                                </span>
+                              ),
                               value: OrderItemQuantityType.Quote,
                             },
                             {
-                              label: "Delivered",
+                              label: (
+                                <span>
+                                  Delivered
+                                  <ProductDirtyIndicator dirty={productChanges.some(
+                                    ({ changes }) => changes.deliveredQuantity !== undefined,
+                                  )} />
+                                </span>
+                              ),
                               value: OrderItemQuantityType.Delivered,
                             },
                           ]}
@@ -421,10 +449,33 @@ function OrderContent({
                           imageUrl: image.imageUrl,
                           title: image.productCode || `Product ${index + 1}`,
                           sequenceNumber: index + 1,
+                          actions: (
+                            <OrderProductImageActions
+                              productNumber={index + 1}
+                              disabled={savingProducts}
+                              onReplace={async (file) => {
+                                const response = await replaceOrderProductImage(
+                                  order.id, image.id, file,
+                                );
+                                onOrderChange((current) => current
+                                  ? {
+                                      ...current,
+                                      productImages: current.productImages.map((item) =>
+                                        item.id === image.id
+                                          ? { ...item, imageUrl: response.item.imageUrl }
+                                          : item,
+                                      ),
+                                    }
+                                  : current,
+                                );
+                              }}
+                            />
+                          ),
                           details: (
                             <div className={styles.itemEditors}>
                               <OrderItemProductCode
                                 productCode={productDrafts[image.id]?.productCode ?? image.productCode}
+                                dirty={dirtyProductFields.get(image.id)?.productCode !== undefined}
                                 disabled={savingProducts}
                                 onChange={(productCode) => updateProductDraft(image.id, { productCode })}
                               />
@@ -433,6 +484,10 @@ function OrderContent({
                                 quoteQuantity={String(getProductQuantity(image, OrderItemQuantityType.Quote) ?? "")}
                                 quantity={getProductQuantity(image, quantityType)}
                                 quantityType={quantityType}
+                                dirty={dirtyProductFields.get(image.id)?.[
+                                  quantityType === OrderItemQuantityType.Quote
+                                    ? "quoteQuantity" : "deliveredQuantity"
+                                ] !== undefined}
                                 disabled={savingProducts}
                                 onChange={(quantity) => updateProductDraft(image.id,
                                   quantityType === OrderItemQuantityType.Quote
@@ -459,12 +514,26 @@ function OrderContent({
   );
 }
 
+function ProductDirtyIndicator({ dirty }: { dirty: boolean }) {
+  return (
+    <span
+      className={styles.productDirtyIndicator}
+      aria-hidden={!dirty}
+      style={{ visibility: dirty ? "visible" : "hidden" }}
+    >
+      <Badge status="warning" role="img" aria-label="Unsaved changes" title="Unsaved changes" />
+    </span>
+  );
+}
+
 function OrderItemProductCode({
   productCode,
+  dirty,
   disabled,
   onChange,
 }: {
   productCode: string;
+  dirty: boolean;
   disabled: boolean;
   onChange: (productCode: string) => void;
 }) {
@@ -472,12 +541,14 @@ function OrderItemProductCode({
     <div className={styles.productCodeEditor}>
       <Text className={styles.quantityLabel} type="secondary">
         Product code
+        <ProductDirtyIndicator dirty={dirty} />
       </Text>
       <Input
         aria-label="Product code"
         maxLength={100}
         placeholder="Product code"
         value={productCode}
+        status={dirty ? "warning" : undefined}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -490,6 +561,7 @@ function OrderItemQuantity({
   quoteQuantity,
   quantity,
   quantityType,
+  dirty,
   disabled,
   onChange,
 }: {
@@ -497,6 +569,7 @@ function OrderItemQuantity({
   quoteQuantity: string;
   quantity: number | null;
   quantityType: OrderItemQuantityType;
+  dirty: boolean;
   disabled: boolean;
   onChange: (quantity: number | null) => void;
 }) {
@@ -508,6 +581,7 @@ function OrderItemQuantity({
     <div className={styles.quantityEditor}>
       <Text className={styles.quantityLabel} type="secondary">
         {quantityLabel}
+        <ProductDirtyIndicator dirty={dirty} />
       </Text>
       <InputNumber<number>
         aria-label={quantityLabel}
@@ -517,6 +591,7 @@ function OrderItemQuantity({
         placeholder="Quantity"
         precision={0}
         value={quantity}
+        status={dirty ? "warning" : undefined}
         disabled={disabled}
         onChange={onChange}
       />
