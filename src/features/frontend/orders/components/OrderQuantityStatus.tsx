@@ -21,8 +21,8 @@ export function OrderQuantityStatus({
   const percentage = Math.round((deliveredQuantity / quoteQuantity) * 100);
   const appearance = {
     matched: { label: "Matched", color: "#16a34a", tagColor: "success" },
-    partial: { label: "Partial", color: "#f59e0b", tagColor: "warning" },
-    exceeds: { label: "Exceeds", color: "#ef2222", tagColor: "error" },
+    partial: { label: "Short", color: "#ef2222", tagColor: "error" },
+    exceeds: { label: "Extra", color: "#1677ff", tagColor: "blue" },
   }[state];
 
   return (
