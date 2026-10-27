@@ -356,47 +356,54 @@ function OrderContent({
             },
             {
               key: "products",
+              className: styles.productImageSection,
               label: (
                 <ImageSectionLabel
                   count={order.productImages.length}
                   title="Product images"
                 />
               ),
+              extra: (
+                <div
+                  className={styles.imageHeaderActions}
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  <Space wrap>
+                    <Text
+                      type="secondary"
+                      aria-hidden={productChanges.length === 0}
+                      style={{ visibility: productChanges.length > 0 ? "visible" : "hidden" }}
+                    >
+                      Unsaved
+                    </Text>
+                    <OrderProductImageUpload
+                      orderId={order.id}
+                      onUploaded={(image) =>
+                        onOrderChange((current) =>
+                          current
+                            ? {
+                                ...current,
+                                productImages: [...current.productImages, image],
+                              }
+                            : current,
+                        )
+                      }
+                    />
+                    <Button
+                      type="primary"
+                      icon={<SaveOutlined />}
+                      loading={savingProducts}
+                      disabled={productChanges.length === 0 || invalidProductChanges}
+                      onClick={() => void saveProducts()}
+                    >
+                      Save
+                    </Button>
+                  </Space>
+                </div>
+              ),
               children: (
                 <>
-                  <div style={{ marginBottom: 16 }}>
-                    <Space wrap>
-                      <OrderProductImageUpload
-                        orderId={order.id}
-                        onUploaded={(image) =>
-                          onOrderChange((current) =>
-                            current
-                              ? {
-                                  ...current,
-                                  productImages: [...current.productImages, image],
-                                }
-                              : current,
-                          )
-                        }
-                      />
-                      <Button
-                        type="primary"
-                        icon={<SaveOutlined />}
-                        loading={savingProducts}
-                        disabled={productChanges.length === 0 || invalidProductChanges}
-                        onClick={() => void saveProducts()}
-                      >
-                        Save product changes
-                      </Button>
-                      <Text
-                        type="secondary"
-                        aria-hidden={productChanges.length === 0}
-                        style={{ visibility: productChanges.length > 0 ? "visible" : "hidden" }}
-                      >
-                        Unsaved changes
-                      </Text>
-                    </Space>
-                  </div>
                   {invalidProductChanges ? (
                     <Alert type="error" showIcon title="Enter positive whole numbers for all changed quantities, including the other quantity tab." style={{ marginBottom: 16 }} />
                   ) : null}

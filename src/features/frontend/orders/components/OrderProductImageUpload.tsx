@@ -66,7 +66,7 @@ export function OrderProductImageUpload({
           setOpen(true);
         }}
       >
-        Add product images
+        Add images
       </Button>
       <Modal
         title="Add product images"

@@ -3,6 +3,11 @@
   background: #f3f5f4;
 }
 
+/* Keep the viewport as the sticky header's scroll container on this page. */
+:global(body):has(.appShell) {
+  overflow-x: clip;
+}
+
 .content {
   width: 100%;
   max-width: 1180px;
@@ -124,7 +129,7 @@
 
 .imageCard {
   margin-top: 20px;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .quantityToolbar {
@@ -207,10 +212,34 @@
   border-bottom: 0;
 }
 
-.imageCollapse :global(.ant-collapse-header) {
+.imageCollapse:global(.ant-collapse) > :global(.ant-collapse-item) > :global(.ant-collapse-header) {
   min-height: 58px;
+  flex-wrap: wrap;
+  row-gap: 10px;
   align-items: center !important;
   padding: 12px 18px !important;
+}
+
+.imageCollapse:global(.ant-collapse) > .productImageSection > :global(.ant-collapse-header) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+}
+
+.imageCollapse :global(.ant-collapse-extra) {
+  max-width: 100%;
+  margin-inline-start: auto;
+}
+
+.imageHeaderActions {
+  display: flex;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.imageHeaderActions > :global(.ant-space) {
+  justify-content: flex-end;
 }
 
 .imageCollapse :global(.ant-collapse-content-box) {
