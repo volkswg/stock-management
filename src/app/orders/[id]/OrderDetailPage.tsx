@@ -159,7 +159,12 @@ function OrderContent({
   >({});
   const [savingProducts, setSavingProducts] = useState(false);
   const [productSaveError, setProductSaveError] = useState<string>();
-  const [productsSaved, setProductsSaved] = useState(false);
+  const [productMessageApi, productMessageContext] = message.useMessage({
+    top: 24,
+    maxCount: 1,
+    duration: 3,
+    pauseOnHover: false,
+  });
   const productChanges = order.productImages.flatMap((image) => {
     const draft = productDrafts[image.id];
     if (!draft) return [];
@@ -196,7 +201,6 @@ function OrderContent({
       ...current,
       [itemId]: { ...current[itemId], ...update },
     }));
-    setProductsSaved(false);
     setProductSaveError(undefined);
   };
 
@@ -213,7 +217,6 @@ function OrderContent({
   const saveProducts = async (): Promise<void> => {
     if (savingProducts || productChanges.length === 0 || invalidProductChanges) return;
     setSavingProducts(true);
-    setProductsSaved(false);
     setProductSaveError(undefined);
     try {
       const items = productChanges.map(({ image, changes }) => ({
@@ -237,7 +240,20 @@ function OrderContent({
         : current,
       );
       setProductDrafts({});
-      setProductsSaved(true);
+      const key = "product-save-success";
+      const dismiss = () => productMessageApi.destroy(key);
+      productMessageApi.success({
+        key,
+        duration: 3,
+        pauseOnHover: false,
+        content: (
+          <Button type="text" size="small" onClick={dismiss}>
+            Product changes saved.
+          </Button>
+        ),
+        onClick: dismiss,
+        style: { cursor: "pointer" },
+      });
     } catch (saveError) {
       setProductSaveError(
         saveError instanceof Error ? saveError.message : "Failed to save product changes. Your edits are kept; try saving again.",
@@ -263,6 +279,7 @@ function OrderContent({
 
   return (
     <>
+      {productMessageContext}
       <header className={styles.pageHeader}>
         <div>
           <Text className={styles.eyebrow}>Order management</Text>
@@ -410,9 +427,6 @@ function OrderContent({
                   {productSaveError ? (
                     <Alert type="error" showIcon title={productSaveError} style={{ marginBottom: 16 }} />
                   ) : null}
-                  <div role="status" aria-live="polite" style={{ minHeight: 22 }}>
-                    {productsSaved ? <Text type="success">Product changes saved.</Text> : null}
-                  </div>
                   {order.productImages.length > 0 ? (
                     <>
                       <div className={styles.quantityToolbar}>
