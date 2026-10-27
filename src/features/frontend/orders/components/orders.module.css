@@ -174,7 +174,35 @@
   gap: 5px;
 }
 
+.productImageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(224px, 100%), 1fr));
+  grid-auto-rows: 1fr;
+}
+
+.productImageCard {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.productImageCard .productImage {
+  gap: 12px;
+}
+
+.productImageCard .productImageTrigger,
+.productImageCard .productImage > div {
+  width: 100%;
+}
+
+.productImageCard .productImageThumbnail {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
 .productImageTrigger {
+  position: relative;
   display: block;
   padding: 0;
   overflow: hidden;
@@ -182,6 +210,26 @@
   border: 0;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.productImageNumber {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  color: #000;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .productImageTrigger:focus-visible {

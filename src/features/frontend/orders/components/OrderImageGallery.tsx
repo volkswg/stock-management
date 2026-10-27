@@ -3,29 +3,26 @@
 
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button, Modal, Typography } from "antd";
-import { type ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { OrderImageCard, type OrderGalleryImage } from "./OrderImageCard";
 import styles from "./orders.module.css";
 
 const { Text } = Typography;
 
-export type OrderGalleryImage = {
-  id: string;
-  imageUrl: string;
-  title: string;
-  description?: string;
-  details?: ReactNode;
-};
+export type { OrderGalleryImage } from "./OrderImageCard";
 
 export function OrderImageGallery({
   ariaLabel,
   images,
   showLabels = true,
   thumbnailSize = 96,
+  variant = "plain",
 }: {
   ariaLabel: string;
   images: OrderGalleryImage[];
   showLabels?: boolean;
   thumbnailSize?: number;
+  variant?: "plain" | "card";
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -62,15 +59,16 @@ export function OrderImageGallery({
       <section
         className={`${styles.productImages} ${
           showLabels ? "" : styles.productImagesCompact
-        }`}
+        } ${variant === "card" ? styles.productImageGrid : ""}`}
         aria-label={ariaLabel}
       >
         {images.map((image, index) => (
-          <OrderImagePreview
+          <OrderImageCard
             image={image}
             key={image.id}
             showLabels={showLabels}
             thumbnailSize={thumbnailSize}
+            variant={variant}
             onPreview={() => setActiveIndex(index)}
           />
         ))}
@@ -145,59 +143,12 @@ export function OrderImageGallery({
   );
 }
 
-function OrderImagePreview({
-  image,
-  onPreview,
-  showLabels,
-  thumbnailSize,
-}: {
-  image: OrderGalleryImage;
-  onPreview: () => void;
-  showLabels: boolean;
-  thumbnailSize: number;
-}) {
-  return (
-    <div className={styles.productImage}>
-      <button
-        aria-label={`Preview ${image.title.toLowerCase()}`}
-        className={styles.productImageTrigger}
-        type="button"
-        onClick={onPreview}
-      >
-        <img
-          alt={image.title}
-          className={styles.productImageThumbnail}
-          height={thumbnailSize}
-          src={getGoogleDriveThumbnailUrl(image.imageUrl)}
-          width={thumbnailSize}
-        />
-      </button>
-      {showLabels ? <Text>{image.title}</Text> : null}
-      {showLabels && image.description ? (
-        <Text type="secondary">{image.description}</Text>
-      ) : null}
-      {showLabels && image.details ? image.details : null}
-    </div>
-  );
-}
-
 function getGoogleDrivePreviewUrl(imageUrl: string): string {
   const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
   if (fileIdMatch?.[1]) {
     return `https://lh3.googleusercontent.com/d/${encodeURIComponent(
       fileIdMatch[1],
     )}?authuser=0`;
-  }
-
-  return imageUrl;
-}
-
-function getGoogleDriveThumbnailUrl(imageUrl: string, size = "w1600"): string {
-  const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
-  if (fileIdMatch?.[1]) {
-    return `https://drive.google.com/thumbnail?id=${encodeURIComponent(
-      fileIdMatch[1],
-    )}&sz=${size}`;
   }
 
   return imageUrl;

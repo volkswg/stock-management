@@ -415,10 +415,12 @@ function OrderContent({
                       </div>
                       <OrderImageGallery
                         ariaLabel="Product images"
+                        variant="card"
                         images={order.productImages.map((image, index) => ({
                           id: image.id,
                           imageUrl: image.imageUrl,
                           title: image.productCode || `Product ${index + 1}`,
+                          sequenceNumber: index + 1,
                           details: (
                             <div className={styles.itemEditors}>
                               <OrderItemProductCode
@@ -499,7 +501,7 @@ function OrderItemQuantity({
   onChange: (quantity: number | null) => void;
 }) {
   const quantityLabel = quantityType === OrderItemQuantityType.Quote
-    ? "Quote quantity" : "Delivered quantity";
+    ? "Quote" : "Deliver";
   const comparison = getItemQuantityComparison({ deliveredQuantity, quoteQuantity });
 
   return (
