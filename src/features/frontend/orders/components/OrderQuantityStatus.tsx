@@ -26,7 +26,7 @@ export function OrderQuantityStatus({
   }[state];
 
   return (
-    <div className={styles.panel} data-state={state} role="status">
+    <div className={styles.panel} data-state={state} role="status" title={`${percentage}% delivered`}>
       <strong className={styles.counts} title="Delivered / Quote">
         {deliveredQuantity} / {quoteQuantity}
       </strong>
@@ -39,7 +39,6 @@ export function OrderQuantityStatus({
         railColor="rgba(0, 0, 0, 0.06)"
         size="small"
         strokeWidth={4}
-        title={`${percentage}% delivered`}
         aria-label={`${appearance.label}: delivered ${deliveredQuantity} of ${quoteQuantity} quoted pieces (${percentage}%)`}
       />
     </div>
