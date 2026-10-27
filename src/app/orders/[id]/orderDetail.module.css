@@ -63,10 +63,41 @@
   gap: 8px;
 }
 
-.remarkValue {
+.orderTimestamps {
+  margin-top: 24px;
+}
+
+.orderTimestamp {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.timestampIcon {
+  flex: 0 0 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f7f8f8;
+  color: #667085;
+  font-size: 24px;
+}
+
+.timestampContent {
   min-width: 0;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
+  display: grid;
+  gap: 4px;
+}
+
+.updatedTimestamp {
+  border-inline-start: 1px solid #f0f0f0;
+}
+
+.orderRemarkSection {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .priceControls {
@@ -83,14 +114,11 @@
   gap: 8px;
 }
 
-.remarkEditor :global(.ant-input-textarea-show-count) {
-  margin-bottom: 16px;
-}
-
 .remarkActions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 16px;
 }
 
 .informationCard :global(.ant-card-head-title),
@@ -191,18 +219,6 @@
   min-width: 0;
 }
 
-.itemQuantityComparison {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.itemQuantityComparison > :global(.ant-typography),
-.itemQuantityComparison > :global(.ant-tag) {
-  margin: 0;
-  font-size: 11px;
-}
 
 .imageCollapse :global(.ant-collapse-item) {
   border-bottom: 1px solid #e1e5e2;
@@ -292,6 +308,12 @@
 
   .pageHeader > :global(.ant-tag) {
     margin-top: 0;
+  }
+}
+
+@media (max-width: 575px) {
+  .updatedTimestamp {
+    border-inline-start: 0;
   }
 }
 

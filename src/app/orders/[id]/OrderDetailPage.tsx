@@ -2,6 +2,8 @@
 
 import {
   ArrowLeftOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
   CloseOutlined,
   EditOutlined,
   FileImageOutlined,
@@ -16,6 +18,7 @@ import {
   Button,
   Card,
   Collapse,
+  Col,
   ConfigProvider,
   Descriptions,
   Divider,
@@ -25,6 +28,7 @@ import {
   InputNumber,
   message,
   Modal,
+  Row,
   Segmented,
   Select,
   Skeleton,
@@ -55,6 +59,7 @@ import {
 import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
 import { OrderProductImageUpload } from "@/features/frontend/orders/components/OrderProductImageUpload";
 import { OrderProductImageActions } from "@/features/frontend/orders/components/OrderProductImageActions";
+import { OrderQuantityStatus } from "@/features/frontend/orders/components/OrderQuantityStatus";
 import styles from "./orderDetail.module.css";
 
 const { Text, Title } = Typography;
@@ -342,29 +347,31 @@ function OrderContent({
                 </Space>
               ),
             },
-            {
-              key: "createdAt",
-              label: "Created",
-              children: formatDate(order.createdAt),
-            },
-            {
-              key: "updatedAt",
-              label: "Last updated",
-              children: formatDate(order.updatedAt),
-            },
-            {
-              key: "remark",
-              label: "Remark",
-              children: (
-                <OrderRemark
-                  order={order}
-                  onUpdated={handleDetailsUpdated}
-                />
-              ),
-              span: 2,
-            },
           ]}
         />
+        <Row className={styles.orderTimestamps} gutter={[32, 16]}>
+          <Col xs={24} sm={12}>
+            <div className={styles.orderTimestamp}>
+              <span className={styles.timestampIcon} aria-hidden="true"><CalendarOutlined /></span>
+              <div className={styles.timestampContent}>
+                <Text type="secondary">Created</Text>
+                <Text>{formatDate(order.createdAt)}</Text>
+              </div>
+            </div>
+          </Col>
+          <Col xs={24} sm={12} className={styles.updatedTimestamp}>
+            <div className={styles.orderTimestamp}>
+              <span className={styles.timestampIcon} aria-hidden="true"><ClockCircleOutlined /></span>
+              <div className={styles.timestampContent}>
+                <Text type="secondary">Last updated</Text>
+                <Text>{formatDate(order.updatedAt)}</Text>
+              </div>
+            </div>
+          </Col>
+        </Row>
+        <div className={styles.orderRemarkSection}>
+          <OrderRemark order={order} onUpdated={handleDetailsUpdated} />
+        </div>
       </Card>
 
       <ShipmentLinkCard
@@ -532,8 +539,6 @@ function OrderContent({
                                 onChange={(productCode) => updateProductDraft(image.id, { productCode })}
                               />
                               <OrderItemQuantity
-                                deliveredQuantity={String(getProductQuantity(image, OrderItemQuantityType.Delivered) ?? "")}
-                                quoteQuantity={String(getProductQuantity(image, OrderItemQuantityType.Quote) ?? "")}
                                 quantity={getProductQuantity(image, quantityType)}
                                 quantityType={quantityType}
                                 dirty={dirtyProductFields.get(image.id)?.[
@@ -546,6 +551,10 @@ function OrderContent({
                                     ? { quoteQuantity: quantity }
                                     : { deliveredQuantity: quantity },
                                 )}
+                              />
+                              <OrderQuantityStatus
+                                deliveredQuantity={getProductQuantity(image, OrderItemQuantityType.Delivered)}
+                                quoteQuantity={getProductQuantity(image, OrderItemQuantityType.Quote)}
                               />
                             </div>
                           ),
@@ -609,16 +618,12 @@ function OrderItemProductCode({
 }
 
 function OrderItemQuantity({
-  deliveredQuantity,
-  quoteQuantity,
   quantity,
   quantityType,
   dirty,
   disabled,
   onChange,
 }: {
-  deliveredQuantity: string;
-  quoteQuantity: string;
   quantity: number | null;
   quantityType: OrderItemQuantityType;
   dirty: boolean;
@@ -627,7 +632,6 @@ function OrderItemQuantity({
 }) {
   const quantityLabel = quantityType === OrderItemQuantityType.Quote
     ? "Quote" : "Deliver";
-  const comparison = getItemQuantityComparison({ deliveredQuantity, quoteQuantity });
 
   return (
     <div className={styles.quantityEditor}>
@@ -647,17 +651,6 @@ function OrderItemQuantity({
         disabled={disabled}
         onChange={onChange}
       />
-      {comparison ? (
-        <div className={styles.itemQuantityComparison}>
-          <Text strong>
-            {comparison.delivered} / {comparison.quote}
-          </Text>
-          <Text type="secondary">delivered / quote</Text>
-          <Tag color={getQuantityDifferenceColor(comparison.difference)}>
-            {formatQuantityDifference(comparison.difference)}
-          </Tag>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -667,30 +660,6 @@ function parseQuantity(value: string): number | null {
 
   const quantity = Number(value);
   return Number.isInteger(quantity) && quantity > 0 ? quantity : null;
-}
-
-function getItemQuantityComparison({
-  deliveredQuantity,
-  quoteQuantity,
-}: {
-  deliveredQuantity: string;
-  quoteQuantity: string;
-}): { delivered: number; quote: number; difference: number } | undefined {
-  const delivered = parseQuantity(deliveredQuantity);
-  const quote = parseQuantity(quoteQuantity);
-  if (delivered === null || quote === null) return undefined;
-
-  return { delivered, quote, difference: delivered - quote };
-}
-
-function formatQuantityDifference(difference: number): string {
-  if (difference === 0) return "Matched";
-  return difference > 0 ? `+${difference}` : String(difference);
-}
-
-function getQuantityDifferenceColor(difference: number): string {
-  if (difference === 0) return "success";
-  return difference > 0 ? "processing" : "warning";
 }
 
 function OrderTotalPrice({
@@ -790,7 +759,6 @@ function OrderRemark({
   onUpdated: (update: UpdateOrderDetailsResponse["order"]) => void;
 }) {
   const [remark, setRemark] = useState(order.remark);
-  const [editing, setEditing] = useState(!order.remark);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -800,7 +768,6 @@ function OrderRemark({
     try {
       const response = await updateOrderDetails(order.id, { remark });
       setRemark(response.order.remark);
-      setEditing(!response.order.remark);
       onUpdated(response.order);
     } catch (saveError) {
       setError(
@@ -813,52 +780,29 @@ function OrderRemark({
     }
   };
 
-  if (!editing && order.remark) {
-    return (
-      <div className={styles.fieldDisplay}>
-        <Text className={styles.remarkValue}>{order.remark}</Text>
-        <Button
-          aria-label="Edit remark"
-          icon={<EditOutlined />}
-          type="text"
-          onClick={() => setEditing(true)}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className={styles.remarkEditor}>
+      <label htmlFor="order-remark"><Text type="secondary">Remark</Text></label>
       <Input.TextArea
+        id="order-remark"
         aria-label="Order remark"
+        aria-describedby="order-remark-count"
+        disabled={saving}
         autoSize={{ minRows: 2, maxRows: 6 }}
         maxLength={1000}
         placeholder="Order remark"
-        showCount
         value={remark}
         onChange={(event) => setRemark(event.target.value)}
       />
       <div className={styles.remarkActions}>
+        <Text type="secondary" id="order-remark-count">{remark.length} / 1000</Text>
         <Button
           aria-label="Save remark"
           disabled={remark.trim() === order.remark}
           icon={<SaveOutlined />}
           loading={saving}
-          type="primary"
           onClick={() => void saveRemark()}
         />
-        {order.remark ? (
-          <Button
-            aria-label="Cancel remark edit"
-            disabled={saving}
-            icon={<CloseOutlined />}
-            onClick={() => {
-              setRemark(order.remark);
-              setError(undefined);
-              setEditing(false);
-            }}
-          />
-        ) : null}
       </div>
       {error ? <Text type="danger">{error}</Text> : null}
     </div>
