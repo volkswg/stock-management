@@ -416,7 +416,6 @@ function OrderContent({
                   {order.productImages.length > 0 ? (
                     <>
                       <div className={styles.quantityToolbar}>
-                        <Text strong>Quantity</Text>
                         <Segmented<OrderItemQuantityType>
                           className={styles.quantityMode}
                           options={[
