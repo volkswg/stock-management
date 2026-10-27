@@ -46,7 +46,7 @@ export function OrderProductImageActions({
         disabled={disabled || uploading}
         trigger={["click"]}
         menu={{
-          items: [{ key: "replace", label: "Upload replacement image", icon: <UploadOutlined /> }],
+          items: [{ key: "replace", label: "Upload New image", icon: <UploadOutlined /> }],
           onClick: () => {
             setError(undefined);
             setOpen(true);
