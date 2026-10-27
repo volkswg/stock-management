@@ -2,71 +2,32 @@
   grid-column: 1 / -1;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
+  justify-self: stretch;
   display: grid;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 10px;
+  justify-items: end;
+  gap: 4px;
+  padding: 4px 0 0;
   color: #262626;
 }
 
-.panel[data-state="matched"] {
-  background: #eefcee;
-}
-
-.panel[data-state="partial"] {
-  background: #fff7e8;
-}
-
-.panel[data-state="exceeds"] {
-  background: #fff0f0;
-}
-
-.summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.icon {
-  font-size: 22px;
-}
-
 .counts {
-  flex: 1;
   min-width: 0;
-  display: grid;
-  line-height: 1.3;
-}
-
-.counts strong {
-  font-size: 16px;
-}
-
-.counts span {
-  font-size: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .status {
   margin: 0;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
-.progress {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.progress > :global(.ant-progress) {
-  flex: 1;
-  min-width: 0;
+.panel .progress {
+  width: 100%;
+  max-width: 100%;
   margin: 0;
-}
-
-.progress strong {
-  flex: 0 0 auto;
-  font-size: 12px;
+  line-height: 1;
 }
