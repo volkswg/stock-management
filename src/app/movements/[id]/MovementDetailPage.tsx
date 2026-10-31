@@ -3,7 +3,7 @@
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
-  MoreOutlined,
+  EditOutlined,
   ReloadOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
@@ -12,18 +12,14 @@ import {
   Button,
   Card,
   Checkbox,
-  Col,
   ConfigProvider,
-  Dropdown,
   Empty,
   Image,
   Input,
   Popconfirm,
-  Row,
   Segmented,
   Skeleton,
   Space,
-  Statistic,
   Tag,
   Typography,
   Upload,
@@ -63,6 +59,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [delivering, setDelivering] = useState(false);
+  const [itemFilter, setItemFilter] = useState<"all" | "missing">("all");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -91,6 +88,10 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     shops[0] ||
     "";
   const currentRecords = recordsByShop[currentShop] || [];
+  const shopMissingCount = currentRecords.filter((record) => !isValidMovementQuantity(record.quantity)).length;
+  const visibleRecords = itemFilter === "missing"
+    ? currentRecords.filter((record) => !isValidMovementQuantity(record.quantity))
+    : currentRecords;
   const totalQuantity = sumQuantity(records);
   const missingQuantityCount = records.filter((record) => !isValidMovementQuantity(record.quantity)).length;
   const isDelivered =
@@ -112,6 +113,15 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     router.replace(`${pathname}?${nextSearchParams.toString()}`, {
       scroll: false,
     });
+  }
+
+  function reviewMissingQuantities() {
+    const nextShop = shopMissingCount > 0 ? currentShop : shops.find((shop) =>
+      recordsByShop[shop].some((record) => !isValidMovementQuantity(record.quantity)),
+    );
+    if (nextShop) selectShop(nextShop);
+    setItemFilter("missing");
+    document.getElementById("movement-items")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function refreshMovement() {
@@ -184,68 +194,58 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     <ConfigProvider theme={movementTheme}>
       <div className={styles.appShell}>
         <main className={styles.content}>
-          <Button className={styles.backButton} href="/movements" icon={<ArrowLeftOutlined />} type="text">Movements</Button>
+          <div className={styles.topBar}>
+            <Button className={styles.backButton} href="/movements" icon={<ArrowLeftOutlined />} type="text">Movements</Button>
+            <Button
+              className={styles.refreshButton}
+              disabled={loading || delivering || savingIds.size > 0 || uploadingIds.size > 0}
+              icon={<ReloadOutlined />}
+              loading={refreshing}
+              onClick={() => void refreshMovement()}
+            >Refresh</Button>
+          </div>
           <header className={styles.pageHeader}>
             <div>
-              <Text className={styles.eyebrow}>Inventory movement</Text>
-              <Title level={1}>{movementMasterId}</Title>
-              <Space size={8} wrap>
-                <Text type="secondary">{records.length} items</Text>
-                <Text type="secondary">{totalQuantity} total quantity</Text>
-                <Tag color={isDelivered ? "green" : "default"}>{isDelivered ? "Delivered" : "Created"}</Tag>
-              </Space>
+              <Text className={styles.eyebrow}>Home → {shops.length > 0 ? shops.join(" + ") : "Shop"}</Text>
+              <Title level={1}>Movement details</Title>
+              <Text className={styles.movementReference}>{movementMasterId}</Text>
             </div>
-            <Space className={styles.pageActions} wrap>
-              <Button
-                disabled={
-                  loading ||
-                  delivering ||
-                  savingIds.size > 0 ||
-                  uploadingIds.size > 0
-                }
-                icon={<ReloadOutlined />}
-                loading={refreshing}
-                onClick={() => void refreshMovement()}
-              >
-                Refresh
-              </Button>
-              <Popconfirm
-                disabled={isDelivered || records.length === 0 || missingQuantityCount > 0}
-                title="Mark this movement as delivered?"
-                description="All movement items will be marked delivered."
-                okText="Mark delivered"
-                onConfirm={markDelivered}
-              >
-                <Button disabled={isDelivered || records.length === 0 || missingQuantityCount > 0} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
-                  {isDelivered ? "Delivered" : "Mark delivered"}
-                </Button>
-              </Popconfirm>
-            </Space>
+            <Tag className={styles.movementStatus} color={isDelivered ? "green" : "default"}>
+              {isDelivered ? "Delivered" : "Created"}
+            </Tag>
           </header>
-
-          {missingQuantityCount > 0 ? <Alert className={styles.alert} title={`${missingQuantityCount} item(s) need a quantity. Edit each item's note or amount before marking delivered.`} showIcon type="warning" /> : null}
+          {missingQuantityCount > 0 ? <Alert className={styles.alert} title={`${missingQuantityCount} ${missingQuantityCount === 1 ? "item needs" : "items need"} a quantity`} description="Add a note or quantity below before marking this movement delivered." showIcon type="warning" /> : null}
           {error ? <Alert className={styles.alert} title={error} showIcon type="error" /> : null}
           {notice ? <Alert className={styles.alert} title={notice} showIcon type="success" closable={{ onClose: () => setNotice(undefined) }} /> : null}
           {loading ? <Card><Skeleton active paragraph={{ rows: 9 }} /></Card> : records.length === 0 ? <Card><Empty description="No movement items" /></Card> : (
             <>
-              <Segmented
-                aria-label="Movement shops"
-                className={styles.shopTabs}
-                options={shops.map((shop) => ({ label: `${shop} (${sumQuantity(recordsByShop[shop])})`, value: shop }))}
-                value={currentShop}
-                onChange={selectShop}
-              />
-              <Row className={styles.summaryGrid} gutter={[16, 16]}>
-                <Col xs={8}><Card><Statistic title="Shop" value={currentShop || "—"} /></Card></Col>
-                <Col xs={8}><Card><Statistic title="Items" value={currentRecords.length} /></Card></Col>
-                <Col xs={8}><Card><Statistic title="Shop quantity" value={sumQuantity(currentRecords)} /></Card></Col>
-              </Row>
-              <section className={styles.itemGrid}>
-                {currentRecords.map((record) => (
+              <div className={styles.shopSummary} aria-label="Selected shop summary">
+                <div><span>Items</span><strong>{currentRecords.length}</strong></div>
+                <div><span>Total pieces</span><strong>{sumQuantity(currentRecords)}</strong></div>
+                <div><span>Need quantity</span><strong className={shopMissingCount ? styles.pendingCount : undefined}>{shopMissingCount}</strong></div>
+              </div>
+              <div className={styles.reviewToolbar}>
+                <Segmented
+                  aria-label="Movement shops"
+                  className={styles.shopTabs}
+                  options={shops.map((shop) => ({ label: `${shop} · ${recordsByShop[shop].length} ${recordsByShop[shop].length === 1 ? "item" : "items"}`, value: shop }))}
+                  value={currentShop}
+                  onChange={selectShop}
+                  block
+                />
+                <div className={styles.itemFilters} aria-label="Filter movement items">
+                  <Button type={itemFilter === "all" ? "primary" : "default"} aria-pressed={itemFilter === "all"} onClick={() => setItemFilter("all")}>All items <span>{currentRecords.length}</span></Button>
+                  <Button type={itemFilter === "missing" ? "primary" : "default"} aria-pressed={itemFilter === "missing"} onClick={() => setItemFilter("missing")}>Needs quantity <span>{shopMissingCount}</span></Button>
+                </div>
+              </div>
+              <section id="movement-items" className={styles.itemGrid} aria-label={`${currentShop} movement items`}>
+                {visibleRecords.length === 0 ? <Card className={styles.emptyCard}><Empty description="All quantities for this shop are ready"><Button onClick={() => setItemFilter("all")}>Show all items</Button></Empty></Card> : null}
+                {visibleRecords.map((record) => (
                   <MovementItem
                     checked={packedIds.has(record.movementId)}
                     key={record.movementId}
                     record={record}
+                    itemNumber={currentRecords.indexOf(record) + 1}
                     saving={savingIds.has(record.movementId)}
                     uploading={uploadingIds.has(record.movementId)}
                     message={messages[record.movementId]}
@@ -260,14 +260,40 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
             </>
           )}
         </main>
+        {!loading && records.length > 0 ? (
+          <footer className={styles.deliveryBar} aria-label="Movement completion">
+            <div className={styles.deliveryInner}>
+              <div className={styles.deliveryInfo}>
+                <Text strong>{isDelivered ? "Movement delivered" : missingQuantityCount > 0 ? `${missingQuantityCount} ${missingQuantityCount === 1 ? "quantity" : "quantities"} to add` : "Ready to deliver"}</Text>
+                <Text type="secondary">{records.length} items · {totalQuantity} pieces · all shops</Text>
+              </div>
+              {missingQuantityCount > 0 ? (
+                <Button type="primary" onClick={reviewMissingQuantities}>Add quantities</Button>
+              ) : (
+                <Popconfirm
+                  disabled={isDelivered || delivering || savingIds.size > 0 || uploadingIds.size > 0 || refreshing}
+                  title="Mark this movement as delivered?"
+                  description={`All ${records.length} items across all shops will be marked delivered.`}
+                  okText="Mark delivered"
+                  onConfirm={markDelivered}
+                >
+                  <Button disabled={isDelivered || savingIds.size > 0 || uploadingIds.size > 0 || refreshing} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
+                    {isDelivered ? "Delivered" : "Mark delivered"}
+                  </Button>
+                </Popconfirm>
+              )}
+            </div>
+          </footer>
+        ) : null}
       </div>
     </ConfigProvider>
   );
 }
 
-function MovementItem({ checked, record, saving, uploading, message, onChecked, onSave, onStockCounted, onNewArrival, onUpdateImage }: {
+function MovementItem({ checked, record, itemNumber, saving, uploading, message, onChecked, onSave, onStockCounted, onNewArrival, onUpdateImage }: {
   checked: boolean;
   record: ProductMovementRecord;
+  itemNumber: number;
   saving: boolean;
   uploading: boolean;
   message?: string;
@@ -280,8 +306,13 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
   const [editing, setEditing] = useState(() => !isValidMovementQuantity(record.quantity));
   const [quantity, setQuantity] = useState(record.quantity);
   const [remark, setRemark] = useState(record.remark);
-  const nextQuantity = quantity.trim();
   const nextRemark = remark.trim();
+  const calculatedQuantity = nextRemark !== record.remark ? parseQuantity(nextRemark)?.quantity : undefined;
+  const nextQuantity = calculatedQuantity || quantity.trim();
+  const quantityMissing = !isValidMovementQuantity(record.quantity);
+  const busy = saving || uploading;
+  const noteInputId = `movement-note-${record.movementId}`;
+  const quantityInputId = `movement-quantity-${record.movementId}`;
   const changed = nextQuantity !== record.quantity || nextRemark !== record.remark;
 
   function updateRemark(value: string) {
@@ -297,44 +328,67 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
   }
 
   return (
-    <Card className={`${styles.itemCard} ${checked ? styles.packed : ""}`}>
-      <div className={styles.itemChecks}>
-        <Checkbox checked={checked} onChange={(event) => onChecked(event.target.checked)}>Packed</Checkbox>
-        <Button aria-pressed={record.stockCounted} loading={saving} size="small" type={record.stockCounted ? "primary" : "default"} onClick={() => void onStockCounted(!record.stockCounted).catch(() => undefined)}>
-          {record.stockCounted ? "Stock counted" : "Stock not counted"}
-        </Button>
-        <Button aria-pressed={record.isNewArrival} loading={saving} size="small" type={record.isNewArrival ? "primary" : "default"} onClick={() => void onNewArrival(!record.isNewArrival).catch(() => undefined)}>
-          {record.isNewArrival ? "New arrival" : "Mark new arrival"}
-        </Button>
+    <Card className={`${styles.itemCard} ${checked ? styles.packed : ""}`} data-needs-quantity={quantityMissing}>
+      <div className={styles.itemHeader}>
+        <div className={styles.itemHeading}>
+          <Text strong>Item {String(itemNumber).padStart(2, "0")}</Text>
+          <Text type="secondary">{record.fromLocation} → {record.toLocation}</Text>
+        </div>
+        <div className={styles.itemHeaderActions}>
+          <Checkbox checked={checked} onChange={(event) => onChecked(event.target.checked)}>Packed</Checkbox>
+          {!editing ? <Button icon={<EditOutlined />} onClick={() => { setQuantity(record.quantity); setRemark(record.remark); setEditing(true); }} aria-label={`Edit item ${itemNumber}`}>Edit</Button> : null}
+        </div>
       </div>
       <div className={styles.itemLayout}>
         <div className={styles.imageColumn}>
           <Image
-            alt={`Movement product ${record.movementId}`}
+            alt={`Product for item ${itemNumber}, ${record.toLocation}`}
             className={styles.productImage}
             fallback={MOVEMENT_IMAGE_PLACEHOLDER}
             src={movementImageUrl(record.productImageUrl, 900) || MOVEMENT_IMAGE_PLACEHOLDER}
             preview={{ src: movementImageUrl(record.productImageUrl, 1600) || MOVEMENT_IMAGE_PLACEHOLDER }}
           />
-          {editing ? <Upload accept="image/*" beforeUpload={(file) => { void onUpdateImage(file as File); return false; }} showUploadList={false}><Button block icon={<UploadOutlined />} loading={uploading} size="small">Update image</Button></Upload> : null}
+          <Text className={styles.photoHint} type="secondary">Tap photo to zoom</Text>
+          {editing ? <Upload accept="image/*" beforeUpload={(file) => { void onUpdateImage(file as File); return false; }} disabled={busy} showUploadList={false}><Button block icon={<UploadOutlined />} loading={uploading} disabled={saving}>Change photo</Button></Upload> : null}
         </div>
         <div className={styles.itemBody}>
-          <div className={styles.itemHeading}>
-            <Text strong>{record.movementId}</Text>
-            <Dropdown menu={{ items: [{ key: "edit", label: editing ? "Close edit" : "Edit item" }], onClick: () => editing ? cancel() : setEditing(true) }} trigger={["click"]}>
-              <Button aria-label={`Actions for ${record.movementId}`} icon={<MoreOutlined />} type="text" />
-            </Dropdown>
-          </div>
-          <Space size={6} wrap><Tag color={isValidMovementQuantity(record.quantity) ? "cyan" : "orange"}>{isValidMovementQuantity(record.quantity) ? `Qty ${record.quantity}` : "Needs quantity"}</Tag><Tag>{record.fromLocation} → {record.toLocation}</Tag><Tag color={record.status === "delivered" ? "green" : "default"}>{record.status === "delivered" ? "Delivered" : "Created"}</Tag></Space>
-          <Text type="secondary">Created {formatBangkokDateTime(record.createdAt)}</Text>
+          <Space className={styles.itemBadges} size={6} wrap>
+            <Tag color={quantityMissing ? "orange" : "cyan"}>{quantityMissing ? "Needs quantity" : `${record.quantity} pieces`}</Tag>
+            {record.status === "delivered" ? <Tag color="green">Delivered</Tag> : null}
+          </Space>
           {editing ? (
             <div className={styles.editForm}>
-              <label><span>Amount</span><Input disabled={saving} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></label>
-              <label><span>Note (quantities are added automatically)</span><TextArea autoSize={{ minRows: 2, maxRows: 4 }} disabled={saving} value={remark} onChange={(event) => updateRemark(event.target.value)} /></label>
-              <Space><Button disabled={saving} onClick={cancel}>Cancel</Button><Button disabled={!isValidMovementQuantity(nextQuantity) || !changed} loading={saving} type="primary" onClick={() => void onSave({ movementId: record.movementId, quantity: nextQuantity, remark: nextRemark }).then(() => { setQuantity(nextQuantity); setRemark(nextRemark); setEditing(false); }).catch(() => undefined)}>Save</Button></Space>
+              <div className={styles.noteField}>
+                <label htmlFor={noteInputId}>Breakdown / note</label>
+                <TextArea id={noteInputId} autoSize={{ minRows: 3, maxRows: 8 }} disabled={busy} value={remark} placeholder={"ดำ 5\nขาว 7"} onChange={(event) => updateRemark(event.target.value)} aria-describedby={`${noteInputId}-help`} />
+                <Text id={`${noteInputId}-help`} type="secondary">One quantity per line, or just a number. We add them for you.</Text>
+              </div>
+              <div className={styles.quantityField}>
+                <label htmlFor={quantityInputId}>Quantity <span>{calculatedQuantity ? "Calculated from note" : "Or enter directly"}</span></label>
+                <Input id={quantityInputId} aria-label="Quantity" inputMode="decimal" size="large" disabled={busy} readOnly={Boolean(calculatedQuantity)} value={nextQuantity} placeholder="0" onChange={(event) => setQuantity(event.target.value)} suffix="pieces" aria-describedby={`${quantityInputId}-help`} />
+                <Text id={`${quantityInputId}-help`} type="secondary">{isValidMovementQuantity(nextQuantity) ? "" : "Enter a quantity greater than 0 to save."}</Text>
+              </div>
+              <div className={styles.editActions}>
+                <Button disabled={busy} onClick={cancel}>Cancel</Button>
+                <Button disabled={busy || !isValidMovementQuantity(nextQuantity) || !changed} loading={saving} type="primary" onClick={() => void onSave({ movementId: record.movementId, quantity: nextQuantity, remark: nextRemark }).then(() => { setQuantity(nextQuantity); setRemark(nextRemark); setEditing(false); }).catch(() => undefined)}>
+                  Save item
+                </Button>
+              </div>
             </div>
           ) : record.remark ? <Paragraph className={styles.remark}>{record.remark}</Paragraph> : null}
-          {message ? <Text type="secondary">{message}</Text> : null}
+          <div className={styles.itemFlags} aria-label={`Flags for item ${itemNumber}`}>
+            <Button aria-pressed={record.stockCounted} loading={saving} disabled={busy} type={record.stockCounted ? "primary" : "default"} onClick={() => void onStockCounted(!record.stockCounted).catch(() => undefined)}>
+              {record.stockCounted ? "✓ Stock counted" : "Stock counted"}
+            </Button>
+            <Button aria-pressed={record.isNewArrival} loading={saving} disabled={busy} type={record.isNewArrival ? "primary" : "default"} onClick={() => void onNewArrival(!record.isNewArrival).catch(() => undefined)}>
+              {record.isNewArrival ? "✓ New arrival" : "New arrival"}
+            </Button>
+          </div>
+          {message ? <Text className={styles.saveMessage} role="status" type={message === "Saved." || message === "Image updated." ? "success" : busy ? "secondary" : "danger"}>{message}</Text> : null}
+          <div className={styles.itemMeta}>
+            <Text type="secondary">Created {formatBangkokDateTime(record.createdAt)}</Text>
+            <Text type="secondary">{record.movementId}</Text>
+          </div>
         </div>
       </div>
     </Card>
@@ -368,7 +422,9 @@ const movementTheme = {
     colorPrimary: "#157347",
     colorBgLayout: "#f3f5f4",
     colorBorderSecondary: "#e1e5e2",
-    borderRadius: 6,
+    borderRadius: 12,
+    controlHeight: 44,
+    controlHeightLG: 48,
     fontFamily: "Arial, Helvetica, sans-serif",
   },
 };
