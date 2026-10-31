@@ -31,6 +31,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductMovementRecord } from "@/services/movements";
+import { parseQuantity } from "@/features/backend/line/services/movements/utils";
 import {
   deliverMovement,
   getMovement,
@@ -281,6 +282,12 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
   const nextRemark = remark.trim();
   const changed = nextQuantity !== record.quantity || nextRemark !== record.remark;
 
+  function updateRemark(value: string) {
+    setRemark(value);
+    const calculated = parseQuantity(value);
+    if (calculated) setQuantity(calculated.quantity);
+  }
+
   function cancel() {
     setQuantity(record.quantity);
     setRemark(record.remark);
@@ -321,7 +328,7 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
           {editing ? (
             <div className={styles.editForm}>
               <label><span>Amount</span><Input disabled={saving} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></label>
-              <label><span>Note</span><TextArea autoSize={{ minRows: 2, maxRows: 4 }} disabled={saving} value={remark} onChange={(event) => setRemark(event.target.value)} /></label>
+              <label><span>Note (quantities are added automatically)</span><TextArea autoSize={{ minRows: 2, maxRows: 4 }} disabled={saving} value={remark} onChange={(event) => updateRemark(event.target.value)} /></label>
               <Space><Button disabled={saving} onClick={cancel}>Cancel</Button><Button disabled={!nextQuantity || !changed} loading={saving} type="primary" onClick={() => void onSave({ movementId: record.movementId, quantity: nextQuantity, remark: nextRemark }).then(() => { setQuantity(nextQuantity); setRemark(nextRemark); setEditing(false); }).catch(() => undefined)}>Save</Button></Space>
             </div>
           ) : record.remark ? <Paragraph className={styles.remark}>{record.remark}</Paragraph> : null}

@@ -3,6 +3,7 @@ import type {
   IGoogleSheetsService,
 } from "@/externals/google/sheet";
 import { DETAIL_HEADERS, ensureHeader, MASTER_HEADERS } from "./state";
+import { parseQuantity } from "@/features/backend/line/services/movements/utils";
 
 export type MovementStatus = "in_progress" | "created" | "delivered";
 
@@ -122,7 +123,13 @@ export async function updateMovementItem({
   const nextRow = [...rows[rowIndex]];
   while (nextRow.length < DETAIL_HEADERS.length) nextRow.push("");
   if (quantity !== undefined) nextRow[3] = quantity;
-  if (remark !== undefined) nextRow[4] = remark;
+  if (remark !== undefined) {
+    nextRow[4] = remark;
+    if (remark !== cell(rows[rowIndex][4])) {
+      const calculated = parseQuantity(remark);
+      if (calculated) nextRow[3] = calculated.quantity;
+    }
+  }
   if (stockCounted !== undefined) nextRow[12] = stockCounted;
   if (isNewArrival !== undefined) nextRow[13] = isNewArrival;
   nextRow[11] = new Date().toISOString();
