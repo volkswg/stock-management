@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { updateMovementItem } from "@/services/movements";
+import { deleteMovementItem, updateMovementItem } from "@/services/movements";
 
 export const runtime = "nodejs";
 
@@ -73,6 +73,30 @@ export async function PATCH(
       { error: "Failed to update movement item." },
       { status: 500 },
     );
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string; itemId: string }> },
+): Promise<NextResponse> {
+  const { id, itemId } = await params;
+  const movementMasterId = id.trim();
+  const movementId = itemId.trim();
+  if (!movementMasterId || !movementId) return badRequest("Movement and item IDs are required.");
+  try {
+    const records = await deleteMovementItem({
+      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      movementMasterId,
+      movementId,
+    });
+    return NextResponse.json({ records });
+  } catch (error) {
+    console.error("Failed to delete movement item", {
+      movementId, movementMasterId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json({ error: "Failed to delete movement item. Refresh to check its current state before retrying." }, { status: 500 });
   }
 }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { getMovementItems, markMovementDelivered, MovementQuantityRequiredError } from "@/services/movements";
+import { getMovementItems, movementExists, markMovementDelivered, MovementQuantityRequiredError } from "@/services/movements";
 
 export const runtime = "nodejs";
 
@@ -17,11 +17,12 @@ export async function GET(
     );
   }
   try {
+    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
     const records = await getMovementItems({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      googleSheetsService,
       movementMasterId,
     });
-    if (records.length === 0) {
+    if (records.length === 0 && !await movementExists({ googleSheetsService, movementMasterId })) {
       return NextResponse.json(
         { error: "Movement was not found." },
         { status: 404 },

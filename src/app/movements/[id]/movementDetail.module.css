@@ -92,7 +92,6 @@
   .photoHint { margin-bottom: 2px; }
   .itemBody { gap: 14px; }
   .itemFlags :global(.ant-btn) { font-size: 12px; }
-  .appShell:has(.editForm input:focus, .editForm textarea:focus) .deliveryBar { display: none; }
   .deliveryBar { position: fixed; inset: auto 0 0; z-index: 20; max-width: none; margin: 0; padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #d9e3dc; background: rgb(255 255 255 / 97%); box-shadow: 0 -4px 20px rgb(21 48 31 / 5%); }
   .deliveryInner { gap: 10px; padding: 0; border: 0; border-radius: 0; background: transparent; }
   .deliveryInfo > :first-child { font-size: 12px; }
@@ -103,3 +102,9 @@
   .itemCard { transition: none; }
   .itemGrid { scroll-behavior: auto; }
 }
+
+.itemFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.itemFooter .itemMeta { min-width: 0; }
+.itemFooter > :global(.ant-btn) { flex-shrink: 0; width: 44px; height: 44px; color: #68736d; }
+.deleteRecordSummary { display: grid; gap: 5px; padding: 12px; margin: 16px 0; border: 1px solid #e1e5e2; border-radius: 10px; background: #f7f9f7; overflow-wrap: anywhere; }
+.deleteRecordSummary > :last-child { font-size: 11px; }

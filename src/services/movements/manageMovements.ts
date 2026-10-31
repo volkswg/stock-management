@@ -100,6 +100,45 @@ export async function getMovementItems({
     );
 }
 
+export async function movementExists({
+  googleSheetsService,
+  movementMasterId,
+}: {
+  googleSheetsService: IGoogleSheetsService;
+  movementMasterId: string;
+}): Promise<boolean> {
+  const rows = await googleSheetsService.movementMasters.readRows("A2:A");
+  return rows.some((row) => cell(row[0]).toUpperCase() === movementMasterId.toUpperCase());
+}
+
+export async function deleteMovementItem({
+  googleSheetsService,
+  movementId,
+  movementMasterId,
+}: {
+  googleSheetsService: IGoogleSheetsService;
+  movementId: string;
+  movementMasterId: string;
+}): Promise<ProductMovementRecord[]> {
+  await ensureHeader(googleSheetsService.movementDetails, DETAIL_HEADERS, "N");
+  const rows = await googleSheetsService.movementDetails.readRows("A:N");
+  const rowIndex = rows.findIndex((row, index) => index > 0 &&
+    cell(row[0]).toUpperCase() === movementId.toUpperCase() &&
+    cell(row[1]).toUpperCase() === movementMasterId.toUpperCase(),
+  );
+  if (rowIndex !== -1) {
+    const sheet = googleSheetsService.movementDetails;
+    if (!sheet.deleteRow) throw new Error("Movement row deletion is unavailable.");
+    // Delete the entire Sheets row, not only its image link or cell contents.
+    // The separate Drive file remains untouched.
+    await sheet.deleteRow(rowIndex + 1);
+  }
+  // Recompute even on retries: a previous row deletion may have succeeded before a
+  // failed total update or HTTP response.
+  await refreshMovementMaster(googleSheetsService, movementMasterId);
+  return getMovementItems({ googleSheetsService, movementMasterId });
+}
+
 export async function updateMovementItem({
   googleSheetsService,
   movementId,

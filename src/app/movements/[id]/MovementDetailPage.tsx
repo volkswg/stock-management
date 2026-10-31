@@ -4,6 +4,8 @@ import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
   EditOutlined,
+  DeleteOutlined,
+  MoreOutlined,
   ReloadOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
@@ -13,9 +15,11 @@ import {
   Card,
   Checkbox,
   ConfigProvider,
+  Dropdown,
   Empty,
   Image,
   Input,
+  Modal,
   Popconfirm,
   Segmented,
   Skeleton,
@@ -31,6 +35,7 @@ import { isValidMovementQuantity, parseQuantity } from "@/features/backend/line/
 import {
   deliverMovement,
   getMovement,
+  removeMovementItem,
   saveMovementImage,
   saveMovementItem,
 } from "../api";
@@ -59,6 +64,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [delivering, setDelivering] = useState(false);
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [itemFilter, setItemFilter] = useState<"all" | "missing">("all");
 
   useEffect(() => {
@@ -176,6 +182,22 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     }
   }
 
+  async function deleteItem(movementId: string) {
+    setDeletingIds((current) => new Set(current).add(movementId));
+    setMessages((current) => ({ ...current, [movementId]: "Deleting record…" }));
+    try {
+      const result = await removeMovementItem(movementMasterId, movementId);
+      setRecords(result.records);
+      setPackedIds((current) => without(current, movementId));
+      setNotice("Movement record deleted. The original Drive file is unchanged.");
+    } catch (requestError) {
+      setMessages((current) => ({ ...current, [movementId]: errorMessage(requestError) }));
+      throw requestError;
+    } finally {
+      setDeletingIds((current) => without(current, movementId));
+    }
+  }
+
   async function updateImage(movementId: string, file: File) {
     setUploadingIds((current) => new Set(current).add(movementId));
     setMessages((current) => ({ ...current, [movementId]: "Updating image…" }));
@@ -198,7 +220,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
             <Button className={styles.backButton} href="/movements" icon={<ArrowLeftOutlined />} type="text">Movements</Button>
             <Button
               className={styles.refreshButton}
-              disabled={loading || delivering || savingIds.size > 0 || uploadingIds.size > 0}
+              disabled={loading || delivering || savingIds.size > 0 || uploadingIds.size > 0 || deletingIds.size > 0}
               icon={<ReloadOutlined />}
               loading={refreshing}
               onClick={() => void refreshMovement()}
@@ -217,7 +239,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
           {missingQuantityCount > 0 ? <Alert className={styles.alert} title={`${missingQuantityCount} ${missingQuantityCount === 1 ? "item needs" : "items need"} a quantity`} description="Add a note or quantity below before marking this movement delivered." showIcon type="warning" /> : null}
           {error ? <Alert className={styles.alert} title={error} showIcon type="error" /> : null}
           {notice ? <Alert className={styles.alert} title={notice} showIcon type="success" closable={{ onClose: () => setNotice(undefined) }} /> : null}
-          {loading ? <Card><Skeleton active paragraph={{ rows: 9 }} /></Card> : records.length === 0 ? <Card><Empty description="No movement items" /></Card> : (
+          {loading ? <Card><Skeleton active paragraph={{ rows: 9 }} /></Card> : records.length === 0 ? <Card><Empty description="No records in this movement" /></Card> : (
             <>
               <div className={styles.shopSummary} aria-label="Selected shop summary">
                 <div><span>Items</span><strong>{currentRecords.length}</strong></div>
@@ -248,9 +270,12 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                     itemNumber={currentRecords.indexOf(record) + 1}
                     saving={savingIds.has(record.movementId)}
                     uploading={uploadingIds.has(record.movementId)}
+                    deleting={deletingIds.has(record.movementId)}
+                    actionsDisabled={delivering || refreshing || deletingIds.size > 0 || savingIds.size > 0 || uploadingIds.size > 0}
                     message={messages[record.movementId]}
                     onChecked={(checked) => setPackedIds((current) => checked ? new Set(current).add(record.movementId) : without(current, record.movementId))}
                     onSave={updateItem}
+                    onDelete={() => deleteItem(record.movementId)}
                     onStockCounted={(stockCounted) => updateItem({ movementId: record.movementId, stockCounted })}
                     onNewArrival={(isNewArrival) => updateItem({ movementId: record.movementId, isNewArrival })}
                     onUpdateImage={(file) => updateImage(record.movementId, file)}
@@ -271,13 +296,13 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                 <Button type="primary" onClick={reviewMissingQuantities}>Add quantities</Button>
               ) : (
                 <Popconfirm
-                  disabled={isDelivered || delivering || savingIds.size > 0 || uploadingIds.size > 0 || refreshing}
+                  disabled={isDelivered || delivering || savingIds.size > 0 || uploadingIds.size > 0 || deletingIds.size > 0 || refreshing}
                   title="Mark this movement as delivered?"
                   description={`All ${records.length} items across all shops will be marked delivered.`}
                   okText="Mark delivered"
                   onConfirm={markDelivered}
                 >
-                  <Button disabled={isDelivered || savingIds.size > 0 || uploadingIds.size > 0 || refreshing} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
+                  <Button disabled={isDelivered || savingIds.size > 0 || uploadingIds.size > 0 || deletingIds.size > 0 || refreshing} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
                     {isDelivered ? "Delivered" : "Mark delivered"}
                   </Button>
                 </Popconfirm>
@@ -290,27 +315,32 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
   );
 }
 
-function MovementItem({ checked, record, itemNumber, saving, uploading, message, onChecked, onSave, onStockCounted, onNewArrival, onUpdateImage }: {
+function MovementItem({ checked, record, itemNumber, saving, uploading, deleting, actionsDisabled, message, onChecked, onSave, onStockCounted, onNewArrival, onUpdateImage, onDelete }: {
   checked: boolean;
   record: ProductMovementRecord;
   itemNumber: number;
   saving: boolean;
   uploading: boolean;
+  deleting: boolean;
+  actionsDisabled: boolean;
   message?: string;
   onChecked: (checked: boolean) => void;
   onSave: (input: { movementId: string; quantity: string; remark: string }) => Promise<void>;
   onStockCounted: (value: boolean) => Promise<void>;
   onNewArrival: (value: boolean) => Promise<void>;
   onUpdateImage: (file: File) => Promise<void>;
+  onDelete: () => Promise<void>;
 }) {
   const [editing, setEditing] = useState(() => !isValidMovementQuantity(record.quantity));
   const [quantity, setQuantity] = useState(record.quantity);
   const [remark, setRemark] = useState(record.remark);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>();
   const nextRemark = remark.trim();
   const calculatedQuantity = nextRemark !== record.remark ? parseQuantity(nextRemark)?.quantity : undefined;
   const nextQuantity = calculatedQuantity || quantity.trim();
   const quantityMissing = !isValidMovementQuantity(record.quantity);
-  const busy = saving || uploading;
+  const busy = saving || uploading || deleting || actionsDisabled;
   const noteInputId = `movement-note-${record.movementId}`;
   const quantityInputId = `movement-quantity-${record.movementId}`;
   const changed = nextQuantity !== record.quantity || nextRemark !== record.remark;
@@ -335,8 +365,8 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, message,
           <Text type="secondary">{record.fromLocation} → {record.toLocation}</Text>
         </div>
         <div className={styles.itemHeaderActions}>
-          <Checkbox checked={checked} onChange={(event) => onChecked(event.target.checked)}>Packed</Checkbox>
-          {!editing ? <Button icon={<EditOutlined />} onClick={() => { setQuantity(record.quantity); setRemark(record.remark); setEditing(true); }} aria-label={`Edit item ${itemNumber}`}>Edit</Button> : null}
+          <Checkbox disabled={busy} checked={checked} onChange={(event) => onChecked(event.target.checked)}>Packed</Checkbox>
+          {!editing ? <Button disabled={busy} icon={<EditOutlined />} onClick={() => { setQuantity(record.quantity); setRemark(record.remark); setEditing(true); }} aria-label={`Edit item ${itemNumber}`}>Edit</Button> : null}
         </div>
       </div>
       <div className={styles.itemLayout}>
@@ -385,12 +415,58 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, message,
             </Button>
           </div>
           {message ? <Text className={styles.saveMessage} role="status" type={message === "Saved." || message === "Image updated." ? "success" : busy ? "secondary" : "danger"}>{message}</Text> : null}
-          <div className={styles.itemMeta}>
-            <Text type="secondary">Created {formatBangkokDateTime(record.createdAt)}</Text>
-            <Text type="secondary">{record.movementId}</Text>
+          <div className={styles.itemFooter}>
+            <div className={styles.itemMeta}>
+              <Text type="secondary">Created {formatBangkokDateTime(record.createdAt)}</Text>
+              <Text type="secondary">{record.movementId}</Text>
+            </div>
+            <Dropdown
+              disabled={busy}
+              trigger={["click"]}
+              placement="topRight"
+              menu={{
+                items: [{ key: "delete", label: "Delete record", icon: <DeleteOutlined />, danger: true }],
+                onClick: () => { setDeleteError(undefined); setDeleteOpen(true); },
+              }}
+            >
+              <Button type="text" disabled={busy} icon={<MoreOutlined />} aria-label={`More actions for item ${itemNumber}`} />
+            </Dropdown>
           </div>
         </div>
       </div>
+      <Modal
+        title="Delete movement record?"
+        open={deleteOpen}
+        centered
+        width={440}
+        okText="Delete record"
+        cancelText="Keep record"
+        okButtonProps={{ danger: true, disabled: busy }}
+        cancelButtonProps={{ autoFocus: true, disabled: deleting }}
+        confirmLoading={deleting}
+        maskClosable={false}
+        closable={!deleting}
+        keyboard={!deleting}
+        onCancel={() => { if (!deleting) setDeleteOpen(false); }}
+        onOk={async () => {
+          setDeleteError(undefined);
+          try {
+            await onDelete();
+            setDeleteOpen(false);
+          } catch (error) {
+            setDeleteError(errorMessage(error));
+          }
+        }}
+      >
+        <Paragraph>This removes the entire item record from Google Sheets, including its photo link, quantity, note and flags. This cannot be undone here.</Paragraph>
+        <div className={styles.deleteRecordSummary}>
+          <Text strong>Item {String(itemNumber).padStart(2, "0")} · {record.fromLocation} → {record.toLocation}</Text>
+          <Text>{isValidMovementQuantity(record.quantity) ? `${record.quantity} pieces` : "Quantity not entered"}</Text>
+          <Text type="secondary">{record.movementId}</Text>
+        </div>
+        <Paragraph type="secondary">The original photo in Google Drive will be kept.</Paragraph>
+        {deleteError ? <Alert type="error" showIcon title={deleteError} /> : null}
+      </Modal>
     </Card>
   );
 }

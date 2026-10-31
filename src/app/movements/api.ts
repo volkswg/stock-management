@@ -65,6 +65,12 @@ export function saveMovementItem({
   );
 }
 
+export function removeMovementItem(movementMasterId: string, movementId: string): Promise<{ records: ProductMovementRecord[] }> {
+  return request(`/api/movements/${encodeURIComponent(movementMasterId)}/items/${encodeURIComponent(movementId)}`, {
+    method: "DELETE",
+  });
+}
+
 export function saveMovementImage({
   movementMasterId,
   movementId,

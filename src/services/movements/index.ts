@@ -1,4 +1,6 @@
 export {
+  deleteMovementItem,
+  movementExists,
   getMovementItems,
   listMovements,
   markMovementDelivered,
