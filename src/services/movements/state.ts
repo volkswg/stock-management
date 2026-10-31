@@ -120,7 +120,7 @@ export async function saveMaster(sheets: IGoogleSheetsService, state: MovementSt
   const total = items.reduce((sum, row) => sum + (Number(String(row[3] || "0").replace(/,/g, "")) || 0), 0);
   const row: GoogleSheetRow = [
     state.masterId, state.userId, existing?.[2] || state.startedAt,
-    existing?.[3] || "", existing?.[4] === "delivered" ? "delivered" : complete ? "created" : "in_progress",
+    existing?.[3] || "", existing?.[4] === "delivered" ? "delivered" : complete || existing?.[4] === "created" ? "created" : "in_progress",
     String(total), existing?.[6] || state.startedAt, new Date().toISOString(),
   ];
   if (index === -1) await sheets.movementMasters.appendRows("A:H", [row]);

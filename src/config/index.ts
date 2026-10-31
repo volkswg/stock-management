@@ -14,6 +14,7 @@ export type AppConfig = {
   };
   publicBaseUrl: string;
   movementPublicBaseUrl: string;
+  movementCreateMode: "quantity_photo" | "photo_only";
   loyverse: {
     accounts: LoyverseAccountConfig[];
   };
@@ -61,6 +62,7 @@ export function getConfig(): AppConfig {
     },
     publicBaseUrl: process.env.PUBLIC_BASE_URL || "",
     movementPublicBaseUrl: process.env.MOVEMENT_PUBLIC_BASE_URL?.trim() || "",
+    movementCreateMode: parseMovementCreateMode(process.env.MOVEMENT_CREATE_MODE),
     loyverse: {
       accounts: parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON),
     },
@@ -178,4 +180,12 @@ function parseLoyverseAccounts(
 
 function toTrimmedString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function parseMovementCreateMode(value: string | undefined): AppConfig["movementCreateMode"] {
+  const mode = value?.trim() || "quantity_photo";
+  if (mode !== "quantity_photo" && mode !== "photo_only") {
+    throw new Error("MOVEMENT_CREATE_MODE must be quantity_photo or photo_only.");
+  }
+  return mode;
 }

@@ -8,3 +8,8 @@ export function parseQuantity(text: string): { quantity: string; remark: string 
   if (!Number.isFinite(total) || total <= 0) return undefined;
   return { quantity: String(total), remark: /^\d[\d,]*(?:\.\d+)?$/.test(text) ? "" : text };
 }
+
+export function isValidMovementQuantity(value: string): boolean {
+  const quantity = Number(value.replace(/,/g, "").trim());
+  return Number.isFinite(quantity) && quantity > 0;
+}

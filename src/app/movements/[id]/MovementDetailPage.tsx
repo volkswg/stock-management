@@ -31,7 +31,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductMovementRecord } from "@/services/movements";
-import { parseQuantity } from "@/features/backend/line/services/movements/utils";
+import { isValidMovementQuantity, parseQuantity } from "@/features/backend/line/services/movements/utils";
 import {
   deliverMovement,
   getMovement,
@@ -92,6 +92,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
     "";
   const currentRecords = recordsByShop[currentShop] || [];
   const totalQuantity = sumQuantity(records);
+  const missingQuantityCount = records.filter((record) => !isValidMovementQuantity(record.quantity)).length;
   const isDelivered =
     records.length > 0 && records.every((record) => record.status === "delivered");
 
@@ -209,19 +210,20 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                 Refresh
               </Button>
               <Popconfirm
-                disabled={isDelivered}
+                disabled={isDelivered || records.length === 0 || missingQuantityCount > 0}
                 title="Mark this movement as delivered?"
                 description="All movement items will be marked delivered."
                 okText="Mark delivered"
                 onConfirm={markDelivered}
               >
-                <Button disabled={isDelivered} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
+                <Button disabled={isDelivered || records.length === 0 || missingQuantityCount > 0} icon={<CheckCircleOutlined />} loading={delivering} type="primary">
                   {isDelivered ? "Delivered" : "Mark delivered"}
                 </Button>
               </Popconfirm>
             </Space>
           </header>
 
+          {missingQuantityCount > 0 ? <Alert className={styles.alert} title={`${missingQuantityCount} item(s) need a quantity. Edit each item's note or amount before marking delivered.`} showIcon type="warning" /> : null}
           {error ? <Alert className={styles.alert} title={error} showIcon type="error" /> : null}
           {notice ? <Alert className={styles.alert} title={notice} showIcon type="success" closable={{ onClose: () => setNotice(undefined) }} /> : null}
           {loading ? <Card><Skeleton active paragraph={{ rows: 9 }} /></Card> : records.length === 0 ? <Card><Empty description="No movement items" /></Card> : (
@@ -323,13 +325,13 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
               <Button aria-label={`Actions for ${record.movementId}`} icon={<MoreOutlined />} type="text" />
             </Dropdown>
           </div>
-          <Space size={6} wrap><Tag color="cyan">Qty {record.quantity}</Tag><Tag>{record.fromLocation} → {record.toLocation}</Tag><Tag color={record.status === "delivered" ? "green" : "default"}>{record.status === "delivered" ? "Delivered" : "Created"}</Tag></Space>
+          <Space size={6} wrap><Tag color={isValidMovementQuantity(record.quantity) ? "cyan" : "orange"}>{isValidMovementQuantity(record.quantity) ? `Qty ${record.quantity}` : "Needs quantity"}</Tag><Tag>{record.fromLocation} → {record.toLocation}</Tag><Tag color={record.status === "delivered" ? "green" : "default"}>{record.status === "delivered" ? "Delivered" : "Created"}</Tag></Space>
           <Text type="secondary">Created {formatBangkokDateTime(record.createdAt)}</Text>
           {editing ? (
             <div className={styles.editForm}>
               <label><span>Amount</span><Input disabled={saving} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></label>
               <label><span>Note (quantities are added automatically)</span><TextArea autoSize={{ minRows: 2, maxRows: 4 }} disabled={saving} value={remark} onChange={(event) => updateRemark(event.target.value)} /></label>
-              <Space><Button disabled={saving} onClick={cancel}>Cancel</Button><Button disabled={!nextQuantity || !changed} loading={saving} type="primary" onClick={() => void onSave({ movementId: record.movementId, quantity: nextQuantity, remark: nextRemark }).then(() => { setQuantity(nextQuantity); setRemark(nextRemark); setEditing(false); }).catch(() => undefined)}>Save</Button></Space>
+              <Space><Button disabled={saving} onClick={cancel}>Cancel</Button><Button disabled={!isValidMovementQuantity(nextQuantity) || !changed} loading={saving} type="primary" onClick={() => void onSave({ movementId: record.movementId, quantity: nextQuantity, remark: nextRemark }).then(() => { setQuantity(nextQuantity); setRemark(nextRemark); setEditing(false); }).catch(() => undefined)}>Save</Button></Space>
             </div>
           ) : record.remark ? <Paragraph className={styles.remark}>{record.remark}</Paragraph> : null}
           {message ? <Text type="secondary">{message}</Text> : null}

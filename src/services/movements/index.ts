@@ -2,6 +2,7 @@ export {
   getMovementItems,
   listMovements,
   markMovementDelivered,
+  MovementQuantityRequiredError,
   updateMovementImage,
   updateMovementItem,
   type MovementDateFilter,

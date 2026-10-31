@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { getMovementItems, markMovementDelivered } from "@/services/movements";
+import { getMovementItems, markMovementDelivered, MovementQuantityRequiredError } from "@/services/movements";
 
 export const runtime = "nodejs";
 
@@ -58,6 +58,9 @@ export async function PATCH(
     }
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof MovementQuantityRequiredError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     return movementError("update", movementMasterId, error);
   }
 }

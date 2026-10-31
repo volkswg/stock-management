@@ -1,3 +1,4 @@
+import type { AppConfig } from "@/config";
 import { createSortableId } from "@/services/utils/createSortableId";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
@@ -21,7 +22,7 @@ const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinishe
 
 // Routing has already resolved the movement session for this event.
 export async function handleMovementEvent({
-  event, session, sheets, drive, line, publicBaseUrl,
+  event, session, sheets, drive, line, publicBaseUrl, createMode = "quantity_photo",
 }: {
   event: MovementEventClassification["event"];
   session: MovementEventClassification["session"];
@@ -29,7 +30,11 @@ export async function handleMovementEvent({
   drive: () => IGoogleDriveService | undefined;
   line: ILineBotService;
   publicBaseUrl: string;
+  createMode?: AppConfig["movementCreateMode"];
 }): Promise<void> {
+  const photoOnly = createMode === "photo_only";
+  const prompt = (line: ILineBotService, event: LineEvent, state: MovementState, prefix = "") =>
+    promptMovement(line, event, state, prefix, createMode);
   const userId = event.source.userId;
   const text = event.message.text?.trim() || "";
   const command = text.toLowerCase();
@@ -58,7 +63,10 @@ export async function handleMovementEvent({
       return;
     }
     if (command === MovementStartCommandEnum.ResumeMovement) {
-      const resumed = state && state.step !== "complete" ? state : await resumeLegacyMovement(sheets, userId);
+      let resumed = state && state.step !== "complete" ? state : await resumeLegacyMovement(sheets, userId);
+      if (resumed && photoOnly && ["quantity", "product_image"].includes(resumed.step)) {
+        resumed = { ...resumed, step: "close_bag", quantity: "", remark: "", imageUrl: "" };
+      }
       if (!resumed) {
         await replyText(line, event, "No unfinished movement was found.", START_CHOICES.slice(0, 1));
       } else {
@@ -88,11 +96,19 @@ export async function handleMovementEvent({
   }
 
   if (event.message.type === LineMessageType.Image) {
-    if (state.step !== "product_image") {
+    const acceptsPhoto = photoOnly
+      ? Boolean(state.shop) && ["quantity", "product_image", "close_bag"].includes(state.step)
+      : state.step === "product_image";
+    if (!acceptsPhoto) {
       await prompt(line, event, state);
       return;
     }
-    await saveImage({ state, event, eventId, sheets, drive: drive(), line });
+    // Photo-only IDs belong to the incoming image, not the shared session cursor.
+    // Distinct images can never consume the same item ID or pending quantity.
+    const imageState = photoOnly ? {
+      ...state, itemId: `MOVED-LINE-${event.message.id}`, quantity: "", remark: "", imageUrl: "",
+    } : state;
+    await saveImage({ state: imageState, event, eventId, sheets, drive: drive(), line, createMode });
     return;
   }
 
@@ -103,11 +119,15 @@ export async function handleMovementEvent({
       await prompt(line, event, state);
       return;
     }
-    next = { ...next, shop, step: "quantity" };
+    next = { ...next, shop, step: photoOnly ? "close_bag" : "quantity" };
   } else if (state.step === "quantity" || state.step === "close_bag") {
-    if (state.step === "close_bag" && command === "close bag") {
+    if ((photoOnly || state.step === "close_bag") && command === "close bag") {
       next.step = "bag_closed";
     } else {
+      if (photoOnly) {
+        await prompt(line, event, state, "Set quantities and notes on the movement web page.\n\n");
+        return;
+      }
       const parsed = parseQuantity(text);
       if (!parsed) {
         await prompt(line, event, state, "⚠️ Quantity not accepted. Send a number greater than 0.\n\n");
@@ -131,9 +151,10 @@ export async function handleMovementEvent({
   await prompt(line, event, next);
 }
 
-async function saveImage({ state, event, eventId, sheets, drive, line }: {
+async function saveImage({ state, event, eventId, sheets, drive, line, createMode }: {
   state: MovementState; event: LineEvent; eventId: string;
   sheets: IGoogleSheetsService; drive: IGoogleDriveService | undefined; line: ILineBotService;
+  createMode: AppConfig["movementCreateMode"];
 }): Promise<void> {
   // A stable item ID makes a retry after an uncertain Sheets response idempotent.
   const existing = (await movementItems(sheets, state.masterId)).find((row) => row[0] === state.itemId);
@@ -154,7 +175,9 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
       return;
     }
     // Persist the upload URL before writing the item so a retry can reuse it.
-    await saveMovementState(sheets, { ...state, imageUrl });
+    if (createMode !== "photo_only") {
+      await saveMovementState(sheets, { ...state, imageUrl });
+    }
   }
   if (!existing) {
     const now = new Date(event.timestamp || Date.now()).toISOString();
@@ -164,12 +187,19 @@ async function saveImage({ state, event, eventId, sheets, drive, line }: {
     ]]);
   }
   await saveMaster(sheets, state);
+  if (createMode === "photo_only") {
+    // Do not overwrite session progress after a slow upload. Another event may
+    // already have closed the bag or selected the next shop.
+    await promptMovement(line, event, { ...state, step: "close_bag" },
+      `✅ Photo saved\nRoute: Home → ${state.shop}\nSet this item's quantity and note on the web page.\n\n`, createMode);
+    return;
+  }
   const next: MovementState = {
     ...state, itemId: `MOVED-${createSortableId()}`, step: "close_bag",
     quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
   };
   await saveMovementState(sheets, next);
-  await prompt(line, event, next, `✅ Item saved\nRoute: Home → ${state.shop}\nQuantity: ${state.quantity}\nPhoto: saved${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n`);
+  await promptMovement(line, event, next, `✅ Item saved\nRoute: Home → ${state.shop}\nQuantity: ${state.quantity}\nPhoto: saved${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n`);
 }
 
 async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleSheetsService, state: MovementState, publicBaseUrl: string): Promise<void> {
@@ -181,7 +211,9 @@ async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleS
   }
   const totalQuantity = Array.from(quantities.values()).reduce((total, quantity) => total + quantity, 0);
   const shopTotals = Array.from(quantities, ([shop, quantity]) => `• Home → ${shop}: ${quantity}`).join("\n");
-  const text = `✅ Movement completed\nRef: ${state.masterId}\n\n${shopTotals || "No items saved."}\n\nItems saved: ${rows.length}\nTotal quantity: ${totalQuantity}`;
+  const missingQuantity = rows.filter((row) => !String(row[3] || "").trim()).length;
+  const pendingNote = missingQuantity ? `\n\n⚠️ ${missingQuantity} item(s) need quantities. Open the web page to enter notes / quantities.` : "";
+  const text = `✅ Movement completed\nRef: ${state.masterId}\n\n${shopTotals || "No items saved."}\n\nItems saved: ${rows.length}\nTotal quantity: ${totalQuantity}${pendingNote}`;
   if (!publicBaseUrl) {
     await replyText(line, event, text);
     return;
@@ -194,7 +226,11 @@ async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleS
   }]);
 }
 
-async function prompt(line: ILineBotService, event: LineEvent, state: MovementState, prefix = ""): Promise<void> {
+async function promptMovement(line: ILineBotService, event: LineEvent, state: MovementState, prefix = "", createMode: AppConfig["movementCreateMode"] = "quantity_photo"): Promise<void> {
+  if (createMode === "photo_only" && ["quantity", "product_image", "close_bag"].includes(state.step)) {
+    await replyText(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send product photos. Set quantities and notes on the web page afterward.\n➡️ Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
+    return;
+  }
   switch (state.step) {
     case "shop": return replyText(line, event, prefix + "📍 Choose destination shop\nFrom: Home\n\n➡️ Tap NJ or YY.", [["NJ", "NJ"], ["YY", "YY"]]);
     case "quantity": return replyText(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send the quantity for one product photo.\nExample: 12\n\nFor a breakdown, put each quantity on a new line:\nขาว 5\nดำ 5\nThe quantities will be added together.`);

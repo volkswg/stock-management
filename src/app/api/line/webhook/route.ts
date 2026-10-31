@@ -71,6 +71,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           sheets: getGoogleSheetsService(),
           drive: getGoogleDriveService,
           line: lineBotService,
+          createMode: config.movementCreateMode,
           publicBaseUrl: config.movementPublicBaseUrl || config.publicBaseUrl,
         });
         continue;

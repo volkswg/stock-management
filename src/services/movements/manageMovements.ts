@@ -3,7 +3,14 @@ import type {
   IGoogleSheetsService,
 } from "@/externals/google/sheet";
 import { DETAIL_HEADERS, ensureHeader, MASTER_HEADERS } from "./state";
-import { parseQuantity } from "@/features/backend/line/services/movements/utils";
+import { isValidMovementQuantity, parseQuantity } from "@/features/backend/line/services/movements/utils";
+
+export class MovementQuantityRequiredError extends Error {
+  constructor() {
+    super("Set a quantity greater than 0 for every item before marking delivered.");
+    this.name = "MovementQuantityRequiredError";
+  }
+}
 
 export type MovementStatus = "in_progress" | "created" | "delivered";
 
@@ -200,6 +207,10 @@ export async function markMovementDelivered({
     index > 0 && cell(row[1]).toUpperCase() === normalizedId ? [index] : [],
   );
   if (masterIndex === -1 || detailIndexes.length === 0) return null;
+
+  if (detailIndexes.some((index) => !isValidMovementQuantity(cell(detailRows[index][3])))) {
+    throw new MovementQuantityRequiredError();
+  }
 
   const now = new Date().toISOString();
   await Promise.all(

@@ -46,3 +46,22 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Movement creation mode
+
+Set `MOVEMENT_CREATE_MODE` in the deployment environment, then redeploy:
+
+- `quantity_photo` (default, including when unset): existing LINE journey —
+  choose NJ/YY, enter quantity/breakdown, send photo, then repeat or close the bag.
+- `photo_only`: choose NJ/YY, send product photos, then Close Bag → Another Shop
+  or Summary. Forwarded text is not used as a quantity/note. Each photo is saved
+  with an unset quantity; enter the note/quantity on the movement detail web page.
+  Notes such as `ดำ 5` or `5` calculate quantity 5 and remain saved as entered.
+
+The switch is global; LINE does not show a mode selector. Resumed sessions use
+whichever mode the deployed environment selects. Existing saved items are not
+converted. Delivery requires a positive quantity for every item in either mode.
+Photo-only items use the LINE image message ID, so different images do not share
+an item cursor and re-delivery of an already-saved image reuses its item.
+This is not a distributed webhook queue; cross-request command ordering still
+requires durable per-user serialization if strict ordering is needed.
