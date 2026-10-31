@@ -277,7 +277,7 @@ function MovementItem({ checked, record, saving, uploading, message, onChecked, 
   onNewArrival: (value: boolean) => Promise<void>;
   onUpdateImage: (file: File) => Promise<void>;
 }) {
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(() => !isValidMovementQuantity(record.quantity));
   const [quantity, setQuantity] = useState(record.quantity);
   const [remark, setRemark] = useState(record.remark);
   const nextQuantity = quantity.trim();
