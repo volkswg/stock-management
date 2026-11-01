@@ -40,3 +40,109 @@
 .formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 900px) { .header { flex-direction: column; } .headerActions { max-width: 100%; } }
 @media (max-width: 600px) { .filters > div { flex: 1 1 100%; } .formGrid { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
+/* Expense list layout; master-data pages retain their existing card layout. */
+.listShell { background: #f5f7f6; color: #182b23; }
+.listContent { max-width: 1280px; padding: 30px 36px 28px; background: transparent; }
+.listHeader { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+.eyebrow { color: #687b6f; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 7px; }
+.listHeader h1:global(.ant-typography) { font-size: 30px; letter-spacing: -.9px; line-height: 1.15; color: #182b23; margin: 0 0 7px; }
+.listHeader :global(.ant-typography-secondary) { font-size: 13px; color: #748078; }
+.listHeaderActions, .desktopLinks { display: flex; align-items: center; gap: 17px; flex-shrink: 0; }
+.desktopLinks a { font-size: 12px; color: #53665a; padding-block: 10px; }
+.desktopLinks a:hover { color: #157347; text-decoration: underline; }
+.listHeaderActions .desktopAdd:global(.ant-btn) { min-height: 40px; font-weight: 600; }
+.listHeaderActions .manageButton:global(.ant-btn) { display: none; }
+.summary { display: grid; grid-template-columns: 1.2fr 1fr 1fr; padding: 21px 0; border: 1px solid #e1e7e2; border-radius: 9px; background: #fff; margin-bottom: 20px; }
+.metric { min-width: 0; padding: 0 24px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid #e6ece7; }
+.metric:last-child { border: 0; }
+.metric > span { color: #718077; font-size: 12px; }
+.metric strong { font-size: 25px; font-weight: 650; letter-spacing: -.6px; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.totalMetric strong { color: #157347; }
+.listFilters { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 23px; }
+.listFilters > div { flex: 0 1 220px; min-width: 0; }
+.listFilters label { display: block; font-size: 11px; font-weight: 600; color: #69796d; margin-bottom: 7px; }
+.listFilters :global(.ant-picker), .listFilters :global(.ant-select) { width: 100%; min-height: 40px; font-size: 12px; }
+.listFilters :global(.ant-picker-input > input), .listFilters :global(.ant-select-content) { font-size: 12px; }
+.listFilters .refreshButton:global(.ant-btn) { margin-left: auto; height: 40px; font-size: 12px; color: #5b7063; padding-inline: 6px; }
+.listTop { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.listTop h2 { font-size: 17px; letter-spacing: -.3px; margin: 0; display: flex; gap: 9px; align-items: center; }
+.listTop > :global(.ant-typography) { font-size: 11px; color: #87938b; }
+.count { border: 1px solid #dce6de; border-radius: 20px; min-width: 24px; padding-inline: 5px; line-height: 20px; text-align: center; font-size: 11px; font-weight: 500; color: #65806c; background: #fff; }
+.expenseList { border: 1px solid #dfe6e0; border-radius: 9px; background: #fff; overflow: hidden; }
+.columnLabels, .expenseRow { display: grid; grid-template-columns: minmax(0, 1fr) 130px 130px 150px 90px; align-items: center; gap: 16px; padding: 0 22px; }
+.columnLabels { min-height: 36px; font-size: 10px; letter-spacing: .6px; color: #8a958d; text-transform: uppercase; border-bottom: 1px solid #e5eae5; }
+.amountLabel { text-align: right; padding-right: 8px; }
+.groupHeader { min-height: 38px; padding: 8px 22px; background: #f2f6f3; border-bottom: 1px solid #e7ede7; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.groupHeader > div { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.groupHeader h3 { font-size: 12px; font-weight: 700; margin: 0; overflow-wrap: anywhere; }
+.groupHeader span { color: #7b8980; font-size: 10px; white-space: nowrap; }
+.groupHeader > strong { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: #526a5a; padding-right: 114px; white-space: nowrap; }
+.expenseRows { list-style: none; margin: 0; padding: 0; }
+.expenseRow { min-height: 53px; padding-block: 10px; border-bottom: 1px solid #edf0ed; }
+.expenseList > section:last-child .expenseRow:last-child { border-bottom: 0; }
+.expenseName { min-width: 0; }
+.expenseName h4 { font-size: 13px; font-weight: 500; margin: 0; overflow-wrap: anywhere; }
+.expenseNote { margin: 5px 0 0; color: #748078; font-size: 11px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.categoryPill { display: inline-block; max-width: 100%; font-size: 10px; line-height: 20px; padding: 0 7px; border: 1px solid #e7ebe7; border-radius: 4px; background: #f5f6f5; color: #6c786f; overflow-wrap: anywhere; }
+.rowDate { font-size: 11px; color: #6c7a70; }
+.unknownDate { color: #98a199; }
+.rowAmount { font-size: 13px; font-weight: 600; text-align: right; padding-right: 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.listRowActions { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+.listRowActions .editButton:global(.ant-btn) { height: 28px; font-size: 13px; padding-inline: 8px; color: #577663; flex-shrink: 0; }
+.listRowActions > :global(.ant-btn) { width: 28px; height: 28px; color: #7b8980; flex-shrink: 0; }
+.mobileMeta { display: none; }
+.listFootnote { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: 10px; color: #8a968d; }
+.listEmpty { padding: 28px 12px; }
+.mobileAddBar { display: none; }
+@media (pointer: coarse) {
+  .listRowActions .editButton:global(.ant-btn), .listRowActions > :global(.ant-btn) { min-width: 44px; min-height: 44px; }
+  .desktopLinks a { min-height: 44px; display: inline-flex; align-items: center; }
+  .listFilters :global(.ant-picker), .listFilters :global(.ant-select), .listFilters .refreshButton:global(.ant-btn), .listHeaderActions .desktopAdd:global(.ant-btn) { min-height: 44px; }
+}
+@media (min-width: 701px) and (max-width: 1050px) {
+  .listHeader { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .listHeaderActions { width: 100%; justify-content: space-between; }
+  .columnLabels, .expenseRow { grid-template-columns: minmax(0, 1fr) 95px 100px 130px 90px; gap: 10px; padding-inline: 16px; }
+  .groupHeader { padding-inline: 16px; }
+  .groupHeader > strong { padding-right: 108px; }
+}
+@media (max-width: 700px) {
+  .listContent { padding: 22px 16px calc(100px + env(safe-area-inset-bottom)); }
+  .listHeader { align-items: flex-start; gap: 10px; margin-bottom: 19px; }
+  .eyebrow { font-size: 10px; letter-spacing: 1.1px; }
+  .listHeader h1:global(.ant-typography) { font-size: 28px; }
+  .listHeader :global(.ant-typography-secondary) { font-size: 11px; line-height: 1.4; }
+  .listHeaderActions { padding-top: 20px; }
+  .desktopLinks, .listHeaderActions .desktopAdd:global(.ant-btn) { display: none; }
+  .listHeaderActions .manageButton:global(.ant-btn) { display: inline-flex; min-height: 44px; font-size: 11px; padding-inline: 10px; }
+  .summary { grid-template-columns: 1fr 1fr; padding: 0; margin-bottom: 18px; border-radius: 8px; }
+  .metric { padding: 12px 16px 14px; gap: 6px; border: 0; }
+  .metric > span { font-size: 10px; }
+  .metric strong { font-size: 17px; letter-spacing: -.2px; }
+  .metric.totalMetric { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; border-bottom: 1px solid #e8eee9; padding: 15px 16px; gap: 5px; }
+  .totalMetric strong { font-size: 23px; letter-spacing: -.6px; }
+  .metric:nth-child(2) { border-right: 1px solid #e8eee9; }
+  .listFilters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 11px 10px; position: relative; }
+  .listFilters > div:first-child { grid-column: 1 / -1; padding-right: 81px; }
+  .listFilters label { font-size: 10px; }
+  .listFilters :global(.ant-picker-input > input), .listFilters :global(.ant-select-content) { font-size: 11px; }
+  .listFilters .refreshButton:global(.ant-btn) { position: absolute; top: 21px; right: 0; margin: 0; padding: 0; font-size: 11px; }
+  .listTop h2 { font-size: 16px; gap: 8px; }
+  .listTop > :global(.ant-typography) { font-size: 10px; }
+  .columnLabels { display: none; }
+  .groupHeader { min-height: 40px; padding-inline: 13px; }
+  .groupHeader > strong { padding: 0; font-size: 12px; }
+  .expenseRow { grid-template-columns: minmax(0, 1fr) auto; min-height: 88px; padding: 12px 13px; gap: 0 10px; }
+  .expenseName { grid-column: 1; grid-row: 1 / 3; align-self: start; padding-top: 2px; }
+  .expenseName h4 { font-size: 12px; font-weight: 600; }
+  .mobileMeta { display: flex; flex-wrap: wrap; gap: 4px; color: #7e8c82; font-size: 10px; line-height: 1.5; margin-top: 7px; overflow-wrap: anywhere; }
+  .rowCategory, .rowDate { display: none; }
+  .rowAmount { grid-column: 2; grid-row: 1; font-size: 12px; padding: 2px 0 0; align-self: start; }
+  .listRowActions { grid-column: 2; grid-row: 2; gap: 0; align-self: end; }
+  .listRowActions .editButton:global(.ant-btn), .listRowActions > :global(.ant-btn) { min-width: 44px; min-height: 44px; font-size: 11px; }
+  .listFootnote { font-size: 9px; line-height: 1.5; }
+  .listFootnote span:last-child { display: none; }
+  .mobileAddBar { display: block; position: fixed; inset: auto 0 0; padding: 11px 16px calc(15px + env(safe-area-inset-bottom)); background: #ffffffed; border-top: 1px solid #e0e7e1; backdrop-filter: blur(6px); z-index: 5; }
+  .mobileAddBar :global(.ant-btn) { width: 100%; min-height: 44px; font-size: 12px; font-weight: 600; }
+}

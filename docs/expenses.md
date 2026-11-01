@@ -10,6 +10,12 @@
 
 Expense operations do not read sales receipts or call Loyverse. Profit reporting consumes expense records and aggregates by accounting month and mapped account (or independent shop ID). Shared costs are deducted once at the month level. Inactive masters remain available for historical records and corrections, but not for new assignments. Changing a shop's Loyverse mapping changes its report attribution, including historical expenses.
 
+## Responsive expense list
+
+Entries are grouped alphabetically by shop, followed by shared expenses. Each group shows its filtered count and subtotal. Overall, shop, and shared totals use the same active filters.
+
+Desktop rows align category, actual date, amount and actions in columns. At 700px and below, category/date stack under the name, management destinations move into the Manage menu, and Add expense stays pinned above the device safe area. Notes remain visible; unknown dates are explicitly unrecorded. Edit opens the existing form; Delete stays in the overflow menu with a separate confirmation and retryable errors. Master-data pages retain their card layout.
+
 ## Authoritative worksheets
 
 `expenses` has these columns:

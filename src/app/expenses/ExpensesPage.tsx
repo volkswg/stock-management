@@ -1,7 +1,7 @@
 "use client";
 
-import { MoreOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Alert, Button, Card, ConfigProvider, DatePicker, Dropdown, Empty, Form, Input, InputNumber, Modal, Select, Spin, Tag, Typography } from "antd";
+import { DownOutlined, MoreOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Alert, Button, ConfigProvider, DatePicker, Dropdown, Empty, Form, Input, InputNumber, Modal, Select, Spin, Typography } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import type { Expense, ExpenseCategory, ExpenseShop } from "@/services/expenses";
@@ -50,6 +50,13 @@ export function ExpensesPage({ initialMonth }: { initialMonth: string }) {
   const busy = loading || saving || Boolean(error);
   const shopName = (row: Expense) => row.scope === "SHARED" ? "Shared" : shops.find(shop => shop.id === row.shopId)?.name || row.shopId;
 
+  const groups = Array.from(new Set(visible.map(row => row.scope === "SHARED" ? "SHARED" : row.shopId)))
+    .sort((a, b) => a === "SHARED" ? 1 : b === "SHARED" ? -1 : (shops.find(shop => shop.id === a)?.name || a).localeCompare(shops.find(shop => shop.id === b)?.name || b))
+    .map(id => ({ id, name: id === "SHARED" ? "Shared expenses" : shops.find(shop => shop.id === id)?.name || id,
+      rows: visible.filter(row => (row.scope === "SHARED" ? "SHARED" : row.shopId) === id) }));
+  const addDisabled = busy || !categories.some(category => category.active);
+  const managementLinks = [{ key: "categories", label: <a href="/expenses/categories">Categories</a> }, { key: "shops", label: <a href="/expenses/shops">Shop master</a> }, { key: "profit", label: <a href="/sales/profit-summary">Profit summary</a> }];
+
   const changeMonth = (next: string) => {
     if (next === month) return;
     setLoading(true); setExpenses([]); setMonth(next); setNotice(undefined);
@@ -82,27 +89,53 @@ export function ExpensesPage({ initialMonth }: { initialMonth: string }) {
   };
 
   return <ConfigProvider theme={{ token: { colorPrimary: "#157347", borderRadius: 6, fontFamily: "Arial, Helvetica, sans-serif" } }}>
-    <div className={styles.appShell}><main className={styles.content}>
-      <header className={styles.header}>
-        <div><Text type="secondary">Operating costs</Text><Title level={1}>Expense entries</Title><Text type="secondary">Record individual shop and shared expenses, independently of sales.</Text></div>
-        <div className={styles.headerActions}><Button href="/expenses/categories">Categories</Button><Button href="/expenses/shops">Shop master</Button><Button href="/sales/profit-summary">Profit summary</Button><Button icon={<ReloadOutlined />} loading={loading} disabled={saving} onClick={() => void load()}>Refresh</Button></div>
+    <div className={`${styles.appShell} ${styles.listShell}`}><main className={`${styles.content} ${styles.listContent}`}>
+      <header className={styles.listHeader}>
+        <div><div className={styles.eyebrow}>Operating costs</div><Title level={1}>Expenses</Title><Text type="secondary">Your shop and shared expenses, in one clear list.</Text></div>
+        <div className={styles.listHeaderActions}>
+          <nav className={styles.desktopLinks} aria-label="Expense management"><a href="/expenses/categories">Categories</a><a href="/expenses/shops">Shop master</a><a href="/sales/profit-summary">Profit summary</a></nav>
+          <Button type="primary" aria-label="Add expense" icon={<PlusOutlined />} className={styles.desktopAdd} disabled={addDisabled} onClick={() => open(null)}>Add expense</Button>
+          <Dropdown trigger={["click"]} menu={{ items: managementLinks }}><Button className={styles.manageButton}>Manage <DownOutlined /></Button></Dropdown>
+        </div>
       </header>
       {error && <Alert title={error} type="error" showIcon className={styles.alert} />}
       {notice && <Alert title={notice} type="success" showIcon className={styles.alert} />}
-      <div className={styles.filters}>
+      <section className={styles.summary} aria-label="Filtered expense totals">
+        <div className={`${styles.metric} ${styles.totalMetric}`}><span>Total expenses</span><strong>{money(shopTotal + sharedTotal)}</strong></div>
+        <div className={styles.metric}><span>Shop expenses</span><strong>{money(shopTotal)}</strong></div>
+        <div className={styles.metric}><span>Shared expenses</span><strong>{money(sharedTotal)}</strong></div>
+      </section>
+      <div className={styles.listFilters}>
         <div><label htmlFor="expense-month">Month</label><DatePicker id="expense-month" aria-label="Expense month" picker="month" format="MMMM YYYY" allowClear={false} value={dayjs(`${month}-01`)} disabled={loading || saving} onChange={value => { if (value) changeMonth(value.format("YYYY-MM")); }} /></div>
         <div><label htmlFor="expense-shop-filter">Shop / scope</label><Select id="expense-shop-filter" aria-label="Filter shop" value={shopFilter} disabled={busy} onChange={setShopFilter} options={[{ value: "ALL", label: "All shops and shared" }, { value: "SHARED", label: "Shared only" }, ...shops.map(shop => ({ value: shop.id, label: `${shop.name}${shop.active ? "" : " (inactive)"}` }))]} /></div>
         <div><label htmlFor="expense-category-filter">Category</label><Select id="expense-category-filter" aria-label="Filter category" value={categoryFilter} disabled={busy} onChange={setCategoryFilter} options={[{ value: "ALL", label: "All categories" }, ...categories.map(category => ({ value: category.id, label: category.name }))]} /></div>
+        <Button type="text" className={styles.refreshButton} icon={<ReloadOutlined />} loading={loading} disabled={saving} onClick={() => void load()}>Refresh</Button>
       </div>
-      <div className={styles.totals}><Card><Text type="secondary">Shop expenses (filtered)</Text><strong>{money(shopTotal)}</strong></Card><Card><Text type="secondary">Shared expenses (filtered)</Text><strong>{money(sharedTotal)}</strong></Card><Card><Text type="secondary">Total expenses (filtered)</Text><strong>{money(shopTotal + sharedTotal)}</strong></Card></div>
-      <section className={styles.section} aria-labelledby="expense-entries">
-        <div className={styles.sectionHeader}><div><h2 id="expense-entries">Entries</h2><Text type="secondary">{visible.length} expense{visible.length === 1 ? "" : "s"} for {dayjs(`${month}-01`).format("MMMM YYYY")}</Text></div><Button type="primary" disabled={busy || !categories.some(category => category.active)} onClick={() => open(null)}>Add expense</Button></div>
-        <Spin spinning={loading}><div className={styles.grid}>{visible.map(row => <Card key={row.id} className={styles.expenseCard}>
-          <div className={styles.cardHeader}><h3>{row.name}</h3><div className={styles.rowActions}><Button type="text" size="small" className={styles.editButton} disabled={busy} aria-label={`Edit ${row.name} for ${shopName(row)}`} onClick={() => open(row)}>Edit</Button><Dropdown trigger={["click"]} menu={{ items: [{ key: "delete", label: "Delete expense", danger: true }], onClick: () => { setModalError(undefined); setDeleting(row); } }}><Button type="text" icon={<MoreOutlined />} disabled={busy} aria-label={`More actions for ${row.name} for ${shopName(row)}`} /></Dropdown></div></div>
-          <Text>{shopName(row)}</Text><div className={styles.tags}><Tag>{categories.find(category => category.id === row.categoryId)?.name || row.categoryId}</Tag></div>
-          <strong className={styles.amount}>{money(row.amount)}</strong><Text type="secondary">{row.expenseDate ? dayjs(row.expenseDate).format("D MMM YYYY") : "Actual date not recorded"}</Text>{row.note && <p>{row.note}</p>}
-        </Card>)}</div>{!loading && !visible.length && <Empty description="No expenses match this month and filters." />}</Spin>
+      <section className={styles.section} aria-labelledby="expense-entries" aria-busy={loading}>
+        <div className={styles.listTop}><h2 id="expense-entries">Expense list <span className={styles.count}>{visible.length}</span></h2><Text type="secondary">{dayjs(`${month}-01`).format("MMMM YYYY")}</Text></div>
+        <Spin spinning={loading}>
+          <div className={styles.expenseList}>
+            <div className={styles.columnLabels} aria-hidden="true"><span>Expense</span><span>Category</span><span>Expense date</span><span className={styles.amountLabel}>Amount</span><span /></div>
+            {groups.map(group => <section key={group.id} aria-label={`${group.name} expenses`}>
+              <div className={styles.groupHeader}><div><h3>{group.name}</h3><span>{group.rows.length} expense{group.rows.length === 1 ? "" : "s"}</span></div><strong>{money(group.rows.reduce((sum, row) => sum + row.amount, 0))}</strong></div>
+              <ul className={styles.expenseRows}>{group.rows.map(row => {
+                const category = categories.find(category => category.id === row.categoryId)?.name || row.categoryId;
+                const date = row.expenseDate ? dayjs(row.expenseDate).format("D MMM YYYY") : "Not recorded";
+                return <li key={row.id} className={styles.expenseRow}>
+                  <div className={styles.expenseName}><h4>{row.name}</h4><div className={styles.mobileMeta}><span>{category}</span><span aria-hidden="true">·</span><span>{row.expenseDate ? date : "Date not recorded"}</span></div>{row.note && <p className={styles.expenseNote}>{row.note}</p>}</div>
+                  <div className={styles.rowCategory}><span className={styles.categoryPill}>{category}</span></div>
+                  <div className={`${styles.rowDate} ${!row.expenseDate ? styles.unknownDate : ""}`}>{date}</div>
+                  <strong className={styles.rowAmount}>{money(row.amount)}</strong>
+                  <div className={styles.listRowActions}><Button type="text" size="small" className={styles.editButton} disabled={busy} aria-label={`Edit ${row.name} for ${shopName(row)}`} onClick={() => open(row)}>Edit</Button><Dropdown trigger={["click"]} menu={{ items: [{ key: "delete", label: "Delete expense", danger: true }], onClick: () => { setModalError(undefined); setDeleting(row); } }}><Button type="text" icon={<MoreOutlined />} disabled={busy} aria-label={`More actions for ${row.name} for ${shopName(row)}`} /></Dropdown></div>
+                </li>;
+              })}</ul>
+            </section>)}
+            {!loading && !visible.length && <Empty className={styles.listEmpty} description="No expenses match this month and filters." />}
+          </div>
+        </Spin>
+        <div className={styles.listFootnote}><span>Showing {visible.length} expense{visible.length === 1 ? "" : "s"} · {shopFilter === "ALL" ? "All shops and shared" : shopFilter === "SHARED" ? "Shared only" : shops.find(shop => shop.id === shopFilter)?.name || shopFilter}{categoryFilter !== "ALL" && ` · ${categories.find(category => category.id === categoryFilter)?.name || categoryFilter}`}</span><span>Amounts in Thai baht (THB)</span></div>
       </section>
+      <div className={styles.mobileAddBar}><Button type="primary" aria-label="Add expense" icon={<PlusOutlined />} disabled={addDisabled} onClick={() => open(null)}>Add expense</Button></div>
     </main></div>
     <Modal open={editing !== undefined} title={editing ? "Edit expense" : "Add expense"} okText="Save expense" confirmLoading={saving} cancelButtonProps={{ disabled: saving }} closable={!saving} keyboard={!saving} mask={{ closable: false }} onCancel={() => { if (!saving) setEditing(undefined); }} onOk={() => form.submit()}>
       {modalError && <Alert title={modalError} type="error" showIcon className={styles.alert} />}
