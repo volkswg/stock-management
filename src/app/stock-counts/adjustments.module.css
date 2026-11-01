@@ -1,0 +1,39 @@
+.panel { margin-top: 24px; background: #fff; border: 1px solid #e1e5e2; border-radius: 6px; padding: 20px; color: #15243a; color-scheme: light; scroll-margin-top: 16px; }
+.header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.header h2 { font-size: 21px; margin: 0 0 6px; }
+.header p, .hint { font-size: 13px; line-height: 1.7; color: #637187; }
+.hint { margin: 16px 0; }
+.actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.filters { display: grid; grid-template-columns: minmax(0,2fr) repeat(3,minmax(0,1fr)); gap: 8px; margin: 16px 0; }
+.filters > * { min-width: 0; }
+.filters :global(.ant-select), .filters :global(.ant-input-affix-wrapper) { min-height: 40px; width: 100%; }
+.list { list-style: none; padding: 0; margin: 0; }
+.list > li { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(0,1fr); gap: 12px; align-items: start; border-top: 1px solid #e1e5e2; padding: 20px 0; overflow-wrap: anywhere; }
+.list > li > div:first-child { display: grid; gap: 6px; font-size: 14px; }
+.list > li > div:first-child > span { color: #637187; font-size: 12px; }
+.tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.out, .in { text-align: right; font-size: 16px; font-variant-numeric: tabular-nums; }
+.out { color: #986817; } .in { color: #157347; }
+.details { grid-column: 1 / -1; font-size: 12px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.details a { color: #157347; text-decoration: underline; display: inline-block; padding-block: 8px; }
+.details summary { cursor: pointer; padding: 8px 0; width: fit-content; }
+.empty { text-align: center; padding: 40px 12px; color: #637187; }
+.empty h3 { font-size: 17px; margin-bottom: 8px; }
+.modal, .form { color-scheme: light; color: #15243a; }
+.form { display: grid; gap: 14px; padding-top: 12px; }
+.form label { display: grid; gap: 6px; font-size: 13px; min-width: 0; }
+.form input, .form select, .form textarea { width: 100%; max-width: 100%; min-width: 0; min-height: 44px; box-sizing: border-box; font: inherit; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; background: #fff; color: #15243a; color-scheme: light; }
+.form select:disabled { opacity: 1; color: #637187; background: #f5f7f6; }
+.form input:focus-visible, .form select:focus-visible, .form textarea:focus-visible { outline: 2px solid #157347; outline-offset: 2px; }
+.form p { font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.form .check { display: flex; align-items: center; gap: 10px; line-height: 1.6; min-height: 44px; }
+.check input { width: 20px; min-width: 20px; height: 20px; min-height: 20px; accent-color: #157347; padding: 0; }
+@media(max-width: 767px) {
+ .panel { padding: 16px 12px; }
+ .header > .actions { width: 100%; justify-content: flex-start; }
+ .filters { grid-template-columns: minmax(0,1fr); }
+ .list > li { grid-template-columns: minmax(0,2fr) minmax(0,1fr); }
+ .list > li > .actions { grid-column: 1 / -1; justify-content: flex-start; }
+ .panel :global(.ant-btn), .form :global(.ant-btn), .filters :global(.ant-select), .filters :global(.ant-input-affix-wrapper) { min-height: 44px; }
+}
+@media(pointer: coarse) { .panel :global(.ant-btn), .form :global(.ant-btn) { min-height: 44px; min-width: 44px; } .details summary { min-height: 44px; } }

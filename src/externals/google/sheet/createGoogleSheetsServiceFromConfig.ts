@@ -31,6 +31,7 @@ export function createGoogleSheetsServiceFromConfig(
     shipmentOrdersWorksheetName:
       config.googleSheets.shipmentOrdersWorksheetName,
     shipmentsWorksheetName: config.googleSheets.shipmentsWorksheetName,
+    stockAdjustmentsWorksheetName: config.googleSheets.stockAdjustmentsWorksheetName,
     stockCountsWorksheetName: config.googleSheets.stockCountsWorksheetName,
     movementMasterWorksheetName: config.googleSheets.movementMasterWorksheetName,
     movementDetailWorksheetName: config.googleSheets.movementDetailWorksheetName,

@@ -27,6 +27,7 @@ export type GoogleSheetsConfig = {
   shipmentOrdersWorksheetName: string;
   shipmentsWorksheetName: string;
   stockCountsWorksheetName: string;
+  stockAdjustmentsWorksheetName: string;
   movementMasterWorksheetName: string;
   movementDetailWorksheetName: string;
   userStateWorksheetName: string;
@@ -75,6 +76,7 @@ export interface IGoogleSheetsService {
   readonly shipmentOrders: IGoogleRowsSheet;
   readonly shipments: IGoogleRowsSheet;
   readonly stockCounts: IGoogleRowsSheet;
+  readonly stockAdjustments: IGoogleRowsSheet;
   readonly movementMasters: IGoogleRowsSheet;
   readonly movementDetails: IGoogleRowsSheet;
   readonly userState: IGoogleRowsSheet;

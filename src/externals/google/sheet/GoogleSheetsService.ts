@@ -1,3 +1,4 @@
+import { StockAdjustmentsSheet } from "./sheets/stock-adjustments/StockAdjustmentsSheet";
 import { PayrollRecordsSheet } from "./sheets/employee-advances/PayrollRecordsSheet";
 import { RecordsSheet } from "./sheets/expenses/RecordsSheet";
 import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
@@ -43,6 +44,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly shipmentOrders: ShipmentOrdersSheet;
   readonly shipments: ShipmentsSheet;
   readonly stockCounts: StockCountsSheet;
+  readonly stockAdjustments: StockAdjustmentsSheet;
   readonly movementMasters: MovementSheet;
   readonly movementDetails: MovementSheet;
   readonly userState: UserStateSheet;
@@ -62,6 +64,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     this.client = new GoogleSheetsClient(auth, config.spreadsheetId);
     this.employeeAdvances = new PayrollRecordsSheet(this.client, config.employeeAdvancesWorksheetName);
     this.payrollSettlements = new PayrollRecordsSheet(this.client, config.payrollSettlementsWorksheetName);
+    this.stockAdjustments = new StockAdjustmentsSheet(this.client, config.stockAdjustmentsWorksheetName);
     this.expenses = new RecordsSheet(this.client, config.expensesWorksheetName);
     this.expenseCategories = new RecordsSheet(this.client, config.expenseCategoriesWorksheetName);
     this.shops = new RecordsSheet(this.client, config.shopsWorksheetName);

@@ -54,7 +54,7 @@ const MENU_GROUPS: MenuGroup[] = [
       { href: "/orders", icon: <ShoppingCartOutlined />, title: "Orders", description: "Manage purchase orders" },
       { href: "/shipments", icon: <TruckOutlined />, title: "Shipments", description: "Track incoming stock" },
       { href: "/movements", icon: <SwapOutlined />, title: "Movements", description: "Review stock changes" },
-      { href: "/stock-counts", icon: <AuditOutlined />, title: "Monthly stock count", description: "Count and reconcile inventory" },
+      { href: "/stock-counts", icon: <AuditOutlined />, title: "Monthly stock count", description: "Count stock, log gifts and other unit adjustments" },
     ],
   },
   {

@@ -1,3 +1,4 @@
+import { listStockAdjustments, stockAdjustmentTotals, stockToday } from "@/services/stock-adjustments/manageStockAdjustments";
 import { randomUUID } from "node:crypto";
 import {
   STOCK_COUNT_HEADERS,
@@ -32,6 +33,12 @@ export type MonthlyShopStockCount = {
   hasOpeningCount: boolean;
   stockIn: number;
   stockOut: number;
+  adjustmentsOut: number;
+  adjustmentsIn: number;
+  adjustmentCount: number;
+  expectedSalesDays: number;
+  missingSalesDays: number;
+  warnings: string[];
   salesSyncedDays: number;
   calculatedStock: number;
   physicalCount: number | null;
@@ -55,7 +62,7 @@ export async function getMonthlyStockCounts({
   const monthStart = `${month}-01`;
   const monthEnd = getMonthEnd(month);
   const previousMonth = shiftMonth(month, -1);
-  const [countRows, movements, salesDashboard] = await Promise.all([
+  const [countRows, movements, salesDashboard, adjustments] = await Promise.all([
     googleSheetsService.stockCounts.readRows(),
     listMovements({ filter: {}, googleSheetsService }),
     getGoogleSheetsSalesDashboard({
@@ -64,6 +71,7 @@ export async function getMonthlyStockCounts({
       googleSheetsService,
       toDate: monthEnd,
     }),
+    listStockAdjustments(googleSheetsService),
   ]);
   const counts = countRows
     .map(mapStockCountRow)
@@ -98,7 +106,17 @@ export async function getMonthlyStockCounts({
     const openingStock = previous?.physicalCount || 0;
     const stockIn = stockInByAccount.get(account.id) || 0;
     const stockOut = stockOutByAccount.get(account.id) || 0;
-    const calculatedStock = normalizeNumber(openingStock + stockIn - stockOut);
+    const adjustmentTotals = stockAdjustmentTotals(adjustments, account.id, month);
+    const calculatedStock = normalizeNumber(openingStock + stockIn - stockOut - adjustmentTotals.adjustmentsOut + adjustmentTotals.adjustmentsIn);
+    const today = stockToday();
+    const expectedSalesDays = month < today.slice(0, 7) ? Number(monthEnd.slice(8)) : month === today.slice(0, 7) ? Number(today.slice(8)) : 0;
+    const syncedDates = new Set(salesDashboard.shopSeries.find(shop => shop.accountId === account.id)?.dailySales.map(day => day.salesDate) || []);
+    const missingSalesDays = Array.from({ length: expectedSalesDays }, (_, i) => `${month}-${String(i + 1).padStart(2, "0")}`).filter(date => !syncedDates.has(date)).length;
+    const warnings: string[] = [];
+    if (!previous) warnings.push("No previous physical count: opening stock is assumed to be 0.");
+    if (missingSalesDays) warnings.push(`${missingSalesDays} of ${expectedSalesDays} days have no completed sales sync. Calculated stock may be incomplete.`);
+    if (calculatedStock < 0) warnings.push("Calculated stock is negative. Review opening counts, deliveries, sales and adjustments.");
+    if (current && adjustments.some(a => a.accountId === account.id && a.date.slice(0, 7) === month && a.createdAt > current.countedAt)) warnings.push("Adjustment history changed after this physical count was saved. Review the variance; the saved physical count is unchanged.");
     const physicalCount = current?.physicalCount ?? null;
     const variance =
       physicalCount === null
@@ -112,6 +130,10 @@ export async function getMonthlyStockCounts({
       hasOpeningCount: Boolean(previous),
       stockIn,
       stockOut,
+      ...adjustmentTotals,
+      expectedSalesDays,
+      missingSalesDays,
+      warnings,
       salesSyncedDays: salesSyncedDaysByAccount.get(account.id) || 0,
       calculatedStock,
       physicalCount,

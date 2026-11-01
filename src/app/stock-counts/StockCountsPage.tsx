@@ -25,7 +25,8 @@ import {
   Typography,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { StockAdjustmentsPanel, type AdjustmentFilter } from "./StockAdjustmentsPanel";
 import styles from "./stockCounts.module.css";
 
 const { Text, Title } = Typography;
@@ -39,6 +40,12 @@ type ShopStockCount = {
   stockIn: number;
   stockOut: number;
   salesSyncedDays: number;
+  adjustmentsOut: number;
+  adjustmentsIn: number;
+  adjustmentCount: number;
+  expectedSalesDays: number;
+  missingSalesDays: number;
+  warnings: string[];
   calculatedStock: number;
   physicalCount: number | null;
   variance: number | null;
@@ -66,43 +73,45 @@ export function StockCountsPage() {
   const [records, setRecords] = useState<ShopStockCount[]>([]);
   const [drafts, setDrafts] = useState<Record<string, CountDraft>>({});
   const [loading, setLoading] = useState(true);
+  const [adjustmentFilter, setAdjustmentFilter] = useState<AdjustmentFilter>({ accountId: "all", direction: "all" });
+  const [reportError, setReportError] = useState("");
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
   const loadStockCounts = useCallback(
-    async (signal?: AbortSignal) => {
-      setLoading(true);
+    async (signal?: AbortSignal, preserveDrafts = false) => {
+      if (signal?.aborted) return;
+      setLoading(true); setReportError("");
+      if (!preserveDrafts) setRecords([]);
       try {
         const body = await requestStockCounts(
           `/api/stock-counts?month=${encodeURIComponent(month)}`,
           { signal },
         );
+        if (signal?.aborted) return;
         const nextRecords = body.stockCounts || [];
         setRecords(nextRecords);
-        setDrafts(
-          Object.fromEntries(
-            nextRecords.map((record) => [
-              record.accountId,
-              {
-                physicalCount: record.physicalCount,
-                note: record.note,
-              },
-            ]),
-          ),
-        );
+        setDrafts(current => Object.fromEntries(nextRecords.map(record => [record.accountId,
+          preserveDrafts && current[record.accountId] ? current[record.accountId] : { physicalCount: record.physicalCount, note: record.note },
+        ])));
       } catch (error) {
-        if (!signal?.aborted) messageApi.error(getErrorMessage(error));
+        if (!signal?.aborted) setReportError(getErrorMessage(error));
       } finally {
         if (!signal?.aborted) setLoading(false);
       }
     },
-    [messageApi, month],
+    [month],
   );
 
   useEffect(() => {
     const controller = new AbortController();
-    void loadStockCounts(controller.signal);
+    queueMicrotask(() => void loadStockCounts(controller.signal));
     return () => controller.abort();
   }, [loadStockCounts]);
+
+  const showAdjustments = (record: ShopStockCount, direction: string) => {
+    setAdjustmentFilter({ accountId: record.accountId, direction });
+    document.getElementById("adjustments")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const updateDraft = (accountId: string, change: Partial<CountDraft>) => {
     setDrafts((current) => ({
@@ -135,17 +144,9 @@ export function StockCountsPage() {
       });
       const nextRecords = body.stockCounts || [];
       setRecords(nextRecords);
-      setDrafts(
-        Object.fromEntries(
-          nextRecords.map((nextRecord) => [
-            nextRecord.accountId,
-            {
-              physicalCount: nextRecord.physicalCount,
-              note: nextRecord.note,
-            },
-          ]),
-        ),
-      );
+      setDrafts(current => Object.fromEntries(nextRecords.map(next => [next.accountId,
+        next.accountId === record.accountId ? { physicalCount: next.physicalCount, note: next.note } : current[next.accountId] || { physicalCount: next.physicalCount, note: next.note },
+      ])));
       messageApi.success(`${record.shopName} physical count saved.`);
     } catch (error) {
       messageApi.error(getErrorMessage(error));
@@ -176,6 +177,8 @@ export function StockCountsPage() {
       openingStock: sum(records, "openingStock"),
       stockIn: sum(records, "stockIn"),
       stockOut: sum(records, "stockOut"),
+      adjustmentsOut: records.reduce((sum, r) => sum + (r.adjustmentsOut || 0), 0),
+      adjustmentsIn: records.reduce((sum, r) => sum + (r.adjustmentsIn || 0), 0),
       calculatedStock: sum(records, "calculatedStock"),
       physicalCount,
       variance,
@@ -219,7 +222,7 @@ export function StockCountsPage() {
       render: (value: number) => <Text type="success">+{formatUnits(value)}</Text>,
     },
     {
-      title: "Stock out",
+      title: "Sales out",
       dataIndex: "stockOut",
       width: 120,
       align: "right",
@@ -230,11 +233,19 @@ export function StockCountsPage() {
       ),
     },
     {
+      title: "Other stock out", dataIndex: "adjustmentsOut", width: 145, align: "right",
+      render: (value: number, record) => <Button type="link" aria-label={`View stock out adjustments for ${record.shopName}`} onClick={() => showAdjustments(record, "out")}>−{formatUnits(value || 0)}</Button>,
+    },
+    {
+      title: "Adjustments in", dataIndex: "adjustmentsIn", width: 145, align: "right",
+      render: (value: number, record) => <Button type="link" aria-label={`View stock in adjustments for ${record.shopName}`} onClick={() => showAdjustments(record, "in")}>+{formatUnits(value || 0)}</Button>,
+    },
+    {
       title: "Sales sync",
       dataIndex: "salesSyncedDays",
       width: 115,
       align: "right",
-      render: (value: number) => `${value} days`,
+      render: (value: number, record) => `${value}/${record.expectedSalesDays ?? "?"} days`,
     },
     {
       title: "Calculated stock",
@@ -315,7 +326,7 @@ export function StockCountsPage() {
       width: 110,
       render: (_, record) => (
         <Button
-          disabled={drafts[record.accountId]?.physicalCount == null}
+          disabled={loading || drafts[record.accountId]?.physicalCount == null}
           icon={<SaveOutlined />}
           loading={savingIds.has(record.accountId)}
           type="primary"
@@ -351,16 +362,18 @@ export function StockCountsPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
+              <Button href="#adjustments">Stock adjustments</Button>
               <Button
                 icon={<ReloadOutlined />}
                 loading={loading}
-                onClick={() => void loadStockCounts()}
+                onClick={() => void loadStockCounts(undefined, true)}
               >
                 Refresh
               </Button>
             </Space>
           </header>
 
+          {reportError && <Alert className={styles.ruleAlert} title={reportError} type="error" showIcon />}
           <Card className={styles.filterCard}>
             <label className={styles.monthField}>
               <span>Count month</span>
@@ -378,34 +391,37 @@ export function StockCountsPage() {
           <Alert
             className={styles.ruleAlert}
             title="Calculation"
-            description="Calculated stock = previous month's physical count + movements delivered this month − Loyverse units sold this month (refunds are added back). If the previous month has no saved physical count, opening stock starts at 0."
+            description="Calculated stock = previous month's physical count + delivered movements − net sales − other stock out + adjustments in. Refunds are added back. Adjustments apply only in their transaction month; physical counts are never changed automatically."
             showIcon
             type="info"
           />
 
+          {records.some(r => r.warnings?.length) && <Alert className={styles.ruleAlert} type="warning" showIcon title="Some calculated stock figures need review" description={<details><summary>View shop warnings</summary><ul className={styles.warningList}>{records.flatMap(r => (r.warnings || []).map(w => <li key={`${r.accountId}:${w}`}><strong>{r.shopName}:</strong> {w}</li>))}</ul></details>} />}
           <Row className={styles.summaryGrid} gutter={[12, 12]}>
-            <Col xs={12} md={4}>
+            <Col xs={12} md={6}>
               <Card><Statistic title="Opening" value={totals.openingStock} /></Card>
             </Col>
-            <Col xs={12} md={4}>
+            <Col xs={12} md={6}>
               <Card><Statistic prefix="+" title="Stock in" value={totals.stockIn} /></Card>
             </Col>
-            <Col xs={12} md={4}>
+            <Col xs={12} md={6}>
               <Card>
                 <Statistic
                   prefix={totals.stockOut >= 0 ? "−" : "+"}
-                  title="Stock out"
+                  title="Sales out"
                   value={Math.abs(totals.stockOut)}
                 />
               </Card>
             </Col>
-            <Col xs={12} md={4}>
+            <Col xs={12} md={6}><Card><Statistic title="Other stock out" prefix="−" value={totals.adjustmentsOut} /></Card></Col>
+            <Col xs={12} md={6}><Card><Statistic title="Adjustments in" prefix="+" value={totals.adjustmentsIn} /></Card></Col>
+            <Col xs={12} md={6}>
               <Card><Statistic title="Calculated" value={totals.calculatedStock} /></Card>
             </Col>
-            <Col xs={12} md={4}>
+            <Col xs={12} md={6}>
               <Card><Statistic title="Physical" value={totals.physicalCount} /></Card>
             </Col>
-            <Col xs={12} md={4}>
+            <Col xs={12} md={6}>
               <Card>
                 <Statistic
                   prefix={<AuditOutlined />}
@@ -424,7 +440,7 @@ export function StockCountsPage() {
               locale={{ emptyText: "No configured shops found." }}
               pagination={false}
               rowKey="accountId"
-              scroll={{ x: 1625 }}
+              scroll={{ x: 1915 }}
             />
           </Card>
 
@@ -476,13 +492,15 @@ export function StockCountsPage() {
                         value={`+${formatUnits(record.stockIn)}`}
                       />
                       <MobileMetric
-                        label="Stock out"
+                        label="Sales out"
                         tone={record.stockOut >= 0 ? "danger" : "success"}
                         value={formatStockOut(record.stockOut)}
                       />
+                      <MobileMetric label="Other stock out" value={<Button type="link" aria-label={`View stock out adjustments for ${record.shopName}`} onClick={() => showAdjustments(record, "out")}>−{formatUnits(record.adjustmentsOut || 0)}</Button>} />
+                      <MobileMetric label="Adjustments in" value={<Button type="link" aria-label={`View stock in adjustments for ${record.shopName}`} onClick={() => showAdjustments(record, "in")}>+{formatUnits(record.adjustmentsIn || 0)}</Button>} />
                       <MobileMetric
                         label="Sales sync"
-                        value={`${record.salesSyncedDays} days`}
+                        value={`${record.salesSyncedDays}/${record.expectedSalesDays ?? "?"} days`}
                       />
                       <MobileMetric
                         emphasized
@@ -506,6 +524,7 @@ export function StockCountsPage() {
                         }
                       />
                     </div>
+                    {record.warnings?.map(w => <Alert key={w} type="warning" title={w} />)}
                     <label className={styles.mobileField}>
                       <span>Physical count</span>
                       <InputNumber
@@ -537,7 +556,7 @@ export function StockCountsPage() {
                     </label>
                     <Button
                       block
-                      disabled={physical == null}
+                      disabled={loading || physical == null}
                       icon={<SaveOutlined />}
                       loading={savingIds.has(record.accountId)}
                       size="large"
@@ -551,6 +570,7 @@ export function StockCountsPage() {
               })}
             </div>
           </Spin>
+          <StockAdjustmentsPanel month={month} shops={records} filter={adjustmentFilter} onFilterChange={setAdjustmentFilter} onChanged={() => loadStockCounts(undefined, true)} />
         </main>
       </div>
     </ConfigProvider>
@@ -568,7 +588,7 @@ function MobileMetric({
   label: string;
   note?: string;
   tone?: "success" | "danger";
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div className={styles.mobileMetric}>

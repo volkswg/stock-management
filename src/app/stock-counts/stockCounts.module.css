@@ -1,4 +1,4 @@
-.appShell { min-height: 100vh; background: #f3f5f4; }
+.appShell { width: 100%; flex: 1; min-height: 100vh; background: #f3f5f4; color: #15243a; color-scheme: light; }
 .content { width: min(1600px, 100%); margin: 0 auto; padding: 32px; }
 .pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 .pageHeader h1 { margin: 2px 0 4px !important; font-size: 30px !important; line-height: 1.2 !important; }
@@ -36,3 +36,7 @@
   .mobileMetric :global(.ant-typography) { margin: 0; overflow-wrap: anywhere; }
   .mobileField { display: grid; gap: 6px; color: #46504a; font-size: 13px; font-weight: 600; }
 }
+
+.warningList { padding-left: 20px; line-height: 1.7; font-size: 12px; margin-top: 8px; }
+.ruleAlert summary { cursor: pointer; padding-block: 8px; }
+@media (pointer: coarse) { .appShell :global(.ant-btn), .appShell :global(.ant-input-number), .appShell :global(.ant-input) { min-height: 44px; } }

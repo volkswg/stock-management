@@ -123,3 +123,12 @@ identical settlement retries return the existing settlement. Google Sheets has
 no cross-instance transactions: process payroll/advance changes one operator at
 a time rather than concurrently from multiple sessions. Do not manually alter
 paid advances or settlement snapshots in Sheets.
+
+## Shop stock adjustments
+
+Record employee gifts, damage, samples, personal use, returns and corrections in
+**Monthly stock count → Stock adjustments**. Entries update only the selected
+shop/month; physical counts and finances remain separate. Corrections retain
+history using reversals and linked replacements. See
+[the stock-adjustment workflow](docs/shop-stock-adjustments.md) for calculations,
+Loyverse duplicate prevention, warnings, optional photo links and worksheet setup.

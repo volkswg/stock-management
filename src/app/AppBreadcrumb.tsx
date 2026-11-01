@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 const PATH_LABELS: Record<string, string> = {
+  "/stock-counts": "Monthly stock count",
   "/expenses": "Expenses",
   "/expenses/categories": "Categories",
   "/expenses/shops": "Shop master",
@@ -30,6 +31,7 @@ const PATH_LABELS: Record<string, string> = {
 
 const NAVIGABLE_PATHS = new Set([
   "/",
+  "/stock-counts",
   "/expenses",
   "/orders",
   "/orders/create",
