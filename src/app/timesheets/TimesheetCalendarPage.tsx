@@ -1,35 +1,22 @@
 "use client";
 
-import {
-  ArrowLeftOutlined,
-  CalendarOutlined,
-  LeftOutlined,
-  ReloadOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import {
   Alert,
   Badge,
   Button,
-  Calendar,
   Card,
-  Col,
   ConfigProvider,
   DatePicker,
   Form,
   message,
   Modal,
-  Row,
   Select,
   Space,
   Spin,
-  Statistic,
-  Table,
-  Tag,
   Tooltip,
   Typography,
 } from "antd";
-import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./timesheetCalendar.module.css";
@@ -170,7 +157,7 @@ export function TimesheetCalendarPage() {
   const workDays = employeeDays
     .filter((entry) => entry.status === "work")
     .reduce((total, entry) => total + (entry.workdayType === "half" ? 0.5 : 1), 0);
-  const leaveDays = employeeDays.length - workDays;
+  const leaveDays = employeeDays.filter((entry) => entry.status === "leave").length;
   const recordedEmployees = new Set(
     employeeDays.map((entry) => entry.employeeId),
   ).size;
@@ -237,52 +224,24 @@ export function TimesheetCalendarPage() {
     setSelectedDate(value === today.slice(0, 7) ? today : `${value}-01`);
   };
 
-  const columns: ColumnsType<EmployeeTimesheet> = [
-    {
-      title: "Employee",
-      dataIndex: "employeeId",
-      width: 220,
-      render: (employeeId: string) => (
-        <div className={styles.employeeCell}>
-          <Text strong>{getEmployeeName(employeeId, employeeById)}</Text>
-          <Text type="secondary">{employeeId}</Text>
-        </div>
-      ),
-    },
-    {
-      title: "Shop",
-      dataIndex: "shopId",
-      width: 170,
-      render: (value: string) => shopById.get(value)?.name || value,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      width: 110,
-      render: (status: EmployeeTimesheet["status"]) => (
-        <Tag color={status === "work" ? "success" : "gold"}>
-          {status === "work" ? "Work" : "Leave"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Attendance",
-      key: "attendance",
-      width: 130,
-      render: (_, timesheet) =>
-        timesheet.status === "leave"
-          ? "Leave"
-          : timesheet.workdayType === "half"
-            ? "Half day"
-            : "Full day",
-    },
-  ];
+  const monthStart = dayjs(`${month}-01`);
+  const calendarStart = monthStart.startOf("week");
+  const calendarDays = Array.from(
+    { length: Math.ceil((monthStart.day() + monthStart.daysInMonth()) / 7) * 7 },
+    (_, index) => calendarStart.add(index, "day"),
+  );
+  const selectedEntries = entriesByDate.get(selectedDate) || [];
+  const fullDays = selectedEntries.filter((entry) => entry.status === "work" && entry.workdayType !== "half").length;
+  const halfDays = selectedEntries.filter((entry) => entry.status === "work" && entry.workdayType === "half").length;
+  const selectedLeaveDays = selectedEntries.filter((entry) => entry.status === "leave").length;
 
   return (
     <ConfigProvider
       theme={{
         token: {
           colorPrimary: "#157347",
+          colorLink: "#157347",
+          colorLinkHover: "#0d5132",
           colorBgLayout: "#f3f5f4",
           colorBorderSecondary: "#e1e5e2",
           borderRadius: 6,
@@ -295,223 +254,132 @@ export function TimesheetCalendarPage() {
         <main className={styles.content}>
           <header className={styles.pageHeader}>
             <div>
-              <Text className={styles.eyebrow}>Timesheets</Text>
-              <Title level={1}>Monthly timesheet summary</Title>
-              <Text type="secondary">
-                Review employee work and leave by business date.
-              </Text>
+              <Title level={1}>Timesheets</Title>
+              <Text type="secondary">Work and leave, by date</Text>
             </div>
-            <Space className={styles.pageActions} wrap>
-              <Button
-                href="/timesheets/tracker"
-                icon={<ArrowLeftOutlined />}
-              >
-                Timesheet tracker
-              </Button>
-              <Button
-                icon={<ReloadOutlined />}
-                loading={loading}
-                onClick={() => void loadSummary()}
-              >
-                Refresh
-              </Button>
-            </Space>
+            <div className={styles.pageActions}>
+              <Button type="link" href="/timesheets/tracker">Tracker</Button>
+              <Button type="text" loading={loading} onClick={() => void loadSummary()}>Refresh</Button>
+              <Button className={styles.desktopAdd} type="primary" disabled={loading || selectedDate > today} onClick={() => openAddTimesheet(selectedDate)}>Add entry</Button>
+            </div>
           </header>
 
-          <Card className={styles.filterCard}>
-            <div className={styles.filters}>
-              <div>
-                <Text className={styles.fieldLabel}>Month</Text>
-                <Space.Compact className={styles.monthControl} block>
-                  <Tooltip title="Previous month">
-                    <Button
-                      aria-label="Previous month"
-                      icon={<LeftOutlined />}
-                      onClick={() =>
-                        updateMonth(
-                          dayjs(`${month}-01`)
-                            .subtract(1, "month")
-                            .format("YYYY-MM"),
-                        )
-                      }
-                    />
-                  </Tooltip>
-                  <DatePicker
-                    allowClear={false}
-                    aria-label="Timesheet summary month"
-                    className={styles.monthPicker}
-                    format="MMMM YYYY"
-                    picker="month"
-                    suffixIcon={<CalendarOutlined />}
-                    value={dayjs(`${month}-01`)}
-                    onChange={(_, value) => updateMonth(getPickerValue(value))}
-                  />
-                  <Tooltip title="Next month">
-                    <Button
-                      aria-label="Next month"
-                      icon={<RightOutlined />}
-                      onClick={() =>
-                        updateMonth(
-                          dayjs(`${month}-01`).add(1, "month").format("YYYY-MM"),
-                        )
-                      }
-                    />
-                  </Tooltip>
-                </Space.Compact>
-              </div>
-              <div>
-                <Text className={styles.fieldLabel}>Shop</Text>
-                <Select
-                  aria-label="Timesheet summary shop"
-                  className={styles.fullWidth}
-                  options={[
-                    { label: "All shops", value: "" },
-                    ...shops.map((shop) => ({
-                      label: shop.name,
-                      value: shop.id,
-                    })),
-                  ]}
-                  value={shopId}
-                  onChange={setShopId}
-                />
-              </div>
-            </div>
-          </Card>
+          <div className={styles.filters}>
+            <Space.Compact className={styles.monthControl} block>
+              <Tooltip title="Previous month">
+                <Button aria-label="Previous month" icon={<LeftOutlined />} onClick={() => updateMonth(monthStart.subtract(1, "month").format("YYYY-MM"))} />
+              </Tooltip>
+              <DatePicker
+                allowClear={false}
+                aria-label="Timesheet summary month"
+                className={styles.monthPicker}
+                format="MMMM YYYY"
+                picker="month"
+                suffixIcon={null}
+                value={monthStart}
+                onChange={(value) => {
+                  if (value) updateMonth(value.format("YYYY-MM"));
+                }}
+              />
+              <Tooltip title="Next month">
+                <Button aria-label="Next month" icon={<RightOutlined />} onClick={() => updateMonth(monthStart.add(1, "month").format("YYYY-MM"))} />
+              </Tooltip>
+            </Space.Compact>
+            <Select
+              aria-label="Timesheet summary shop"
+              className={styles.shopFilter}
+              options={[
+                { label: "All shops", value: "" },
+                ...shops.map((shop) => ({ label: shop.name, value: shop.id })),
+              ]}
+              value={shopId}
+              onChange={setShopId}
+            />
+          </div>
 
-          <Row className={styles.summaryGrid} gutter={[12, 12]}>
-            <Col xs={12} lg={6}>
-              <Card>
-                <Statistic title="Employees recorded" value={recordedEmployees} />
-              </Card>
-            </Col>
-            <Col xs={12} lg={6}>
-              <Card>
-                <Statistic title="Employee work days" value={workDays} />
-              </Card>
-            </Col>
-            <Col xs={12} lg={6}>
-              <Card>
-                <Statistic title="Employee leave days" value={leaveDays} />
-              </Card>
-            </Col>
-            <Col xs={12} lg={6}>
-              <Card>
-                <Statistic title="Timesheet records" value={timesheets.length} />
-              </Card>
-            </Col>
-          </Row>
+          <section className={styles.summaryGrid} aria-label="Month summary" aria-busy={loading}>
+            {[
+              ["Employees", recordedEmployees],
+              ["Work days", workDays],
+              ["Leave days", leaveDays],
+              ["Records", timesheets.length],
+            ].map(([label, value]) => (
+              <div className={styles.summaryCell} key={label}>
+                <strong>{loading ? "—" : value}</strong>
+                <span>{label}</span>
+              </div>
+            ))}
+          </section>
 
           <Spin spinning={loading} description="Loading monthly summary...">
-            <Card
-              className={styles.calendarCard}
-              title="Attendance calendar"
-              extra={
-                <Space>
-                  <Badge status="success" text="Work" />
-                  <Badge status="warning" text="Leave" />
-                </Space>
-              }
-            >
-              <Text className={styles.calendarInstruction} type="secondary">
-                Select a date up to today to add a work or leave entry.
-              </Text>
-              <div className={styles.calendarViewport}>
-                <Calendar
-                  className={styles.calendar}
-                  disabledDate={(value) =>
-                    value.format("YYYY-MM-DD") > today
-                  }
-                  headerRender={() => null}
-                  value={dayjs(selectedDate)}
-                  cellRender={(current, info) => {
-                    if (
-                      info.type !== "date" ||
-                      current.format("YYYY-MM") !== month
-                    ) {
-                      return null;
-                    }
-                    const entries =
-                      entriesByDate.get(current.format("YYYY-MM-DD")) || [];
-                    if (!entries.length) return null;
-                    const visibleEntries = entries.slice(0, 3);
+            <div className={styles.workspace} aria-busy={loading}>
+              <Card className={styles.calendarCard} title="Attendance" extra={
+                <Button type="link" onClick={() => { setMonth(today.slice(0, 7)); setSelectedDate(today); }}>Today</Button>
+              }>
+                <div className={styles.weekdays} aria-hidden="true">
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <span key={day}>{day}</span>)}
+                </div>
+                <div className={styles.calendar} role="group" aria-label={monthStart.format("MMMM YYYY attendance")}>
+                  {calendarDays.map((day) => {
+                    const date = day.format("YYYY-MM-DD");
+                    const inMonth = day.format("YYYY-MM") === month;
+                    const entries = entriesByDate.get(date) || [];
+                    const hasWork = entries.some((entry) => entry.status === "work");
+                    const hasLeave = entries.some((entry) => entry.status === "leave");
                     return (
-                      <ul className={styles.calendarEntries}>
-                        {visibleEntries.map((entry) => (
-                          <li
-                            className={
-                              entry.status === "work"
-                                ? styles.workEntry
-                                : styles.leaveEntry
-                            }
-                            key={entry.employeeId}
-                          >
-                            <a
-                              className={styles.calendarEntryLink}
-                              href={`/timesheets/tracker?date=${current.format(
-                                "YYYY-MM-DD",
-                              )}&timesheetId=${encodeURIComponent(entry.timesheetId)}`}
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              {getEmployeeName(entry.employeeId, employeeById)}
-                              {" · "}
-                              {shopById.get(entry.shopId)?.name || entry.shopId}
-                              {entry.status === "work" && entry.workdayType === "half"
-                                ? " · Half day"
-                                : ""}
-                            </a>
-                          </li>
-                        ))}
-                        {entries.length > visibleEntries.length ? (
-                          <li className={styles.moreEntry}>
-                            +{entries.length - visibleEntries.length} more
-                          </li>
-                        ) : null}
-                      </ul>
+                      <button
+                        type="button"
+                        key={date}
+                        className={styles.calendarDay}
+                        disabled={!inMonth || date > today || loading}
+                        aria-label={`${day.format("dddd, D MMMM YYYY")}${hasWork ? ", Work" : ""}${hasLeave ? ", Leave" : ""}`}
+                        aria-pressed={date === selectedDate}
+                        aria-current={date === today ? "date" : undefined}
+                        onClick={() => setSelectedDate(date)}
+                      >
+                        <span className={styles.dayNumber}>{day.date()}</span>
+                        <span className={styles.dayIndicators} aria-hidden="true">
+                          {inMonth && hasWork ? <span className={styles.workDot} /> : null}
+                          {inMonth && hasLeave ? <span className={styles.leaveDot} /> : null}
+                        </span>
+                      </button>
                     );
-                  }}
-                  onSelect={(value, info) => {
-                    if (info.source !== "date") return;
-                    const valueMonth = value.format("YYYY-MM");
-                    if (valueMonth !== month) {
-                      updateMonth(valueMonth);
-                      return;
-                    }
-                    openAddTimesheet(value.format("YYYY-MM-DD"));
-                  }}
-                />
-              </div>
-            </Card>
-          </Spin>
+                  })}
+                </div>
+                <div className={styles.calendarFooter}>
+                  <Space size={16}><Badge color="#157347" text="Work" /><Badge color="#d48806" text="Leave" /></Space>
+                  <Text type="secondary">Choose a date to see records</Text>
+                </div>
+              </Card>
 
-          <Card
-            className={styles.dayCard}
-            title={dayjs(selectedDate).format("dddd, DD MMMM YYYY")}
-            extra={`${selectedRows.length} record${
-              selectedRows.length === 1 ? "" : "s"
-            }`}
-          >
-            <Table
-              columns={columns}
-              dataSource={selectedRows}
-              locale={{ emptyText: "No work or leave recorded for this date." }}
-              pagination={false}
-              rowKey="id"
-              rowClassName={styles.clickableRecord}
-              scroll={{ x: 850 }}
-              size="middle"
-              onRow={(timesheet) => ({
-                onClick: () => openTimesheetRecord(timesheet),
-                onKeyDown: (event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    openTimesheetRecord(timesheet);
-                  }
-                },
-                role: "link",
-                tabIndex: 0,
-              })}
-            />
-          </Card>
+              <Card className={styles.dayCard} title={<h2>{dayjs(selectedDate).format("ddd, D MMMM")}</h2>} extra={`${selectedRows.length} record${selectedRows.length === 1 ? "" : "s"}`}>
+                <Text className={styles.daySummary} type="secondary">
+                  {fullDays} full day{fullDays === 1 ? "" : "s"} · {halfDays} half day{halfDays === 1 ? "" : "s"} · {selectedLeaveDays} leave
+                </Text>
+                {selectedRows.length ? (
+                  <ul className={styles.records}>
+                    {selectedRows.map((timesheet) => (
+                      <li key={timesheet.id} className={styles.record}>
+                        <div className={styles.recordHeading}>
+                          <h3>{getEmployeeName(timesheet.employeeId, employeeById)}</h3>
+                          <span className={timesheet.status === "work" ? styles.workStatus : styles.leaveStatus}>{timesheet.status === "work" ? "Work" : "Leave"}</span>
+                        </div>
+                        <p>{shopById.get(timesheet.shopId)?.name || timesheet.shopId}{timesheet.status === "work" ? ` · ${timesheet.workdayType === "half" ? "Half day" : "Full day"}` : ""}</p>
+                        <a className={styles.recordLink} href={getTimesheetRecordUrl(timesheet)} aria-label={`View details for ${getEmployeeName(timesheet.employeeId, employeeById)}`}>View details <span aria-hidden="true">›</span></a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className={styles.emptyState}>
+                    <Text type="secondary">No work or leave recorded for this date.</Text>
+                  </div>
+                )}
+              </Card>
+            </div>
+          </Spin>
+          <div className={styles.mobileAdd}>
+            <Button type="primary" block disabled={loading || selectedDate > today} onClick={() => openAddTimesheet(selectedDate)}>Add entry</Button>
+          </div>
         </main>
       </div>
 
@@ -626,9 +494,9 @@ function getEmployeeName(
   return employees.get(employeeId)?.name || employeeId;
 }
 
-function openTimesheetRecord(timesheet: EmployeeTimesheet): void {
+function getTimesheetRecordUrl(timesheet: EmployeeTimesheet): string {
   const date = getBangkokDate(timesheet.createdAt);
-  window.location.href = `/timesheets/tracker?date=${date}&timesheetId=${encodeURIComponent(
+  return `/timesheets/tracker?date=${date}&timesheetId=${encodeURIComponent(
     timesheet.id,
   )}`;
 }
@@ -642,11 +510,6 @@ function getBangkokDate(value: string | Date = new Date()): string {
     timeZone: "Asia/Bangkok",
     year: "numeric",
   }).format(date);
-}
-
-function getPickerValue(value: string | string[] | null): string {
-  if (value === null) return "";
-  return Array.isArray(value) ? value[0] || "" : value;
 }
 
 function getErrorMessage(error: unknown): string {

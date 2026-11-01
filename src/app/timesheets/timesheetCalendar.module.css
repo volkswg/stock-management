@@ -1,209 +1,382 @@
-/* Timesheet calendar layout */
 .appShell {
   min-height: 100vh;
-  background: #f3f5f4;
+  background: #f6f8f7;
+  color: #14201a;
 }
 
 .content {
-  width: min(1500px, 100%);
+  width: min(1400px, 100%);
   margin: 0 auto;
   padding: 32px;
 }
 
 .pageHeader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .pageHeader h1 {
-  margin: 2px 0 4px !important;
+  margin: 0 0 6px !important;
   font-size: 30px !important;
   line-height: 1.2 !important;
-  letter-spacing: 0;
-}
-
-.eyebrow {
-  color: #157347;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
+  letter-spacing: -0.7px;
 }
 
 .pageActions {
-  justify-content: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-.filterCard,
-.summaryGrid {
-  margin-bottom: 16px;
-}
-
-.filterCard :global(.ant-card-body) {
-  padding: 16px;
+.pageActions :global(.ant-btn) {
+  min-height: 44px;
 }
 
 .filters {
-  display: grid;
-  grid-template-columns: minmax(300px, 420px) minmax(200px, 320px);
-  gap: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #e1e5e2;
+  border-radius: 8px;
 }
 
-.fieldLabel {
-  display: block;
-  margin-bottom: 6px;
-  color: #46504a;
-  font-size: 13px;
-  font-weight: 600;
+.filters .monthControl {
+  width: min(420px, 100%);
+  flex: 0 1 420px;
 }
 
-.monthControl,
-.fullWidth {
-  width: 100%;
+.monthControl :global(.ant-btn),
+.monthPicker {
+  min-height: 44px;
+}
+
+.monthControl :global(.ant-btn) {
+  min-width: 44px;
 }
 
 .monthPicker {
   width: 100%;
+  min-width: 0;
 }
 
-.summaryGrid :global(.ant-card-body) {
+.monthPicker input {
+  text-align: center;
+  font-weight: 600;
+}
+
+.shopFilter {
+  width: 260px;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.summaryCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 18px 20px;
+  border: 1px solid #e1e5e2;
+  border-radius: 8px;
+  background: #fff;
 }
 
-.calendarCard :global(.ant-card-body) {
-  padding: 12px 16px 16px;
+.summaryCell strong {
+  font-size: 26px;
+  line-height: 1.2;
 }
 
-.calendarViewport {
-  overflow-x: auto;
+.summaryCell span {
+  color: #66716b;
+  font-size: 14px;
 }
 
-.calendarInstruction {
-  display: block;
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.workspace > * {
+  min-width: 0;
+}
+
+.calendarCard :global(.ant-card-head),
+.dayCard :global(.ant-card-head) {
+  padding: 0 20px;
+  min-height: 64px;
+}
+
+.calendarCard :global(.ant-card-head-title),
+.dayCard :global(.ant-card-head-title) {
+  white-space: normal;
+}
+
+.dayCard :global(.ant-card-head-wrapper) {
+  gap: 8px;
+}
+
+.dayCard :global(.ant-card-extra) {
+  flex-shrink: 0;
+  color: #66716b;
+}
+
+.calendarCard :global(.ant-card-body),
+.dayCard :global(.ant-card-body) {
+  padding: 20px;
+}
+
+.calendarCard :global(.ant-card-extra .ant-btn) {
+  min-height: 44px;
+  padding-inline: 0;
+}
+
+.weekdays,
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.weekdays {
+  color: #66716b;
+  font-size: 12px;
+  text-align: center;
   margin-bottom: 10px;
 }
 
-.calendar {
-  min-width: 820px;
-}
-
-.calendar :global(.ant-picker-calendar-date) {
-  min-height: 112px;
-}
-
-.calendar
-  :global(.ant-picker-cell:not(.ant-picker-cell-disabled) .ant-picker-calendar-date) {
+.calendarDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 60px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #14201a;
+  font: inherit;
   cursor: pointer;
 }
 
-.calendar
-  :global(.ant-picker-cell:not(.ant-picker-cell-disabled) .ant-picker-calendar-date:hover) {
-  border-color: #157347;
-  background: #f0f7f3;
+.dayNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
 }
 
-.calendarEntries {
+.calendarDay:disabled {
+  color: #9aa5a0;
+  cursor: default;
+}
+
+.calendarDay:not(:disabled):hover {
+  background: #eff6f2;
+}
+
+.calendarDay[aria-current="date"] .dayNumber {
+  box-shadow: inset 0 0 0 1px #157347;
+}
+
+.calendarDay[aria-pressed="true"] .dayNumber {
+  color: #fff;
+  background: #157347;
+}
+
+.calendarDay:focus-visible,
+.recordLink:focus-visible {
+  outline: 2px solid #157347;
+  outline-offset: 2px;
+}
+
+.dayIndicators {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 8px;
+}
+
+.workDot,
+.leaveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.workDot { background: #157347; }
+.leaveDot { background: #d48806; }
+
+.calendarFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+.dayCard h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.daySummary {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.records {
   display: grid;
-  gap: 4px;
-  margin: 5px 0 0;
+  gap: 12px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.workEntry,
-.leaveEntry,
-.moreEntry {
-  overflow: hidden;
-  padding: 2px 5px;
-  border-left: 3px solid;
-  border-radius: 2px;
-  font-size: 11px;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.record {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e1e5e2;
+  border-radius: 8px;
+  background: #fff;
 }
 
-.workEntry {
-  color: #0d5132;
-  background: #edf7f1;
-  border-color: #157347;
-}
-
-.leaveEntry {
-  color: #754b00;
-  background: #fff7e6;
-  border-color: #d48806;
-}
-
-.moreEntry {
-  color: #66716b;
-  background: #f1f3f2;
-  border-color: #a8b0ab;
-}
-
-.calendarEntryLink {
-  display: block;
-  overflow: hidden;
-  color: inherit;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.calendarEntryLink:hover,
-.calendarEntryLink:focus-visible {
-  color: inherit;
-  text-decoration: underline;
-}
-
-.calendarEntryLink:focus-visible {
-  outline: 2px solid currentcolor;
-  outline-offset: 1px;
-}
-
-.dayCard {
-  margin-top: 16px;
-}
-
-.dayCard :global(.ant-card-body) {
-  padding: 0;
-}
-
-.clickableRecord {
-  cursor: pointer;
-}
-
-.clickableRecord:hover > td {
-  background: #f0f7f3 !important;
-}
-
-.clickableRecord:focus-visible {
-  outline: 2px solid #157347;
-  outline-offset: -2px;
-}
-
-.employeeCell {
+.recordHeading {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-@media (max-width: 767px) {
+.record h3 {
+  margin: 0;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.record p {
+  margin-top: 4px;
+  color: #66716b;
+  overflow-wrap: anywhere;
+}
+
+.workStatus,
+.leaveStatus {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.workStatus {
+  color: #0d5132;
+  background: #edf7ee;
+}
+
+.leaveStatus {
+  color: #875300;
+  background: #fff0cb;
+}
+
+.recordLink {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 4px;
+  color: #157347;
+}
+
+.recordLink:hover { text-decoration: underline; }
+
+.emptyState {
+  padding: 32px 0;
+  text-align: center;
+}
+
+.mobileAdd { display: none; }
+
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
   .content {
-    padding: 20px 16px;
+    padding: 20px 14px calc(100px + env(safe-area-inset-bottom));
   }
 
   .pageHeader {
-    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 20px;
   }
 
-  .pageActions {
-    width: 100%;
-    justify-content: flex-start;
-  }
+  .pageHeader h1 { font-size: 26px !important; }
+  .pageActions { flex-direction: column; gap: 0; }
+  .pageActions :global(.ant-btn) { padding-inline: 8px; }
+  .pageActions .desktopAdd { display: none; }
 
   .filters {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
   }
+
+  .filters .monthControl { width: 100%; flex: none; }
+  .shopFilter { width: 100%; }
+
+  .summaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .summaryCell { padding: 12px; gap: 2px; }
+  .summaryCell strong { font-size: 22px; }
+  .summaryCell span { font-size: 13px; }
+  .workspace { gap: 14px; }
+  .calendarCard :global(.ant-card-head),
+  .dayCard :global(.ant-card-head) { padding: 0 12px; min-height: 56px; }
+  .calendarCard :global(.ant-card-body),
+  .dayCard :global(.ant-card-body) { padding: 12px; }
+  .calendarDay { min-height: 44px; }
+  .dayNumber { width: 32px; height: 32px; }
+  .weekdays { font-size: 11px; margin-bottom: 6px; }
+  .calendarFooter { margin-top: 12px; gap: 6px; }
+  .calendarFooter > :global(.ant-typography) { font-size: 12px; }
+  .dayCard h2 { font-size: 16px; }
+  .record { padding: 12px; }
+  .mobileAdd {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid #e1e5e2;
+    background: #fff;
+  }
+  .mobileAdd :global(.ant-btn) { min-height: 48px; font-size: 16px; font-weight: 600; }
 }
