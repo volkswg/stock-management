@@ -17,7 +17,7 @@ import {
   Tooltip,
   Typography,
 } from "antd";
-import dayjs from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./timesheetCalendar.module.css";
 
@@ -62,6 +62,7 @@ type CalendarEntry = {
 };
 
 type AddTimesheetFormValues = {
+  date: Dayjs;
   employeeId: string;
   shopId: string;
   workdayType: "full" | "half";
@@ -80,6 +81,8 @@ export function TimesheetCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editingTimesheet, setEditingTimesheet] = useState<EmployeeTimesheet | null>(null);
+  const [saveError, setSaveError] = useState<string>();
   const [addStatus, setAddStatus] = useState<"work" | "leave">("work");
 
   const loadSummary = useCallback(
@@ -172,13 +175,15 @@ export function TimesheetCalendarPage() {
   );
   const availableEmployees = employees.filter(
     (employee) =>
-      employee.status === "active" &&
-      !unavailableEmployeeIds.has(employee.id),
+      (employee.status === "active" || employee.id === editingTimesheet?.employeeId) &&
+      (Boolean(editingTimesheet) || !unavailableEmployeeIds.has(employee.id)),
   );
 
   const openAddTimesheet = (date: string) => {
     if (date > today) return;
     setSelectedDate(date);
+    setEditingTimesheet(null);
+    setSaveError(undefined);
     setAddStatus("work");
     form.resetFields();
     form.setFieldsValue({
@@ -188,14 +193,33 @@ export function TimesheetCalendarPage() {
     setAddModalOpen(true);
   };
 
+  const openEditTimesheet = (timesheet: EmployeeTimesheet) => {
+    setEditingTimesheet(timesheet);
+    setSaveError(undefined);
+    setAddStatus(timesheet.status);
+    form.resetFields();
+    form.setFieldsValue({
+      date: dayjs(getBangkokDate(timesheet.createdAt)),
+      employeeId: timesheet.employeeId,
+      shopId: timesheet.shopId,
+      workdayType: timesheet.workdayType || "full",
+    });
+    setAddModalOpen(true);
+  };
+
   const addTimesheet = async (values: AddTimesheetFormValues) => {
+    if (submitting) return;
     setSubmitting(true);
+    setSaveError(undefined);
+    const entryDate = editingTimesheet ? values.date.format("YYYY-MM-DD") : selectedDate;
     try {
-      await requestSummary("/api/employees/timesheets", {
-        method: "POST",
+      await requestSummary(editingTimesheet
+        ? `/api/employees/timesheets/${encodeURIComponent(editingTimesheet.id)}`
+        : "/api/employees/timesheets", {
+        method: editingTimesheet ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date: selectedDate,
+          date: entryDate,
           employeeId: values.employeeId,
           shopId: values.shopId,
           status: addStatus,
@@ -204,15 +228,21 @@ export function TimesheetCalendarPage() {
       });
       const employee = employeeById.get(values.employeeId);
       messageApi.success(
-        addStatus === "work"
+        editingTimesheet ? "Timesheet updated." : addStatus === "work"
           ? `${employee?.name || "Employee"} work recorded.`
           : `Leave recorded for ${employee?.name || "employee"}.`,
       );
       setAddModalOpen(false);
       form.resetFields();
-      await loadSummary();
+      if (entryDate.slice(0, 7) === month) {
+        setSelectedDate(entryDate);
+        await loadSummary();
+      } else {
+        setMonth(entryDate.slice(0, 7));
+        setSelectedDate(entryDate);
+      }
     } catch (requestError) {
-      messageApi.error(getErrorMessage(requestError));
+      setSaveError(getErrorMessage(requestError));
     } finally {
       setSubmitting(false);
     }
@@ -365,7 +395,10 @@ export function TimesheetCalendarPage() {
                           <span className={timesheet.status === "work" ? styles.workStatus : styles.leaveStatus}>{timesheet.status === "work" ? "Work" : "Leave"}</span>
                         </div>
                         <p>{shopById.get(timesheet.shopId)?.name || timesheet.shopId}{timesheet.status === "work" ? ` · ${timesheet.workdayType === "half" ? "Half day" : "Full day"}` : ""}</p>
+                        <div className={styles.recordActions}>
+                          <Button type="text" size="small" className={styles.editButton} disabled={loading} onClick={() => openEditTimesheet(timesheet)} aria-label={`Edit entry for ${getEmployeeName(timesheet.employeeId, employeeById)}`}>Edit</Button>
                         <a className={styles.recordLink} href={getTimesheetRecordUrl(timesheet)} aria-label={`View details for ${getEmployeeName(timesheet.employeeId, employeeById)}`}>View details <span aria-hidden="true">›</span></a>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -386,10 +419,15 @@ export function TimesheetCalendarPage() {
       <Modal
         destroyOnHidden
         open={addModalOpen}
-        title={`Add timesheet — ${dayjs(selectedDate).format("DD MMMM YYYY")}`}
-        okText={addStatus === "work" ? "Add work" : "Record leave"}
+        title={`${editingTimesheet ? "Edit" : "Add"} timesheet — ${dayjs(selectedDate).format("DD MMMM YYYY")}`}
+        okText={editingTimesheet ? "Save changes" : addStatus === "work" ? "Add work" : "Record leave"}
         confirmLoading={submitting}
+        mask={{ closable: !submitting }}
+        keyboard={!submitting}
+        closable={!submitting}
+        cancelButtonProps={{ disabled: submitting }}
         onCancel={() => {
+          if (submitting) return;
           setAddModalOpen(false);
           form.resetFields();
         }}
@@ -397,10 +435,17 @@ export function TimesheetCalendarPage() {
       >
         <Form
           form={form}
+          disabled={submitting}
           layout="vertical"
           requiredMark="optional"
           onFinish={(values) => void addTimesheet(values)}
         >
+          {saveError ? <Alert type="error" title={saveError} showIcon style={{ marginBottom: 16 }} /> : null}
+          {editingTimesheet ? (
+            <Form.Item label="Date" name="date" rules={[{ required: true, message: "Select a date." }]}>
+              <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} disabledDate={(value) => value.format("YYYY-MM-DD") > today} />
+            </Form.Item>
+          ) : null}
           <Form.Item label="Entry type">
             <Select
               aria-label="Timesheet entry type"
@@ -411,7 +456,7 @@ export function TimesheetCalendarPage() {
               value={addStatus}
               onChange={(value: "work" | "leave") => {
                 setAddStatus(value);
-                form.setFieldValue("employeeId", undefined);
+                if (!editingTimesheet) form.setFieldValue("employeeId", undefined);
               }}
             />
           </Form.Item>
@@ -460,7 +505,7 @@ export function TimesheetCalendarPage() {
           </Form.Item>
           <Alert
             title={
-              addStatus === "work"
+              editingTimesheet ? "Changes will update this record only. Leave cannot overlap another entry for the employee on the same date." : addStatus === "work"
                 ? "The selected employee will be recorded as working on this date."
                 : "Leave will be recorded for the selected date."
             }

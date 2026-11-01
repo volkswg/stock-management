@@ -380,3 +380,23 @@
   }
   .mobileAdd :global(.ant-btn) { min-height: 48px; font-size: 16px; font-weight: 600; }
 }
+
+.recordActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recordActions .editButton:global(.ant-btn) {
+  height: 28px;
+  padding-inline: 8px;
+  font-size: 13px;
+}
+
+@media (pointer: coarse) {
+  .recordActions .editButton:global(.ant-btn) { min-width: 44px; min-height: 44px; }
+}
+
+.recordActions .recordLink { margin-top: 0; }

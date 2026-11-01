@@ -4,6 +4,7 @@ import {
   type GoogleSheetRow,
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
+import { listEmployees } from "./manageEmployees";
 
 export enum EmployeeTimesheetStatus {
   Work = "work",
@@ -24,6 +25,75 @@ export type EmployeeTimesheet = {
 };
 
 export class EmployeeTimesheetDateConflictError extends Error {}
+export class EmployeeTimesheetValidationError extends Error {}
+
+export async function updateEmployeeTimesheet({
+  timesheetId,
+  date,
+  employeeId,
+  shopId,
+  status,
+  workdayType,
+  googleSheetsService,
+}: {
+  timesheetId: string;
+  date: string;
+  employeeId: string;
+  shopId: string;
+  status: EmployeeTimesheetStatus;
+  workdayType: EmployeeWorkdayType | null;
+  googleSheetsService: IGoogleSheetsService;
+}): Promise<EmployeeTimesheet | null> {
+  const rows = await googleSheetsService.employeeTimesheets.readRows();
+  const rowIndex = rows.findIndex(
+    (row, index) => index > 0 && toStringValue(row[0]) === timesheetId,
+  );
+  if (rowIndex < 0) return null;
+  const current = mapTimesheetRow(rows[rowIndex]);
+  if (!current) return null;
+
+  const employees = await listEmployees({ googleSheetsService });
+  const employee = employees.find((candidate) => candidate.id === employeeId);
+  if (!employee || (employee.status !== "active" && employeeId !== current.employeeId)) {
+    throw new EmployeeTimesheetValidationError("Select an active employee.");
+  }
+  const conflict = rows.some((row, index) => {
+    if (index === rowIndex) return false;
+    const other = mapTimesheetRow(row);
+    return other?.employeeId === employeeId &&
+      getBangkokDate(other.createdAt) === date &&
+      (status === EmployeeTimesheetStatus.Leave || other.status === EmployeeTimesheetStatus.Leave);
+  });
+  if (conflict) {
+    throw new EmployeeTimesheetDateConflictError(
+      "Employee cannot have leave and another timesheet on the same date.",
+    );
+  }
+
+  const createdAt = getBangkokDate(current.createdAt) === date
+    ? current.createdAt
+    : createTimestampForBangkokDate(date);
+  const isOpen = status === EmployeeTimesheetStatus.Work && current.isOpen;
+  // Existing work rows encode an open shift with equal timestamps.
+  const updatedAt = isOpen ? createdAt : new Date(
+    Math.max(Date.now(), new Date(createdAt).getTime() + 1),
+  ).toISOString();
+  const timesheet: EmployeeTimesheet = {
+    id: current.id,
+    employeeId,
+    shopId,
+    status,
+    isOpen,
+    createdAt,
+    updatedAt,
+    workdayType: status === EmployeeTimesheetStatus.Work ? workdayType : null,
+  };
+  await googleSheetsService.employeeTimesheets.updateRows(
+    `A${rowIndex + 1}:G${rowIndex + 1}`,
+    [timesheetToRow(timesheet)],
+  );
+  return timesheet;
+}
 
 export async function listEmployeeTimesheets({
   date,

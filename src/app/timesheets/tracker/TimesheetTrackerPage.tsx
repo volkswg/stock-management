@@ -91,6 +91,8 @@ export function TimesheetTrackerPage({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [modalStatus, setModalStatus] = useState<"work" | "leave">("work");
+  const [editingTimesheet, setEditingTimesheet] = useState<EmployeeTimesheet | null>(null);
+  const [saveError, setSaveError] = useState<string>();
   const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
@@ -152,8 +154,8 @@ export function TimesheetTrackerPage({
   );
   const availableEmployees = employees.filter(
     (employee) =>
-      employee.status === "active" &&
-      !unavailableEmployeeIds.has(employee.id),
+      (employee.status === "active" || employee.id === editingTimesheet?.employeeId) &&
+      (Boolean(editingTimesheet) || !unavailableEmployeeIds.has(employee.id)),
   );
   const workShifts = timesheets.filter(
     (timesheet) => timesheet.status === "work",
@@ -168,6 +170,8 @@ export function TimesheetTrackerPage({
   );
 
   const openTimesheetModal = (status: "work" | "leave") => {
+    setEditingTimesheet(null);
+    setSaveError(undefined);
     setModalStatus(status);
     form.setFieldsValue({
       date: dayjs(date),
@@ -178,14 +182,32 @@ export function TimesheetTrackerPage({
     setModalOpen(true);
   };
 
+  const openEditTimesheet = (timesheet: EmployeeTimesheet) => {
+    setEditingTimesheet(timesheet);
+    setSaveError(undefined);
+    setModalStatus(timesheet.status);
+    form.resetFields();
+    form.setFieldsValue({
+      date: dayjs(date),
+      employeeId: timesheet.employeeId,
+      shopId: timesheet.shopId,
+      workdayType: timesheet.workdayType || "full",
+    });
+    setModalOpen(true);
+  };
+
   const addTimesheet = async (values: TimesheetFormValues) => {
+    if (submitting) return;
     setSubmitting(true);
+    setSaveError(undefined);
     setError(undefined);
     setNotice(undefined);
     const clockInDate = values.date.format("YYYY-MM-DD");
     try {
-      await requestTimesheets("/api/employees/timesheets", {
-        method: "POST",
+      await requestTimesheets(editingTimesheet
+        ? `/api/employees/timesheets/${encodeURIComponent(editingTimesheet.id)}`
+        : "/api/employees/timesheets", {
+        method: editingTimesheet ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date: clockInDate,
@@ -198,7 +220,7 @@ export function TimesheetTrackerPage({
       });
       const employee = employeeById.get(values.employeeId);
       setNotice(
-        modalStatus === "work"
+        editingTimesheet ? "Timesheet updated." : modalStatus === "work"
           ? `${employee?.name || "Employee"} work recorded.`
           : `Leave recorded for ${employee?.name || "employee"}.`,
       );
@@ -210,7 +232,7 @@ export function TimesheetTrackerPage({
         setDate(clockInDate);
       }
     } catch (requestError) {
-      setError(getErrorMessage(requestError));
+      setSaveError(getErrorMessage(requestError));
     } finally {
       setSubmitting(false);
     }
@@ -255,6 +277,14 @@ export function TimesheetTrackerPage({
           : timesheet.workdayType === "half"
             ? "Half day"
             : "Full day",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 100,
+      render: (_, timesheet) => (
+        <Button type="text" size="small" className={styles.editButton} disabled={loading} onClick={() => openEditTimesheet(timesheet)} aria-label={`Edit entry for ${employeeById.get(timesheet.employeeId)?.name || timesheet.employeeId}`}>Edit</Button>
+      ),
     },
   ];
 
@@ -428,7 +458,7 @@ export function TimesheetTrackerPage({
               rowClassName={(timesheet) =>
                 timesheet.id === selectedTimesheetId ? styles.selectedRow : ""
               }
-              scroll={{ x: 630 }}
+              scroll={{ x: 730 }}
             />
           </Card>
         </main>
@@ -437,10 +467,15 @@ export function TimesheetTrackerPage({
       <Modal
         destroyOnHidden
         open={modalOpen}
-        title={modalStatus === "work" ? "Add work record" : "Record leave"}
-        okText={modalStatus === "work" ? "Add work" : "Record leave"}
+        title={editingTimesheet ? "Edit timesheet" : modalStatus === "work" ? "Add work record" : "Record leave"}
+        okText={editingTimesheet ? "Save changes" : modalStatus === "work" ? "Add work" : "Record leave"}
         confirmLoading={submitting}
+        mask={{ closable: !submitting }}
+        keyboard={!submitting}
+        closable={!submitting}
+        cancelButtonProps={{ disabled: submitting }}
         onCancel={() => {
+          if (submitting) return;
           setModalOpen(false);
           form.resetFields();
         }}
@@ -448,10 +483,17 @@ export function TimesheetTrackerPage({
       >
         <Form
           form={form}
+          disabled={submitting}
           layout="vertical"
           requiredMark="optional"
           onFinish={(values) => void addTimesheet(values)}
         >
+          {saveError ? <Alert type="error" title={saveError} showIcon style={{ marginBottom: 16 }} /> : null}
+          {editingTimesheet ? (
+            <Form.Item label="Entry type">
+              <Select aria-label="Timesheet entry type" value={modalStatus} onChange={setModalStatus} options={[{ label: "Work", value: "work" }, { label: "Leave", value: "leave" }]} />
+            </Form.Item>
+          ) : null}
           <Form.Item
             label={modalStatus === "work" ? "Work date" : "Leave date"}
             name="date"
@@ -510,7 +552,7 @@ export function TimesheetTrackerPage({
           </Form.Item>
           <Alert
             title={
-              modalStatus === "work"
+              editingTimesheet ? "Changes will update this record only. Leave cannot overlap another entry for the employee on the same date." : modalStatus === "work"
                 ? "The employee will be recorded as working on the selected date."
                 : "Leave will be recorded for the selected business date."
             }

@@ -91,6 +91,16 @@
   gap: 2px;
 }
 
+.tableCard .editButton:global(.ant-btn) {
+  height: 28px;
+  padding-inline: 8px;
+  font-size: 13px;
+}
+
+@media (pointer: coarse) {
+  .tableCard .editButton:global(.ant-btn) { min-width: 44px; min-height: 44px; }
+}
+
 .completedIcon {
   color: #157347;
   font-size: 18px;

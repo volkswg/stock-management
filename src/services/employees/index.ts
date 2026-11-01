@@ -14,6 +14,8 @@ export {
   addEmployeeLeave,
   clockInEmployee,
   clockOutEmployee,
+  updateEmployeeTimesheet,
+  EmployeeTimesheetValidationError,
   EmployeeTimesheetDateConflictError,
   EmployeeTimesheetStatus,
   listEmployeeTimesheets,
