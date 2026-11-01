@@ -3,6 +3,7 @@
 import {
   ArrowLeftOutlined,
   CalculatorOutlined,
+  FilePdfOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
@@ -22,38 +23,10 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./payroll.module.css";
+import type { PayrollRecord } from "./payrollPdf";
+type DailyCommissionRecord = PayrollRecord["dailyCommissions"][number];
 
 const { Text, Title } = Typography;
-
-type DailyCommissionRecord = {
-  date: string;
-  shopId: string;
-  shopName: string;
-  attendanceUnits: number;
-  netSales: number;
-  commissionType: "none" | "sales_bucket";
-  bucketCount: number;
-  commission: number;
-};
-
-type PayrollRecord = {
-  employeeId: string;
-  employeeName: string;
-  compensationType: "daily" | "monthly" | null;
-  effectiveFrom: string;
-  baseSalary: number;
-  commission: number;
-  commissionType: "none" | "sales_bucket";
-  commissionBucketSales: number;
-  commissionBucketAmount: number;
-  commissionRoundupThreshold: number;
-  commissionSales: number;
-  workedDays: number;
-  leaveDays: number;
-  basePay: number;
-  totalPay: number;
-  dailyCommissions: DailyCommissionRecord[];
-};
 
 type PayrollResponse = {
   ok: boolean;
@@ -124,9 +97,25 @@ export function PayrollPage() {
   const [payroll, setPayroll] = useState<PayrollRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [exportingId, setExportingId] = useState<string>();
+
+  async function exportPdf(record: PayrollRecord) {
+    setExportingId(record.employeeId);
+    setError(undefined);
+    try {
+      const { downloadPayrollPdf } = await import("./payrollPdf");
+      await downloadPayrollPdf(record, month);
+    } catch {
+      setError("Could not export the salary PDF. Please try again.");
+    } finally {
+      setExportingId(undefined);
+    }
+  }
 
   const loadPayroll = useCallback(async (signal?: AbortSignal) => {
+    if (signal?.aborted) return;
     setLoading(true);
+    setPayroll([]);
     setError(undefined);
     try {
       const response = await fetch(
@@ -155,7 +144,7 @@ export function PayrollPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void loadPayroll(controller.signal);
+    queueMicrotask(() => void loadPayroll(controller.signal));
     return () => controller.abort();
   }, [loadPayroll]);
 
@@ -178,6 +167,18 @@ export function PayrollPage() {
         <div className={styles.employeeCell}>
           <Text strong>{record.employeeName}</Text>
           <Text type="secondary">{record.employeeId}</Text>
+          <Button
+            icon={<FilePdfOutlined />}
+            loading={exportingId === record.employeeId}
+            disabled={loading || Boolean(exportingId && exportingId !== record.employeeId)}
+            aria-label={`Export PDF for ${record.employeeName}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              void exportPdf(record);
+            }}
+          >
+            Export PDF
+          </Button>
         </div>
       ),
     },

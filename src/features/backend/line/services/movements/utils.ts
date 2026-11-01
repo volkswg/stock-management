@@ -1,7 +1,8 @@
 export function parseQuantity(text: string): { quantity: string; remark: string } | undefined {
-  const total = text.split(/\r?\n/)
-    .map((line) => line.match(/\d[\d,]*(?:\.\d+)?/g)?.at(-1))
-    .filter((value): value is string => Boolean(value))
+  // Amounts must be standalone whitespace-separated numbers, not part of a
+  // label such as "Lot2" or "Set2ชิ้น". Count every amount, including on one line.
+  const total = text.split(/\s+/)
+    .filter((value) => /^\d[\d,]*(?:\.\d+)?$/.test(value))
     .map((value) => Number(value.replace(/,/g, "")))
     .filter((value) => Number.isFinite(value) && value > 0)
     .reduce((sum, value) => sum + value, 0);

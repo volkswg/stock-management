@@ -366,7 +366,6 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, deleting
         </div>
         <div className={styles.itemHeaderActions}>
           <Checkbox disabled={busy} checked={checked} onChange={(event) => onChecked(event.target.checked)}>Packed</Checkbox>
-          {!editing ? <Button disabled={busy} icon={<EditOutlined />} onClick={() => { setQuantity(record.quantity); setRemark(record.remark); setEditing(true); }} aria-label={`Edit item ${itemNumber}`}>Edit</Button> : null}
         </div>
       </div>
       <div className={styles.itemLayout}>
@@ -384,6 +383,8 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, deleting
         <div className={styles.itemBody}>
           <Space className={styles.itemBadges} size={6} wrap>
             <Tag color={quantityMissing ? "orange" : "cyan"}>{quantityMissing ? "Needs quantity" : `${record.quantity} pieces`}</Tag>
+            {record.stockCounted ? <Tag color="green">Stock counted</Tag> : null}
+            {record.isNewArrival ? <Tag color="blue">New arrival</Tag> : null}
             {record.status === "delivered" ? <Tag color="green">Delivered</Tag> : null}
           </Space>
           {editing ? (
@@ -406,14 +407,6 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, deleting
               </div>
             </div>
           ) : record.remark ? <Paragraph className={styles.remark}>{record.remark}</Paragraph> : null}
-          <div className={styles.itemFlags} aria-label={`Flags for item ${itemNumber}`}>
-            <Button aria-pressed={record.stockCounted} loading={saving} disabled={busy} type={record.stockCounted ? "primary" : "default"} onClick={() => void onStockCounted(!record.stockCounted).catch(() => undefined)}>
-              {record.stockCounted ? "✓ Stock counted" : "Stock counted"}
-            </Button>
-            <Button aria-pressed={record.isNewArrival} loading={saving} disabled={busy} type={record.isNewArrival ? "primary" : "default"} onClick={() => void onNewArrival(!record.isNewArrival).catch(() => undefined)}>
-              {record.isNewArrival ? "✓ New arrival" : "New arrival"}
-            </Button>
-          </div>
           {message ? <Text className={styles.saveMessage} role="status" type={message === "Saved." || message === "Image updated." ? "success" : busy ? "secondary" : "danger"}>{message}</Text> : null}
           <div className={styles.itemFooter}>
             <div className={styles.itemMeta}>
@@ -425,8 +418,27 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, deleting
               trigger={["click"]}
               placement="topRight"
               menu={{
-                items: [{ key: "delete", label: "Delete record", icon: <DeleteOutlined />, danger: true }],
-                onClick: () => { setDeleteError(undefined); setDeleteOpen(true); },
+                items: [
+                  ...(!editing ? [{ key: "edit", label: "Edit", icon: <EditOutlined /> }] : []),
+                  { key: "stockCounted", label: record.stockCounted ? "Unmark stock counted" : "Mark stock counted" },
+                  { key: "newArrival", label: record.isNewArrival ? "Unmark new arrival" : "Mark new arrival" },
+                  { type: "divider" },
+                  { key: "delete", label: "Delete record", icon: <DeleteOutlined />, danger: true },
+                ],
+                onClick: ({ key }) => {
+                  if (key === "edit") {
+                    setQuantity(record.quantity);
+                    setRemark(record.remark);
+                    setEditing(true);
+                  } else if (key === "stockCounted") {
+                    void onStockCounted(!record.stockCounted).catch(() => undefined);
+                  } else if (key === "newArrival") {
+                    void onNewArrival(!record.isNewArrival).catch(() => undefined);
+                  } else if (key === "delete") {
+                    setDeleteError(undefined);
+                    setDeleteOpen(true);
+                  }
+                },
               }}
             >
               <Button type="text" disabled={busy} icon={<MoreOutlined />} aria-label={`More actions for item ${itemNumber}`} />
@@ -444,7 +456,7 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, deleting
         okButtonProps={{ danger: true, disabled: busy }}
         cancelButtonProps={{ autoFocus: true, disabled: deleting }}
         confirmLoading={deleting}
-        maskClosable={false}
+        mask={{ closable: false }}
         closable={!deleting}
         keyboard={!deleting}
         onCancel={() => { if (!deleting) setDeleteOpen(false); }}
@@ -494,6 +506,16 @@ function errorMessage(error: unknown): string {
 }
 
 const movementTheme = {
+  components: {
+    Button: {
+      borderRadius: 16,
+      borderRadiusLG: 16,
+      borderRadiusSM: 16,
+      controlHeight: 44,
+      controlHeightLG: 44,
+      controlHeightSM: 44,
+    },
+  },
   token: {
     colorPrimary: "#157347",
     colorBgLayout: "#f3f5f4",

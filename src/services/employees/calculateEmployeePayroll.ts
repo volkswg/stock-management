@@ -36,6 +36,7 @@ export type EmployeePayroll = {
   commissionSales: number;
   workedDays: number;
   leaveDays: number;
+  leaveDates: string[];
   basePay: number;
   totalPay: number;
   dailyCommissions: EmployeePayrollDailyCommission[];
@@ -189,6 +190,7 @@ export async function calculateEmployeePayroll({
         commissionSales: roundMoney(commissionSales),
         workedDays,
         leaveDays: leaveDates.size,
+        leaveDates: Array.from(leaveDates).sort(),
         basePay: roundMoney(basePay),
         totalPay: roundMoney(basePay + commission),
         dailyCommissions,
