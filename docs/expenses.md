@@ -24,40 +24,16 @@ The accounting month and actual expense date are separate. Actual dates may be b
 
 Override worksheet names with `GOOGLE_SHEETS_EXPENSES_WORKSHEET_NAME`, `GOOGLE_SHEETS_EXPENSE_CATEGORIES_WORKSHEET_NAME`, and `GOOGLE_SHEETS_SHOPS_WORKSHEET_NAME`. Destination names must not collide with another configured worksheet.
 
-## Rebuild existing data
+## Storage setup
 
-Read-only preview:
+For a new installation, create the three authoritative worksheets above with their exact header rows before using expense management. The environment template lists their default names. Existing installations already use these tables; do not rerun a historical rebuild or recreate retired storage.
 
-```sh
-node --env-file=.env src/scripts/migrate-expenses.cjs
-```
+The shared connection check reads the three authoritative worksheets. It does not require any retired expense table. Profit reports consume only the independent expense service; item-cost overrides remain part of sales reporting.
 
-Apply, with a private backup directory outside this repository:
-
-```sh
-node --env-file=.env src/scripts/migrate-expenses.cjs --apply --backup-dir /absolute/private/backup-directory
-```
-
-The rebuild reads `sales_profit_expenses`, validates every source row, and splits explicit shop-note breakdowns into individual rent/electricity/salary/etc. entries. Every split must exactly match its original total in cents. Shared records retain their names, categories, amounts, notes, and audit timestamps. No legacy columns or combined legacy-total category are added to the new schema. Original-to-rebuilt provenance is retained in the backup and deterministic entry IDs, not in additional expense fields.
-
-All breakdowns are validated before any destination writes. The command saves a permission-restricted source backup, provisions only new tables with expected schemas, retains original audit timestamps, imports with deterministic IDs, then verifies every rebuilt row. Re-running an unchanged rebuild adds no duplicates. If an imported entry has subsequently changed or been deleted, reconciliation fails rather than resurrecting or overwriting it. Unknown nonempty schemas are never overwritten. The source worksheet remains unchanged and is never combined with the new table in reporting.
-
-Rebuild from a stable source before deploying the new app. Changes in the old application after copying require reconciliation; the command does not overwrite edits to the new source of truth. The old sales expense mutation endpoint returns 409 rather than applying monthly-total updates over itemized data.
+Historical data has been rebuilt and the previous storage retired. Backups and retirement verification reports are retained privately outside the repository. No historical rebuild utility or obsolete mutation endpoint is shipped with the application.
 
 ## Verification
 
-Use mock storage and intercept every `/api/**` browser request. Cover malformed or mismatching source breakdowns, rerun safety, exact totals, multiple shop entries, CRUD, no-mapping shops, inactive master handling, category filters, scope conversions, cancellation and retries, profit aggregation, and light/dark responsive geometry including widths beyond the 1400px content maximum. Application verification must not write test fixtures to live worksheets.
+Use mock storage and intercept every `/api/**` browser request. Cover individual expense CRUD, multiple entries per shop/month, shops without Loyverse mappings, inactive master handling, category filters, scope conversions, cancellation and retries, and profit aggregation. Application verification must not write test fixtures to live worksheets.
 
-## Retire the old worksheet
-
-The runtime connection check uses `expenses`, `expense_categories`, and `shops`, not `sales_profit_expenses`. The old-sheet adapter is retained only for the one-time rebuild utility.
-
-Before deleting the old worksheet:
-
-1. Run the rebuild with a fresh external backup and require successful reconciliation. A retry with unchanged data should add zero rows.
-2. Identify the actual stock-management production service. `PUBLIC_BASE_URL` can point to a separate LINE/purchase app; a successful HTTP response alone does not identify the correct deployment.
-3. Deploy this code to the verified service. Confirm the real expense API returns the new schema and the category/shop masters work, and ensure older app instances are no longer writing monthly totals.
-4. Repeat source/new-table reconciliation immediately before deletion. Preserve the source backup.
-5. Delete only the configured old expense worksheet by its exact spreadsheet worksheet ID, never the entire spreadsheet or any of the three new worksheets. Verify that production expense and connection reads still work afterward.
-
-After deletion, the old-sheet rebuild command is historical tooling; restore the worksheet from the backup before using it again. Do not silently recreate the old worksheet as part of runtime health checks.
+For visual changes, include light/dark responsive geometry and widths beyond the 1400px content maximum. For storage or configuration changes, verify the independent expense API and profit deductions using mocked storage, then run TypeScript, targeted lint, and the production build.

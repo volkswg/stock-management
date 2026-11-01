@@ -8,7 +8,6 @@ export { OrdersSheet } from "./orders/OrdersSheet";
 export { SalesReceiptItemsSheet } from "./sales/receipt-items/SalesReceiptItemsSheet";
 export { SalesProfitCostOverridesSheet } from "./sales/profit-cost-overrides/SalesProfitCostOverridesSheet";
 export { SalesReceiptPaymentsSheet } from "./sales/receipt-payments/SalesReceiptPaymentsSheet";
-export { SalesProfitExpensesSheet } from "./sales/profit-expenses/SalesProfitExpensesSheet";
 export { SalesReceiptsSheet } from "./sales/receipts/SalesReceiptsSheet";
 export { SalesReceiptSyncsSheet } from "./sales/receipt-syncs/SalesReceiptSyncsSheet";
 export { ShipmentOrdersSheet } from "./shipment-orders/ShipmentOrdersSheet";

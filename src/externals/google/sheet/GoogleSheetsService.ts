@@ -12,7 +12,6 @@ import {
   SalesReceiptItemsSheet,
   SalesProfitCostOverridesSheet,
   SalesReceiptPaymentsSheet,
-  SalesProfitExpensesSheet,
   SalesReceiptsSheet,
   SalesReceiptSyncsSheet,
   ShipmentOrdersSheet,
@@ -33,7 +32,6 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly salesReceiptItems: SalesReceiptItemsSheet;
   readonly salesProfitCostOverrides: SalesProfitCostOverridesSheet;
   readonly salesReceiptPayments: SalesReceiptPaymentsSheet;
-  readonly salesProfitExpenses: SalesProfitExpensesSheet;
   readonly expenses: RecordsSheet;
   readonly expenseCategories: RecordsSheet;
   readonly shops: RecordsSheet;
@@ -98,10 +96,6 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     this.salesReceiptPayments = new SalesReceiptPaymentsSheet(
       this.client,
       config.salesReceiptPaymentsWorksheetName,
-    );
-    this.salesProfitExpenses = new SalesProfitExpensesSheet(
-      this.client,
-      config.salesProfitExpensesWorksheetName,
     );
     this.salesReceiptSyncs = new SalesReceiptSyncsSheet(
       this.client,

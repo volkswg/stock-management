@@ -14,7 +14,7 @@ function validDate(value: string) {
 export async function readTable(sheet: IGoogleRowsSheet, headers: string[]): Promise<GoogleSheetRow[]> {
   const rows = await sheet.readRows();
   if (rows[0]?.slice(0, headers.length).join("|") !== headers.join("|")) {
-    throw new ExpenseError("Expense storage is not initialized or has an unexpected schema. Run the expense migration.", 503);
+    throw new ExpenseError("Expense storage is unavailable or has an unexpected schema. Check the configured worksheet names and headers.", 503);
   }
   return rows;
 }

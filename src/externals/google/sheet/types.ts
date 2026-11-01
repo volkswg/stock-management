@@ -17,7 +17,6 @@ export type GoogleSheetsConfig = {
   salesReceiptItemsWorksheetName: string;
   salesProfitCostOverridesWorksheetName: string;
   salesReceiptPaymentsWorksheetName: string;
-  salesProfitExpensesWorksheetName: string;
   expensesWorksheetName: string;
   expenseCategoriesWorksheetName: string;
   shopsWorksheetName: string;
@@ -64,7 +63,6 @@ export interface IGoogleSheetsService {
   readonly salesReceiptItems: IGoogleRowsSheet;
   readonly salesProfitCostOverrides: IGoogleRowsSheet;
   readonly salesReceiptPayments: IGoogleRowsSheet;
-  readonly salesProfitExpenses: IGoogleRowsSheet;
   readonly expenses: IGoogleRowsSheet;
   readonly expenseCategories: IGoogleRowsSheet;
   readonly shops: IGoogleRowsSheet;
