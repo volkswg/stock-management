@@ -1,32 +1,12 @@
 "use client";
 
-import {
-  ArrowLeftOutlined,
-  CalculatorOutlined,
-  FilePdfOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  ConfigProvider,
-  Row,
-  Select,
-  Space,
-  Statistic,
-  Table,
-  Tag,
-  Typography,
-} from "antd";
-import type { ColumnsType } from "antd/es/table";
+import { Alert, Button, ConfigProvider, Input, Select, Spin } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./payroll.module.css";
 import type { PayrollRecord } from "./payrollPdf";
 type DailyCommissionRecord = PayrollRecord["dailyCommissions"][number];
 
-const { Text, Title } = Typography;
+
 
 type PayrollResponse = {
   ok: boolean;
@@ -35,69 +15,23 @@ type PayrollResponse = {
   error?: string;
 };
 
-const dailyCommissionColumns: ColumnsType<DailyCommissionRecord> = [
-  {
-    title: "Date",
-    dataIndex: "date",
-    width: 130,
-    render: formatDate,
-  },
-  {
-    title: "Selected shop",
-    key: "shop",
-    width: 240,
-    render: (_, record) => (
-      <div className={styles.employeeCell}>
-        <Text>{record.shopName || record.shopId}</Text>
-        {record.shopName && record.shopName !== record.shopId ? (
-          <Text type="secondary">{record.shopId}</Text>
-        ) : null}
-      </div>
-    ),
-  },
-  {
-    title: "Attendance",
-    dataIndex: "attendanceUnits",
-    width: 120,
-    render: (units: number) => (
-      <Tag color={units === 0.5 ? "gold" : "green"}>
-        {units === 0.5 ? "Half day" : "Full day"}
-      </Tag>
-    ),
-  },
-  {
-    title: "Shop net sales",
-    dataIndex: "netSales",
-    width: 160,
-    align: "right",
-    render: formatMoney,
-  },
-  {
-    title: "Bucket result",
-    key: "bucketResult",
-    width: 150,
-    align: "right",
-    render: (_, record) => {
-      if (record.commissionType !== "sales_bucket") return "Not eligible";
-      if (record.bucketCount === 0) return "Below first bucket";
-      return `${record.bucketCount} ${record.bucketCount === 1 ? "bucket" : "buckets"}`;
-    },
-  },
-  {
-    title: "Daily commission",
-    dataIndex: "commission",
-    width: 160,
-    align: "right",
-    render: (value: number) => <Text strong>{formatMoney(value)}</Text>,
-  },
-];
-
 export function PayrollPage() {
   const [month, setMonth] = useState(getBangkokMonth());
   const [payroll, setPayroll] = useState<PayrollRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
   const [exportingId, setExportingId] = useState<string>();
+  const [query, setQuery] = useState("");
+  const [payType, setPayType] = useState("all");
+  const [expanded, setExpanded] = useState<string[]>([]);
+  const filtered = payroll.filter(record =>
+    `${record.employeeName} ${record.employeeId}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
+    (payType === "all" || (record.compensationType || "none") === payType),
+  );
+  const period = getPayrollMonthOptions().find(option => option.value === month)?.label;
+  function toggleDetails(id: string) {
+    setExpanded(previous => previous.includes(id) ? previous.filter(value => value !== id) : [...previous, id]);
+  }
 
   async function exportPdf(record: PayrollRecord) {
     setExportingId(record.employeeId);
@@ -157,258 +91,99 @@ export function PayrollPage() {
     [payroll],
   );
 
-  const columns: ColumnsType<PayrollRecord> = [
-    {
-      title: "Employee",
-      key: "employee",
-      fixed: "left",
-      width: 220,
-      render: (_, record) => (
-        <div className={styles.employeeCell}>
-          <Text strong>{record.employeeName}</Text>
-          <Text type="secondary">{record.employeeId}</Text>
-          <Button
-            icon={<FilePdfOutlined />}
-            loading={exportingId === record.employeeId}
-            disabled={loading || Boolean(exportingId && exportingId !== record.employeeId)}
-            aria-label={`Export PDF for ${record.employeeName}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              void exportPdf(record);
-            }}
-          >
-            Export PDF
-          </Button>
-        </div>
-      ),
-    },
-    {
-      title: "Pay type",
-      dataIndex: "compensationType",
-      width: 105,
-      render: (type: PayrollRecord["compensationType"]) =>
-        type ? (
-          <Tag color={type === "daily" ? "blue" : "purple"}>
-            {type === "daily" ? "Daily" : "Monthly"}
-          </Tag>
-        ) : (
-          <Tag>No rate</Tag>
-        ),
-    },
-    {
-      title: "Attendance",
-      key: "attendance",
-      width: 185,
-      render: (_, record) => (
-        <Space size={[4, 4]} wrap>
-          <Tag color="green">{record.workedDays} worked</Tag>
-          <Tag color="gold">{record.leaveDays} leave</Tag>
-        </Space>
-      ),
-    },
-    {
-      title: "Base rate",
-      key: "baseSalary",
-      width: 155,
-      align: "right",
-      render: (_, record) => (
-        <div className={styles.moneyCell}>
-          <Text>{formatMoney(record.baseSalary)}</Text>
-          {record.effectiveFrom ? (
-            <Text type="secondary">From {record.effectiveFrom}</Text>
-          ) : null}
-        </div>
-      ),
-    },
-    {
-      title: "Base pay",
-      dataIndex: "basePay",
-      width: 140,
-      align: "right",
-      render: formatMoney,
-    },
-    {
-      title: "Eligible sales",
-      dataIndex: "commissionSales",
-      width: 145,
-      align: "right",
-      render: (value: number, record) =>
-        record.commissionType === "sales_bucket"
-          ? formatMoney(value)
-          : "-",
-    },
-    {
-      title: "Commission rule",
-      key: "commissionRule",
-      width: 190,
-      align: "right",
-      render: (_, record) =>
-        record.commissionType === "sales_bucket" ? (
-          <div className={styles.moneyCell}>
-            <Text>
-              {formatMoney(record.commissionBucketAmount)} /{" "}
-              {formatMoney(record.commissionBucketSales)}
-            </Text>
-            <Text type="secondary">
-              Round at {formatMoney(record.commissionRoundupThreshold)}
-            </Text>
-          </div>
-        ) : (
-          "None"
-        ),
-    },
-    {
-      title: "Commission",
-      dataIndex: "commission",
-      width: 140,
-      align: "right",
-      render: formatMoney,
-    },
-    {
-      title: "Total pay",
-      dataIndex: "totalPay",
-      fixed: "right",
-      width: 150,
-      align: "right",
-      render: (value: number) => <Text strong>{formatMoney(value)}</Text>,
-    },
-  ];
-
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: "#157347",
-          colorBgLayout: "#f3f5f4",
-          colorBorderSecondary: "#e1e5e2",
-          borderRadius: 6,
-          fontFamily: "Arial, Helvetica, sans-serif",
-        },
-      }}
-    >
+    <ConfigProvider theme={{ token: { colorPrimary: "#157347", colorBorder: "#dfe5e8", borderRadius: 6, fontFamily: "Arial, Helvetica, sans-serif" } }}>
       <div className={styles.appShell}>
         <main className={styles.content}>
           <header className={styles.pageHeader}>
             <div>
-              <Text className={styles.eyebrow}>Human resources</Text>
-              <Title level={1}>Payroll</Title>
-              <Text type="secondary">
-                Monthly pay ignores leave. Daily pay uses recorded workdays.
-              </Text>
+              <span className={styles.eyebrow}>Human resources</span>
+              <h1>Payroll</h1>
+              <p>Review attendance, salary and commission.</p>
             </div>
-            <Space className={styles.pageActions} wrap>
-              <Button href="/employees" icon={<ArrowLeftOutlined />}>
-                Employees
-              </Button>
-              <Button
-                icon={<ReloadOutlined />}
-                loading={loading}
-                onClick={() => void loadPayroll()}
-              >
-                Refresh
-              </Button>
-            </Space>
+            <div className={styles.pageActions}>
+              <Button href="/employees">Employees</Button>
+              <Button aria-label="Refresh" loading={loading} onClick={() => void loadPayroll()}>Refresh</Button>
+            </div>
           </header>
-
-          {error ? (
-            <Alert className={styles.alert} title={error} showIcon type="error" />
-          ) : null}
-
-          <Card className={styles.filterCard}>
+          {error && <Alert className={styles.alert} title={error} type="error" />}
+          <div className={styles.monthBar}>
             <label className={styles.monthField}>
               <span>Payroll month</span>
-              <Select
-                aria-label="Payroll month"
-                options={getPayrollMonthOptions()}
-                optionFilterProp="label"
-                showSearch
-                value={month}
-                onChange={setMonth}
-              />
+              <Select aria-label="Payroll month" options={getPayrollMonthOptions()} optionFilterProp="label" showSearch value={month} onChange={setMonth} />
             </label>
-          </Card>
-
-          <Row className={styles.summaryGrid} gutter={[12, 12]}>
-            <Col xs={24} sm={6}>
-              <Card><Statistic prefix={<CalculatorOutlined />} title="Employees" value={payroll.length} /></Card>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Card><Statistic precision={2} prefix="฿" title="Base pay" value={totals.basePay} /></Card>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Card><Statistic precision={2} prefix="฿" title="Commission" value={totals.commission} /></Card>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Card><Statistic precision={2} prefix="฿" title="Total payroll" value={totals.totalPay} /></Card>
-            </Col>
-          </Row>
-
-          <Alert
-            className={styles.ruleAlert}
-            title="Calculation rules"
-            description="Monthly: full base salary. Daily: base rate × workday units. Commission: synced net sales for the selected shop and work date earn one configured amount per full sales bucket; a remainder at the round-up threshold earns the next bucket. Sales below the first full bucket earn no commission. A half day counts as 0.5."
-            showIcon
-            type="info"
-          />
-
-          <Card className={styles.tableCard}>
-            <Table
-              columns={columns}
-              dataSource={payroll}
-              loading={loading}
-              locale={{ emptyText: "No employees found for this payroll month." }}
-              pagination={false}
-              rowKey="employeeId"
-              scroll={{ x: 1430 }}
-              expandable={{
-                expandRowByClick: true,
-                expandedRowRender: (record) => (
-                  <div className={styles.dailyBreakdown}>
-                    <Text strong>Daily sales and commission</Text>
-                    <Table
-                      columns={dailyCommissionColumns}
-                      dataSource={record.dailyCommissions}
-                      locale={{ emptyText: "No worked days recorded." }}
-                      pagination={false}
-                      rowKey={(dailyRecord) =>
-                        `${dailyRecord.date}:${dailyRecord.shopId}`
-                      }
-                      scroll={{ x: 960 }}
-                      size="small"
-                    />
-                  </div>
-                ),
-                rowExpandable: (record) => record.dailyCommissions.length > 0,
-              }}
-              summary={(records) => (
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0} />
-                  <Table.Summary.Cell index={1} colSpan={4}>
-                    <Text strong>Total</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={5}>
-                    <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.basePay, 0))}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={6}>
-                    <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.commissionSales, 0))}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={7}>
-                    <Text type="secondary">-</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={8}>
-                    <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.commission, 0))}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell align="right" index={9}>
-                    <Text strong>{formatMoney(records.reduce((sum, record) => sum + record.totalPay, 0))}</Text>
-                  </Table.Summary.Cell>
-                </Table.Summary.Row>
-              )}
-            />
-          </Card>
+          </div>
+          <section className={styles.summaryGrid} aria-label="Monthly payroll totals" aria-busy={loading}>
+            {[
+              ["Employees", payroll.length], ["Base pay", formatMoney(totals.basePay)],
+              ["Commission", formatMoney(totals.commission)], ["Total payroll", formatMoney(totals.totalPay)],
+            ].map(([label, value]) => <div key={label} className={styles.summaryCard}><span>{label}</span><strong>{loading ? "—" : value}</strong></div>)}
+          </section>
+          <details className={styles.rules}>
+            <summary>How pay is calculated</summary>
+            <p>Monthly: full base salary, regardless of leave. Daily: base rate × recorded workday units. A half day counts as 0.5.</p>
+            <p>Commission: synced net sales for the selected shop and work date earn one configured amount per full sales bucket. A remainder at the round-up threshold earns the next bucket. Sales below the first full bucket earn no commission.</p>
+          </details>
+          <section className={styles.payrollPanel} aria-label="Employee payroll">
+            <div className={styles.listHeader}>
+              <div className={styles.listTitle}><h2>Employee payroll</h2><span aria-live="polite">{loading ? "Loading…" : `${filtered.length} of ${payroll.length} employees`}</span></div>
+              <div className={styles.filters}>
+                <Input aria-label="Find an employee" placeholder="Find an employee…" value={query} onChange={event => setQuery(event.target.value)} allowClear />
+                <Select aria-label="Filter by pay type" value={payType} onChange={setPayType} options={[{value:"all",label:"All pay types"},{value:"daily",label:"Daily"},{value:"monthly",label:"Monthly"},{value:"none",label:"No rate"}]} />
+              </div>
+            </div>
+            {loading ? <div className={styles.empty}><Spin /><p>Calculating payroll…</p></div> : !filtered.length ? <div className={styles.empty} role="status"><h3>{payroll.length ? "No matching employees" : "No employees for this month"}</h3><p>{payroll.length ? "Try a different name, employee ID or pay type." : "Choose another payroll month or refresh to try again."}</p>{payroll.length > 0 && <Button onClick={() => {setQuery("");setPayType("all");}}>Clear filters</Button>}</div> : <>
+              <div className={styles.columnHeaders} aria-hidden="true"><span>Employee</span><span>Attendance</span><span>Base pay</span><span>Commission</span><span>Total pay</span><span>Actions</span></div>
+              <ul className={styles.employeeList}>
+                {filtered.map(record => {
+                  const open = expanded.includes(record.employeeId);
+                  const detailsId = `payroll-details-${encodeURIComponent(record.employeeId)}`;
+                  return <li className={styles.employeeItem} key={record.employeeId}>
+                    <div className={styles.employeeRow}>
+                      <div className={styles.employeeIdentity}><div><strong>{record.employeeName}</strong><span className={styles.employeeId}>{record.employeeId}</span></div><span className={styles.badge}>{record.compensationType === "daily" ? "Daily" : record.compensationType === "monthly" ? "Monthly" : "No rate"}</span></div>
+                      <div className={styles.attendance}><span>{record.workedDays} worked</span><span>{record.leaveDays} leave</span></div>
+                      <div className={styles.payValue}><span>Base pay</span>{formatMoney(record.basePay)}</div>
+                      <div className={styles.payValue}><span>Commission</span>{formatMoney(record.commission)}</div>
+                      <div className={`${styles.payValue} ${styles.totalPay}`}><span>Total pay</span><strong>{formatMoney(record.totalPay)}</strong></div>
+                      <div className={styles.rowActions}>
+                        <Button type="text" loading={exportingId === record.employeeId} disabled={Boolean(exportingId && exportingId !== record.employeeId)} aria-label={`Export PDF for ${record.employeeName}`} onClick={() => void exportPdf(record)}>Export PDF</Button>
+                        <Button type="text" aria-expanded={open} aria-controls={detailsId} aria-label={`${open ? "Hide" : "View"} details for ${record.employeeName}`} onClick={() => toggleDetails(record.employeeId)}>{open ? "Hide details" : "View details"}</Button>
+                      </div>
+                    </div>
+                    {open && <div id={detailsId} className={styles.dailyBreakdown}>
+                      <div className={styles.detailHeading}><h3>Daily sales, commission &amp; leave</h3><span>{period}</span></div>
+                      <div className={styles.rateInfo}><span>{record.compensationType === "daily" ? "Daily rate" : "Base salary"}: {formatMoney(record.baseSalary)}{record.effectiveFrom ? ` · From ${formatDate(record.effectiveFrom)}` : ""}</span><span>Eligible sales: {record.commissionType === "sales_bucket" ? formatMoney(record.commissionSales) : "Not eligible"}</span><span>Commission rule: {record.commissionType === "sales_bucket" ? `${formatMoney(record.commissionBucketAmount)} per ${formatMoney(record.commissionBucketSales)} · Round at ${formatMoney(record.commissionRoundupThreshold)}` : "None"}</span></div>
+                      <DailyDetails record={record} />
+                    </div>}
+                  </li>;
+                })}
+              </ul>
+              <div className={styles.listTotal}><strong>Total · {filtered.length} employees</strong><div><span>Base pay</span><strong>{formatMoney(filtered.reduce((sum, r) => sum + r.basePay, 0))}</strong></div><div><span>Commission</span><strong>{formatMoney(filtered.reduce((sum, r) => sum + r.commission, 0))}</strong></div><div><span>Total pay</span><strong>{formatMoney(filtered.reduce((sum, r) => sum + r.totalPay, 0))}</strong></div></div>
+            </>}
+          </section>
+          <p className={styles.pdfNote}>PDF includes daily sales, commission and leave.</p>
         </main>
       </div>
     </ConfigProvider>
   );
+}
+
+function DailyDetails({ record }: { record: PayrollRecord }) {
+  const days: Array<{ date: string; day?: DailyCommissionRecord }> = [
+    ...record.dailyCommissions.map(day => ({ date: day.date, day })),
+    ...Array.from(new Set(record.leaveDates || [])).map(date => ({ date })),
+  ].sort((a, b) => a.date.localeCompare(b.date));
+  if (!days.length) return <p className={styles.noDays}>No work or leave days recorded.</p>;
+  return <div className={styles.dayList}>
+    <div className={styles.dayHeaders} aria-hidden="true"><span>Date / shop</span><span>Attendance</span><span>Net sales</span><span>Buckets</span><span>Commission</span></div>
+    {days.map(({ date, day }, index) => <div className={styles.dayRow} key={`${date}:${day?.shopId || "leave"}:${index}`}>
+      <div><strong>{formatDate(date)}</strong><span className={styles.shop}>{day ? day.shopName || day.shopId : "—"}</span></div>
+      <span className={day ? styles.workStatus : styles.leaveStatus}>{day ? day.attendanceUnits === 0.5 ? "Half day" : "Full day" : "Leave"}</span>
+      <div className={styles.dayMoney}><span>Sales</span>{day ? formatMoney(day.netSales) : "—"}</div>
+      <div className={styles.bucket}><span>Buckets</span>{day ? day.commissionType !== "sales_bucket" ? "Not eligible" : day.bucketCount === 0 ? "Below first bucket" : day.bucketCount : "—"}</div>
+      <div className={styles.dayMoney}><span>Commission</span>{day ? formatMoney(day.commission) : "—"}</div>
+    </div>)}
+  </div>;
 }
 
 function getBangkokMonth(): string {
@@ -441,6 +216,7 @@ function formatMoney(value: number): string {
   return new Intl.NumberFormat("en-TH", {
     style: "currency",
     currency: "THB",
+    currencyDisplay: "narrowSymbol",
     minimumFractionDigits: 2,
   }).format(value);
 }

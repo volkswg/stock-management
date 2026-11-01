@@ -1,21 +1,128 @@
-.appShell { min-height: 100vh; background: #f3f5f4; }
-.content { width: min(1500px, 100%); margin: 0 auto; padding: 32px; }
-.pageHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
-.pageHeader h1 { margin: 2px 0 4px !important; font-size: 30px !important; line-height: 1.2 !important; }
-.eyebrow { color: #157347; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-.pageActions { justify-content: flex-end; }
-.alert, .filterCard, .summaryGrid, .ruleAlert { margin-bottom: 16px; }
-.filterCard :global(.ant-card-body) { padding: 16px; }
-.monthField { display: grid; width: min(320px, 100%); gap: 6px; color: #46504a; font-size: 13px; font-weight: 600; }
-.summaryGrid :global(.ant-card), .summaryGrid :global(.ant-card-body) { height: 100%; }
-.summaryGrid :global(.ant-card-body) { padding: 18px 20px; }
-.tableCard :global(.ant-card-body) { padding: 0; }
-.employeeCell, .moneyCell { display: flex; flex-direction: column; gap: 2px; }
-.moneyCell { align-items: flex-end; }
-.dailyBreakdown { display: grid; gap: 10px; padding: 6px 8px 10px; }
-.dailyBreakdown :global(.ant-table-wrapper) { min-width: 0; }
-@media (max-width: 767px) {
+.appShell { min-height: 100vh; background: #f7f9fb; color: #15243a; }
+.content { max-width: 1360px; margin: 0 auto; padding: 32px; }
+.pageHeader { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid #e4e9ee; }
+.pageHeader h1 { margin: 4px 0 6px; font-size: 36px; line-height: 1.2; letter-spacing: -1px; }
+.pageHeader p { margin: 0; color: #637187; font-size: 14px; }
+.eyebrow { color: #637187; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.pageActions { display: flex; gap: 8px; flex-shrink: 0; }
+.pageActions :global(.ant-btn) { height: 38px; padding-inline: 18px; }
+.alert { margin-top: 16px; }
+.monthBar { padding: 22px 0 18px; }
+.monthField { display: flex; align-items: center; gap: 16px; font-size: 13px; font-weight: 500; }
+.monthField :global(.ant-select) { width: 220px; height: 38px; }
+.summaryGrid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.summaryCard { display: flex; flex-direction: column; gap: 12px; padding: 20px 24px; border: 1px solid #e1e7ed; border-radius: 6px; background: white; min-width: 0; }
+.summaryCard > span { color: #637187; font-size: 13px; }
+.summaryCard strong { font-size: clamp(18px,2.1vw,28px); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; letter-spacing: -.6px; }
+.summaryCard:last-child { background: #eef8f2; border-color: #d7ecdf; color: #157347; }
+.summaryCard:last-child > span { color: #157347; }
+.rules { margin: 12px 0 22px; color: #637187; font-size: 13px; }
+.rules summary { cursor: pointer; width: fit-content; padding: 10px 0; min-height: 38px; }
+.rules p { max-width: 960px; margin: 6px 0 12px; line-height: 1.7; }
+.payrollPanel { border: 1px solid #e1e7ed; border-radius: 7px; background: white; overflow: hidden; }
+.listHeader { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 20px; }
+.listTitle { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.listTitle h2 { margin: 0; font-size: 20px; letter-spacing: -.4px; }
+.listTitle > span { font-size: 12px; color: #637187; }
+.filters { display: flex; gap: 8px; }
+.filters > :global(.ant-input-affix-wrapper) { width: 250px; min-height: 38px; }
+.filters > :global(.ant-select) { width: 150px; height: 38px; }
+.columnHeaders, .employeeRow { display: grid; grid-template-columns: minmax(180px,1.8fr) minmax(90px,.9fr) repeat(3,minmax(100px,1fr)) minmax(100px,1fr); gap: 12px; align-items: center; }
+.columnHeaders { padding: 12px 20px; background: #f9fafc; border-block: 1px solid #e9edf2; font-size: 12px; color: #637187; }
+.columnHeaders > span:nth-child(n+3) { text-align: right; }
+.employeeList { list-style: none; margin: 0; padding: 0; }
+.employeeItem + .employeeItem { border-top: 1px solid #e9edf2; }
+.employeeRow { padding: 20px; }
+.employeeIdentity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.employeeIdentity strong { font-size: 14px; overflow-wrap: anywhere; }
+.employeeId { display: block; font-size: 12px; color: #637187; margin-top: 4px; overflow-wrap: anywhere; }
+.badge { border-radius: 20px; background: #f3f5f8; color: #627089; padding: 5px 10px; font-size: 11px; white-space: nowrap; }
+.attendance { display: flex; flex-direction: column; gap: 5px; font-size: 13px; }
+.attendance > span:last-child { color: #637187; font-size: 12px; }
+.payValue { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.payValue > span { display: none; }
+.totalPay { color: #157347; }
+.rowActions { display: flex; flex-direction: column; align-items: flex-end; }
+.rowActions :global(.ant-btn) { padding-inline: 8px; font-size: 12px; height: 34px; color: #315677; }
+.dailyBreakdown { margin: 0 20px 20px; border: 1px solid #e3eaf0; background: #fbfcfe; border-radius: 5px; padding: 16px; }
+.detailHeading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; }
+.detailHeading h3 { font-size: 14px; margin: 0; }
+.detailHeading > span { font-size: 12px; color: #637187; }
+.rateInfo { display: flex; gap: 8px 20px; flex-wrap: wrap; font-size: 12px; color: #637187; margin: 12px 0; line-height: 1.6; }
+.dayList { border: 1px solid #e3eaf0; border-radius: 4px; background: white; overflow: hidden; }
+.dayHeaders, .dayRow { display: grid; grid-template-columns: minmax(120px,1.5fr) 1fr 1fr 1fr 1fr; align-items: center; gap: 12px; padding: 12px; font-size: 12px; }
+.dayHeaders { color: #637187; background: #f6f8fb; }
+.dayHeaders > :nth-child(n+3) { text-align: right; }
+.dayRow { border-top: 1px solid #edf0f4; }
+.dayRow strong { font-weight: 500; }
+.shop { display: block; color: #637187; margin-top: 4px; overflow-wrap: anywhere; }
+.workStatus { color: #157347; }
+.leaveStatus { color: #986817; }
+.dayMoney, .bucket { text-align: right; font-variant-numeric: tabular-nums; }
+.dayMoney > span, .bucket > span { display: none; }
+.noDays { font-size: 13px; color: #637187; }
+.listTotal { display: flex; justify-content: flex-end; align-items: center; gap: 32px; padding: 18px 20px; border-top: 1px solid #e3eaf0; background: #fafcfd; font-size: 13px; }
+.listTotal > strong { margin-right: auto; }
+.listTotal > div { display: grid; text-align: right; gap: 6px; }
+.listTotal span { color: #637187; font-size: 11px; }
+.listTotal > div:last-child strong { color: #157347; }
+.pdfNote { color: #637187; font-size: 12px; padding: 0 16px; margin-top: 12px; }
+.empty { text-align: center; color: #637187; padding: 48px 20px; font-size: 14px; }
+.empty h3 { color: #15243a; font-size: 16px; }
+@media (max-width: 1000px) {
+  .content { padding: 24px; }
+  .employeeIdentity { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .columnHeaders, .employeeRow { gap: 8px; grid-template-columns: minmax(120px,1.3fr) 80px repeat(3,minmax(85px,1fr)) 100px; }
+  .summaryCard { padding: 18px; }
+}
+@media (max-width: 900px) {
   .content { padding: 20px 16px; }
-  .pageHeader { flex-direction: column; }
-  .pageActions { width: 100%; justify-content: flex-start; }
+  .pageHeader { gap: 12px; flex-wrap: wrap; padding-bottom: 18px; }
+  .pageHeader h1 { font-size: 30px; }
+  .pageHeader p { font-size: 13px; }
+  .pageActions :global(.ant-btn) { padding-inline: 12px; min-height: 40px; }
+  .monthBar { padding: 18px 0 12px; }
+  .monthField { display: grid; gap: 8px; }
+  .monthField :global(.ant-select) { width: 100%; height: 40px; }
+  .summaryGrid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .summaryCard { gap: 8px; padding: 16px 12px; }
+  .summaryCard strong { font-size: clamp(17px,4.5vw,24px); }
+  .summaryCard > span { font-size: 12px; }
+  .rules { margin: 10px 0 14px; }
+  .rules summary { min-height: 44px; }
+  .payrollPanel { background: transparent; border: 0; overflow: visible; }
+  .listHeader { padding: 0 0 12px; gap: 12px; }
+  .listTitle h2 { font-size: 19px; }
+  .filters { width: 100%; flex-wrap: wrap; }
+  .filters > :global(.ant-input-affix-wrapper) { width: 100%; min-height: 42px; }
+  .filters > :global(.ant-select) { width: 100%; height: 42px; }
+  .columnHeaders { display: none; }
+  .employeeItem, .employeeItem + .employeeItem { border: 1px solid #e1e7ed; border-radius: 6px; background: white; margin-bottom: 12px; overflow: hidden; }
+  .employeeRow { grid-template-columns: repeat(3,minmax(0,1fr)); padding: 16px 12px 8px; gap: 16px 8px; }
+  .employeeIdentity { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
+  .employeeIdentity strong { font-size: 15px; }
+  .attendance { grid-column: 1 / -1; flex-direction: row; gap: 12px; align-items: baseline; }
+  .payValue { text-align: left; font-size: 12px; border-top: 1px solid #edf0f4; padding-top: 12px; }
+  .payValue > span { display: block; font-size: 11px; color: #637187; margin-bottom: 6px; }
+  .rowActions { grid-column: 1 / -1; flex-direction: row; gap: 8px; justify-content: space-between; }
+  .rowActions :global(.ant-btn) { min-height: 44px; padding-inline: 10px; }
+  .rowActions > :first-child { flex: 1; border-color: #e1e7ed; }
+  .dailyBreakdown { margin: 0 10px 12px; padding: 12px; }
+  .detailHeading { gap: 5px; }
+  .detailHeading h3 { font-size: 13px; }
+  .rateInfo { display: grid; gap: 4px; font-size: 11px; }
+  .dayHeaders { display: none; }
+  .dayRow { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; padding: 12px 8px; font-size: 11px; }
+  .dayRow > :first-child { grid-column: 1; }
+  .workStatus, .leaveStatus { grid-column: 1; }
+  .dayMoney { grid-column: 2; display: flex; justify-content: space-between; gap: 6px; text-align: right; }
+  .dayRow > .dayMoney:nth-child(3) { grid-row: 1; }
+  .dayRow > .dayMoney:last-child { grid-row: 2; }
+  .dayMoney > span { display: inline; color: #637187; }
+  .bucket { grid-column: 1 / -1; text-align: left; color: #637187; }
+  .bucket > span { display: inline; margin-right: 8px; }
+  .listTotal { flex-wrap: wrap; gap: 16px; border: 1px solid #e1e7ed; border-radius: 6px; padding: 16px 12px; }
+  .listTotal > strong { flex-basis: 100%; }
+  .listTotal > div { flex: 1; text-align: left; font-size: 12px; min-width: 0; overflow-wrap: anywhere; }
+  .pdfNote { padding: 0; line-height: 1.6; }
 }
