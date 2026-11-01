@@ -20,13 +20,6 @@ export {
   type SalesProfitCostOverride,
 } from "./manageSalesProfitCostOverrides";
 export {
-  listSalesProfitExpenses,
-  removeSalesProfitSharedExpense,
-  saveSalesProfitSharedExpense,
-  setSalesProfitExpense,
-  type SalesProfitExpense,
-} from "./manageSalesProfitExpenses";
-export {
   getLoyverseReceiptsForSalesDate,
   isValidBangkokSalesDate,
 } from "./getLoyverseReceiptsForSalesDate";

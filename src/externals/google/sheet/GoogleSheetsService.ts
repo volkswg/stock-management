@@ -1,3 +1,4 @@
+import { RecordsSheet } from "./sheets/expenses/RecordsSheet";
 import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
 import { GoogleSheetsClient } from "./client";
 import { GOOGLE_SHEETS_SCOPE } from "./const";
@@ -33,6 +34,9 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly salesProfitCostOverrides: SalesProfitCostOverridesSheet;
   readonly salesReceiptPayments: SalesReceiptPaymentsSheet;
   readonly salesProfitExpenses: SalesProfitExpensesSheet;
+  readonly expenses: RecordsSheet;
+  readonly expenseCategories: RecordsSheet;
+  readonly shops: RecordsSheet;
   readonly salesReceipts: SalesReceiptsSheet;
   readonly salesReceiptSyncs: SalesReceiptSyncsSheet;
   readonly shipmentOrders: ShipmentOrdersSheet;
@@ -55,6 +59,9 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       scopes: [GOOGLE_SHEETS_SCOPE],
     });
     this.client = new GoogleSheetsClient(auth, config.spreadsheetId);
+    this.expenses = new RecordsSheet(this.client, config.expensesWorksheetName);
+    this.expenseCategories = new RecordsSheet(this.client, config.expenseCategoriesWorksheetName);
+    this.shops = new RecordsSheet(this.client, config.shopsWorksheetName);
     this.employeeCompensations = new EmployeeCompensationsSheet(
       this.client,
       config.employeeCompensationsWorksheetName,
@@ -130,7 +137,9 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.salesReceiptItems.checkConnection(),
       this.salesProfitCostOverrides.checkConnection(),
       this.salesReceiptPayments.checkConnection(),
-      this.salesProfitExpenses.checkConnection(),
+      this.expenses.checkConnection(),
+      this.expenseCategories.checkConnection(),
+      this.shops.checkConnection(),
       this.salesReceipts.checkConnection(),
       this.salesReceiptSyncs.checkConnection(),
       this.shipmentOrders.checkConnection(),

@@ -1,0 +1,42 @@
+.appShell { width: 100%; flex: 1; min-height: 100vh; background: #f3f5f4; color: #171717; color-scheme: light; }
+.content { width: min(1400px, 100%); min-height: 100vh; margin: 0 auto; padding: 32px; background: #f3f5f4; }
+.header, .sectionHeader, .cardHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.header { margin-bottom: 24px; }
+.header h1 { margin: 4px 0 8px !important; font-size: 30px !important; }
+.headerActions, .rowActions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.alert { margin-bottom: 16px; }
+.filters { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.filters :global(.ant-picker) { width: 240px; max-width: 100%; min-height: 44px; }
+.totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+.totals strong { display: block; font-size: 24px; margin-top: 8px; overflow-wrap: anywhere; }
+.section { margin-bottom: 28px; }
+.sectionHeader { margin-bottom: 16px; }
+.sectionHeader h2 { font-size: 20px; margin: 0 0 6px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid > * { min-width: 0; }
+.expenseCard h3 { font-size: 17px; margin: 0; overflow-wrap: anywhere; }
+.expenseCard p { margin: 12px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #66716b; }
+.cardHeader { gap: 8px; margin-bottom: 12px; }
+.amount { display: block; margin-top: 8px; font-size: 24px; overflow-wrap: anywhere; }
+.fullWidth { width: 100%; }
+.expenseCard .editButton:global(.ant-btn) { height: 28px; font-size: 13px; padding-inline: 8px; flex-shrink: 0; }
+@media (pointer: coarse) { .expenseCard .editButton:global(.ant-btn) { min-width: 44px; min-height: 44px; } .rowActions :global(.ant-btn) { min-width: 44px; min-height: 44px; } }
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .content { padding: 20px 14px; }
+  .header, .sectionHeader { flex-direction: column; }
+  .headerActions { flex-wrap: wrap; }
+  .headerActions :global(.ant-btn), .sectionHeader :global(.ant-btn) { min-height: 44px; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .totals { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .totals :global(.ant-card-body) { padding: 14px 16px; }
+  .totals strong { font-size: 22px; }
+}
+.filters > div { min-width: 0; flex: 0 1 240px; }
+.filters label { display: block; margin-bottom: 6px; }
+.filters :global(.ant-select) { width: 100%; min-height: 44px; }
+.headerActions { flex-wrap: wrap; max-width: 55%; }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .header { flex-direction: column; } .headerActions { max-width: 100%; } }
+@media (max-width: 600px) { .filters > div { flex: 1 1 100%; } .formGrid { grid-template-columns: minmax(0, 1fr); gap: 0; } }

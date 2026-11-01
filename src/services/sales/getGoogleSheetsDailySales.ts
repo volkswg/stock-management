@@ -9,7 +9,7 @@ import {
   SALES_RECEIPT_PAYMENT_HEADERS,
   SALES_RECEIPT_SYNC_HEADERS,
 } from "@/externals/google/sheet";
-import type { SalesProfitExpense } from "./manageSalesProfitExpenses";
+import type { Expense } from "@/services/expenses";
 import type { SalesProfitCostOverride } from "./manageSalesProfitCostOverrides";
 
 export type GoogleSheetsDailySalesItemRow = {
@@ -92,7 +92,7 @@ export type GoogleSheetsProfitSummaryShop = GoogleSheetsProfitSummaryMetrics & {
 };
 
 export type GoogleSheetsProfitSummarySharedExpense = Pick<
-  SalesProfitExpense,
+  Expense,
   "id" | "amount" | "category" | "name" | "note"
 >;
 
@@ -236,7 +236,7 @@ export async function getGoogleSheetsProfitSummary({
 }: {
   accounts: Array<{ id: string; shopName: string }>;
   costOverrides: SalesProfitCostOverride[];
-  expenses: SalesProfitExpense[];
+  expenses: Expense[];
   googleSheetsService: IGoogleSheetsService;
   year: string;
 }): Promise<GoogleSheetsProfitSummary> {
@@ -271,7 +271,7 @@ export async function getGoogleSheetsProfitSummary({
   const sharedExpenses = expenses.filter(
     (expense) => expense.scope === "SHARED",
   );
-  const expensesByShopKey = new Map<string, SalesProfitExpense[]>();
+  const expensesByShopKey = new Map<string, Expense[]>();
   for (const expense of shopExpenses) {
     const key = `${expense.month}:${expense.accountId}`;
     expensesByShopKey.set(key, [
@@ -633,7 +633,7 @@ function aggregateTotals(
 function createProfitSummaryMonth(
   month: string,
   shops: GoogleSheetsProfitSummaryShop[],
-  sharedExpenses: SalesProfitExpense[],
+  sharedExpenses: Expense[],
 ): GoogleSheetsProfitSummaryMonth {
   const shopTotals = aggregateProfitRows(shops);
   const sharedExpenseTotal = normalizeNumber(

@@ -67,6 +67,14 @@ const MENU_GROUPS: MenuGroup[] = [
     ],
   },
   {
+    id: "expenses-menu", title: "Expenses", description: "Shop and shared operating costs", tone: "amber", icon: <DollarOutlined />,
+    items: [
+      { href: "/expenses", icon: <DollarOutlined />, title: "Expense entries", description: "Manage individual shop and shared expenses" },
+      { href: "/expenses/categories", icon: <AuditOutlined />, title: "Expense categories", description: "Manage expense categories" },
+      { href: "/expenses/shops", icon: <ShopOutlined />, title: "Shop master", description: "Manage shops and optional Loyverse mappings" },
+    ],
+  },
+  {
     id: "human-resources-menu", title: "Human resources", description: "People, attendance and pay", tone: "amber", icon: <TeamOutlined />,
     items: [
       { href: "/employees", icon: <TeamOutlined />, title: "Employees", description: "Manage your team" },

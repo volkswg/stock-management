@@ -2,9 +2,7 @@
 
 import {
   CalendarOutlined,
-  DeleteOutlined,
   EditOutlined,
-  PlusOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 import {
@@ -18,9 +16,7 @@ import {
   Input,
   InputNumber,
   Modal,
-  Popconfirm,
   Row,
-  Select,
   Space,
   Statistic,
   Table,
@@ -82,31 +78,14 @@ type ProfitSummaryResponse = {
   error?: string;
 };
 
-type ExpenseFormValues = {
-  amount: number;
-  note?: string;
-};
-
 type CostOverrideFormValues = {
   averageItemCost: number;
-  note?: string;
-};
-
-type SharedExpenseFormValues = {
-  amount: number;
-  category: string;
-  name: string;
   note?: string;
 };
 
 type SelectedExpense = {
   month: string;
   shop: ShopProfitRow;
-};
-
-type SelectedSharedExpense = {
-  month: string;
-  expense?: SharedExpenseRow;
 };
 
 const MONEY_FORMATTER = new Intl.NumberFormat("th-TH", {
@@ -121,20 +100,13 @@ const NUMBER_FORMATTER = new Intl.NumberFormat("th-TH", {
 });
 
 export function SalesProfitSummaryPage() {
-  const [expenseForm] = Form.useForm<ExpenseFormValues>();
   const [costForm] = Form.useForm<CostOverrideFormValues>();
-  const [sharedExpenseForm] = Form.useForm<SharedExpenseFormValues>();
   const [year, setYear] = useState(getBangkokYear);
   const [summary, setSummary] = useState<ProfitSummaryResponse>();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<SelectedExpense>();
   const [selectedCost, setSelectedCost] = useState<SelectedExpense>();
-  const [selectedSharedExpense, setSelectedSharedExpense] =
-    useState<SelectedSharedExpense>();
-  const [expenseModalOpen, setExpenseModalOpen] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
-  const [sharedExpenseModalOpen, setSharedExpenseModalOpen] = useState(false);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
 
@@ -168,15 +140,6 @@ export function SalesProfitSummaryPage() {
     };
   }, [loadSummary]);
 
-  const openExpenseModal = (month: string, shop: ShopProfitRow) => {
-    setSelectedExpense({ month, shop });
-    expenseForm.setFieldsValue({
-      amount: shop.expenses,
-      note: shop.expenseNote,
-    });
-    setExpenseModalOpen(true);
-  };
-
   const openCostModal = (month: string, shop: ShopProfitRow) => {
     setSelectedCost({ month, shop });
     costForm.setFieldsValue({
@@ -184,51 +147,6 @@ export function SalesProfitSummaryPage() {
       note: shop.itemCostOverrideNote,
     });
     setCostModalOpen(true);
-  };
-
-  const openSharedExpenseModal = (
-    month: string,
-    expense?: SharedExpenseRow,
-  ) => {
-    setSelectedSharedExpense({ month, expense });
-    sharedExpenseForm.setFieldsValue({
-      amount: expense?.amount,
-      category: expense?.category || "RENT",
-      name: expense?.name || "",
-      note: expense?.note || "",
-    });
-    setSharedExpenseModalOpen(true);
-  };
-
-  const saveExpense = async (values: ExpenseFormValues) => {
-    if (!selectedExpense) return;
-    setSubmitting(true);
-    setError(undefined);
-    setNotice(undefined);
-    try {
-      await requestProfitSummary("/api/sales/profit-summary/expenses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId: selectedExpense.shop.accountId,
-          amount: values.amount,
-          month: selectedExpense.month,
-          note: values.note || "",
-        }),
-      });
-      setNotice(
-        `Expense saved for ${selectedExpense.shop.shopName}, ${formatMonth(
-          selectedExpense.month,
-        )}.`,
-      );
-      setExpenseModalOpen(false);
-      expenseForm.resetFields();
-      await loadSummary();
-    } catch (requestError) {
-      setError(getErrorMessage(requestError));
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const saveCostOverride = async (values: CostOverrideFormValues) => {
@@ -291,55 +209,6 @@ export function SalesProfitSummaryPage() {
     }
   };
 
-  const saveSharedExpense = async (values: SharedExpenseFormValues) => {
-    if (!selectedSharedExpense) return;
-    setSubmitting(true);
-    setError(undefined);
-    setNotice(undefined);
-    try {
-      await requestProfitSummary("/api/sales/profit-summary/expenses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          id: selectedSharedExpense.expense?.id,
-          month: selectedSharedExpense.month,
-          note: values.note || "",
-          scope: "SHARED",
-        }),
-      });
-      setNotice(
-        `Shared expense saved for ${formatMonth(selectedSharedExpense.month)}.`,
-      );
-      setSharedExpenseModalOpen(false);
-      sharedExpenseForm.resetFields();
-      await loadSummary();
-    } catch (requestError) {
-      setError(getErrorMessage(requestError));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const removeSharedExpense = async (expense: SharedExpenseRow) => {
-    setSubmitting(true);
-    setError(undefined);
-    setNotice(undefined);
-    try {
-      await requestProfitSummary("/api/sales/profit-summary/expenses", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: expense.id }),
-      });
-      setNotice(`${expense.name} removed.`);
-      await loadSummary();
-    } catch (requestError) {
-      setError(getErrorMessage(requestError));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const monthColumns: ColumnsType<MonthProfitRow> = [
     {
       title: "Month",
@@ -377,26 +246,9 @@ export function SalesProfitSummaryPage() {
         </Space>
       ),
     }),
-    {
-      title: "Expense",
-      key: "edit",
-      fixed: "right",
-      width: 70,
-      render: (_, shop) => (
-        <Tooltip title="Edit expense">
-          <Button
-            aria-label={`Edit expense for ${shop.shopName}`}
-            icon={<EditOutlined />}
-            onClick={() => openExpenseModal(month, shop)}
-          />
-        </Tooltip>
-      ),
-    },
   ];
 
-  const createSharedExpenseColumns = (
-    month: string,
-  ): ColumnsType<SharedExpenseRow> => [
+  const sharedExpenseColumns: ColumnsType<SharedExpenseRow> = [
     {
       title: "Expense",
       dataIndex: "name",
@@ -420,42 +272,6 @@ export function SalesProfitSummaryPage() {
       title: "Note",
       dataIndex: "note",
       ellipsis: true,
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      align: "right",
-      width: 96,
-      render: (_, expense) => (
-        <Space size={2}>
-          <Tooltip title="Edit shared expense">
-            <Button
-              aria-label={`Edit ${expense.name}`}
-              icon={<EditOutlined />}
-              size="small"
-              type="text"
-              onClick={() => openSharedExpenseModal(month, expense)}
-            />
-          </Tooltip>
-          <Popconfirm
-            cancelText="Cancel"
-            okButtonProps={{ danger: true, loading: submitting }}
-            okText="Delete"
-            title={`Delete ${expense.name}?`}
-            onConfirm={() => removeSharedExpense(expense)}
-          >
-            <Tooltip title="Delete shared expense">
-              <Button
-                aria-label={`Delete ${expense.name}`}
-                danger
-                icon={<DeleteOutlined />}
-                size="small"
-                type="text"
-              />
-            </Tooltip>
-          </Popconfirm>
-        </Space>
-      ),
     },
   ];
 
@@ -487,6 +303,7 @@ export function SalesProfitSummaryPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
+              <Button href="/expenses">Manage expenses</Button>
               <Button
                 icon={<ReloadOutlined />}
                 loading={loading}
@@ -604,15 +421,10 @@ export function SalesProfitSummaryPage() {
                             {formatMoney(monthRow.sharedExpenseTotal)}
                           </Text>
                         </Space>
-                        <Button
-                          icon={<PlusOutlined />}
-                          onClick={() => openSharedExpenseModal(monthRow.month)}
-                        >
-                          Add shared expense
-                        </Button>
+                        <Button href={`/expenses?month=${monthRow.month}`}>Manage expenses</Button>
                       </div>
                       <Table
-                        columns={createSharedExpenseColumns(monthRow.month)}
+                        columns={sharedExpenseColumns}
                         dataSource={monthRow.sharedExpenses}
                         locale={{
                           emptyText: "No shared expenses for this month.",
@@ -637,116 +449,6 @@ export function SalesProfitSummaryPage() {
           </Card>
         </main>
       </div>
-
-      <Modal
-        destroyOnHidden
-        open={sharedExpenseModalOpen}
-        title={`${
-          selectedSharedExpense?.expense ? "Edit" : "Add"
-        } shared expense - ${formatMonth(selectedSharedExpense?.month || "")}`}
-        okText="Save expense"
-        confirmLoading={submitting}
-        onCancel={() => {
-          setSharedExpenseModalOpen(false);
-          sharedExpenseForm.resetFields();
-        }}
-        onOk={() => sharedExpenseForm.submit()}
-      >
-        <Form
-          form={sharedExpenseForm}
-          layout="vertical"
-          requiredMark="optional"
-          onFinish={(values) => void saveSharedExpense(values)}
-        >
-          <Form.Item
-            label="Expense name"
-            name="name"
-            rules={[
-              { required: true, message: "Enter an expense name." },
-              { max: 100 },
-            ]}
-          >
-            <Input maxLength={100} />
-          </Form.Item>
-          <Form.Item
-            label="Category"
-            name="category"
-            rules={[{ required: true, message: "Select a category." }]}
-          >
-            <Select
-              options={[
-                { label: "Rent", value: "RENT" },
-                { label: "Utilities", value: "UTILITIES" },
-                { label: "Salary", value: "SALARY" },
-                { label: "Other", value: "OTHER" },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Amount"
-            name="amount"
-            rules={[
-              { required: true, message: "Enter the expense amount." },
-              { type: "number", min: 0, message: "Amount cannot be negative." },
-            ]}
-          >
-            <InputNumber
-              addonAfter="THB"
-              className={styles.fullWidth}
-              min={0}
-              precision={2}
-              step={100}
-            />
-          </Form.Item>
-          <Form.Item label="Note" name="note" rules={[{ max: 200 }]}>
-            <TextArea maxLength={200} rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        destroyOnHidden
-        open={expenseModalOpen}
-        title={`Expense for ${selectedExpense?.shop.shopName || "shop"}`}
-        okText="Save expense"
-        confirmLoading={submitting}
-        onCancel={() => {
-          setExpenseModalOpen(false);
-          expenseForm.resetFields();
-        }}
-        onOk={() => expenseForm.submit()}
-      >
-        <Form
-          form={expenseForm}
-          layout="vertical"
-          requiredMark="optional"
-          onFinish={(values) => void saveExpense(values)}
-        >
-          <Form.Item
-            label="Expense amount"
-            name="amount"
-            rules={[
-              { required: true, message: "Enter the expense amount." },
-              {
-                type: "number",
-                min: 0,
-                message: "Expense cannot be negative.",
-              },
-            ]}
-          >
-            <InputNumber
-              addonAfter="THB"
-              className={styles.fullWidth}
-              min={0}
-              precision={2}
-              step={100}
-            />
-          </Form.Item>
-          <Form.Item label="Note" name="note" rules={[{ max: 200 }]}>
-            <TextArea maxLength={200} rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
 
       <Modal
         destroyOnHidden

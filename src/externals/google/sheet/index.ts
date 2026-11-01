@@ -44,6 +44,7 @@ export type {
   GoogleSheetRow,
   GoogleSheetRangeUpdate,
   IGoogleBatchRowsSheet,
+  IGoogleRowsSheet,
   GoogleSheetsConfig,
   IGoogleSheetsService,
 } from "./types";

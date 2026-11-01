@@ -4,8 +4,9 @@ import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   getGoogleSheetsProfitSummary,
   listSalesProfitCostOverrides,
-  listSalesProfitExpenses,
 } from "@/services/sales";
+
+import { listExpenses, listExpenseShops } from "@/services/expenses";
 
 export const runtime = "nodejs";
 
@@ -21,15 +22,22 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    const accounts = config.loyverse.accounts.map(({ id, shopName }) => ({
+    const configuredAccounts = config.loyverse.accounts.map(({ id, shopName }) => ({
       id,
       shopName,
     }));
     const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
-    const [expenses, costOverrides] = await Promise.all([
-      listSalesProfitExpenses({ googleSheetsService, year }),
+    const [expenses, costOverrides, shops] = await Promise.all([
+      listExpenses({ googleSheetsService, year }),
       listSalesProfitCostOverrides({ googleSheetsService, year }),
+      listExpenseShops(googleSheetsService),
     ]);
+    const accountMap = new Map(configuredAccounts.map(account => [account.id, account]));
+    for (const shop of shops) {
+      const id = shop.loyverseAccountId || shop.id;
+      accountMap.set(id, { id, shopName: shop.name });
+    }
+    const accounts = [...accountMap.values()];
     const summary = await getGoogleSheetsProfitSummary({
       accounts,
       costOverrides,
