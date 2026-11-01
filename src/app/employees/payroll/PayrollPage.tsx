@@ -24,7 +24,11 @@ export function PayrollPage() {
   const [query, setQuery] = useState("");
   const [payType, setPayType] = useState("all");
   const [expanded, setExpanded] = useState<string[]>([]);
-  const filtered = payroll.filter(record =>
+  const activePayroll = useMemo(
+    () => payroll.filter(record => record.workedDays > 0 || record.leaveDays > 0),
+    [payroll],
+  );
+  const filtered = activePayroll.filter(record =>
     `${record.employeeName} ${record.employeeId}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) &&
     (payType === "all" || (record.compensationType || "none") === payType),
   );
@@ -84,11 +88,11 @@ export function PayrollPage() {
 
   const totals = useMemo(
     () => ({
-      basePay: payroll.reduce((sum, record) => sum + record.basePay, 0),
-      commission: payroll.reduce((sum, record) => sum + record.commission, 0),
-      totalPay: payroll.reduce((sum, record) => sum + record.totalPay, 0),
+      basePay: activePayroll.reduce((sum, record) => sum + record.basePay, 0),
+      commission: activePayroll.reduce((sum, record) => sum + record.commission, 0),
+      totalPay: activePayroll.reduce((sum, record) => sum + record.totalPay, 0),
     }),
-    [payroll],
+    [activePayroll],
   );
 
   return (
@@ -115,7 +119,7 @@ export function PayrollPage() {
           </div>
           <section className={styles.summaryGrid} aria-label="Monthly payroll totals" aria-busy={loading}>
             {[
-              ["Employees", payroll.length], ["Base pay", formatMoney(totals.basePay)],
+              ["Employees", activePayroll.length], ["Base pay", formatMoney(totals.basePay)],
               ["Commission", formatMoney(totals.commission)], ["Total payroll", formatMoney(totals.totalPay)],
             ].map(([label, value]) => <div key={label} className={styles.summaryCard}><span>{label}</span><strong>{loading ? "—" : value}</strong></div>)}
           </section>
@@ -126,13 +130,13 @@ export function PayrollPage() {
           </details>
           <section className={styles.payrollPanel} aria-label="Employee payroll">
             <div className={styles.listHeader}>
-              <div className={styles.listTitle}><h2>Employee payroll</h2><span aria-live="polite">{loading ? "Loading…" : `${filtered.length} of ${payroll.length} employees`}</span></div>
+              <div className={styles.listTitle}><h2>Employee payroll</h2><span aria-live="polite">{loading ? "Loading…" : `${filtered.length} of ${activePayroll.length} employees`}</span></div>
               <div className={styles.filters}>
                 <Input aria-label="Find an employee" placeholder="Find an employee…" value={query} onChange={event => setQuery(event.target.value)} allowClear />
                 <Select aria-label="Filter by pay type" value={payType} onChange={setPayType} options={[{value:"all",label:"All pay types"},{value:"daily",label:"Daily"},{value:"monthly",label:"Monthly"},{value:"none",label:"No rate"}]} />
               </div>
             </div>
-            {loading ? <div className={styles.empty}><Spin /><p>Calculating payroll…</p></div> : !filtered.length ? <div className={styles.empty} role="status"><h3>{payroll.length ? "No matching employees" : "No employees for this month"}</h3><p>{payroll.length ? "Try a different name, employee ID or pay type." : "Choose another payroll month or refresh to try again."}</p>{payroll.length > 0 && <Button onClick={() => {setQuery("");setPayType("all");}}>Clear filters</Button>}</div> : <>
+            {loading ? <div className={styles.empty}><Spin /><p>Calculating payroll…</p></div> : !filtered.length ? <div className={styles.empty} role="status"><h3>{activePayroll.length ? "No matching employees" : "No attendance for this month"}</h3><p>{activePayroll.length ? "Try a different name, employee ID or pay type." : "Only employees with recorded work or leave appear. Choose another payroll month to see attendance."}</p>{activePayroll.length > 0 && <Button onClick={() => {setQuery("");setPayType("all");}}>Clear filters</Button>}</div> : <>
               <div className={styles.columnHeaders} aria-hidden="true"><span>Employee</span><span>Attendance</span><span>Base pay</span><span>Commission</span><span>Total pay</span><span>Actions</span></div>
               <ul className={styles.employeeList}>
                 {filtered.map(record => {
@@ -140,7 +144,7 @@ export function PayrollPage() {
                   const detailsId = `payroll-details-${encodeURIComponent(record.employeeId)}`;
                   return <li className={styles.employeeItem} key={record.employeeId}>
                     <div className={styles.employeeRow}>
-                      <div className={styles.employeeIdentity}><div><strong>{record.employeeName}</strong><span className={styles.employeeId}>{record.employeeId}</span></div><span className={styles.badge}>{record.compensationType === "daily" ? "Daily" : record.compensationType === "monthly" ? "Monthly" : "No rate"}</span></div>
+                      <div className={styles.employeeIdentity}><div><strong>{record.employeeName}</strong></div><span className={styles.badge}>{record.compensationType === "daily" ? "Daily" : record.compensationType === "monthly" ? "Monthly" : "No rate"}</span></div>
                       <div className={styles.attendance}><span>{record.workedDays} worked</span><span>{record.leaveDays} leave</span></div>
                       <div className={styles.payValue}><span>Base pay</span>{formatMoney(record.basePay)}</div>
                       <div className={styles.payValue}><span>Commission</span>{formatMoney(record.commission)}</div>
@@ -152,6 +156,7 @@ export function PayrollPage() {
                     </div>
                     {open && <div id={detailsId} className={styles.dailyBreakdown}>
                       <div className={styles.detailHeading}><h3>Daily sales, commission &amp; leave</h3><span>{period}</span></div>
+                      <p className={styles.employeeId}>Employee ID: {record.employeeId}</p>
                       <div className={styles.rateInfo}><span>{record.compensationType === "daily" ? "Daily rate" : "Base salary"}: {formatMoney(record.baseSalary)}{record.effectiveFrom ? ` · From ${formatDate(record.effectiveFrom)}` : ""}</span><span>Eligible sales: {record.commissionType === "sales_bucket" ? formatMoney(record.commissionSales) : "Not eligible"}</span><span>Commission rule: {record.commissionType === "sales_bucket" ? `${formatMoney(record.commissionBucketAmount)} per ${formatMoney(record.commissionBucketSales)} · Round at ${formatMoney(record.commissionRoundupThreshold)}` : "None"}</span></div>
                       <DailyDetails record={record} />
                     </div>}
