@@ -11,6 +11,8 @@ export type GoogleSheetsConfig = {
   employeeCompensationsWorksheetName: string;
   employeesWorksheetName: string;
   employeeTimesheetsWorksheetName: string;
+  employeeAdvancesWorksheetName: string;
+  payrollSettlementsWorksheetName: string;
   ordersWorksheetName: string;
   orderBillsWorksheetName: string;
   orderItemsWorksheetName: string;
@@ -57,6 +59,8 @@ export interface IGoogleSheetsService {
   readonly employeeCompensations: IGoogleRowsSheet;
   readonly employees: IGoogleRowsSheet;
   readonly employeeTimesheets: IGoogleRowsSheet;
+  readonly employeeAdvances: IGoogleRowsSheet;
+  readonly payrollSettlements: IGoogleRowsSheet;
   readonly orders: IGoogleRowsSheet;
   readonly orderBills: IGoogleRowsSheet;
   readonly orderItems: IGoogleBatchRowsSheet;

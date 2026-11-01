@@ -4,13 +4,13 @@
 .pageHeader h1 { margin: 4px 0 6px; font-size: 36px; line-height: 1.2; letter-spacing: -1px; }
 .pageHeader p { margin: 0; color: #637187; font-size: 14px; }
 .eyebrow { color: #637187; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-.pageActions { display: flex; gap: 8px; flex-shrink: 0; }
+.pageActions { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
 .pageActions :global(.ant-btn) { height: 38px; padding-inline: 18px; }
 .alert { margin-top: 16px; }
 .monthBar { padding: 22px 0 18px; }
 .monthField { display: flex; align-items: center; gap: 16px; font-size: 13px; font-weight: 500; }
 .monthField :global(.ant-select) { width: 220px; height: 38px; }
-.summaryGrid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.summaryGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
 .summaryCard { display: flex; flex-direction: column; gap: 12px; padding: 20px 24px; border: 1px solid #e1e7ed; border-radius: 6px; background: white; min-width: 0; }
 .summaryCard > span { color: #637187; font-size: 13px; }
 .summaryCard strong { font-size: clamp(18px,2.1vw,28px); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; letter-spacing: -.6px; }
@@ -27,7 +27,7 @@
 .filters { display: flex; gap: 8px; }
 .filters > :global(.ant-input-affix-wrapper) { width: 250px; min-height: 38px; }
 .filters > :global(.ant-select) { width: 150px; height: 38px; }
-.columnHeaders, .employeeRow { display: grid; grid-template-columns: minmax(180px,1.8fr) minmax(90px,.9fr) repeat(3,minmax(100px,1fr)) minmax(100px,1fr); gap: 12px; align-items: center; }
+.columnHeaders, .employeeRow { display: grid; grid-template-columns: minmax(140px,1.6fr) minmax(70px,.8fr) repeat(4,minmax(85px,1fr)) minmax(100px,1fr); gap: 12px; align-items: center; }
 .columnHeaders { padding: 12px 20px; background: #f9fafc; border-block: 1px solid #e9edf2; font-size: 12px; color: #637187; }
 .columnHeaders > span:nth-child(n+3) { text-align: right; }
 .employeeList { list-style: none; margin: 0; padding: 0; }
@@ -72,7 +72,7 @@
 @media (max-width: 1000px) {
   .content { padding: 24px; }
   .employeeIdentity { align-items: flex-start; flex-direction: column; gap: 6px; }
-  .columnHeaders, .employeeRow { gap: 8px; grid-template-columns: minmax(120px,1.3fr) 80px repeat(3,minmax(85px,1fr)) 100px; }
+  .columnHeaders, .employeeRow { gap: 8px; grid-template-columns: minmax(110px,1.3fr) 65px repeat(4,minmax(75px,1fr)) 100px; }
   .summaryCard { padding: 18px; }
 }
 @media (max-width: 900px) {
@@ -98,13 +98,13 @@
   .filters > :global(.ant-select) { width: 100%; height: 42px; }
   .columnHeaders { display: none; }
   .employeeItem, .employeeItem + .employeeItem { border: 1px solid #e1e7ed; border-radius: 6px; background: white; margin-bottom: 12px; overflow: hidden; }
-  .employeeRow { grid-template-columns: repeat(3,minmax(0,1fr)); padding: 16px 12px 8px; gap: 16px 8px; }
+  .employeeRow { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 16px 12px 8px; gap: 16px 8px; }
   .employeeIdentity { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
   .employeeIdentity strong { font-size: 15px; }
   .attendance { grid-column: 1 / -1; flex-direction: row; gap: 12px; align-items: baseline; }
   .payValue { text-align: left; font-size: 12px; border-top: 1px solid #edf0f4; padding-top: 12px; }
   .payValue > span { display: block; font-size: 11px; color: #637187; margin-bottom: 6px; }
-  .rowActions { grid-column: 1 / -1; flex-direction: row; gap: 8px; justify-content: space-between; }
+  .rowActions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
   .rowActions :global(.ant-btn) { min-height: 44px; padding-inline: 10px; }
   .rowActions > :first-child { flex: 1; border-color: #e1e7ed; }
   .dailyBreakdown { margin: 0 10px 12px; padding: 12px; }
@@ -126,3 +126,10 @@
   .listTotal > div { flex: 1; text-align: left; font-size: 12px; min-width: 0; overflow-wrap: anywhere; }
   .pdfNote { padding: 0; line-height: 1.6; }
 }
+
+.settledBadge { font-size: 11px; color: #157347; line-height: 1.6; text-align: right; }
+.advanceBreakdown { margin-bottom: 20px; font-size: 12px; overflow-wrap: anywhere; }
+.advanceBreakdown h3 { font-size: 14px; }
+.advanceBreakdown p { line-height: 1.7; }
+.advanceBreakdown > div { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 10px 0; border-top: 1px solid #e3eaf0; }
+@media (pointer: coarse) { .rowActions :global(.ant-btn), .pageActions :global(.ant-btn) { min-height: 44px; min-width: 44px; } }

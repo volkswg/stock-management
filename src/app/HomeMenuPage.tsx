@@ -79,6 +79,7 @@ const MENU_GROUPS: MenuGroup[] = [
     items: [
       { href: "/employees", icon: <TeamOutlined />, title: "Employees", description: "Manage your team" },
       { href: "/timesheets", icon: <ClockCircleOutlined />, title: "Timesheets", description: "Review attendance and leave" },
+      { href: "/employees/advances", icon: <DollarOutlined />, title: "Salary advances", description: "Record advance payments and payroll deductions" },
       { href: "/employees/payroll", icon: <DollarOutlined />, title: "Payroll", description: "Calculate pay and export PDFs" },
     ],
   },

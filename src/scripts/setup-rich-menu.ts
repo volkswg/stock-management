@@ -29,7 +29,7 @@ async function main(): Promise<void> {
 
   if (!config.newPublicBaseUrl) {
     throw new Error(
-      "NEW_PUBLIC_BASE_URL is required for the Order List rich menu link.",
+      "NEW_PUBLIC_BASE_URL is required for the Order and Movement rich menu links.",
     );
   }
 

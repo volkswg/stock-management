@@ -1,3 +1,4 @@
+import { PayrollRecordsSheet } from "./sheets/employee-advances/PayrollRecordsSheet";
 import { RecordsSheet } from "./sheets/expenses/RecordsSheet";
 import { GoogleServiceAccountAuth } from "../auth/GoogleServiceAccountAuth";
 import { GoogleSheetsClient } from "./client";
@@ -26,6 +27,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly employeeCompensations: EmployeeCompensationsSheet;
   readonly employees: EmployeesSheet;
   readonly employeeTimesheets: EmployeeTimesheetsSheet;
+  readonly employeeAdvances: PayrollRecordsSheet;
+  readonly payrollSettlements: PayrollRecordsSheet;
   readonly orders: OrdersSheet;
   readonly orderBills: OrderBillsSheet;
   readonly orderItems: OrderItemsSheet;
@@ -57,6 +60,8 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       scopes: [GOOGLE_SHEETS_SCOPE],
     });
     this.client = new GoogleSheetsClient(auth, config.spreadsheetId);
+    this.employeeAdvances = new PayrollRecordsSheet(this.client, config.employeeAdvancesWorksheetName);
+    this.payrollSettlements = new PayrollRecordsSheet(this.client, config.payrollSettlementsWorksheetName);
     this.expenses = new RecordsSheet(this.client, config.expensesWorksheetName);
     this.expenseCategories = new RecordsSheet(this.client, config.expenseCategoriesWorksheetName);
     this.shops = new RecordsSheet(this.client, config.shopsWorksheetName);

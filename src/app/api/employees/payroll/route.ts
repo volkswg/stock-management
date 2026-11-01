@@ -1,3 +1,4 @@
+import { payrollRevision } from "@/services/employees/settleEmployeePayroll";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
@@ -19,7 +20,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
       month,
     });
-    return NextResponse.json({ ok: true, month, payroll });
+    return NextResponse.json({ ok: true, month, payroll: payroll.map(record => ({ ...record, revision: payrollRevision(record) })) });
   } catch (error) {
     console.error("Failed to calculate employee payroll", {
       error: error instanceof Error ? error.message : String(error),

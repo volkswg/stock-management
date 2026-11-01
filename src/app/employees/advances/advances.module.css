@@ -1,0 +1,55 @@
+.appShell { width: 100%; flex: 1; min-height: 100vh; background: #f7f9fb; color: #15243a; color-scheme: light; }
+.page { max-width: 1360px; width: 100%; margin: 0 auto; padding: 32px; color: #15243a; }
+.header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; margin-bottom: 24px; }
+.header h1 { font-size: 32px; margin: 6px 0; }
+.header p, .header > div > span, .hint { color: #637187; font-size: 13px; line-height: 1.7; }
+.actions, .rowActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.summary { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin-top: 20px; }
+.summary > div { border: 1px solid #e1e7ed; border-radius: 6px; background: #fff; padding: 20px; display: grid; gap: 12px; }
+.summary span { font-size: 13px; color: #637187; }
+.summary strong { font-size: 24px; overflow-wrap: anywhere; }
+.summary > div:last-child { background: #eef8f2; color: #157347; }
+.panel { background: #fff; border: 1px solid #e1e7ed; border-radius: 6px; overflow: hidden; }
+.filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 20px; border-bottom: 1px solid #e1e7ed; }
+.filters > :global(.ant-input-affix-wrapper) { flex: 1; min-width: 160px; min-height: 38px; }
+.filters > :global(.ant-select) { width: 170px; height: 38px; }
+.filters label { display: grid; gap: 4px; font-size: 12px; color: #637187; }
+.filters input[type=month] { color-scheme: light; background: #fff; color: #15243a; min-height: 38px; font: inherit; border: 1px solid #d9d9d9; border-radius: 6px; padding: 6px; max-width: 100%; min-width: 0; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list > li { display: grid; grid-template-columns: minmax(0,2fr) repeat(2,minmax(0,1fr)); gap: 18px; padding: 20px; align-items: start; }
+.list > li.unpaidRow { grid-template-columns: minmax(0,2fr) repeat(2,minmax(0,1fr)) minmax(0,1.3fr); }
+.list > li + li { border-top: 1px solid #e1e7ed; }
+.identity, .amount { display: grid; gap: 7px; font-size: 14px; overflow-wrap: anywhere; }
+.identity > span, .amount > span { color: #637187; font-size: 12px; }
+.identity :global(.ant-tag) { width: fit-content; }
+.amount strong { font-variant-numeric: tabular-nums; }
+.rowActions { justify-content: flex-end; }
+.note { grid-column: 1 / -1; font-size: 12px; color: #637187; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; line-height: 1.6; }
+.note span { display: block; }
+.empty { text-align: center; padding: 48px 20px; color: #637187; }
+.empty h2 { font-size: 18px; }
+.modal { color-scheme: light; color: #15243a; }
+.form { color-scheme: light; color: #15243a; display: grid; gap: 14px; padding-top: 12px; }
+.form label { display: grid; gap: 6px; font-size: 13px; min-width: 0; }
+.form input, .form select, .form textarea { color-scheme: light; min-height: 44px; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; font: inherit; background: white; color: #15243a; }
+.form input:focus-visible, .form select:focus-visible, .form textarea:focus-visible { outline: 2px solid #157347; outline-offset: 2px; }
+.form p { font-size: 13px; line-height: 1.7; margin: 0; overflow-wrap: anywhere; }
+.formActions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+@media (max-width: 760px) {
+ .page { padding: 20px 12px; }
+ .header h1 { font-size: 28px; }
+ .actions { width: 100%; }
+ .summary { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+ .summary > div { padding: 14px 10px; }
+ .summary strong { font-size: 20px; }
+ .filters { padding: 12px; }
+ .filters > :global(.ant-input-affix-wrapper), .filters > :global(.ant-select), .filters > label { flex-basis: 100%; width: 100%; }
+ .list > li, .list > li.unpaidRow { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 16px 12px; gap: 16px 8px; }
+ .identity, .rowActions { grid-column: 1 / -1; }
+ .rowActions { justify-content: flex-start; }
+ .page :global(.ant-btn), .formActions :global(.ant-btn) { min-height: 44px; }
+ .filters :global(.ant-select), .filters :global(.ant-input-affix-wrapper), .filters input[type=month] { min-height: 44px; }
+}
+@media (pointer: coarse) { .page :global(.ant-btn), .formActions :global(.ant-btn) { min-height: 44px; min-width: 44px; } }
+
+.hint { margin: 14px 0; }

@@ -9,7 +9,6 @@ export const MAIN_RICH_MENU_ALIAS_ID = "main-menu";
 export const PURCHASE_RICH_MENU_ALIAS_ID = "purchase-menu";
 export const ORDER_RICH_MENU_ALIAS_ID = "order-menu";
 export const MOVEMENT_RICH_MENU_ALIAS_ID = "movement-menu";
-const MOVEMENT_LIST_BASE_URL = "https://stock-management-beta-one.vercel.app";
 
 const RICH_MENU_WIDTH = 2500;
 const RICH_MENU_HEIGHT = 843;
@@ -116,7 +115,11 @@ export function createOrderRichMenu({
   });
 }
 
-export function createMovementRichMenu(): RichMenuRequest {
+export function createMovementRichMenu({
+  newPublicBaseUrl,
+}: {
+  newPublicBaseUrl: string;
+}): RichMenuRequest {
   return createThreeActionSubmenu({
     name: "Movement Menu",
     chatBarText: "Movement Menu",
@@ -128,7 +131,7 @@ export function createMovementRichMenu(): RichMenuRequest {
     secondAction: {
       type: "uri",
       label: "List Movement",
-      uri: buildMovementListUrl(),
+      uri: buildMovementListUrl(newPublicBaseUrl),
     },
   });
 }
@@ -174,7 +177,7 @@ export async function setupSwitchableRichMenus({
   const movementRichMenuId = await createRichMenuWithImage({
     lineRichMenuClient,
     imagePath: movementImagePath,
-    richMenu: createMovementRichMenu(),
+    richMenu: createMovementRichMenu({ newPublicBaseUrl }),
   });
 
   await lineRichMenuClient.upsertRichMenuAlias({
@@ -259,8 +262,8 @@ function createThreeActionSubmenu({
   };
 }
 
-function buildMovementListUrl(): string {
-  return `${MOVEMENT_LIST_BASE_URL}/movements`;
+function buildMovementListUrl(publicBaseUrl: string): string {
+  return `${normalizePublicBaseUrl(publicBaseUrl)}/movements`;
 }
 
 function buildOrderListUrl(publicBaseUrl: string): string {

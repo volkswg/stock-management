@@ -1,35 +1,7 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
-type DailyCommissionRecord = {
-  date: string;
-  shopId: string;
-  shopName: string;
-  attendanceUnits: number;
-  netSales: number;
-  commissionType: "none" | "sales_bucket";
-  bucketCount: number;
-  commission: number;
-};
-
-export type PayrollRecord = {
-  employeeId: string;
-  employeeName: string;
-  compensationType: "daily" | "monthly" | null;
-  effectiveFrom: string;
-  baseSalary: number;
-  commission: number;
-  commissionType: "none" | "sales_bucket";
-  commissionBucketSales: number;
-  commissionBucketAmount: number;
-  commissionRoundupThreshold: number;
-  commissionSales: number;
-  workedDays: number;
-  leaveDays: number;
-  leaveDates: string[];
-  basePay: number;
-  totalPay: number;
-  dailyCommissions: DailyCommissionRecord[];
-};
+import type { EmployeePayroll } from "@/services/employees/calculateEmployeePayroll";
+export type PayrollRecord = EmployeePayroll & { revision?: string };
 
 const money = (value: number) => new Intl.NumberFormat("en-TH", {
   style: "currency", currency: "THB", minimumFractionDigits: 2,
@@ -62,8 +34,19 @@ export function buildPayrollDocument(record: PayrollRecord, month: string): TDoc
     defaultStyle: { font: "Sarabun", fontSize: 10, color: "#24352c" },
     footer: (page, pages) => ({ text: `${period} • Page ${page} of ${pages}`, alignment: "center", fontSize: 8, color: "#68756c" }),
     content: [
-      { text: "Daily sales and commission", fontSize: 21, bold: true, color: "#157347" },
+      { text: "Salary statement", fontSize: 21, bold: true, color: "#157347" },
       { text: `${record.employeeName} • ${period}`, fontSize: 12, margin: [0, 4, 0, 16] },
+      { text: `Base pay: ${money(record.basePay)} · Commission: ${money(record.commission)}`, margin: [0, 0, 0, 6] },
+      { text: `Gross earnings: ${money(record.grossPay)} · Advance deductions: ${money(record.advanceDeduction)}`, margin: [0, 0, 0, 6] },
+      { text: `${record.settlement ? "Final salary paid" : "Remaining salary to pay"}: ${money(record.totalPay)}`, bold: true, margin: [0, 0, 0, 6] },
+      { text: `Advance balance carried forward: ${money(record.advanceBalance)}`, margin: [0, 0, 0, 6] },
+      { text: record.settlement ? `Settled ${record.settlement.paidDate}${record.settlement.reference ? ` · ${record.settlement.reference}` : ""}` : "Preview — payroll not settled", margin: [0, 0, 0, 12] },
+      ...(record.advances.length ? [{
+        table: { headerRows: 1, widths: ["*", 65, 75, 75], body: [
+          ["Advance / payment date", "Reference", "Deducted", "Remaining"].map(text => ({ text, bold: true, fillColor: "#e8f3ec" })),
+          ...record.advances.map(a => [`${a.id}\n${a.paidDate}`, a.reference || "—", money(a.deduction), money(a.balance)]),
+        ] }, layout: "lightHorizontalLines", fontSize: 9, margin: [0, 0, 0, 16] as [number, number, number, number],
+      }] : []),
       dailyRows.length ? {
         table: { headerRows: 1, widths: [60, "*", 54, 68, 34, 68], body: [
           ["Date", "Shop", "Attendance", "Net sales", "Buckets", "Commission"].map(text => ({ text, bold: true, fillColor: "#e8f3ec" })),

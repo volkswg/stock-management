@@ -1,3 +1,4 @@
+import { calculateAdvanceDeductions, readSalaryLedger, type AdvanceDeduction } from "./manageSalaryAdvances";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { getGoogleSheetsSalesDashboard } from "@/services/sales";
 import {
@@ -38,6 +39,11 @@ export type EmployeePayroll = {
   leaveDays: number;
   leaveDates: string[];
   basePay: number;
+  grossPay: number;
+  advanceDeduction: number;
+  advanceBalance: number;
+  advances: AdvanceDeduction[];
+  settlement: { id: string; paidDate: string; reference: string } | null;
   totalPay: number;
   dailyCommissions: EmployeePayrollDailyCommission[];
 };
@@ -50,9 +56,10 @@ export async function calculateEmployeePayroll({
   month: string;
 }): Promise<EmployeePayroll[]> {
   const employees = await listEmployees({ googleSheetsService });
-  const [compensations, timesheets] = await Promise.all([
+  const [compensations, timesheets, { advances, settlements }] = await Promise.all([
     listEmployeeCompensations({ googleSheetsService }),
     listEmployeeTimesheetsForMonth({ googleSheetsService, month }),
+    readSalaryLedger(googleSheetsService),
   ]);
   const monthStart = `${month}-01`;
   const monthEnd = getMonthEnd(month);
@@ -80,10 +87,14 @@ export async function calculateEmployeePayroll({
   return employees
     .filter(
       (employee) =>
-        employee.hiredDate <= monthEnd &&
-        (!employee.terminatedDate || employee.terminatedDate >= monthStart),
+        (employee.hiredDate <= monthEnd &&
+        (!employee.terminatedDate || employee.terminatedDate >= monthStart)) ||
+        settlements.some(s => s.employeeId === employee.id && s.month === month) ||
+        advances.some(a => a.employeeId === employee.id && a.status === "paid" && a.payrollMonth <= month),
     )
     .map((employee) => {
+      const settled = settlements.find(s => s.employeeId === employee.id && s.month === month);
+      if (settled) return { ...settled.snapshot, settlement: { id: settled.id, paidDate: settled.paidDate, reference: settled.reference } };
       const employeeTimesheets = timesheets.filter(
         (timesheet) => timesheet.employeeId === employee.id,
       );
@@ -171,10 +182,13 @@ export async function calculateEmployeePayroll({
           left.date.localeCompare(right.date) ||
           left.shopName.localeCompare(right.shopName),
       );
-      const basePay =
+      const outsideEmployment = employee.hiredDate > monthEnd || Boolean(employee.terminatedDate && employee.terminatedDate < monthStart);
+      const basePay = outsideEmployment ? 0 :
         compensation?.compensationType === "daily"
           ? baseSalary * workedDays
           : baseSalary;
+      const grossPay = roundMoney(basePay + commission);
+      const deduction = calculateAdvanceDeductions(advances, settlements, employee.id, month, grossPay);
       return {
         employeeId: employee.id,
         employeeName: employee.name,
@@ -192,7 +206,9 @@ export async function calculateEmployeePayroll({
         leaveDays: leaveDates.size,
         leaveDates: Array.from(leaveDates).sort(),
         basePay: roundMoney(basePay),
-        totalPay: roundMoney(basePay + commission),
+        grossPay,
+        ...deduction,
+        settlement: null,
         dailyCommissions,
       };
     })

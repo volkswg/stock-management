@@ -23,6 +23,8 @@ export type AppConfig = {
     employeeCompensationsWorksheetName: string;
     employeesWorksheetName: string;
     employeeTimesheetsWorksheetName: string;
+    employeeAdvancesWorksheetName: string;
+    payrollSettlementsWorksheetName: string;
     ordersWorksheetName: string;
     orderBillsWorksheetName: string;
     orderItemsWorksheetName: string;
@@ -79,6 +81,8 @@ export function getConfig(): AppConfig {
       employeeTimesheetsWorksheetName:
         process.env.GOOGLE_SHEETS_EMPLOYEE_TIMESHEETS_WORKSHEET_NAME?.trim() ||
         "employee_timesheets",
+      employeeAdvancesWorksheetName: process.env.GOOGLE_SHEETS_EMPLOYEE_ADVANCES_WORKSHEET_NAME?.trim() || "employee_advances",
+      payrollSettlementsWorksheetName: process.env.GOOGLE_SHEETS_PAYROLL_SETTLEMENTS_WORKSHEET_NAME?.trim() || "payroll_settlements",
       ordersWorksheetName:
         process.env.GOOGLE_SHEETS_ORDERS_WORKSHEET_NAME?.trim() || "orders",
       orderBillsWorksheetName:

@@ -32,12 +32,13 @@ export class GoogleSheetsClient {
     worksheetName: string,
     range: string,
     values: GoogleSheetRow[],
+    inputOption: "USER_ENTERED" | "RAW" = "USER_ENTERED",
   ): Promise<void> {
     await this.request(
       `/values/${this.encodeRange(
         worksheetName,
         range,
-      )}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+      )}:append?valueInputOption=${inputOption}&insertDataOption=INSERT_ROWS`,
       {
         method: "POST",
         body: JSON.stringify({ values }),
@@ -49,12 +50,13 @@ export class GoogleSheetsClient {
     worksheetName: string,
     range: string,
     values: GoogleSheetRow[],
+    inputOption: "USER_ENTERED" | "RAW" = "USER_ENTERED",
   ): Promise<void> {
     await this.request(
       `/values/${this.encodeRange(
         worksheetName,
         range,
-      )}?valueInputOption=USER_ENTERED`,
+      )}?valueInputOption=${inputOption}`,
       {
         method: "PUT",
         body: JSON.stringify({ values }),

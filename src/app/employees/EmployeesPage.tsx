@@ -467,6 +467,7 @@ export function EmployeesPage() {
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
+              <Button href="/employees/advances">Salary advances</Button>
               <Button href="/" icon={<ArrowLeftOutlined />}>
                 Home
               </Button>
