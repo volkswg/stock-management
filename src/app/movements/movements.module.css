@@ -1,52 +1,121 @@
-.appShell { min-height: 100vh; background: #f3f5f4; }
-.content { width: 100%; max-width: 1500px; margin: 0 auto; padding: 38px 40px 48px; }
-.backButton { margin-bottom: 14px; margin-left: -12px; }
+.appShell { min-height: 100vh; background: #f3f5f4; color: #1f2923; color-scheme: light; }
+.content { width: 100%; max-width: 1420px; margin: 0 auto; padding: 24px 40px 48px; }
+.backButton { margin-bottom: 10px; margin-left: -12px; min-height: 44px; }
 .pageHeader { display: grid; justify-items: start; margin-bottom: 22px; }
-.eyebrow { margin-bottom: 7px; color: #157347 !important; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-.pageHeader h1 { margin: 0 0 5px !important; font-size: 30px !important; }
-.toolbarCard { margin-bottom: 16px; }
-.toolbarCard :global(.ant-card-body) { padding: 16px 20px; }
-.toolbar { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-.periodControl { display: grid; gap: 7px; }
-.summaryGrid { margin-bottom: 16px; }
-.summaryGrid :global(.ant-card), .summaryGrid :global(.ant-card-body) { height: 100%; }
-.summaryGrid :global(.ant-card-body) { padding: 18px 20px; }
+.eyebrow { margin-bottom: 7px; color: #157347 !important; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.pageHeader h1 { margin: 0 0 5px !important; font-size: 30px !important; letter-spacing: -.03em; }
+.toolbarCard:global(.ant-card) { margin-bottom: 14px; }
+.toolbarCard:global(.ant-card) :global(.ant-card-body) { padding: 14px 20px; }
+.toolbar { display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+.periodControl { display: grid; gap: 6px; width: 350px; max-width: 100%; min-width: 0; }
+.periodLabel { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.periodLabel > :global(.ant-typography) { color: #59665e; font-size: 12px; }
+.periodControl .currentMonth:global(.ant-btn) { min-height: 36px; padding-inline: 8px; font-size: 12px; color: #157347; }
+.monthStepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 8px; }
+.periodControl .monthStepper :global(.ant-btn), .periodControl .monthStepper :global(.ant-picker) { width: 100%; min-width: 0; height: 44px; }
+.monthStepper :global(.ant-picker input) { min-width: 0; text-align: center; font-size: 16px; font-weight: 600; cursor: pointer; }
+.viewSwitch { min-width: 270px; }
+.toolbar .viewSwitch :global(.ant-segmented-item-label) { min-height: 40px; display: flex; align-items: center; justify-content: center; }
+.overview { border: 1px solid #e1e5e2; border-radius: 10px; background: white; overflow: hidden; margin-bottom: 22px; }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 18px 0; }
+.metric { min-width: 0; display: grid; gap: 6px; padding: 0 22px; }
+.metric + .metric { border-left: 1px solid #e8ede9; }
+.metric > span { color: #657168; font-size: 12px; }
+.metric > strong { font-size: 27px; line-height: 1.2; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; letter-spacing: -.03em; }
+.shopTotals { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 22px; border-top: 1px solid #edf0ed; }
+.shopTotalsLabel { color: #657168; margin-right: auto; font-size: 12px; }
+.shopChip { display: inline-flex; align-items: center; gap: 9px; border-radius: 5px; padding: 4px 8px; background: #edf6f0; color: #17663e; font-size: 12px; line-height: 1.4; max-width: 100%; overflow-wrap: anywhere; }
+.shopChip > strong { font-variant-numeric: tabular-nums; }
+.shopPlaceholder { color: #657168; font-size: 12px; }
 .alert { margin-bottom: 16px; }
-.tableCard :global(.ant-card-body), .calendarCard :global(.ant-card-body) { padding: 0; }
+.activityHeading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; }
+.activityHeading h2 { margin: 0 !important; font-size: 18px; }
+.activityHeading > :global(.ant-typography) { font-size: 12px; }
+.dayGroup + .dayGroup { margin-top: 24px; }
+.dayHeading { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-bottom: 9px; padding: 0 2px; }
+.dayHeading h3 { margin: 0; font-size: 13px; font-weight: 700; }
+.dayHeading > span { color: #657168; font-size: 12px; }
+.movementCards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.movementCard { min-width: 0; display: flex; flex-direction: column; padding: 18px; border: 1px solid #dfe6df; border-radius: 10px; background: white; color: #1f2923; transition: border-color .15s, box-shadow .15s; }
+.movementCard:hover { color: #1f2923; border-color: #157347; box-shadow: 0 3px 12px #183a2310; }
+.movementCard:focus-visible, .calendarCell:focus-visible { outline: 3px solid #157347; outline-offset: 3px; }
+.movementCardTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 7px; margin-bottom: 12px; }
+.movementCardTop :global(.ant-tag) { margin: 0; }
+.movementCardTop time { color: #657168; font-size: 11px; }
+.movementIdentity { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.movementIdentity > strong { min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.movementIdentity > :global(.anticon) { flex: none; color: #819085; font-size: 12px; }
+.movementNumbers { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 14px 0; color: #657168; font-size: 12px; }
+.movementNumbers strong { margin-right: 3px; color: #1f2923; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.movementShops { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding-top: 12px; border-top: 1px solid #edf0ed; }
+.movementShops > span:first-child { color: #657168; font-size: 12px; margin-right: 2px; }
+.deliveredAt { color: #657168; font-size: 11px; margin-top: 10px; }
+.openDetail { display: flex; align-items: center; gap: 5px; margin-top: auto; padding-top: 14px; color: #157347; font-size: 12px; font-weight: 600; }
+.openDetail > :global(.anticon) { font-size: 9px; }
+.tableCard:global(.ant-card) :global(.ant-card-body), .calendarCard:global(.ant-card) :global(.ant-card-body) { padding: 0; }
 .clickableRow { cursor: pointer; }
 .clickableRow:focus { outline: 2px solid #157347; outline-offset: -2px; }
 .calendarCard { overflow: hidden; }
+.calendarCard :global(.ant-picker-calendar) { padding: 10px; }
 .calendarCard :global(.ant-picker-content) { width: 100%; table-layout: fixed; }
 .calendarCard :global(.ant-picker-calendar-date) { margin: 0 !important; padding: 0 !important; border: 0 !important; }
 .calendarCard :global(.ant-picker-cell) { padding: 0 !important; }
 .calendarCard :global(.ant-picker-calendar-date-content) { height: 108px !important; }
 .calendarCell { width: 100%; height: 108px; display: grid; grid-template-rows: auto minmax(0, 1fr); align-content: start; gap: 8px; overflow: hidden; padding: 9px; border: 1px solid #e1e5e2; background: white; color: #1f2923; font: inherit; text-align: left; }
-.calendarCell:disabled { color: inherit; }
-.activeCell { cursor: pointer; }
-.activeCell:hover { border-color: #157347; background: #f0f7f3; }
+.calendarCell:disabled { color: #69766e; }
+.activeCell { cursor: pointer; background: #f0f8f3; }
+.activeCell:hover { border-color: #157347; background: #e6f3eb; }
 .mutedCell { background: #f7f8f7; color: #8a948e; }
 .cellHeader { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 3px; }
 .cellHeader :global(.ant-badge) { flex: none; }
-.cellSummary { min-width: 0; display: grid; align-content: start; gap: 3px; overflow: hidden; color: #68736d; font-size: 12px; }
+.cellSummary, .cellShops { min-width: 0; display: grid; align-content: start; gap: 3px; overflow: hidden; color: #68736d; font-size: 12px; }
+.cellTotal { display: none; }
 .shopQuantity { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 2px 6px; border-radius: 4px; background: #edf6f1; color: #157347; }
 .shopQuantity > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shopQuantity strong { flex: none; color: inherit; font-size: inherit; }
 .emptyIcon { color: #157347; font-size: 44px; }
-.pickerList { width: 100%; }
-.pickerDescriptions { margin-top: 14px; }
-@media (max-width: 768px) {
-  .content { padding: 28px 20px 40px; }
-  .toolbar { align-items: stretch; flex-direction: column; }
-  .periodControl :global(.ant-space-compact) { display: flex; width: 100%; }
-  .periodControl :global(.ant-picker) { flex: 1; min-width: 0; }
+.pickerList { display: grid; gap: 12px; width: 100%; }
+.pickerSummary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 0 16px; }
+.dayPicker { color-scheme: light; }
+.dayPicker:global(.ant-modal) :global(.ant-modal-close) { width: 44px; height: 44px; top: 8px; right: 8px; }
+.dayPicker:global(.ant-modal) :global(.ant-modal-title) { padding-right: 28px; line-height: 1.6; }
+.dayPicker:global(.ant-modal) :global(.ant-modal-body) { max-height: 75dvh; overflow-y: auto; }
+@media (max-width: 1023px) {
+  .movementCards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 480px) {
-  .content { padding: 22px 14px 32px; }
-  .pageHeader h1 { font-size: 26px !important; }
-  .calendarCard :global(.ant-picker-calendar-date-content) { height: 78px !important; }
-  .calendarCard :global(.ant-picker-content th) { padding: 6px 0; font-size: 11px; }
-  .calendarCell { height: 78px; gap: 4px; padding: 5px; }
-  .cellHeader :global(.ant-badge-count) { min-width: 16px; height: 16px; padding: 0 4px; font-size: 9px; line-height: 16px; }
-  .cellSummary { gap: 2px; font-size: 10px; }
-  .shopQuantity { gap: 2px; padding: 1px 3px; }
+@media (max-width: 767px) {
+  .content { padding: 16px 16px 32px; }
+  .backButton:global(.ant-btn) { display: none; }
+  .pageHeader { margin-bottom: 16px; }
+  .toolbarCard:global(.ant-card) :global(.ant-card-body) { padding: 12px; }
+  .toolbar { align-items: stretch; flex-direction: column; gap: 14px; }
+  .periodControl { width: 100%; }
+  .viewSwitch { width: 100%; min-width: 0; }
+  .overview { margin-bottom: 22px; }
+  .metric { padding: 0 14px; }
+  .metrics { padding: 16px 0; }
+  .metric > strong { font-size: 25px; }
+  .shopTotals { padding: 10px 14px; }
+  .movementCards { grid-template-columns: minmax(0, 1fr); }
+  .movementCard { padding: 16px; }
+  .calendarCard :global(.ant-picker-calendar) { padding: 4px; }
+  .calendarCard :global(.ant-picker-calendar-date-content) { height: 80px !important; }
+  .calendarCard :global(.ant-picker-content th) { padding: 8px 0; font-size: 11px; }
+  .calendarCell { height: 80px; gap: 5px; padding: 5px 3px; }
+  .cellHeader { font-size: 11px; gap: 0; }
+  .cellHeader :global(.ant-badge-count) { min-width: 14px; height: 14px; padding: 0 3px; font-size: 9px; line-height: 14px; }
+  .cellShops { display: none; }
+  .cellTotal { display: grid; gap: 1px; font-size: 10px; }
+  .cellTotal strong { font-size: 12px; color: #157347; font-weight: 700; }
+}
+@media (max-width: 359px) {
+  .content { padding-inline: 12px; }
+  .metric { padding-inline: 10px; }
+  .metric > strong { font-size: 22px; }
+  .shopTotalsLabel { flex-basis: 100%; }
+  .movementCard { padding: 14px; }
+}
+@media (pointer: coarse) {
+  .periodControl .currentMonth:global(.ant-btn) { min-height: 44px; min-width: 44px; }
+  .toolbar .viewSwitch :global(.ant-segmented-item-label) { min-height: 44px; }
 }

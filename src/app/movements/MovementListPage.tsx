@@ -2,7 +2,6 @@
 
 import {
   ArrowLeftOutlined,
-  CalendarOutlined,
   LeftOutlined,
   RightOutlined,
   SwapOutlined,
@@ -13,24 +12,20 @@ import {
   Button,
   Calendar,
   Card,
-  Col,
   ConfigProvider,
   DatePicker,
-  Descriptions,
   Empty,
+  Grid,
   Modal,
-  Row,
   Segmented,
   Skeleton,
-  Space,
-  Statistic,
   Table,
   Tag,
-  Tooltip,
   Typography,
   type TableProps,
 } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ProductMovementMasterRecord } from "@/services/movements";
@@ -45,7 +40,7 @@ import {
 import styles from "./movements.module.css";
 
 const { Text, Title } = Typography;
-type ViewMode = "calendar" | "table";
+type ViewMode = "list" | "calendar" | "table";
 type DailySummary = {
   date: string;
   itemCount: number;
@@ -57,15 +52,23 @@ type DailySummary = {
 export function MovementListPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [records, setRecords] = useState<ProductMovementMasterRecord[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>("calendar");
-  const [selectedDay, setSelectedDay] = useState<DailySummary>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const [resource, setResource] = useState<{ key: string; records: ProductMovementMasterRecord[]; error?: string }>({ key: "", records: [] });
+  const [viewMode, setViewMode] = useState<ViewMode>();
+  const screens = Grid.useBreakpoint();
+  const activeView = viewMode === "table" && !screens.md ? "list" : viewMode || (screens.md ? "calendar" : "list");
+  const [pickedDay, setPickedDay] = useState<{ key: string; summary: DailySummary }>();
   const filters = useMemo(
     () => readFilters(searchParams),
     [searchParams],
   );
+  const requestKey = JSON.stringify(filters);
+  const loading = resource.key !== requestKey;
+  const records = useMemo(() => loading ? [] : resource.records, [loading, resource.records]);
+  const error = loading ? undefined : resource.error;
+  const selectedDay = pickedDay?.key === requestKey ? pickedDay.summary : undefined;
+  function setSelectedDay(summary?: DailySummary) {
+    setPickedDay(summary ? { key: requestKey, summary } : undefined);
+  }
   const selectedDate = filters.fromDate || filters.date || filters.toDate;
   const period = dayjs(selectedDate || undefined);
 
@@ -76,22 +79,19 @@ export function MovementListPage() {
       return;
     }
     const controller = new AbortController();
-    setLoading(true);
-    setError(undefined);
     getMovements(filters, controller.signal)
-      .then(setRecords)
+      .then((records) => {
+        if (!controller.signal.aborted) setResource({ key: requestKey, records });
+      })
       .catch((requestError: unknown) => {
         if (!controller.signal.aborted) {
-          setError(errorMessage(requestError));
+          setResource({ key: requestKey, records: [], error: errorMessage(requestError) });
         }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [filters, router, selectedDate]);
+  }, [filters, router, selectedDate, requestKey]);
 
-  const dailySummaries = useMemo(() => summarizeDays(records), [records]);
+  const dailySummaries = useMemo(() => summarizeDays(records).sort((a, b) => b.date.localeCompare(a.date)), [records]);
   const summaryByDate = useMemo(
     () => new Map(dailySummaries.map((summary) => [summary.date, summary])),
     [dailySummaries],
@@ -104,6 +104,7 @@ export function MovementListPage() {
   const shopTotals = summarizeShops(records);
 
   function setPeriod(value: Dayjs) {
+    setSelectedDay(undefined);
     router.push(`/movements?${monthQuery(value)}`);
   }
 
@@ -157,67 +158,85 @@ export function MovementListPage() {
             <div>
               <Text className={styles.eyebrow}>Inventory operations</Text>
               <Title level={1}>Movements</Title>
-              <Text type="secondary">Summary by packing date and shop</Text>
+              <Text type="secondary">Packing history and delivery status</Text>
             </div>
           </header>
 
           <Card className={styles.toolbarCard}>
             <div className={styles.toolbar}>
               <div className={styles.periodControl}>
-                <Text strong>Month</Text>
-                <Space.Compact>
-                  <Button
-                    aria-label="Previous month"
-                    icon={<LeftOutlined />}
-                    onClick={() => setPeriod(period.subtract(1, "month"))}
-                  />
+                <div className={styles.periodLabel}>
+                  <Text strong>Packing month</Text>
+                  <Button className={styles.currentMonth} type="text" onClick={() => setPeriod(getCurrentBangkokDate())}>
+                    This month
+                  </Button>
+                </div>
+                <div className={styles.monthStepper}>
+                  <Button aria-label="Previous month" icon={<LeftOutlined />} onClick={() => setPeriod(period.subtract(1, "month"))} />
                   <DatePicker
+                    aria-label="Packing month"
                     allowClear={false}
-                    format="YYYY-MM"
+                    format="MMMM YYYY"
+                    inputReadOnly
+                    suffixIcon={null}
                     picker="month"
                     value={period}
-                    onChange={(value) => setPeriod(value || dayjs())}
+                    onChange={(value) => { if (value) setPeriod(value); }}
                   />
-                  <Tooltip title="Current month">
-                    <Button
-                      aria-label="Current month"
-                      icon={<CalendarOutlined />}
-                      onClick={() => setPeriod(getCurrentBangkokDate())}
-                    />
-                  </Tooltip>
-                  <Button
-                    aria-label="Next month"
-                    icon={<RightOutlined />}
-                    onClick={() => setPeriod(period.add(1, "month"))}
-                  />
-                </Space.Compact>
+                  <Button aria-label="Next month" icon={<RightOutlined />} onClick={() => setPeriod(period.add(1, "month"))} />
+                </div>
               </div>
-              <Space wrap>
-                <Segmented<ViewMode>
-                  aria-label="Movement view"
-                  options={[
-                    { label: "Calendar", value: "calendar" },
-                    { label: "Table", value: "table" },
-                  ]}
-                  value={viewMode}
-                  onChange={setViewMode}
-                />
-              </Space>
+              <Segmented<ViewMode>
+                block
+                className={styles.viewSwitch}
+                aria-label="Movement view"
+                options={[
+                  { label: "List", value: "list" },
+                  { label: "Calendar", value: "calendar" },
+                  ...(screens.md ? [{ label: "Table", value: "table" as const }] : []),
+                ]}
+                value={activeView}
+                onChange={setViewMode}
+              />
             </div>
           </Card>
 
-          <Row className={styles.summaryGrid} gutter={[16, 16]}>
-            <SummaryCard title="Quantity" value={totalQuantity} />
-            <SummaryCard title="Items" value={totalItems} />
-            <SummaryCard title="Shop totals" value={formatShopTotals(shopTotals)} />
-          </Row>
+          <section className={styles.overview} aria-label="Month totals" aria-busy={loading}>
+            <div className={styles.metrics}>
+              <SummaryMetric title="Movements" value={records.length} pending={loading || Boolean(error)} />
+              <SummaryMetric title="Items" value={totalItems} pending={loading || Boolean(error)} />
+              <SummaryMetric title="Quantity" value={totalQuantity} pending={loading || Boolean(error)} />
+            </div>
+            <div className={styles.shopTotals}>
+              <span className={styles.shopTotalsLabel}>Shop quantities</span>
+              <ShopTotals totals={shopTotals} pending={loading || Boolean(error)} />
+            </div>
+          </section>
 
-          {error ? <Alert className={styles.alert} title={error} showIcon type="error" /> : null}
+          {error ? <Alert className={styles.alert} title={error} description="Movement totals are unavailable. Try another month or reload this page." showIcon type="error" /> : null}
           {loading ? (
             <Card><Skeleton active paragraph={{ rows: 8 }} /></Card>
-          ) : records.length === 0 ? (
+          ) : error ? null : records.length === 0 ? (
             <Card><Empty description="No movement records in this period" image={<SwapOutlined className={styles.emptyIcon} />} /></Card>
-          ) : viewMode === "table" ? (
+          ) : activeView === "list" ? (
+            <section className={styles.activityList} aria-label="Movement list">
+              <div className={styles.activityHeading}>
+                <Title level={2}>Movement history</Title>
+                <Text type="secondary">Newest first</Text>
+              </div>
+              {dailySummaries.map((day) => (
+                <section className={styles.dayGroup} key={day.date} aria-label={`Movements on ${day.date}`}>
+                  <div className={styles.dayHeading}>
+                    <h3>{dayjs(day.date).format("ddd, D MMM")}</h3>
+                    <span>{day.movementMasters.length} {day.movementMasters.length === 1 ? "movement" : "movements"} · {day.quantity.toLocaleString()} units</span>
+                  </div>
+                  <div className={styles.movementCards}>
+                    {[...day.movementMasters].reverse().map((movement) => <MovementCard key={movement.id} movement={movement} />)}
+                  </div>
+                </section>
+              ))}
+            </section>
+          ) : activeView === "table" ? (
             <Card className={styles.tableCard}>
               <Table
                 columns={columns}
@@ -272,14 +291,40 @@ export function MovementListPage() {
       <MovementPicker
         summary={selectedDay}
         onClose={() => setSelectedDay(undefined)}
-        onOpen={(id) => router.push(`/movements/${encodeURIComponent(id)}`)}
       />
     </ConfigProvider>
   );
 }
 
-function SummaryCard({ title, value }: { title: string; value: number | string }) {
-  return <Col xs={24} sm={8}><Card><Statistic title={title} value={value} /></Card></Col>;
+function SummaryMetric({ title, value, pending }: { title: string; value: number; pending: boolean }) {
+  return <div className={styles.metric}><span>{title}</span><strong>{pending ? "—" : value.toLocaleString()}</strong></div>;
+}
+
+function ShopTotals({ totals, pending = false }: { totals: Record<string, number>; pending?: boolean }) {
+  if (pending) return <span className={styles.shopPlaceholder}>—</span>;
+  const entries = Object.entries(totals).sort(([a], [b]) => a.localeCompare(b));
+  return entries.length ? entries.map(([shop, quantity]) => (
+    <span className={styles.shopChip} key={shop}><span>{shop}</span><strong>{quantity.toLocaleString()}</strong></span>
+  )) : <span className={styles.shopPlaceholder}>No shop quantities</span>;
+}
+
+function MovementCard({ movement }: { movement: ProductMovementMasterRecord }) {
+  return (
+    <Link className={styles.movementCard} href={`/movements/${encodeURIComponent(movement.id)}`} aria-label={`View movement ${movement.id}`}>
+      <div className={styles.movementCardTop}>
+        {statusTag(movement.status)}
+        <time dateTime={movement.packingDate}>{formatBangkokDateTime(movement.packingDate) || "Packing date unavailable"}</time>
+      </div>
+      <div className={styles.movementIdentity}><strong>{movement.id}</strong><RightOutlined aria-hidden="true" /></div>
+      <div className={styles.movementNumbers}>
+        <span><strong>{movement.itemCount.toLocaleString()}</strong> items</span>
+        <span><strong>{toNumber(movement.totalQuantity).toLocaleString()}</strong> units</span>
+      </div>
+      <div className={styles.movementShops}><span>Home →</span><ShopTotals totals={movement.shopQuantities} /></div>
+      {movement.deliverDateTime ? <div className={styles.deliveredAt}>Delivered {formatBangkokDateTime(movement.deliverDateTime)}</div> : null}
+      <span className={styles.openDetail}>View movement <RightOutlined aria-hidden="true" /></span>
+    </Link>
+  );
 }
 
 function CalendarCell({ date, period, summary, onSelect }: {
@@ -291,6 +336,7 @@ function CalendarCell({ date, period, summary, onSelect }: {
   return (
     <button
       className={`${styles.calendarCell} ${date.month() !== period.month() ? styles.mutedCell : ""} ${summary ? styles.activeCell : ""}`}
+      aria-label={`${date.format("D MMMM YYYY")}${summary ? `, ${summary.movementMasters.length} movements, ${summary.quantity} units` : ", no movements"}`}
       disabled={!summary}
       type="button"
       onClick={() => summary && onSelect(summary)}
@@ -311,39 +357,43 @@ function CalendarCell({ date, period, summary, onSelect }: {
           aria-label={`${summary.quantity} total. ${formatShopTotals(summary.shopQuantities)}`}
           className={styles.cellSummary}
         >
-          {Object.entries(summary.shopQuantities)
+          <span className={styles.cellTotal} title={`${summary.quantity.toLocaleString()} units`}>
+            <strong>{new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(summary.quantity)}</strong><span>units</span>
+          </span>
+          <span className={styles.cellShops}>{Object.entries(summary.shopQuantities)
             .sort(([left], [right]) => left.localeCompare(right))
             .map(([shop, quantity]) => (
               <span className={styles.shopQuantity} key={shop}>
                 <span>{shop}</span>
                 <strong>{quantity}</strong>
               </span>
-            ))}
+            ))}</span>
         </span>
       ) : null}
     </button>
   );
 }
 
-function MovementPicker({ summary, onClose, onOpen }: {
+function MovementPicker({ summary, onClose }: {
   summary?: DailySummary;
   onClose: () => void;
-  onOpen: (id: string) => void;
 }) {
   return (
-    <Modal footer={null} open={Boolean(summary)} title={summary ? `Movements on ${summary.date}` : "Movements"} width={680} onCancel={onClose}>
-      <Space className={styles.pickerList} orientation="vertical" size={12}>
-        {summary?.movementMasters.map((movement) => (
-          <Card key={movement.id} size="small" title={<Space><Text strong>{movement.id}</Text>{statusTag(movement.status)}</Space>} extra={<Button onClick={() => onOpen(movement.id)} type="primary">Open</Button>}>
-            <Row gutter={[12, 12]}><Col span={12}><Statistic title="Items" value={movement.itemCount} /></Col><Col span={12}><Statistic title="Quantity" value={toNumber(movement.totalQuantity)} /></Col></Row>
-            <Descriptions className={styles.pickerDescriptions} column={1} size="small">
-              <Descriptions.Item label="Packed">{formatBangkokDateTime(movement.packingDate)}</Descriptions.Item>
-              <Descriptions.Item label="Delivered">{formatBangkokDateTime(movement.deliverDateTime) || "—"}</Descriptions.Item>
-              <Descriptions.Item label="Shops">{formatShopTotals(movement.shopQuantities)}</Descriptions.Item>
-            </Descriptions>
-          </Card>
-        ))}
-      </Space>
+    <Modal
+      className={styles.dayPicker}
+      footer={null}
+      open={Boolean(summary)}
+      title={summary ? dayjs(summary.date).format("dddd, D MMMM YYYY") : "Movements"}
+      width={680}
+      onCancel={onClose}
+    >
+      <div className={styles.pickerSummary}>
+        <Text>{summary?.movementMasters.length || 0} movements</Text>
+        <Text strong>{summary?.quantity.toLocaleString() || 0} units</Text>
+      </div>
+      <div className={styles.pickerList}>
+        {summary?.movementMasters.map((movement) => <MovementCard key={movement.id} movement={movement} />)}
+      </div>
     </Modal>
   );
 }
