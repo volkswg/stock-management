@@ -76,3 +76,32 @@ YY item, then request the summary. Verify totals and the new rows in Sheets;
 open the stock-management detail page and check Packed, Stock counted, and Delivered.
 Also verify a Drive failure leaves the draft waiting for an image and inserts
 no item, and that normal order creation still works after the movement completes.
+
+### Photo upload counts
+
+Movement photo replies now show confirmed image-bearing rows for the original
+shop and the whole movement. These are saved-so-far counts from the existing
+post-insert read, not a guarantee that every image in a concurrently delivered
+LINE image set has finished. Concurrent replies may arrive out of order. No
+additional Sheets reads or cross-request counters are introduced.
+
+The webhook JSON includes `images` and `imageResults` on normal and movement-error
+responses. `images.received` counts image events in this HTTP payload;
+`routedToMovement`, `otherFlows`, `unprocessed` and `failedBeforeRouting` explain
+routing. Upload/save outcomes have movement-only scope:
+
+- `uploaded`: new Drive uploads confirmed in this request.
+- `saved`: new detail appends confirmed in this request.
+- `alreadySaved`: existing records reused; never counted as a new upload/save.
+- `completed`: movement image handlers finished, including their reply.
+- `failed`, `ignored`: processing failures and images not accepted in the current step.
+- `saveUncertain`: an append was attempted without a confirmed response; the row
+  may already exist. Retrying checks the stable item ID before uploading again.
+
+A confirmed append remains counted as saved even if master synchronization or a
+later reply fails and the webhook returns HTTP 503. `imageResults` includes each
+routed movement image's message ID, stage flags and, after successful master sync,
+confirmed shop/movement photo totals. Counts describe this HTTP request, not all
+requests comprising a LINE image set. Order-flow uploads are not counted as
+movement uploads. The HTTP JSON is not itself displayed by LINE; the chat text
+is sent through the existing reply flow.

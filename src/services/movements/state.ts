@@ -145,7 +145,7 @@ export async function movementItems(sheets: IGoogleSheetsService, masterId: stri
   return rows.slice(1).filter((row) => row[1] === masterId && row[0]);
 }
 
-export async function saveMaster(sheets: IGoogleSheetsService, state: MovementState, complete = false): Promise<void> {
+export async function saveMaster(sheets: IGoogleSheetsService, state: MovementState, complete = false): Promise<GoogleSheetRow[]> {
   const [rows, detailRows] = await readMovementTables(sheets, ["movementMasters", "movementDetails"]);
   const index = rows.findIndex((row, i) => i > 0 && row[0] === state.masterId);
   const existing = rows[index];
@@ -158,6 +158,7 @@ export async function saveMaster(sheets: IGoogleSheetsService, state: MovementSt
   ];
   if (index === -1) await sheets.movementMasters.appendRows("A:H", [row]);
   else await sheets.movementMasters.updateRows(`A${index + 1}:H${index + 1}`, [row]);
+  return items;
 }
 
 export async function resumeLegacyMovement(sheets: IGoogleSheetsService, userId: string): Promise<MovementState | undefined> {

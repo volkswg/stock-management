@@ -20,9 +20,33 @@ import { replyText } from "../reply";
 
 const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinished", "resume:movement"]];
 
+export type MovementImageUploadProgress = {
+  messageId: string;
+  uploaded: boolean;
+  saved: boolean;
+  alreadySaved: boolean;
+  completed: boolean;
+  failed: boolean;
+  ignored: boolean;
+  saveUncertain: boolean;
+  shop?: string;
+  shopPhotosSaved?: number;
+  movementPhotosSaved?: number;
+};
+
+function savedPhotoCounts(items: GoogleSheetRow[], shop: string) {
+  // Count unique confirmed image-bearing rows, not delivery order or image-set index.
+  const photos = new Map(items.filter((row) => row[0] && String(row[7] || "").trim())
+    .map((row) => [String(row[0]), row]));
+  return {
+    shopPhotosSaved: [...photos.values()].filter((row) => row[2] === shop).length,
+    movementPhotosSaved: photos.size,
+  };
+}
+
 // Routing has already resolved the movement session for this event.
 export async function handleMovementEvent({
-  event, session, sheets, drive, line, publicBaseUrl, createMode = "quantity_photo",
+  event, session, sheets, drive, line, publicBaseUrl, createMode = "quantity_photo", imageUpload,
 }: {
   event: MovementEventClassification["event"];
   session: MovementEventClassification["session"];
@@ -31,6 +55,7 @@ export async function handleMovementEvent({
   line: ILineBotService;
   publicBaseUrl: string;
   createMode?: AppConfig["movementCreateMode"];
+  imageUpload?: MovementImageUploadProgress;
 }): Promise<void> {
   const photoOnly = createMode === "photo_only";
   const prompt = (line: ILineBotService, event: LineEvent, state: MovementState, prefix = "") =>
@@ -46,9 +71,16 @@ export async function handleMovementEvent({
       await summary(line, event, sheets, state, publicBaseUrl);
     } else {
       // Repair the master if the current state saved but its master sync failed.
-      await saveMaster(sheets, state);
-      await prompt(line, event, state);
+      const items = await saveMaster(sheets, state);
+      if (imageUpload && state.step === "close_bag") {
+        Object.assign(imageUpload, { alreadySaved: true, shop: state.shop, ...savedPhotoCounts(items, state.shop) });
+      }
+      const photoSummary = imageUpload?.alreadySaved
+        ? `✅ Photo already saved\nPhotos saved for ${state.shop} in this movement: ${imageUpload.shopPhotosSaved}\nMovement photos saved: ${imageUpload.movementPhotosSaved}\n\n`
+        : "";
+      await prompt(line, event, state, photoSummary);
     }
+    if (imageUpload) imageUpload.completed = true;
     return;
   }
 
@@ -88,6 +120,7 @@ export async function handleMovementEvent({
   }
 
   if (!state || state.step === "complete") {
+    if (imageUpload) imageUpload.ignored = true;
     return;
   }
   if (command === "create:order" || command === "create:purchase-order") {
@@ -100,6 +133,7 @@ export async function handleMovementEvent({
       ? Boolean(state.shop) && ["quantity", "product_image", "close_bag"].includes(state.step)
       : state.step === "product_image";
     if (!acceptsPhoto) {
+      if (imageUpload) imageUpload.ignored = true;
       await prompt(line, event, state);
       return;
     }
@@ -108,7 +142,7 @@ export async function handleMovementEvent({
     const imageState = photoOnly ? {
       ...state, itemId: `MOVED-LINE-${event.message.id}`, quantity: "", remark: "", imageUrl: "",
     } : state;
-    await saveImage({ state: imageState, event, eventId, sheets, drive: drive(), line, createMode, existingItems: session.photoItems });
+    await saveImage({ state: imageState, event, eventId, sheets, drive: drive(), line, createMode, existingItems: session.photoItems, imageUpload });
     return;
   }
 
@@ -151,17 +185,21 @@ export async function handleMovementEvent({
   await prompt(line, event, next);
 }
 
-async function saveImage({ state, event, eventId, sheets, drive, line, createMode, existingItems }: {
+async function saveImage({ state, event, eventId, sheets, drive, line, createMode, existingItems, imageUpload }: {
   state: MovementState; event: LineEvent; eventId: string;
   sheets: IGoogleSheetsService; drive: IGoogleDriveService | undefined; line: ILineBotService;
   createMode: AppConfig["movementCreateMode"];
   existingItems?: GoogleSheetRow[];
+  imageUpload?: MovementImageUploadProgress;
 }): Promise<void> {
   // A stable item ID makes a retry after an uncertain Sheets response idempotent.
   const existing = (existingItems ?? await movementItems(sheets, state.masterId)).find((row) => row[0] === state.itemId);
+  const savedShop = String(existing?.[2] || state.shop);
+  if (imageUpload) Object.assign(imageUpload, { shop: savedShop, alreadySaved: Boolean(existing) });
   let imageUrl = state.imageUrl;
   if (!existing && !imageUrl) {
     if (!drive) {
+      if (imageUpload) imageUpload.failed = true;
       await replyText(line, event, `⚠️ Photo upload is unavailable\nShop: ${state.shop} | Quantity: ${state.quantity}\nYour progress is saved, but this item is not saved yet.\n\nAsk an administrator to configure Google Drive, then resend the photo.`);
       return;
     }
@@ -171,7 +209,9 @@ async function saveImage({ state, event, eventId, sheets, drive, line, createMod
       const file = await drive.uploadImage({ fileName: `${state.itemId}${extension}`, contentType: image.contentType, bytes: image.bytes });
       if (!file.webViewLink?.trim()) throw new Error("Google Drive returned no image URL.");
       imageUrl = file.webViewLink;
+      if (imageUpload) imageUpload.uploaded = true;
     } catch {
+      if (imageUpload) imageUpload.failed = true;
       await replyText(line, event, `⚠️ Photo upload failed\nShop: ${state.shop} | Quantity: ${state.quantity}\nThis item is not saved yet. Your entered quantity is kept.\n\n➡️ Send the product photo again to save this item.`);
       return;
     }
@@ -182,17 +222,23 @@ async function saveImage({ state, event, eventId, sheets, drive, line, createMod
   }
   if (!existing) {
     const now = new Date(event.timestamp || Date.now()).toISOString();
+    if (imageUpload) imageUpload.saveUncertain = true;
     await sheets.movementDetails.appendRows("A:N", [[
       state.itemId, state.masterId, state.shop, state.quantity, state.remark,
       "Home", state.shop, imageUrl, "", "created", now, now, false, false,
     ]]);
+    if (imageUpload) Object.assign(imageUpload, { saved: true, saveUncertain: false });
   }
-  await saveMaster(sheets, state);
+  const savedItems = await saveMaster(sheets, state);
+  const counts = savedPhotoCounts(savedItems, savedShop);
+  if (imageUpload) Object.assign(imageUpload, counts);
+  const photoCountText = `Photos saved for ${savedShop} in this movement: ${counts.shopPhotosSaved}\nMovement photos saved: ${counts.movementPhotosSaved}`;
   if (createMode === "photo_only") {
     // Do not overwrite session progress after a slow upload. Another event may
     // already have closed the bag or selected the next shop.
     await promptMovement(line, event, { ...state, step: "close_bag" },
-      `✅ Photo saved\nRoute: Home → ${state.shop}\nSet this item's quantity and note on the web page.\n\n`, createMode);
+      `✅ ${existing ? "Photo already saved" : "Photo saved"}\nRoute: Home → ${savedShop}\n${photoCountText}\nSet this item's quantity and note on the web page.\n\n`, createMode);
+    if (imageUpload) imageUpload.completed = true;
     return;
   }
   const next: MovementState = {
@@ -200,7 +246,8 @@ async function saveImage({ state, event, eventId, sheets, drive, line, createMod
     quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
   };
   await saveMovementState(sheets, next);
-  await promptMovement(line, event, next, `✅ Item saved\nRoute: Home → ${state.shop}\nQuantity: ${state.quantity}\nPhoto: saved${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n`);
+  await promptMovement(line, event, next, `✅ Item saved\nRoute: Home → ${savedShop}\nQuantity: ${state.quantity}\nPhoto: saved\n${photoCountText}${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n`);
+  if (imageUpload) imageUpload.completed = true;
 }
 
 async function summary(line: ILineBotService, event: LineEvent, sheets: IGoogleSheetsService, state: MovementState, publicBaseUrl: string): Promise<void> {
