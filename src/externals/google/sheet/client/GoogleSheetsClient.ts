@@ -28,6 +28,24 @@ export class GoogleSheetsClient {
     return response.values || [];
   }
 
+  // One quota-counted read for related ranges; results preserve requested order.
+  async getValuesBatch(
+    ranges: Array<{ worksheetName: string; range: string }>,
+  ): Promise<GoogleSheetRow[][]> {
+    if (!ranges.length) return [];
+    const query = new URLSearchParams();
+    for (const { worksheetName, range } of ranges) {
+      query.append("ranges", `${quoteWorksheetName(worksheetName)}!${range}`);
+    }
+    const response = await this.request<{ valueRanges?: GoogleSheetsValuesResponse[] }>(
+      `/values:batchGet?${query.toString()}`, { method: "GET" },
+    );
+    if (response.valueRanges?.length !== ranges.length) {
+      throw new Error("Google Sheets batch read returned an incomplete set of ranges.");
+    }
+    return response.valueRanges.map((range) => range.values || []);
+  }
+
   async appendValues(
     worksheetName: string,
     range: string,

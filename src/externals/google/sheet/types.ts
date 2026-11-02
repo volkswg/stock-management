@@ -56,7 +56,11 @@ export interface IGoogleBatchRowsSheet extends IGoogleRowsSheet {
   batchUpdateRows(updates: GoogleSheetRangeUpdate[]): Promise<void>;
 }
 
+export type MovementWorksheet = "userState" | "movementDetails" | "movementMasters";
+export type MovementRange = { sheet: MovementWorksheet; range: string };
+
 export interface IGoogleSheetsService {
+  readMovementRanges?(ranges: MovementRange[]): Promise<GoogleSheetRow[][]>;
   readonly employeeCompensations: IGoogleRowsSheet;
   readonly employees: IGoogleRowsSheet;
   readonly employeeTimesheets: IGoogleRowsSheet;

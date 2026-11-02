@@ -1,6 +1,6 @@
 import { LineMessageType, type LineEvent, type LineWebhookPayload } from "@/externals/line";
-import type { IGoogleSheetsService } from "@/externals/google/sheet";
-import { readMovementSession } from "@/services/movements/state";
+import type { GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet";
+import { readMovementSession, readMovementTables } from "@/services/movements/state";
 import { isRecord } from "@/features/backend/shared/utils";
 import { MovementStartCommandEnum, EventKindEnum } from "@/features/backend/line/enum";
 
@@ -30,7 +30,7 @@ export type MovementEventClassification = {
     message: NonNullable<LineEvent["message"]>;
     source: NonNullable<LineEvent["source"]> & { userId: string };
   };
-  session: Awaited<ReturnType<typeof readMovementSession>>;
+  session: Awaited<ReturnType<typeof readMovementSession>> & { photoItems?: GoogleSheetRow[] };
 };
 
 export type LineEventClassification =
@@ -59,10 +59,15 @@ export async function classifyLineEvent({
     return { kind: EventKindEnum.Order };
   }
 
+  const sheets = getGoogleSheetsService();
+  const photoRows = message.type === LineMessageType.Image
+    ? await readMovementTables(sheets, ["userState", "movementDetails"])
+    : undefined;
   const session = await readMovementSession(
-    getGoogleSheetsService(),
+    sheets,
     userId,
     event.webhookEventId || message.id,
+    photoRows?.[0],
   );
   const command = message.text?.trim().toLowerCase() || "";
 
@@ -75,7 +80,10 @@ export async function classifyLineEvent({
     return {
       kind: EventKindEnum.Movement,
       event: { ...event, message, source: { ...event.source, userId } },
-      session,
+      session: {
+        ...session,
+        photoItems: photoRows?.[1].slice(1).filter((row) => row[1] === session.state?.masterId && row[0]),
+      },
     };
   }
 

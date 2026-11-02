@@ -1,7 +1,7 @@
 import type { AppConfig } from "@/config";
 import { createSortableId } from "@/services/utils/createSortableId";
 import type { IGoogleDriveService } from "@/externals/google/drive";
-import type { IGoogleSheetsService } from "@/externals/google/sheet";
+import type { GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet";
 import { LineMessageType, type LineEvent } from "@/externals/line";
 import type { ILineBotService } from "@/externals/line/types";
 import { findLatestUserState } from "@/services/user-states";
@@ -108,7 +108,7 @@ export async function handleMovementEvent({
     const imageState = photoOnly ? {
       ...state, itemId: `MOVED-LINE-${event.message.id}`, quantity: "", remark: "", imageUrl: "",
     } : state;
-    await saveImage({ state: imageState, event, eventId, sheets, drive: drive(), line, createMode });
+    await saveImage({ state: imageState, event, eventId, sheets, drive: drive(), line, createMode, existingItems: session.photoItems });
     return;
   }
 
@@ -151,13 +151,14 @@ export async function handleMovementEvent({
   await prompt(line, event, next);
 }
 
-async function saveImage({ state, event, eventId, sheets, drive, line, createMode }: {
+async function saveImage({ state, event, eventId, sheets, drive, line, createMode, existingItems }: {
   state: MovementState; event: LineEvent; eventId: string;
   sheets: IGoogleSheetsService; drive: IGoogleDriveService | undefined; line: ILineBotService;
   createMode: AppConfig["movementCreateMode"];
+  existingItems?: GoogleSheetRow[];
 }): Promise<void> {
   // A stable item ID makes a retry after an uncertain Sheets response idempotent.
-  const existing = (await movementItems(sheets, state.masterId)).find((row) => row[0] === state.itemId);
+  const existing = (existingItems ?? await movementItems(sheets, state.masterId)).find((row) => row[0] === state.itemId);
   let imageUrl = state.imageUrl;
   if (!existing && !imageUrl) {
     if (!drive) {

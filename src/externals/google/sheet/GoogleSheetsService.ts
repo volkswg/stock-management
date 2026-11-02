@@ -22,7 +22,7 @@ import {
   UserStateSheet,
 } from "./sheets";
 import { MovementSheet } from "./sheets/movements/MovementSheet";
-import type { GoogleSheetsConfig, IGoogleSheetsService } from "./types";
+import type { GoogleSheetsConfig, GoogleSheetRow, MovementRange, MovementWorksheet, IGoogleSheetsService } from "./types";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
   readonly employeeCompensations: EmployeeCompensationsSheet;
@@ -50,6 +50,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly userState: UserStateSheet;
 
   private readonly client: GoogleSheetsClient;
+  private readonly movementWorksheetNames: Record<MovementWorksheet, string>;
 
   constructor(config: GoogleSheetsConfig) {
     if (!config.spreadsheetId.trim()) {
@@ -62,6 +63,11 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       scopes: [GOOGLE_SHEETS_SCOPE],
     });
     this.client = new GoogleSheetsClient(auth, config.spreadsheetId);
+    this.movementWorksheetNames = {
+      userState: config.userStateWorksheetName,
+      movementDetails: config.movementDetailWorksheetName,
+      movementMasters: config.movementMasterWorksheetName,
+    };
     this.employeeAdvances = new PayrollRecordsSheet(this.client, config.employeeAdvancesWorksheetName);
     this.payrollSettlements = new PayrollRecordsSheet(this.client, config.payrollSettlementsWorksheetName);
     this.stockAdjustments = new StockAdjustmentsSheet(this.client, config.stockAdjustmentsWorksheetName);
@@ -127,6 +133,12 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.client,
       config.userStateWorksheetName,
     );
+  }
+
+  async readMovementRanges(ranges: MovementRange[]): Promise<GoogleSheetRow[][]> {
+    return this.client.getValuesBatch(ranges.map(({ sheet, range }) => ({
+      worksheetName: this.movementWorksheetNames[sheet], range,
+    })));
   }
 
   async checkConnection(): Promise<void> {
