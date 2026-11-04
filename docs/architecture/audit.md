@@ -117,7 +117,7 @@ Orders UI/API and the three Shipments UI consumers of OrderStatus now use `modul
 
 ## PR 3 follow-up
 
-All 15 Orders frontend/client/style files are consolidated in `modules/orders/ui`, with no implementation duplicates at their former locations. The pre-move consumer audit identified four app routing/loading files and three Shipments gallery consumers; only their imports changed. Module UI now uses its own browser client. Existing shipment enum/browser-client compatibility dependencies remain through PR 5. Resolved module runtime imports reach no server implementations, and the reachable type/value graph is acyclic; unrelated legacy cycles recorded above remain out of scope. See [migration audit](orders-ui-migration.md) and [verification](verification.md).
+All 15 Orders frontend/client/style files are consolidated in `modules/orders/ui`, with no implementation duplicates at their former locations. The pre-move consumer audit identified four app routing/loading files and three Shipments gallery consumers; only their imports changed. Module UI now uses its own browser client. Existing shipment enum/browser-client compatibility dependencies remain after PR 5 first slice until dedicated Orders/Shipments decoupling. Resolved module runtime imports reach no server implementations, and the reachable type/value graph is acyclic; unrelated legacy cycles recorded above remain out of scope. See [migration audit](orders-ui-migration.md) and [verification](verification.md).
 
 ## PR 4 follow-up
 

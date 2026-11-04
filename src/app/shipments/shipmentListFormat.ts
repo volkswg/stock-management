@@ -1,5 +1,5 @@
 import { OrderStatus } from "@/modules/orders/contracts";
-import { ShipmentStatus } from "@/services/shipments";
+import { ShipmentStatus } from "@/modules/shipments/contracts";
 
 const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
   style: "currency",

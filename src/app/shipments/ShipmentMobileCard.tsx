@@ -9,7 +9,7 @@ import { Button, Card, Descriptions, Tag, Typography } from "antd";
 import type {
   ShipmentListItem,
   ShipmentRelatedOrder,
-} from "@/services/shipments";
+} from "@/modules/shipments/contracts";
 import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
 import {
   formatShipmentCurrency,

@@ -1,0 +1,380 @@
+{
+  "rows": {
+    "shipments": [
+      [
+        "id",
+        "status"
+      ],
+      [],
+      [
+        "s/1",
+        "draft",
+        " Carrier ",
+        " PO-0 ",
+        "1,234.50",
+        "",
+        " ship ",
+        " delivery ",
+        " c ",
+        " u ",
+        "",
+        "web",
+        " url "
+      ],
+      [
+        "s-1",
+        "ready_to_ship",
+        " Carrier ",
+        " PO-1 ",
+        "12.5",
+        "",
+        " ship ",
+        " delivery ",
+        " c ",
+        " u ",
+        "",
+        "web",
+        " url "
+      ],
+      [
+        "s-2",
+        "shipping",
+        " Carrier ",
+        " PO-2 ",
+        "12.5",
+        "",
+        " ship ",
+        " delivery ",
+        " c ",
+        " u ",
+        "",
+        "web",
+        " url "
+      ],
+      [
+        "s-3",
+        "delivered",
+        " Carrier ",
+        " PO-3 ",
+        "12.5",
+        "",
+        " ship ",
+        " delivery ",
+        " c ",
+        " u ",
+        "",
+        "web",
+        " url "
+      ],
+      [
+        "s-4",
+        "canceled",
+        " Carrier ",
+        " PO-4 ",
+        "12.5",
+        "",
+        " ship ",
+        " delivery ",
+        " c ",
+        " u ",
+        "",
+        "web",
+        " url "
+      ],
+      [
+        "deleted",
+        "draft",
+        "Carrier",
+        "PO-1",
+        null,
+        "",
+        "",
+        "",
+        "created",
+        "updated",
+        "deleted",
+        "web",
+        ""
+      ],
+      [
+        "bad",
+        "unknown",
+        "Carrier",
+        "PO-1",
+        null,
+        "",
+        "",
+        "",
+        "created",
+        "updated",
+        "",
+        "web",
+        ""
+      ],
+      [
+        "no-po",
+        "draft",
+        "Carrier",
+        " ",
+        null,
+        "",
+        "",
+        "",
+        "created",
+        "updated",
+        "",
+        "web",
+        ""
+      ],
+      [
+        "boolean-po",
+        "draft",
+        "Carrier",
+        false,
+        null,
+        "",
+        "",
+        "",
+        "created",
+        "updated",
+        "",
+        "web",
+        ""
+      ]
+    ],
+    "orders": [
+      [
+        "o/1",
+        "complete",
+        " Seller ",
+        "2,000",
+        "",
+        " created ",
+        "",
+        "",
+        "actor"
+      ],
+      [
+        "o/1",
+        "paid",
+        "Latest",
+        "3,000"
+      ],
+      [
+        "deleted",
+        "complete",
+        "",
+        10,
+        "",
+        "",
+        "",
+        "deleted"
+      ],
+      [
+        "invalid",
+        "unknown"
+      ]
+    ],
+    "orderItems": [
+      [
+        "i/1",
+        "o/1",
+        " url ",
+        "1,000",
+        "500",
+        " SKU "
+      ],
+      [
+        "i/2",
+        "o/1",
+        "url2",
+        "2",
+        "1"
+      ],
+      [
+        "deleted",
+        "o/1",
+        "url3",
+        "1",
+        "1",
+        "",
+        "",
+        "",
+        "deleted"
+      ],
+      [
+        "missing-image",
+        "o/1",
+        ""
+      ]
+    ],
+    "shipmentOrders": [
+      [
+        "a",
+        "s/1",
+        "o/1"
+      ],
+      [
+        "duplicate",
+        "s/1",
+        "o/1"
+      ],
+      [
+        "deleted",
+        "s/1",
+        "deleted",
+        "",
+        "",
+        "deleted"
+      ],
+      [
+        "bad",
+        "s/1",
+        "invalid"
+      ],
+      [
+        "missing",
+        "s/1",
+        "missing"
+      ],
+      [
+        "",
+        "s/1",
+        "o/1"
+      ]
+    ]
+  },
+  "expected": [
+    {
+      "id": "boolean-po",
+      "status": "draft",
+      "carrier": "Carrier",
+      "poNumber": "false",
+      "shippingFee": null,
+      "remark": "",
+      "shippedAt": "",
+      "deliveredAt": "",
+      "createdAt": "created",
+      "updatedAt": "updated",
+      "createdBy": "web",
+      "shippingBillUrl": "",
+      "costSummary": null,
+      "orders": []
+    },
+    {
+      "id": "s-4",
+      "status": "canceled",
+      "carrier": "Carrier",
+      "poNumber": "PO-4",
+      "shippingFee": 12.5,
+      "remark": "",
+      "shippedAt": "ship",
+      "deliveredAt": "delivery",
+      "createdAt": "c",
+      "updatedAt": "u",
+      "createdBy": "web",
+      "shippingBillUrl": "url",
+      "costSummary": null,
+      "orders": []
+    },
+    {
+      "id": "s-3",
+      "status": "delivered",
+      "carrier": "Carrier",
+      "poNumber": "PO-3",
+      "shippingFee": 12.5,
+      "remark": "",
+      "shippedAt": "ship",
+      "deliveredAt": "delivery",
+      "createdAt": "c",
+      "updatedAt": "u",
+      "createdBy": "web",
+      "shippingBillUrl": "url",
+      "costSummary": null,
+      "orders": []
+    },
+    {
+      "id": "s-2",
+      "status": "shipping",
+      "carrier": "Carrier",
+      "poNumber": "PO-2",
+      "shippingFee": 12.5,
+      "remark": "",
+      "shippedAt": "ship",
+      "deliveredAt": "delivery",
+      "createdAt": "c",
+      "updatedAt": "u",
+      "createdBy": "web",
+      "shippingBillUrl": "url",
+      "costSummary": null,
+      "orders": []
+    },
+    {
+      "id": "s-1",
+      "status": "ready_to_ship",
+      "carrier": "Carrier",
+      "poNumber": "PO-1",
+      "shippingFee": 12.5,
+      "remark": "",
+      "shippedAt": "ship",
+      "deliveredAt": "delivery",
+      "createdAt": "c",
+      "updatedAt": "u",
+      "createdBy": "web",
+      "shippingBillUrl": "url",
+      "costSummary": null,
+      "orders": []
+    },
+    {
+      "id": "s/1",
+      "status": "draft",
+      "carrier": "Carrier",
+      "poNumber": "PO-0",
+      "shippingFee": 1234.5,
+      "remark": "",
+      "shippedAt": "ship",
+      "deliveredAt": "delivery",
+      "createdAt": "c",
+      "updatedAt": "u",
+      "createdBy": "web",
+      "shippingBillUrl": "url",
+      "costSummary": {
+        "totalOrderPrice": 3000,
+        "shippingFee": 1234.5,
+        "quote": {
+          "totalQuantity": 1002,
+          "averageLandedCostPerUnit": 4.226047904191617
+        },
+        "delivered": {
+          "totalQuantity": 501,
+          "averageLandedCostPerUnit": 8.452095808383234
+        }
+      },
+      "orders": [
+        {
+          "id": "o/1",
+          "status": "paid",
+          "seller": "Latest",
+          "totalPrice": 3000,
+          "createdAt": "",
+          "productImages": [
+            {
+              "id": "i/1",
+              "imageUrl": "url",
+              "quoteQuantity": "1,000",
+              "deliveredQuantity": "500",
+              "productCode": "SKU"
+            },
+            {
+              "id": "i/2",
+              "imageUrl": "url2",
+              "quoteQuantity": "2",
+              "deliveredQuantity": "1",
+              "productCode": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

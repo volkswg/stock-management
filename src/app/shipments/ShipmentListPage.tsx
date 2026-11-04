@@ -31,7 +31,7 @@ import {
   ShipmentStatus,
   type ShipmentListItem,
   type ShipmentRelatedOrder,
-} from "@/services/shipments";
+} from "@/modules/shipments/contracts";
 import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
 import { getShipments } from "./api";
 import { ShipmentMobileCard } from "./ShipmentMobileCard";

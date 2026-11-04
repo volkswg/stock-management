@@ -39,7 +39,7 @@ import {
   ShipmentStatus,
   type ShipmentListItem,
   type ShipmentRelatedOrder,
-} from "@/services/shipments";
+} from "@/modules/shipments/contracts";
 import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
 import { advanceShipmentStatus, getShipment } from "../api";
 import styles from "./shipmentDetail.module.css";
