@@ -103,11 +103,11 @@ function graph(runtime) {
 }
 test("Shipment runtime graph reaches only browser-safe project code and has no cycles", () => graph(true));
 test("Shipment graph including type-only edges has no cycles or server implementations", () => graph(false));
-test("Orders retains its old bridges without adding a reverse Shipments module edge", () => {
+test("Orders removes both browser bridges without adding a reverse Shipments module edge", () => {
   function walk(dir) { return readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]); }
   for (const file of walk("src/modules/orders").filter(f => /\.tsx?$/.test(f))) assert.ok(!readFileSync(file, "utf8").includes("modules/shipments"), file);
   const detail = readFileSync("src/modules/orders/ui/[id]/OrderDetailPage.tsx", "utf8");
-  assert.ok(detail.includes('"@/services/shipments/types"')); assert.ok(detail.includes('"@/app/shipments/api"'));
+  assert.ok(!detail.includes('"@/services/shipments/types"')); assert.ok(!detail.includes('"@/app/shipments/api"'));
 });
 
 test("module UI glob rejects unrelated app imports and limits the retained client exception to two screens", async () => {

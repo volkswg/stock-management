@@ -6,13 +6,18 @@ const browserImports = {
     "server-only", "next/server", "next/headers", "next/cache", "next/after",
   ],
   patterns: [{
-    // Match aliases AND relative paths. The one pure shipment contract file is
-    // a temporary bridge for the order detail picker, removed by the Shipments PR.
-    regex: "(^|/)(services(?:$|/(?!shipments/types(?:\\.ts)?$))|externals(?:/|$)|config(?:/|$)|infrastructure(?:/|$)|features/backend(?:/|$)|application(?:/|$))|(^|/)server(?:\\.[^/]+)?$",
+    // Orders browser dependencies stay inside Orders/public generic code.
+    regex: "(^|/)(services(?:/|$)|externals(?:/|$)|config(?:/|$)|infrastructure(?:/|$)|features/backend(?:/|$)|application(?:/|$))|(^|/)server(?:\\.[^/]+)?$",
     message: "Orders browser code must use browser-safe public contracts, not server services/config/adapters.",
   }, {
-    regex: "(^|/)(app(?:$|/(?!shipments/api(?:\\.ts)?$))|features/frontend/orders(?:/|$))",
-    message: "Orders UI is consolidated in its module. Only the documented browser shipment HTTP bridge may import from app until PR 5.",
+    regex: "(^|/)(app(?:/|$)|features/frontend/orders(?:/|$))",
+    message: "Orders UI must not import app implementations; dependencies are injected at client composition.",
+  }, {
+    regex: "(^|/)shipments(?:/|$)",
+    message: "Orders UI consumes its own picker port; Shipment implementations/contracts must stay at app composition.",
+  }, {
+    regex: "^node:|^(googleapis|google-auth-library|@google-cloud/|@line/)",
+    message: "Orders browser code cannot import provider SDKs or Node APIs.",
   }],
 };
 
@@ -54,3 +59,25 @@ export const ordersBoundaries = [
     },
   },
 ];
+
+ordersBoundaries.push(
+  {
+    files: ["src/modules/orders/ui/[[]id[]]/shipment-picker-port.ts"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [{ regex: "^(?!@/modules/orders/contracts$).*", message: "The Orders picker port may import only Orders contracts." }] }],
+      "no-restricted-syntax": noDynamicServerBypass,
+      "no-restricted-globals": ["error", "process", "Buffer", "fetch"],
+    },
+  },
+  {
+    files: ["src/app/orders/[[]id[]]/OrderDetailClient.tsx"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [{
+        regex: "^(?!@/modules/orders/ui/\\[id\\]/(?:OrderDetailPage|shipment-picker-port)$|@/app/shipments/api$|@/modules/shipments/contracts$).*",
+        message: "Orders client composition may wire only its UI/port, the existing Shipment browser client and public enum.",
+      }] }],
+      "no-restricted-syntax": noDynamicServerBypass,
+      "no-restricted-globals": ["error", "process", "Buffer", "fetch"],
+    },
+  },
+);

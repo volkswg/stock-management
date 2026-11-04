@@ -4,6 +4,19 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## Orders browser picker dependency seam — implemented
+
+| Source / public entrypoint | Implemented responsibility / remaining work |
+| --- | --- |
+| `src/modules/orders/ui/[id]/shipment-picker-port.ts` (new) | Orders-owned `PickerShipment` and three-operation `OrderShipmentPickerPort`; imports Orders contracts only |
+| `src/app/orders/[id]/OrderDetailClient.tsx` (new) | Client-side composition with a stable adapter delegating to the existing Shipment client; imports the public enum here only |
+| `src/modules/orders/ui/[id]/OrderDetailPage.tsx` | Required injected port threaded through content/card; removes both browser client/legacy enum imports; non-picker behavior unchanged |
+| `src/app/orders/[id]/page.tsx` | Import/render target becomes app client wrapper; metadata/params/orderId unchanged; no function-valued prop across RSC boundary |
+| `src/app/shipments/api.ts`, Shipment contracts/enum leaf and UI | Byte-identical, no forwarding shim or duplicate; client relocation remains a future PR |
+| Orders legacy server detail projection | Unchanged; separate consumer-owned server seam still needed |
+
+The browser prerequisite behind PR 6's historical client blocker is now satisfied: runtime/type-only browser ownership has only Shipments → Orders. The full seven-file client/UI slice and Shipments milestone remain incomplete. [Interface, exact graph and evidence](orders-shipment-picker.md).
+
 ## Shipments UI follow-up — six safe moves; client deferred
 
 The [focused audit](shipments-ui-relocation.md) overrides the original proposed destinations for this slice. The full seven-file UI/client migration is incomplete.
@@ -16,9 +29,9 @@ The [focused audit](shipments-ui-relocation.md) overrides the original proposed 
 | `src/app/shipments/shipments.module.css` | `src/modules/shipments/ui/shipments.module.css` (moved, bytes unchanged) |
 | `src/app/shipments/[id]/ShipmentDetailPage.tsx` | `src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx` (moved) |
 | `src/app/shipments/[id]/shipmentDetail.module.css` | `src/modules/shipments/ui/[id]/shipmentDetail.module.css` (moved, bytes unchanged) |
-| `src/app/shipments/api.ts` | Retained byte-identical; proposed `modules/shipments/ui/api.ts` blocked until Orders picker decoupling |
+| `src/app/shipments/api.ts` | Retained byte-identical; proposed `modules/shipments/ui/api.ts` remains future work; browser picker prerequisite now satisfied |
 
-Four route/loading wrappers keep their locations and import module UI/CSS. Orders picker, Shipment contracts and API handlers remain unchanged. There is no forwarding compatibility entrypoint: the original app client remains the single implementation, used only by its existing Orders picker and two Shipment screens. The inherited type-only reverse ownership trace is documented; forwarding runtime calls to a new module client would introduce a forbidden runtime module cycle.
+Four route/loading wrappers keep their locations and import module UI/CSS. Orders picker, Shipment contracts and API handlers remain unchanged. There is no forwarding compatibility entrypoint: the original app client remains the single implementation, used by the new Orders app composition and two Shipment screens. The historical reverse ownership trace below has been removed by the picker seam above.
 
 ## PR 5 implemented first slice — Shipment contracts/characterization
 
@@ -192,7 +205,7 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/app/shipments/[id]/loading.tsx` | `src/app/shipments/[id]/loading.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/[id]/page.tsx` | `src/app/shipments/[id]/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/[id]/shipmentDetail.module.css` | `src/modules/shipments/ui/[id]/shipmentDetail.module.css` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
-| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts` (deferred) | Keep the original app implementation byte-identical until Orders picker decoupling removes the new runtime module-cycle risk. |
+| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts` (deferred) | Original app implementation remains byte-identical here; Orders picker prerequisite is now satisfied, so a later scoped PR may relocate it. |
 | `src/app/shipments/loading.tsx` | `src/app/shipments/loading.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/page.tsx` | `src/app/shipments/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/shipmentListFormat.ts` | `src/modules/shipments/ui/shipmentListFormat.ts` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |

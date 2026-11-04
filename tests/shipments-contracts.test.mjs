@@ -5,6 +5,7 @@ import test from "node:test";
 import ts from "typescript";
 import { shipmentServices } from "./helpers/shipments.mjs";
 import { plain } from "./helpers/load-source.mjs";
+import { assertPickerDetailParity, assertPickerStaticLintParity } from "./helpers/orders-picker-structure.mjs";
 import { restoreRelocationImports } from "./helpers/shipment-ui-paths.mjs";
 
 const baseline = JSON.parse(readFileSync(new URL("./fixtures/shipments-structure.json", import.meta.url), "utf8"));
@@ -44,5 +45,9 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     const node = source.statements.find(n => ts.isFunctionDeclaration(n) && n.name?.text === name);
     assert.equal(hash(printer.printNode(ts.EmitHint.Unspecified, node, source)), expected, key);
   }
-  for (const [file, expected] of Object.entries(baseline.preserved)) assert.equal(hash(restoreRelocationImports(file, readFileSync(file, "utf8"))), expected, file);
+  for (const [file, expected] of Object.entries(baseline.preserved)) {
+    if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
+    else if (file === "eslint/orders-boundaries.mjs") assertPickerStaticLintParity();
+    else assert.equal(hash(restoreRelocationImports(file, readFileSync(file, "utf8"))), expected, file);
+  }
 });

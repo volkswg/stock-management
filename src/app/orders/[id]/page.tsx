@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OrderDetailPage } from "@/modules/orders/ui/[id]/OrderDetailPage";
+import { OrderDetailClient } from "./OrderDetailClient";
 
 export const metadata: Metadata = {
   title: "Order details | Stock Management",
@@ -12,5 +12,5 @@ export default async function OrderPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <OrderDetailPage orderId={id} />;
+  return <OrderDetailClient orderId={id} />;
 }

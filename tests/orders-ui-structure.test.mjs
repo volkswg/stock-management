@@ -4,10 +4,13 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import test from "node:test";
 import ts from "typescript";
+import { detailBodyHash, pickerPageBodyHash, assertPickerDetailParity } from "./helpers/orders-picker-structure.mjs";
 
 const baseline = JSON.parse(readFileSync(new URL("./fixtures/orders-ui-structure.json", import.meta.url), "utf8"));
 const hash = (text) => createHash("sha256").update(text).digest("hex");
 function bodyHash(file) {
+  if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") { assertPickerDetailParity(); return detailBodyHash(); }
+  if (file === "src/app/orders/[id]/page.tsx") return pickerPageBodyHash();
   const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
   const printer = ts.createPrinter();
   return hash(source.statements.filter((node) => !ts.isImportDeclaration(node) && !ts.isExportDeclaration(node))
@@ -19,7 +22,7 @@ function walk(dir) {
 
 test("all 15 UI moves preserve component/type/JSX bodies, directives, formatting and CSS bytes", () => {
   assert.equal(baseline.moves.length, 15);
-  assert.deepEqual(walk("src/modules/orders/ui").sort(), baseline.moves.map(({ to }) => to).sort());
+  assert.deepEqual(walk("src/modules/orders/ui").sort(), [...baseline.moves.map(({ to }) => to), "src/modules/orders/ui/[id]/shipment-picker-port.ts"].sort());
   for (const { from, to, hash: expected } of baseline.moves) {
     assert.equal(existsSync(from), false, `Obsolete implementation remains at ${from}`);
     assert.equal(to.endsWith(".css") ? hash(readFileSync(to)) : bodyHash(to), expected, to);

@@ -10,8 +10,8 @@ const eslint = new ESLint();
 const browserFile = "src/modules/orders/ui/[id]/OrderDetailPage.tsx";
 const restricted = (messages) => messages.some(({ ruleId }) => ["no-restricted-imports", "no-restricted-syntax", "no-restricted-globals"].includes(ruleId));
 
-test("actual ESLint config allows public Orders contracts and the explicit pure shipment bridge", async () => {
-  const code = 'import { OrderStatus } from "@/modules/orders/contracts"; import { ShipmentStatus } from "@/services/shipments/types"; import { getShipments } from "@/app/shipments/api"; export const statuses = [OrderStatus.Complete, ShipmentStatus.Draft, getShipments];';
+test("actual ESLint config allows Orders contracts and requires injection instead of Shipment bridges", async () => {
+  const code = 'import { OrderStatus } from "@/modules/orders/contracts"; export const status = OrderStatus.Complete;';
   const [result] = await eslint.lintText(code, { filePath: browserFile });
   assert.equal(restricted(result.messages), false, JSON.stringify(result.messages));
   const [serverPage] = await eslint.lintText('import { getOrderDetail } from "@/services/orders"; export const query = getOrderDetail;', { filePath: "src/app/orders/page.tsx" });
@@ -27,6 +27,12 @@ test("actual ESLint config allows public Orders contracts and the explicit pure 
 test("Orders lint boundaries reject aliases, relatives, type imports, re-exports, Node and dynamic bypasses", async () => {
   const sources = [
     'import { OrderStatus } from "@/services/orders";',
+    'import { ShipmentStatus } from "@/services/shipments/types";',
+    'import { getShipments } from "@/app/shipments/api";',
+    'import type { Shipment } from "@/modules/shipments/contracts";',
+    'export { ShipmentStatus } from "../../../../shipments/contracts";',
+    'export * from "../../../../../app/shipments/api";',
+    'import type { Shipment } from "../../../../../services/shipments/types";',
     'import type { OrderDetail } from "../../../services/orders/listOrders";',
     'export { OrderStatus } from "@/services/orders/createDraftOrder";',
     'export * from "../../../services/orders";',
@@ -38,6 +44,8 @@ test("Orders lint boundaries reject aliases, relatives, type imports, re-exports
     'import { query } from "@/modules/orders/server";',
     'import { ShipmentStatus } from "@/services/shipments";',
     'import fs from "fs";',
+    'import { google } from "googleapis";',
+    'import { GoogleAuth } from "google-auth-library";',
     'import fs from "node:fs/promises";',
     'import { cookies } from "next/headers";',
     'const dependency = import("@/services/orders");',
@@ -70,7 +78,7 @@ function walk(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => entry.isDirectory() ? walk(`${dir}/${entry.name}`) : [`${dir}/${entry.name}`]);
 }
 
-test("resolved Orders browser runtime graph reaches no server services, config or adapter modules", () => {
+function browserGraph(runtime = true) {
   const options = ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json", ts.sys.readFile).config, ts.sys, process.cwd()).options;
   const roots = walk("src/modules/orders/ui").filter((file) => /\.tsx?$/.test(file));
   const serverPackages = new Set([...builtinModules, ...builtinModules.map((name) => `node:${name.replace(/^node:/, "")}`), "server-only", "next/server", "next/headers", "next/cache", "next/after"]);
@@ -79,11 +87,12 @@ test("resolved Orders browser runtime graph reaches no server services, config o
     if (active.has(file)) assert.fail(`Browser import cycle at ${file}`);
     if (visited.has(file)) return;
     assert.ok(!/^src\/(config|externals|infrastructure)\//.test(file), file);
-    assert.ok(!file.startsWith("src/services/") || file === "src/services/shipments/types.ts", file);
+    assert.ok(!file.startsWith("src/services/"), file);
+    assert.ok(!file.startsWith("src/modules/shipments/"), file);
     assert.ok(!/\/features\/backend\//.test(file), file);
     assert.ok(!/\/modules\/[^/]+\/(application|infrastructure)\//.test(file), file);
     assert.ok(!/\/server\.[^/]+$/.test(file), file);
-    assert.ok(!file.startsWith("src/app/") || file === "src/app/shipments/api.ts", file);
+    assert.ok(!file.startsWith("src/app/"), file);
     active.add(file);
     const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
     function check(node) {
@@ -91,7 +100,7 @@ test("resolved Orders browser runtime graph reaches no server services, config o
         const clause = node.importClause;
         const elements = clause?.namedBindings && ts.isNamedImports(clause.namedBindings) ? clause.namedBindings.elements : undefined;
         const typeOnly = node.isTypeOnly || clause?.isTypeOnly || (elements?.length && !clause.name && elements.every((element) => element.isTypeOnly));
-        if (typeOnly) return;
+        if (runtime && typeOnly) return;
         const specifier = node.moduleSpecifier.text;
         assert.ok(!serverPackages.has(specifier), `${specifier} in ${file}`);
         const resolved = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
@@ -110,5 +119,36 @@ test("resolved Orders browser runtime graph reaches no server services, config o
   }
   for (const root of roots) visit(root);
   assert.ok(visited.has("src/modules/orders/contracts.ts"));
-  assert.ok(visited.has("src/services/shipments/types.ts"));
+  assert.ok(!visited.has("src/services/shipments/types.ts"));
+}
+test("resolved Orders browser runtime graph reaches no app, Shipment, server, config or adapter modules", () => browserGraph());
+test("resolved Orders browser type graph reaches no app, Shipment or server implementations", () => browserGraph(false));
+
+test("picker port and client app composition have exact tested browser-only import surfaces", async () => {
+  const portPath = "src/modules/orders/ui/[id]/shipment-picker-port.ts", composition = "src/app/orders/[id]/OrderDetailClient.tsx";
+  for (const filePath of [portPath, composition]) {
+    const [actual] = await eslint.lintFiles(filePath); assert.equal(restricted(actual.messages), false, JSON.stringify(actual.messages));
+    for (const source of [
+      'import { getConfig } from "@/config";',
+      'import { Client } from "@/externals/google/sheet";',
+      'import { Drive } from "@/externals/google/drive";',
+      'import fs from "node:fs";', 'import "server-only";',
+      'import { cookies } from "next/headers";',
+      'const x = import("@/app/shipments/api");',
+      'const x = require("@/app/shipments/api");',
+      'type X = import("@/app/shipments/api").ShipmentResponse;',
+      'const x = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;',
+      'fetch("https://example.test");',
+    ]) { const [result] = await eslint.lintText(source, { filePath }); assert.ok(restricted(result.messages), `${filePath}: ${source}`); }
+  }
+  for (const source of [
+    'import type { Shipment } from "@/modules/shipments/contracts";',
+    'import { ShipmentStatus } from "@/services/shipments/types";',
+    'import { getShipments } from "@/app/shipments/api";',
+    'import type { Response } from "../../../../../app/shipments/api";',
+    'export * from "../../../shipments/contracts";',
+    'import { useState } from "react";',
+  ]) { const [result] = await eslint.lintText(source, { filePath: portPath }); assert.ok(restricted(result.messages), source); }
+  const [valid] = await eslint.lintText('import type { OrderShipment } from "@/modules/orders/contracts"; export type Picker = Pick<OrderShipment, "id">;', { filePath: portPath });
+  assert.equal(restricted(valid.messages), false);
 });
