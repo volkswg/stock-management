@@ -4,7 +4,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Alert, Button, Modal, Upload, message, type UploadFile } from "antd";
 import { useState } from "react";
 import { uploadOrderImage } from "@/app/orders/api";
-import type { OrderProductImage } from "@/services/orders";
+import type { OrderProductImage } from "@/modules/orders/contracts";
 
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;

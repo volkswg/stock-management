@@ -11,6 +11,7 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2022,
+      jsx: ts.JsxEmit.ReactJSX,
       esModuleInterop: true,
     },
     fileName: filename,

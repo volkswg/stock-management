@@ -4,6 +4,23 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 2 completed extraction
+
+`src/modules/orders/contracts.ts` now owns the enum values and UI DTOs extracted from the files below. No implementation/UI file was relocated. Existing destinations in the inventory remain future work.
+
+| Current source / consumer | Completed change | Remaining work |
+| --- | --- | --- |
+| `services/orders/createDraftOrder.ts`, `OrderItemQuantityType.ts` | Enum definitions now in Orders contracts; legacy exports reference the same objects | Draft/session business logic remains in place; migrate consumers before retiring exports |
+| `services/orders/listOrders.ts` | Read/image/detail DTOs extracted; nested shipment represented by Orders-owned `OrderShipment` | Queries and mapping stay here until PR 4 |
+| `services/orders/createOrder.ts`, `updateOrderProducts.ts`, `replaceOrderProductImage.ts` | UI-used result/input DTOs extracted with type compatibility exports | All write/upload implementations stay here |
+| `app/orders/api.ts`, Orders detail, Orders frontend components/formatter | Import public Orders contracts | UI/client moves deferred to PR 3 |
+| Shipments list/detail/formatter | OrderStatus imports now use Orders contracts | Shipments UI/contracts migration remains PR 5 |
+| `services/shipments/types.ts` | Type-only OrderStatus import now uses Orders contracts | Pure temporary runtime enum bridge for Orders detail; replace with Shipments public contract in PR 5 |
+
+Paths in this progress table are relative to `src/`. Exact public names, consumers and bridge removal criteria: [Orders contracts](orders-contracts.md).
+
+## Original file inventory
+
 | Current file | Proposed destination / ownership | Migration note |
 | --- | --- | --- |
 | `src/app/AppBreadcrumb.tsx` | `src/modules/workspace/ui/AppBreadcrumb.tsx` | Move with home/navigation consumers. |
@@ -232,12 +249,12 @@ Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.conf
 | `src/services/movements/index.ts` | `src/modules/inventory/contracts.ts + server.ts` | Retire broad barrel after consumers use explicit browser/server exports; not a whole-file move. |
 | `src/services/movements/manageMovements.ts` | `src/modules/inventory/application/manageMovements.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/movements/state.ts` | `src/modules/line-workflows/application/sessions/ + src/modules/inventory/infrastructure/google-sheets/` | Split session workflow from inventory master/item persistence; preserve ordering and retry behavior. |
-| `src/services/orders/OrderItemQuantityType.ts` | `src/modules/orders/domain/OrderItemQuantityType.ts` | Pure feature values; split worksheet headers/provider DTOs into infrastructure before moving. |
+| `src/services/orders/OrderItemQuantityType.ts` | `src/modules/orders/contracts.ts` (implemented) | Definition extracted in PR 2; existing file is a compatibility re-export. |
 | `src/services/orders/completeOrderBill.ts` | `src/modules/orders/application/completeOrderBill.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/completeOrderProducts.ts` | `src/modules/orders/application/completeOrderProducts.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/completeOrderTotalPrice.ts` | `src/modules/orders/application/completeOrderTotalPrice.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/completeWebOrderPrice.ts` | `src/modules/orders/application/completeWebOrderPrice.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
-| `src/services/orders/createDraftOrder.ts` | `src/modules/orders/application/createDraftOrder.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
+| `src/services/orders/createDraftOrder.ts` | `src/modules/orders/application/createDraftOrder.ts` | OrderStatus extracted to contracts in PR 2; application/workflow/persistence split remains future work. |
 | `src/services/orders/createOrder.ts` | `src/modules/orders/application/createOrder.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/createOrderBill.ts` | `src/modules/orders/application/createOrderBill.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/createOrderItem.ts` | `src/modules/orders/application/createOrderItem.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
@@ -246,7 +263,7 @@ Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.conf
 | `src/services/orders/index.ts` | `src/modules/orders/contracts.ts + server.ts` | Retire broad barrel after consumers use explicit browser/server exports; not a whole-file move. |
 | `src/services/orders/isActiveOrderCreateState.ts` | `src/modules/line-workflows/application/orders/isActiveOrderCreateState.ts` | Workflow/session responsibility; consume orders public status contracts. |
 | `src/services/orders/isOrderImageUploadState.ts` | `src/modules/line-workflows/application/orders/isOrderImageUploadState.ts` | Workflow/session responsibility; consume orders public status contracts. |
-| `src/services/orders/listOrders.ts` | `src/modules/orders/application/listOrders.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
+| `src/services/orders/listOrders.ts` | `src/modules/orders/application/listOrders.ts` | UI DTOs extracted to contracts in PR 2; query/mapping implementation remains here. |
 | `src/services/orders/orderExists.ts` | `src/modules/orders/application/orderExists.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/replaceOrderProductImage.ts` | `src/modules/orders/application/replaceOrderProductImage.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/updateOrderCreateState.ts` | `src/modules/line-workflows/application/orders/updateOrderCreateState.ts` | Workflow/session responsibility; consume orders public status contracts. |

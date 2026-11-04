@@ -1,4 +1,4 @@
-import type { OrderStatus } from "../orders/createDraftOrder";
+import type { OrderStatus } from "@/modules/orders/contracts";
 
 export enum ShipmentStatus {
   Draft = "draft",

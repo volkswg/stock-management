@@ -1,3 +1,5 @@
+import { type OrderListItem, type OrderProductImage, type OrderBillImage, type OrderDetail } from "@/modules/orders/contracts";
+export { type OrderListItem, type OrderProductImage, type OrderBillImage, type OrderDetail } from "@/modules/orders/contracts";
 import type {
   GoogleSheetCellValue,
   GoogleSheetRow,
@@ -5,41 +7,6 @@ import type {
 } from "@/externals/google/sheet";
 import { ShipmentStatus, type Shipment } from "@/services/shipments";
 import { OrderStatus } from "./createDraftOrder";
-
-export type OrderListItem = {
-  id: string;
-  status: OrderStatus;
-  seller: string;
-  totalPrice: number | null;
-  remark: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  shipmentId: string | null;
-  productImages: OrderProductImage[];
-};
-
-export type OrderProductImage = {
-  id: string;
-  orderId: string;
-  imageUrl: string;
-  quoteQuantity: string;
-  deliveredQuantity: string;
-  productCode: string;
-  createdAt: string;
-};
-
-export type OrderBillImage = {
-  id: string;
-  orderId: string;
-  imageUrl: string;
-  createdAt: string;
-};
-
-export type OrderDetail = OrderListItem & {
-  billImages: OrderBillImage[];
-  shipment: Shipment | null;
-};
 
 export async function listOrders({
   googleSheetsService,

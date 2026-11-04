@@ -1,19 +1,6 @@
+import { type OrderProductUpdate, type UpdatedOrderProduct } from "@/modules/orders/contracts";
+export { type OrderProductUpdate, type UpdatedOrderProduct } from "@/modules/orders/contracts";
 import type { GoogleSheetRangeUpdate, IGoogleSheetsService } from "@/externals/google/sheet";
-
-export type OrderProductUpdate = {
-  id: string;
-  productCode?: string;
-  quoteQuantity?: number;
-  deliveredQuantity?: number;
-};
-
-export type UpdatedOrderProduct = {
-  id: string;
-  productCode: string;
-  quoteQuantity: string;
-  deliveredQuantity: string;
-  updatedAt: string;
-};
 
 export async function updateOrderProducts({
   googleSheetsService,

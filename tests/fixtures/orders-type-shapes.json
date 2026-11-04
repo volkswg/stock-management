@@ -1,0 +1,10 @@
+{
+  "OrderListItem": "{ id: string; status: OrderStatus; seller: string; totalPrice: number | null; remark: string; createdAt: string; updatedAt: string; createdBy: string; shipmentId: string | null; productImages: OrderProductImage[]; }",
+  "OrderProductImage": "{ id: string; orderId: string; imageUrl: string; quoteQuantity: string; deliveredQuantity: string; productCode: string; createdAt: string; }",
+  "OrderBillImage": "{ id: string; orderId: string; imageUrl: string; createdAt: string; }",
+  "OrderDetail": "OrderListItem & { billImages: OrderBillImage[]; shipment: Shipment | null; }",
+  "CreatedOrder": "{ id: string; status: OrderStatus.Complete | OrderStatus.WaitingForTotalPrice; seller: string; totalPrice: number | null; remark: string; createdAt: string; updatedAt: string; deletedAt: string; createdBy: string; }",
+  "OrderProductUpdate": "{ id: string; productCode?: string; quoteQuantity?: number; deliveredQuantity?: number; }",
+  "UpdatedOrderProduct": "{ id: string; productCode: string; quoteQuantity: string; deliveredQuantity: string; updatedAt: string; }",
+  "ReplacedOrderProductImage": "{ id: string; imageUrl: string; updatedAt: string; }"
+}

@@ -42,8 +42,9 @@ import {
   OrderItemQuantityType,
   OrderStatus,
   type OrderDetail,
-} from "@/services/orders";
-import { ShipmentStatus, type Shipment } from "@/services/shipments";
+  type OrderShipment,
+} from "@/modules/orders/contracts";
+import { ShipmentStatus } from "@/services/shipments/types";
 import {
   createShipmentMaster,
   getShipments,
@@ -812,7 +813,7 @@ type ShipmentOption = {
   id: string;
   poNumber: string;
   carrier: string;
-  status: ShipmentStatus;
+  status: OrderShipment["status"];
 };
 
 type NewShipmentFormValues = {
@@ -825,7 +826,7 @@ function ShipmentLinkCard({
   currentShipmentId,
   orderId,
 }: {
-  currentShipment?: Shipment;
+  currentShipment?: OrderShipment;
   currentShipmentId?: string;
   orderId: string;
 }) {
@@ -1113,7 +1114,7 @@ function formatShipmentLabel(shipment: ShipmentOption): string {
     : shipment.poNumber;
 }
 
-function mapShipmentToOption(shipment: Shipment): ShipmentOption {
+function mapShipmentToOption(shipment: OrderShipment): ShipmentOption {
   return {
     id: shipment.id,
     poNumber: shipment.poNumber,

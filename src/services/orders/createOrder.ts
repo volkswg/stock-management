@@ -1,3 +1,5 @@
+import { type CreatedOrder } from "@/modules/orders/contracts";
+export { type CreatedOrder } from "@/modules/orders/contracts";
 import {
   lastColumnLetter,
   ORDERS_SHEET_HEADERS,
@@ -5,18 +7,6 @@ import {
 } from "@/externals/google/sheet";
 import { createSortableId } from "../utils/createSortableId";
 import { OrderStatus } from "./createDraftOrder";
-
-export type CreatedOrder = {
-  id: string;
-  status: OrderStatus.Complete | OrderStatus.WaitingForTotalPrice;
-  seller: string;
-  totalPrice: number | null;
-  remark: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string;
-  createdBy: string;
-};
 
 export async function createOrder({
   googleSheetsService,

@@ -1,0 +1,221 @@
+{
+  "rows": {
+    "orders": [
+      [
+        "old",
+        "draft",
+        "Old",
+        null,
+        "",
+        "2026-01-01",
+        "",
+        "",
+        "web"
+      ],
+      [
+        "order/1",
+        "complete",
+        " Seller ",
+        "1,234.50",
+        " note ",
+        "2026-11-01",
+        "2026-11-02",
+        "",
+        "web"
+      ],
+      [
+        "deleted",
+        "complete",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "deleted",
+        ""
+      ],
+      [
+        "invalid",
+        "unknown",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ],
+    "orderItems": [
+      [
+        "item/1",
+        "order/1",
+        "https://example.test/product",
+        "10",
+        "5",
+        "SKU",
+        "created",
+        "",
+        "",
+        ""
+      ],
+      [
+        "deleted-item",
+        "order/1",
+        "https://example.test/deleted",
+        "1",
+        "0",
+        "",
+        "",
+        "",
+        "deleted",
+        ""
+      ]
+    ],
+    "orderBills": [
+      [
+        "bill/1",
+        "order/1",
+        "https://example.test/bill",
+        "created",
+        "",
+        ""
+      ]
+    ],
+    "shipmentOrders": [
+      [
+        "link-old",
+        "ship-old",
+        "order/1",
+        "",
+        "",
+        ""
+      ],
+      [
+        "link",
+        "ship/1",
+        "order/1",
+        "",
+        "",
+        ""
+      ],
+      [
+        "link-deleted",
+        "ignored",
+        "order/1",
+        "",
+        "",
+        "deleted"
+      ]
+    ],
+    "shipments": [
+      [
+        "ship/1",
+        "ready_to_ship",
+        "Carrier",
+        "PO-1",
+        "50.25",
+        "note",
+        "",
+        "",
+        "created",
+        "updated",
+        "",
+        "web",
+        "https://example.test/shipping-bill"
+      ]
+    ]
+  },
+  "expectedList": [
+    {
+      "id": "order/1",
+      "status": "complete",
+      "seller": "Seller",
+      "totalPrice": 1234.5,
+      "remark": "note",
+      "createdAt": "2026-11-01",
+      "updatedAt": "2026-11-02",
+      "createdBy": "web",
+      "shipmentId": "ship/1",
+      "productImages": [
+        {
+          "id": "item/1",
+          "orderId": "order/1",
+          "imageUrl": "https://example.test/product",
+          "quoteQuantity": "10",
+          "deliveredQuantity": "5",
+          "productCode": "SKU",
+          "createdAt": "created"
+        }
+      ]
+    },
+    {
+      "id": "old",
+      "status": "draft",
+      "seller": "Old",
+      "totalPrice": null,
+      "remark": "",
+      "createdAt": "2026-01-01",
+      "updatedAt": "",
+      "createdBy": "web",
+      "shipmentId": null,
+      "productImages": []
+    }
+  ],
+  "expectedDetail": {
+    "id": "order/1",
+    "status": "complete",
+    "seller": "Seller",
+    "totalPrice": 1234.5,
+    "remark": "note",
+    "createdAt": "2026-11-01",
+    "updatedAt": "2026-11-02",
+    "createdBy": "web",
+    "shipmentId": "ship/1",
+    "productImages": [
+      {
+        "id": "item/1",
+        "orderId": "order/1",
+        "imageUrl": "https://example.test/product",
+        "quoteQuantity": "10",
+        "deliveredQuantity": "5",
+        "productCode": "SKU",
+        "createdAt": "created"
+      }
+    ],
+    "billImages": [
+      {
+        "id": "bill/1",
+        "orderId": "order/1",
+        "imageUrl": "https://example.test/bill",
+        "createdAt": "created"
+      }
+    ],
+    "shipment": {
+      "id": "ship/1",
+      "status": "ready_to_ship",
+      "carrier": "Carrier",
+      "poNumber": "PO-1",
+      "shippingFee": 50.25,
+      "remark": "note",
+      "shippedAt": "",
+      "deliveredAt": "",
+      "deletedAt": "",
+      "createdAt": "created",
+      "updatedAt": "updated",
+      "createdBy": "web",
+      "shippingBillUrl": "https://example.test/shipping-bill"
+    }
+  },
+  "statuses": {
+    "Draft": "draft",
+    "WaitingForBillImage": "waiting_for_bill_image",
+    "WaitingForProductImage": "waiting_for_product_image",
+    "WaitingForTotalPrice": "waiting_for_total_price",
+    "Complete": "complete",
+    "Paid": "paid",
+    "Shipped": "shipped",
+    "Delivered": "delivered",
+    "Canceled": "canceled"
+  }
+}

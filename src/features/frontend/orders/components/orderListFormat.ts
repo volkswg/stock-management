@@ -1,4 +1,4 @@
-import type { OrderStatus } from "@/services/orders";
+import type { OrderStatus } from "@/modules/orders/contracts";
 
 const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
   style: "currency",

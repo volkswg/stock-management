@@ -34,7 +34,7 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { OrderStatus } from "@/services/orders";
+import { OrderStatus } from "@/modules/orders/contracts";
 import {
   ShipmentStatus,
   type ShipmentListItem,
