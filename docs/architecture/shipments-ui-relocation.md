@@ -1,4 +1,6 @@
-# Shipment UI relocation — safe subset; browser client blocked
+# Shipment UI relocation — historical PR 6 safe subset; client not yet moved
+
+Current status after the [Orders-owned picker seam](orders-shipment-picker.md): the browser dependency prerequisite is satisfied, both former Orders browser imports and reverse type trace are removed, and app client composition supplies the unchanged original client. The client is still not relocated. The account below preserves the PR 6 decision/evidence; the full seven-file migration and Shipments milestone remain incomplete.
 
 Base main is exactly `a0ff4127b68419d15a7836cdb130a3a33c87d21d`, confirmed as the merged PR 5 commit before branching. No intervening changes or pending work were present. Branch: `refactor/shipments-ui`. This implements six UI/formatter/CSS moves. The requested seven-file UI/client slice is **incomplete** because the browser client cannot move without violating the module dependency gate. The full Shipments milestone also remains incomplete.
 

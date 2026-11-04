@@ -44,12 +44,7 @@ import {
   type OrderDetail,
   type OrderShipment,
 } from "@/modules/orders/contracts";
-import { ShipmentStatus } from "@/services/shipments/types";
-import {
-  createShipmentMaster,
-  getShipments,
-  linkOrderToShipment,
-} from "@/app/shipments/api";
+import type { OrderShipmentPickerPort } from "./shipment-picker-port";
 import {
   getOrder,
   updateOrderProducts,
@@ -72,7 +67,10 @@ const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 2,
 });
 
-export function OrderDetailPage({ orderId }: { orderId: string }) {
+export function OrderDetailPage({ orderId, shipmentPicker }: {
+  orderId: string;
+  shipmentPicker: OrderShipmentPickerPort;
+}) {
   const [order, setOrder] = useState<OrderDetail>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -136,7 +134,7 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
             />
           ) : null}
           {!loading && !error && order ? (
-            <OrderContent order={order} onOrderChange={setOrder} />
+            <OrderContent order={order} onOrderChange={setOrder} shipmentPicker={shipmentPicker} />
           ) : null}
         </main>
       </div>
@@ -153,9 +151,11 @@ type ProductImageDraft = {
 function OrderContent({
   order,
   onOrderChange,
+  shipmentPicker,
 }: {
   order: OrderDetail;
   onOrderChange: Dispatch<SetStateAction<OrderDetail | undefined>>;
+  shipmentPicker: OrderShipmentPickerPort;
 }) {
   const [quantityType, setQuantityType] = useState<OrderItemQuantityType>(
     OrderItemQuantityType.Quote,
@@ -380,6 +380,7 @@ function OrderContent({
         currentShipmentId={order.shipmentId ?? undefined}
         currentShipment={order.shipment ?? undefined}
         orderId={order.id}
+        shipmentPicker={shipmentPicker}
       />
 
       <Card className={styles.imageCard} styles={{ body: { padding: 0 } }}>
@@ -825,10 +826,12 @@ function ShipmentLinkCard({
   currentShipment,
   currentShipmentId,
   orderId,
+  shipmentPicker,
 }: {
   currentShipment?: OrderShipment;
   currentShipmentId?: string;
   orderId: string;
+  shipmentPicker: OrderShipmentPickerPort;
 }) {
   const [form] = Form.useForm<NewShipmentFormValues>();
   const [messageApi, messageContextHolder] = message.useMessage();
@@ -853,13 +856,7 @@ function ShipmentLinkCard({
   useEffect(() => {
     const controller = new AbortController();
 
-    getShipments({
-      excludeStatuses: [
-        ShipmentStatus.Shipping,
-        ShipmentStatus.Delivered,
-        ShipmentStatus.Canceled,
-      ],
-      includeOrders: false,
+    shipmentPicker.listLinkableShipments({
       signal: controller.signal,
     })
       .then((response) => {
@@ -896,7 +893,7 @@ function ShipmentLinkCard({
       });
 
     return () => controller.abort();
-  }, [currentShipment, shipmentsRequestId]);
+  }, [currentShipment, shipmentPicker, shipmentsRequestId]);
 
   const handleCreateShipment = async ({
     poNumber,
@@ -904,7 +901,7 @@ function ShipmentLinkCard({
   }: NewShipmentFormValues): Promise<void> => {
     setShipmentCreating(true);
     try {
-      const response = await createShipmentMaster({ poNumber, carrier });
+      const response = await shipmentPicker.createShipmentMaster({ poNumber, carrier });
       const shipment: ShipmentOption = {
         id: response.shipment.id,
         poNumber: response.shipment.poNumber,
@@ -936,7 +933,7 @@ function ShipmentLinkCard({
     }
     setShipmentLinking(true);
     try {
-      await linkOrderToShipment(selectedShipmentId, orderId);
+      await shipmentPicker.linkOrderToShipment(selectedShipmentId, orderId);
       setLinkedShipmentId(selectedShipmentId);
       messageApi.success("Order linked to shipment.");
     } catch (linkError) {

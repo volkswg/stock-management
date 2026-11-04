@@ -12,20 +12,31 @@ test("runtime module ownership remains Shipments -> Orders, including paths thro
   assert.ok(traces.some(t => t.path.at(-1) === "src/modules/orders/ui/OrderImageGallery.tsx"));
 });
 
-test("type ownership exposes the exact inherited Orders app-client -> Shipment contract exception", () => {
+test("type ownership removes the inherited reverse Orders trace and has no module cycle", () => {
   const traces = browserOwnership({ types: true });
-  assert.deepEqual(ownershipEdges(traces), ["orders->shipments", "shipments->orders"]);
-  assert.deepEqual(reverse(traces), [{ from: "orders", to: "shipments", erased: true, path: ["src/modules/orders/ui/[id]/OrderDetailPage.tsx", "src/app/shipments/api.ts", "src/modules/shipments/contracts.ts"] }]);
-  // This baseline type-only ownership cycle is explicit debt, not a claim of
-  // decoupling. No extra reverse path or new runtime cycle is permitted.
+  assert.deepEqual(ownershipEdges(traces), ["shipments->orders"]);
+  assert.deepEqual(reverse(traces), []);
 });
 
-test("a proposed app forwarding shim with a relocated client is rejected at module ownership level", () => {
+test("reintroducing the old Orders direct import plus a forwarding shim exposes a forbidden module cycle", () => {
   const virtual = {
+    "src/modules/orders/ui/[id]/OrderDetailPage.tsx": readFileSync("src/modules/orders/ui/[id]/OrderDetailPage.tsx", "utf8") + '\nimport { getShipments } from "@/app/shipments/api";',
     "src/app/shipments/api.ts": 'export { getShipments, createShipmentMaster, linkOrderToShipment } from "@/modules/shipments/ui/api";',
     "src/modules/shipments/ui/api.ts": readFileSync("src/app/shipments/api.ts", "utf8"),
   };
   const traces = browserOwnership({ virtual });
   assert.deepEqual(ownershipEdges(traces), ["orders->shipments", "shipments->orders"]);
   assert.ok(reverse(traces).some(t => !t.erased && t.path.join(" -> ") === "src/modules/orders/ui/[id]/OrderDetailPage.tsx -> src/app/shipments/api.ts -> src/modules/shipments/ui/api.ts"));
+});
+
+test("after picker injection a hypothetical client relocation preserves one-way ownership, without shipping that move", () => {
+  const virtual = {
+    "src/app/shipments/api.ts": 'export { getShipments, getShipment, advanceShipmentStatus } from "@/modules/shipments/ui/api";',
+    "src/modules/shipments/ui/api.ts": readFileSync("src/app/shipments/api.ts", "utf8"),
+  };
+  for (const types of [false, true]) {
+    const traces = browserOwnership({ types, virtual });
+    assert.deepEqual(ownershipEdges(traces), ["shipments->orders"]);
+    assert.deepEqual(reverse(traces), []);
+  }
 });

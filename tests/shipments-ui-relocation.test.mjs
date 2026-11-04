@@ -6,6 +6,8 @@ import ts from "typescript";
 import { componentHarness, elements, flush } from "./helpers/component-harness.mjs";
 import { loadSource, plain } from "./helpers/load-source.mjs";
 import { shipmentUiPath } from "./helpers/shipment-ui-paths.mjs";
+import { assertPickerDetailParity } from "./helpers/orders-picker-structure.mjs";
+import { pickerFromHttp } from "./helpers/orders-picker.mjs";
 
 const baseline = JSON.parse(readFileSync(new URL("./fixtures/shipments-ui-relocation.json", import.meta.url), "utf8"));
 const hash = value => createHash("sha256").update(value).digest("hex");
@@ -19,7 +21,10 @@ test("seven original Shipment source bodies/CSS and route wrapper metadata/JSX r
     assert.equal(file.endsWith(".css") ? hash(readFileSync(file)) : bodyHash(file), entry.hash, file);
   }
   for (const entry of baseline.wrappers) assert.equal(bodyHash(entry.file), entry.hash, entry.file);
-  for (const [file, expected] of Object.entries(baseline.retained)) assert.equal(hash(readFileSync(file)), expected, file);
+  for (const [file, expected] of Object.entries(baseline.retained)) {
+    if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
+    else assert.equal(hash(readFileSync(file)), expected, file);
+  }
 });
 
 test("Orders shipment picker executes original query/create/link requests through the real retained browser client", async () => {
@@ -29,8 +34,8 @@ test("Orders shipment picker executes original query/create/link requests throug
     return Response.json(init.method === "POST" ? url.endsWith("/orders") ? { shipmentOrder: { id: "link" }, created: true } : { shipment: { id: "ship/new", poNumber: "PO-NEW", status: "draft", carrier: "Carrier" } } : { shipments: [existing], total: 1 });
   } } });
   const initial = { id: "order/1", status: "complete", totalPrice: 1, seller: "S", remark: "", createdAt: "created", productImages: [], billImages: [], shipment: existing, shipmentId: existing.id };
-  const h = componentHarness("src/modules/orders/ui/[id]/OrderDetailPage.tsx", { api: { getOrder: async () => ({ order: initial }) }, shipments: api });
-  h.render(h.module.OrderDetailPage, { orderId: initial.id }); await flush();
+  const h = componentHarness("src/modules/orders/ui/[id]/OrderDetailPage.tsx", { api: { getOrder: async () => ({ order: initial }) } });
+  h.render(h.module.OrderDetailPage, { orderId: initial.id, shipmentPicker: pickerFromHttp(api) }); await flush();
   const content = one(h.render(), "OrderContent"); const card = one(h.mount(content.type, content.props), "ShipmentLinkCard");
   h.mount(card.type, card.props); await flush();
   assert.equal(one(h.render(), "Select").props.value, "ship/old");

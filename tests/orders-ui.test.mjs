@@ -1,3 +1,4 @@
+import { pickerFromHttp, unusedPicker } from "./helpers/orders-picker.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { componentHarness, elements, flush, deferred } from "./helpers/component-harness.mjs";
@@ -85,8 +86,8 @@ test("creation retains field limits, required image messages, file rules and nav
 test("detail loading, aborted failures and retry preserve the existing request lifecycle", async () => {
   const requests = [];
   const h = componentHarness(files.detail, { api: { getOrder: (id, { signal }) => { const pending = deferred(); requests.push({ ...pending, signal, id }); return pending.promise; } } });
-  assert.equal(elements(h.render(h.module.OrderDetailPage, { orderId: "one" }), "OrderDetailLoading").length, 1);
-  h.render(undefined, { orderId: "two" }); assert.equal(requests[0].signal.aborted, true);
+  assert.equal(elements(h.render(h.module.OrderDetailPage, { orderId: "one", shipmentPicker: unusedPicker }), "OrderDetailLoading").length, 1);
+  h.render(undefined, { orderId: "two", shipmentPicker: unusedPicker }); assert.equal(requests[0].signal.aborted, true);
   requests[0].reject(new Error("Abort from previous order")); await flush();
   assert.equal(elements(h.render(), "OrderDetailError").length, 0);
   requests[1].reject(new Error("Synthetic detail error")); await flush();
@@ -122,9 +123,9 @@ test("product drafts validate positive integers, trim codes and save the same it
     getOrder: async () => ({ order: initial }),
     updateOrderProducts: async (...args) => { calls.push(plain(args)); return { items: [{ id: "item/1", quoteQuantity: "12", productCode: "NEW", deliveredQuantity: "5", updatedAt: "fixed" }] }; },
   } });
-  h.render(h.module.OrderDetailPage, { orderId: initial.id }); await flush();
+  h.render(h.module.OrderDetailPage, { orderId: initial.id, shipmentPicker: unusedPicker }); await flush();
   const content = one(h.render(), "OrderContent");
-  let tree = h.mount(content.type, { order: initial, onOrderChange: (update) => { current = update(current); } });
+  let tree = h.mount(content.type, { order: initial, shipmentPicker: unusedPicker, onOrderChange: (update) => { current = update(current); } });
   one(tree, "OrderItemQuantity").props.onChange(1.5);
   tree = h.render(); assert.equal(one(tree, "Button", (p) => p.children === "Save").props.disabled, true);
   one(tree, "OrderItemQuantity").props.onChange(12);
@@ -139,14 +140,15 @@ test("product drafts validate positive integers, trim codes and save the same it
 test("shipment picker preserves current selection, de-duplicates it, creates and links shipments", async () => {
   const calls = [], currentShipment = { id: "existing", poNumber: "PO-1", carrier: "Carrier", status: "draft" };
   const initial = { ...order(1), billImages: [], productImages: [], shipment: currentShipment, shipmentId: currentShipment.id };
-  const h = componentHarness(files.detail, { api: { getOrder: async () => ({ order: initial }) }, shipments: {
+  const shipmentPicker = pickerFromHttp({
     getShipments: async (input) => { calls.push(["query", input]); return { shipments: [currentShipment, { id: "other", poNumber: "PO-2", carrier: "", status: "ready_to_ship" }] }; },
     createShipmentMaster: async (input) => { calls.push(["create", input]); return { shipment: { id: "new", poNumber: "PO-3", carrier: "New", status: "draft" } }; },
     linkOrderToShipment: async (...args) => { calls.push(["link", ...args]); },
-  } });
-  h.render(h.module.OrderDetailPage, { orderId: initial.id }); await flush();
+  });
+  const h = componentHarness(files.detail, { api: { getOrder: async () => ({ order: initial }) } });
+  h.render(h.module.OrderDetailPage, { orderId: initial.id, shipmentPicker }); await flush();
   const content = one(h.render(), "OrderContent");
-  const card = one(h.mount(content.type, { order: initial, onOrderChange() {} }), "ShipmentLinkCard");
+  const card = one(h.mount(content.type, { order: initial, shipmentPicker, onOrderChange() {} }), "ShipmentLinkCard");
   h.mount(card.type, card.props); await flush(); let tree = h.render();
   assert.deepEqual(plain(one(tree, "Select").props.options.map((option) => option.value)), ["existing", "other"]);
   assert.equal(one(tree, "Select").props.value, "existing");

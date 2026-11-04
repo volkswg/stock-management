@@ -1,0 +1,140 @@
+{
+  "base": "c58669b7a00e8c9169423228fa6f18ab782c358a",
+  "statements": {
+    "src/modules/orders/ui/[id]/OrderDetailPage.tsx": [
+      {
+        "name": "245",
+        "hash": "c5e39c2214a9d1b0a5cb007b7821f7ed2fc2d44fa546249ac2529e7d78e1bf77"
+      },
+      {
+        "name": "{ Text, Title }",
+        "hash": "bd53e926ca5b9cb4d997de2bb3ebae6d88d53325b86180b718d807cfba5908bb"
+      },
+      {
+        "name": "THB_FORMATTER",
+        "hash": "3b94e71ae9d478d02d05548c324f81c3f3fa8ae7fd055036410a19c2b0d7c108"
+      },
+      {
+        "name": "OrderDetailPage",
+        "hash": "22555327f48e8545fcee7e95b2de641e7232d91de070e4dc0d2c23b6eb71ec92"
+      },
+      {
+        "name": "ProductImageDraft",
+        "hash": "2c28e09f66bf6cee2333c96ba7dd0b7f62a610736565a35f6aae8304cee59c23"
+      },
+      {
+        "name": "OrderContent",
+        "hash": "6654b9272c8e3ab47201669de79cac9cb0162ff06e51e1f1c25ab55cc919a967"
+      },
+      {
+        "name": "ProductDirtyIndicator",
+        "hash": "17d3739ba15d7d10284fc6640b664d47f659978654757dc3766c8666e351518c"
+      },
+      {
+        "name": "OrderItemProductCode",
+        "hash": "3c7a0eeb9f07a85bd7744cee2241e014ff7a12bbcb5c0252a6433d2cde28fd7a"
+      },
+      {
+        "name": "OrderItemQuantity",
+        "hash": "835f07748aa65d28743d52edd766d63d7f6593fe663579676a560451ec1c5252"
+      },
+      {
+        "name": "parseQuantity",
+        "hash": "5197cc08322454c0751d26304be6d6dc654dd517a24b3f11ba497e21789884e8"
+      },
+      {
+        "name": "OrderTotalPrice",
+        "hash": "3e6fda38406e1269460424d315e6b3f899b831a8c64783290b4d7699b3968f51"
+      },
+      {
+        "name": "OrderRemark",
+        "hash": "e9c9ecac1da93adb8354b5adba4a4a57493cef0ed77e82658f7d39d01142e468"
+      },
+      {
+        "name": "ShipmentOption",
+        "hash": "3b3dfc2461cdb2ac156adb55943c744c32eca8b8b4668c0feda083eae15f89d0"
+      },
+      {
+        "name": "NewShipmentFormValues",
+        "hash": "cd4b1994a298b7b380b06945aadcd8b1b1092873b12eed5c467133a8c1d927a4"
+      },
+      {
+        "name": "ShipmentLinkCard",
+        "hash": "2666912e1362ebb9475590f2af41cac3da5af36d1cf835c690e3c98de9b5e6a3"
+      },
+      {
+        "name": "createTemporaryPoNumber",
+        "hash": "0c7ad2e0e26965e3417823b32088811a6ceedcd7da30ba548e001d1ab0b636b6"
+      },
+      {
+        "name": "padNumber",
+        "hash": "99456796161a1efd822467df37d9573ab1aff2b090d11ee5c98dd5cad440176e"
+      },
+      {
+        "name": "formatShipmentLabel",
+        "hash": "b46f4d56ef3c88377b8e0f5e27a1d7a5627fa6729a35a877c7b9dbbf14b17907"
+      },
+      {
+        "name": "mapShipmentToOption",
+        "hash": "7311c565dbd560f5dccf956d51623c6ea6473bd251a0c6164c45fb48521fe4dd"
+      },
+      {
+        "name": "ImageSectionLabel",
+        "hash": "6201f9c514b457d693bc459f2cf4f19abae3d60bb8c36d5b547ffe4f5c180d1c"
+      },
+      {
+        "name": "ImageEmptyState",
+        "hash": "c11adcff8444c875b24132db5fe4b993e31727051c23cd9f6161966d1cce3525"
+      },
+      {
+        "name": "OrderDetailLoading",
+        "hash": "e4262a9a1e3f1f9f0a91f427c6c8bba5c61dba9d08e0b5a5ac0e755113c3d352"
+      },
+      {
+        "name": "OrderDetailError",
+        "hash": "b3e2d53b7dd466d262be6143d3de44164788b42d4499c29a08318dd1843775b3"
+      },
+      {
+        "name": "formatStatus",
+        "hash": "f15c410d3f06af87b44e4f3724e0590b482b9f25ce66fa5fa49f51978b7ff180"
+      },
+      {
+        "name": "getStatusColor",
+        "hash": "6630a59e26b3da75fe7c3a30d624d0a9318999493491b2e1075c9c23ee8ebb38"
+      },
+      {
+        "name": "formatDate",
+        "hash": "15bde3804729efda89f97deacde9b17bdd65439a43041cbaef78ad8d5998c16b"
+      }
+    ],
+    "src/app/orders/[id]/page.tsx": [
+      {
+        "name": "metadata",
+        "hash": "82c124b78d3f58257e83d824457d727e63a7303fb615c902a5986d63db63a057"
+      },
+      {
+        "name": "OrderPage",
+        "hash": "1c3592fcde8e00c5eb29388b5cca9ff0fef438d3ed59b401d75182eb2a515215"
+      }
+    ],
+    "eslint/orders-boundaries.mjs": [
+      {
+        "name": "browserImports",
+        "hash": "f0841148fa2b24c30f30cef7100c6efad62e88992c1e948df67e592a9f74ba60"
+      },
+      {
+        "name": "noDynamicServerBypass",
+        "hash": "c43724e25e421af29287891ad0a15af7e02af4f66579094e277b75dfa9d9c081"
+      },
+      {
+        "name": "ordersBoundaries",
+        "hash": "52f2f7bb8fdf1688652fe9d320e705a194b92308b73aab168613ce80440fd528"
+      }
+    ]
+  },
+  "raw": {
+    "src/modules/orders/ui/[id]/OrderDetailPage.tsx": "fb94a1de812b75b8b6f35b6dcef15d11f54bc6df70471bb013ba100b6345b721",
+    "src/app/orders/[id]/page.tsx": "4442e385ab6e7de6c1fb6679d857e584d5812285fe23f67627891761ad5142f3",
+    "eslint/orders-boundaries.mjs": "7119afbe920a2db5af473321fa6f5a37dc09a0fc0a6ea1dee6f448ef198138f8"
+  }
+}
