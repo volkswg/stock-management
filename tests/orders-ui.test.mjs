@@ -182,7 +182,7 @@ test("browser product edits and shipment queries/linking retain URLs and JSON pa
   await api.updateOrderProducts("order/1", [{ id: "item/1", productCode: "SKU", quoteQuantity: 10, deliveredQuantity: 5 }]);
   assert.equal(requests[0].url, "/api/orders/order%2F1/items");
   assert.deepEqual(JSON.parse(requests[0].init.body), { items: [{ id: "item/1", productCode: "SKU", quoteQuantity: 10, deliveredQuantity: 5 }] });
-  const shipments = loadSource("src/app/shipments/api.ts", { globals: { fetch } });
+  const shipments = loadSource("src/modules/shipments/ui/api.ts", { globals: { fetch } });
   await shipments.getShipments({ includeOrders: false, excludeStatuses: ["shipping", "delivered", "canceled"] });
   assert.equal(requests[1].url, "/api/shipments?includeOrders=false&excludeStatuses=shipping%2Cdelivered%2Ccanceled");
   await shipments.linkOrderToShipment("ship/1", "order/1");

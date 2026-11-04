@@ -7,12 +7,12 @@ import { ESLint } from "eslint";
 import ts from "typescript";
 
 const eslint = new ESLint(), contract = "src/modules/shipments/contracts.ts", leaf = "src/services/shipments/types.ts";
-const files = ["ShipmentListPage.tsx", "ShipmentMobileCard.tsx", "[id]/ShipmentDetailPage.tsx", "shipmentListFormat.ts", "api.ts"].map(f => f === "api.ts" ? "src/app/shipments/api.ts" : `src/modules/shipments/ui/${f}`);
+const files = ["ShipmentListPage.tsx", "ShipmentMobileCard.tsx", "[id]/ShipmentDetailPage.tsx", "shipmentListFormat.ts", "api.ts"].map(f => `src/modules/shipments/ui/${f}`);
 const restricted = result => result.messages.some(m => ["no-restricted-imports", "no-restricted-syntax", "no-restricted-globals"].includes(m.ruleId));
 
 test("Shipment lint permits the public contract/gallery/client and only the documented pure leaf exception", async () => {
   for (const filePath of files) {
-    const code = filePath === "src/app/shipments/api.ts" ? 'import type { Shipment } from "@/modules/shipments/contracts"; export type Result = Shipment;' : 'import { ShipmentStatus } from "@/modules/shipments/contracts"; import type { OrderStatus } from "@/modules/orders/contracts"; import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery"; export const allowed = [ShipmentStatus, OrderImageGallery]; export type Order = OrderStatus;';
+    const code = filePath === "src/modules/shipments/ui/api.ts" ? 'import type { Shipment } from "@/modules/shipments/contracts"; export type Result = Shipment;' : 'import { ShipmentStatus } from "@/modules/shipments/contracts"; import type { OrderStatus } from "@/modules/orders/contracts"; import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery"; export const allowed = [ShipmentStatus, OrderImageGallery]; export type Order = OrderStatus;';
     const [result] = await eslint.lintText(code, { filePath });
     assert.equal(restricted(result), false, filePath);
     const [actual] = await eslint.lintFiles(filePath); assert.equal(restricted(actual), false, filePath);
@@ -82,7 +82,7 @@ function graph(runtime) {
     assert.ok(!/^src\/(config|externals|infrastructure|features\/backend)\//.test(file), file);
     assert.ok(!file.startsWith("src/services/") || file === leaf, file);
     assert.ok(!/\/modules\/[^/]+\/(application|infrastructure)\/|\/server\.[^/]+$/.test(file), file);
-    assert.ok(!file.startsWith("src/app/") || file === "src/app/shipments/api.ts", file);
+    assert.ok(!file.startsWith("src/app/"), file);
     active.push(file);
     const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
     for (const node of source.statements) {
@@ -110,8 +110,8 @@ test("Orders removes both browser bridges without adding a reverse Shipments mod
   assert.ok(!detail.includes('"@/services/shipments/types"')); assert.ok(!detail.includes('"@/app/shipments/api"'));
 });
 
-test("module UI glob rejects unrelated app imports and limits the retained client exception to two screens", async () => {
-  const moduleFiles = files.filter(f => f !== "src/app/shipments/api.ts").concat("src/modules/shipments/ui/nested/Future.tsx");
+test("module UI glob rejects every app import, including the retired client, in all screens", async () => {
+  const moduleFiles = files.filter(f => f !== "src/modules/shipments/ui/api.ts").concat("src/modules/shipments/ui/nested/Future.tsx");
   for (const filePath of moduleFiles) {
     const [valid] = await eslint.lintText('import { ShipmentStatus } from "@/modules/shipments/contracts"; export const status = ShipmentStatus.Draft;', { filePath });
     assert.equal(restricted(valid), false, filePath);
@@ -122,11 +122,11 @@ test("module UI glob rejects unrelated app imports and limits the retained clien
       'import { GET } from "@/app/api/shipments/route";',
     ]) { const [result] = await eslint.lintText(code, { filePath }); assert.ok(restricted(result), `${filePath}: ${code}`); }
     const [bridge] = await eslint.lintText('import { getShipments } from "@/app/shipments/api"; export const read = getShipments;', { filePath });
-    assert.equal(restricted(bridge), !["src/modules/shipments/ui/ShipmentListPage.tsx", "src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx"].includes(filePath), filePath);
+    assert.equal(restricted(bridge), true, filePath);
   }
 });
 
-test("retained browser client rejects forwarding/implementation imports and keeps only erased public contract types", async () => {
+test("module browser client rejects forwarding/implementation imports and keeps only erased public contract types", async () => {
   for (const code of [
     'export { getShipments } from "@/modules/shipments/ui/api";',
     'export type { ShipmentsResponse } from "@/modules/shipments/ui/api";',
@@ -135,5 +135,27 @@ test("retained browser client rejects forwarding/implementation imports and keep
     'import { ShipmentStatus } from "@/modules/shipments/contracts";',
     'import { getShipments } from "../../modules/shipments/ui/api";',
     'export { listShipments } from "@/services/shipments";',
-  ]) { const [result] = await eslint.lintText(code, { filePath: "src/app/shipments/api.ts" }); assert.ok(restricted(result), code); }
+  ]) { const [result] = await eslint.lintText(code, { filePath: "src/modules/shipments/ui/api.ts" }); assert.ok(restricted(result), code); }
+});
+
+test("relocated client permits browser fetch and rejects retired app/client/type/provider and relative bypasses", async () => {
+  const filePath = "src/modules/shipments/ui/api.ts";
+  const [allowed] = await eslint.lintText('import type { Shipment } from "@/modules/shipments/contracts"; export type Response = Shipment; export const read = () => fetch("/api/shipments");', { filePath });
+  assert.equal(restricted(allowed), false);
+  for (const code of [
+    'import { getShipments } from "@/app/shipments/api";',
+    'import type { ShipmentsResponse } from "../../../../app/shipments/api";',
+    'import type { OrderShipment } from "@/modules/orders/contracts";',
+    'import type { Shipment } from "../../../services/shipments/types";',
+    'import { GoogleAuth } from "google-auth-library";',
+    'export { getShipments } from "@/app/shipments/api";',
+    'export * from "../other-client";',
+    'import { getShipments } from "@/app/orders/[id]/OrderDetailClient";',
+  ]) { const [result] = await eslint.lintText(code, { filePath }); assert.ok(restricted(result), code); }
+  const [oldComposition] = await eslint.lintText('import { getShipments } from "@/app/shipments/api";', { filePath: "src/app/orders/[id]/OrderDetailClient.tsx" });
+  assert.ok(restricted(oldComposition));
+  const [newComposition] = await eslint.lintText('import { getShipments } from "@/modules/shipments/ui/api"; export const read = getShipments;', { filePath: "src/app/orders/[id]/OrderDetailClient.tsx" });
+  assert.equal(restricted(newComposition), false);
+  const [featureReverse] = await eslint.lintText('import { getShipments } from "@/modules/shipments/ui/api";', { filePath: "src/modules/orders/ui/[id]/OrderDetailPage.tsx" });
+  assert.ok(restricted(featureReverse));
 });

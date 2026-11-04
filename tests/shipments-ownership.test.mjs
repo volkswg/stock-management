@@ -22,20 +22,16 @@ test("reintroducing the old Orders direct import plus a forwarding shim exposes 
   const virtual = {
     "src/modules/orders/ui/[id]/OrderDetailPage.tsx": readFileSync("src/modules/orders/ui/[id]/OrderDetailPage.tsx", "utf8") + '\nimport { getShipments } from "@/app/shipments/api";',
     "src/app/shipments/api.ts": 'export { getShipments, createShipmentMaster, linkOrderToShipment } from "@/modules/shipments/ui/api";',
-    "src/modules/shipments/ui/api.ts": readFileSync("src/app/shipments/api.ts", "utf8"),
+    "src/modules/shipments/ui/api.ts": readFileSync("src/modules/shipments/ui/api.ts", "utf8"),
   };
   const traces = browserOwnership({ virtual });
   assert.deepEqual(ownershipEdges(traces), ["orders->shipments", "shipments->orders"]);
   assert.ok(reverse(traces).some(t => !t.erased && t.path.join(" -> ") === "src/modules/orders/ui/[id]/OrderDetailPage.tsx -> src/app/shipments/api.ts -> src/modules/shipments/ui/api.ts"));
 });
 
-test("after picker injection a hypothetical client relocation preserves one-way ownership, without shipping that move", () => {
-  const virtual = {
-    "src/app/shipments/api.ts": 'export { getShipments, getShipment, advanceShipmentStatus } from "@/modules/shipments/ui/api";',
-    "src/modules/shipments/ui/api.ts": readFileSync("src/app/shipments/api.ts", "utf8"),
-  };
+test("completed real client relocation preserves one-way runtime and type-only module ownership", () => {
   for (const types of [false, true]) {
-    const traces = browserOwnership({ types, virtual });
+    const traces = browserOwnership({ types });
     assert.deepEqual(ownershipEdges(traces), ["shipments->orders"]);
     assert.deepEqual(reverse(traces), []);
   }

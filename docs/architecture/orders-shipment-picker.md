@@ -12,7 +12,7 @@ Base: `c58669b7a00e8c9169423228fa6f18ab782c358a`, confirmed as the merged PR 6 m
 
 The only import is the Orders-owned `OrderShipment` type. There are no Shipment DTOs, runtime status values, provider interfaces, HTTP wrappers, rows, ranges or IO in the port. `OrderDetailPage` requires `shipmentPicker`, threads it to `OrderContent` and `ShipmentLinkCard`, and calls only these three operations. There is no context, global store, generic service/container or new module layer.
 
-`app/orders/[id]/OrderDetailClient.tsx` starts with `"use client"`. A module-scope adapter has stable object identity across renders. It imports the actual existing Shipment browser functions from `app/shipments/api.ts` and the single enum through `modules/shipments/contracts.ts`:
+`app/orders/[id]/OrderDetailClient.tsx` starts with `"use client"`. A module-scope adapter has stable object identity across renders. It imports the actual existing Shipment browser functions from `modules/shipments/ui/api.ts` (moved byte-identically in PR 8) and the single enum through `modules/shipments/contracts.ts`:
 
 - List delegates to `getShipments` with the original `excludeStatuses` order `[Shipping, Delivered, Canceled]`, `includeOrders: false`, and the exact supplied signal. It returns the existing response without reordering/mapping; the unchanged picker still maps options and suppresses duplicate current shipments.
 - Create delegates directly with the same input object and successful response.
@@ -32,13 +32,13 @@ Current client flow:
 app server page (orderId only)
   -> app client composition (stable adapter)
      -> Orders UI -> Orders-owned picker port
-     -> unchanged app Shipment HTTP client -> unchanged /api/shipments routes
+     -> unchanged module Shipment HTTP client -> unchanged /api/shipments routes
      -> public ShipmentStatus -> original pure legacy enum definition
 ```
 
-Shipment list/detail remain byte-identical and still use the retained app client. Shipment contracts and the legacy enum leaf remain byte-identical and retain one runtime enum object. The old comment in the unchanged Shipment contract records its earlier compatibility rationale; the browser exception is now removed, while physical ownership remains intentionally outside this task. The legacy Orders server detail projection and other server service imports still need a separate consumer-owned seam. This browser graph result does not claim the entire repository's server dependencies are decoupled.
+PR 8 changes only the client import specifiers in Shipment list/detail and this app composition; their bodies remain identical and use the single module client. Shipment contracts and the legacy enum leaf remain byte-identical and retain one runtime enum object. The old comment in the unchanged Shipment contract records its earlier compatibility rationale; the browser exception is now removed, while physical ownership remains intentionally outside this task. The legacy Orders server detail projection and other server service imports still need a separate consumer-owned seam. This browser graph result does not claim the entire repository's server dependencies are decoupled.
 
-The browser picker prerequisite blocking client relocation in PR 6 is now satisfied. A later scoped PR can relocate the single Shipment client and update app composition plus the two Shipment screens, retaining its original response/type/HTTP tests. A virtual graph test confirms that proposed future move no longer adds a reverse module edge; it does not implement the move. Existing Shipment client no-forwarding lint remains unchanged until that future task. Enum physical ownership and server projection work remain separate scopes.
+The browser picker prerequisite was satisfied here and PR 8 now completes the client relocation: the implementation lives at `modules/shipments/ui/api.ts`, the old app path is removed without a shim, and both Shipment screens plus Orders app composition use it. The actual runtime/type ownership graphs remain one-way and acyclic. The unchanged module-scope adapter, required Orders port, server-only orderId props and response validation behavior are retained. Enum physical ownership and server projection work remain separate scopes; the full Shipments milestone remains incomplete.
 
 ## Characterization and surgical structural evidence
 

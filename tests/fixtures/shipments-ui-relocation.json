@@ -28,7 +28,7 @@
     {
       "from": "src/app/shipments/api.ts",
       "to": "src/modules/shipments/ui/api.ts",
-      "moved": false,
+      "moved": true,
       "hash": "64c6c72f42853451eb087a5db681a628d9db304c0755281da8099b63ca3f669e"
     },
     {

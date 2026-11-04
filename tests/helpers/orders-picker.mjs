@@ -9,7 +9,7 @@ export function pickerComposition(http, OrderDetailPage = function OrderDetailPa
     imports: {
       "react/jsx-runtime": { jsx: (type, props) => ({ type, props }) },
       "@/modules/orders/ui/[id]/OrderDetailPage": { OrderDetailPage },
-      "@/app/shipments/api": http,
+      "@/modules/shipments/ui/api": http,
       "@/modules/shipments/contracts": load("src/modules/shipments/contracts.ts"),
     },
   });

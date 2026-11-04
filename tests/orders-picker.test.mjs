@@ -11,7 +11,7 @@ const order = current => ({ id: "order/1", status: "complete", totalPrice: 1, se
 
 async function mountPicker({ current, remote = [], fetch: respond } = {}) {
   const requests = [];
-  const http = loadSource("src/app/shipments/api.ts", { globals: { Error, fetch: async (url, init) => {
+  const http = loadSource("src/modules/shipments/ui/api.ts", { globals: { Error, fetch: async (url, init) => {
     requests.push({ url, init });
     return respond ? respond(url, init, requests.length) : Response.json({ shipments: remote, total: remote.length });
   } } });

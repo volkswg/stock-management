@@ -11,7 +11,7 @@ import { assertPickerDetailParity } from "./helpers/orders-picker-structure.mjs"
 
 const clientPath = "src/app/orders/[id]/OrderDetailClient.tsx", detailPath = "src/modules/orders/ui/[id]/OrderDetailPage.tsx";
 const one = (tree, name, match = () => true) => { const e = elements(tree, name).find(e => match(e.props)); assert.ok(e, name); return e; };
-const real = fetch => loadSource("src/app/shipments/api.ts", { globals: { Error, fetch } });
+const real = fetch => loadSource("src/modules/shipments/ui/api.ts", { globals: { Error, fetch } });
 const port = fetch => pickerComposition(real(fetch)).render("order/1").props.shipmentPicker;
 
 test("client composition supplies one stable adapter and no DOM; server page passes only the original orderId", async () => {
@@ -99,7 +99,7 @@ for (const runtime of [true, false]) test(`app client composition graph is brows
     assert.ok(!/^src\/(config|externals|infrastructure|features\/backend)\//.test(file), file);
     assert.ok(!file.startsWith("src/services/") || file === "src/services/shipments/types.ts", file);
     assert.ok(!/\/(application|infrastructure)\/|\/server\.ts$/.test(file), file);
-    assert.ok(!file.startsWith("src/app/") || [clientPath, "src/app/shipments/api.ts"].includes(file), file);
+    assert.ok(!file.startsWith("src/app/") || file === clientPath, file);
     active.push(file);
     const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
     for (const n of source.statements) {
@@ -113,5 +113,5 @@ for (const runtime of [true, false]) test(`app client composition graph is brows
     }
     active.pop(); visited.add(file);
   }
-  visit(clientPath); assert.ok(visited.has(detailPath)); assert.ok(visited.has("src/app/shipments/api.ts")); assert.ok(visited.has("src/modules/shipments/contracts.ts"));
+  visit(clientPath); assert.ok(visited.has(detailPath)); assert.ok(visited.has("src/modules/shipments/ui/api.ts")); assert.ok(visited.has("src/modules/shipments/contracts.ts"));
 });
