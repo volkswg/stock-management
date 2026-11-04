@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ShipmentListPage } from "./ShipmentListPage";
+import { ShipmentListPage } from "@/modules/shipments/ui/ShipmentListPage";
 
 export const metadata: Metadata = {
   title: "Shipments | Stock Management",

@@ -1,0 +1,73 @@
+{
+  "base": "a0ff4127b68419d15a7836cdb130a3a33c87d21d",
+  "files": [
+    {
+      "from": "src/app/shipments/ShipmentListPage.tsx",
+      "to": "src/modules/shipments/ui/ShipmentListPage.tsx",
+      "moved": true,
+      "hash": "90cdf07452320f1b1445aa4e88040fb1768973200699feb14a4b597f78580776"
+    },
+    {
+      "from": "src/app/shipments/ShipmentMobileCard.tsx",
+      "to": "src/modules/shipments/ui/ShipmentMobileCard.tsx",
+      "moved": true,
+      "hash": "910b7bbe92c513423dade091f7ee04f3ae611e2e03e652fd0e2e0fb5a388e1b0"
+    },
+    {
+      "from": "src/app/shipments/shipmentListFormat.ts",
+      "to": "src/modules/shipments/ui/shipmentListFormat.ts",
+      "moved": true,
+      "hash": "d818feebece98e64c5a43fa685889a609c34d859fcb3ac6da33bb530e9bc6527"
+    },
+    {
+      "from": "src/app/shipments/shipments.module.css",
+      "to": "src/modules/shipments/ui/shipments.module.css",
+      "moved": true,
+      "hash": "9e7779e03d3a1a8459e0a6b2cc52efd883df72583f4fa35a37567f21b2b83888"
+    },
+    {
+      "from": "src/app/shipments/api.ts",
+      "to": "src/modules/shipments/ui/api.ts",
+      "moved": false,
+      "hash": "64c6c72f42853451eb087a5db681a628d9db304c0755281da8099b63ca3f669e"
+    },
+    {
+      "from": "src/app/shipments/[id]/ShipmentDetailPage.tsx",
+      "to": "src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx",
+      "moved": true,
+      "hash": "97d675d3c334a162ae1f073b1b27a8bc90f3f581f62bcd6dbff257da50f33a30"
+    },
+    {
+      "from": "src/app/shipments/[id]/shipmentDetail.module.css",
+      "to": "src/modules/shipments/ui/[id]/shipmentDetail.module.css",
+      "moved": true,
+      "hash": "f6b1c4e196ed75b3bcf1427e547ca575d60f9b6ff03437d48b1737430b860e79"
+    }
+  ],
+  "wrappers": [
+    {
+      "file": "src/app/shipments/page.tsx",
+      "hash": "8984c4f17b4873f16b1d24b0f62491739e857f194dfa3f549df724a15164bbcb"
+    },
+    {
+      "file": "src/app/shipments/loading.tsx",
+      "hash": "d0218d4802cb72d2fdd1979ddccdf07a52be19ddb6e5d76d12b8d8febfec864e"
+    },
+    {
+      "file": "src/app/shipments/[id]/page.tsx",
+      "hash": "707a97ac0a2d10aa552bcdc0d5c1551cd524c6ed94aca194bfc6f43005ee803d"
+    },
+    {
+      "file": "src/app/shipments/[id]/loading.tsx",
+      "hash": "aa66616b97421329c37be174456b113293b6c3a134bc74a2fba8fc0e062dcce0"
+    }
+  ],
+  "retained": {
+    "src/modules/shipments/contracts.ts": "77753cb8809856586d5399999b7be5ca5ca8983a8e67897391b976cac2aacd78",
+    "src/app/shipments/api.ts": "7aa8e27b7928a27637ad8fcc0480c4c471bd4deeee25b7c4c314a95f709eb379",
+    "src/modules/orders/ui/[id]/OrderDetailPage.tsx": "fb94a1de812b75b8b6f35b6dcef15d11f54bc6df70471bb013ba100b6345b721",
+    "package.json": "8374d08772db9d2400806db585a453d03175439cb94c06f2a25fa038fb1edc34",
+    "yarn.lock": "262e935409efe85b6a8af41f4ca90fb1b8ff1ce131980715bfd96cbd4763a66b",
+    ".env.example": "3eaf577660b9d03e7c13654e922031bcb9fff172b69ecf2d0fa068cdfcf62ed2"
+  }
+}

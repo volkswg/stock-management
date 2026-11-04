@@ -41,7 +41,7 @@ import {
   type ShipmentRelatedOrder,
 } from "@/modules/shipments/contracts";
 import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
-import { advanceShipmentStatus, getShipment } from "../api";
+import { advanceShipmentStatus, getShipment } from "@/app/shipments/api";
 import styles from "./shipmentDetail.module.css";
 
 const { Text, Title } = Typography;

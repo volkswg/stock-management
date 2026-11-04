@@ -4,9 +4,25 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## Shipments UI follow-up — six safe moves; client deferred
+
+The [focused audit](shipments-ui-relocation.md) overrides the original proposed destinations for this slice. The full seven-file UI/client migration is incomplete.
+
+| Original path | Current implementation / status |
+| --- | --- |
+| `src/app/shipments/ShipmentListPage.tsx` | `src/modules/shipments/ui/ShipmentListPage.tsx` (moved) |
+| `src/app/shipments/ShipmentMobileCard.tsx` | `src/modules/shipments/ui/ShipmentMobileCard.tsx` (moved) |
+| `src/app/shipments/shipmentListFormat.ts` | `src/modules/shipments/ui/shipmentListFormat.ts` (moved) |
+| `src/app/shipments/shipments.module.css` | `src/modules/shipments/ui/shipments.module.css` (moved, bytes unchanged) |
+| `src/app/shipments/[id]/ShipmentDetailPage.tsx` | `src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx` (moved) |
+| `src/app/shipments/[id]/shipmentDetail.module.css` | `src/modules/shipments/ui/[id]/shipmentDetail.module.css` (moved, bytes unchanged) |
+| `src/app/shipments/api.ts` | Retained byte-identical; proposed `modules/shipments/ui/api.ts` blocked until Orders picker decoupling |
+
+Four route/loading wrappers keep their locations and import module UI/CSS. Orders picker, Shipment contracts and API handlers remain unchanged. There is no forwarding compatibility entrypoint: the original app client remains the single implementation, used only by its existing Orders picker and two Shipment screens. The inherited type-only reverse ownership trace is documented; forwarding runtime calls to a new module client would introduce a forbidden runtime module cycle.
+
 ## PR 5 implemented first slice — Shipment contracts/characterization
 
-This status table overrides the proposed destinations below only for this narrow slice. The full Shipments milestone remains incomplete; all UI/client/CSS and worksheet destinations below are future work.
+This status table overrides the proposed destinations below only for this narrow slice. The full Shipments milestone remains incomplete; that initial status is historical; the six UI/CSS follow-up moves above are now implemented, while the client and worksheet destinations remain future work.
 
 | Current file | Implemented change | Remaining migration |
 | --- | --- | --- |
@@ -170,17 +186,17 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/app/sales/profit-summary/salesProfitSummary.module.css` | `src/modules/sales/ui/profit-summary/salesProfitSummary.module.css` | Feature UI/client/style; retain current route entrypoints. |
 | `src/app/sales/salesSyncStatus.module.css` | `src/modules/sales/ui/salesSyncStatus.module.css` | Feature UI/client/style; retain current route entrypoints. |
 | `src/app/sales/sync-status/page.tsx` | `src/app/sales/sync-status/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
-| `src/app/shipments/ShipmentListPage.tsx` | `src/modules/shipments/ui/ShipmentListPage.tsx` | Feature UI/client/style; retain current route entrypoints. |
-| `src/app/shipments/ShipmentMobileCard.tsx` | `src/modules/shipments/ui/ShipmentMobileCard.tsx` | Feature UI/client/style; retain current route entrypoints. |
-| `src/app/shipments/[id]/ShipmentDetailPage.tsx` | `src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx` | Feature UI/client/style; retain current route entrypoints. |
+| `src/app/shipments/ShipmentListPage.tsx` | `src/modules/shipments/ui/ShipmentListPage.tsx` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
+| `src/app/shipments/ShipmentMobileCard.tsx` | `src/modules/shipments/ui/ShipmentMobileCard.tsx` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
+| `src/app/shipments/[id]/ShipmentDetailPage.tsx` | `src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
 | `src/app/shipments/[id]/loading.tsx` | `src/app/shipments/[id]/loading.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/[id]/page.tsx` | `src/app/shipments/[id]/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
-| `src/app/shipments/[id]/shipmentDetail.module.css` | `src/modules/shipments/ui/[id]/shipmentDetail.module.css` | Feature UI/client/style; retain current route entrypoints. |
-| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts` | Feature UI/client/style; retain current route entrypoints. |
+| `src/app/shipments/[id]/shipmentDetail.module.css` | `src/modules/shipments/ui/[id]/shipmentDetail.module.css` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
+| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts` (deferred) | Keep the original app implementation byte-identical until Orders picker decoupling removes the new runtime module-cycle risk. |
 | `src/app/shipments/loading.tsx` | `src/app/shipments/loading.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/page.tsx` | `src/app/shipments/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
-| `src/app/shipments/shipmentListFormat.ts` | `src/modules/shipments/ui/shipmentListFormat.ts` | Feature UI/client/style; retain current route entrypoints. |
-| `src/app/shipments/shipments.module.css` | `src/modules/shipments/ui/shipments.module.css` | Feature UI/client/style; retain current route entrypoints. |
+| `src/app/shipments/shipmentListFormat.ts` | `src/modules/shipments/ui/shipmentListFormat.ts` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
+| `src/app/shipments/shipments.module.css` | `src/modules/shipments/ui/shipments.module.css` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
 | `src/app/stock-counts/StockAdjustmentsPanel.tsx` | `src/modules/inventory/ui/StockAdjustmentsPanel.tsx` | Feature UI/client/style; retain current route entrypoints. |
 | `src/app/stock-counts/StockCountsPage.tsx` | `src/modules/inventory/ui/StockCountsPage.tsx` | Feature UI/client/style; retain current route entrypoints. |
 | `src/app/stock-counts/adjustments.module.css` | `src/modules/inventory/ui/adjustments.module.css` | Feature UI/client/style; retain current route entrypoints. |

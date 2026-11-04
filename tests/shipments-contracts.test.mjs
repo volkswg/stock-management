@@ -5,6 +5,7 @@ import test from "node:test";
 import ts from "typescript";
 import { shipmentServices } from "./helpers/shipments.mjs";
 import { plain } from "./helpers/load-source.mjs";
+import { restoreRelocationImports } from "./helpers/shipment-ui-paths.mjs";
 
 const baseline = JSON.parse(readFileSync(new URL("./fixtures/shipments-structure.json", import.meta.url), "utf8"));
 const hash = value => createHash("sha256").update(value).digest("hex");
@@ -43,5 +44,5 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     const node = source.statements.find(n => ts.isFunctionDeclaration(n) && n.name?.text === name);
     assert.equal(hash(printer.printNode(ts.EmitHint.Unspecified, node, source)), expected, key);
   }
-  for (const [file, expected] of Object.entries(baseline.preserved)) assert.equal(hash(readFileSync(file)), expected, file);
+  for (const [file, expected] of Object.entries(baseline.preserved)) assert.equal(hash(restoreRelocationImports(file, readFileSync(file, "utf8"))), expected, file);
 });
