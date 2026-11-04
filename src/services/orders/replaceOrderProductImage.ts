@@ -1,12 +1,8 @@
+import { type ReplacedOrderProductImage } from "@/modules/orders/contracts";
+export { type ReplacedOrderProductImage } from "@/modules/orders/contracts";
 import type { IGoogleDriveService } from "@/externals/google/drive";
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
 import { createSortableId } from "@/services/utils/createSortableId";
-
-export type ReplacedOrderProductImage = {
-  id: string;
-  imageUrl: string;
-  updatedAt: string;
-};
 
 export async function replaceOrderProductImage({
   googleSheetsService,

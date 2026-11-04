@@ -26,7 +26,7 @@ import {
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import type { Key } from "react";
-import { OrderStatus } from "@/services/orders";
+import { OrderStatus } from "@/modules/orders/contracts";
 import {
   ShipmentStatus,
   type ShipmentListItem,

@@ -37,3 +37,5 @@ Module ownership:
 Public files may be added only with real consumers: `contracts.ts` for browser-safe DTOs/constants, `server.ts` for named server use cases, `ui/<Component>.tsx` for UI. Avoid `index.ts` exposing all layers. Feature-owned contracts stay with their feature rather than migrating to `shared/types` solely because another feature consumes them.
 
 Mixed files in the migration map require a later split, not an immediate whole-file relocation. For example, payroll calculation currently mixes pure rules and IO; pure deduction logic may become domain code only after it has no infrastructure imports. The central `GoogleSheetsService` is a temporary legacy composition facade: split feature adapters before retiring it.
+
+PR 2 creates only `modules/orders/contracts.ts`: self-contained public DTOs and enum values with real UI consumers. It creates no empty domain/application/infrastructure/ui folders. Existing Orders files stay in place with narrow compatibility type/enum exports until their implementation migrates.

@@ -9,7 +9,7 @@ import type {
   UpdatedOrderProduct,
   ReplacedOrderProductImage,
   OrderStatus,
-} from "@/services/orders";
+} from "@/modules/orders/contracts";
 
 export type OrdersResponse = {
   orders: OrderListItem[];

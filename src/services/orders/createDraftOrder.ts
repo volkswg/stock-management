@@ -1,3 +1,5 @@
+import { OrderStatus } from "@/modules/orders/contracts";
+export { OrderStatus } from "@/modules/orders/contracts";
 import {
   lastColumnLetter,
   type IGoogleSheetsService,
@@ -17,18 +19,6 @@ export type Order = {
   createdBy: string;
   remark: string;
 };
-
-export enum OrderStatus {
-  Draft = "draft",
-  WaitingForBillImage = "waiting_for_bill_image",
-  WaitingForProductImage = "waiting_for_product_image",
-  WaitingForTotalPrice = "waiting_for_total_price",
-  Complete = "complete",
-  Paid = "paid",
-  Shipped = "shipped",
-  Delivered = "delivered",
-  Canceled = "canceled",
-}
 
 export enum UserStateFlowName {
   OrderCreate = "OrderCreate",

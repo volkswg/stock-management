@@ -1,6 +1,6 @@
 # Incremental PR plan
 
-This document proposes future PRs; Phase 1 implements only PR 1. Keep every existing route file and URL stable. Never combine directory moves with financial fixes, schema/env changes, provider replacement, or SaaS feature work.
+This document tracks incremental PRs. PR 1 established preparation; PR 2 implements [browser-safe Orders contracts](orders-contracts.md). PRs 3–11 remain proposed work. Keep every existing route file and URL stable. Never combine directory moves with financial fixes, schema/env changes, provider replacement, or SaaS feature work.
 
 | PR | Scope and sequence | Required evidence / exit condition |
 | --- | --- | --- |

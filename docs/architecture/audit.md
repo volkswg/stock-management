@@ -110,3 +110,7 @@ Parsed import/export declarations and literal dynamic imports with the installed
 - `src/services/stock-counts/manageStockCounts.ts`
 
 Do not introduce new cycles. Existing components above are migration debt; extract pure contracts and consumer-owned ports before removing compatibility barrels. In particular, type references from salary advances back to payroll do not justify moving both into a broad public index.
+
+## PR 2 follow-up
+
+Orders UI/API and the three Shipments UI consumers of OrderStatus now use `modules/orders/contracts.ts`. Order detail no longer imports a runtime mixed service barrel; its sole legacy runtime bridge is the pure shipment enum/DTO file. That file imports OrderStatus as a type from the contract leaf, not the draft writer. Orders read DTOs use an owned shipment projection without a dependency back to Shipments. Legacy order services retain compatibility re-exports; existing server orchestration, Sheets/Drive mapping, LINE logic and the two unrelated type-cycle components above remain unchanged. The checked transitive Orders project-runtime graph has no server implementation paths or cycles. See [scope and limitations](orders-contracts.md); the original table remains the Phase 1 snapshot, not post-migration counts.

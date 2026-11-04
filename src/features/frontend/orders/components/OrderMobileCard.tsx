@@ -1,6 +1,6 @@
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { Button, Card, Descriptions, Tag, Typography } from "antd";
-import { OrderStatus, type OrderListItem } from "@/services/orders";
+import { OrderStatus, type OrderListItem } from "@/modules/orders/contracts";
 import { OrderImageGallery } from "./OrderImageGallery";
 import {
   formatOrderDate,
