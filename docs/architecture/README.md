@@ -6,6 +6,8 @@ PR 2 established [Orders browser contracts](orders-contracts.md) at `src/modules
 
 PR 4 implements the [initial Orders use-case seam](orders-use-case-seam.md): `listOrders` and simple `createOrder` now use consumer-owned ports and feature Sheets adapters, composed through `modules/orders/server.ts`. Legacy exports remain; detail/images/drafts and other services stay in place. Contracts and UI are unchanged.
 
+PR 5 establishes [Shipment browser contracts and characterization](shipments-contracts.md), the first slice of the Shipments milestone. Five existing frontend/client files use named public contracts; the single enum remains in a restricted pure legacy leaf pending Orders/Shipments decoupling. UI relocation, use cases and adapters are deferred.
+
 The application is a Next.js App Router shop operations workspace using React, Ant Design, Google Sheets, Google Drive, LINE, and Loyverse. Feature ownership should make changes local and make persistence replaceable without changing business behavior. Future SaaS and Supabase work is intentionally deferred: this phase introduces no provider, schema, auth, tenant context, subscription, or runtime abstraction.
 
 ```text

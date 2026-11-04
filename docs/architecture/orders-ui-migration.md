@@ -20,7 +20,7 @@ References were searched across `src`, tests, and ESLint before relocating code.
 
 No server, LINE, Loyverse, Google Drive or Sheets implementation imports the browser client or these UI components. The Orders list and product-image upload component import the old browser client internally; create/detail use its relative path. Detail also imports four legacy frontend components. All of those imports must follow the moved implementation; no compatibility copy of a browser file is needed.
 
-The remaining outward dependency is the documented pure shipment enum bridge plus the existing browser shipment HTTP client at `src/app/shipments/api.ts`. These remain until PR 5. Shipments continues to consume the Orders gallery through its explicit UI file; no broad barrel is introduced. Contracts remain unchanged.
+The remaining outward dependency is the documented pure shipment enum bridge plus the existing browser shipment HTTP client at `src/app/shipments/api.ts`. These remain after the first PR 5 contracts slice until dedicated Orders/Shipments decoupling. Shipments continues to consume the Orders gallery through its explicit UI file; no broad barrel is introduced. Contracts remain unchanged.
 
 ## Characterization before relocation
 
@@ -36,4 +36,4 @@ The browser flow remains `Orders UI → modules/orders/ui/api.ts → existing /a
 
 Before moves, 41 tests pass (32 inherited plus 9 new characterization tests). After moves, all 44 pass, including added move-body/CSS/consumer fingerprints and a type/value cycle check. Lint, typecheck and credential-free build pass, and the Next app-paths manifest is unchanged. Test paths follow the relocated code; existing expected route and contract fixtures are preserved. See [the full command/results report](verification.md#pr-3--orders-ui-restructuring).
 
-Remaining legacy dependencies are limited to the explicitly retained shipment picker bridges (PR 5) and unmigrated server/LINE compatibility exports (PR 4/10). No unused domain/application/infrastructure directory or new dependency was added. Observable behavior is preserved by unchanged component/client bodies and the characterization checks; real-browser visual and live-integration verification remain the limitations above.
+Remaining legacy dependencies are limited to the explicitly retained shipment picker bridges (retained after PR 5 first slice; removal in dedicated decoupling) and unmigrated server/LINE compatibility exports (PR 4/10). No unused domain/application/infrastructure directory or new dependency was added. Observable behavior is preserved by unchanged component/client bodies and the characterization checks; real-browser visual and live-integration verification remain the limitations above.

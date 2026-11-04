@@ -52,7 +52,7 @@ Remaining imports and removal criteria:
 - The two legacy entrypoints and barrel remain until their API/image/server callers migrate to documented module entrypoints in a separately scoped Orders task. No compatibility export is deleted in this PR.
 - Detail's private row-mapper import remains within Orders ownership until a future detail-use-case migration; detail-specific shipment/bill mapping remains legacy.
 - `server.ts` uses the existing `services/utils/createSortableId` implementation; move it to the planned shared server utility only in a later utility migration, preserving its state/clock semantics.
-- The pure shipment enum/browser-client bridges remain unchanged through PR 5. PR 5 is the future Shipments migration, not an extension of this seam.
+- The Orders-side pure shipment enum/browser-client bridges remain unchanged after the first PR 5 contracts slice, until dedicated Orders/Shipments decoupling. The Shipment client now uses public type contracts internally. PR 5 does not extend this Orders seam; see [Shipment contracts](shipments-contracts.md).
 - Remaining Orders mutations, drafts and LINE workflow compatibility stay for later Orders/LINE work. No claim of full Orders service migration is made.
 
 No live provider, production data, env credentials, schema change, browser redesign, merge or deployment is used. Fake-port/transport tests do not verify real Google permissions, provider availability, browser visuals or concurrency guarantees. Existing Sheets limitations remain unchanged.

@@ -4,6 +4,22 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 5 implemented first slice — Shipment contracts/characterization
+
+This status table overrides the proposed destinations below only for this narrow slice. The full Shipments milestone remains incomplete; all UI/client/CSS and worksheet destinations below are future work.
+
+| Current file | Implemented change | Remaining migration |
+| --- | --- | --- |
+| `src/modules/shipments/contracts.ts` (new) | Named browser-safe public forwarding of the single enum and eight actual DTOs | Transfer physical definitions only after Orders decoupling |
+| `src/services/shipments/types.ts` | Keeps original enum/DTO ownership; receives `ShipmentStatusUpdate` and `ShipmentOrder` aliases unchanged | Temporary pure compatibility leaf; retire only after all callers/Orders bridges migrate |
+| `src/services/shipments/updateShipmentStatus.ts` | Re-exports extracted response type; function bodies unchanged | Future status use case/adapter seam |
+| `src/services/shipments/linkOrderToShipment.ts` | Re-exports extracted link DTO; function bodies unchanged | Future linking use case/adapter seam |
+| `src/app/shipments/ShipmentListPage.tsx`, `ShipmentMobileCard.tsx`, `[id]/ShipmentDetailPage.tsx`, `shipmentListFormat.ts`, `api.ts` | Import source corrections to public contracts only, no moves | Separate UI/client relocation PR at the listed destinations |
+| Orders detail enum/client bridges and `services/orders/listOrders.ts` detail projection | Unchanged | Consumer-owned picker/projection interfaces at app composition in dedicated decoupling slice |
+| Three Shipment API handlers, legacy Shipment list/create/barrel, backend validation, all Shipment Sheets classes | Unchanged | Later server/use-case/adapter slices; retain paths/schema/HTTP behavior |
+
+See [exports, audited consumers, tests and removal criteria](shipments-contracts.md). No empty target layers are created.
+
 ## PR 2 completed extraction
 
 `src/modules/orders/contracts.ts` now owns the enum values and UI DTOs extracted from the files below. No implementation/UI file was relocated. Existing destinations in the inventory remain future work.
@@ -15,7 +31,7 @@ Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.conf
 | `services/orders/createOrder.ts`, `updateOrderProducts.ts`, `replaceOrderProductImage.ts` | UI-used result/input DTOs extracted with type compatibility exports | All write/upload implementations stay here |
 | `app/orders/api.ts`, Orders detail, Orders frontend components/formatter | Import public Orders contracts | UI/client moves deferred to PR 3 |
 | Shipments list/detail/formatter | OrderStatus imports now use Orders contracts | Shipments UI/contracts migration remains PR 5 |
-| `services/shipments/types.ts` | Type-only OrderStatus import now uses Orders contracts | Pure temporary runtime enum bridge for Orders detail; replace with Shipments public contract in PR 5 |
+| `services/shipments/types.ts` | Type-only OrderStatus import now uses Orders contracts | Pure temporary runtime enum bridge for Orders detail; retained after PR 5 first slice until dedicated decoupling |
 
 Paths in this progress table are relative to `src/`. Exact public names, consumers and bridge removal criteria: [Orders contracts](orders-contracts.md).
 
@@ -320,7 +336,7 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/services/shipments/index.ts` | `src/modules/shipments/contracts.ts + server.ts` | Retire broad barrel after consumers use explicit browser/server exports; not a whole-file move. |
 | `src/services/shipments/linkOrderToShipment.ts` | `src/modules/shipments/application/linkOrderToShipment.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/shipments/listShipments.ts` | `src/modules/shipments/application/listShipments.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
-| `src/services/shipments/types.ts` | `src/modules/shipments/domain/types.ts` | Pure feature values; split worksheet headers/provider DTOs into infrastructure before moving. |
+| `src/services/shipments/types.ts` | `src/modules/shipments/contracts.ts` (public surface implemented; physical definitions deferred) | Pure enum/DTO leaf retained temporarily for Orders bridge/identity; physically transfer only after decoupling. No speculative domain layer. |
 | `src/services/shipments/updateShipmentStatus.ts` | `src/modules/shipments/application/updateShipmentStatus.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/stock-adjustments/manageStockAdjustments.ts` | `src/modules/inventory/application/manageStockAdjustments.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/stock-adjustments/types.ts` | `src/modules/inventory/domain/adjustments/types.ts` | Pure feature values; split worksheet headers/provider DTOs into infrastructure before moving. |

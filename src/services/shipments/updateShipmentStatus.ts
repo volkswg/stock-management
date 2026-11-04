@@ -1,15 +1,7 @@
 import type { IGoogleSheetsService } from "@/externals/google/sheet";
-import { ShipmentStatus } from "./types";
+import { ShipmentStatus, type ShipmentStatusUpdate } from "./types";
 
-export type ShipmentStatusUpdate = {
-  status: ShipmentStatus;
-  poNumber: string;
-  shippingFee: number | null;
-  shippedAt: string;
-  deliveredAt: string;
-  updatedAt: string;
-  shippingBillUrl: string;
-};
+export type { ShipmentStatusUpdate } from "./types";
 
 export type UpdateShipmentStatusResult =
   | { outcome: "updated"; shipment: ShipmentStatusUpdate }

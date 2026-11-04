@@ -57,3 +57,23 @@ export type ShipmentListItem = Omit<Shipment, "deletedAt"> & {
   costSummary: ShipmentCostSummary | null;
   orders: ShipmentRelatedOrder[];
 };
+
+export type ShipmentStatusUpdate = {
+  status: ShipmentStatus;
+  poNumber: string;
+  shippingFee: number | null;
+  shippedAt: string;
+  deliveredAt: string;
+  updatedAt: string;
+  shippingBillUrl: string;
+};
+
+export type ShipmentOrder = {
+  id: string;
+  shipmentId: string;
+  orderId: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+  createdBy: string;
+};

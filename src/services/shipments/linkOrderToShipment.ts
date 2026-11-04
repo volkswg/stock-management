@@ -6,17 +6,9 @@ import {
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
 import { createSortableId } from "../utils/createSortableId";
-import { ShipmentStatus } from "./types";
+import { ShipmentStatus, type ShipmentOrder } from "./types";
 
-export type ShipmentOrder = {
-  id: string;
-  shipmentId: string;
-  orderId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string;
-  createdBy: string;
-};
+export type { ShipmentOrder } from "./types";
 
 export type LinkOrderToShipmentResult = {
   shipmentOrder: ShipmentOrder;

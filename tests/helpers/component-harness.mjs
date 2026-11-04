@@ -30,7 +30,7 @@ export function componentHarness(path, { api = {}, shipments = {}, globals = {} 
     },
   };
   function Form() { return null; }
-  Object.assign(Form, { Item: "Form.Item", useForm: () => [{ resetFields() {}, setFieldsValue() {} }] });
+  Object.assign(Form, { Item: "Form.Item", useForm: () => [{ resetFields() {}, setFieldsValue() {}, setFieldValue() {}, submit() {} }] });
   function Input() { return null; }
   Object.assign(Input, { TextArea: "TextArea" });
   function Upload() { return null; }
@@ -46,6 +46,8 @@ export function componentHarness(path, { api = {}, shipments = {}, globals = {} 
     "next/navigation": { useRouter: () => ({ push: (url) => navigation.push(url) }) },
     "@/modules/orders/contracts": loadSource("src/modules/orders/contracts.ts"),
     "@/services/shipments/types": loadSource("src/services/shipments/types.ts"),
+    "@/services/shipments": loadSource("src/services/shipments/types.ts"),
+    "@/modules/shipments/contracts": loadSource("src/services/shipments/types.ts"),
   };
   const source = ts.createSourceFile(path, readFileSync(path, "utf8"), ts.ScriptTarget.Latest, true);
   for (const node of source.statements) {
@@ -55,6 +57,7 @@ export function componentHarness(path, { api = {}, shipments = {}, globals = {} 
     if (name.endsWith(".css")) imports[name] = { __esModule: true, default: new Proxy({}, { get: (_, key) => String(key) }) };
     else if (name.endsWith("/api")) imports[name] = name.includes("shipments") ? shipments : api;
     else if (name.endsWith("orderListFormat")) imports[name] = loadSource(resolve(dirname(path), `${name}.ts`));
+    else if (name.endsWith("shipmentListFormat")) imports[name] = loadSource(resolve(dirname(path), `${name}.ts`), { imports });
     else if (node.importClause?.namedBindings && ts.isNamedImports(node.importClause.namedBindings)) {
       imports[name] = Object.fromEntries(node.importClause.namedBindings.elements.map((entry) => [entry.propertyName?.text ?? entry.name.text, entry.propertyName?.text ?? entry.name.text]));
     } else throw new Error(`Unexpected component dependency: ${name}`);

@@ -4,7 +4,7 @@ import type {
   ShipmentOrder,
   ShipmentStatus,
   ShipmentStatusUpdate,
-} from "@/services/shipments";
+} from "@/modules/shipments/contracts";
 
 export type ShipmentsResponse = {
   shipments: ShipmentListItem[];

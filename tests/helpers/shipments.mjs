@@ -1,0 +1,77 @@
+import { relative, resolve } from "node:path";
+import ts from "typescript";
+import { loadSource, plain } from "./load-source.mjs";
+
+export const SHIPMENT_TIME = "2026-11-04T00:00:00.000Z";
+export class ShipmentClock extends Date {
+  constructor(...args) { super(...(args.length ? args : [SHIPMENT_TIME])); }
+  static now() { return Date.parse(SHIPMENT_TIME); }
+}
+
+export function shipmentRow(values = {}) {
+  const record = { id: "s/1", status: "draft", carrier: "Carrier", poNumber: "PO-1", shippingFee: null, remark: "", shippedAt: "", deliveredAt: "", createdAt: "created", updatedAt: "updated", deletedAt: "", createdBy: "web", shippingBillUrl: "", ...values };
+  return [record.id, record.status, record.carrier, record.poNumber, record.shippingFee, record.remark, record.shippedAt, record.deliveredAt, record.createdAt, record.updatedAt, record.deletedAt, record.createdBy, record.shippingBillUrl];
+}
+
+export function fakeShipmentSheets(initial = {}, { failRead, failUpdate, failAppend } = {}) {
+  const rows = structuredClone({ shipments: [], orders: [], shipmentOrders: [], orderItems: [], ...initial });
+  const events = [];
+  const sheets = Object.fromEntries(Object.keys(rows).map((name) => [name, {
+    readRows: async (...args) => { events.push(["read", name, ...args]); if (failRead === name) throw new Error("synthetic read failure"); return rows[name]; },
+    appendRows: async (range, values) => { events.push(["append", name, range, plain(values)]); if (failAppend === name) throw new Error("synthetic append failure"); rows[name].push(...values); },
+    updateRows: async (range, values) => {
+      events.push(["update", name, range, plain(values)]);
+      if (failUpdate === range || failUpdate === name) throw new Error("synthetic update failure");
+      const match = /^B(\d+):M\d+$/.exec(range);
+      if (name === "shipments" && match) { const index = Number(match[1]) - 2; rows[name][index] = [rows[name][index][0], ...values[0]]; }
+    },
+  }]));
+  return { sheets, rows, events };
+}
+
+// Only pure contracts/constants and the existing shipment service code can load.
+// Config, transport/auth and Drive implementations are never evaluated.
+export function shipmentServices() {
+  const cache = new Map();
+  const options = ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json", ts.sys.readFile).config, ts.sys, process.cwd()).options;
+  const constants = { ...loadSource("src/externals/google/sheet/const.ts"),
+    ...loadSource("src/externals/google/sheet/sheets/shipments/const.ts"),
+    ...loadSource("src/externals/google/sheet/sheets/shipment-orders/const.ts") };
+  function load(path) {
+    const file = relative(process.cwd(), resolve(path)).replaceAll("\\", "/");
+    if (file === "src/services/orders/createDraftOrder.ts") return load("src/modules/orders/contracts.ts");
+    if (file === "src/services/utils/createSortableId.ts") return { createSortableId: () => "synthetic-shipment-id" };
+    if (cache.has(file)) return cache.get(file);
+    if (!/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
+    const imports = new Proxy({}, {
+      getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
+      get(_, specifier) {
+        if (specifier === "@/externals/google/sheet") return constants;
+        const target = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
+        if (!target) throw new Error(`Unknown shipment dependency ${specifier}`);
+        return load(target);
+      },
+    });
+    const result = loadSource(file, { imports, globals: { Date: ShipmentClock, Error } });
+    cache.set(file, result); return result;
+  }
+  return { load, services: load("src/services/shipments/index.ts") };
+}
+
+export function shipmentRoutes(sheets, { drive, services: replacement } = {}) {
+  const { load, services } = shipmentServices();
+  const errors = [], events = [];
+  const imports = {
+    "next/server": { NextResponse: Response }, "@/config": { getConfig: () => ({}) },
+    "@/externals/google/sheet": { createGoogleSheetsServiceFromConfig: () => { events.push("sheets"); return sheets; } },
+    "@/externals/google/drive": { createGoogleDriveServiceFromConfig: () => { events.push("drive"); return drive; } },
+    "@/services/shipments": { ...services, ...replacement },
+    "@/features/backend/shared/utils": load("src/features/backend/shared/utils.ts"),
+    "@/features/backend/shipments/utils": load("src/features/backend/shipments/utils.ts"),
+  };
+  const globals = { Date: ShipmentClock, Error, File, console: { error: (...args) => errors.push(args) } };
+  const route = (file) => loadSource(file, { imports, globals });
+  return { collection: route("src/app/api/shipments/route.ts"), detail: route("src/app/api/shipments/[id]/route.ts"), links: route("src/app/api/shipments/[id]/orders/route.ts"), errors, events };
+}
+export const shipmentParams = (id = "s/1") => ({ params: Promise.resolve({ id }) });
+export const jsonRequest = (body, method = "POST") => new Request("https://example.test/api/shipments", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });

@@ -32,3 +32,9 @@ Example override for a future domain slice (illustrative, deliberately not enabl
 ```
 
 This fragment is only a first layer: it does not enforce same-module application/UI imports or unprefixed Node modules such as `fs`; a complete rule set must also prohibit those and resolve relative paths. Test the actual flat config with valid/invalid fixtures before enabling each slice. Use separate `contracts.ts` and `server.ts` public files, `import type` where appropriate, and server-only guards as complementary checks. Do not make an architecture claim based solely on a passing lint run.
+
+## PR 5 Shipment contracts slice
+
+`eslint/shipments-boundaries.mjs` adds browser restrictions to the five existing Shipment UI/client/formatter files, including the literal `[id]` path. It rejects mixed services (including type imports and the legacy leaf), relative server paths, config, providers, application/infrastructure/server implementations, API handlers, Node builtins, known provider packages and process/Buffer access. Dynamic import, require, import-equals and type-import-expression bypasses remain prohibited. The public contract permits only explicit named forwarding of the exact pure legacy types leaf and no IO/broad exports; that leaf permits only Orders contracts. The physical exception has the removal criteria in [Shipment contracts](shipments-contracts.md).
+
+Positive/negative tests run the actual flat configuration for every protected file and both contract paths; a resolved transitive graph checks browser safety and cycles both with and without type-only edges. Existing Orders lint rule files remain byte-identical and the Orders legacy enum/client exceptions persist until dedicated decoupling. Core ESLint is scoped direct-import enforcement, not a general resolved cycle detector; graph tests supply that check for this slice. No new plugin/dependency or global legacy exemption is added.
