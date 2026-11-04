@@ -1,0 +1,415 @@
+[
+  {
+    "file": "api/employees/[id]/route.ts",
+    "path": "/api/employees/[id]",
+    "kind": "api",
+    "methods": [
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/employees/advances/route.ts",
+    "path": "/api/employees/advances",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "PATCH",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/employees/payroll/route.ts",
+    "path": "/api/employees/payroll",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/employees/payroll/settle/route.ts",
+    "path": "/api/employees/payroll/settle",
+    "kind": "api",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "file": "api/employees/route.ts",
+    "path": "/api/employees",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/employees/timesheets/[id]/route.ts",
+    "path": "/api/employees/timesheets/[id]",
+    "kind": "api",
+    "methods": [
+      "PATCH",
+      "PUT"
+    ]
+  },
+  {
+    "file": "api/employees/timesheets/route.ts",
+    "path": "/api/employees/timesheets",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/employees/timesheets/summary/route.ts",
+    "path": "/api/employees/timesheets/summary",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/expenses/masters/[kind]/route.ts",
+    "path": "/api/expenses/masters/[kind]",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/expenses/route.ts",
+    "path": "/api/expenses",
+    "kind": "api",
+    "methods": [
+      "DELETE",
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/line/webhook/route.ts",
+    "path": "/api/line/webhook",
+    "kind": "api",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "file": "api/loyverse/accounts/route.ts",
+    "path": "/api/loyverse/accounts",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/loyverse/daily-sales/route.ts",
+    "path": "/api/loyverse/daily-sales",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/loyverse/daily-sales/sync/route.ts",
+    "path": "/api/loyverse/daily-sales/sync",
+    "kind": "api",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "file": "api/movements/[id]/items/[itemId]/image/route.ts",
+    "path": "/api/movements/[id]/items/[itemId]/image",
+    "kind": "api",
+    "methods": [
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/movements/[id]/items/[itemId]/route.ts",
+    "path": "/api/movements/[id]/items/[itemId]",
+    "kind": "api",
+    "methods": [
+      "DELETE",
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/movements/[id]/route.ts",
+    "path": "/api/movements/[id]",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/movements/route.ts",
+    "path": "/api/movements",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/orders/[id]/images/route.ts",
+    "path": "/api/orders/[id]/images",
+    "kind": "api",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "file": "api/orders/[id]/items/[itemId]/image/route.ts",
+    "path": "/api/orders/[id]/items/[itemId]/image",
+    "kind": "api",
+    "methods": [
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/orders/[id]/items/[itemId]/route.ts",
+    "path": "/api/orders/[id]/items/[itemId]",
+    "kind": "api",
+    "methods": [
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/orders/[id]/items/route.ts",
+    "path": "/api/orders/[id]/items",
+    "kind": "api",
+    "methods": [
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/orders/[id]/route.ts",
+    "path": "/api/orders/[id]",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/orders/route.ts",
+    "path": "/api/orders",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/orders/with-images/route.ts",
+    "path": "/api/orders/with-images",
+    "kind": "api",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "file": "api/sales/daily-sales/route.ts",
+    "path": "/api/sales/daily-sales",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/sales/dashboard/route.ts",
+    "path": "/api/sales/dashboard",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/sales/profit-summary/cost-overrides/route.ts",
+    "path": "/api/sales/profit-summary/cost-overrides",
+    "kind": "api",
+    "methods": [
+      "DELETE",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/sales/profit-summary/route.ts",
+    "path": "/api/sales/profit-summary",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/sales/sync-status/route.ts",
+    "path": "/api/sales/sync-status",
+    "kind": "api",
+    "methods": [
+      "GET"
+    ]
+  },
+  {
+    "file": "api/shipments/[id]/orders/route.ts",
+    "path": "/api/shipments/[id]/orders",
+    "kind": "api",
+    "methods": [
+      "POST"
+    ]
+  },
+  {
+    "file": "api/shipments/[id]/route.ts",
+    "path": "/api/shipments/[id]",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "PATCH"
+    ]
+  },
+  {
+    "file": "api/shipments/route.ts",
+    "path": "/api/shipments",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/stock-adjustments/route.ts",
+    "path": "/api/stock-adjustments",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "PATCH",
+      "POST"
+    ]
+  },
+  {
+    "file": "api/stock-counts/route.ts",
+    "path": "/api/stock-counts",
+    "kind": "api",
+    "methods": [
+      "GET",
+      "PUT"
+    ]
+  },
+  {
+    "file": "employees/advances/page.tsx",
+    "path": "/employees/advances",
+    "kind": "page"
+  },
+  {
+    "file": "employees/page.tsx",
+    "path": "/employees",
+    "kind": "page"
+  },
+  {
+    "file": "employees/payroll/page.tsx",
+    "path": "/employees/payroll",
+    "kind": "page"
+  },
+  {
+    "file": "expenses/categories/page.tsx",
+    "path": "/expenses/categories",
+    "kind": "page"
+  },
+  {
+    "file": "expenses/page.tsx",
+    "path": "/expenses",
+    "kind": "page"
+  },
+  {
+    "file": "expenses/shops/page.tsx",
+    "path": "/expenses/shops",
+    "kind": "page"
+  },
+  {
+    "file": "loyverse/daily-sales/page.tsx",
+    "path": "/loyverse/daily-sales",
+    "kind": "page"
+  },
+  {
+    "file": "movements/[id]/page.tsx",
+    "path": "/movements/[id]",
+    "kind": "page"
+  },
+  {
+    "file": "movements/page.tsx",
+    "path": "/movements",
+    "kind": "page"
+  },
+  {
+    "file": "orders/[id]/page.tsx",
+    "path": "/orders/[id]",
+    "kind": "page"
+  },
+  {
+    "file": "orders/create/page.tsx",
+    "path": "/orders/create",
+    "kind": "page"
+  },
+  {
+    "file": "orders/page.tsx",
+    "path": "/orders",
+    "kind": "page"
+  },
+  {
+    "file": "page.tsx",
+    "path": "/",
+    "kind": "page"
+  },
+  {
+    "file": "sales/daily-sales/page.tsx",
+    "path": "/sales/daily-sales",
+    "kind": "page"
+  },
+  {
+    "file": "sales/dashboard/page.tsx",
+    "path": "/sales/dashboard",
+    "kind": "page"
+  },
+  {
+    "file": "sales/page.tsx",
+    "path": "/sales",
+    "kind": "page"
+  },
+  {
+    "file": "sales/profit-summary/page.tsx",
+    "path": "/sales/profit-summary",
+    "kind": "page"
+  },
+  {
+    "file": "sales/sync-status/page.tsx",
+    "path": "/sales/sync-status",
+    "kind": "page"
+  },
+  {
+    "file": "shipments/[id]/page.tsx",
+    "path": "/shipments/[id]",
+    "kind": "page"
+  },
+  {
+    "file": "shipments/page.tsx",
+    "path": "/shipments",
+    "kind": "page"
+  },
+  {
+    "file": "stock-counts/page.tsx",
+    "path": "/stock-counts",
+    "kind": "page"
+  },
+  {
+    "file": "timesheets/page.tsx",
+    "path": "/timesheets",
+    "kind": "page"
+  },
+  {
+    "file": "timesheets/tracker/page.tsx",
+    "path": "/timesheets/tracker",
+    "kind": "page"
+  }
+]
