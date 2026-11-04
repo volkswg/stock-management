@@ -1,0 +1,553 @@
+[
+  {
+    "name": "empty sheets",
+    "rows": {
+      "orders": [],
+      "orderItems": [],
+      "shipmentOrders": []
+    },
+    "expected": []
+  },
+  {
+    "name": "original read model",
+    "rows": {
+      "orders": [
+        [
+          "old",
+          "draft",
+          "Old",
+          null,
+          "",
+          "2026-01-01",
+          "",
+          "",
+          "web"
+        ],
+        [
+          "order/1",
+          "complete",
+          " Seller ",
+          "1,234.50",
+          " note ",
+          "2026-11-01",
+          "2026-11-02",
+          "",
+          "web"
+        ],
+        [
+          "deleted",
+          "complete",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "deleted",
+          ""
+        ],
+        [
+          "invalid",
+          "unknown",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "orderItems": [
+        [
+          "item/1",
+          "order/1",
+          "https://example.test/product",
+          "10",
+          "5",
+          "SKU",
+          "created",
+          "",
+          "",
+          ""
+        ],
+        [
+          "deleted-item",
+          "order/1",
+          "https://example.test/deleted",
+          "1",
+          "0",
+          "",
+          "",
+          "",
+          "deleted",
+          ""
+        ]
+      ],
+      "shipmentOrders": [
+        [
+          "link-old",
+          "ship-old",
+          "order/1",
+          "",
+          "",
+          ""
+        ],
+        [
+          "link",
+          "ship/1",
+          "order/1",
+          "",
+          "",
+          ""
+        ],
+        [
+          "link-deleted",
+          "ignored",
+          "order/1",
+          "",
+          "",
+          "deleted"
+        ]
+      ]
+    },
+    "expected": [
+      {
+        "id": "order/1",
+        "status": "complete",
+        "seller": "Seller",
+        "totalPrice": 1234.5,
+        "remark": "note",
+        "createdAt": "2026-11-01",
+        "updatedAt": "2026-11-02",
+        "createdBy": "web",
+        "shipmentId": "ship/1",
+        "productImages": [
+          {
+            "id": "item/1",
+            "orderId": "order/1",
+            "imageUrl": "https://example.test/product",
+            "quoteQuantity": "10",
+            "deliveredQuantity": "5",
+            "productCode": "SKU",
+            "createdAt": "created"
+          }
+        ]
+      },
+      {
+        "id": "old",
+        "status": "draft",
+        "seller": "Old",
+        "totalPrice": null,
+        "remark": "",
+        "createdAt": "2026-01-01",
+        "updatedAt": "",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      }
+    ]
+  },
+  {
+    "name": "statuses, malformed rows, duplicate IDs/links, trimming and image order",
+    "rows": {
+      "orders": [
+        [
+          "id",
+          "status"
+        ],
+        [],
+        [
+          "status-0",
+          "draft",
+          " Seller ",
+          "1,234.50",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-1",
+          "waiting_for_bill_image",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-2",
+          "waiting_for_product_image",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-3",
+          "waiting_for_total_price",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-4",
+          "complete",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-5",
+          "paid",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-6",
+          "shipped",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-7",
+          "delivered",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          "status-8",
+          "canceled",
+          " Seller ",
+          "123.45",
+          " remark ",
+          " created ",
+          " updated ",
+          "",
+          " web "
+        ],
+        [
+          " trimmed ",
+          " complete ",
+          " seller ",
+          "n/a",
+          " note ",
+          true,
+          12,
+          "",
+          "actor"
+        ],
+        [
+          "blank-price",
+          "draft",
+          "",
+          " "
+        ],
+        [
+          "deleted",
+          "complete",
+          "",
+          "1",
+          "",
+          "",
+          "",
+          "deleted"
+        ],
+        [
+          "bad",
+          "COMPLETE"
+        ],
+        [
+          "",
+          "complete"
+        ],
+        [
+          "duplicate",
+          "draft"
+        ],
+        [
+          "duplicate",
+          "complete"
+        ]
+      ],
+      "orderItems": [
+        [
+          "i-1",
+          "status-0",
+          " url ",
+          "10",
+          "5",
+          " SKU ",
+          " created "
+        ],
+        [
+          "i-2",
+          "status-0",
+          "url-2",
+          4,
+          0,
+          false,
+          "time"
+        ],
+        [
+          "i-deleted",
+          "status-0",
+          "url",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "deleted"
+        ],
+        [
+          "no-url",
+          "status-0",
+          ""
+        ],
+        [
+          "foreign",
+          "missing",
+          "url"
+        ]
+      ],
+      "shipmentOrders": [
+        [
+          "a",
+          " old ",
+          " status-0 "
+        ],
+        [
+          "b",
+          "new",
+          "status-0"
+        ],
+        [
+          "c",
+          "ignored",
+          "status-0",
+          "",
+          "",
+          "deleted"
+        ],
+        [
+          "d",
+          "",
+          "status-0"
+        ],
+        [
+          "e",
+          "new",
+          ""
+        ],
+        []
+      ]
+    },
+    "expected": [
+      {
+        "id": "duplicate",
+        "status": "complete",
+        "seller": "",
+        "totalPrice": null,
+        "remark": "",
+        "createdAt": "",
+        "updatedAt": "",
+        "createdBy": "",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "duplicate",
+        "status": "draft",
+        "seller": "",
+        "totalPrice": null,
+        "remark": "",
+        "createdAt": "",
+        "updatedAt": "",
+        "createdBy": "",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "blank-price",
+        "status": "draft",
+        "seller": "",
+        "totalPrice": null,
+        "remark": "",
+        "createdAt": "",
+        "updatedAt": "",
+        "createdBy": "",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "trimmed",
+        "status": "complete",
+        "seller": "seller",
+        "totalPrice": null,
+        "remark": "note",
+        "createdAt": "true",
+        "updatedAt": "12",
+        "createdBy": "actor",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-8",
+        "status": "canceled",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-7",
+        "status": "delivered",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-6",
+        "status": "shipped",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-5",
+        "status": "paid",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-4",
+        "status": "complete",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-3",
+        "status": "waiting_for_total_price",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-2",
+        "status": "waiting_for_product_image",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-1",
+        "status": "waiting_for_bill_image",
+        "seller": "Seller",
+        "totalPrice": 123.45,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": []
+      },
+      {
+        "id": "status-0",
+        "status": "draft",
+        "seller": "Seller",
+        "totalPrice": 1234.5,
+        "remark": "remark",
+        "createdAt": "created",
+        "updatedAt": "updated",
+        "createdBy": "web",
+        "shipmentId": "new",
+        "productImages": [
+          {
+            "id": "i-1",
+            "orderId": "status-0",
+            "imageUrl": "url",
+            "quoteQuantity": "10",
+            "deliveredQuantity": "5",
+            "productCode": "SKU",
+            "createdAt": "created"
+          },
+          {
+            "id": "i-2",
+            "orderId": "status-0",
+            "imageUrl": "url-2",
+            "quoteQuantity": "4",
+            "deliveredQuantity": "0",
+            "productCode": "false",
+            "createdAt": "time"
+          }
+        ]
+      }
+    ]
+  }
+]

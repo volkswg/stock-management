@@ -90,3 +90,27 @@ Verified latest `main` exactly matches the requested `d10d530a2052cfc10bdb71708a
 No baseline test/lint/type/build failures were found, and no new failures remain. The same pre-move test expectations were retained after updating source paths. The nine added behavior tests cover list query/status/shipment filtering and pagination, mobile/expanded descriptors, loading/error/retry/abort, creation validation settings and required images, accepted/rejected files and navigation, product draft save payloads, shipment selection/create/link callbacks, gallery keyboard/modal controls, and browser product/shipment HTTP requests. Existing PR 2 tests preserve multipart, API error/invalid-response handling, enum identity and JSON compatibility. Expected edge cases, including different zero-byte file selection rules in creation versus add/replace, were retained.
 
 The component harness executes actual component functions and callbacks against fake hooks, UI element descriptors and mock requests. It does **not** render React DOM, run Ant Design's validation engine, exercise browser focus/layout, or verify native file dialogs. No browser automation tool was available, so visual equivalence is not claimed. The runtime graph excludes type-only edges from browser-safety assertions; a separate graph checks cycles including type-only edges, but neither audits third-party package internals. Real integration permissions, data, delivery and concurrency remain untested. The documented shipment enum/browser-client bridges remain until PR 5. No data/schema changes, merge or deployment are performed.
+
+## PR 4 — Initial Orders use-case seam
+
+Latest main was confirmed at the supplied `a29396dc5d597b8ac7e40e95d9bb2ab652e59e4c`, the merged PR 3 commit. There were no intervening changes to review. A dedicated `refactor/orders-use-case-seam` branch starts there. All source callers were audited before extraction; the collection API and image workflow retain their imports through legacy compatibility exports. Detail/draft/image orchestration is not migrated.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| `npm test` | All 44 inherited tests pass; 15 added characterization tests pass against legacy code before extraction (59 total) | 68 pass with the same expectations and additional fake-port/adapter/transport/boundary tests |
+| `npm run lint` | Pass | Pass, including application/server/adapter restrictions; UI protections retained |
+| `npm run typecheck` | Pass | Pass, including legacy parameter/return/type compatibility |
+| `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` | Pass, no application env files | Pass, no application env files |
+| Route source fixture | 23 pages / 35 API routes | Unchanged; fixture not regenerated |
+| Next app-paths manifest | Saved base build manifest | Byte-identical |
+| Contracts/UI/CSS | PR 3 source fingerprints | Unchanged; no UI/contract import updates needed |
+| APIs and integrations | Existing routes, services, headers/transport | API files, external integrations, LINE/shipments, draft/image workflow, barrel, env/package/lockfiles unchanged |
+| Project dependencies | Existing Orders reachable graph | No runtime/type-only cycle or browser-to-server leak; new application uses only contracts/ports |
+
+No baseline failures or new failures remain. Legacy fixture cases preserve empty/populated sheets, every valid status, invalid/deleted/malformed rows, duplicate IDs/links, trimming/comma prices, image order and JSON fields. Read tests assert the exact three calls/ranges and concurrent launch, preserving failure propagation. Creation tests assert explicit/generated IDs, missing/null/zero/nonzero price, timestamp and generator invocation order, normalization, nine append values, one write and no success before append completes.
+
+The write-adapter test goes through the existing OrdersSheet/BaseGoogleSheet/GoogleSheetsClient with fake auth/fetch: exactly one header-derived A:I append, original nine values and USER_ENTERED mode. No transport implementation changes. Application use cases also run solely against synthetic business ports, with explicit clock/ID functions and no provider credentials. Server composition supplies the original Date clock and sortable generator in production.
+
+Unchanged image workflow tests preserve upload → order append → bill/item reference sequence, upload-failure cleanup/no-order behavior, and later storage-failure partial writes/no rollback/retry. Collection API tests exercise actual handlers with fake services for 200/201/400/500 responses and web creator; existing detail GET tests plus added PATCH tests preserve 404/409 and error shapes. Fingerprints retain the image/draft/barrel files and the getOrderDetail orchestration body. Existing 44 assertions/fixtures are retained; the legacy-source test loader was adapted for new module dependencies only.
+
+Limitations: no live Google Sheets/Drive/LINE/Loyverse, production data, credentials, browser visuals or provider permissions were exercised. Fake transport tests cannot establish production availability/concurrency guarantees. Legacy detail and other Orders mutations remain unmigrated, as do the documented shipment UI bridges until PR 5. Server-only markers are validated by the successful Next build; the offline test loader stubs the marker intentionally. No merge, approval or deployment is performed. See [file-by-file design and removal criteria](orders-use-case-seam.md).

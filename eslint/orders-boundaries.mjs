@@ -16,7 +16,7 @@ const browserImports = {
   }],
 };
 
-const noDynamicServerBypass = [
+export const noDynamicServerBypass = [
   "error",
   { selector: "ImportExpression", message: "Keep migrated Orders imports static so browser boundaries can be checked." },
   { selector: "CallExpression[callee.name='require']", message: "Use static browser-safe imports in migrated Orders files." },
