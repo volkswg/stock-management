@@ -70,3 +70,23 @@ No baseline or new test/lint/type/build failures were found. No dependency/lockf
 New synthetic fixtures were captured by executing the original main order list/detail functions against fake worksheets; DTO declaration fixtures were captured from original type aliases. Tests also exercise creation IDs/status/append values with a fake writer, existing quantity UI state descriptors without rendering a browser, browser reads/writes/multipart requests with fake fetch, and actual detail HTTP response translation with fake services. No live Sheets/Drive/LINE/Loyverse calls occurred.
 
 Remaining limitations: no real browser interaction or provider end-to-end tests, repository-wide type graph/third-party package internals are not checked by the scoped runtime graph, and the pure shipment bridge plus shipment HTTP client's legacy type-only imports remain until PR 5. See [Orders contracts](orders-contracts.md) for ownership/removal criteria. Existing authentication and Sheets concurrency issues are unchanged. No merge or deployment is performed.
+
+## PR 3 — Orders UI restructuring
+
+Verified latest `main` exactly matches the requested `d10d530a2052cfc10bdb71708af267ccd8db91bb`. GitHub confirmed PR 2 merged at that commit; its tree matches the prior verified checkout. A dedicated `refactor/orders-ui` branch starts at that commit. The GitHub connector is used for repository access because the shell proxy was unavailable in the preceding work. No production service access is used for verification.
+
+| Check | Before moves | Final |
+| --- | --- | --- |
+| `npm test` | All 32 existing tests pass; all 9 new behavior tests also pass at original paths (41 total) | 44 pass: the same behavior tests plus 3 structural/cycle tests |
+| `npm run lint` | Pass on base | Pass; all relocated TS/TSX files covered by tested import restrictions |
+| `npm run typecheck` | Pass on base | Pass; PR 2 contract/legacy export assertions preserved |
+| `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` | Pass with no application env files/credentials | Pass with no application env files/credentials |
+| Route source contracts | Existing reviewed fixture, 23 pages / 35 API route files | Unchanged; original route fixture not regenerated |
+| `.next/server/app-paths-manifest.json` | Saved from the base build | Byte-identical |
+| UI and consumers | Body/CSS fingerprints captured before moves | All 15 moves retain non-import statements, types, JSX and directives; all 4 CSS modules byte-identical; 4 route wrappers and 3 Shipments gallery consumers change imports only |
+| Contracts, API handlers and integrations | Base files | Contracts byte-identical; API handlers, services, config, external/LINE implementations, public assets, env examples, package.json and yarn.lock unchanged |
+| Dependencies | Recorded pre-move consumer audit | No stale browser source paths/duplicate implementations; no server implementations reachable at runtime; reachable type/value graph is acyclic |
+
+No baseline test/lint/type/build failures were found, and no new failures remain. The same pre-move test expectations were retained after updating source paths. The nine added behavior tests cover list query/status/shipment filtering and pagination, mobile/expanded descriptors, loading/error/retry/abort, creation validation settings and required images, accepted/rejected files and navigation, product draft save payloads, shipment selection/create/link callbacks, gallery keyboard/modal controls, and browser product/shipment HTTP requests. Existing PR 2 tests preserve multipart, API error/invalid-response handling, enum identity and JSON compatibility. Expected edge cases, including different zero-byte file selection rules in creation versus add/replace, were retained.
+
+The component harness executes actual component functions and callbacks against fake hooks, UI element descriptors and mock requests. It does **not** render React DOM, run Ant Design's validation engine, exercise browser focus/layout, or verify native file dialogs. No browser automation tool was available, so visual equivalence is not claimed. The runtime graph excludes type-only edges from browser-safety assertions; a separate graph checks cycles including type-only edges, but neither audits third-party package internals. Real integration permissions, data, delivery and concurrency remain untested. The documented shipment enum/browser-client bridges remain until PR 5. No data/schema changes, merge or deployment are performed.

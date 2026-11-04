@@ -1,5 +1,5 @@
 import { Card, Col, Row, Skeleton } from "antd";
-import styles from "../../features/frontend/orders/components/orders.module.css";
+import styles from "@/modules/orders/ui/orders.module.css";
 
 export default function OrdersLoading() {
   return (

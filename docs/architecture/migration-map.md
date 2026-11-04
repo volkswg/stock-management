@@ -19,9 +19,31 @@ Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.conf
 
 Paths in this progress table are relative to `src/`. Exact public names, consumers and bridge removal criteria: [Orders contracts](orders-contracts.md).
 
+## PR 3 implemented UI relocation
+
+All 15 UI/client/style files below now reside at their listed destination. The old implementations and empty legacy Orders frontend directories are removed. Contracts remain unchanged; no domain/application/infrastructure layers were created. Four Next routing/loading files stay in place; the three Shipments gallery consumers now import the module UI entrypoint. The [pre-move consumer audit](orders-ui-migration.md) records each consumer and retained shipment bridge (PR 5).
+
+| Original file | Implemented destination |
+| --- | --- |
+| `src/app/orders/api.ts` | `src/modules/orders/ui/api.ts` |
+| `src/app/orders/create/OrderCreatePage.tsx` | `src/modules/orders/ui/create/OrderCreatePage.tsx` |
+| `src/app/orders/create/orderCreate.module.css` | `src/modules/orders/ui/create/orderCreate.module.css` |
+| `src/app/orders/[id]/OrderDetailPage.tsx` | `src/modules/orders/ui/[id]/OrderDetailPage.tsx` |
+| `src/app/orders/[id]/orderDetail.module.css` | `src/modules/orders/ui/[id]/orderDetail.module.css` |
+| `src/features/frontend/orders/components/OrderImageCard.tsx` | `src/modules/orders/ui/OrderImageCard.tsx` |
+| `src/features/frontend/orders/components/OrderImageGallery.tsx` | `src/modules/orders/ui/OrderImageGallery.tsx` |
+| `src/features/frontend/orders/components/OrderListPage.tsx` | `src/modules/orders/ui/OrderListPage.tsx` |
+| `src/features/frontend/orders/components/OrderMobileCard.tsx` | `src/modules/orders/ui/OrderMobileCard.tsx` |
+| `src/features/frontend/orders/components/OrderProductImageActions.tsx` | `src/modules/orders/ui/OrderProductImageActions.tsx` |
+| `src/features/frontend/orders/components/OrderProductImageUpload.tsx` | `src/modules/orders/ui/OrderProductImageUpload.tsx` |
+| `src/features/frontend/orders/components/OrderQuantityStatus.tsx` | `src/modules/orders/ui/OrderQuantityStatus.tsx` |
+| `src/features/frontend/orders/components/orderListFormat.ts` | `src/modules/orders/ui/orderListFormat.ts` |
+| `src/features/frontend/orders/components/orderQuantityStatus.module.css` | `src/modules/orders/ui/orderQuantityStatus.module.css` |
+| `src/features/frontend/orders/components/orders.module.css` | `src/modules/orders/ui/orders.module.css` |
+
 ## Original file inventory
 
-| Current file | Proposed destination / ownership | Migration note |
+| Original file | Destination / ownership | Migration note |
 | --- | --- | --- |
 | `src/app/AppBreadcrumb.tsx` | `src/modules/workspace/ui/AppBreadcrumb.tsx` | Move with home/navigation consumers. |
 | `src/app/HomeMenuPage.tsx` | `src/modules/workspace/ui/HomeMenuPage.tsx` | Move with home/navigation consumers. |
@@ -90,12 +112,12 @@ Paths in this progress table are relative to `src/`. Exact public names, consume
 | `src/app/movements/format.ts` | `src/modules/inventory/ui/format.ts` | Feature UI/client/style; retain current route entrypoints. |
 | `src/app/movements/movements.module.css` | `src/modules/inventory/ui/movements.module.css` | Feature UI/client/style; retain current route entrypoints. |
 | `src/app/movements/page.tsx` | `src/app/movements/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
-| `src/app/orders/[id]/OrderDetailPage.tsx` | `src/modules/orders/ui/[id]/OrderDetailPage.tsx` | Feature UI/client/style; retain current route entrypoints. |
-| `src/app/orders/[id]/orderDetail.module.css` | `src/modules/orders/ui/[id]/orderDetail.module.css` | Feature UI/client/style; retain current route entrypoints. |
+| `src/app/orders/[id]/OrderDetailPage.tsx` | `src/modules/orders/ui/[id]/OrderDetailPage.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/app/orders/[id]/orderDetail.module.css` | `src/modules/orders/ui/[id]/orderDetail.module.css` | Moved in PR 3; component/client/style body preserved; imports corrected. |
 | `src/app/orders/[id]/page.tsx` | `src/app/orders/[id]/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
-| `src/app/orders/api.ts` | `src/modules/orders/ui/api.ts` | Feature UI/client/style; retain current route entrypoints. |
-| `src/app/orders/create/OrderCreatePage.tsx` | `src/modules/orders/ui/create/OrderCreatePage.tsx` | Feature UI/client/style; retain current route entrypoints. |
-| `src/app/orders/create/orderCreate.module.css` | `src/modules/orders/ui/create/orderCreate.module.css` | Feature UI/client/style; retain current route entrypoints. |
+| `src/app/orders/api.ts` | `src/modules/orders/ui/api.ts` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/app/orders/create/OrderCreatePage.tsx` | `src/modules/orders/ui/create/OrderCreatePage.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/app/orders/create/orderCreate.module.css` | `src/modules/orders/ui/create/orderCreate.module.css` | Moved in PR 3; component/client/style body preserved; imports corrected. |
 | `src/app/orders/create/page.tsx` | `src/app/orders/create/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/orders/loading.tsx` | `src/app/orders/loading.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/orders/page.tsx` | `src/app/orders/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
@@ -212,16 +234,16 @@ Paths in this progress table are relative to `src/`. Exact public names, consume
 | `src/features/backend/line/utils/index.ts` | `src/modules/line-workflows/application/utils/index.ts` | Workflow routing/reply/state; separate pure command models into domain when needed. |
 | `src/features/backend/shared/utils.ts` | `src/shared/lib/isRecord.ts` | Generic parser only; no business dependencies. |
 | `src/features/backend/shipments/utils.ts` | `src/modules/shipments/application/validation.ts + app route HTTP parsing` | Split business validation from readJsonBody transport helper. |
-| `src/features/frontend/orders/components/OrderImageCard.tsx` | `src/modules/orders/ui/OrderImageCard.tsx` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/OrderImageGallery.tsx` | `src/modules/orders/ui/OrderImageGallery.tsx` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/OrderListPage.tsx` | `src/modules/orders/ui/OrderListPage.tsx` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/OrderMobileCard.tsx` | `src/modules/orders/ui/OrderMobileCard.tsx` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/OrderProductImageActions.tsx` | `src/modules/orders/ui/OrderProductImageActions.tsx` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/OrderProductImageUpload.tsx` | `src/modules/orders/ui/OrderProductImageUpload.tsx` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/OrderQuantityStatus.tsx` | `src/modules/orders/ui/OrderQuantityStatus.tsx` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/orderListFormat.ts` | `src/modules/orders/ui/orderListFormat.ts` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/orderQuantityStatus.module.css` | `src/modules/orders/ui/orderQuantityStatus.module.css` | Orders feature component/style/formatter. |
-| `src/features/frontend/orders/components/orders.module.css` | `src/modules/orders/ui/orders.module.css` | Orders feature component/style/formatter. |
+| `src/features/frontend/orders/components/OrderImageCard.tsx` | `src/modules/orders/ui/OrderImageCard.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/OrderImageGallery.tsx` | `src/modules/orders/ui/OrderImageGallery.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/OrderListPage.tsx` | `src/modules/orders/ui/OrderListPage.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/OrderMobileCard.tsx` | `src/modules/orders/ui/OrderMobileCard.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/OrderProductImageActions.tsx` | `src/modules/orders/ui/OrderProductImageActions.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/OrderProductImageUpload.tsx` | `src/modules/orders/ui/OrderProductImageUpload.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/OrderQuantityStatus.tsx` | `src/modules/orders/ui/OrderQuantityStatus.tsx` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/orderListFormat.ts` | `src/modules/orders/ui/orderListFormat.ts` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/orderQuantityStatus.module.css` | `src/modules/orders/ui/orderQuantityStatus.module.css` | Moved in PR 3; component/client/style body preserved; imports corrected. |
+| `src/features/frontend/orders/components/orders.module.css` | `src/modules/orders/ui/orders.module.css` | Moved in PR 3; component/client/style body preserved; imports corrected. |
 | `src/scripts/line-rich-menu-client.ts` | `src/scripts/line-rich-menu-client.ts` | Keep operational entrypoint; rich-menu content may later move to line-workflows; do not execute. |
 | `src/scripts/rich-menu.ts` | `src/scripts/rich-menu.ts` | Keep operational entrypoint; rich-menu content may later move to line-workflows; do not execute. |
 | `src/scripts/setup-rich-menu.ts` | `src/scripts/setup-rich-menu.ts` | Keep operational entrypoint; rich-menu content may later move to line-workflows; do not execute. |

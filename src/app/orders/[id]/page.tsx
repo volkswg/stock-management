@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OrderDetailPage } from "./OrderDetailPage";
+import { OrderDetailPage } from "@/modules/orders/ui/[id]/OrderDetailPage";
 
 export const metadata: Metadata = {
   title: "Order details | Stock Management",

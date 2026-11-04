@@ -2,7 +2,7 @@
 
 Status: Phase 1 preparation, based on `main` at `383cf5956b7e8a0705586936c78b7efd29ec6102`. Existing production code is unchanged. This guide is the target for incremental work, not a claim that current code already conforms.
 
-PR 2 progress: [Orders browser contracts](orders-contracts.md) are now implemented at `src/modules/orders/contracts.ts`. Feature UI and server use cases remain in their existing folders; the Phase 1 statement above records the preparation baseline.
+PR 2 established [Orders browser contracts](orders-contracts.md) at `src/modules/orders/contracts.ts`. PR 3 now consolidates all 15 Orders UI/client/style files under `src/modules/orders/ui/`; route wrappers and server use cases remain in place. See the [UI migration and consumer audit](orders-ui-migration.md). The Phase 1 statement above records the preparation baseline.
 
 The application is a Next.js App Router shop operations workspace using React, Ant Design, Google Sheets, Google Drive, LINE, and Loyverse. Feature ownership should make changes local and make persistence replaceable without changing business behavior. Future SaaS and Supabase work is intentionally deferred: this phase introduces no provider, schema, auth, tenant context, subscription, or runtime abstraction.
 

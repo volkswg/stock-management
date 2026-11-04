@@ -85,7 +85,7 @@ test("existing order list/detail wire shapes, row filtering, links and quantity 
 
 function browserClient(body, status = 200) {
   const requests = [];
-  const api = loadSource("src/app/orders/api.ts", { globals: {
+  const api = loadSource("src/modules/orders/ui/api.ts", { globals: {
     FormData, File,
     fetch: async (url, init) => { requests.push({ url, init }); return Response.json(body, { status }); },
   } });
@@ -135,7 +135,7 @@ test("quantity updates preserve JSON fields, enum values, encoded IDs and string
 
 test("existing quantity UI preserves hidden, matched, short and extra states and percentage caps", () => {
   const jsx = (type, props) => ({ type, props });
-  const { OrderQuantityStatus } = loadSource("src/features/frontend/orders/components/OrderQuantityStatus.tsx", { imports: {
+  const { OrderQuantityStatus } = loadSource("src/modules/orders/ui/OrderQuantityStatus.tsx", { imports: {
     "react/jsx-runtime": { jsx, jsxs: jsx },
     antd: { Progress: "Progress", Tag: "Tag" },
     "./orderQuantityStatus.module.css": {},

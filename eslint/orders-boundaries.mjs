@@ -10,6 +10,9 @@ const browserImports = {
     // a temporary bridge for the order detail picker, removed by the Shipments PR.
     regex: "(^|/)(services(?:$|/(?!shipments/types(?:\\.ts)?$))|externals(?:/|$)|config(?:/|$)|infrastructure(?:/|$)|features/backend(?:/|$)|application(?:/|$))|(^|/)server(?:\\.[^/]+)?$",
     message: "Orders browser code must use browser-safe public contracts, not server services/config/adapters.",
+  }, {
+    regex: "(^|/)(app(?:$|/(?!shipments/api(?:\\.ts)?$))|features/frontend/orders(?:/|$))",
+    message: "Orders UI is consolidated in its module. Only the documented browser shipment HTTP bridge may import from app until PR 5.",
   }],
 };
 
@@ -31,7 +34,7 @@ export const ordersBoundaries = [
     },
   },
   {
-    files: ["src/app/orders/api.ts", "src/app/orders/**/Order*Page.tsx", "src/features/frontend/orders/**/*.{ts,tsx}"],
+    files: ["src/modules/orders/ui/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": ["error", browserImports],
       "no-restricted-syntax": noDynamicServerBypass,

@@ -10,7 +10,7 @@ import type {
   ShipmentListItem,
   ShipmentRelatedOrder,
 } from "@/services/shipments";
-import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
+import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
 import {
   formatShipmentCurrency,
   formatShipmentDate,

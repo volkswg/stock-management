@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OrderListPage } from "../../features/frontend/orders/components/OrderListPage";
+import { OrderListPage } from "@/modules/orders/ui/OrderListPage";
 
 export const metadata: Metadata = {
   title: "Orders | Stock Management",

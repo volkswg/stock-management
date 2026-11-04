@@ -1,0 +1,111 @@
+{
+  "base": "d10d530a2052cfc10bdb71708af267ccd8db91bb",
+  "moves": [
+    {
+      "from": "src/app/orders/api.ts",
+      "to": "src/modules/orders/ui/api.ts",
+      "hash": "1c5e60c939cc94a5d7ed4189eceb8e7d2748121c60fa3e1c8da3412bdc5f8d5b"
+    },
+    {
+      "from": "src/app/orders/create/OrderCreatePage.tsx",
+      "to": "src/modules/orders/ui/create/OrderCreatePage.tsx",
+      "hash": "78e50046db8681819345188a5d0f91be268e7d2b9fea423fe3dbc02ccea69c7f"
+    },
+    {
+      "from": "src/app/orders/create/orderCreate.module.css",
+      "to": "src/modules/orders/ui/create/orderCreate.module.css",
+      "hash": "a43c9b3b87cf065814cc881bed539281c4ce3d9a7ac067187da4e74081245845"
+    },
+    {
+      "from": "src/app/orders/[id]/OrderDetailPage.tsx",
+      "to": "src/modules/orders/ui/[id]/OrderDetailPage.tsx",
+      "hash": "d00bd3384da68160f9b0d026c0305a86543083c5153b89e5a742b3b2fc5875d9"
+    },
+    {
+      "from": "src/app/orders/[id]/orderDetail.module.css",
+      "to": "src/modules/orders/ui/[id]/orderDetail.module.css",
+      "hash": "bb23de4d623af55cb7584073fb4b40c8414ca0edc4350b305ee63f1b64d42318"
+    },
+    {
+      "from": "src/features/frontend/orders/components/OrderImageCard.tsx",
+      "to": "src/modules/orders/ui/OrderImageCard.tsx",
+      "hash": "832ff2104b952bbf2dff02388ec91f8c10bb630abcd920a0f52da11157b57bc4"
+    },
+    {
+      "from": "src/features/frontend/orders/components/OrderImageGallery.tsx",
+      "to": "src/modules/orders/ui/OrderImageGallery.tsx",
+      "hash": "c178cb02e5319a42ca834cbbcbefc58e8ee5351e217edcc52ebbc987712aac47"
+    },
+    {
+      "from": "src/features/frontend/orders/components/OrderListPage.tsx",
+      "to": "src/modules/orders/ui/OrderListPage.tsx",
+      "hash": "ea85cc86469a953949fe042c6a3f8e8e07b61abba105f53f862ed9a35b731e12"
+    },
+    {
+      "from": "src/features/frontend/orders/components/OrderMobileCard.tsx",
+      "to": "src/modules/orders/ui/OrderMobileCard.tsx",
+      "hash": "833831066f2a44cd709eb815d86f8bd9b8c531a189c747e7185b74e9cedf4140"
+    },
+    {
+      "from": "src/features/frontend/orders/components/OrderProductImageActions.tsx",
+      "to": "src/modules/orders/ui/OrderProductImageActions.tsx",
+      "hash": "c67e53e94d8e23fa97f4037f118d328ee3ba9994fdedc2d472bbd6004a2765b2"
+    },
+    {
+      "from": "src/features/frontend/orders/components/OrderProductImageUpload.tsx",
+      "to": "src/modules/orders/ui/OrderProductImageUpload.tsx",
+      "hash": "e1089fdbc874987131851739c2cbd4a242d14b4b471ad827f85aabada224bdbe"
+    },
+    {
+      "from": "src/features/frontend/orders/components/OrderQuantityStatus.tsx",
+      "to": "src/modules/orders/ui/OrderQuantityStatus.tsx",
+      "hash": "611053040d229198ec2a27157fd30106d87af947b092f2790be2617e2625fd04"
+    },
+    {
+      "from": "src/features/frontend/orders/components/orderListFormat.ts",
+      "to": "src/modules/orders/ui/orderListFormat.ts",
+      "hash": "7b88f7c7e1d17da568dc707fc92736632096d23143a9833eafff524eec8088c4"
+    },
+    {
+      "from": "src/features/frontend/orders/components/orderQuantityStatus.module.css",
+      "to": "src/modules/orders/ui/orderQuantityStatus.module.css",
+      "hash": "b5714cfc02f9902b8792436eef6dec22f415d66092665e82e32e69c0256b7de5"
+    },
+    {
+      "from": "src/features/frontend/orders/components/orders.module.css",
+      "to": "src/modules/orders/ui/orders.module.css",
+      "hash": "96c61b1ec82e694c7f8abe919720b919414f0c0f997a484efe887c79e5962149"
+    }
+  ],
+  "consumers": [
+    {
+      "file": "src/app/orders/page.tsx",
+      "hash": "c896014d8109cc8d4aa54dc30a982b89f057b0edd52c047d2bca014917710bc4"
+    },
+    {
+      "file": "src/app/orders/loading.tsx",
+      "hash": "ad0364b0981c830dfdac493406e84738b0afb548ae30c61ef5a8a0fae2a4b97c"
+    },
+    {
+      "file": "src/app/orders/create/page.tsx",
+      "hash": "8c7fa4e4c10b3cf2f83516124cf3ee90bbca85f529cda3c42527721a2787d36c"
+    },
+    {
+      "file": "src/app/orders/[id]/page.tsx",
+      "hash": "73571c4252bd42cdef138ba745a9c5b424d127a3130de938405ef070823436f5"
+    },
+    {
+      "file": "src/app/shipments/ShipmentListPage.tsx",
+      "hash": "90cdf07452320f1b1445aa4e88040fb1768973200699feb14a4b597f78580776"
+    },
+    {
+      "file": "src/app/shipments/ShipmentMobileCard.tsx",
+      "hash": "910b7bbe92c513423dade091f7ee04f3ae611e2e03e652fd0e2e0fb5a388e1b0"
+    },
+    {
+      "file": "src/app/shipments/[id]/ShipmentDetailPage.tsx",
+      "hash": "97d675d3c334a162ae1f073b1b27a8bc90f3f581f62bcd6dbff257da50f33a30"
+    }
+  ],
+  "contractsHash": "74aac05a20621fed1501101b4b17db79f6037caa56311e93bdefbafaef5f6f0b"
+}

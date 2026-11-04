@@ -40,7 +40,7 @@ import {
   type ShipmentListItem,
   type ShipmentRelatedOrder,
 } from "@/services/shipments";
-import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
+import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
 import { advanceShipmentStatus, getShipment } from "../api";
 import styles from "./shipmentDetail.module.css";
 
