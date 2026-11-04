@@ -1,0 +1,57 @@
+# Architecture
+
+Status: Phase 1 preparation, based on `main` at `383cf5956b7e8a0705586936c78b7efd29ec6102`. Existing production code is unchanged. This guide is the target for incremental work, not a claim that current code already conforms.
+
+The application is a Next.js App Router shop operations workspace using React, Ant Design, Google Sheets, Google Drive, LINE, and Loyverse. Feature ownership should make changes local and make persistence replaceable without changing business behavior. Future SaaS and Supabase work is intentionally deferred: this phase introduces no provider, schema, auth, tenant context, subscription, or runtime abstraction.
+
+```text
+src/
+  app/                        Next.js entrypoints and composition
+  modules/
+    orders/                   Purchase orders, bills, product images, quantities
+    shipments/                Shipments, linked orders, delivery status
+    inventory/                Movements, stock counts, stock adjustments
+    sales/                    Receipt sync, daily sales, profit/cost reports
+    expenses/                 Expense ledger, categories, shop master data
+    hr/                       Employees, compensation, attendance, advances, payroll
+    line-workflows/           LINE journeys, commands, sessions, rich-menu content
+    workspace/                Home/navigation and workspace-level presentation
+  infrastructure/
+    persistence/              Shared Sheets transport; future storage transport
+    external/                 LINE and Loyverse protocol clients
+    files/                    Drive and future file storage transport
+  shared/
+    ui/                       Proven generic reusable UI
+    lib/                      Proven generic utilities
+    types/                    Small genuinely cross-cutting contracts
+  config/                     Existing environment-backed server configuration
+```
+
+Within a module, create `domain`, `application`, `infrastructure`, or `ui` only when needed. No empty target directories are created in Phase 1. Route URLs retain their current names even when the owner is different: `/employees` belongs to `hr`, `/stock-counts` and `/movements` to `inventory`, and `/loyverse/daily-sales` to `sales`.
+
+```mermaid
+flowchart TD
+  A[app: server composition / HTTP] --> U[module UI]
+  A --> C[module application]
+  A --> I[module infrastructure adapters]
+  I --> P[application ports]
+  I --> T[root infrastructure transports]
+  C --> P
+  C --> D[module domain]
+  U --> B[browser-safe module contracts]
+  U --> H[HTTP API]
+```
+
+Application ports are TypeScript interfaces owned by the use case that consumes them. A future repository migration can replace the adapter at composition points; it must not leak database rows, worksheet columns, tenant assumptions, or SDK types into business rules. Do not build those interfaces for every service now. First characterize one use case and extract the smallest interface it needs.
+
+Read next:
+
+- [Current structure and dependency audit](audit.md)
+- [Exact folder ownership](folder-rules.md)
+- [Import rules and public contracts](dependency-rules.md)
+- [Current file → proposed destination map](migration-map.md)
+- [Incremental PR plan](refactoring-plan.md)
+- [Regression baseline and verification](verification.md)
+- [ESLint enforcement rollout](eslint-boundaries.md)
+
+Repository-wide working rules live in [AGENTS.md](../../AGENTS.md).

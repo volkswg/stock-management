@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
     "setup:rich-menu": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types src/scripts/setup-rich-menu.ts"
   },
   "dependencies": {
