@@ -3,10 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { loadSource, plain } from "./helpers/load-source.mjs";
+import { ordersServer } from "./helpers/orders-server.mjs";
 
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/orders-read-model.json", import.meta.url), "utf8"));
 const contracts = loadSource("src/modules/orders/contracts.ts");
-const shipmentTypes = loadSource("src/services/shipments/types.ts");
 const noIO = () => { throw new Error("Unexpected real dependency in Orders tests"); };
 
 test("extracted DTO fields, optionality and nullability retain their base declarations", () => {
@@ -41,23 +41,11 @@ test("Orders contract enum values and legacy exports retain the same runtime ide
 });
 
 function readService() {
-  return loadSource("src/services/orders/listOrders.ts", { imports: {
-    "@/services/shipments": shipmentTypes,
-    "./createDraftOrder": contracts,
-    "@/modules/orders/contracts": contracts,
-  } });
+  return ordersServer()("src/services/orders/listOrders.ts");
 }
 
 test("creation keeps provided/generated IDs, price-dependent status and the existing append values", async () => {
-  const { createOrder } = loadSource("src/services/orders/createOrder.ts", { imports: {
-    "@/modules/orders/contracts": contracts,
-    "./createDraftOrder": contracts,
-    "../utils/createSortableId": { createSortableId: () => "synthetic-generated-id" },
-    "@/externals/google/sheet": {
-      ...loadSource("src/externals/google/sheet/const.ts"),
-      ...loadSource("src/externals/google/sheet/sheets/orders/const.ts"),
-    },
-  } });
+  const { createOrder } = ordersServer({ createId: () => "synthetic-generated-id" })("src/services/orders/createOrder.ts");
   for (const [id, totalPrice, expectedId, status] of [[" order/1 ", 0, "order/1", "complete"], [undefined, null, "synthetic-generated-id", "waiting_for_total_price"]]) {
     const writes = [];
     const order = await createOrder({ id, totalPrice, seller: " Seller ", remark: " note ", createdBy: "web", googleSheetsService: { orders: { appendRows: async (...args) => writes.push(plain(args)) } } });

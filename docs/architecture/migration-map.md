@@ -41,6 +41,21 @@ All 15 UI/client/style files below now reside at their listed destination. The o
 | `src/features/frontend/orders/components/orderQuantityStatus.module.css` | `src/modules/orders/ui/orderQuantityStatus.module.css` |
 | `src/features/frontend/orders/components/orders.module.css` | `src/modules/orders/ui/orders.module.css` |
 
+## PR 4 implemented initial use-case seam
+
+Only list read and simple creation migrate. Exact ownership and caller/removal criteria are in [Orders use-case seam](orders-use-case-seam.md). Contracts, UI and all route paths remain unchanged.
+
+| Original responsibility | Implemented destination | Compatibility retained |
+| --- | --- | --- |
+| `services/orders/listOrders.ts`: list execution | `modules/orders/application/list-orders.ts` + `application/ports/order-list-reader.ts` | Legacy file re-exports named server composition; `getOrderDetail` stays there |
+| List reads/grouping | `modules/orders/infrastructure/google-sheets/order-list-reader.ts` | Same three ranges/Promise.all and mapped record order; final reverse remains application-owned |
+| Common order/item/string/price/status mapping | `modules/orders/infrastructure/google-sheets/order-row-mapping.ts` | Legacy detail imports the same helpers; detail orchestration and detail-only mapping are unchanged |
+| `services/orders/createOrder.ts`: record construction | `modules/orders/application/create-order.ts` + `application/ports/created-order-writer.ts` | Legacy direct and barrel exports keep the same parameters/CreatedOrder type |
+| Creation append | `modules/orders/infrastructure/google-sheets/order-writer.ts` | Existing Orders sheet interface, header-derived range, nine values and transport mode |
+| Composition | `modules/orders/server.ts` | Explicit server-only list/create functions wire adapters and unchanged clock/ID semantics |
+
+Paths above are relative to `src/`. No image/draft/detail/shipment use case or other order mutation is extracted. No domain directory, generic repository or future provider is scaffolded.
+
 ## Original file inventory
 
 | Original file | Destination / ownership | Migration note |
@@ -277,7 +292,7 @@ All 15 UI/client/style files below now reside at their listed destination. The o
 | `src/services/orders/completeOrderTotalPrice.ts` | `src/modules/orders/application/completeOrderTotalPrice.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/completeWebOrderPrice.ts` | `src/modules/orders/application/completeWebOrderPrice.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/createDraftOrder.ts` | `src/modules/orders/application/createDraftOrder.ts` | OrderStatus extracted to contracts in PR 2; application/workflow/persistence split remains future work. |
-| `src/services/orders/createOrder.ts` | `src/modules/orders/application/createOrder.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
+| `src/services/orders/createOrder.ts` | `src/modules/orders/application/create-order.ts` + feature writer adapter (implemented) | Legacy file is a server composition/type compatibility re-export; image workflow call path retained. |
 | `src/services/orders/createOrderBill.ts` | `src/modules/orders/application/createOrderBill.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/createOrderItem.ts` | `src/modules/orders/application/createOrderItem.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/createOrderWithImages.ts` | `src/modules/orders/application/createOrderWithImages.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
@@ -285,7 +300,7 @@ All 15 UI/client/style files below now reside at their listed destination. The o
 | `src/services/orders/index.ts` | `src/modules/orders/contracts.ts + server.ts` | Retire broad barrel after consumers use explicit browser/server exports; not a whole-file move. |
 | `src/services/orders/isActiveOrderCreateState.ts` | `src/modules/line-workflows/application/orders/isActiveOrderCreateState.ts` | Workflow/session responsibility; consume orders public status contracts. |
 | `src/services/orders/isOrderImageUploadState.ts` | `src/modules/line-workflows/application/orders/isOrderImageUploadState.ts` | Workflow/session responsibility; consume orders public status contracts. |
-| `src/services/orders/listOrders.ts` | `src/modules/orders/application/listOrders.ts` | UI DTOs extracted to contracts in PR 2; query/mapping implementation remains here. |
+| `src/services/orders/listOrders.ts` | `src/modules/orders/application/list-orders.ts` + feature read/mapping adapters (implemented) | List compatibility export retained; getOrderDetail and its detail-only mapping remain legacy. |
 | `src/services/orders/orderExists.ts` | `src/modules/orders/application/orderExists.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/replaceOrderProductImage.ts` | `src/modules/orders/application/replaceOrderProductImage.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/orders/updateOrderCreateState.ts` | `src/modules/line-workflows/application/orders/updateOrderCreateState.ts` | Workflow/session responsibility; consume orders public status contracts. |

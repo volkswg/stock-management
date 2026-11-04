@@ -1,0 +1,8 @@
+{
+  "files": {
+    "src/services/orders/createDraftOrder.ts": "370b1b4d144906c1bcd6684c440a3bfacc62c8c20e7d009cc18e67383f6c018b",
+    "src/services/orders/createOrderWithImages.ts": "9d19d7636612169c4e711a72a1762f2040282b355fed4479b7bad9a296e0af09",
+    "src/services/orders/index.ts": "d17e04caf58614caa55763d60057732d7b8332dfe6b118b910e595be251742f8"
+  },
+  "detailBodyHash": "7a863b4ebdd1220a8e7f250978f5fc644f19656f95a286b2fe88e3abdadff293"
+}
