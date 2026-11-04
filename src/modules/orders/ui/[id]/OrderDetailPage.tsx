@@ -57,10 +57,10 @@ import {
   updateOrderDetails,
   type UpdateOrderDetailsResponse,
 } from "../api";
-import { OrderImageGallery } from "@/features/frontend/orders/components/OrderImageGallery";
-import { OrderProductImageUpload } from "@/features/frontend/orders/components/OrderProductImageUpload";
-import { OrderProductImageActions } from "@/features/frontend/orders/components/OrderProductImageActions";
-import { OrderQuantityStatus } from "@/features/frontend/orders/components/OrderQuantityStatus";
+import { OrderImageGallery } from "../OrderImageGallery";
+import { OrderProductImageUpload } from "../OrderProductImageUpload";
+import { OrderProductImageActions } from "../OrderProductImageActions";
+import { OrderQuantityStatus } from "../OrderQuantityStatus";
 import styles from "./orderDetail.module.css";
 
 const { Text, Title } = Typography;

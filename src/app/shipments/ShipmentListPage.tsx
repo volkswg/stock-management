@@ -32,7 +32,7 @@ import {
   type ShipmentListItem,
   type ShipmentRelatedOrder,
 } from "@/services/shipments";
-import { OrderImageGallery } from "../../features/frontend/orders/components/OrderImageGallery";
+import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
 import { getShipments } from "./api";
 import { ShipmentMobileCard } from "./ShipmentMobileCard";
 import {

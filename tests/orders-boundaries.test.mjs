@@ -7,15 +7,21 @@ import { ESLint } from "eslint";
 import ts from "typescript";
 
 const eslint = new ESLint();
-const browserFile = "src/app/orders/[id]/OrderDetailPage.tsx";
+const browserFile = "src/modules/orders/ui/[id]/OrderDetailPage.tsx";
 const restricted = (messages) => messages.some(({ ruleId }) => ["no-restricted-imports", "no-restricted-syntax", "no-restricted-globals"].includes(ruleId));
 
 test("actual ESLint config allows public Orders contracts and the explicit pure shipment bridge", async () => {
-  const code = 'import { OrderStatus } from "@/modules/orders/contracts"; import { ShipmentStatus } from "@/services/shipments/types"; export const statuses = [OrderStatus.Complete, ShipmentStatus.Draft];';
+  const code = 'import { OrderStatus } from "@/modules/orders/contracts"; import { ShipmentStatus } from "@/services/shipments/types"; import { getShipments } from "@/app/shipments/api"; export const statuses = [OrderStatus.Complete, ShipmentStatus.Draft, getShipments];';
   const [result] = await eslint.lintText(code, { filePath: browserFile });
   assert.equal(restricted(result.messages), false, JSON.stringify(result.messages));
   const [serverPage] = await eslint.lintText('import { getOrderDetail } from "@/services/orders"; export const query = getOrderDetail;', { filePath: "src/app/orders/page.tsx" });
   assert.equal(restricted(serverPage.messages), false, "Server routing/composition is outside the browser-only restriction");
+  for (const filePath of walk("src/modules/orders/ui").filter((file) => /\.tsx?$/.test(file))) {
+    const [allowed] = await eslint.lintText(code, { filePath });
+    assert.equal(restricted(allowed.messages), false, filePath);
+    const [blocked] = await eslint.lintText('import { getConfig } from "@/config";', { filePath });
+    assert.ok(restricted(blocked.messages), filePath);
+  }
 });
 
 test("Orders lint boundaries reject aliases, relatives, type imports, re-exports, Node and dynamic bypasses", async () => {
@@ -38,6 +44,10 @@ test("Orders lint boundaries reject aliases, relatives, type imports, re-exports
     'const dependency = require("@/services/orders");',
     'type Detail = import("@/services/orders").OrderDetail;',
     'const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;',
+    'import { getOrders } from "@/app/orders/api";',
+    'import { Gallery } from "@/features/frontend/orders/components/OrderImageGallery";',
+    'import { getOrders } from "../../../../app/orders/api";',
+    'import { GET } from "@/app/api/orders/route";',
   ];
   for (const source of sources) {
     const [result] = await eslint.lintText(source, { filePath: browserFile });
@@ -62,9 +72,7 @@ function walk(dir) {
 
 test("resolved Orders browser runtime graph reaches no server services, config or adapter modules", () => {
   const options = ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json", ts.sys.readFile).config, ts.sys, process.cwd()).options;
-  const roots = [...walk("src/app/orders"), ...walk("src/features/frontend/orders")].filter((file) =>
-    /\.tsx?$/.test(file) && (file.startsWith("src/features/frontend/orders/") || file === "src/app/orders/api.ts" || /^['"]use client['"]/.test(readFileSync(file, "utf8"))),
-  );
+  const roots = walk("src/modules/orders/ui").filter((file) => /\.tsx?$/.test(file));
   const serverPackages = new Set([...builtinModules, ...builtinModules.map((name) => `node:${name.replace(/^node:/, "")}`), "server-only", "next/server", "next/headers", "next/cache", "next/after"]);
   const visited = new Set(), active = new Set();
   function visit(file) {
@@ -75,6 +83,7 @@ test("resolved Orders browser runtime graph reaches no server services, config o
     assert.ok(!/\/features\/backend\//.test(file), file);
     assert.ok(!/\/modules\/[^/]+\/(application|infrastructure)\//.test(file), file);
     assert.ok(!/\/server\.[^/]+$/.test(file), file);
+    assert.ok(!file.startsWith("src/app/") || file === "src/app/shipments/api.ts", file);
     active.add(file);
     const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
     function check(node) {

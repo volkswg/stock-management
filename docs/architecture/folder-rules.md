@@ -39,3 +39,5 @@ Public files may be added only with real consumers: `contracts.ts` for browser-s
 Mixed files in the migration map require a later split, not an immediate whole-file relocation. For example, payroll calculation currently mixes pure rules and IO; pure deduction logic may become domain code only after it has no infrastructure imports. The central `GoogleSheetsService` is a temporary legacy composition facade: split feature adapters before retiring it.
 
 PR 2 creates only `modules/orders/contracts.ts`: self-contained public DTOs and enum values with real UI consumers. It creates no empty domain/application/infrastructure/ui folders. Existing Orders files stay in place with narrow compatibility type/enum exports until their implementation migrates.
+
+PR 3 implements `modules/orders/ui`: components, create/detail screens, the browser HTTP client, formatter and CSS modules. Only the four Next Orders routing/loading files remain in `app/orders`. Shipments consumes the explicit public `ui/OrderImageGallery.tsx` entrypoint; it is feature-owned UI, not a generic shared component. No empty domain/application/infrastructure directories are introduced.
