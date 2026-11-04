@@ -55,7 +55,7 @@ export function componentHarness(path, { api = {}, shipments = {}, globals = {} 
     const name = node.moduleSpecifier.text;
     if (imports[name]) continue;
     if (name.endsWith(".css")) imports[name] = { __esModule: true, default: new Proxy({}, { get: (_, key) => String(key) }) };
-    else if (name.endsWith("/api")) imports[name] = name.includes("shipments") ? shipments : api;
+    else if (name.endsWith("/api")) imports[name] = name === "@/app/shipments/api" && path.startsWith("src/modules/orders/") ? shipments : api;
     else if (name.endsWith("orderListFormat")) imports[name] = loadSource(resolve(dirname(path), `${name}.ts`));
     else if (name.endsWith("shipmentListFormat")) imports[name] = loadSource(resolve(dirname(path), `${name}.ts`), { imports });
     else if (node.importClause?.namedBindings && ts.isNamedImports(node.importClause.namedBindings)) {

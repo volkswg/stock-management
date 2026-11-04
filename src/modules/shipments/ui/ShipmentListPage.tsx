@@ -33,7 +33,7 @@ import {
   type ShipmentRelatedOrder,
 } from "@/modules/shipments/contracts";
 import { OrderImageGallery } from "@/modules/orders/ui/OrderImageGallery";
-import { getShipments } from "./api";
+import { getShipments } from "@/app/shipments/api";
 import { ShipmentMobileCard } from "./ShipmentMobileCard";
 import {
   formatShipmentCurrency,

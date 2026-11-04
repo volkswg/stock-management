@@ -45,9 +45,9 @@ export const ordersBoundaries = [
     // These consumers migrate only their Orders import; their own legacy
     // shipment service dependencies are deliberately left for the Shipments PR.
     files: [
-      "src/app/shipments/ShipmentListPage.tsx",
-      "src/app/shipments/[[]id[]]/ShipmentDetailPage.tsx",
-      "src/app/shipments/shipmentListFormat.ts",
+      "src/modules/shipments/ui/ShipmentListPage.tsx",
+      "src/modules/shipments/ui/[[]id[]]/ShipmentDetailPage.tsx",
+      "src/modules/shipments/ui/shipmentListFormat.ts",
     ],
     rules: {
       "no-restricted-imports": ["error", { patterns: [{ regex: "(^|/)services/orders(?:/|$)", message: "Use @/modules/orders/contracts for Orders values and DTOs." }] }],

@@ -1,5 +1,5 @@
 import { Card, Skeleton } from "antd";
-import styles from "./shipments.module.css";
+import styles from "@/modules/shipments/ui/shipments.module.css";
 
 export default function ShipmentsLoading() {
   return (

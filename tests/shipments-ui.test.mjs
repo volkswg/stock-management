@@ -3,7 +3,7 @@ import test from "node:test";
 import { componentHarness, elements, flush, deferred } from "./helpers/component-harness.mjs";
 import { plain } from "./helpers/load-source.mjs";
 
-const listFile = "src/app/shipments/ShipmentListPage.tsx", detailFile = "src/app/shipments/[id]/ShipmentDetailPage.tsx";
+const listFile = "src/modules/shipments/ui/ShipmentListPage.tsx", detailFile = "src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx";
 const one = (tree, type, match = () => true) => { const item = elements(tree, type).find((element) => match(element.props)); assert.ok(item, `Missing ${type}`); return item; };
 const shipment = (i, override = {}) => ({ id: `s/${i}`, poNumber: `PO-${i}`, status: "draft", carrier: "Carrier", shippingFee: null, shippedAt: "", deliveredAt: "", createdAt: "created", updatedAt: "updated", createdBy: "web", remark: "", shippingBillUrl: "", costSummary: null, orders: [{ id: `o/${i}`, status: "complete", seller: `Seller ${i}`, totalPrice: 10, createdAt: "created", productImages: [{ id: "image", imageUrl: "https://example.test/image", quoteQuantity: "2", deliveredQuantity: "1", productCode: "SKU" }] }], ...override });
 
@@ -96,7 +96,7 @@ test("status failure keeps confirmation open, restores controls and shows the or
 });
 
 test("mobile linked-order presentation retains expand/collapse and gallery navigation properties", () => {
-  const h = componentHarness("src/app/shipments/ShipmentMobileCard.tsx"), toggles = [];
+  const h = componentHarness("src/modules/shipments/ui/ShipmentMobileCard.tsx"), toggles = [];
   const props = { shipment: shipment(1), ordersExpanded: false, onOrdersExpandedChange: (value) => toggles.push(value) };
   let tree = h.render(h.module.ShipmentMobileCard, props); one(tree, "Button", (p) => p.children === "Expand").props.onClick(); assert.deepEqual(toggles, [true]);
   tree = h.render(undefined, { ...props, ordersExpanded: true });

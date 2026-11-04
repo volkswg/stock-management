@@ -60,7 +60,7 @@ test("public contract leaf rejects dependencies and IO; shipment consumers rejec
     const [result] = await eslint.lintText(code, { filePath: "src/modules/orders/contracts.ts" });
     assert.ok(restricted(result.messages), code);
   }
-  for (const filePath of ["src/app/shipments/ShipmentListPage.tsx", "src/app/shipments/[id]/ShipmentDetailPage.tsx", "src/app/shipments/shipmentListFormat.ts"]) {
+  for (const filePath of ["src/modules/shipments/ui/ShipmentListPage.tsx", "src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx", "src/modules/shipments/ui/shipmentListFormat.ts"]) {
     const [result] = await eslint.lintText('import { OrderStatus } from "@/services/orders";', { filePath });
     assert.ok(restricted(result.messages), filePath);
   }

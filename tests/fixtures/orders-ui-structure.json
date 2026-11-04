@@ -95,15 +95,15 @@
       "hash": "73571c4252bd42cdef138ba745a9c5b424d127a3130de938405ef070823436f5"
     },
     {
-      "file": "src/app/shipments/ShipmentListPage.tsx",
+      "file": "src/modules/shipments/ui/ShipmentListPage.tsx",
       "hash": "90cdf07452320f1b1445aa4e88040fb1768973200699feb14a4b597f78580776"
     },
     {
-      "file": "src/app/shipments/ShipmentMobileCard.tsx",
+      "file": "src/modules/shipments/ui/ShipmentMobileCard.tsx",
       "hash": "910b7bbe92c513423dade091f7ee04f3ae611e2e03e652fd0e2e0fb5a388e1b0"
     },
     {
-      "file": "src/app/shipments/[id]/ShipmentDetailPage.tsx",
+      "file": "src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx",
       "hash": "97d675d3c334a162ae1f073b1b27a8bc90f3f581f62bcd6dbff257da50f33a30"
     }
   ],
