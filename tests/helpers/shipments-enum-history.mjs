@@ -1,3 +1,4 @@
+import { restorePr15DtoSources } from "./shipments-dto-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -33,9 +34,9 @@ export function originalEnumGraph() {
 export function assertShipmentEnumContractHistory(file, expected) {
   assert.equal(file, "src/modules/shipments/contracts.ts");
   const original = enumBefore.sources[file]; assert.equal(enumHash(original.source), expected); assert.equal(original.sha256, expected);
-  // Reverse only the one reviewed forwarding source. Comments are historical
-  // and intentionally unchanged; DTO forwarding and all other bytes must match.
-  const current = readFileSync(file, "utf8");
+  // Reverse PR 16 DTO ownership first (including its obsolete-comment removal),
+  // then reverse only PR 15 enum forwarding against the original older witness.
+  const current = restorePr15DtoSources().contract;
   assert.equal(current.replace('export { ShipmentStatus } from "./status";', 'export { ShipmentStatus } from "@/services/shipments/types";'), original.source);
   const physical = enumParse("src/modules/shipments/status.ts");
   assert.equal(physical.statements.length, 1);

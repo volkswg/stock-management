@@ -27,23 +27,25 @@ test("physical status leaf accepts only the original exact enum; aliases, type i
   ]) await reject(physical,code);
 });
 
-test("public contract permits only named runtime status plus eight erased DTO forwards and rejects reverse/relative forwarding",async()=>{
+test("public contract owns exactly eight DTOs and rejects reverse/relative forwarding and erased/runtime swaps",async()=>{
   const code=readFileSync(contract,"utf8");
   for(const bad of [
     code.replace('"./status"','"@/services/shipments/types"'), code.replace('"./status"','"@/modules/shipments/status"'),
-    code.replace('export type {','export {'), code.replace('export { ShipmentStatus }','export { type ShipmentStatus }'), code.replace('ShipmentOrder,','ShipmentOrder, Extra,'), code+'\nexport * from "./status";',
+    code.replace('import type { OrderStatus }','import { OrderStatus }'), code.replace('export { ShipmentStatus }','export { type ShipmentStatus }'),
+    code.replace('export type ShipmentOrder =','export type Extra ='), code+'\nexport * from "./status";',
     code+'\nimport { ShipmentStatus } from "./status";', code+'\nexport { createShipment } from "@/services/shipments";',
     'export * from "../../services/shipments";', 'const x = import("./status");', 'type X = import("./status").ShipmentStatus;',
     code+'\nconst x = require("./status");', code+'\nfetch("/api/shipments");',
   ]) await reject(contract,bad);
 });
 
-test("legacy DTO leaf permits only erased Orders type and exact physical enum; cyclic/type/value/re-export bypasses fail",async()=>{
+test("legacy DTO leaf permits only public named forwards; reverse/type/value/re-export bypasses fail",async()=>{
   const code=readFileSync(legacy,"utf8");
   for(const bad of [
-    code.replace('"@/modules/shipments/status"','"@/modules/shipments/contracts"'),
-    code.replace('"@/modules/shipments/status"','"../../modules/shipments/contracts"'),
-    code.replace('import type { OrderStatus }','import { OrderStatus }'), code.replace('import { ShipmentStatus }','import type { ShipmentStatus }'), code.replace('import { ShipmentStatus }','import { type ShipmentStatus }'),
+    code.replaceAll('"@/modules/shipments/contracts"','"@/modules/shipments/status"'),
+    code.replaceAll('"@/modules/shipments/contracts"','"../../modules/shipments/contracts"'),
+    code.replace('export type {','export {'), code.replace('export { ShipmentStatus }','export type { ShipmentStatus }'), code.replace('export { ShipmentStatus }','export { type ShipmentStatus }'),
+    code+'\nimport type { OrderStatus } from "@/modules/orders/contracts";',
     code+'\nexport * from "@/modules/shipments/status";', code+'\nexport { createShipment } from "./index";',
     code+'\nimport type { Private } from "@/modules/shipments/application/list-shipments";',
     code+'\nconst x = import("./index");', code+'\nconst x = require("@/config");', code+'\ntype X = import("@/modules/shipments/contracts").Shipment;',

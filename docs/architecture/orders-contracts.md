@@ -36,3 +36,8 @@ PR 14 [Orders detail projection](orders-detail-shipment-projection.md) keeps thi
 ## PR 15 compatibility note
 
 Physical ShipmentStatus now belongs to `modules/shipments/status.ts`, forwarded through public/legacy Shipment exports as one enum object. Orders contracts remain byte-identical: OrderShipment keeps its own status wire union and imports no Shipment types/enum. Both consumer-owned picker and server projection seams remain unchanged; app/Shipment composition resolves the moved object transparently. Compile-time checks retain structural projection compatibility and enum nominal equivalence across forwarding paths. This removes only the former physical-enum debt; wider legacy Orders cleanup remains separate. [Exact graph and evidence](shipments-enum-ownership.md).
+
+
+## PR 16 compatibility note
+
+Orders contracts remain byte-identical and independent. Shipment public DTOs now physically live beside their public enum export, importing Orders OrderStatus only as an erased type. Orders OrderShipment keeps its own five wire strings; its consumer-owned detail/picker ports and server/app/browser composition remain unchanged. Type assertions preserve projection compatibility without adding an Orders → Shipments module edge. [Current ownership and graph](shipments-dto-ownership.md).

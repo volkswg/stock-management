@@ -1,5 +1,7 @@
 # ShipmentStatus physical ownership (PR 15)
 
+Current state after PR 16: [all eight DTO declarations now live in public Shipment contracts](shipments-dto-ownership.md); the legacy leaf forwards them and the enum from that public file. The enum's sole physical owner remains status.ts, byte-identical to PR15. The historical PR15 graph/source/counts below are retained as evidence; only DTO ownership/forwarding direction is superseded. Both original and PR15 raw contract sources/hashes remain checked through exact reconstruction. Legacy types/barrel retirement remains future work.
+
 Base: `d405fa9333780d6b32abd3df8efaccabf7fc7d20`, verified exact latest main and merged PR 14 squash commit. Clean initial working tree; no intervening commits. Branch: `refactor/shipments-status-enum-ownership`. Node 24.22.1 and existing installed dependencies only. This completes physical enum ownership only; eight legacy DTO declarations and the mixed legacy service barrel remain for compatibility.
 
 ## Exact ownership and consumers

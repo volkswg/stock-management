@@ -17,6 +17,8 @@ const browserRules = {
 
 const dtoNames = ["Shipment", "ShipmentListItem", "ShipmentRelatedOrder", "ShipmentRelatedProductImage",
   "ShipmentQuantityCost", "ShipmentCostSummary", "ShipmentStatusUpdate", "ShipmentOrder"];
+const dtoDeclarationNames = ["Shipment", "ShipmentRelatedOrder", "ShipmentRelatedProductImage",
+  "ShipmentQuantityCost", "ShipmentCostSummary", "ShipmentListItem", "ShipmentStatusUpdate", "ShipmentOrder"];
 const enumNames = ["Draft", "ReadyToShip", "Shipping", "Delivered", "Canceled"];
 const enumValues = ["draft", "ready_to_ship", "shipping", "delivered", "canceled"];
 const named = (node, names) => node.specifiers?.length === names.length && node.specifiers.every((s, i) =>
@@ -36,17 +38,17 @@ const pureShipmentShape = {
           declaration.id.name === "ShipmentStatus" && !declaration.const && !declaration.declare && members?.length === 5 &&
           members.every((m, i) => m.id.name === enumNames[i] && m.initializer?.type === "Literal" && m.initializer.value === enumValues[i]);
       } else if (file.endsWith("/modules/shipments/contracts.ts")) {
-        valid = body.length === 2 && body.every(n => n.type === "ExportNamedDeclaration") &&
-          body[0].source?.value === "./status" && body[0].exportKind === "value" && named(body[0], ["ShipmentStatus"]) &&
-          body[1].source?.value === "@/services/shipments/types" && body[1].exportKind === "type" && named(body[1], dtoNames);
-      } else {
         const order = body[0], status = body[1], forward = body[2];
         valid = body.length === 11 && order.type === "ImportDeclaration" && order.importKind === "type" &&
           order.source.value === "@/modules/orders/contracts" && order.specifiers.length === 1 && order.specifiers[0].imported?.name === "OrderStatus" && order.specifiers[0].local.name === "OrderStatus" &&
-          status.type === "ImportDeclaration" && status.importKind === "value" && status.source.value === "@/modules/shipments/status" &&
+          status.type === "ImportDeclaration" && status.importKind === "value" && status.source.value === "./status" &&
           status.specifiers.length === 1 && status.specifiers[0].importKind !== "type" && status.specifiers[0].imported?.name === "ShipmentStatus" && status.specifiers[0].local.name === "ShipmentStatus" &&
           forward.type === "ExportNamedDeclaration" && !forward.source && forward.exportKind === "value" && named(forward, ["ShipmentStatus"]) &&
-          body.slice(3).every(n => n.type === "ExportNamedDeclaration" && n.declaration?.type === "TSTypeAliasDeclaration" && dtoNames.includes(n.declaration.id.name));
+          body.slice(3).every((n, i) => n.type === "ExportNamedDeclaration" && n.declaration?.type === "TSTypeAliasDeclaration" && n.declaration.id.name === dtoDeclarationNames[i]);
+      } else {
+        valid = body.length === 2 && body.every(n => n.type === "ExportNamedDeclaration") &&
+          body[0].source?.value === "@/modules/shipments/contracts" && body[0].exportKind === "value" && named(body[0], ["ShipmentStatus"]) &&
+          body[1].source?.value === "@/modules/shipments/contracts" && body[1].exportKind === "type" && named(body[1], dtoNames);
       }
       if (!valid) context.report({ node: program, messageId: "shape" });
     } };
@@ -90,8 +92,8 @@ export const shipmentsBoundaries = [
     files: ["src/modules/shipments/contracts.ts"],
     rules: {
       "no-restricted-imports": ["error", { patterns: [{
-        regex: "^(?!\\./status$|@/services/shipments/types$).*",
-        message: "Shipment contracts forward only their pure status leaf and the exact erased legacy DTO leaf.",
+        regex: "^(?!\\./status$|@/modules/orders/contracts$).*",
+        message: "Shipment contracts own DTOs and import only the pure status leaf and erased Orders status.",
       }] }],
     },
   },
@@ -99,8 +101,8 @@ export const shipmentsBoundaries = [
     files: ["src/services/shipments/types.ts"],
     rules: {
       "no-restricted-imports": ["error", { patterns: [{
-        regex: "^(?!@/modules/orders/contracts$|@/modules/shipments/status$).*",
-        message: "The legacy DTO leaf imports only erased Orders contracts and the single owned Shipment enum.",
+        regex: "^(?!@/modules/shipments/contracts$).*",
+        message: "The legacy DTO leaf forwards only explicit named public Shipment contracts.",
       }] }],
     },
   },

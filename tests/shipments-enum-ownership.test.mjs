@@ -57,7 +57,7 @@ test("original public contract raw hashes remain authoritative with only the exa
     const fixture=JSON.parse(readFileSync(`tests/fixtures/${file}`,"utf8")); assert.equal(fixture.retained[contract],expected);
     assertShipmentEnumContractHistory(contract,expected);
   }
-  const source=enumParse(legacy), original=enumParse(legacy,enumBefore.sources[legacy].source);
+  const source=enumParse(contract), original=enumParse(legacy,enumBefore.sources[legacy].source);
   const dtoAST=s=>s.statements.filter(ts.isTypeAliasDeclaration).map(n=>enumPrint(n,s));
   assert.deepEqual(dtoAST(source),dtoAST(original));
 });
@@ -74,8 +74,8 @@ function dependencies(file,types) {
 }
 for(const types of [false,true]) test(`physical/public/DTO and feature graphs resolve acyclic one-way ownership (${types?"runtime plus types":"runtime"})`,()=>{
   assert.deepEqual(dependencies(physical,types),[]);
-  assert.deepEqual(dependencies(contract,types),types?[physical,legacy]:[physical]);
-  assert.deepEqual(dependencies(legacy,types),types?["src/modules/orders/contracts.ts",physical]:[physical]);
+  assert.deepEqual(dependencies(contract,types),types?["src/modules/orders/contracts.ts",physical]:[physical]);
+  assert.deepEqual(dependencies(legacy,types),types?[contract,contract]:[contract]);
   const active=[],seen=new Set(),edges=new Set();
   function visit(file,from) {
     assert.ok(!active.includes(file),[...active,file].join(" -> "));
@@ -88,9 +88,9 @@ for(const types of [false,true]) test(`physical/public/DTO and feature graphs re
   [...walk("src/modules/orders"),...walk("src/modules/shipments")].filter(f=>/\.tsx?$/.test(f)).forEach(f=>visit(f));
   assert.deepEqual([...edges].sort(),["shipments->orders"]);
   assert.deepEqual(ownershipEdges(browserOwnership({types})),["shipments->orders"]);
-  const browser=new Set(); function safe(file){if(browser.has(file))return;browser.add(file);assert.ok(!/\/application\/|\/infrastructure\/|\/server\.ts$|^src\/(config|externals)\//.test(file),file);assert.ok(!file.startsWith("src/services/")||file===legacy,file);dependencies(file,types).forEach(safe);}
+  const browser=new Set(); function safe(file){if(browser.has(file))return;browser.add(file);assert.ok(!/\/application\/|\/infrastructure\/|\/server\.ts$|^src\/(config|externals)\//.test(file),file);assert.ok(!file.startsWith("src/services/"),file);dependencies(file,types).forEach(safe);}
   [contract,...walk("src/modules/shipments/ui").filter(f=>/\.tsx?$/.test(f))].forEach(safe);
-  assert.ok(browser.has(physical));assert.equal(browser.has(legacy),types);
+  assert.ok(browser.has(physical));assert.equal(browser.has(legacy),false,"Public contracts now physically own DTOs; no legacy edge in either browser graph");
 });
 
 test("actual existing link use case retains Draft/Ready eligibility and enum-invalid/status-first outcomes",async()=>{

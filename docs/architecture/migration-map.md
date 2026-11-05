@@ -4,6 +4,16 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 16 — Shipment DTO physical ownership implemented
+
+| Original owner / surface | Current owner / compatibility |
+| --- | --- |
+| Eight aliases in `src/services/shipments/types.ts` | Verbatim declarations now in `src/modules/shipments/contracts.ts`; original order/AST hashes retained |
+| `src/services/shipments/types.ts` | Pure named public enum/eight erased DTO forwards; original path remains |
+| `src/modules/shipments/status.ts`, legacy index and all other production source | Byte-identical; no new production file, caller import rewrite or service migration |
+
+This table supersedes temporary physical DTO ownership proposals below. The public contract no longer reaches legacy types; [exact consumers, graph, history and retirement criteria](shipments-dto-ownership.md). Only DTO ownership is complete.
+
 ## PR 15 — physical ShipmentStatus ownership implemented
 
 | Original / current file | Implemented ownership / remaining work |

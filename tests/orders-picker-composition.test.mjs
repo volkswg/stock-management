@@ -97,7 +97,7 @@ for (const runtime of [true, false]) test(`app client composition graph is brows
   function visit(file) {
     assert.ok(!active.includes(file), `File cycle: ${[...active, file].join(" -> ")}`); if (visited.has(file)) return;
     assert.ok(!/^src\/(config|externals|infrastructure|features\/backend)\//.test(file), file);
-    assert.ok(!file.startsWith("src/services/") || file === "src/services/shipments/types.ts", file);
+    assert.ok(!file.startsWith("src/services/"), file);
     assert.ok(!/\/(application|infrastructure)\/|\/server\.ts$/.test(file), file);
     assert.ok(!file.startsWith("src/app/") || file === clientPath, file);
     active.push(file);
