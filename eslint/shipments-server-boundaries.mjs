@@ -81,6 +81,27 @@ export const shipmentsServerBoundaries = [
     },
   },
   {
+    files: ["src/modules/shipments/application/update-shipment-status.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../contracts", "./ports/shipment-status-store"]),
+    },
+  },
+  {
+    files: ["src/modules/shipments/application/ports/shipment-status-store.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../../contracts"]),
+    },
+  },
+  {
+    files: ["src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports([
+        "server-only", "@/externals/google/sheet/types", "../../contracts",
+        "../../application/ports/shipment-status-store",
+      ]),
+    },
+  },
+  {
     files: ["src/modules/shipments/server.ts"],
     rules: {
       ...serverRules,
@@ -89,6 +110,7 @@ export const shipmentsServerBoundaries = [
         "./application/create-shipment", "./infrastructure/google-sheets/shipment-writer",
         "./application/list-shipments", "./infrastructure/google-sheets/shipment-list-reader",
         "./application/link-order-to-shipment", "./infrastructure/google-sheets/shipment-order-link-store",
+        "./application/update-shipment-status", "./infrastructure/google-sheets/shipment-status-store",
       ]),
     },
   },

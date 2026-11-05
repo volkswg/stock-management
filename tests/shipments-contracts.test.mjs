@@ -1,3 +1,4 @@
+import { migratedStatusFunctions, assertShipmentStatusHistory } from "./helpers/shipments-status-history.mjs";
 import { migratedLinkFunctions, assertShipmentLinkHistory } from "./helpers/shipments-link-history.mjs";
 import { migratedReadFunctions, assertShipmentReadHistory } from "./helpers/shipments-read-history.mjs";
 import assert from "node:assert/strict";
@@ -44,6 +45,7 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     assert.equal(hash(body), expected, file);
   }
   for (const [key, expected] of Object.entries(baseline.functions)) {
+    if (migratedStatusFunctions.has(key)) { assertShipmentStatusHistory(key, expected); continue; }
     if (migratedLinkFunctions.has(key)) { assertShipmentLinkHistory(key, expected); continue; }
     if (migratedReadFunctions.has(key)) { assertShipmentReadHistory(key, expected); continue; }
     if (migratedCreationFunctions.has(key)) { assertShipmentCreationHistory(key, expected); continue; }
