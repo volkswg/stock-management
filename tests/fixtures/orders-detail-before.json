@@ -1,0 +1,548 @@
+{
+  "base": "b16df0fff494b01357c318b65cc5e586656c028b",
+  "file": "src/services/orders/listOrders.ts",
+  "source": "import { type OrderProductImage, type OrderBillImage, type OrderDetail } from \"@/modules/orders/contracts\";\nexport { type OrderListItem, type OrderProductImage, type OrderBillImage, type OrderDetail } from \"@/modules/orders/contracts\";\nimport type {\n  GoogleSheetRow,\n  IGoogleSheetsService,\n} from \"@/externals/google/sheet\";\nimport { ShipmentStatus, type Shipment } from \"@/services/shipments\";\nexport { listOrders } from \"@/modules/orders/server\";\nimport { mapOrderRow, mapOrderProductImageRow, toStringValue, toPrice } from \"@/modules/orders/infrastructure/google-sheets/order-row-mapping\";\n\nexport async function getOrderDetail({\n  googleSheetsService,\n  orderId,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  orderId: string;\n}): Promise<OrderDetail | undefined> {\n  const [\n    orderRows,\n    orderItemRows,\n    orderBillRows,\n    shipmentOrderRows,\n    shipmentRows,\n  ] =\n    await Promise.all([\n      googleSheetsService.orders.readRows(\"A:I\"),\n      googleSheetsService.orderItems.readRows(),\n      googleSheetsService.orderBills.readRows(),\n      googleSheetsService.shipmentOrders.readRows(),\n      googleSheetsService.shipments.readRows(),\n    ]);\n  const order = orderRows\n    .map(mapOrderRow)\n    .find((candidate) => candidate?.id === orderId);\n\n  if (!order) {\n    return undefined;\n  }\n\n  const shipmentId = findShipmentIdForOrder(shipmentOrderRows, orderId);\n\n  return {\n    ...order,\n    productImages: orderItemRows\n      .map(mapOrderProductImageRow)\n      .filter(\n        (image): image is OrderProductImage => image?.orderId === orderId,\n      ),\n    billImages: orderBillRows\n      .map(mapOrderBillImageRow)\n      .filter((image): image is OrderBillImage => image?.orderId === orderId),\n    shipmentId,\n    shipment: shipmentId\n      ? (shipmentRows\n          .map(mapShipmentRow)\n          .find((shipment) => shipment?.id === shipmentId) ?? null)\n      : null,\n  };\n}\n\nfunction findShipmentIdForOrder(\n  rows: GoogleSheetRow[],\n  orderId: string,\n): string | null {\n  for (let index = rows.length - 1; index >= 0; index -= 1) {\n    const [, shipmentId, linkedOrderId, , , deletedAt] = rows[index];\n    if (\n      toStringValue(linkedOrderId) === orderId &&\n      !toStringValue(deletedAt)\n    ) {\n      return toStringValue(shipmentId) || null;\n    }\n  }\n  return null;\n}\n\nfunction mapOrderBillImageRow(\n  row: GoogleSheetRow,\n): OrderBillImage | undefined {\n  const [id, orderId, imageUrl, createdAt, , deletedAt] = row;\n  const normalizedId = toStringValue(id);\n  const normalizedOrderId = toStringValue(orderId);\n  const normalizedImageUrl = toStringValue(imageUrl);\n  if (\n    !normalizedId ||\n    !normalizedOrderId ||\n    !normalizedImageUrl ||\n    toStringValue(deletedAt)\n  ) {\n    return undefined;\n  }\n\n  return {\n    id: normalizedId,\n    orderId: normalizedOrderId,\n    imageUrl: normalizedImageUrl,\n    createdAt: toStringValue(createdAt),\n  };\n}\n\nfunction mapShipmentRow(row: GoogleSheetRow): Shipment | undefined {\n  const [\n    id,\n    status,\n    carrier,\n    poNumber,\n    shippingFee,\n    remark,\n    shippedAt,\n    deliveredAt,\n    createdAt,\n    updatedAt,\n    deletedAt,\n    createdBy,\n    shippingBillUrl,\n  ] = row;\n  const normalizedId = toStringValue(id);\n  const normalizedStatus = toStringValue(status);\n  const normalizedPoNumber = toStringValue(poNumber);\n  if (\n    !normalizedId ||\n    !isShipmentStatus(normalizedStatus) ||\n    !normalizedPoNumber ||\n    toStringValue(deletedAt)\n  ) {\n    return undefined;\n  }\n\n  return {\n    id: normalizedId,\n    status: normalizedStatus,\n    carrier: toStringValue(carrier),\n    poNumber: normalizedPoNumber,\n    shippingFee: toPrice(shippingFee),\n    remark: toStringValue(remark),\n    shippedAt: toStringValue(shippedAt),\n    deliveredAt: toStringValue(deliveredAt),\n    deletedAt: toStringValue(deletedAt),\n    createdAt: toStringValue(createdAt),\n    updatedAt: toStringValue(updatedAt),\n    createdBy: toStringValue(createdBy),\n    shippingBillUrl: toStringValue(shippingBillUrl),\n  };\n}\n\nfunction isShipmentStatus(value: string): value is ShipmentStatus {\n  return Object.values(ShipmentStatus).includes(value as ShipmentStatus);\n}\n",
+  "rawHash": "a27a6f024d9c1e39cde0d5bf7a66a1edcc6441a3f0db1b01feb7beaf112764da",
+  "functions": {
+    "getOrderDetail": "a161337e142234f7c92ea54b220dce2e738cd41e589bece65e237d5dcb1aeff7",
+    "findShipmentIdForOrder": "23f54968fe7be324183c28de36dfba8c1c248d32c0bf10c0e9777e84e8c67f4d",
+    "mapOrderBillImageRow": "b44518483d6fc2df85ddf1c8ed3ca14ce4186762f2635053b246affb422cf719",
+    "mapShipmentRow": "2eb640884b0f27fcb6fdaab4bd111082954362a5cea711b58c37e3111771740f",
+    "isShipmentStatus": "b83e8bfcc6aaa5640ba8390d50854611887f02241992e582b64aa690d1ca954e"
+  },
+  "bodyHash": "7a863b4ebdd1220a8e7f250978f5fc644f19656f95a286b2fe88e3abdadff293",
+  "mapperDeclarations": {
+    "mapOrderRow": "export function mapOrderRow(row: GoogleSheetRow): OrderListItem | undefined {\n  const [\n    id,\n    status,\n    seller,\n    totalPrice,\n    remark,\n    createdAt,\n    updatedAt,\n    deletedAt,\n    createdBy,\n  ] = row;\n\n  const normalizedId = toStringValue(id);\n  const normalizedStatus = toStringValue(status);\n  if (\n    !normalizedId ||\n    !isOrderStatus(normalizedStatus) ||\n    toStringValue(deletedAt)\n  ) {\n    return undefined;\n  }\n\n  return {\n    id: normalizedId,\n    status: normalizedStatus,\n    seller: toStringValue(seller),\n    totalPrice: toPrice(totalPrice),\n    remark: toStringValue(remark),\n    createdAt: toStringValue(createdAt),\n    updatedAt: toStringValue(updatedAt),\n    createdBy: toStringValue(createdBy),\n    shipmentId: null,\n    productImages: [],\n  };\n}",
+    "mapOrderProductImageRow": "export function mapOrderProductImageRow(\n  row: GoogleSheetRow,\n): OrderProductImage | undefined {\n  const [\n    id,\n    orderId,\n    imageUrl,\n    quoteQuantity,\n    deliveredQuantity,\n    productCode,\n    createdAt,\n    ,\n    deletedAt,\n  ] = row;\n  const normalizedId = toStringValue(id);\n  const normalizedOrderId = toStringValue(orderId);\n  const normalizedImageUrl = toStringValue(imageUrl);\n  if (\n    !normalizedId ||\n    !normalizedOrderId ||\n    !normalizedImageUrl ||\n    toStringValue(deletedAt)\n  ) {\n    return undefined;\n  }\n\n  return {\n    id: normalizedId,\n    orderId: normalizedOrderId,\n    imageUrl: normalizedImageUrl,\n    quoteQuantity: toStringValue(quoteQuantity),\n    deliveredQuantity: toStringValue(deliveredQuantity),\n    productCode: toStringValue(productCode),\n    createdAt: toStringValue(createdAt),\n  };\n}",
+    "toStringValue": "export function toStringValue(value: GoogleSheetCellValue | undefined): string {\n  if (typeof value === \"string\") {\n    return value.trim();\n  }\n  if (typeof value === \"number\" || typeof value === \"boolean\") {\n    return String(value);\n  }\n  return \"\";\n}",
+    "toPrice": "export function toPrice(value: GoogleSheetCellValue | undefined): number | null {\n  if (typeof value === \"number\" && Number.isFinite(value)) {\n    return value;\n  }\n  if (typeof value !== \"string\" || !value.trim()) {\n    return null;\n  }\n\n  const price = Number(value.replace(/,/g, \"\"));\n  return Number.isFinite(price) ? price : null;\n}",
+    "isOrderStatus": "export function isOrderStatus(value: string): value is OrderStatus {\n  return Object.values(OrderStatus).includes(value as OrderStatus);\n}"
+  },
+  "mapperSource": "import \"server-only\";\nimport type { GoogleSheetCellValue, GoogleSheetRow } from \"@/externals/google/sheet\";\nimport { OrderStatus, type OrderListItem, type OrderProductImage } from \"../../contracts\";\n\nexport function mapOrderRow(row: GoogleSheetRow): OrderListItem | undefined {\n  const [\n    id,\n    status,\n    seller,\n    totalPrice,\n    remark,\n    createdAt,\n    updatedAt,\n    deletedAt,\n    createdBy,\n  ] = row;\n\n  const normalizedId = toStringValue(id);\n  const normalizedStatus = toStringValue(status);\n  if (\n    !normalizedId ||\n    !isOrderStatus(normalizedStatus) ||\n    toStringValue(deletedAt)\n  ) {\n    return undefined;\n  }\n\n  return {\n    id: normalizedId,\n    status: normalizedStatus,\n    seller: toStringValue(seller),\n    totalPrice: toPrice(totalPrice),\n    remark: toStringValue(remark),\n    createdAt: toStringValue(createdAt),\n    updatedAt: toStringValue(updatedAt),\n    createdBy: toStringValue(createdBy),\n    shipmentId: null,\n    productImages: [],\n  };\n}\n\nexport function mapOrderProductImageRow(\n  row: GoogleSheetRow,\n): OrderProductImage | undefined {\n  const [\n    id,\n    orderId,\n    imageUrl,\n    quoteQuantity,\n    deliveredQuantity,\n    productCode,\n    createdAt,\n    ,\n    deletedAt,\n  ] = row;\n  const normalizedId = toStringValue(id);\n  const normalizedOrderId = toStringValue(orderId);\n  const normalizedImageUrl = toStringValue(imageUrl);\n  if (\n    !normalizedId ||\n    !normalizedOrderId ||\n    !normalizedImageUrl ||\n    toStringValue(deletedAt)\n  ) {\n    return undefined;\n  }\n\n  return {\n    id: normalizedId,\n    orderId: normalizedOrderId,\n    imageUrl: normalizedImageUrl,\n    quoteQuantity: toStringValue(quoteQuantity),\n    deliveredQuantity: toStringValue(deliveredQuantity),\n    productCode: toStringValue(productCode),\n    createdAt: toStringValue(createdAt),\n  };\n}\n\nexport function toStringValue(value: GoogleSheetCellValue | undefined): string {\n  if (typeof value === \"string\") {\n    return value.trim();\n  }\n  if (typeof value === \"number\" || typeof value === \"boolean\") {\n    return String(value);\n  }\n  return \"\";\n}\n\nexport function toPrice(value: GoogleSheetCellValue | undefined): number | null {\n  if (typeof value === \"number\" && Number.isFinite(value)) {\n    return value;\n  }\n  if (typeof value !== \"string\" || !value.trim()) {\n    return null;\n  }\n\n  const price = Number(value.replace(/,/g, \"\"));\n  return Number.isFinite(price) ? price : null;\n}\n\nexport function isOrderStatus(value: string): value is OrderStatus {\n  return Object.values(OrderStatus).includes(value as OrderStatus);\n}\n",
+  "routeSource": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/externals/google/sheet\";\nimport { getOrderDetail, updateOrderDetails } from \"@/services/orders\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(\n  _request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  try {\n    const { id } = await params;\n    const orderId = id.trim();\n    if (!orderId) {\n      return NextResponse.json(\n        { error: \"Order ID is required.\" },\n        { status: 400 },\n      );\n    }\n\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());\n    const order = await getOrderDetail({ googleSheetsService, orderId });\n    if (!order) {\n      return NextResponse.json({ error: \"Order not found.\" }, { status: 404 });\n    }\n\n    return NextResponse.json({ order });\n  } catch (error) {\n    console.error(\"Failed to load order\", {\n      error: error instanceof Error ? error.message : String(error),\n    });\n\n    return NextResponse.json(\n      { error: \"Failed to load order.\" },\n      { status: 500 },\n    );\n  }\n}\n\nexport async function PATCH(\n  request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const { id } = await params;\n  const orderId = id.trim();\n  if (!orderId) {\n    return NextResponse.json(\n      { error: \"Order ID is required.\" },\n      { status: 400 },\n    );\n  }\n\n  const body = await readJsonBody(request);\n  const input = parseOrderUpdate(body);\n  if (!input) {\n    return NextResponse.json(\n      { error: \"Enter a valid total price or remark.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());\n    const result = await updateOrderDetails({\n      googleSheetsService,\n      orderId,\n      remark: input.remark,\n      totalPrice: input.totalPrice,\n    });\n    if (result.outcome === \"not_found\") {\n      return NextResponse.json({ error: \"Order not found.\" }, { status: 404 });\n    }\n    if (result.outcome === \"invalid_status\") {\n      return NextResponse.json(\n        { error: \"Order has an invalid status.\" },\n        { status: 409 },\n      );\n    }\n\n    return NextResponse.json({\n      order: {\n        id: orderId,\n        ...result.order,\n      },\n    });\n  } catch (error) {\n    console.error(\"Failed to update order details\", {\n      orderId,\n      error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json(\n      { error: \"Failed to update the order details.\" },\n      { status: 500 },\n    );\n  }\n}\n\nasync function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nfunction parseOrderUpdate(value: unknown): {\n  totalPrice?: number;\n  remark?: string;\n} | undefined {\n  if (!isRecord(value)) {\n    return undefined;\n  }\n\n  const totalPrice = value.totalPrice;\n  const remark = value.remark;\n  if (\n    (totalPrice !== undefined &&\n      (typeof totalPrice !== \"number\" ||\n        !Number.isFinite(totalPrice) ||\n        totalPrice < 0)) ||\n    (remark !== undefined &&\n      (typeof remark !== \"string\" || remark.length > 1000)) ||\n    (totalPrice === undefined && remark === undefined)\n  ) {\n    return undefined;\n  }\n\n  return {\n    totalPrice: typeof totalPrice === \"number\" ? totalPrice : undefined,\n    remark: typeof remark === \"string\" ? remark : undefined,\n  };\n}\n\nfunction isRecord(value: unknown): value is Record<string, unknown> {\n  return typeof value === \"object\" && value !== null && !Array.isArray(value);\n}\n",
+  "routeRawHash": "6ce35da4c5ddf5e2162a017ef107ec49e2a6d8103037ec5a45cd434b088e59f8",
+  "routeFunctions": {
+    "GET": "57a9f9cc1c115fe0482d93b18e2fcf3d9b5e133101a1794b72767f4bc31cee34",
+    "PATCH": "06be263398a12ca52c0d5364c9b29baea567476335830bca2ae06a169d45b965",
+    "readJsonBody": "4bae33b6462fcb849944d95fe7816a2f22831a9fa7bc98d34ec8c5889b582746",
+    "parseOrderUpdate": "2538c5f27b8fd3fa4f0238aa9f3519fe5f8df038d3151223b08dc11215a9b5f9",
+    "isRecord": "d83d1e773cbe6139e882d0dbdf4f4c2af7251c7c1b52bb356b4252e59197fabf"
+  },
+  "serverFunctions": {
+    "listOrders": "export async function listOrders({\n  googleSheetsService,\n}: { googleSheetsService: IGoogleSheetsService }): Promise<OrderListItem[]> {\n  return executeListOrders(new GoogleSheetsOrderListReader(googleSheetsService));\n}",
+    "createOrder": "export async function createOrder({\n  googleSheetsService, id, seller, totalPrice, remark, createdBy,\n}: CreateOrderInput & { googleSheetsService: IGoogleSheetsService }): Promise<CreatedOrder> {\n  return executeCreateOrder({ id, seller, totalPrice, remark, createdBy }, {\n    writer: new GoogleSheetsOrderWriter(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}"
+  },
+  "examples": [
+    {
+      "orderId": "order/1",
+      "rows": {
+        "orders": [
+          [
+            "old",
+            "draft",
+            "Old",
+            null,
+            "",
+            "2026-01-01",
+            "",
+            "",
+            "web"
+          ],
+          [
+            "order/1",
+            "complete",
+            " Seller ",
+            "1,234.50",
+            " note ",
+            "2026-11-01",
+            "2026-11-02",
+            "",
+            "web"
+          ],
+          [
+            "deleted",
+            "complete",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "deleted",
+            ""
+          ],
+          [
+            "invalid",
+            "unknown",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "orderItems": [
+          [
+            "item/1",
+            "order/1",
+            "https://example.test/product",
+            "10",
+            "5",
+            "SKU",
+            "created",
+            "",
+            "",
+            ""
+          ],
+          [
+            "deleted-item",
+            "order/1",
+            "https://example.test/deleted",
+            "1",
+            "0",
+            "",
+            "",
+            "",
+            "deleted",
+            ""
+          ]
+        ],
+        "orderBills": [
+          [
+            "bill/1",
+            "order/1",
+            "https://example.test/bill",
+            "created",
+            "",
+            ""
+          ]
+        ],
+        "shipmentOrders": [
+          [
+            "link-old",
+            "ship-old",
+            "order/1",
+            "",
+            "",
+            ""
+          ],
+          [
+            "link",
+            "ship/1",
+            "order/1",
+            "",
+            "",
+            ""
+          ],
+          [
+            "link-deleted",
+            "ignored",
+            "order/1",
+            "",
+            "",
+            "deleted"
+          ]
+        ],
+        "shipments": [
+          [
+            "ship/1",
+            "ready_to_ship",
+            "Carrier",
+            "PO-1",
+            "50.25",
+            "note",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            "https://example.test/shipping-bill"
+          ]
+        ]
+      },
+      "result": {
+        "id": "order/1",
+        "status": "complete",
+        "seller": "Seller",
+        "totalPrice": 1234.5,
+        "remark": "note",
+        "createdAt": "2026-11-01",
+        "updatedAt": "2026-11-02",
+        "createdBy": "web",
+        "shipmentId": "ship/1",
+        "productImages": [
+          {
+            "id": "item/1",
+            "orderId": "order/1",
+            "imageUrl": "https://example.test/product",
+            "quoteQuantity": "10",
+            "deliveredQuantity": "5",
+            "productCode": "SKU",
+            "createdAt": "created"
+          }
+        ],
+        "billImages": [
+          {
+            "id": "bill/1",
+            "orderId": "order/1",
+            "imageUrl": "https://example.test/bill",
+            "createdAt": "created"
+          }
+        ],
+        "shipment": {
+          "id": "ship/1",
+          "status": "ready_to_ship",
+          "carrier": "Carrier",
+          "poNumber": "PO-1",
+          "shippingFee": 50.25,
+          "remark": "note",
+          "shippedAt": "",
+          "deliveredAt": "",
+          "deletedAt": "",
+          "createdAt": "created",
+          "updatedAt": "updated",
+          "createdBy": "web",
+          "shippingBillUrl": "https://example.test/shipping-bill"
+        }
+      },
+      "missing": false,
+      "events": [
+        [
+          "orders",
+          "A:I"
+        ],
+        [
+          "orderItems"
+        ],
+        [
+          "orderBills"
+        ],
+        [
+          "shipmentOrders"
+        ],
+        [
+          "shipments"
+        ]
+      ]
+    },
+    {
+      "orderId": "old",
+      "rows": {
+        "orders": [
+          [
+            "old",
+            "draft",
+            "Old",
+            null,
+            "",
+            "2026-01-01",
+            "",
+            "",
+            "web"
+          ],
+          [
+            "order/1",
+            "complete",
+            " Seller ",
+            "1,234.50",
+            " note ",
+            "2026-11-01",
+            "2026-11-02",
+            "",
+            "web"
+          ],
+          [
+            "deleted",
+            "complete",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "deleted",
+            ""
+          ],
+          [
+            "invalid",
+            "unknown",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "orderItems": [
+          [
+            "item/1",
+            "order/1",
+            "https://example.test/product",
+            "10",
+            "5",
+            "SKU",
+            "created",
+            "",
+            "",
+            ""
+          ],
+          [
+            "deleted-item",
+            "order/1",
+            "https://example.test/deleted",
+            "1",
+            "0",
+            "",
+            "",
+            "",
+            "deleted",
+            ""
+          ]
+        ],
+        "orderBills": [
+          [
+            "bill/1",
+            "order/1",
+            "https://example.test/bill",
+            "created",
+            "",
+            ""
+          ]
+        ],
+        "shipmentOrders": [
+          [
+            "link-old",
+            "ship-old",
+            "order/1",
+            "",
+            "",
+            ""
+          ],
+          [
+            "link",
+            "ship/1",
+            "order/1",
+            "",
+            "",
+            ""
+          ],
+          [
+            "link-deleted",
+            "ignored",
+            "order/1",
+            "",
+            "",
+            "deleted"
+          ]
+        ],
+        "shipments": [
+          [
+            "ship/1",
+            "ready_to_ship",
+            "Carrier",
+            "PO-1",
+            "50.25",
+            "note",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            "https://example.test/shipping-bill"
+          ]
+        ]
+      },
+      "result": {
+        "id": "old",
+        "status": "draft",
+        "seller": "Old",
+        "totalPrice": null,
+        "remark": "",
+        "createdAt": "2026-01-01",
+        "updatedAt": "",
+        "createdBy": "web",
+        "shipmentId": null,
+        "productImages": [],
+        "billImages": [],
+        "shipment": null
+      },
+      "missing": false,
+      "events": [
+        [
+          "orders",
+          "A:I"
+        ],
+        [
+          "orderItems"
+        ],
+        [
+          "orderBills"
+        ],
+        [
+          "shipmentOrders"
+        ],
+        [
+          "shipments"
+        ]
+      ]
+    },
+    {
+      "orderId": "missing",
+      "rows": {
+        "orders": [
+          [
+            "old",
+            "draft",
+            "Old",
+            null,
+            "",
+            "2026-01-01",
+            "",
+            "",
+            "web"
+          ],
+          [
+            "order/1",
+            "complete",
+            " Seller ",
+            "1,234.50",
+            " note ",
+            "2026-11-01",
+            "2026-11-02",
+            "",
+            "web"
+          ],
+          [
+            "deleted",
+            "complete",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "deleted",
+            ""
+          ],
+          [
+            "invalid",
+            "unknown",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ],
+        "orderItems": [
+          [
+            "item/1",
+            "order/1",
+            "https://example.test/product",
+            "10",
+            "5",
+            "SKU",
+            "created",
+            "",
+            "",
+            ""
+          ],
+          [
+            "deleted-item",
+            "order/1",
+            "https://example.test/deleted",
+            "1",
+            "0",
+            "",
+            "",
+            "",
+            "deleted",
+            ""
+          ]
+        ],
+        "orderBills": [
+          [
+            "bill/1",
+            "order/1",
+            "https://example.test/bill",
+            "created",
+            "",
+            ""
+          ]
+        ],
+        "shipmentOrders": [
+          [
+            "link-old",
+            "ship-old",
+            "order/1",
+            "",
+            "",
+            ""
+          ],
+          [
+            "link",
+            "ship/1",
+            "order/1",
+            "",
+            "",
+            ""
+          ],
+          [
+            "link-deleted",
+            "ignored",
+            "order/1",
+            "",
+            "",
+            "deleted"
+          ]
+        ],
+        "shipments": [
+          [
+            "ship/1",
+            "ready_to_ship",
+            "Carrier",
+            "PO-1",
+            "50.25",
+            "note",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            "https://example.test/shipping-bill"
+          ]
+        ]
+      },
+      "result": null,
+      "missing": true,
+      "events": [
+        [
+          "orders",
+          "A:I"
+        ],
+        [
+          "orderItems"
+        ],
+        [
+          "orderBills"
+        ],
+        [
+          "shipmentOrders"
+        ],
+        [
+          "shipments"
+        ]
+      ]
+    }
+  ],
+  "serverSource": "import \"server-only\";\nimport type { IGoogleSheetsService } from \"@/externals/google/sheet\";\nimport { createSortableId } from \"@/services/utils/createSortableId\";\nimport type { CreatedOrder, OrderListItem } from \"./contracts\";\nimport { createOrder as executeCreateOrder, type CreateOrderInput } from \"./application/create-order\";\nimport { listOrders as executeListOrders } from \"./application/list-orders\";\nimport { GoogleSheetsOrderListReader } from \"./infrastructure/google-sheets/order-list-reader\";\nimport { GoogleSheetsOrderWriter } from \"./infrastructure/google-sheets/order-writer\";\n\n// Existing server callers keep passing the existing service. Only this\n// composition boundary knows the concrete adapter, clock and ID generator.\nexport async function listOrders({\n  googleSheetsService,\n}: { googleSheetsService: IGoogleSheetsService }): Promise<OrderListItem[]> {\n  return executeListOrders(new GoogleSheetsOrderListReader(googleSheetsService));\n}\n\nexport async function createOrder({\n  googleSheetsService, id, seller, totalPrice, remark, createdBy,\n}: CreateOrderInput & { googleSheetsService: IGoogleSheetsService }): Promise<CreatedOrder> {\n  return executeCreateOrder({ id, seller, totalPrice, remark, createdBy }, {\n    writer: new GoogleSheetsOrderWriter(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}\n",
+  "serverRawHash": "9f97db0480c781fbe51c6d46770732ea723d8b813d36975d2f1029544ef6e273",
+  "boundarySource": "import { noDynamicServerBypass } from \"./orders-boundaries.mjs\";\n\n// This is the exact implemented seam, not a repository-wide legacy allowlist.\n// Add a new permitted dependency only with a real use case and boundary tests.\nfunction onlyImports(paths) {\n  const choices = paths.map((path) => path.replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\")).join(\"|\");\n  return [\"error\", { patterns: [{ regex: `^(?!(?:${choices})$).+`, message: \"Import outside the documented Orders use-case seam. Keep application ports independent and server composition explicit.\" }] }];\n}\n\nconst serverRules = {\n  \"no-restricted-syntax\": [\n    ...noDynamicServerBypass,\n    { selector: \"ImportDeclaration[source.value='@/externals/google/sheet']:not([importKind='type'])\", message: \"Use only sheet interface types from the legacy aggregate; runtime adapters import explicit constants.\" },\n    { selector: \"ExportAllDeclaration\", message: \"Expose explicit named Orders operations, not a broad server/provider barrel.\" },\n    { selector: \"ExportNamedDeclaration[source.value='@/externals/google/sheet']:not([exportKind='type'])\", message: \"Do not re-export provider implementations through Orders adapters or server composition.\" },\n  ],\n  \"no-restricted-globals\": [\"error\", \"process\", \"Buffer\", \"fetch\"],\n};\n\nexport const ordersServerBoundaries = [\n  {\n    files: [\"src/modules/orders/application/**/*.ts\"],\n    rules: {\n      \"no-restricted-imports\": onlyImports([\n        \"../contracts\", \"../../contracts\", \"@/modules/orders/contracts\",\n        \"./ports/order-list-reader\", \"./ports/created-order-writer\",\n      ]),\n      \"no-restricted-syntax\": noDynamicServerBypass,\n      \"no-restricted-globals\": [\"error\", \"process\", \"Buffer\", \"fetch\", \"Date\"],\n    },\n  },\n  {\n    files: [\"src/modules/orders/infrastructure/google-sheets/**/*.ts\"],\n    rules: {\n      ...serverRules,\n      \"no-restricted-imports\": onlyImports([\n        \"server-only\", \"@/externals/google/sheet\", \"@/externals/google/sheet/const\",\n        \"@/externals/google/sheet/sheets/orders/const\", \"../../contracts\",\n        \"../../application/ports/order-list-reader\", \"../../application/ports/created-order-writer\",\n        \"./order-row-mapping\",\n      ]),\n    },\n  },\n  {\n    files: [\"src/modules/orders/server.ts\"],\n    rules: {\n      ...serverRules,\n      \"no-restricted-imports\": onlyImports([\n        \"server-only\", \"@/externals/google/sheet\", \"@/services/utils/createSortableId\", \"./contracts\",\n        \"./application/create-order\", \"./application/list-orders\",\n        \"./infrastructure/google-sheets/order-list-reader\", \"./infrastructure/google-sheets/order-writer\",\n      ]),\n    },\n  },\n];\n",
+  "boundaryRawHash": "be7da9352422cd4c0bbeb9d264ded4062b5d36a07136bbdc4941507ff899ab4d"
+}

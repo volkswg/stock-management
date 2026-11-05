@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { getOrderDetail, updateOrderDetails } from "@/services/orders";
+import { updateOrderDetails } from "@/services/orders";
+import { getOrderDetail } from "@/modules/orders/server";
+import { GoogleSheetsOrderDetailShipmentProjection } from "@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection";
 
 export const runtime = "nodejs";
 
@@ -20,7 +22,11 @@ export async function GET(
     }
 
     const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
-    const order = await getOrderDetail({ googleSheetsService, orderId });
+    const order = await getOrderDetail({
+      googleSheetsService,
+      orderId,
+      shipmentProjection: new GoogleSheetsOrderDetailShipmentProjection(googleSheetsService),
+    });
     if (!order) {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
     }

@@ -1,3 +1,4 @@
+import { assertOrdersDetailServerHistory } from "./helpers/orders-detail-history.mjs";
 import { assertShipmentDriveRouteHistory } from "./helpers/shipments-drive-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -28,7 +29,8 @@ test("original client raw bytes, every function/guard and all seven exported typ
     assert.equal(hash(body), expected, consumer);
   }
   for (const [file, expected] of Object.entries(baseline.retained)) {
-    if (file === "src/app/api/shipments/[id]/route.ts") assertShipmentDriveRouteHistory(file, expected);
+    if (file === "src/modules/orders/server.ts") assertOrdersDetailServerHistory(file, expected);
+    else if (file === "src/app/api/shipments/[id]/route.ts") assertShipmentDriveRouteHistory(file, expected);
     else assert.equal(hash(readFileSync(file)), expected, file);
   }
 });

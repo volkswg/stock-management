@@ -42,12 +42,38 @@ export const ordersServerBoundaries = [
     },
   },
   {
+    files: ["src/modules/orders/application/get-order-detail.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../contracts", "./ports/order-detail-reader", "./ports/order-detail-shipment-projection"]),
+      "no-restricted-syntax": [...noDynamicServerBypass, { selector: "ExportAllDeclaration", message: "Keep detail imports explicit." }, { selector: "ExportNamedDeclaration[source]", message: "No forwarding implementations." }],
+      "no-restricted-globals": ["error", "Date", "process", "Buffer", "fetch", "crypto", "performance"],
+      "no-restricted-properties": ["error", { object: "Math", property: "random", message: "Detail is a pure read use case." }],
+    },
+  },
+  {
+    files: ["src/modules/orders/application/ports/order-detail-reader.ts", "src/modules/orders/application/ports/order-detail-shipment-projection.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../../contracts"]),
+      "no-restricted-syntax": [...noDynamicServerBypass, { selector: "ExportAllDeclaration", message: "Expose only the consumer contract." }, { selector: "ExportNamedDeclaration[source]", message: "No forwarding implementations." }],
+      "no-restricted-globals": ["error", "Date", "process", "Buffer", "fetch", "crypto", "performance"],
+    },
+  },
+  {
+    files: ["src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["server-only", "@/externals/google/sheet/types", "../../contracts", "../../application/ports/order-detail-reader", "./order-row-mapping"]),
+      "no-restricted-syntax": [...serverRules["no-restricted-syntax"], { selector: "ImportDeclaration[source.value='@/externals/google/sheet/types']:not([importKind='type'])", message: "Erase Sheets interface imports." }],
+    },
+  },
+  {
     files: ["src/modules/orders/server.ts"],
     rules: {
       ...serverRules,
       "no-restricted-imports": onlyImports([
         "server-only", "@/externals/google/sheet", "@/services/utils/createSortableId", "./contracts",
         "./application/create-order", "./application/list-orders",
+        "./application/get-order-detail", "./application/ports/order-detail-shipment-projection",
+        "./infrastructure/google-sheets/order-detail-reader",
         "./infrastructure/google-sheets/order-list-reader", "./infrastructure/google-sheets/order-writer",
       ]),
     },
