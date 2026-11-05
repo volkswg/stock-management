@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import {
-  createGoogleDriveServiceFromConfig,
-  type IGoogleDriveService,
-} from "@/externals/google/drive";
+import { createGoogleDriveServiceFromConfig } from "@/externals/google/drive";
+import { advanceShipmentStatusWithBill } from "@/modules/shipments/server";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { isRecord } from "@/features/backend/shared/utils";
 import {
@@ -116,42 +114,30 @@ export async function PATCH(
     }
   }
 
-  let googleDriveService: IGoogleDriveService | undefined;
-  let uploadedFileId: string | undefined;
+  let workflow: Awaited<ReturnType<typeof advanceShipmentStatusWithBill>> | undefined;
   try {
     const config = getConfig();
     const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
-    let shippingBillUrl: string | undefined;
-    if (shippingBill) {
-      googleDriveService = createGoogleDriveServiceFromConfig(config);
-      if (!googleDriveService) {
-        return NextResponse.json(
-          { error: "Google Drive is not configured." },
-          { status: 503 },
-        );
-      }
-      const driveFile = await googleDriveService.uploadImage({
-        fileName: createShippingBillFileName(shipmentId, shippingBill),
-        contentType: shippingBill.type,
-        bytes: Buffer.from(await shippingBill.arrayBuffer()),
-      });
-      uploadedFileId = driveFile.id;
-      shippingBillUrl = driveFile.webViewLink;
-    }
-
-    const result = await updateShipmentStatus({
-      deliveryFee,
-      googleSheetsService,
-      poNumber,
-      shippingBillUrl,
+    workflow = await advanceShipmentStatusWithBill({
       shipmentId,
-      status: body.status,
+      shippingBill,
+      createDriveService: () => createGoogleDriveServiceFromConfig(config),
+      updateStatus: (shippingBillUrl) => updateShipmentStatus({
+        deliveryFee,
+        googleSheetsService,
+        poNumber,
+        shippingBillUrl,
+        shipmentId,
+        status: body.status as ShipmentStatus,
+      }),
     });
-
-    if (result.outcome !== "updated") {
-      await cleanUpUploadedFile(googleDriveService, uploadedFileId);
-      uploadedFileId = undefined;
+    if (workflow.outcome === "drive_unavailable") {
+      return NextResponse.json(
+        { error: "Google Drive is not configured." },
+        { status: 503 },
+      );
     }
+    const result = workflow.result;
     if (result.outcome === "not_found") {
       return NextResponse.json(
         { error: "Shipment was not found." },
@@ -179,7 +165,7 @@ export async function PATCH(
 
     return NextResponse.json({ shipment: result.shipment });
   } catch (error) {
-    await cleanUpUploadedFile(googleDriveService, uploadedFileId);
+    await workflow?.cleanupAfterFailure();
     console.error("Failed to update shipment status", {
       error: error instanceof Error ? error.message : String(error),
       shipmentId,
@@ -219,32 +205,4 @@ function isValidShippingBill(value: unknown): value is File {
     value.size <= MAX_SHIPPING_BILL_SIZE_BYTES &&
     ALLOWED_SHIPPING_BILL_TYPES.has(value.type)
   );
-}
-
-function createShippingBillFileName(shipmentId: string, file: File): string {
-  const extension =
-    file.type === "application/pdf"
-      ? ".pdf"
-      : file.type === "image/png"
-        ? ".png"
-        : file.type === "image/webp"
-          ? ".webp"
-          : ".jpg";
-  const safeShipmentId = shipmentId.replace(/[^a-zA-Z0-9_-]/g, "_");
-  return `shipment-bill-${safeShipmentId}-${Date.now()}${extension}`;
-}
-
-async function cleanUpUploadedFile(
-  googleDriveService: IGoogleDriveService | undefined,
-  fileId: string | undefined,
-): Promise<void> {
-  if (!googleDriveService || !fileId) return;
-  try {
-    await googleDriveService.deleteFile(fileId);
-  } catch (error) {
-    console.error("Failed to clean up shipment bill upload", {
-      fileId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
 }

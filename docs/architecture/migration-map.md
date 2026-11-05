@@ -4,6 +4,19 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 13 — Shipment shipping-bill workflow seam implemented
+
+| Existing / new file | Ownership and retained compatibility |
+| --- | --- |
+| `src/app/api/shipments/[id]/route.ts` | Delegates only upload/status/cleanup; GET/parsing/validation/constants and HTTP mappings remain; two helpers move unchanged |
+| `src/modules/shipments/application/advance-shipment-status-with-bill.ts` (new) | Upload coordination, raw metadata ID→URL order, one injected status call, cleanup state and internal completion |
+| `src/modules/shipments/application/ports/shipment-bill-storage.ts` (new) | Business metadata/upload-unavailable/cleanup capability, no File/Buffer/provider/HTTP types |
+| `src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts` (new) | Lazy existing Drive adapter, original filename/upload/Buffer evaluation and best-effort cleanup helpers |
+| `src/modules/shipments/server.ts` | One explicit bill composition; five existing function declarations unchanged |
+| Existing status seam, all providers/auth/factories/contracts/UI/other services | Byte-identical, no replacement or move |
+
+Exactly one old raw-route hash has explicit historical handling, with complete original source and unchanged/moved helper AST comparisons. All original fixtures remain intact. [Operation order, compatibility and evidence](shipments-drive-seam.md). Full milestone remains incomplete.
+
 ## PR 12 — Shipment status-update seam implemented
 
 | Existing / new file | Ownership and compatibility |

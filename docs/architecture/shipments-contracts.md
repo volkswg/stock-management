@@ -63,3 +63,6 @@ PR 11 extracts only [order linking](shipments-link-seam.md) behind unchanged API
 
 
 PR 12 extracts only the [status-update seam](shipments-status-seam.md), preserving public/legacy ShipmentStatusUpdate and the single runtime enum definition byte-for-byte. Original UpdateShipmentStatusResult now belongs to application and is narrowly forwarded through the same direct/barrel imports; no new outcome/browser contract. The opaque business target hides raw preserved cells/position/ranges while application owns transition/fee/PO/clock/updated DTO decisions. PATCH and its Drive workflow are byte-identical. Creation/read/link, UI/client and Orders picker/projection remain unchanged; Drive/projection/physical enum cleanup and the full milestone remain incomplete.
+
+
+PR 13 [bill orchestration](shipments-drive-seam.md) adds no browser/public DTO changes. Existing status union/DTO/enum and all earlier use cases remain unchanged. The server-only workflow wraps completed status results or internal drive_unavailable and retains a cleanup callback for later response errors; neither wrapper nor callback appears in HTTP JSON. Business storage metadata uses id/webViewLink while concrete File/Buffer/Drive types remain infrastructure/composition details. Orders projection/enum ownership/legacy retirement remain separate work; full milestone is incomplete.

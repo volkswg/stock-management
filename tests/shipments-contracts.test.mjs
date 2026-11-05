@@ -1,3 +1,4 @@
+import { assertShipmentDriveRouteHistory } from "./helpers/shipments-drive-history.mjs";
 import { migratedStatusFunctions, assertShipmentStatusHistory } from "./helpers/shipments-status-history.mjs";
 import { migratedLinkFunctions, assertShipmentLinkHistory } from "./helpers/shipments-link-history.mjs";
 import { migratedReadFunctions, assertShipmentReadHistory } from "./helpers/shipments-read-history.mjs";
@@ -54,7 +55,8 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     assert.equal(hash(printer.printNode(ts.EmitHint.Unspecified, node, source)), expected, key);
   }
   for (const [file, expected] of Object.entries(baseline.preserved)) {
-    if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
+    if (file === "src/app/api/shipments/[id]/route.ts") assertShipmentDriveRouteHistory(file, expected);
+    else if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
     else if (file === "eslint/orders-boundaries.mjs") assertPickerStaticLintParity();
     else assert.equal(hash(restoreRelocationImports(file, readFileSync(file, "utf8"))), expected, file);
   }

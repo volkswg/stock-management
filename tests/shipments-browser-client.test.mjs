@@ -1,3 +1,4 @@
+import { assertShipmentDriveRouteHistory } from "./helpers/shipments-drive-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -26,7 +27,10 @@ test("original client raw bytes, every function/guard and all seven exported typ
     const s = parse(consumer), body = s.statements.filter(n => !ts.isImportDeclaration(n) && !ts.isExportDeclaration(n)).map(n => printer.printNode(ts.EmitHint.Unspecified, n, s)).join("\n");
     assert.equal(hash(body), expected, consumer);
   }
-  for (const [file, expected] of Object.entries(baseline.retained)) assert.equal(hash(readFileSync(file)), expected, file);
+  for (const [file, expected] of Object.entries(baseline.retained)) {
+    if (file === "src/app/api/shipments/[id]/route.ts") assertShipmentDriveRouteHistory(file, expected);
+    else assert.equal(hash(readFileSync(file)), expected, file);
+  }
 });
 
 test("real client defaults/omissions, encoded GETs, POST payloads and JSON PATCH headers retain exact wire behavior", async () => {
