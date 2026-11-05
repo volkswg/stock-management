@@ -4,6 +4,10 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 17 — Shipment validation contract import implemented
+
+`src/features/backend/shipments/utils.ts` stays in place. Its only production change replaces the mixed legacy Shipment barrel import with the public ShipmentStatus contract import. All four declarations and all other production bytes remain unchanged. The three Shipment HTTP routes still consume the legacy barrel and remain deferred with facade retirement, Orders cleanup and provider/SaaS work. [Exact history, graph and verification](shipments-validation-import.md).
+
 ## PR 16 — Shipment DTO physical ownership implemented
 
 | Original owner / surface | Current owner / compatibility |

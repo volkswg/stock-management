@@ -1,0 +1,35 @@
+{
+  "base": "7dbf3d4824a2b6d5cd38ee6b959c2c9f805f30b2",
+  "file": "src/features/backend/shipments/utils.ts",
+  "source": "import { ShipmentStatus } from \"@/services/shipments\";\n\nexport async function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nexport function isUpdatableStatus(value: unknown): value is ShipmentStatus {\n  return (\n    value === ShipmentStatus.ReadyToShip ||\n    value === ShipmentStatus.Shipping ||\n    value === ShipmentStatus.Delivered\n  );\n}\n\nexport function isValidDeliveryFee(value: unknown): value is number {\n  return (\n    typeof value === \"number\" &&\n    Number.isFinite(value) &&\n    value >= 0 &&\n    value <= 1_000_000_000\n  );\n}\n\nexport function isValidPoNumber(value: unknown): value is string {\n  return (\n    typeof value === \"string\" && Boolean(value.trim()) && value.length <= 100\n  );\n}\n",
+  "sha256": "5a7eee8047a280c4c01df65457cd809de71b581ae565d1bbae1034a298e4d4df",
+  "functions": {
+    "readJsonBody": {
+      "ast": "export async function readJsonBody(request: Request): Promise<unknown> {\n    try {\n        return await request.json();\n    }\n    catch {\n        return undefined;\n    }\n}",
+      "sha256": "6e8ebde46175c258408bf019c1580d5800ad936289a0de03c6ab4cd98ee43307"
+    },
+    "isUpdatableStatus": {
+      "ast": "export function isUpdatableStatus(value: unknown): value is ShipmentStatus {\n    return (value === ShipmentStatus.ReadyToShip ||\n        value === ShipmentStatus.Shipping ||\n        value === ShipmentStatus.Delivered);\n}",
+      "sha256": "03d491476f2280676b1c6099a1c1bd0387992b2b361d0d7195b70fdbee59fac5"
+    },
+    "isValidDeliveryFee": {
+      "ast": "export function isValidDeliveryFee(value: unknown): value is number {\n    return (typeof value === \"number\" &&\n        Number.isFinite(value) &&\n        value >= 0 &&\n        value <= 1000000000);\n}",
+      "sha256": "2dc324d64e91284f1e7dac1233171fd838227ec31275ee461b07c84fa8b8d35a"
+    },
+    "isValidPoNumber": {
+      "ast": "export function isValidPoNumber(value: unknown): value is string {\n    return (typeof value === \"string\" && Boolean(value.trim()) && value.length <= 100);\n}",
+      "sha256": "76011cc3b8d0735b94453b660f1a4899fbf2bc16403eb51e250559445d4a384c"
+    }
+  },
+  "preserved": {
+    "src/app/api/shipments/route.ts": "b84c0b222cc8cd9f146d6f718538bd993a9940e5b3e0cf4e583d94e002751526",
+    "src/app/api/shipments/[id]/route.ts": "24ffbc46d8e57546480310aaeff5829223279db6c97dbc932c0f8112beab5d90",
+    "src/app/api/shipments/[id]/orders/route.ts": "f870e3cc529c911a35eb7bfb1a0ef146ad49072096e0b647a83122fd9b04d610",
+    "src/modules/shipments/status.ts": "5a11cb3efdeb811196076d64e91a9883e2dc4c1eaf0bd798ea6aa6f8bc37f4bc",
+    "src/modules/shipments/contracts.ts": "97b893532718e3e622ac454f91eb0045e6087ea47c4afca35835267d383a6156",
+    "src/services/shipments/types.ts": "f8b693312153552368580d6b49dcea0fb9128b8232fd5f7ca109fe8a435fc9a4",
+    "src/services/shipments/index.ts": "5279b74a84628f93b27109f1bd2294ba5502c168abbcae302f26756e83df5134",
+    "src/services/shipments/linkOrderToShipment.ts": "bdf2efec31eb7661d9a5620f14f2eed874df94bbcce1a54c37d844cb6cb35985",
+    "src/services/shipments/updateShipmentStatus.ts": "c9d9ac98296b685b272ce0e3dd72640942e53fe69d94f96e987eaf0ca97f0393"
+  }
+}
