@@ -1,0 +1,706 @@
+{
+  "base": "ffb14fa63842efdc705de6709ae1efd3df13cd25",
+  "file": "src/services/shipments/updateShipmentStatus.ts",
+  "source": "import type { IGoogleSheetsService } from \"@/externals/google/sheet\";\nimport { ShipmentStatus, type ShipmentStatusUpdate } from \"./types\";\n\nexport type { ShipmentStatusUpdate } from \"./types\";\n\nexport type UpdateShipmentStatusResult =\n  | { outcome: \"updated\"; shipment: ShipmentStatusUpdate }\n  | { outcome: \"not_found\" }\n  | { outcome: \"invalid_transition\" }\n  | { outcome: \"invalid_delivery_fee\" }\n  | { outcome: \"invalid_po_number\" };\n\nexport async function updateShipmentStatus({\n  deliveryFee,\n  googleSheetsService,\n  poNumber,\n  shippingBillUrl,\n  shipmentId,\n  status,\n}: {\n  deliveryFee?: number;\n  googleSheetsService: IGoogleSheetsService;\n  poNumber?: string;\n  shippingBillUrl?: string;\n  shipmentId: string;\n  status: ShipmentStatus;\n}): Promise<UpdateShipmentStatusResult> {\n  if (\n    status === ShipmentStatus.Delivered &&\n    (deliveryFee === undefined ||\n      !Number.isFinite(deliveryFee) ||\n      deliveryFee < 0 ||\n      deliveryFee > 1_000_000_000)\n  ) {\n    return { outcome: \"invalid_delivery_fee\" };\n  }\n\n  await googleSheetsService.shipments.updateRows(\"M1\", [\n    [\"shippingBillUrl\"],\n  ]);\n  const rows = await googleSheetsService.shipments.readRows(\"A2:M\");\n  const rowIndex = rows.findIndex(\n    ([id, , , , , , , , , , deletedAt]) =>\n      String(id ?? \"\").trim() === shipmentId &&\n      !String(deletedAt ?? \"\").trim(),\n  );\n  if (rowIndex === -1) {\n    return { outcome: \"not_found\" };\n  }\n\n  const [\n    ,\n    currentStatus,\n    carrier,\n    currentPoNumber,\n    currentShippingFee,\n    remark,\n    currentShippedAt,\n    currentDeliveredAt,\n    createdAt,\n    ,\n    deletedAt,\n    createdBy,\n    currentShippingBillUrl,\n  ] = rows[rowIndex];\n  if (!isValidTransition(String(currentStatus ?? \"\").trim(), status)) {\n    return { outcome: \"invalid_transition\" };\n  }\n  if (\n    status === ShipmentStatus.Shipping &&\n    (!poNumber?.trim() || poNumber.length > 100)\n  ) {\n    return { outcome: \"invalid_po_number\" };\n  }\n\n  const now = new Date().toISOString();\n  const updatedPoNumber =\n    status === ShipmentStatus.Shipping\n      ? (poNumber?.trim() ?? \"\")\n      : String(currentPoNumber ?? \"\").trim();\n  const shippingFee =\n    status === ShipmentStatus.Delivered\n      ? (deliveryFee ?? null)\n      : toNumber(currentShippingFee);\n  const shippedAt =\n    status === ShipmentStatus.Shipping\n      ? now\n      : String(currentShippedAt ?? \"\").trim();\n  const deliveredAt =\n    status === ShipmentStatus.Delivered\n      ? now\n      : String(currentDeliveredAt ?? \"\").trim();\n  const updatedShippingBillUrl =\n    status === ShipmentStatus.Shipping\n      ? shippingBillUrl?.trim() || \"\"\n      : String(currentShippingBillUrl ?? \"\").trim();\n  const sheetRowNumber = rowIndex + 2;\n\n  await googleSheetsService.shipments.updateRows(\n    `B${sheetRowNumber}:M${sheetRowNumber}`,\n    [\n      [\n        status,\n        carrier ?? \"\",\n        updatedPoNumber,\n        shippingFee,\n        remark ?? \"\",\n        shippedAt,\n        deliveredAt,\n        createdAt ?? \"\",\n        now,\n        deletedAt ?? \"\",\n        createdBy ?? \"\",\n        updatedShippingBillUrl,\n      ],\n    ],\n  );\n\n  return {\n    outcome: \"updated\",\n    shipment: {\n      status,\n      poNumber: updatedPoNumber,\n      shippingFee,\n      shippedAt,\n      deliveredAt,\n      updatedAt: now,\n      shippingBillUrl: updatedShippingBillUrl,\n    },\n  };\n}\n\nfunction isValidTransition(\n  currentStatus: string,\n  nextStatus: ShipmentStatus,\n): boolean {\n  return (\n    (currentStatus === ShipmentStatus.Draft &&\n      nextStatus === ShipmentStatus.ReadyToShip) ||\n    (currentStatus === ShipmentStatus.ReadyToShip &&\n      nextStatus === ShipmentStatus.Shipping) ||\n    (currentStatus === ShipmentStatus.Shipping &&\n      nextStatus === ShipmentStatus.Delivered)\n  );\n}\n\nfunction toNumber(value: unknown): number | null {\n  if (typeof value === \"number\" && Number.isFinite(value)) {\n    return value;\n  }\n  if (typeof value !== \"string\" || !value.trim()) {\n    return null;\n  }\n\n  const number = Number(value.replace(/,/g, \"\"));\n  return Number.isFinite(number) ? number : null;\n}\n",
+  "rawHash": "fa1f8cb29fe21cc1b94321ca2f398c014baf0a73e2682a1fcbd00e1e3b101439",
+  "functions": {
+    "updateShipmentStatus": "83c128cf187031a27ce7ddcd46b4fdb26e3502e18defccfdea59f6969548a7e5",
+    "isValidTransition": "27db644f9a3ea8992c388a73b888ae4bc5c28daa41e50a39a710c94d4cb0dc65",
+    "toNumber": "4134db4a917261f2115c7f8750e9d49e34dfc7972dc98654303509cd936a60ec"
+  },
+  "declarations": {
+    "UpdateShipmentStatusResult": "export type UpdateShipmentStatusResult = {\n    outcome: \"updated\";\n    shipment: ShipmentStatusUpdate;\n} | {\n    outcome: \"not_found\";\n} | {\n    outcome: \"invalid_transition\";\n} | {\n    outcome: \"invalid_delivery_fee\";\n} | {\n    outcome: \"invalid_po_number\";\n};",
+    "updateShipmentStatus": "export async function updateShipmentStatus({ deliveryFee, googleSheetsService, poNumber, shippingBillUrl, shipmentId, status, }: {\n    deliveryFee?: number;\n    googleSheetsService: IGoogleSheetsService;\n    poNumber?: string;\n    shippingBillUrl?: string;\n    shipmentId: string;\n    status: ShipmentStatus;\n}): Promise<UpdateShipmentStatusResult> {\n    if (status === ShipmentStatus.Delivered &&\n        (deliveryFee === undefined ||\n            !Number.isFinite(deliveryFee) ||\n            deliveryFee < 0 ||\n            deliveryFee > 1000000000)) {\n        return { outcome: \"invalid_delivery_fee\" };\n    }\n    await googleSheetsService.shipments.updateRows(\"M1\", [\n        [\"shippingBillUrl\"],\n    ]);\n    const rows = await googleSheetsService.shipments.readRows(\"A2:M\");\n    const rowIndex = rows.findIndex(([id, , , , , , , , , , deletedAt]) => String(id ?? \"\").trim() === shipmentId &&\n        !String(deletedAt ?? \"\").trim());\n    if (rowIndex === -1) {\n        return { outcome: \"not_found\" };\n    }\n    const [, currentStatus, carrier, currentPoNumber, currentShippingFee, remark, currentShippedAt, currentDeliveredAt, createdAt, , deletedAt, createdBy, currentShippingBillUrl,] = rows[rowIndex];\n    if (!isValidTransition(String(currentStatus ?? \"\").trim(), status)) {\n        return { outcome: \"invalid_transition\" };\n    }\n    if (status === ShipmentStatus.Shipping &&\n        (!poNumber?.trim() || poNumber.length > 100)) {\n        return { outcome: \"invalid_po_number\" };\n    }\n    const now = new Date().toISOString();\n    const updatedPoNumber = status === ShipmentStatus.Shipping\n        ? (poNumber?.trim() ?? \"\")\n        : String(currentPoNumber ?? \"\").trim();\n    const shippingFee = status === ShipmentStatus.Delivered\n        ? (deliveryFee ?? null)\n        : toNumber(currentShippingFee);\n    const shippedAt = status === ShipmentStatus.Shipping\n        ? now\n        : String(currentShippedAt ?? \"\").trim();\n    const deliveredAt = status === ShipmentStatus.Delivered\n        ? now\n        : String(currentDeliveredAt ?? \"\").trim();\n    const updatedShippingBillUrl = status === ShipmentStatus.Shipping\n        ? shippingBillUrl?.trim() || \"\"\n        : String(currentShippingBillUrl ?? \"\").trim();\n    const sheetRowNumber = rowIndex + 2;\n    await googleSheetsService.shipments.updateRows(`B${sheetRowNumber}:M${sheetRowNumber}`, [\n        [\n            status,\n            carrier ?? \"\",\n            updatedPoNumber,\n            shippingFee,\n            remark ?? \"\",\n            shippedAt,\n            deliveredAt,\n            createdAt ?? \"\",\n            now,\n            deletedAt ?? \"\",\n            createdBy ?? \"\",\n            updatedShippingBillUrl,\n        ],\n    ]);\n    return {\n        outcome: \"updated\",\n        shipment: {\n            status,\n            poNumber: updatedPoNumber,\n            shippingFee,\n            shippedAt,\n            deliveredAt,\n            updatedAt: now,\n            shippingBillUrl: updatedShippingBillUrl,\n        },\n    };\n}",
+    "isValidTransition": "function isValidTransition(currentStatus: string, nextStatus: ShipmentStatus): boolean {\n    return ((currentStatus === ShipmentStatus.Draft &&\n        nextStatus === ShipmentStatus.ReadyToShip) ||\n        (currentStatus === ShipmentStatus.ReadyToShip &&\n            nextStatus === ShipmentStatus.Shipping) ||\n        (currentStatus === ShipmentStatus.Shipping &&\n            nextStatus === ShipmentStatus.Delivered));\n}",
+    "toNumber": "function toNumber(value: unknown): number | null {\n    if (typeof value === \"number\" && Number.isFinite(value)) {\n        return value;\n    }\n    if (typeof value !== \"string\" || !value.trim()) {\n        return null;\n    }\n    const number = Number(value.replace(/,/g, \"\"));\n    return Number.isFinite(number) ? number : null;\n}"
+  },
+  "examples": [
+    {
+      "name": "ready",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "ready_to_ship"
+      },
+      "options": {},
+      "result": {
+        "outcome": "updated",
+        "shipment": {
+          "status": "ready_to_ship",
+          "poNumber": "PO-1",
+          "shippingFee": null,
+          "shippedAt": "",
+          "deliveredAt": "",
+          "updatedAt": "2026-11-04T00:00:00.000Z",
+          "shippingBillUrl": ""
+        }
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ],
+        [
+          "update",
+          "shipments",
+          "B2:M2",
+          [
+            [
+              "ready_to_ship",
+              "Carrier",
+              "PO-1",
+              null,
+              "",
+              "",
+              "",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shipping",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "ready_to_ship",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            "old"
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "shipping",
+        "poNumber": " PO "
+      },
+      "options": {},
+      "result": {
+        "outcome": "updated",
+        "shipment": {
+          "status": "shipping",
+          "poNumber": "PO",
+          "shippingFee": null,
+          "shippedAt": "2026-11-04T00:00:00.000Z",
+          "deliveredAt": "",
+          "updatedAt": "2026-11-04T00:00:00.000Z",
+          "shippingBillUrl": ""
+        }
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ],
+        [
+          "update",
+          "shipments",
+          "B2:M2",
+          [
+            [
+              "shipping",
+              "Carrier",
+              "PO",
+              null,
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "delivered-zero",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "shipping",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "delivered",
+        "deliveryFee": 0
+      },
+      "options": {},
+      "result": {
+        "outcome": "updated",
+        "shipment": {
+          "status": "delivered",
+          "poNumber": "PO-1",
+          "shippingFee": 0,
+          "shippedAt": "",
+          "deliveredAt": "2026-11-04T00:00:00.000Z",
+          "updatedAt": "2026-11-04T00:00:00.000Z",
+          "shippingBillUrl": ""
+        }
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ],
+        [
+          "update",
+          "shipments",
+          "B2:M2",
+          [
+            [
+              "delivered",
+              "Carrier",
+              "PO-1",
+              0,
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "delivered-max",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "shipping",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "delivered",
+        "deliveryFee": 1000000000
+      },
+      "options": {},
+      "result": {
+        "outcome": "updated",
+        "shipment": {
+          "status": "delivered",
+          "poNumber": "PO-1",
+          "shippingFee": 1000000000,
+          "shippedAt": "",
+          "deliveredAt": "2026-11-04T00:00:00.000Z",
+          "updatedAt": "2026-11-04T00:00:00.000Z",
+          "shippingBillUrl": ""
+        }
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ],
+        [
+          "update",
+          "shipments",
+          "B2:M2",
+          [
+            [
+              "delivered",
+              "Carrier",
+              "PO-1",
+              1000000000,
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "missing",
+      "rows": {
+        "shipments": []
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "ready_to_ship"
+      },
+      "options": {},
+      "result": {
+        "outcome": "not_found"
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ]
+      ]
+    },
+    {
+      "name": "deleted",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "yes",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "ready_to_ship"
+      },
+      "options": {},
+      "result": {
+        "outcome": "not_found"
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ]
+      ]
+    },
+    {
+      "name": "invalid-transition",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "shipping"
+      },
+      "options": {},
+      "result": {
+        "outcome": "invalid_transition"
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ]
+      ]
+    },
+    {
+      "name": "invalid-po",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "ready_to_ship",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "shipping",
+        "poNumber": " "
+      },
+      "options": {},
+      "result": {
+        "outcome": "invalid_po_number"
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ]
+      ]
+    },
+    {
+      "name": "invalid-fee",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "shipping",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "delivered"
+      },
+      "options": {},
+      "result": {
+        "outcome": "invalid_delivery_fee"
+      },
+      "events": []
+    },
+    {
+      "name": "storage-failure",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "ready_to_ship"
+      },
+      "options": {
+        "failUpdate": "M1"
+      },
+      "error": {
+        "name": "Error",
+        "message": "synthetic update failure"
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "storage-failure",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "ready_to_ship"
+      },
+      "options": {
+        "failRead": "shipments"
+      },
+      "error": {
+        "name": "Error",
+        "message": "synthetic read failure"
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ]
+      ]
+    },
+    {
+      "name": "storage-failure",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "status": "ready_to_ship"
+      },
+      "options": {
+        "failUpdate": "B2:M2"
+      },
+      "error": {
+        "name": "Error",
+        "message": "synthetic update failure"
+      },
+      "events": [
+        [
+          "update",
+          "shipments",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "shipments",
+          "A2:M"
+        ],
+        [
+          "update",
+          "shipments",
+          "B2:M2",
+          [
+            [
+              "ready_to_ship",
+              "Carrier",
+              "PO-1",
+              null,
+              "",
+              "",
+              "",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              ""
+            ]
+          ]
+        ]
+      ]
+    }
+  ],
+  "serverFunctions": {
+    "createShipment": "export async function createShipment({\n  googleSheetsService,\n  poNumber,\n  carrier,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  poNumber: string;\n  carrier?: string;\n  createdBy: string;\n}): Promise<Shipment> {\n  return await executeCreateShipment({ poNumber, carrier, createdBy }, {\n    writer: new GoogleSheetsShipmentWriter(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}",
+    "listShipments": "export async function listShipments({\n  excludeStatuses = [],\n  googleSheetsService,\n  includeOrders = true,\n}: {\n  excludeStatuses?: readonly ShipmentStatus[];\n  googleSheetsService: IGoogleSheetsService;\n  includeOrders?: boolean;\n}): Promise<ShipmentListItem[]> {\n  return await executeListShipments(new GoogleSheetsShipmentListReader(googleSheetsService), {\n    excludeStatuses, includeOrders,\n  });\n}",
+    "getShipmentDetail": "export async function getShipmentDetail({\n  googleSheetsService,\n  shipmentId,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n}): Promise<ShipmentListItem | undefined> {\n  return await executeGetShipmentDetail(new GoogleSheetsShipmentListReader(googleSheetsService), shipmentId);\n}",
+    "linkOrderToShipment": "export async function linkOrderToShipment({\n  googleSheetsService,\n  shipmentId,\n  orderId,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n  orderId: string;\n  createdBy: string;\n}): Promise<LinkOrderToShipmentResult> {\n  return await executeLinkOrderToShipment({ shipmentId, orderId, createdBy }, {\n    store: new GoogleSheetsShipmentOrderLinkStore(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}"
+  }
+}

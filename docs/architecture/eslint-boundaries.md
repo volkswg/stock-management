@@ -76,3 +76,10 @@ Actual positive/negative fixtures cover aliases, relative/type/re-export/dynamic
 Three exact link-file scopes extend the existing server config: application allows only own public contracts/port, port only own contracts, and adapter only server-only, erased pure Sheets interfaces/rows, explicit original range/link-header constants and own contracts/port. Server composition adds exactly two owned link imports. Original creation/read scopes, browser rule files, dynamic/type-import/export restrictions and application time/env/IO bans are unchanged. No private Orders mapper or mixed legacy barrel is allowed in the new seam.
 
 Positive/negative tests cover aliases, relative/type/re-export/dynamic/require/import-type bypasses, erased Sheets types, explicit guards and browser isolation. Shared server graph tests include only three new link files and the pure link header constant and remain acyclic at runtime and including type edges. Browser ownership remains Shipments → Orders with no reverse feature dependency. [Deferred snapshot design, error identity, historical exceptions and verification](shipments-link-seam.md).
+
+
+## PR 12 Shipment status-update seam
+
+Three exact status-file overrides permit only own contracts/port in application, own contracts in port and server-only/erased pure Sheets interface/own contracts/port in adapter. Server composition adds two exact named application/adapter imports. Earlier creation/read/link scopes and Orders/Shipment browser rules remain unchanged. Existing bans on application time/random/env/IO, framework/config/provider/Drive/app/Node imports, forwarding exports and dynamic/require/import-type bypasses stay active.
+
+Actual positive/negative tests cover alias/relative/type/re-export paths, runtime interface imports, guards, pure opaque port and earlier scope nonexpansion. Closed runtime/type-only composed server graphs gain exactly the three status files and remain acyclic. Browser graphs reach no server/application/provider, with only Shipments → Orders ownership. [Method-order rationale, history and verification](shipments-status-seam.md).

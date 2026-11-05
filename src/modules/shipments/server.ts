@@ -13,6 +13,9 @@ import { GoogleSheetsShipmentListReader } from "./infrastructure/google-sheets/s
 import { linkOrderToShipment as executeLinkOrderToShipment, type LinkOrderToShipmentResult } from "./application/link-order-to-shipment";
 import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-sheets/shipment-order-link-store";
 
+import { updateShipmentStatus as executeUpdateShipmentStatus, type UpdateShipmentStatusResult } from "./application/update-shipment-status";
+import { GoogleSheetsShipmentStatusStore } from "./infrastructure/google-sheets/shipment-status-store";
+
 export async function createShipment({
   googleSheetsService,
   poNumber,
@@ -70,5 +73,26 @@ export async function linkOrderToShipment({
     store: new GoogleSheetsShipmentOrderLinkStore(googleSheetsService),
     now: () => new Date().toISOString(),
     createId: createSortableId,
+  });
+}
+
+export async function updateShipmentStatus({
+  deliveryFee,
+  googleSheetsService,
+  poNumber,
+  shippingBillUrl,
+  shipmentId,
+  status,
+}: {
+  deliveryFee?: number;
+  googleSheetsService: IGoogleSheetsService;
+  poNumber?: string;
+  shippingBillUrl?: string;
+  shipmentId: string;
+  status: ShipmentStatus;
+}): Promise<UpdateShipmentStatusResult> {
+  return await executeUpdateShipmentStatus({ deliveryFee, poNumber, shippingBillUrl, shipmentId, status }, {
+    store: new GoogleSheetsShipmentStatusStore(googleSheetsService),
+    now: () => new Date().toISOString(),
   });
 }
