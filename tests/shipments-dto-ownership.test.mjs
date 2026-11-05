@@ -1,3 +1,4 @@
+import { shipmentValidationFile, assertShipmentValidationImportHistory } from "./helpers/shipments-validation-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { relative, resolve } from "node:path";
@@ -34,7 +35,7 @@ test("DTO erasure leaves only original enum exports; legacy direct/barrel/server
 
 test("two exact production edits and chained PR15/PR16 history preserve every earlier fixture, route and enum/provider/browser byte",()=>{
   assertShipmentDtoHistory();
-  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>dtoHash(readFileSync(file))!==hash).map(([file])=>file).sort();
+  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>{if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return dtoHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
   assert.deepEqual(changed,[dtoContract,dtoLegacy].sort());
   assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(dtoBefore.productionHashes,f)),[]);
   for(const [file,hash]of Object.entries(dtoBefore.fixtureHashes))assert.equal(dtoHash(readFileSync(file)),hash,file);

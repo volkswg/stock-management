@@ -1,4 +1,4 @@
-import { ShipmentStatus } from "@/services/shipments";
+import { ShipmentStatus } from "@/modules/shipments/contracts";
 
 export async function readJsonBody(request: Request): Promise<unknown> {
   try {

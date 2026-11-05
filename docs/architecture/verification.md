@@ -448,3 +448,26 @@ All inherited HTTP/application/browser/fake Sheets/Drive transport tests stay ac
 Exact production diff: only modules/shipments/contracts.ts and services/shipments/types.ts. No new/deleted production file. Enum leaf/barrel/operations/ports/adapters/providers/auth/header/schema/routes/UI/LINE/Loyverse, package.json/yarn.lock/env/data remain unchanged. Only DTO physical ownership is complete; legacy leaf/barrel/HTTP consumer retirement, broader Orders cleanup and separately reviewed provider/SaaS/concurrency work remain deferred. [Detailed inventory, graph and evidence](shipments-dto-ownership.md).
 
 These are locally executed Codex checks, not independent GitHub/Vercel CI results. No live Google/LINE/Loyverse requests, production records/credentials, operational scripts, approval, merge or deployment. Synthetic evidence does not establish live provider permissions/availability, real-browser visual parity or concurrency safety. No baseline or final introduced failures remain; the one inherited lint warning is explicitly retained outside scope.
+
+## PR 17 — Shipment validation helper contract import
+
+Base: `7dbf3d4824a2b6d5cd38ee6b959c2c9f805f30b2`, verified exact latest main/merged PR16 commit, clean initial tree/no intervening commits. Branch: `refactor/shipments-validation-contract-import`. Node 24.22.1, existing dependencies. Latest main/signed commit fetched through GitHub connector; tree matches reviewed local source.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| `npm test` | 366 inherited pass; three new characterization tests pass against untouched helper before replacement | 370 pass = 366 inherited + 4 new, zero failures/skips |
+| `npm run lint` | Exit 0; inherited unused shipmentRow warning in tests/shipments-read-seam.test.mjs:6 | Exit 0; same one warning, no new warnings/errors |
+| `npm run typecheck` | Pass | Pass; unchanged nominal enum/type predicates and JSON helper signature |
+| Isolated credential-free build | Pass in `/tmp/validation-baseline-safe`, exact base archive | Pass in `/tmp/validation-safe-build`, final source copy |
+| Page/API contracts | 23 / 35 | Unchanged; all route source bytes and original fixture untouched |
+| Next app-paths manifest | SHA-256 `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e` | Byte-identical, same SHA-256 |
+
+Both builds run `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` with only tracked .env.example and no inherited application credentials. Env filenames inspected only; no secrets read/deleted. Existing isolated dependencies hardlinked without installs/package changes. Every final production file matches isolated build source. A complete base fingerprint comparison of 303 source files confirms only the named helper changed, by exactly the one import replacement.
+
+New fixture shipments-validation-before.json records complete original helper source/raw hash and four full function ASTs/hashes, plus unchanged API/contract/barrel/facade hashes. Actual base and PR16 inventory both match original helper hash `5a7eee8047a280c4c01df65457cd809de71b581ae565d1bbae1034a298e4d4df`. Reversing only the import restores the entire original bytes; every function declaration remains exact. Only this exact key in the PR15/PR16 inventory assertions gains named independently verified history handling. All previous fixtures and every other inventory assertion remain unchanged; no regenerated expectations, blanket exclusions or disabled tests.
+
+Four tests execute saved-original/current production helpers for status strings/nonstring/malformed inputs and enum identity, finite fee inclusive boundaries, pre-trim PO length/whitespace/noncoercion, JSON identity/receiver/invalid/getter/sync/async/deferred behavior, exact helper dependency graph and unchanged API/legacy export identity. A compile-time fixture retains value-is-ShipmentStatus nominal predicate, number/string predicates and Request→Promise<unknown>. Helper runtime closure is exactly public contracts/status; erased graph additionally reaches only Orders contracts. Complete inherited feature runtime/type DAG and browser ownership tests remain active: no reverse Orders module edge, no browser legacy/server/provider reachability, one unchanged enum and erased DTOs.
+
+All inherited HTTP tests remain unchanged, covering collection/detail/link/status/Drive outcomes and errors, JSON/multipart 200/201/400/404/409/500/503 behavior, A:M/A:G/M1-before-A2:M/B:M operations, upload/retention/cleanup/partial failures, Orders five-read projection and browser filters/guards. Production API/routes/UI, enum/DTOs, application/adapters/providers, all legacy exports, Sheets/Drive/LINE/Loyverse, package/lockfile/env/schema/data remain byte-identical. No ESLint or closed-loader change.
+
+Only helper dependency cleanup is complete. The three Shipment HTTP route mixed-barrel imports, legacy facade/barrel retirement, Orders cleanup, providers and SaaS work remain deferred. [Short architecture note and exact remaining consumers](shipments-validation-import.md). Results are Codex-local, not independent GitHub/Vercel CI; no live providers/credentials/records, operational scripts, merge/approval/deploy or real-browser/concurrency verification. No baseline or introduced failures remain; the inherited lint warning stays out of scope.

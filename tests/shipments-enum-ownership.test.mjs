@@ -1,3 +1,4 @@
+import { shipmentValidationFile, assertShipmentValidationImportHistory } from "./helpers/shipments-validation-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { relative, resolve } from "node:path";
@@ -43,7 +44,7 @@ test("physical, public, legacy leaf and unchanged barrel share one cached enum r
 });
 
 test("only the two reviewed existing production files change; all other source, routes, clients, DTO owners and provider bytes remain exact", () => {
-  const changes=Object.entries(enumBefore.productionHashes).filter(([file,hash])=>enumHash(readFileSync(file))!==hash).map(([file])=>file).sort();
+  const changes=Object.entries(enumBefore.productionHashes).filter(([file,hash])=>{if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return enumHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
   assert.deepEqual(changes,[contract,legacy].sort());
   assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(enumBefore.productionHashes,f)),[physical]);
   assert.equal(enumBefore.productionTypeScriptCount,277);
