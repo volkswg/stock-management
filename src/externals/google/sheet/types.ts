@@ -1,10 +1,5 @@
-export type GoogleSheetCellValue = string | number | boolean | null;
-export type GoogleSheetRow = GoogleSheetCellValue[];
-
-export type GoogleSheetRangeUpdate = {
-  range: string;
-  values: GoogleSheetRow[];
-};
+import type { GoogleSheetRow, IGoogleRowsSheet, IGoogleBatchRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
+export type { GoogleSheetCellValue, GoogleSheetRow, GoogleSheetRangeUpdate, IGoogleSheet, IGoogleRowsSheet, IGoogleBatchRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 
 export type GoogleSheetsConfig = {
   spreadsheetId: string;
@@ -35,28 +30,8 @@ export type GoogleSheetsConfig = {
   serviceAccountPrivateKey: string;
 };
 
-export interface IGoogleSheet {
-  checkConnection(): Promise<void>;
-  ensureExists(): Promise<void>;
-  read(range: string): Promise<GoogleSheetRow[]>;
-  append(range: string, values: GoogleSheetRow[]): Promise<void>;
-  update(range: string, values: GoogleSheetRow[]): Promise<void>;
-  clear(range: string): Promise<void>;
-}
-
-export interface IGoogleRowsSheet {
-  ensureExists?(): Promise<void>;
-  readRows(range?: string): Promise<GoogleSheetRow[]>;
-  appendRows(range: string, values: GoogleSheetRow[]): Promise<void>;
-  updateRows(range: string, values: GoogleSheetRow[]): Promise<void>;
-  deleteRow?(rowNumber: number): Promise<void>;
-}
-
-export interface IGoogleBatchRowsSheet extends IGoogleRowsSheet {
-  batchUpdateRows(updates: GoogleSheetRangeUpdate[]): Promise<void>;
-}
-
 export type MovementWorksheet = "userState" | "movementDetails" | "movementMasters";
+
 export type MovementRange = { sheet: MovementWorksheet; range: string };
 
 export interface IGoogleSheetsService {

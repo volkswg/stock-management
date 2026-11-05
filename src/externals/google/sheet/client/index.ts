@@ -1,1 +1,1 @@
-export { GoogleSheetsClient } from "./GoogleSheetsClient";
+export { GoogleSheetsClient } from "@/infrastructure/persistence/google-sheets/client/index";

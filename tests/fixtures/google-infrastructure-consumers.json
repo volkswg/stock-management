@@ -1,0 +1,816 @@
+{
+  "base": "9388f8a89f23e7547731ee649baf84af92c892e6",
+  "typescriptProductionFiles": 278,
+  "operationalScripts": [
+    "src/scripts/line-rich-menu-client.ts",
+    "src/scripts/rich-menu.ts",
+    "src/scripts/setup-rich-menu.ts"
+  ],
+  "consumers": [
+    {
+      "file": "src/app/api/line/webhook/route.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/app/api/movements/[id]/items/[itemId]/image/route.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/app/api/orders/[id]/images/route.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/app/api/orders/[id]/items/[itemId]/image/route.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/app/api/orders/with-images/route.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/app/api/shipments/[id]/route.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/auth/GoogleAccessTokenProvider.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/auth/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/auth/GoogleAccessTokenProvider.ts",
+      "specifier": "./types",
+      "target": "src/externals/google/auth/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/auth/GoogleOAuthRefreshTokenAuth.ts",
+      "specifier": "./GoogleAccessTokenProvider",
+      "target": "src/externals/google/auth/GoogleAccessTokenProvider.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/auth/GoogleOAuthRefreshTokenAuth.ts",
+      "specifier": "./types",
+      "target": "src/externals/google/auth/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/auth/GoogleServiceAccountAuth.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/auth/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/auth/GoogleServiceAccountAuth.ts",
+      "specifier": "./types",
+      "target": "src/externals/google/auth/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/auth/GoogleServiceAccountAuth.ts",
+      "specifier": "./GoogleAccessTokenProvider",
+      "target": "src/externals/google/auth/GoogleAccessTokenProvider.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/auth/GoogleServiceAccountAuth.ts",
+      "specifier": "../utils/jwt",
+      "target": "src/externals/google/utils/jwt.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/GoogleDriveService.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/drive/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/GoogleDriveService.ts",
+      "specifier": "./types",
+      "target": "src/externals/google/drive/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/drive/createGoogleDriveServiceFromConfig.ts",
+      "specifier": "../auth/GoogleOAuthRefreshTokenAuth",
+      "target": "src/externals/google/auth/GoogleOAuthRefreshTokenAuth.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/createGoogleDriveServiceFromConfig.ts",
+      "specifier": "../auth/GoogleServiceAccountAuth",
+      "target": "src/externals/google/auth/GoogleServiceAccountAuth.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/createGoogleDriveServiceFromConfig.ts",
+      "specifier": "../auth/types",
+      "target": "src/externals/google/auth/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/drive/createGoogleDriveServiceFromConfig.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/drive/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/createGoogleDriveServiceFromConfig.ts",
+      "specifier": "./GoogleDriveService",
+      "target": "src/externals/google/drive/GoogleDriveService.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/index.ts",
+      "specifier": "./GoogleDriveService",
+      "target": "src/externals/google/drive/GoogleDriveService.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/index.ts",
+      "specifier": "./createGoogleDriveServiceFromConfig",
+      "target": "src/externals/google/drive/createGoogleDriveServiceFromConfig.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/index.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/drive/const.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/drive/index.ts",
+      "specifier": "./types",
+      "target": "src/externals/google/drive/types.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/drive/types.ts",
+      "specifier": "../auth/types",
+      "target": "src/externals/google/auth/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/GoogleSheetsService.ts",
+      "specifier": "../auth/GoogleServiceAccountAuth",
+      "target": "src/externals/google/auth/GoogleServiceAccountAuth.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/GoogleSheetsService.ts",
+      "specifier": "./client",
+      "target": "src/externals/google/sheet/client/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/GoogleSheetsService.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/GoogleSheetsService.ts",
+      "specifier": "./types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/client/GoogleSheetsClient.ts",
+      "specifier": "../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/client/GoogleSheetsClient.ts",
+      "specifier": "../../auth/GoogleServiceAccountAuth",
+      "target": "src/externals/google/auth/GoogleServiceAccountAuth.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/client/GoogleSheetsClient.ts",
+      "specifier": "../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/client/index.ts",
+      "specifier": "./GoogleSheetsClient",
+      "target": "src/externals/google/sheet/client/GoogleSheetsClient.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./client",
+      "target": "src/externals/google/sheet/client/index.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "specifier": "../client",
+      "target": "src/externals/google/sheet/client/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "specifier": "../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employee-advances/PayrollRecordsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employee-compensations/EmployeeCompensationsSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employee-compensations/EmployeeCompensationsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employee-compensations/EmployeeCompensationsSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employee-timesheets/EmployeeTimesheetsSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employee-timesheets/EmployeeTimesheetsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employee-timesheets/EmployeeTimesheetsSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employees/EmployeesSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employees/EmployeesSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/employees/EmployeesSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/expenses/RecordsSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/expenses/RecordsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/index.ts",
+      "specifier": "./BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/movements/MovementSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/movements/MovementSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/order-bills/OrderBillsSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/order-bills/OrderBillsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/order-bills/OrderBillsSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/order-items/OrderItemsSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/order-items/OrderItemsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/order-items/OrderItemsSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/orders/OrdersSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/orders/OrdersSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+      "specifier": "../../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+      "specifier": "../../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+      "specifier": "../../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+      "specifier": "../../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+      "specifier": "../../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+      "specifier": "../../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+      "specifier": "../../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+      "specifier": "../../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+      "specifier": "../../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+      "specifier": "../../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+      "specifier": "../../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+      "specifier": "../../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+      "specifier": "../../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+      "specifier": "../../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+      "specifier": "../../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/shipment-orders/ShipmentOrdersSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/shipment-orders/ShipmentOrdersSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/shipment-orders/ShipmentOrdersSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/shipments/ShipmentsSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/shipments/ShipmentsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/shipments/ShipmentsSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/stock-adjustments/StockAdjustmentsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/stock-counts/StockCountsSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/stock-counts/StockCountsSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/stock-counts/StockCountsSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/user-state/UserStateSheet.ts",
+      "specifier": "../../const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/user-state/UserStateSheet.ts",
+      "specifier": "../../types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/user-state/UserStateSheet.ts",
+      "specifier": "../BaseGoogleSheet",
+      "target": "src/externals/google/sheet/sheets/BaseGoogleSheet.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/features/backend/line/services/movements/index.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/orders/infrastructure/google-sheets/order-writer.ts",
+      "specifier": "@/externals/google/sheet/const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts",
+      "specifier": "@/externals/google/drive/types",
+      "target": "src/externals/google/drive/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts",
+      "specifier": "@/externals/google/sheet/const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",
+      "specifier": "@/externals/google/sheet/const",
+      "target": "src/externals/google/sheet/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false
+    },
+    {
+      "file": "src/modules/shipments/server.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/modules/shipments/server.ts",
+      "specifier": "@/externals/google/drive/types",
+      "target": "src/externals/google/drive/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/services/line/events.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/services/line/events/orderBillImage.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/services/line/events/orderProductImage.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/services/movements/state.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/services/orders/createOrderWithImages.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/services/orders/listOrders.ts",
+      "specifier": "@/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "src/services/orders/replaceOrderProductImage.ts",
+      "specifier": "@/externals/google/drive",
+      "target": "src/externals/google/drive/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "tests/orders-detail.types.ts",
+      "specifier": "../src/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "tests/shipments-create.types.ts",
+      "specifier": "../src/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "tests/shipments-link.types.ts",
+      "specifier": "../src/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "tests/shipments-read.types.ts",
+      "specifier": "../src/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    },
+    {
+      "file": "tests/shipments-status.types.ts",
+      "specifier": "../src/externals/google/sheet/types",
+      "target": "src/externals/google/sheet/types.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true
+    }
+  ]
+}

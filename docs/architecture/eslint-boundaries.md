@@ -107,3 +107,8 @@ Only `eslint/shipments-boundaries.mjs` changes. A new exact pure-leaf scope plus
 ## PR 16 DTO physical ownership
 
 Only the public/legacy contract branches and import allowlists in shipments-boundaries.mjs change. Public requires erased Orders OrderStatus, exact ./status value import/named export and all eight exported aliases, original names/order/count. Legacy requires exactly runtime enum/eight erased DTO named forwards from public contracts. Both reject alternate/relative/legacy/provider/config/framework/Node paths, extra runtime exports/helpers, duplicates and dynamic/type-only/require/import-type bypasses. The pure enum branch, browser/client scopes and all Orders/Shipment server files retain their protections. Historical DTO AST equality is independent of lint shape. Browser graph expectations now forbid every legacy service file in both modes. [Exact scoped changes and tests](shipments-dto-ownership.md).
+
+
+## PR 19 — Google shared infrastructure
+
+PR 19 registers `eslint/google-infrastructure-boundaries.mjs`: exact-path import allowlists for the sixteen real root files, no feature/legacy implementation edges, dynamic/require/import-type bypasses or broad forwards, and erased-only AppConfig at the Drive factory. Existing Orders/Shipments scopes remain intact. Resolved runtime/type/browser graph and negative lint tests accompany the rules. [Details](google-shared-infrastructure.md).

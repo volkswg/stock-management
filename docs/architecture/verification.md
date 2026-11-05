@@ -498,3 +498,26 @@ The first final full run exposed one further retained link-route hash in browser
 All inherited HTTP status/validation/error, JSON/multipart/Drive/getter/cleanup, Sheets real-fake transport, financial/null/zero, IDs/clock/partial writes, Orders five-read projection and browser filter/picker/abort/guard tests remain enabled. No handler/helper bodies, validation order, config/provider laziness, actual ranges/modes/write timing, DTO/enum, app/adapter/provider, UI/page or package/lockfile/env/schema/data changes. No production import from the Shipment legacy barrel remains: TS resolver audit finds only its five internal leaf forwards. All legacy direct/barrel exports remain operational for tests/types/external compatibility; retirement and broader Orders/provider/SaaS/concurrency work are deferred.
 
 [Exact inventory, raw hashes, graph and remaining work](shipments-http-boundary.md). Results are Codex-local, not independent GitHub/Vercel CI. No live Google/LINE/Loyverse, production credentials/records, operational scripts, approval/merge/deploy or real-browser/concurrency verification. No baseline or final introduced failures remain; only the inherited warning is retained.
+
+## PR 19 — Google shared infrastructure
+
+Base `9388f8a89f23e7547731ee649baf84af92c892e6`, exact remote main / merged PR18 verified before editing and again before publication. Branch `refactor/google-shared-infrastructure`. Node 24.22.1, existing dependencies, no install or lockfile change.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| `npm test` | 375 pass; nine new characterization tests also passed against untouched providers | 395 pass = 375 inherited + 20 added; zero failures/skips |
+| `npm run lint` | Exit 0; inherited unused `shipmentRow` warning at tests/shipments-read-seam.test.mjs:6 | Exit 0; same warning only |
+| `npm run typecheck` | Pass | Pass, including generic type/constructor/factory nominal compatibility |
+| Isolated credential-free build | Pass, `/tmp/google-baseline-safe` exact base archive | Pass, `/tmp/google-final-safe` clean source copy |
+| Route source contracts | 23 page / 35 API | Unchanged fixture and source contracts; every route file byte-identical |
+| Next app-paths manifest | SHA-256 `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e` | Byte-identical, same SHA-256 |
+
+Both builds ran `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`, with no application .env files or inherited integration credentials. Only tracked .env.example in source inventories; filenames inspected, no secrets read or removed. Existing isolated dependencies were hardlinked, not installed. Final production source matches the isolated build source.
+
+Twenty added tests cover saved-original and actual OAuth/JWT/Drive-factory/Sheets transport behavior, service-account validation/claims/cache/errors, all fifteen old/new export/constructor identities, unchanged aggregate factory/worksheet inheritance, exact raw source restoration, six generic/aggregate declaration preservation, resolved consumer audit, exact lint/negative bypasses and runtime/type/browser graphs. Existing four real Drive-provider tests continue executing the moved production provider through its named forward; all 375 inherited HTTP/Sheets/Drive/Orders/browser regressions remain active. No old fixture is modified. The PR15/16 complete-source loops reconcile only the sixteen reviewed old paths against original expected hashes; the strict creation graph adds only four root pure interface/constant paths. No feature-specific loader is opened to arbitrary providers.
+
+Only fifteen old provider files become explicit named forwards and the old aggregate type file splits six generic declarations; sixteen real root infrastructure files are added. All other production sources remain byte-identical, including registry/factory/worksheets/headers, routes, application/use-case/adapter logic, UI/CSS, providers outside this move and operational scripts. Root implementations reconstruct original complete bytes after reversing four files' import-path corrections. Existing public signatures/nominal types, error handling and lazy construction are unchanged. Type graph retains the permitted erased Drive AppConfig input and config's existing pure helper trace; there is no runtime config import.
+
+No baseline failures. Initial new-test assumptions about VM array realms, worksheet inheritance and the number of audited scripts were corrected to match observed original production behavior; no product behavior or historical expected fixture was changed. Final suite has no introduced failure. Lint's one inherited warning remains separately identified.
+
+[Exact move/hash inventory, consumer graph, history/loader design and deferred ownership](google-shared-infrastructure.md). These are Codex-local executions, not independently executed GitHub/Vercel checks. No live Google/LINE/Loyverse requests, production credentials/records, operational scripts, real-browser visual checks, permission/availability/concurrency verification, approval, merge or deployment occurred. Aggregate registry/feature worksheets/compatibility retirement and broader provider/SaaS work remain separate milestones.

@@ -40,3 +40,8 @@ For each PR:
 ## Deferred design decisions
 
 Supabase adapter design, schema/data migration, transactional semantics, tenant ownership/IDs, authorization, workspace membership, billing and subscriptions each need separate requirements and threat/data migration review. The current shop master is not a tenant model. Do not add tenant columns, change IDs, dual-write stores, introduce fake tenancy, or promise transactional behavior while Sheets remains the backend. Port extraction is preparation for these decisions, not implementation of them.
+
+
+## PR 19 — Google shared infrastructure
+
+PR 19 implements only the shared Google auth/Sheets transport/Drive ownership slice. Existing named forwards, aggregate Sheets service/configuration and feature worksheet registry remain; this does not complete the broad shared-infrastructure/shell phase or authorize retiring compatibility paths. [Scope and exit evidence](google-shared-infrastructure.md).
