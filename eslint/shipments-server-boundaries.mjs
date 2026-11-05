@@ -131,6 +131,15 @@ export const shipmentsServerBoundaries = [
     },
   },
   {
+    files: ["src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports([
+        "server-only", "@/externals/google/sheet/types", "../../contracts",
+        "@/modules/orders/contracts", "@/modules/orders/application/ports/order-detail-shipment-projection",
+      ]),
+    },
+  },
+  {
     files: ["src/modules/shipments/server.ts"],
     rules: {
       ...serverRules,

@@ -1,9 +1,9 @@
+import { assertOrderDetailHistory } from "./helpers/orders-detail-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import test from "node:test";
 import { ESLint } from "eslint";
-import ts from "typescript";
 import { ordersServer } from "./helpers/orders-server.mjs";
 import { loadSource, plain } from "./helpers/load-source.mjs";
 
@@ -73,10 +73,7 @@ test("write adapter uses the existing OrdersSheet transport with one USER_ENTERE
 test("unmigrated image/draft implementations, barrel exports and detail orchestration remain unchanged", () => {
   const expected = JSON.parse(readFileSync(new URL("./fixtures/orders-seam-preserved.json", import.meta.url), "utf8"));
   for (const [file, hash] of Object.entries(expected.files)) assert.equal(createHash("sha256").update(readFileSync(file)).digest("hex"), hash, file);
-  const source = ts.createSourceFile("listOrders.ts", readFileSync("src/services/orders/listOrders.ts", "utf8"), ts.ScriptTarget.Latest, true);
-  const detail = source.statements.find((node) => ts.isFunctionDeclaration(node) && node.name?.text === "getOrderDetail");
-  const body = ts.createPrinter().printNode(ts.EmitHint.Unspecified, detail.body, source);
-  assert.equal(createHash("sha256").update(body).digest("hex"), expected.detailBodyHash);
+  assertOrderDetailHistory(expected.detailBodyHash);
 });
 
 test("detail PATCH retains 404/409 outcomes and validation without migrating its use case", async () => {
@@ -86,6 +83,8 @@ test("detail PATCH retains 404/409 outcomes and validation without migrating its
     "next/server": { NextResponse: Response }, "@/config": { getConfig: () => ({}) },
     "@/externals/google/sheet": { createGoogleSheetsServiceFromConfig: () => ({ orders: { readRows: async () => rows, updateRows: async () => assert.fail("Must not write") } }) },
     "@/services/orders": legacy,
+    "@/modules/orders/server": {},
+    "@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection": {},
   }, globals: { console: { error() {} } } });
   const patch = (body) => route.PATCH(new Request("https://example.test/order", { method: "PATCH", body: JSON.stringify(body) }), { params: Promise.resolve({ id: "id" }) });
   const missing = await patch({ totalPrice: 0 }); assert.equal(missing.status, 404); assert.deepEqual(await missing.json(), { error: "Order not found." });

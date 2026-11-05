@@ -18,6 +18,8 @@ PR 12 implements the [Shipment status-update seam](shipments-status-seam.md): a 
 
 PR 13 implements the [Shipment shipping-bill workflow seam](shipments-drive-seam.md): conditional upload/status coordination and cleanup are application-owned; a lazy Drive adapter reuses the existing provider. PATCH keeps validation/configuration/HTTP translation, with original getter/error/order and cleanup semantics. Orders server projection, enum ownership and legacy cleanup remain deferred; full milestone is incomplete.
 
+PR 14 implements [Orders detail Shipment projection decoupling](orders-detail-shipment-projection.md): Orders-owned business ports and a Shipment-owned adapter preserve five-read ordering and deferred mapping. App GET injects the projection; a narrow legacy-only composition keeps old callers compatible. No Orders-module reverse Shipment import is introduced. Enum physical ownership and broader legacy cleanup remain deferred.
+
 The application is a Next.js App Router shop operations workspace using React, Ant Design, Google Sheets, Google Drive, LINE, and Loyverse. Feature ownership should make changes local and make persistence replaceable without changing business behavior. Future SaaS and Supabase work is intentionally deferred: this phase introduces no provider, schema, auth, tenant context, subscription, or runtime abstraction.
 
 ```text

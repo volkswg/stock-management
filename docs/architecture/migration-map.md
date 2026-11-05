@@ -4,6 +4,20 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 14 — Orders detail Shipment projection implemented
+
+| Existing / new file | Ownership / compatibility |
+| --- | --- |
+| `src/services/orders/listOrders.ts` | Legacy detail wrapper composes injected port; original input/DTO/list exports remain, mapping removed |
+| `src/modules/orders/application/get-order-detail.ts` (new) | Flat five business reads, deferred existence/association/assembly |
+| `src/modules/orders/application/ports/order-detail-reader.ts` (new) | Three independent Order/product/bill business handles |
+| `src/modules/orders/application/ports/order-detail-shipment-projection.ts` (new) | Public Orders-owned link and Shipment projection query handles |
+| `src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts` (new) | First three original read calls, unchanged Order/product mapper and moved bill mapper |
+| `src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts` (new) | Last two read calls, exact reverse-link/nested Shipment mapping and local converter parity |
+| `src/modules/orders/server.ts`, `src/app/api/orders/[id]/route.ts` | Named injected detail operation and app GET composition; old create/list and HTTP PATCH/helper bodies unchanged |
+
+Historical detail body and old raw server hash remain authoritative; no existing fixture values regenerated. [Five-read/error parity, dependency direction and deferred cleanup](orders-detail-shipment-projection.md).
+
 ## PR 13 — Shipment shipping-bill workflow seam implemented
 
 | Existing / new file | Ownership and retained compatibility |

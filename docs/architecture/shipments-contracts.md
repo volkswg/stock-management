@@ -66,3 +66,6 @@ PR 12 extracts only the [status-update seam](shipments-status-seam.md), preservi
 
 
 PR 13 [bill orchestration](shipments-drive-seam.md) adds no browser/public DTO changes. Existing status union/DTO/enum and all earlier use cases remain unchanged. The server-only workflow wraps completed status results or internal drive_unavailable and retains a cleanup callback for later response errors; neither wrapper nor callback appears in HTTP JSON. Business storage metadata uses id/webViewLink while concrete File/Buffer/Drive types remain infrastructure/composition details. Orders projection/enum ownership/legacy retirement remain separate work; full milestone is incomplete.
+
+
+PR 14's [Orders-owned detail query port](orders-detail-shipment-projection.md) replaces legacy Orders detail's Shipment row/enum logic with a Shipment-owned projection adapter. It uses the existing public ShipmentStatus runtime object and exact original detail-specific mapper, returns only Orders OrderShipment and does not substitute ShipmentListItem/listShipments. The adapter's dependency on Orders public DTO/consumer port follows Shipments → Orders; Orders core receives injection with no reverse import. Enum definitions/contracts and all earlier Shipment use cases/Drive/providers remain untouched. Physical ownership and legacy retirement remain future milestones.

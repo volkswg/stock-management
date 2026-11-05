@@ -161,7 +161,9 @@ test("existing order detail HTTP handler preserves 200/400/404/500 response shap
     "next/server": { NextResponse: Response },
     "@/config": { getConfig: () => ({}) },
     "@/externals/google/sheet": { createGoogleSheetsServiceFromConfig: () => ({}) },
-    "@/services/orders": { getOrderDetail: async () => { if (result instanceof Error) throw result; return result; } },
+    "@/services/orders": {},
+    "@/modules/orders/server": { getOrderDetail: async () => { if (result instanceof Error) throw result; return result; } },
+    "@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection": { GoogleSheetsOrderDetailShipmentProjection: class {} },
   }, globals: { console: { error: () => {} } } });
   const get = (id) => route.GET(undefined, { params: Promise.resolve({ id }) });
   const success = await get("order/1");
