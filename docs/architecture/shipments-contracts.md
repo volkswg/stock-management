@@ -57,3 +57,6 @@ Current consumer locations after the UI follow-up: replace the three app present
 
 
 PR 10 now implements the [list/detail read seam](shipments-read-seam.md) behind the existing legacy server exports. Public/legacy DTOs and the single ShipmentStatus definition remain byte-identical. The new reader imports Orders public OrderStatus directly; it does not import Orders private mapping or alter Orders detail's five-sheet/latest-link projection. Creation stays unchanged. The two actual API GET consumers retain byte-identical imports/validation/responses. Linking/status/Drive, physical enum ownership and server projection decoupling remain future slices; the full milestone is incomplete.
+
+
+PR 11 extracts only [order linking](shipments-link-seam.md) behind unchanged API/barrel imports. Browser contracts and the pure legacy ShipmentOrder/ShipmentStatus leaf remain byte-identical. The original link error class/result/code types now belong to application, with exact direct legacy exports; they are server workflow contracts, not additions to this browser surface. The new business snapshot/write port uses own ShipmentOrder and deferred status lookup to preserve malformed-row/error precedence. Creation/read/UI/client/Orders picker are untouched. Status/Drive/Orders server projection/physical enum cleanup remain future work; full milestone remains incomplete.

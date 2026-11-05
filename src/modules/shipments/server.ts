@@ -10,6 +10,9 @@ import {
 } from "./application/list-shipments";
 import { GoogleSheetsShipmentListReader } from "./infrastructure/google-sheets/shipment-list-reader";
 
+import { linkOrderToShipment as executeLinkOrderToShipment, type LinkOrderToShipmentResult } from "./application/link-order-to-shipment";
+import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-sheets/shipment-order-link-store";
+
 export async function createShipment({
   googleSheetsService,
   poNumber,
@@ -50,4 +53,22 @@ export async function getShipmentDetail({
   shipmentId: string;
 }): Promise<ShipmentListItem | undefined> {
   return await executeGetShipmentDetail(new GoogleSheetsShipmentListReader(googleSheetsService), shipmentId);
+}
+
+export async function linkOrderToShipment({
+  googleSheetsService,
+  shipmentId,
+  orderId,
+  createdBy,
+}: {
+  googleSheetsService: IGoogleSheetsService;
+  shipmentId: string;
+  orderId: string;
+  createdBy: string;
+}): Promise<LinkOrderToShipmentResult> {
+  return await executeLinkOrderToShipment({ shipmentId, orderId, createdBy }, {
+    store: new GoogleSheetsShipmentOrderLinkStore(googleSheetsService),
+    now: () => new Date().toISOString(),
+    createId: createSortableId,
+  });
 }

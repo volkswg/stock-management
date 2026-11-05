@@ -1,0 +1,176 @@
+{
+  "base": "d4e512bc2f3d5273231f174dd117ea507ccb4850",
+  "file": "src/services/shipments/linkOrderToShipment.ts",
+  "source": "import {\n  lastColumnLetter,\n  SHIPMENT_ORDERS_SHEET_HEADERS,\n  type GoogleSheetCellValue,\n  type GoogleSheetRow,\n  type IGoogleSheetsService,\n} from \"@/externals/google/sheet\";\nimport { createSortableId } from \"../utils/createSortableId\";\nimport { ShipmentStatus, type ShipmentOrder } from \"./types\";\n\nexport type { ShipmentOrder } from \"./types\";\n\nexport type LinkOrderToShipmentResult = {\n  shipmentOrder: ShipmentOrder;\n  created: boolean;\n};\n\nexport type LinkOrderToShipmentErrorCode =\n  | \"shipment_not_found\"\n  | \"order_not_found\"\n  | \"order_already_linked\"\n  | \"shipment_not_linkable\";\n\nexport class LinkOrderToShipmentError extends Error {\n  constructor(\n    readonly code: LinkOrderToShipmentErrorCode,\n    message: string,\n  ) {\n    super(message);\n    this.name = \"LinkOrderToShipmentError\";\n  }\n}\n\nexport async function linkOrderToShipment({\n  googleSheetsService,\n  shipmentId,\n  orderId,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n  orderId: string;\n  createdBy: string;\n}): Promise<LinkOrderToShipmentResult> {\n  const [shipmentRows, orderRows, shipmentOrderRows] = await Promise.all([\n    googleSheetsService.shipments.readRows(),\n    googleSheetsService.orders.readRows(\"A:I\"),\n    googleSheetsService.shipmentOrders.readRows(),\n  ]);\n  const shipmentRow = shipmentRows.find(\n    (row) =>\n      toStringValue(row[0]) === shipmentId && !toStringValue(row[10]),\n  );\n  if (!shipmentRow) {\n    throw new LinkOrderToShipmentError(\n      \"shipment_not_found\",\n      \"Shipment not found.\",\n    );\n  }\n\n  const orderExists = orderRows.some(\n    (row) => toStringValue(row[0]) === orderId && !toStringValue(row[7]),\n  );\n  if (!orderExists) {\n    throw new LinkOrderToShipmentError(\"order_not_found\", \"Order not found.\");\n  }\n\n  const existingLink = findLatestShipmentOrder(shipmentOrderRows, orderId);\n  if (existingLink?.shipmentId === shipmentId) {\n    return { shipmentOrder: existingLink, created: false };\n  }\n  if (existingLink) {\n    throw new LinkOrderToShipmentError(\n      \"order_already_linked\",\n      \"Order is already linked to another shipment.\",\n    );\n  }\n\n  const shipmentStatus = toStringValue(shipmentRow[1]);\n  if (\n    shipmentStatus !== ShipmentStatus.Draft &&\n    shipmentStatus !== ShipmentStatus.ReadyToShip\n  ) {\n    throw new LinkOrderToShipmentError(\n      \"shipment_not_linkable\",\n      \"Orders can only be linked to draft or ready-to-ship shipments.\",\n    );\n  }\n\n  const now = new Date().toISOString();\n  const shipmentOrder: ShipmentOrder = {\n    id: createSortableId(),\n    shipmentId,\n    orderId,\n    createdAt: now,\n    updatedAt: now,\n    deletedAt: \"\",\n    createdBy,\n  };\n\n  await googleSheetsService.shipmentOrders.appendRows(\n    getShipmentOrdersAppendRange(),\n    [\n      [\n        shipmentOrder.id,\n        shipmentOrder.shipmentId,\n        shipmentOrder.orderId,\n        shipmentOrder.createdAt,\n        shipmentOrder.updatedAt,\n        shipmentOrder.deletedAt,\n        shipmentOrder.createdBy,\n      ],\n    ],\n  );\n\n  return { shipmentOrder, created: true };\n}\n\nfunction findLatestShipmentOrder(\n  rows: GoogleSheetRow[],\n  orderId: string,\n): ShipmentOrder | undefined {\n  for (let index = rows.length - 1; index >= 0; index -= 1) {\n    const shipmentOrder = mapShipmentOrderRow(rows[index]);\n    if (shipmentOrder?.orderId === orderId) {\n      return shipmentOrder;\n    }\n  }\n  return undefined;\n}\n\nfunction mapShipmentOrderRow(row: GoogleSheetRow): ShipmentOrder | undefined {\n  const [\n    id,\n    shipmentId,\n    orderId,\n    createdAt,\n    updatedAt,\n    deletedAt,\n    createdBy,\n  ] = row;\n  const normalizedId = toStringValue(id);\n  const normalizedShipmentId = toStringValue(shipmentId);\n  const normalizedOrderId = toStringValue(orderId);\n  if (\n    !normalizedId ||\n    !normalizedShipmentId ||\n    !normalizedOrderId ||\n    toStringValue(deletedAt)\n  ) {\n    return undefined;\n  }\n\n  return {\n    id: normalizedId,\n    shipmentId: normalizedShipmentId,\n    orderId: normalizedOrderId,\n    createdAt: toStringValue(createdAt),\n    updatedAt: toStringValue(updatedAt),\n    deletedAt: \"\",\n    createdBy: toStringValue(createdBy),\n  };\n}\n\nfunction getShipmentOrdersAppendRange(): string {\n  return `A:${lastColumnLetter(SHIPMENT_ORDERS_SHEET_HEADERS.length - 1)}`;\n}\n\nfunction toStringValue(value: GoogleSheetCellValue | undefined): string {\n  if (typeof value === \"string\") {\n    return value.trim();\n  }\n  if (typeof value === \"number\" || typeof value === \"boolean\") {\n    return String(value);\n  }\n  return \"\";\n}\n",
+  "rawHash": "2d6fda5536cf04d1416f199c505799b910b58bb183d80ab712a65cf41ad7636e",
+  "functions": {
+    "linkOrderToShipment": "f7cb1abe4ad9b5262ee75432b1b2542edbdcfa1f68d1b803da8293f43c06aa84",
+    "findLatestShipmentOrder": "ed4f58572dd89cec7ab43e6eacf0c0601d5ee935c2cf114b9ddec9bbdb44316d",
+    "mapShipmentOrderRow": "7f266c105d340cce94ab1c5ecf225a21a11270d20fb57f7d679a62f87bddb30e",
+    "getShipmentOrdersAppendRange": "2baebe5be2fd23570c818d2fc9139f7b184462521d95f4845cd243dd1c054a50",
+    "toStringValue": "2628b34ed95f3f581bb09e581282261ef0cbb6aa2f0ca4cc6ada1df178cb3d53"
+  },
+  "declarations": {
+    "LinkOrderToShipmentResult": "export type LinkOrderToShipmentResult = {\n    shipmentOrder: ShipmentOrder;\n    created: boolean;\n};",
+    "LinkOrderToShipmentErrorCode": "export type LinkOrderToShipmentErrorCode = \"shipment_not_found\" | \"order_not_found\" | \"order_already_linked\" | \"shipment_not_linkable\";",
+    "LinkOrderToShipmentError": "export class LinkOrderToShipmentError extends Error {\n    constructor(readonly code: LinkOrderToShipmentErrorCode, message: string) {\n        super(message);\n        this.name = \"LinkOrderToShipmentError\";\n    }\n}",
+    "linkOrderToShipment": "export async function linkOrderToShipment({ googleSheetsService, shipmentId, orderId, createdBy, }: {\n    googleSheetsService: IGoogleSheetsService;\n    shipmentId: string;\n    orderId: string;\n    createdBy: string;\n}): Promise<LinkOrderToShipmentResult> {\n    const [shipmentRows, orderRows, shipmentOrderRows] = await Promise.all([\n        googleSheetsService.shipments.readRows(),\n        googleSheetsService.orders.readRows(\"A:I\"),\n        googleSheetsService.shipmentOrders.readRows(),\n    ]);\n    const shipmentRow = shipmentRows.find((row) => toStringValue(row[0]) === shipmentId && !toStringValue(row[10]));\n    if (!shipmentRow) {\n        throw new LinkOrderToShipmentError(\"shipment_not_found\", \"Shipment not found.\");\n    }\n    const orderExists = orderRows.some((row) => toStringValue(row[0]) === orderId && !toStringValue(row[7]));\n    if (!orderExists) {\n        throw new LinkOrderToShipmentError(\"order_not_found\", \"Order not found.\");\n    }\n    const existingLink = findLatestShipmentOrder(shipmentOrderRows, orderId);\n    if (existingLink?.shipmentId === shipmentId) {\n        return { shipmentOrder: existingLink, created: false };\n    }\n    if (existingLink) {\n        throw new LinkOrderToShipmentError(\"order_already_linked\", \"Order is already linked to another shipment.\");\n    }\n    const shipmentStatus = toStringValue(shipmentRow[1]);\n    if (shipmentStatus !== ShipmentStatus.Draft &&\n        shipmentStatus !== ShipmentStatus.ReadyToShip) {\n        throw new LinkOrderToShipmentError(\"shipment_not_linkable\", \"Orders can only be linked to draft or ready-to-ship shipments.\");\n    }\n    const now = new Date().toISOString();\n    const shipmentOrder: ShipmentOrder = {\n        id: createSortableId(),\n        shipmentId,\n        orderId,\n        createdAt: now,\n        updatedAt: now,\n        deletedAt: \"\",\n        createdBy,\n    };\n    await googleSheetsService.shipmentOrders.appendRows(getShipmentOrdersAppendRange(), [\n        [\n            shipmentOrder.id,\n            shipmentOrder.shipmentId,\n            shipmentOrder.orderId,\n            shipmentOrder.createdAt,\n            shipmentOrder.updatedAt,\n            shipmentOrder.deletedAt,\n            shipmentOrder.createdBy,\n        ],\n    ]);\n    return { shipmentOrder, created: true };\n}",
+    "findLatestShipmentOrder": "function findLatestShipmentOrder(rows: GoogleSheetRow[], orderId: string): ShipmentOrder | undefined {\n    for (let index = rows.length - 1; index >= 0; index -= 1) {\n        const shipmentOrder = mapShipmentOrderRow(rows[index]);\n        if (shipmentOrder?.orderId === orderId) {\n            return shipmentOrder;\n        }\n    }\n    return undefined;\n}",
+    "mapShipmentOrderRow": "function mapShipmentOrderRow(row: GoogleSheetRow): ShipmentOrder | undefined {\n    const [id, shipmentId, orderId, createdAt, updatedAt, deletedAt, createdBy,] = row;\n    const normalizedId = toStringValue(id);\n    const normalizedShipmentId = toStringValue(shipmentId);\n    const normalizedOrderId = toStringValue(orderId);\n    if (!normalizedId ||\n        !normalizedShipmentId ||\n        !normalizedOrderId ||\n        toStringValue(deletedAt)) {\n        return undefined;\n    }\n    return {\n        id: normalizedId,\n        shipmentId: normalizedShipmentId,\n        orderId: normalizedOrderId,\n        createdAt: toStringValue(createdAt),\n        updatedAt: toStringValue(updatedAt),\n        deletedAt: \"\",\n        createdBy: toStringValue(createdBy),\n    };\n}",
+    "getShipmentOrdersAppendRange": "function getShipmentOrdersAppendRange(): string {\n    return `A:${lastColumnLetter(SHIPMENT_ORDERS_SHEET_HEADERS.length - 1)}`;\n}",
+    "toStringValue": "function toStringValue(value: GoogleSheetCellValue | undefined): string {\n    if (typeof value === \"string\") {\n        return value.trim();\n    }\n    if (typeof value === \"number\" || typeof value === \"boolean\") {\n        return String(value);\n    }\n    return \"\";\n}"
+  },
+  "examples": [
+    {
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ],
+        "orders": [
+          [
+            "o/1",
+            "unvalidated"
+          ]
+        ],
+        "shipmentOrders": []
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "orderId": "o/1",
+        "createdBy": " actor "
+      },
+      "result": {
+        "shipmentOrder": {
+          "id": "synthetic-shipment-id",
+          "shipmentId": "s/1",
+          "orderId": "o/1",
+          "createdAt": "2026-11-04T00:00:00.000Z",
+          "updatedAt": "2026-11-04T00:00:00.000Z",
+          "deletedAt": "",
+          "createdBy": " actor "
+        },
+        "created": true
+      },
+      "events": [
+        [
+          "read",
+          "shipments"
+        ],
+        [
+          "read",
+          "orders",
+          "A:I"
+        ],
+        [
+          "read",
+          "shipmentOrders"
+        ],
+        [
+          "append",
+          "shipmentOrders",
+          "A:G",
+          [
+            [
+              "synthetic-shipment-id",
+              "s/1",
+              "o/1",
+              "2026-11-04T00:00:00.000Z",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              " actor "
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "delivered",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ],
+        "orders": [
+          [
+            "o/1",
+            "unvalidated"
+          ]
+        ],
+        "shipmentOrders": [
+          [
+            " old ",
+            " s/1 ",
+            " o/1 ",
+            " c ",
+            " u ",
+            "",
+            " actor "
+          ]
+        ]
+      },
+      "input": {
+        "shipmentId": "s/1",
+        "orderId": "o/1",
+        "createdBy": " actor "
+      },
+      "result": {
+        "shipmentOrder": {
+          "id": "old",
+          "shipmentId": "s/1",
+          "orderId": "o/1",
+          "createdAt": "c",
+          "updatedAt": "u",
+          "deletedAt": "",
+          "createdBy": "actor"
+        },
+        "created": false
+      },
+      "events": [
+        [
+          "read",
+          "shipments"
+        ],
+        [
+          "read",
+          "orders",
+          "A:I"
+        ],
+        [
+          "read",
+          "shipmentOrders"
+        ]
+      ]
+    }
+  ],
+  "serverFunctions": {
+    "createShipment": "export async function createShipment({\n  googleSheetsService,\n  poNumber,\n  carrier,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  poNumber: string;\n  carrier?: string;\n  createdBy: string;\n}): Promise<Shipment> {\n  return await executeCreateShipment({ poNumber, carrier, createdBy }, {\n    writer: new GoogleSheetsShipmentWriter(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}",
+    "listShipments": "export async function listShipments({\n  excludeStatuses = [],\n  googleSheetsService,\n  includeOrders = true,\n}: {\n  excludeStatuses?: readonly ShipmentStatus[];\n  googleSheetsService: IGoogleSheetsService;\n  includeOrders?: boolean;\n}): Promise<ShipmentListItem[]> {\n  return await executeListShipments(new GoogleSheetsShipmentListReader(googleSheetsService), {\n    excludeStatuses, includeOrders,\n  });\n}",
+    "getShipmentDetail": "export async function getShipmentDetail({\n  googleSheetsService,\n  shipmentId,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n}): Promise<ShipmentListItem | undefined> {\n  return await executeGetShipmentDetail(new GoogleSheetsShipmentListReader(googleSheetsService), shipmentId);\n}"
+  }
+}
