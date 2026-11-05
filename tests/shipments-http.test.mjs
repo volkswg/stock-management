@@ -154,14 +154,14 @@ const clients = [
 ];
 for (const [name, args, invalid] of clients) test(`browser ${name} preserves API, fallback and invalid-success errors`, async () => {
   for (const [body, status, message] of [[{ error: "synthetic" }, 409, "synthetic"], [{}, 500, "Failed to load shipments."], [{}, 200, invalid]]) {
-    const api = loadSource("src/app/shipments/api.ts", { globals: { FormData, File, fetch: async () => Response.json(body, { status }) } });
+    const api = loadSource("src/modules/shipments/ui/api.ts", { globals: { FormData, File, fetch: async () => Response.json(body, { status }) } });
     await assert.rejects(api[name](...args), (error) => error.message === message);
   }
 });
 
 test("browser client preserves encoded requests, abort/no-store and JSON/multipart field names", async () => {
   const requests = [], bodies = [{ shipments: [], total: 0 }, { shipment: { orders: [] } }, { shipment: { status: "shipping", updatedAt: "now", shippingBillUrl: "url" } }, { shipment: {} }, { shipmentOrder: {}, created: false }];
-  const api = loadSource("src/app/shipments/api.ts", { globals: { FormData, File, fetch: async (url, init) => { requests.push({ url, init }); return Response.json(bodies.shift()); } } });
+  const api = loadSource("src/modules/shipments/ui/api.ts", { globals: { FormData, File, fetch: async (url, init) => { requests.push({ url, init }); return Response.json(bodies.shift()); } } });
   const controller = new AbortController();
   await api.getShipments({ includeOrders: false, excludeStatuses: ["delivered", "canceled"], signal: controller.signal });
   await api.getShipment("s/1", { signal: controller.signal });
@@ -201,11 +201,11 @@ test("exact maximum bill size is accepted, JSON delivery sends zero fee and HTTP
   const routes = shipmentRoutes(h.sheets, { drive: { uploadImage: async input => { assert.equal(input.bytes.length, 10 * 1024 * 1024); return { id: "fake", webViewLink: "url" }; } } });
   assert.equal((await routes.detail.PATCH(billRequest("application/pdf", 10 * 1024 * 1024), shipmentParams())).status, 200);
   assert.equal((await routes.detail.PATCH(jsonRequest({ status: "delivered", deliveryFee: 0 }), shipmentParams())).status, 200);
-  const calls = [], api = loadSource("src/app/shipments/api.ts", { globals: { fetch: async (url, init) => { calls.push({ url, init }); return Response.json({ shipment: { status: "delivered", updatedAt: "now", shippingBillUrl: "url" } }); } } });
+  const calls = [], api = loadSource("src/modules/shipments/ui/api.ts", { globals: { fetch: async (url, init) => { calls.push({ url, init }); return Response.json({ shipment: { status: "delivered", updatedAt: "now", shippingBillUrl: "url" } }); } } });
   await api.advanceShipmentStatus("s/1", { status: "delivered", deliveryFee: 0 });
   assert.deepEqual(JSON.parse(calls[0].init.body), { status: "delivered", deliveryFee: 0 });
   assert.equal(calls[0].init.headers["Content-Type"], "application/json");
   const abort = new DOMException("synthetic abort", "AbortError");
-  const aborted = loadSource("src/app/shipments/api.ts", { globals: { fetch: async () => { throw abort; } } });
+  const aborted = loadSource("src/modules/shipments/ui/api.ts", { globals: { fetch: async () => { throw abort; } } });
   await assert.rejects(aborted.getShipments(), error => error === abort);
 });

@@ -23,13 +23,13 @@ test("seven original Shipment source bodies/CSS and route wrapper metadata/JSX r
   for (const entry of baseline.wrappers) assert.equal(bodyHash(entry.file), entry.hash, entry.file);
   for (const [file, expected] of Object.entries(baseline.retained)) {
     if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
-    else assert.equal(hash(readFileSync(file)), expected, file);
+    else assert.equal(hash(readFileSync(baseline.files.find(e => e.from === file)?.to ?? file)), expected, file);
   }
 });
 
 test("Orders shipment picker executes original query/create/link requests through the real retained browser client", async () => {
   const requests = [], existing = { id: "ship/old", poNumber: "PO-OLD", status: "draft", carrier: "" };
-  const api = loadSource("src/app/shipments/api.ts", { globals: { fetch: async (url, init) => {
+  const api = loadSource("src/modules/shipments/ui/api.ts", { globals: { fetch: async (url, init) => {
     requests.push({ url, init });
     return Response.json(init.method === "POST" ? url.endsWith("/orders") ? { shipmentOrder: { id: "link" }, created: true } : { shipment: { id: "ship/new", poNumber: "PO-NEW", status: "draft", carrier: "Carrier" } } : { shipments: [existing], total: 1 });
   } } });
@@ -53,7 +53,7 @@ test("Orders shipment picker executes original query/create/link requests throug
 test("Shipment list/detail execute actual browser reads with encoded IDs and preserve abort signals", async () => {
   const shipment = { id: "s/1", status: "draft", poNumber: "PO", orders: [], carrier: "", createdAt: "", shippingFee: null, costSummary: null };
   for (const [file, component, props, expected] of [["ShipmentListPage.tsx", "ShipmentListPage", undefined, "/api/shipments"], ["[id]/ShipmentDetailPage.tsx", "ShipmentDetailPage", { shipmentId: "s/1" }, "/api/shipments/s%2F1"]]) {
-    const calls = [], api = loadSource("src/app/shipments/api.ts", { globals: { fetch: async (url, init) => { calls.push({ url, init }); return Response.json({ shipments: [shipment], total: 1, shipment }); } } });
+    const calls = [], api = loadSource("src/modules/shipments/ui/api.ts", { globals: { fetch: async (url, init) => { calls.push({ url, init }); return Response.json({ shipments: [shipment], total: 1, shipment }); } } });
     const h = componentHarness(shipmentUiPath(file), { api });
     h.render(h.module[component], props); await flush(); h.render();
     assert.equal(calls[0].url, expected); assert.equal(calls[0].init.cache, "no-store");
@@ -62,12 +62,12 @@ test("Shipment list/detail execute actual browser reads with encoded IDs and pre
   }
 });
 
-test("six implementations/styles move once; four wrappers reference their exact module UI/CSS entries", async () => {
+test("all seven implementations/styles move once; four wrappers reference their exact module UI/CSS entries", async () => {
   const { existsSync, readdirSync } = await import("node:fs");
-  const moved = baseline.files.filter(e => e.moved); assert.equal(moved.length, 6);
+  const moved = baseline.files.filter(e => e.moved); assert.equal(moved.length, 7);
   for (const entry of moved) { assert.equal(existsSync(entry.from), false, entry.from); assert.equal(existsSync(entry.to), true, entry.to); }
-  assert.equal(existsSync("src/modules/shipments/ui/api.ts"), false, "Client move is blocked pending picker decoupling, not replaced with a duplicate or hidden forwarding shim");
-  assert.deepEqual(readdirSync("src/app/shipments").sort(), ["[id]", "api.ts", "loading.tsx", "page.tsx"]);
+  assert.equal(existsSync("src/app/shipments/api.ts"), false, "No legacy client, compatibility shim or placeholder may remain");
+  assert.deepEqual(readdirSync("src/app/shipments").sort(), ["[id]", "loading.tsx", "page.tsx"]);
   assert.deepEqual(readdirSync("src/app/shipments/[id]").sort(), ["loading.tsx", "page.tsx"]);
   const imports = [
     ["src/app/shipments/page.tsx", "@/modules/shipments/ui/ShipmentListPage"],
@@ -82,5 +82,5 @@ test("six implementations/styles move once; four wrappers reference their exact 
     const text = readFileSync(file, "utf8");
     for (const entry of moved) assert.ok(!text.includes(`@/${entry.from.slice(4).replace(/\.(tsx?|css)$/, "")}`), `${file}: retired ${entry.from}`);
   }
-  for (const file of ["ShipmentListPage.tsx", "[id]/ShipmentDetailPage.tsx"]) assert.ok(source(shipmentUiPath(file)).statements.some(n => ts.isImportDeclaration(n) && n.moduleSpecifier.text === "@/app/shipments/api"));
+  for (const [file, client] of [["ShipmentListPage.tsx", "./api"], ["[id]/ShipmentDetailPage.tsx", "../api"]]) assert.ok(source(shipmentUiPath(file)).statements.some(n => ts.isImportDeclaration(n) && n.moduleSpecifier.text === client));
 });

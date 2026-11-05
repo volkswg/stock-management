@@ -18,28 +18,17 @@ const browserRules = {
 export const shipmentsBoundaries = [
   { files: ["src/modules/shipments/ui/**/*.{ts,tsx}"], rules: browserRules },
   {
-    // Only these two existing screens retain the original browser client until
-    // Orders picker decoupling. Moving that client now creates a module cycle.
-    files: ["src/modules/shipments/ui/ShipmentListPage.tsx", "src/modules/shipments/ui/[[]id[]]/ShipmentDetailPage.tsx"],
-    rules: {
-      "no-restricted-imports": ["error", { paths, patterns: [...serverPatterns, {
-        regex: "^(?!@/app/shipments/api$)(?:.*/)?app(/|$)",
-        message: "Only the exact retained @/app/shipments/api browser client is allowed until picker decoupling.",
-      }] }],
-    },
-  },
-  {
-    files: ["src/app/shipments/api.ts"],
+    files: ["src/modules/shipments/ui/api.ts"],
     rules: {
       ...browserRules,
       "no-restricted-imports": ["error", { patterns: [{
         regex: "^(?!@/modules/shipments/contracts$).*",
-        message: "The retained browser client may import only Shipment contracts; do not forward a relocated client and create a module cycle.",
+        message: "The Shipment browser client may import only its public contracts; never forward other clients or server implementations.",
       }] }],
       "no-restricted-syntax": [...noDynamicServerBypass,
-        { selector: "ImportDeclaration[importKind!='type']", message: "Retain only erased contract imports in the legacy browser client." },
-        { selector: "ExportAllDeclaration", message: "Do not forward Shipment implementations through the retained client." },
-        { selector: "ExportNamedDeclaration[source]", message: "Do not forward Shipment implementations through the retained client." }],
+        { selector: "ImportDeclaration[importKind!='type']", message: "Use only erased public contract imports in the Shipment browser client." },
+        { selector: "ExportAllDeclaration", message: "Do not forward Shipment implementations through the browser client." },
+        { selector: "ExportNamedDeclaration[source]", message: "Do not forward Shipment implementations through the browser client." }],
     },
   },
   {

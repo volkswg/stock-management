@@ -6,7 +6,7 @@ import {
   createShipmentMaster,
   getShipments,
   linkOrderToShipment,
-} from "@/app/shipments/api";
+} from "@/modules/shipments/ui/api";
 import { ShipmentStatus } from "@/modules/shipments/contracts";
 
 const shipmentPicker: OrderShipmentPickerPort = {

@@ -4,6 +4,17 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 8 — seventh Shipment UI/client move completed
+
+| Old / consumer path | Implemented location / correction |
+| --- | --- |
+| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts`, Git-recognized byte-identical rename; old file deleted, no shim |
+| `src/modules/shipments/ui/ShipmentListPage.tsx` | Import becomes `./api` only |
+| `src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx` | Import becomes `../api` only |
+| `src/app/orders/[id]/OrderDetailClient.tsx` | Import becomes `@/modules/shipments/ui/api` only; stable adapter/Orders port unchanged |
+
+All seven UI/client/style destinations below are now implemented. Original body/CSS/raw hashes are preserved, including the fixture's original from/to/hash history. Both Shipment app-client lint exceptions are removed, with no app imports permitted in module UI. The ownership direction remains Shipments → Orders for runtime/types; app composition consumes both modules. Full milestone, server projection, enum physical ownership and application/adapter work remain incomplete. [Final evidence and historical six-file scope](shipments-ui-relocation.md).
+
 ## Orders browser picker dependency seam — implemented
 
 | Source / public entrypoint | Implemented responsibility / remaining work |
@@ -12,14 +23,14 @@ Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.conf
 | `src/app/orders/[id]/OrderDetailClient.tsx` (new) | Client-side composition with a stable adapter delegating to the existing Shipment client; imports the public enum here only |
 | `src/modules/orders/ui/[id]/OrderDetailPage.tsx` | Required injected port threaded through content/card; removes both browser client/legacy enum imports; non-picker behavior unchanged |
 | `src/app/orders/[id]/page.tsx` | Import/render target becomes app client wrapper; metadata/params/orderId unchanged; no function-valued prop across RSC boundary |
-| `src/app/shipments/api.ts`, Shipment contracts/enum leaf and UI | Byte-identical, no forwarding shim or duplicate; client relocation remains a future PR |
+| `src/app/shipments/api.ts`, Shipment contracts/enum leaf and UI | Byte-identical definitions/implementation; PR 8 relocates only the client and updates its three consumer imports, with no shim |
 | Orders legacy server detail projection | Unchanged; separate consumer-owned server seam still needed |
 
-The browser prerequisite behind PR 6's historical client blocker is now satisfied: runtime/type-only browser ownership has only Shipments → Orders. The full seven-file client/UI slice and Shipments milestone remain incomplete. [Interface, exact graph and evidence](orders-shipment-picker.md).
+The browser prerequisite behind PR 6's historical client blocker is now satisfied: runtime/type-only browser ownership has only Shipments → Orders. PR 8 now completes the seven-file client/UI slice. The full Shipments milestone remains incomplete. [Interface, exact graph and evidence](orders-shipment-picker.md).
 
 ## Shipments UI follow-up — six safe moves; client deferred
 
-The [focused audit](shipments-ui-relocation.md) overrides the original proposed destinations for this slice. The full seven-file UI/client migration is incomplete.
+The [focused audit](shipments-ui-relocation.md) overrides the original proposed destinations for this slice. This table records the historical six-file step; PR 8 above completes the seventh move.
 
 | Original path | Current implementation / status |
 | --- | --- |
@@ -29,13 +40,13 @@ The [focused audit](shipments-ui-relocation.md) overrides the original proposed 
 | `src/app/shipments/shipments.module.css` | `src/modules/shipments/ui/shipments.module.css` (moved, bytes unchanged) |
 | `src/app/shipments/[id]/ShipmentDetailPage.tsx` | `src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx` (moved) |
 | `src/app/shipments/[id]/shipmentDetail.module.css` | `src/modules/shipments/ui/[id]/shipmentDetail.module.css` (moved, bytes unchanged) |
-| `src/app/shipments/api.ts` | Retained byte-identical; proposed `modules/shipments/ui/api.ts` remains future work; browser picker prerequisite now satisfied |
+| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts` (moved byte-identically in PR 8) |
 
-Four route/loading wrappers keep their locations and import module UI/CSS. Orders picker, Shipment contracts and API handlers remain unchanged. There is no forwarding compatibility entrypoint: the original app client remains the single implementation, used by the new Orders app composition and two Shipment screens. The historical reverse ownership trace below has been removed by the picker seam above.
+Four route/loading wrappers keep their locations and import module UI/CSS. Orders picker, Shipment contracts and API handlers remain unchanged. There is no forwarding compatibility entrypoint: PR 8 moves the single implementation into its module, used by Orders app composition and the two Shipment screens. The historical reverse ownership trace below has been removed by the picker seam above.
 
 ## PR 5 implemented first slice — Shipment contracts/characterization
 
-This status table overrides the proposed destinations below only for this narrow slice. The full Shipments milestone remains incomplete; that initial status is historical; the six UI/CSS follow-up moves above are now implemented, while the client and worksheet destinations remain future work.
+This status table overrides the proposed destinations below only for this narrow slice. The full Shipments milestone remains incomplete; that initial status is historical; the six UI/CSS follow-up moves above are now implemented, while worksheet destinations remain future work.
 
 | Current file | Implemented change | Remaining migration |
 | --- | --- | --- |
@@ -205,7 +216,7 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/app/shipments/[id]/loading.tsx` | `src/app/shipments/[id]/loading.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/[id]/page.tsx` | `src/app/shipments/[id]/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/[id]/shipmentDetail.module.css` | `src/modules/shipments/ui/[id]/shipmentDetail.module.css` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
-| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts` (deferred) | Original app implementation remains byte-identical here; Orders picker prerequisite is now satisfied, so a later scoped PR may relocate it. |
+| `src/app/shipments/api.ts` | `src/modules/shipments/ui/api.ts` (implemented PR 8) | Byte-identical move; original app path deleted without a forwarding shim. |
 | `src/app/shipments/loading.tsx` | `src/app/shipments/loading.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/page.tsx` | `src/app/shipments/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/shipments/shipmentListFormat.ts` | `src/modules/shipments/ui/shipmentListFormat.ts` | Moved in UI follow-up; body/CSS preserved, route entrypoints retained. |
