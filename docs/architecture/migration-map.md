@@ -4,6 +4,10 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 18 — Shipment HTTP boundary implemented
+
+Three Shipment API route files keep their paths and every non-import byte; operations now import module server and status imports module contracts. Module server names the original application LinkOrderToShipmentError through its existing import and a local export. No new class or legacy deletion. Source-only legacy audit now finds only the unchanged barrel's internal leaf forwards, with no production barrel consumer. [Exact files, historical source restoration and remaining compatibility](shipments-http-boundary.md).
+
 ## PR 17 — Shipment validation contract import implemented
 
 `src/features/backend/shipments/utils.ts` stays in place. Its only production change replaces the mixed legacy Shipment barrel import with the public ShipmentStatus contract import. All four declarations and all other production bytes remain unchanged. The three Shipment HTTP routes still consume the legacy barrel and remain deferred with facade retirement, Orders cleanup and provider/SaaS work. [Exact history, graph and verification](shipments-validation-import.md).

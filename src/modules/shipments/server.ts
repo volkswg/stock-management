@@ -10,7 +10,8 @@ import {
 } from "./application/list-shipments";
 import { GoogleSheetsShipmentListReader } from "./infrastructure/google-sheets/shipment-list-reader";
 
-import { linkOrderToShipment as executeLinkOrderToShipment, type LinkOrderToShipmentResult } from "./application/link-order-to-shipment";
+import { linkOrderToShipment as executeLinkOrderToShipment, LinkOrderToShipmentError, type LinkOrderToShipmentResult } from "./application/link-order-to-shipment";
+export { LinkOrderToShipmentError };
 import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-sheets/shipment-order-link-store";
 
 import { updateShipmentStatus as executeUpdateShipmentStatus, type UpdateShipmentStatusResult } from "./application/update-shipment-status";

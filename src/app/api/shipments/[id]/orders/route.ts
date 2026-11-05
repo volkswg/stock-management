@@ -4,7 +4,7 @@ import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   linkOrderToShipment,
   LinkOrderToShipmentError,
-} from "@/services/shipments";
+} from "@/modules/shipments/server";
 
 export const runtime = "nodejs";
 

@@ -12,9 +12,9 @@ import {
 } from "@/features/backend/shipments/utils";
 import {
   getShipmentDetail,
-  ShipmentStatus,
   updateShipmentStatus,
-} from "@/services/shipments";
+} from "@/modules/shipments/server";
+import { ShipmentStatus } from "@/modules/shipments/contracts";
 
 export const runtime = "nodejs";
 
