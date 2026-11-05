@@ -59,7 +59,7 @@ test("adapter/server reject broad exports, runtime interface/provider imports, c
 
 for (const runtime of [true, false]) test(`creation project graph is file-acyclic and uses only its exact owned/pure dependencies (${runtime ? "runtime" : "including types"})`, () => {
   const options = ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json", ts.sys.readFile).config, ts.sys, process.cwd()).options;
-  const common = [application, port, adapter, server, "src/services/shipments/createShipment.ts", "src/modules/shipments/contracts.ts", "src/services/shipments/types.ts", "src/modules/orders/contracts.ts", "src/services/utils/createSortableId.ts", "src/externals/google/sheet/types.ts", "src/externals/google/sheet/const.ts", "src/externals/google/sheet/sheets/shipments/const.ts"];
+  const common = [application, port, adapter, server, "src/modules/shipments/application/list-shipments.ts", "src/modules/shipments/application/ports/shipment-list-reader.ts", "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts", "src/services/shipments/createShipment.ts", "src/modules/shipments/contracts.ts", "src/services/shipments/types.ts", "src/modules/orders/contracts.ts", "src/services/utils/createSortableId.ts", "src/externals/google/sheet/types.ts", "src/externals/google/sheet/const.ts", "src/externals/google/sheet/sheets/shipments/const.ts"];
   const active = [], visited = new Set(), edges = new Set();
   function visit(file) {
     assert.ok(!active.includes(file), `File cycle: ${[...active, file].join(" -> ")}`); if (visited.has(file)) return;
@@ -70,7 +70,7 @@ for (const runtime of [true, false]) test(`creation project graph is file-acycli
       const clause = n.importClause, elements = clause?.namedBindings && ts.isNamedImports(clause.namedBindings) ? clause.namedBindings.elements : undefined;
       if (runtime && (n.isTypeOnly || clause?.isTypeOnly || (elements?.length && !clause.name && elements.every(e => e.isTypeOnly)))) continue;
       const specifier = n.moduleSpecifier.text;
-      if (["server-only", "node:crypto"].includes(specifier)) { assert.ok(specifier === "server-only" ? [adapter, server].includes(file) : file === "src/services/utils/createSortableId.ts"); continue; }
+      if (["server-only", "node:crypto"].includes(specifier)) { assert.ok(specifier === "server-only" ? [adapter, server, "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts"].includes(file) : file === "src/services/utils/createSortableId.ts"); continue; }
       const resolved = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName; assert.ok(resolved, `${file}: ${specifier}`);
       const target = relative(process.cwd(), resolved).replaceAll("\\", "/"); assert.ok(target.startsWith("src/"), target);
       const fromOwner = /^src\/modules\/([^/]+)\//.exec(file)?.[1], toOwner = /^src\/modules\/([^/]+)\//.exec(target)?.[1];

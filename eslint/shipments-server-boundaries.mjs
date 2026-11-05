@@ -2,12 +2,12 @@ import { noDynamicServerBypass } from "./orders-boundaries.mjs";
 
 function onlyImports(paths) {
   const choices = paths.map(path => path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
-  return ["error", { patterns: [{ regex: `^(?!(?:${choices})$).+`, message: "Import outside the exact Shipment creation seam; keep the business port independent and server wiring explicit." }] }];
+  return ["error", { patterns: [{ regex: `^(?!(?:${choices})$).+`, message: "Import outside the exact Shipment creation/read seams; keep the business port independent and server wiring explicit." }] }];
 }
 const staticExports = [
   ...noDynamicServerBypass,
   { selector: "ExportAllDeclaration", message: "Expose named Shipment operations, never a broad barrel." },
-  { selector: "ExportNamedDeclaration[source]", message: "Do not forward server/provider implementations from the Shipment creation seam." },
+  { selector: "ExportNamedDeclaration[source]", message: "Do not forward server/provider implementations from the Shipment server seams." },
 ];
 const serverRules = {
   "no-restricted-syntax": [...staticExports,
@@ -38,12 +38,34 @@ export const shipmentsServerBoundaries = [
     },
   },
   {
+    files: ["src/modules/shipments/application/list-shipments.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../contracts", "./ports/shipment-list-reader"]),
+    },
+  },
+  {
+    files: ["src/modules/shipments/application/ports/shipment-list-reader.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../../contracts"]),
+    },
+  },
+  {
+    files: ["src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports([
+        "server-only", "@/externals/google/sheet/types", "@/modules/orders/contracts",
+        "../../contracts", "../../application/ports/shipment-list-reader",
+      ]),
+    },
+  },
+  {
     files: ["src/modules/shipments/server.ts"],
     rules: {
       ...serverRules,
       "no-restricted-imports": onlyImports([
         "server-only", "@/externals/google/sheet/types", "@/services/utils/createSortableId", "./contracts",
         "./application/create-shipment", "./infrastructure/google-sheets/shipment-writer",
+        "./application/list-shipments", "./infrastructure/google-sheets/shipment-list-reader",
       ]),
     },
   },
