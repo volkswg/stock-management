@@ -59,6 +59,28 @@ export const shipmentsServerBoundaries = [
     },
   },
   {
+    files: ["src/modules/shipments/application/link-order-to-shipment.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../contracts", "./ports/shipment-order-link-store"]),
+    },
+  },
+  {
+    files: ["src/modules/shipments/application/ports/shipment-order-link-store.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["../../contracts"]),
+    },
+  },
+  {
+    files: ["src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports([
+        "server-only", "@/externals/google/sheet/types", "@/externals/google/sheet/const",
+        "@/externals/google/sheet/sheets/shipment-orders/const", "../../contracts",
+        "../../application/ports/shipment-order-link-store",
+      ]),
+    },
+  },
+  {
     files: ["src/modules/shipments/server.ts"],
     rules: {
       ...serverRules,
@@ -66,6 +88,7 @@ export const shipmentsServerBoundaries = [
         "server-only", "@/externals/google/sheet/types", "@/services/utils/createSortableId", "./contracts",
         "./application/create-shipment", "./infrastructure/google-sheets/shipment-writer",
         "./application/list-shipments", "./infrastructure/google-sheets/shipment-list-reader",
+        "./application/link-order-to-shipment", "./infrastructure/google-sheets/shipment-order-link-store",
       ]),
     },
   },

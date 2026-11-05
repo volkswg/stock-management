@@ -29,7 +29,7 @@ export function fakeShipmentSheets(initial = {}, { failRead, failUpdate, failApp
   return { sheets, rows, events };
 }
 
-// Closed legacy graph plus the exact Shipment creation/read seams and pure constants.
+// Closed legacy graph plus the exact Shipment creation/read/link seams and pure constants.
 // Config, transport/auth and Drive implementations are never evaluated.
 export function shipmentServices({ globals = {}, createId = () => "synthetic-shipment-id" } = {}) {
   const cache = new Map();
@@ -38,6 +38,10 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
     "src/modules/shipments/application/ports/created-shipment-writer.ts",
     "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",
     "src/modules/shipments/server.ts",
+    "src/modules/shipments/application/link-order-to-shipment.ts",
+    "src/modules/shipments/application/ports/shipment-order-link-store.ts",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts",
+    "src/externals/google/sheet/sheets/shipment-orders/const.ts",
     "src/modules/shipments/application/list-shipments.ts",
     "src/modules/shipments/application/ports/shipment-list-reader.ts",
     "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts",

@@ -1,3 +1,4 @@
+import { migratedLinkFunctions, assertShipmentLinkHistory } from "./helpers/shipments-link-history.mjs";
 import { migratedReadFunctions, assertShipmentReadHistory } from "./helpers/shipments-read-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -43,6 +44,7 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     assert.equal(hash(body), expected, file);
   }
   for (const [key, expected] of Object.entries(baseline.functions)) {
+    if (migratedLinkFunctions.has(key)) { assertShipmentLinkHistory(key, expected); continue; }
     if (migratedReadFunctions.has(key)) { assertShipmentReadHistory(key, expected); continue; }
     if (migratedCreationFunctions.has(key)) { assertShipmentCreationHistory(key, expected); continue; }
     const split = key.lastIndexOf(":"), file = key.slice(0, split), name = key.slice(split + 1), source = parse(file);
