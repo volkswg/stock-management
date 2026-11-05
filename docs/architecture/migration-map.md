@@ -4,6 +4,19 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 10 — Shipment list/detail read seam implemented
+
+| Existing / new file | Ownership and retained compatibility |
+| --- | --- |
+| `src/services/shipments/listShipments.ts` | Exactly two named read re-exports from `modules/shipments/server`; direct/barrel identity retained |
+| `src/modules/shipments/application/list-shipments.ts` (new) | Final filtering, relation assembly, unchanged pure costs, reversal and full-list detail lookup |
+| `src/modules/shipments/application/ports/shipment-list-reader.ts` (new) | `ShipmentListReader` and business-only `ShipmentReadModel`, readonly sequences/maps |
+| `src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts` (new) | Lazy existing-service reader, four concurrent conditional reads and eight unchanged mapping/grouping helpers |
+| `src/modules/shipments/server.ts` | Adds only named list/detail composition; original creation declaration/body unchanged |
+| Legacy barrel, APIs, Orders detail, creation/link/status/provider/UI/client/contracts | Byte-identical; remain at existing locations |
+
+The original thirteen read function hashes remain in historical fixtures: eleven helpers match at exact new destinations; two orchestrations have explicit executable parity/history checks. No blanket skip or fixture regeneration. [Port, callers, tests and remaining work](shipments-read-seam.md). Only this read slice is complete.
+
 ## PR 9 — Shipment creation seam implemented
 
 | Existing / new file | Ownership and retained compatibility |
@@ -388,7 +401,7 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/services/shipments/createShipment.ts` | `src/modules/shipments/application/create-shipment.ts` + writer adapter/server (implemented PR 9) | Legacy path is one named composition re-export; original business object and A:M payload preserved. |
 | `src/services/shipments/index.ts` | `src/modules/shipments/contracts.ts + server.ts` | Retire broad barrel after consumers use explicit browser/server exports; not a whole-file move. |
 | `src/services/shipments/linkOrderToShipment.ts` | `src/modules/shipments/application/linkOrderToShipment.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
-| `src/services/shipments/listShipments.ts` | `src/modules/shipments/application/listShipments.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
+| `src/services/shipments/listShipments.ts` | `src/modules/shipments/application/list-shipments.ts` + reader port/Sheets adapter (implemented PR 10) | Two named legacy re-exports retained; final read rules in application, row decoding in adapter; see implemented table above. |
 | `src/services/shipments/types.ts` | `src/modules/shipments/contracts.ts` (public surface implemented; physical definitions deferred) | Pure enum/DTO leaf retained temporarily for Orders bridge/identity; physically transfer only after decoupling. No speculative domain layer. |
 | `src/services/shipments/updateShipmentStatus.ts` | `src/modules/shipments/application/updateShipmentStatus.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/stock-adjustments/manageStockAdjustments.ts` | `src/modules/inventory/application/manageStockAdjustments.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |

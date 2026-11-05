@@ -29,15 +29,18 @@ export function fakeShipmentSheets(initial = {}, { failRead, failUpdate, failApp
   return { sheets, rows, events };
 }
 
-// Closed legacy graph plus the exact Shipment creation seam and pure constants.
+// Closed legacy graph plus the exact Shipment creation/read seams and pure constants.
 // Config, transport/auth and Drive implementations are never evaluated.
 export function shipmentServices({ globals = {}, createId = () => "synthetic-shipment-id" } = {}) {
   const cache = new Map();
-  const creationFiles = new Set([
+  const seamFiles = new Set([
     "src/modules/shipments/application/create-shipment.ts",
     "src/modules/shipments/application/ports/created-shipment-writer.ts",
     "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",
     "src/modules/shipments/server.ts",
+    "src/modules/shipments/application/list-shipments.ts",
+    "src/modules/shipments/application/ports/shipment-list-reader.ts",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts",
     "src/externals/google/sheet/const.ts",
     "src/externals/google/sheet/sheets/shipments/const.ts",
   ]);
@@ -50,7 +53,7 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
     if (file === "src/services/orders/createDraftOrder.ts") return load("src/modules/orders/contracts.ts");
     if (file === "src/services/utils/createSortableId.ts") return { createSortableId: createId };
     if (cache.has(file)) return cache.get(file);
-    if (!creationFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
+    if (!seamFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
     const imports = new Proxy({}, {
       getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
       get(_, specifier) {
