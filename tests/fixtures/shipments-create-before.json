@@ -1,0 +1,369 @@
+{
+  "base": "7900bc93c8de47cf435fa14b07a76eb8710b9348",
+  "file": "src/services/shipments/createShipment.ts",
+  "source": "import {\n  lastColumnLetter,\n  SHIPMENTS_SHEET_HEADERS,\n  type IGoogleSheetsService,\n} from \"@/externals/google/sheet\";\nimport { createSortableId } from \"../utils/createSortableId\";\nimport { ShipmentStatus, type Shipment } from \"./types\";\n\nexport async function createShipment({\n  googleSheetsService,\n  poNumber,\n  carrier,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  poNumber: string;\n  carrier?: string;\n  createdBy: string;\n}): Promise<Shipment> {\n  const normalizedPoNumber = poNumber.trim();\n  if (!normalizedPoNumber) {\n    throw new Error(\"Shipment PO number is required.\");\n  }\n\n  const now = new Date().toISOString();\n  const shipment: Shipment = {\n    id: createSortableId(),\n    status: ShipmentStatus.Draft,\n    carrier: carrier?.trim() || \"\",\n    poNumber: normalizedPoNumber,\n    shippingFee: null,\n    remark: \"\",\n    shippedAt: \"\",\n    deliveredAt: \"\",\n    createdAt: now,\n    updatedAt: now,\n    deletedAt: \"\",\n    createdBy,\n    shippingBillUrl: \"\",\n  };\n\n  await googleSheetsService.shipments.appendRows(getShipmentsAppendRange(), [\n    [\n      shipment.id,\n      shipment.status,\n      shipment.carrier,\n      shipment.poNumber,\n      shipment.shippingFee,\n      shipment.remark,\n      shipment.shippedAt,\n      shipment.deliveredAt,\n      shipment.createdAt,\n      shipment.updatedAt,\n      shipment.deletedAt,\n      shipment.createdBy,\n      shipment.shippingBillUrl,\n    ],\n  ]);\n\n  return shipment;\n}\n\nfunction getShipmentsAppendRange(): string {\n  return `A:${lastColumnLetter(SHIPMENTS_SHEET_HEADERS.length - 1)}`;\n}\n",
+  "rawHash": "36549a540035f803ddb9ae984182058fa0c5cc40658c244f2b770495b221cc6e",
+  "functions": {
+    "createShipment": "09af3ac3a266f9d4f7055ce06860490632a771c555534c517f33e9e079655494",
+    "getShipmentsAppendRange": "b959dd72a4f8917a6b20bc43335e9f9b6e8a7a7c55afc89e0cd6d2b2eb2e0f11"
+  },
+  "inputType": "{\n    googleSheetsService: IGoogleSheetsService;\n    poNumber: string;\n    carrier?: string;\n    createdBy: string;\n}",
+  "returnType": "Promise<Shipment>",
+  "time": "2026-11-04T00:00:00.000Z",
+  "id": "synthetic-shipment-id",
+  "cases": [
+    {
+      "input": {
+        "poNumber": " PO-1 ",
+        "carrier": " Carrier ",
+        "createdBy": " actor "
+      },
+      "shipment": {
+        "id": "synthetic-shipment-id",
+        "status": "draft",
+        "carrier": "Carrier",
+        "poNumber": "PO-1",
+        "shippingFee": null,
+        "remark": "",
+        "shippedAt": "",
+        "deliveredAt": "",
+        "createdAt": "2026-11-04T00:00:00.000Z",
+        "updatedAt": "2026-11-04T00:00:00.000Z",
+        "deletedAt": "",
+        "createdBy": " actor ",
+        "shippingBillUrl": ""
+      },
+      "keys": [
+        "id",
+        "status",
+        "carrier",
+        "poNumber",
+        "shippingFee",
+        "remark",
+        "shippedAt",
+        "deliveredAt",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "createdBy",
+        "shippingBillUrl"
+      ],
+      "appends": [
+        [
+          "A:M",
+          [
+            [
+              "synthetic-shipment-id",
+              "draft",
+              "Carrier",
+              "PO-1",
+              null,
+              "",
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              " actor ",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "input": {
+        "poNumber": "PO",
+        "createdBy": "web"
+      },
+      "shipment": {
+        "id": "synthetic-shipment-id",
+        "status": "draft",
+        "carrier": "",
+        "poNumber": "PO",
+        "shippingFee": null,
+        "remark": "",
+        "shippedAt": "",
+        "deliveredAt": "",
+        "createdAt": "2026-11-04T00:00:00.000Z",
+        "updatedAt": "2026-11-04T00:00:00.000Z",
+        "deletedAt": "",
+        "createdBy": "web",
+        "shippingBillUrl": ""
+      },
+      "keys": [
+        "id",
+        "status",
+        "carrier",
+        "poNumber",
+        "shippingFee",
+        "remark",
+        "shippedAt",
+        "deliveredAt",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "createdBy",
+        "shippingBillUrl"
+      ],
+      "appends": [
+        [
+          "A:M",
+          [
+            [
+              "synthetic-shipment-id",
+              "draft",
+              "",
+              "PO",
+              null,
+              "",
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "input": {
+        "poNumber": "PO",
+        "carrier": "",
+        "createdBy": ""
+      },
+      "shipment": {
+        "id": "synthetic-shipment-id",
+        "status": "draft",
+        "carrier": "",
+        "poNumber": "PO",
+        "shippingFee": null,
+        "remark": "",
+        "shippedAt": "",
+        "deliveredAt": "",
+        "createdAt": "2026-11-04T00:00:00.000Z",
+        "updatedAt": "2026-11-04T00:00:00.000Z",
+        "deletedAt": "",
+        "createdBy": "",
+        "shippingBillUrl": ""
+      },
+      "keys": [
+        "id",
+        "status",
+        "carrier",
+        "poNumber",
+        "shippingFee",
+        "remark",
+        "shippedAt",
+        "deliveredAt",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "createdBy",
+        "shippingBillUrl"
+      ],
+      "appends": [
+        [
+          "A:M",
+          [
+            [
+              "synthetic-shipment-id",
+              "draft",
+              "",
+              "PO",
+              null,
+              "",
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "input": {
+        "poNumber": "PO",
+        "carrier": "   ",
+        "createdBy": "who"
+      },
+      "shipment": {
+        "id": "synthetic-shipment-id",
+        "status": "draft",
+        "carrier": "",
+        "poNumber": "PO",
+        "shippingFee": null,
+        "remark": "",
+        "shippedAt": "",
+        "deliveredAt": "",
+        "createdAt": "2026-11-04T00:00:00.000Z",
+        "updatedAt": "2026-11-04T00:00:00.000Z",
+        "deletedAt": "",
+        "createdBy": "who",
+        "shippingBillUrl": ""
+      },
+      "keys": [
+        "id",
+        "status",
+        "carrier",
+        "poNumber",
+        "shippingFee",
+        "remark",
+        "shippedAt",
+        "deliveredAt",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "createdBy",
+        "shippingBillUrl"
+      ],
+      "appends": [
+        [
+          "A:M",
+          [
+            [
+              "synthetic-shipment-id",
+              "draft",
+              "",
+              "PO",
+              null,
+              "",
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "who",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "input": {
+        "poNumber": "PO",
+        "carrier": null,
+        "createdBy": "who"
+      },
+      "shipment": {
+        "id": "synthetic-shipment-id",
+        "status": "draft",
+        "carrier": "",
+        "poNumber": "PO",
+        "shippingFee": null,
+        "remark": "",
+        "shippedAt": "",
+        "deliveredAt": "",
+        "createdAt": "2026-11-04T00:00:00.000Z",
+        "updatedAt": "2026-11-04T00:00:00.000Z",
+        "deletedAt": "",
+        "createdBy": "who",
+        "shippingBillUrl": ""
+      },
+      "keys": [
+        "id",
+        "status",
+        "carrier",
+        "poNumber",
+        "shippingFee",
+        "remark",
+        "shippedAt",
+        "deliveredAt",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "createdBy",
+        "shippingBillUrl"
+      ],
+      "appends": [
+        [
+          "A:M",
+          [
+            [
+              "synthetic-shipment-id",
+              "draft",
+              "",
+              "PO",
+              null,
+              "",
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "who",
+              ""
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "input": {
+        "poNumber": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+        "carrier": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "createdBy": " long "
+      },
+      "shipment": {
+        "id": "synthetic-shipment-id",
+        "status": "draft",
+        "carrier": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "poNumber": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+        "shippingFee": null,
+        "remark": "",
+        "shippedAt": "",
+        "deliveredAt": "",
+        "createdAt": "2026-11-04T00:00:00.000Z",
+        "updatedAt": "2026-11-04T00:00:00.000Z",
+        "deletedAt": "",
+        "createdBy": " long ",
+        "shippingBillUrl": ""
+      },
+      "keys": [
+        "id",
+        "status",
+        "carrier",
+        "poNumber",
+        "shippingFee",
+        "remark",
+        "shippedAt",
+        "deliveredAt",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "createdBy",
+        "shippingBillUrl"
+      ],
+      "appends": [
+        [
+          "A:M",
+          [
+            [
+              "synthetic-shipment-id",
+              "draft",
+              "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+              null,
+              "",
+              "",
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              " long ",
+              ""
+            ]
+          ]
+        ]
+      ]
+    }
+  ]
+}

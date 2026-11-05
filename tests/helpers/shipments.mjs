@@ -29,10 +29,18 @@ export function fakeShipmentSheets(initial = {}, { failRead, failUpdate, failApp
   return { sheets, rows, events };
 }
 
-// Only pure contracts/constants and the existing shipment service code can load.
+// Closed legacy graph plus the exact Shipment creation seam and pure constants.
 // Config, transport/auth and Drive implementations are never evaluated.
-export function shipmentServices() {
+export function shipmentServices({ globals = {}, createId = () => "synthetic-shipment-id" } = {}) {
   const cache = new Map();
+  const creationFiles = new Set([
+    "src/modules/shipments/application/create-shipment.ts",
+    "src/modules/shipments/application/ports/created-shipment-writer.ts",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",
+    "src/modules/shipments/server.ts",
+    "src/externals/google/sheet/const.ts",
+    "src/externals/google/sheet/sheets/shipments/const.ts",
+  ]);
   const options = ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json", ts.sys.readFile).config, ts.sys, process.cwd()).options;
   const constants = { ...loadSource("src/externals/google/sheet/const.ts"),
     ...loadSource("src/externals/google/sheet/sheets/shipments/const.ts"),
@@ -40,19 +48,20 @@ export function shipmentServices() {
   function load(path) {
     const file = relative(process.cwd(), resolve(path)).replaceAll("\\", "/");
     if (file === "src/services/orders/createDraftOrder.ts") return load("src/modules/orders/contracts.ts");
-    if (file === "src/services/utils/createSortableId.ts") return { createSortableId: () => "synthetic-shipment-id" };
+    if (file === "src/services/utils/createSortableId.ts") return { createSortableId: createId };
     if (cache.has(file)) return cache.get(file);
-    if (!/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
+    if (!creationFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
     const imports = new Proxy({}, {
       getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
       get(_, specifier) {
+        if (specifier === "server-only") return {};
         if (specifier === "@/externals/google/sheet") return constants;
         const target = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
         if (!target) throw new Error(`Unknown shipment dependency ${specifier}`);
         return load(target);
       },
     });
-    const result = loadSource(file, { imports, globals: { Date: ShipmentClock, Error } });
+    const result = loadSource(file, { imports, globals: { Date: ShipmentClock, Error, ...globals } });
     cache.set(file, result); return result;
   }
   return { load, services: load("src/services/shipments/index.ts") };

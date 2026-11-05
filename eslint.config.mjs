@@ -4,6 +4,7 @@ import nextTs from "eslint-config-next/typescript";
 import { ordersBoundaries } from "./eslint/orders-boundaries.mjs";
 import { ordersServerBoundaries } from "./eslint/orders-server-boundaries.mjs";
 import { shipmentsBoundaries } from "./eslint/shipments-boundaries.mjs";
+import { shipmentsServerBoundaries } from "./eslint/shipments-server-boundaries.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -11,6 +12,7 @@ const eslintConfig = defineConfig([
   ...ordersBoundaries,
   ...ordersServerBoundaries,
   ...shipmentsBoundaries,
+  ...shipmentsServerBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
