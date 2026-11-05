@@ -1,0 +1,596 @@
+{
+  "base": "c1f5678b88b162856f7754b889bf4667c22fccf1",
+  "file": "src/app/api/shipments/[id]/route.ts",
+  "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport {\n  createGoogleDriveServiceFromConfig,\n  type IGoogleDriveService,\n} from \"@/externals/google/drive\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/externals/google/sheet\";\nimport { isRecord } from \"@/features/backend/shared/utils\";\nimport {\n  isUpdatableStatus,\n  isValidDeliveryFee,\n  isValidPoNumber,\n  readJsonBody,\n} from \"@/features/backend/shipments/utils\";\nimport {\n  getShipmentDetail,\n  ShipmentStatus,\n  updateShipmentStatus,\n} from \"@/services/shipments\";\n\nexport const runtime = \"nodejs\";\n\nconst ALLOWED_SHIPPING_BILL_TYPES = new Set([\n  \"application/pdf\",\n  \"image/jpeg\",\n  \"image/png\",\n  \"image/webp\",\n]);\nconst MAX_SHIPPING_BILL_SIZE_BYTES = 10 * 1024 * 1024;\n\nexport async function GET(\n  _request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const { id } = await params;\n  const shipmentId = id.trim();\n  if (!shipmentId) {\n    return NextResponse.json(\n      { error: \"Shipment ID is required.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(\n      getConfig(),\n    );\n    const shipment = await getShipmentDetail({\n      googleSheetsService,\n      shipmentId,\n    });\n\n    if (!shipment) {\n      return NextResponse.json(\n        { error: \"Shipment was not found.\" },\n        { status: 404 },\n      );\n    }\n\n    return NextResponse.json({ shipment });\n  } catch (error) {\n    console.error(\"Failed to load shipment\", {\n      error: error instanceof Error ? error.message : String(error),\n      shipmentId,\n    });\n    return NextResponse.json(\n      { error: \"Failed to load shipment.\" },\n      { status: 500 },\n    );\n  }\n}\n\nexport async function PATCH(\n  request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const { id } = await params;\n  const shipmentId = id.trim();\n  const body = await readShipmentUpdateBody(request);\n  if (!shipmentId || !isRecord(body) || !isUpdatableStatus(body.status)) {\n    return NextResponse.json(\n      { error: \"Shipment ID and a valid next status are required.\" },\n      { status: 400 },\n    );\n  }\n\n  let deliveryFee: number | undefined;\n  if (body.status === ShipmentStatus.Delivered) {\n    if (!isValidDeliveryFee(body.deliveryFee)) {\n      return NextResponse.json(\n        { error: \"Delivery fee must be a non-negative number.\" },\n        { status: 400 },\n      );\n    }\n    deliveryFee = body.deliveryFee;\n  }\n\n  let poNumber: string | undefined;\n  let shippingBill: File | undefined;\n  if (body.status === ShipmentStatus.Shipping) {\n    if (!isValidPoNumber(body.poNumber)) {\n      return NextResponse.json(\n        { error: \"PO number confirmation is required.\" },\n        { status: 400 },\n      );\n    }\n    poNumber = body.poNumber.trim();\n    if (body.shippingBill !== undefined) {\n      if (!isValidShippingBill(body.shippingBill)) {\n        return NextResponse.json(\n          { error: \"Select a PDF, JPEG, PNG, or WebP file up to 10 MB.\" },\n          { status: 400 },\n        );\n      }\n      shippingBill = body.shippingBill;\n    }\n  }\n\n  let googleDriveService: IGoogleDriveService | undefined;\n  let uploadedFileId: string | undefined;\n  try {\n    const config = getConfig();\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    let shippingBillUrl: string | undefined;\n    if (shippingBill) {\n      googleDriveService = createGoogleDriveServiceFromConfig(config);\n      if (!googleDriveService) {\n        return NextResponse.json(\n          { error: \"Google Drive is not configured.\" },\n          { status: 503 },\n        );\n      }\n      const driveFile = await googleDriveService.uploadImage({\n        fileName: createShippingBillFileName(shipmentId, shippingBill),\n        contentType: shippingBill.type,\n        bytes: Buffer.from(await shippingBill.arrayBuffer()),\n      });\n      uploadedFileId = driveFile.id;\n      shippingBillUrl = driveFile.webViewLink;\n    }\n\n    const result = await updateShipmentStatus({\n      deliveryFee,\n      googleSheetsService,\n      poNumber,\n      shippingBillUrl,\n      shipmentId,\n      status: body.status,\n    });\n\n    if (result.outcome !== \"updated\") {\n      await cleanUpUploadedFile(googleDriveService, uploadedFileId);\n      uploadedFileId = undefined;\n    }\n    if (result.outcome === \"not_found\") {\n      return NextResponse.json(\n        { error: \"Shipment was not found.\" },\n        { status: 404 },\n      );\n    }\n    if (result.outcome === \"invalid_transition\") {\n      return NextResponse.json(\n        { error: \"Shipment status has changed or cannot be advanced.\" },\n        { status: 409 },\n      );\n    }\n    if (result.outcome === \"invalid_delivery_fee\") {\n      return NextResponse.json(\n        { error: \"Delivery fee must be a non-negative number.\" },\n        { status: 400 },\n      );\n    }\n    if (result.outcome === \"invalid_po_number\") {\n      return NextResponse.json(\n        { error: \"Enter a valid PO number before starting shipping.\" },\n        { status: 400 },\n      );\n    }\n\n    return NextResponse.json({ shipment: result.shipment });\n  } catch (error) {\n    await cleanUpUploadedFile(googleDriveService, uploadedFileId);\n    console.error(\"Failed to update shipment status\", {\n      error: error instanceof Error ? error.message : String(error),\n      shipmentId,\n    });\n    return NextResponse.json(\n      { error: \"Failed to update shipment status.\" },\n      { status: 500 },\n    );\n  }\n}\n\nasync function readShipmentUpdateBody(request: Request): Promise<unknown> {\n  if (!request.headers.get(\"content-type\")?.includes(\"multipart/form-data\")) {\n    return readJsonBody(request);\n  }\n\n  try {\n    const formData = await request.formData();\n    const shippingBill = formData.get(\"shippingBill\");\n    return {\n      status: formData.get(\"status\"),\n      poNumber: formData.get(\"poNumber\"),\n      shippingBill:\n        shippingBill instanceof File && shippingBill.size > 0\n          ? shippingBill\n          : undefined,\n    };\n  } catch {\n    return undefined;\n  }\n}\n\nfunction isValidShippingBill(value: unknown): value is File {\n  return (\n    value instanceof File &&\n    value.size > 0 &&\n    value.size <= MAX_SHIPPING_BILL_SIZE_BYTES &&\n    ALLOWED_SHIPPING_BILL_TYPES.has(value.type)\n  );\n}\n\nfunction createShippingBillFileName(shipmentId: string, file: File): string {\n  const extension =\n    file.type === \"application/pdf\"\n      ? \".pdf\"\n      : file.type === \"image/png\"\n        ? \".png\"\n        : file.type === \"image/webp\"\n          ? \".webp\"\n          : \".jpg\";\n  const safeShipmentId = shipmentId.replace(/[^a-zA-Z0-9_-]/g, \"_\");\n  return `shipment-bill-${safeShipmentId}-${Date.now()}${extension}`;\n}\n\nasync function cleanUpUploadedFile(\n  googleDriveService: IGoogleDriveService | undefined,\n  fileId: string | undefined,\n): Promise<void> {\n  if (!googleDriveService || !fileId) return;\n  try {\n    await googleDriveService.deleteFile(fileId);\n  } catch (error) {\n    console.error(\"Failed to clean up shipment bill upload\", {\n      fileId,\n      error: error instanceof Error ? error.message : String(error),\n    });\n  }\n}\n",
+  "rawHash": "38c6cf266865af6fc49d402d46cbc06cb9c8b0238e94f18186e6e3a3208e6f63",
+  "functions": {
+    "GET": "e810bc60b9cf89b2683b34c14e21755deb4551ea5f587fdfdcd24dde70ec6607",
+    "PATCH": "b7485756edf5a0974738d5fca78b19d8e80e146b77cb735d69e9f3e8ef172803",
+    "readShipmentUpdateBody": "7e11cf90b17ce260d1e8c7dbfd8068e99feb994ee09610def1cd9ef317b70310",
+    "isValidShippingBill": "15ea161eebe0d81f36369200b0aff819531aec27aa36077ab4f76f63ffbbb5c6",
+    "createShippingBillFileName": "79540bfc313e38805f300947a6d079c1dd72fe40fe9dfba3ff11fabcf2695940",
+    "cleanUpUploadedFile": "6a50f2899ae2eebc1bb7af8df18cbb346118795e7d5cded00458032c8489ad52"
+  },
+  "declarations": {
+    "GET": "export async function GET(_request: Request, { params }: {\n    params: Promise<{\n        id: string;\n    }>;\n}): Promise<NextResponse> {\n    const { id } = await params;\n    const shipmentId = id.trim();\n    if (!shipmentId) {\n        return NextResponse.json({ error: \"Shipment ID is required.\" }, { status: 400 });\n    }\n    try {\n        const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());\n        const shipment = await getShipmentDetail({\n            googleSheetsService,\n            shipmentId,\n        });\n        if (!shipment) {\n            return NextResponse.json({ error: \"Shipment was not found.\" }, { status: 404 });\n        }\n        return NextResponse.json({ shipment });\n    }\n    catch (error) {\n        console.error(\"Failed to load shipment\", {\n            error: error instanceof Error ? error.message : String(error),\n            shipmentId,\n        });\n        return NextResponse.json({ error: \"Failed to load shipment.\" }, { status: 500 });\n    }\n}",
+    "PATCH": "export async function PATCH(request: Request, { params }: {\n    params: Promise<{\n        id: string;\n    }>;\n}): Promise<NextResponse> {\n    const { id } = await params;\n    const shipmentId = id.trim();\n    const body = await readShipmentUpdateBody(request);\n    if (!shipmentId || !isRecord(body) || !isUpdatableStatus(body.status)) {\n        return NextResponse.json({ error: \"Shipment ID and a valid next status are required.\" }, { status: 400 });\n    }\n    let deliveryFee: number | undefined;\n    if (body.status === ShipmentStatus.Delivered) {\n        if (!isValidDeliveryFee(body.deliveryFee)) {\n            return NextResponse.json({ error: \"Delivery fee must be a non-negative number.\" }, { status: 400 });\n        }\n        deliveryFee = body.deliveryFee;\n    }\n    let poNumber: string | undefined;\n    let shippingBill: File | undefined;\n    if (body.status === ShipmentStatus.Shipping) {\n        if (!isValidPoNumber(body.poNumber)) {\n            return NextResponse.json({ error: \"PO number confirmation is required.\" }, { status: 400 });\n        }\n        poNumber = body.poNumber.trim();\n        if (body.shippingBill !== undefined) {\n            if (!isValidShippingBill(body.shippingBill)) {\n                return NextResponse.json({ error: \"Select a PDF, JPEG, PNG, or WebP file up to 10 MB.\" }, { status: 400 });\n            }\n            shippingBill = body.shippingBill;\n        }\n    }\n    let googleDriveService: IGoogleDriveService | undefined;\n    let uploadedFileId: string | undefined;\n    try {\n        const config = getConfig();\n        const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n        let shippingBillUrl: string | undefined;\n        if (shippingBill) {\n            googleDriveService = createGoogleDriveServiceFromConfig(config);\n            if (!googleDriveService) {\n                return NextResponse.json({ error: \"Google Drive is not configured.\" }, { status: 503 });\n            }\n            const driveFile = await googleDriveService.uploadImage({\n                fileName: createShippingBillFileName(shipmentId, shippingBill),\n                contentType: shippingBill.type,\n                bytes: Buffer.from(await shippingBill.arrayBuffer()),\n            });\n            uploadedFileId = driveFile.id;\n            shippingBillUrl = driveFile.webViewLink;\n        }\n        const result = await updateShipmentStatus({\n            deliveryFee,\n            googleSheetsService,\n            poNumber,\n            shippingBillUrl,\n            shipmentId,\n            status: body.status,\n        });\n        if (result.outcome !== \"updated\") {\n            await cleanUpUploadedFile(googleDriveService, uploadedFileId);\n            uploadedFileId = undefined;\n        }\n        if (result.outcome === \"not_found\") {\n            return NextResponse.json({ error: \"Shipment was not found.\" }, { status: 404 });\n        }\n        if (result.outcome === \"invalid_transition\") {\n            return NextResponse.json({ error: \"Shipment status has changed or cannot be advanced.\" }, { status: 409 });\n        }\n        if (result.outcome === \"invalid_delivery_fee\") {\n            return NextResponse.json({ error: \"Delivery fee must be a non-negative number.\" }, { status: 400 });\n        }\n        if (result.outcome === \"invalid_po_number\") {\n            return NextResponse.json({ error: \"Enter a valid PO number before starting shipping.\" }, { status: 400 });\n        }\n        return NextResponse.json({ shipment: result.shipment });\n    }\n    catch (error) {\n        await cleanUpUploadedFile(googleDriveService, uploadedFileId);\n        console.error(\"Failed to update shipment status\", {\n            error: error instanceof Error ? error.message : String(error),\n            shipmentId,\n        });\n        return NextResponse.json({ error: \"Failed to update shipment status.\" }, { status: 500 });\n    }\n}",
+    "readShipmentUpdateBody": "async function readShipmentUpdateBody(request: Request): Promise<unknown> {\n    if (!request.headers.get(\"content-type\")?.includes(\"multipart/form-data\")) {\n        return readJsonBody(request);\n    }\n    try {\n        const formData = await request.formData();\n        const shippingBill = formData.get(\"shippingBill\");\n        return {\n            status: formData.get(\"status\"),\n            poNumber: formData.get(\"poNumber\"),\n            shippingBill: shippingBill instanceof File && shippingBill.size > 0\n                ? shippingBill\n                : undefined,\n        };\n    }\n    catch {\n        return undefined;\n    }\n}",
+    "isValidShippingBill": "function isValidShippingBill(value: unknown): value is File {\n    return (value instanceof File &&\n        value.size > 0 &&\n        value.size <= MAX_SHIPPING_BILL_SIZE_BYTES &&\n        ALLOWED_SHIPPING_BILL_TYPES.has(value.type));\n}",
+    "createShippingBillFileName": "function createShippingBillFileName(shipmentId: string, file: File): string {\n    const extension = file.type === \"application/pdf\"\n        ? \".pdf\"\n        : file.type === \"image/png\"\n            ? \".png\"\n            : file.type === \"image/webp\"\n                ? \".webp\"\n                : \".jpg\";\n    const safeShipmentId = shipmentId.replace(/[^a-zA-Z0-9_-]/g, \"_\");\n    return `shipment-bill-${safeShipmentId}-${Date.now()}${extension}`;\n}",
+    "cleanUpUploadedFile": "async function cleanUpUploadedFile(googleDriveService: IGoogleDriveService | undefined, fileId: string | undefined): Promise<void> {\n    if (!googleDriveService || !fileId)\n        return;\n    try {\n        await googleDriveService.deleteFile(fileId);\n    }\n    catch (error) {\n        console.error(\"Failed to clean up shipment bill upload\", {\n            fileId,\n            error: error instanceof Error ? error.message : String(error),\n        });\n    }\n}"
+  },
+  "constants": [
+    "const ALLOWED_SHIPPING_BILL_TYPES = new Set([\n    \"application/pdf\",\n    \"image/jpeg\",\n    \"image/png\",\n    \"image/webp\",\n]);",
+    "const MAX_SHIPPING_BILL_SIZE_BYTES = 10 * 1024 * 1024;"
+  ],
+  "imports": [
+    "import { NextResponse } from \"next/server\";",
+    "import { getConfig } from \"@/config\";",
+    "import { createGoogleDriveServiceFromConfig, type IGoogleDriveService, } from \"@/externals/google/drive\";",
+    "import { createGoogleSheetsServiceFromConfig } from \"@/externals/google/sheet\";",
+    "import { isRecord } from \"@/features/backend/shared/utils\";",
+    "import { isUpdatableStatus, isValidDeliveryFee, isValidPoNumber, readJsonBody, } from \"@/features/backend/shipments/utils\";",
+    "import { getShipmentDetail, ShipmentStatus, updateShipmentStatus, } from \"@/services/shipments\";"
+  ],
+  "exports": [
+    "GET",
+    "PATCH"
+  ],
+  "runtime": "nodejs",
+  "examples": [
+    {
+      "scenario": "json",
+      "status": 200,
+      "json": {
+        "shipment": {
+          "status": "shipping",
+          "poNumber": "PO",
+          "shippingFee": null,
+          "shippedAt": "2026-11-04T00:00:00.000Z",
+          "deliveredAt": "",
+          "updatedAt": "2026-11-04T00:00:00.000Z",
+          "shippingBillUrl": ""
+        }
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "A2:M"
+        ],
+        [
+          "write",
+          "B2:M2",
+          [
+            [
+              "shipping",
+              "Carrier",
+              "PO",
+              null,
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              ""
+            ]
+          ]
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "scenario": "success",
+      "status": 200,
+      "json": {
+        "shipment": {
+          "status": "shipping",
+          "poNumber": "PO",
+          "shippingFee": null,
+          "shippedAt": "2026-11-04T00:00:00.000Z",
+          "deliveredAt": "",
+          "updatedAt": "2026-11-04T00:00:00.000Z",
+          "shippingBillUrl": "url"
+        }
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "A2:M"
+        ],
+        [
+          "write",
+          "B2:M2",
+          [
+            [
+              "shipping",
+              "Carrier",
+              "PO",
+              null,
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              "url"
+            ]
+          ]
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "scenario": "unavailable",
+      "status": 503,
+      "json": {
+        "error": "Google Drive is not configured."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "scenario": "config",
+      "status": 500,
+      "json": {
+        "error": "Failed to update shipment status."
+      },
+      "trace": [
+        [
+          "config"
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to update shipment status",
+          {
+            "error": "failure config",
+            "shipmentId": "s/1"
+          }
+        ]
+      ]
+    },
+    {
+      "scenario": "sheets",
+      "status": 500,
+      "json": {
+        "error": "Failed to update shipment status."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to update shipment status",
+          {
+            "error": "failure sheets",
+            "shipmentId": "s/1"
+          }
+        ]
+      ]
+    },
+    {
+      "scenario": "drive",
+      "status": 500,
+      "json": {
+        "error": "Failed to update shipment status."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to update shipment status",
+          {
+            "error": "failure drive",
+            "shipmentId": "s/1"
+          }
+        ]
+      ]
+    },
+    {
+      "scenario": "upload",
+      "status": 500,
+      "json": {
+        "error": "Failed to update shipment status."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to update shipment status",
+          {
+            "error": "failure upload",
+            "shipmentId": "s/1"
+          }
+        ]
+      ]
+    },
+    {
+      "scenario": "not_found",
+      "status": 404,
+      "json": {
+        "error": "Shipment was not found."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "A2:M"
+        ],
+        [
+          "delete",
+          "fake-id"
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "scenario": "invalid_transition",
+      "status": 409,
+      "json": {
+        "error": "Shipment status has changed or cannot be advanced."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "A2:M"
+        ],
+        [
+          "delete",
+          "fake-id"
+        ]
+      ],
+      "errors": []
+    },
+    {
+      "scenario": "M1",
+      "status": 500,
+      "json": {
+        "error": "Failed to update shipment status."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "delete",
+          "fake-id"
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to update shipment status",
+          {
+            "error": "failure M1",
+            "shipmentId": "s/1"
+          }
+        ]
+      ]
+    },
+    {
+      "scenario": "A2:M",
+      "status": 500,
+      "json": {
+        "error": "Failed to update shipment status."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "A2:M"
+        ],
+        [
+          "delete",
+          "fake-id"
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to update shipment status",
+          {
+            "error": "failure A2:M",
+            "shipmentId": "s/1"
+          }
+        ]
+      ]
+    },
+    {
+      "scenario": "B2:M2",
+      "status": 500,
+      "json": {
+        "error": "Failed to update shipment status."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "A2:M"
+        ],
+        [
+          "write",
+          "B2:M2",
+          [
+            [
+              "shipping",
+              "Carrier",
+              "PO",
+              null,
+              "",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "created",
+              "2026-11-04T00:00:00.000Z",
+              "",
+              "web",
+              "url"
+            ]
+          ]
+        ],
+        [
+          "delete",
+          "fake-id"
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to update shipment status",
+          {
+            "error": "failure B2:M2",
+            "shipmentId": "s/1"
+          }
+        ]
+      ]
+    },
+    {
+      "scenario": "delete",
+      "status": 409,
+      "json": {
+        "error": "Shipment status has changed or cannot be advanced."
+      },
+      "trace": [
+        [
+          "config"
+        ],
+        [
+          "sheets"
+        ],
+        [
+          "drive"
+        ],
+        [
+          "upload",
+          "shipment-bill-s_1-1793750400000.pdf",
+          "application/pdf",
+          4
+        ],
+        [
+          "write",
+          "M1",
+          [
+            [
+              "shippingBillUrl"
+            ]
+          ]
+        ],
+        [
+          "read",
+          "A2:M"
+        ],
+        [
+          "delete",
+          "fake-id"
+        ]
+      ],
+      "errors": [
+        [
+          "Failed to clean up shipment bill upload",
+          {
+            "fileId": "fake-id",
+            "error": "failure delete"
+          }
+        ]
+      ]
+    }
+  ],
+  "serverFunctions": {
+    "createShipment": "export async function createShipment({\n  googleSheetsService,\n  poNumber,\n  carrier,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  poNumber: string;\n  carrier?: string;\n  createdBy: string;\n}): Promise<Shipment> {\n  return await executeCreateShipment({ poNumber, carrier, createdBy }, {\n    writer: new GoogleSheetsShipmentWriter(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}",
+    "listShipments": "export async function listShipments({\n  excludeStatuses = [],\n  googleSheetsService,\n  includeOrders = true,\n}: {\n  excludeStatuses?: readonly ShipmentStatus[];\n  googleSheetsService: IGoogleSheetsService;\n  includeOrders?: boolean;\n}): Promise<ShipmentListItem[]> {\n  return await executeListShipments(new GoogleSheetsShipmentListReader(googleSheetsService), {\n    excludeStatuses, includeOrders,\n  });\n}",
+    "getShipmentDetail": "export async function getShipmentDetail({\n  googleSheetsService,\n  shipmentId,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n}): Promise<ShipmentListItem | undefined> {\n  return await executeGetShipmentDetail(new GoogleSheetsShipmentListReader(googleSheetsService), shipmentId);\n}",
+    "linkOrderToShipment": "export async function linkOrderToShipment({\n  googleSheetsService,\n  shipmentId,\n  orderId,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n  orderId: string;\n  createdBy: string;\n}): Promise<LinkOrderToShipmentResult> {\n  return await executeLinkOrderToShipment({ shipmentId, orderId, createdBy }, {\n    store: new GoogleSheetsShipmentOrderLinkStore(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}",
+    "updateShipmentStatus": "export async function updateShipmentStatus({\n  deliveryFee,\n  googleSheetsService,\n  poNumber,\n  shippingBillUrl,\n  shipmentId,\n  status,\n}: {\n  deliveryFee?: number;\n  googleSheetsService: IGoogleSheetsService;\n  poNumber?: string;\n  shippingBillUrl?: string;\n  shipmentId: string;\n  status: ShipmentStatus;\n}): Promise<UpdateShipmentStatusResult> {\n  return await executeUpdateShipmentStatus({ deliveryFee, poNumber, shippingBillUrl, shipmentId, status }, {\n    store: new GoogleSheetsShipmentStatusStore(googleSheetsService),\n    now: () => new Date().toISOString(),\n  });\n}"
+  }
+}

@@ -16,6 +16,8 @@ PR 11 implements the [Shipment order-linking seam](shipments-link-seam.md): a co
 
 PR 12 implements the [Shipment status-update seam](shipments-status-seam.md): a consumer-owned opaque target keeps row mechanics/raw cells in the Sheets adapter and transition/validation/clock decisions in application. Original M1-before-read/B:M behavior and PATCH/Drive ownership are retained. This completes only status updates, not the full milestone.
 
+PR 13 implements the [Shipment shipping-bill workflow seam](shipments-drive-seam.md): conditional upload/status coordination and cleanup are application-owned; a lazy Drive adapter reuses the existing provider. PATCH keeps validation/configuration/HTTP translation, with original getter/error/order and cleanup semantics. Orders server projection, enum ownership and legacy cleanup remain deferred; full milestone is incomplete.
+
 The application is a Next.js App Router shop operations workspace using React, Ant Design, Google Sheets, Google Drive, LINE, and Loyverse. Feature ownership should make changes local and make persistence replaceable without changing business behavior. Future SaaS and Supabase work is intentionally deferred: this phase introduces no provider, schema, auth, tenant context, subscription, or runtime abstraction.
 
 ```text

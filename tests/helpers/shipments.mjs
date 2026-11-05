@@ -29,7 +29,7 @@ export function fakeShipmentSheets(initial = {}, { failRead, failUpdate, failApp
   return { sheets, rows, events };
 }
 
-// Closed legacy graph plus the exact Shipment creation/read/link/status seams and pure constants.
+// Closed legacy graph plus the exact Shipment creation/read/link/status/bill seams and pure constants.
 // Config, transport/auth and Drive implementations are never evaluated.
 export function shipmentServices({ globals = {}, createId = () => "synthetic-shipment-id" } = {}) {
   const cache = new Map();
@@ -38,6 +38,9 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
     "src/modules/shipments/application/ports/created-shipment-writer.ts",
     "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",
     "src/modules/shipments/server.ts",
+    "src/modules/shipments/application/advance-shipment-status-with-bill.ts",
+    "src/modules/shipments/application/ports/shipment-bill-storage.ts",
+    "src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts",
     "src/modules/shipments/application/update-shipment-status.ts",
     "src/modules/shipments/application/ports/shipment-status-store.ts",
     "src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts",
@@ -78,13 +81,14 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
 }
 
 export function shipmentRoutes(sheets, { drive, services: replacement } = {}) {
-  const { load, services } = shipmentServices();
   const errors = [], events = [];
+  const { load, services } = shipmentServices({ globals: { console: { error: (...args) => errors.push(args) } } });
   const imports = {
     "next/server": { NextResponse: Response }, "@/config": { getConfig: () => ({}) },
     "@/externals/google/sheet": { createGoogleSheetsServiceFromConfig: () => { events.push("sheets"); return sheets; } },
     "@/externals/google/drive": { createGoogleDriveServiceFromConfig: () => { events.push("drive"); return drive; } },
     "@/services/shipments": { ...services, ...replacement },
+    "@/modules/shipments/server": load("src/modules/shipments/server.ts"),
     "@/features/backend/shared/utils": load("src/features/backend/shared/utils.ts"),
     "@/features/backend/shipments/utils": load("src/features/backend/shipments/utils.ts"),
   };

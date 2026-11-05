@@ -11,6 +11,7 @@ const staticExports = [
 ];
 const serverRules = {
   "no-restricted-syntax": [...staticExports,
+    { selector: "ImportDeclaration[source.value='@/externals/google/drive/types']:not([importKind='type'])", message: "Drive interfaces must be erased type imports." },
     { selector: "ImportDeclaration[source.value='@/externals/google/sheet/types']:not([importKind='type'])", message: "Sheet interfaces must be erased type imports; runtime mapping imports explicit constants only." }],
   "no-restricted-globals": ["error", "process", "Buffer", "fetch"],
 };
@@ -102,6 +103,34 @@ export const shipmentsServerBoundaries = [
     },
   },
   {
+    files: ["src/modules/shipments/application/advance-shipment-status-with-bill.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports(["./update-shipment-status", "./ports/shipment-bill-storage"]),
+      "no-restricted-globals": ["error", "Date", "process", "Buffer", "File", "FormData", "Request", "Response", "fetch", "crypto", "performance"],
+      "no-restricted-syntax": [...staticExports,
+        { selector: "TSTypeReference[typeName.name=/^(File|Buffer|FormData|Request|Response)$/]", message: "Browser/transport file types do not belong in the bill application." },
+        { selector: "ImportDeclaration[source.value='./update-shipment-status']:not([importKind='type'])", message: "Inject the status operation; import only its existing result type." }],
+    },
+  },
+  {
+    files: ["src/modules/shipments/application/ports/shipment-bill-storage.ts"],
+    rules: {
+      "no-restricted-imports": onlyImports([]),
+      "no-restricted-syntax": [...staticExports, { selector: "TSTypeReference[typeName.name=/^(File|Buffer|FormData|Request|Response)$/]", message: "The storage port exposes business metadata only." }],
+      "no-restricted-globals": ["error", "Date", "process", "Buffer", "File", "FormData", "Request", "Response", "fetch", "crypto", "performance"],
+    },
+  },
+  {
+    files: ["src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts"],
+    rules: {
+      ...serverRules,
+      "no-restricted-imports": onlyImports(["server-only", "@/externals/google/drive/types", "../../application/ports/shipment-bill-storage"]),
+      "no-restricted-syntax": [...staticExports,
+        { selector: "ImportDeclaration[source.value='@/externals/google/drive/types']:not([importKind='type'])", message: "Drive interfaces must be erased imports." }],
+      "no-restricted-globals": ["error", "process", "fetch"],
+    },
+  },
+  {
     files: ["src/modules/shipments/server.ts"],
     rules: {
       ...serverRules,
@@ -111,6 +140,8 @@ export const shipmentsServerBoundaries = [
         "./application/list-shipments", "./infrastructure/google-sheets/shipment-list-reader",
         "./application/link-order-to-shipment", "./infrastructure/google-sheets/shipment-order-link-store",
         "./application/update-shipment-status", "./infrastructure/google-sheets/shipment-status-store",
+        "@/externals/google/drive/types", "./application/advance-shipment-status-with-bill",
+        "./infrastructure/google-drive/shipment-bill-storage",
       ]),
     },
   },

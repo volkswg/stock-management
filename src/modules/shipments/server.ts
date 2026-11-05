@@ -16,6 +16,10 @@ import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-shee
 import { updateShipmentStatus as executeUpdateShipmentStatus, type UpdateShipmentStatusResult } from "./application/update-shipment-status";
 import { GoogleSheetsShipmentStatusStore } from "./infrastructure/google-sheets/shipment-status-store";
 
+import type { IGoogleDriveService } from "@/externals/google/drive/types";
+import { advanceShipmentStatusWithBill as executeAdvanceShipmentStatusWithBill, type ShipmentStatusUpdater, type AdvanceShipmentStatusWithBillResult } from "./application/advance-shipment-status-with-bill";
+import { GoogleDriveShipmentBillStorage } from "./infrastructure/google-drive/shipment-bill-storage";
+
 export async function createShipment({
   googleSheetsService,
   poNumber,
@@ -94,5 +98,24 @@ export async function updateShipmentStatus({
   return await executeUpdateShipmentStatus({ deliveryFee, poNumber, shippingBillUrl, shipmentId, status }, {
     store: new GoogleSheetsShipmentStatusStore(googleSheetsService),
     now: () => new Date().toISOString(),
+  });
+}
+
+export async function advanceShipmentStatusWithBill({
+  shipmentId,
+  shippingBill,
+  createDriveService,
+  updateStatus,
+}: {
+  shipmentId: string;
+  shippingBill?: File;
+  createDriveService: () => IGoogleDriveService | undefined;
+  updateStatus: ShipmentStatusUpdater;
+}): Promise<AdvanceShipmentStatusWithBillResult> {
+  return await executeAdvanceShipmentStatusWithBill({
+    storage: shippingBill
+      ? new GoogleDriveShipmentBillStorage(shipmentId, shippingBill, createDriveService)
+      : undefined,
+    updateStatus,
   });
 }

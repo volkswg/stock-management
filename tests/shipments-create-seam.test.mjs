@@ -41,7 +41,7 @@ test("actual adapter is lazy and writes each captured thirteen-field A:M payload
 test("direct legacy and unchanged barrel export the same named server-only composition, preserving validation laziness", async () => {
   const { load, services } = shipmentServices();
   const direct = load("src/services/shipments/createShipment.ts"), server = load("src/modules/shipments/server.ts");
-  assert.deepEqual(Object.keys(server).sort(), ["createShipment", "getShipmentDetail", "linkOrderToShipment", "listShipments", "updateShipmentStatus"]); assert.deepEqual(Object.keys(direct), ["createShipment"]);
+  assert.deepEqual(Object.keys(server).sort(), ["advanceShipmentStatusWithBill", "createShipment", "getShipmentDetail", "linkOrderToShipment", "listShipments", "updateShipmentStatus"]); assert.deepEqual(Object.keys(direct), ["createShipment"]);
   assert.equal(services.createShipment, direct.createShipment); assert.equal(direct.createShipment, server.createShipment);
   for (const f of [adapter, "src/modules/shipments/server.ts"]) assert.ok(readFileSync(f, "utf8").startsWith('import "server-only";'));
   await assert.rejects(server.createShipment({ poNumber: " ", createdBy: "web", googleSheetsService: { get shipments() { assert.fail("Validation must precede worksheet access"); } } }), error => error.message === "Shipment PO number is required.");
