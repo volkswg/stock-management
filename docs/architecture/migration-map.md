@@ -4,6 +4,19 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 9 — Shipment creation seam implemented
+
+| Existing / new file | Ownership and retained compatibility |
+| --- | --- |
+| `src/services/shipments/createShipment.ts` | One named re-export from `modules/shipments/server`; old direct callers remain compatible |
+| `src/modules/shipments/application/create-shipment.ts` (new) | Original creation validation/record/clock/ID/await behavior; explicit business input/dependencies |
+| `src/modules/shipments/application/ports/created-shipment-writer.ts` (new) | Consumer-owned single-record writer, no worksheet/provider types |
+| `src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts` (new) | Server-only lazy wrapper, unchanged thirteen-column A:M mapping and append |
+| `src/modules/shipments/server.ts` (new) | Only named creation composition using the supplied service, original Date clock and ID utility |
+| `src/services/shipments/index.ts`, `src/app/api/shipments/route.ts` | Byte-identical; existing creation export/import, validation and HTTP responses retained |
+
+The historical original source and two function hashes are preserved with explicit reviewed creation exceptions only; list/link/status/UI/client/route/contract hashes remain intact. No other services or Sheets classes move. [Detailed evidence and remaining scopes](shipments-create-seam.md).
+
 ## PR 8 — seventh Shipment UI/client move completed
 
 | Old / consumer path | Implemented location / correction |
@@ -372,7 +385,7 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/services/sales/manageSalesProfitCostOverrides.ts` | `src/modules/sales/application/manageSalesProfitCostOverrides.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/sales/rowMappers.ts` | `src/modules/sales/application/rowMappers.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/sales/syncLoyverseDailySales.ts` | `src/modules/sales/application/syncLoyverseDailySales.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
-| `src/services/shipments/createShipment.ts` | `src/modules/shipments/application/createShipment.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
+| `src/services/shipments/createShipment.ts` | `src/modules/shipments/application/create-shipment.ts` + writer adapter/server (implemented PR 9) | Legacy path is one named composition re-export; original business object and A:M payload preserved. |
 | `src/services/shipments/index.ts` | `src/modules/shipments/contracts.ts + server.ts` | Retire broad barrel after consumers use explicit browser/server exports; not a whole-file move. |
 | `src/services/shipments/linkOrderToShipment.ts` | `src/modules/shipments/application/linkOrderToShipment.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |
 | `src/services/shipments/listShipments.ts` | `src/modules/shipments/application/listShipments.ts` | Split DTOs/pure rules to domain and row schemas/mapping/IO to module infrastructure; use explicit ports. |

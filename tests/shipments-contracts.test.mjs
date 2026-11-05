@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import { migratedCreationFunctions, assertShipmentCreationHistory } from "./helpers/shipments-create-history.mjs";
 import { shipmentServices } from "./helpers/shipments.mjs";
 import { plain } from "./helpers/load-source.mjs";
 import { assertPickerDetailParity, assertPickerStaticLintParity } from "./helpers/orders-picker-structure.mjs";
@@ -41,6 +42,7 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     assert.equal(hash(body), expected, file);
   }
   for (const [key, expected] of Object.entries(baseline.functions)) {
+    if (migratedCreationFunctions.has(key)) { assertShipmentCreationHistory(key, expected); continue; }
     const split = key.lastIndexOf(":"), file = key.slice(0, split), name = key.slice(split + 1), source = parse(file);
     const node = source.statements.find(n => ts.isFunctionDeclaration(n) && n.name?.text === name);
     assert.equal(hash(printer.printNode(ts.EmitHint.Unspecified, node, source)), expected, key);
