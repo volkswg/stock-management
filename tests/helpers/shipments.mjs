@@ -34,6 +34,7 @@ export function fakeShipmentSheets(initial = {}, { failRead, failUpdate, failApp
 export function shipmentServices({ globals = {}, createId = () => "synthetic-shipment-id" } = {}) {
   const cache = new Map();
   const seamFiles = new Set([
+    "src/modules/shipments/status.ts",
     "src/modules/shipments/application/create-shipment.ts",
     "src/modules/shipments/application/ports/created-shipment-writer.ts",
     "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",

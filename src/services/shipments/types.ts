@@ -1,12 +1,7 @@
 import type { OrderStatus } from "@/modules/orders/contracts";
 
-export enum ShipmentStatus {
-  Draft = "draft",
-  ReadyToShip = "ready_to_ship",
-  Shipping = "shipping",
-  Delivered = "delivered",
-  Canceled = "canceled",
-}
+import { ShipmentStatus } from "@/modules/shipments/status";
+export { ShipmentStatus };
 
 export type Shipment = {
   id: string;

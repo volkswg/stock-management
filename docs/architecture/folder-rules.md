@@ -66,3 +66,8 @@ PR 13 adds only Shipment `application/advance-shipment-status-with-bill.ts`, `ap
 
 
 PR 14 adds Orders `application/get-order-detail.ts`, its `ports/order-detail-reader.ts` and public consumer `ports/order-detail-shipment-projection.ts`, plus own `infrastructure/google-sheets/order-detail-reader.ts`. Orders owns final assembly and Order/image/bill storage mapping. Shipment `infrastructure/google-sheets/order-detail-shipment-projection.ts` owns reverse link and nested Shipment mapping, implementing the Orders port; it does not reuse private Orders adapters. App GET composes both modules; Orders server composes only own reader plus supplied port. Legacy detail leaf is explicit compatibility composition with original exports; no duplicated business mapper. [Exact ownership](orders-detail-shipment-projection.md).
+
+
+## PR 15 current enum ownership
+
+`modules/shipments/status.ts` owns only the single pure ShipmentStatus runtime enum, with no dependencies, IO or server marker. `modules/shipments/contracts.ts` forwards it by name and retains eight erased DTO exports from `services/shipments/types.ts`. That compatibility leaf keeps all eight exact DTO declarations, imports Orders OrderStatus as a type and imports/re-exports the same physical Shipment enum directly. It must not import Shipment contracts. The unchanged legacy barrel remains server compatibility, never a browser entrypoint. No domain folder or wider DTO migration. This supersedes earlier temporary physical ownership descriptions; [history, consumers and retirement criteria](shipments-enum-ownership.md).

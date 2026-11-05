@@ -17,9 +17,9 @@ test("Shipment lint permits the public contract/gallery/client and only the docu
     assert.equal(restricted(result), false, filePath);
     const [actual] = await eslint.lintFiles(filePath); assert.equal(restricted(actual), false, filePath);
   }
-  const [forward] = await eslint.lintText('export { ShipmentStatus } from "@/services/shipments/types";', { filePath: contract });
+  const [forward] = await eslint.lintText('export { ShipmentStatus } from "./status"; export type { Shipment, ShipmentListItem, ShipmentRelatedOrder, ShipmentRelatedProductImage, ShipmentQuantityCost, ShipmentCostSummary, ShipmentStatusUpdate, ShipmentOrder } from "@/services/shipments/types";', { filePath: contract });
   assert.equal(restricted(forward), false);
-  const [pure] = await eslint.lintText('import type { OrderStatus } from "@/modules/orders/contracts"; export type Status = OrderStatus;', { filePath: leaf });
+  const [pure] = await eslint.lintText(readFileSync(leaf, "utf8"), { filePath: leaf });
   assert.equal(restricted(pure), false);
   const [route] = await eslint.lintText('import { listShipments } from "@/services/shipments"; export const read = listShipments;', { filePath: "src/app/api/shipments/route.ts" });
   assert.equal(restricted(route), false, "HTTP server composition is deliberately outside browser restrictions");
@@ -99,7 +99,7 @@ function graph(runtime) {
     active.pop(); visited.add(file);
   }
   [contract, ...files].forEach(visit);
-  assert.ok(visited.has(contract)); assert.ok(visited.has(leaf));
+  assert.ok(visited.has(contract)); assert.ok(visited.has("src/modules/shipments/status.ts")); assert.equal(visited.has(leaf), !runtime, "DTO forwarding is erased; runtime now terminates at owned status leaf");
 }
 test("Shipment runtime graph reaches only browser-safe project code and has no cycles", () => graph(true));
 test("Shipment graph including type-only edges has no cycles or server implementations", () => graph(false));

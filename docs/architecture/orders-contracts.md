@@ -31,3 +31,8 @@ PR 4 adds a separate server-only entrypoint for list/simple creation and consume
 
 
 PR 14 [Orders detail projection](orders-detail-shipment-projection.md) keeps this contracts.ts byte-identical. OrderShipment remains the Orders-owned nested DTO, including deletedAt and nullable fee, distinct from richer Shipment list/detail DTOs. Orders detail consumes its own public projection port; app injects Shipment infrastructure. No Orders module imports Shipment contracts/runtime/services, including types. Existing legacy direct/barrel detail callers retain their signature through explicit compatibility composition. Browser/client/picker/page interfaces and enum identities stay unchanged. Physical ShipmentStatus transfer and broader legacy cleanup are later milestones.
+
+
+## PR 15 compatibility note
+
+Physical ShipmentStatus now belongs to `modules/shipments/status.ts`, forwarded through public/legacy Shipment exports as one enum object. Orders contracts remain byte-identical: OrderShipment keeps its own status wire union and imports no Shipment types/enum. Both consumer-owned picker and server projection seams remain unchanged; app/Shipment composition resolves the moved object transparently. Compile-time checks retain structural projection compatibility and enum nominal equivalence across forwarding paths. This removes only the former physical-enum debt; wider legacy Orders cleanup remains separate. [Exact graph and evidence](shipments-enum-ownership.md).

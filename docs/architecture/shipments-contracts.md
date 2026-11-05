@@ -69,3 +69,8 @@ PR 13 [bill orchestration](shipments-drive-seam.md) adds no browser/public DTO c
 
 
 PR 14's [Orders-owned detail query port](orders-detail-shipment-projection.md) replaces legacy Orders detail's Shipment row/enum logic with a Shipment-owned projection adapter. It uses the existing public ShipmentStatus runtime object and exact original detail-specific mapper, returns only Orders OrderShipment and does not substitute ShipmentListItem/listShipments. The adapter's dependency on Orders public DTO/consumer port follows Shipments → Orders; Orders core receives injection with no reverse import. Enum definitions/contracts and all earlier Shipment use cases/Drive/providers remain untouched. Physical ownership and legacy retirement remain future milestones.
+
+
+## PR 15 current physical ownership
+
+The single enum is now physically defined at `modules/shipments/status.ts`, unchanged in declaration/member order/wire values and emitted runtime initialization. `contracts.ts` runtime-exports only ShipmentStatus from `./status`; the eight existing DTO type exports still point to `services/shipments/types.ts`. That legacy leaf imports/re-exports the same enum directly from status.ts and retains every DTO declaration exactly. It imports erased OrderStatus from Orders contracts, never Shipment contracts; this avoids a type-only forwarding cycle. The unchanged mixed barrel still exports the same object and operations. Earlier physical-owner claims above are historical; [current graph, consumer inventory, source/AST witnesses and verification](shipments-enum-ownership.md) supersede them. No application/HTTP/UI/provider behavior or DTO shape changes. Physical DTO transfer, legacy DTO leaf/barrel retirement and broader cleanup remain future reviewed milestones.
