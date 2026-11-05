@@ -1,5 +1,7 @@
 # Shipment validation helper import cleanup (PR 17)
 
+Current after PR18: [the three HTTP routes now use public module entrypoints](shipments-http-boundary.md). The PR17 consumer inventory below remains historical; the helper is unchanged, and legacy exports are retained for compatibility.
+
 Base: `7dbf3d4824a2b6d5cd38ee6b959c2c9f805f30b2`, verified exact latest main and merged PR16 commit; clean initial tree/no intervening changes. Branch: `refactor/shipments-validation-contract-import`. Node 24.22.1, existing dependencies.
 
 Only `src/features/backend/shipments/utils.ts` changes in production: ShipmentStatus import source changes from `@/services/shipments` to `@/modules/shipments/contracts`. Every other byte in that file and all other production files remain unchanged. The four function declarations/type predicates and all validation/JSON behavior are preserved. No helper move, enum/DTO/route change, new rule or loader allowance.

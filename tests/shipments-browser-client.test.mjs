@@ -1,3 +1,4 @@
+import { assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import { assertShipmentEnumContractHistory } from "./helpers/shipments-enum-history.mjs";
 import { assertOrdersDetailServerHistory } from "./helpers/orders-detail-history.mjs";
 import { assertShipmentDriveRouteHistory } from "./helpers/shipments-drive-history.mjs";
@@ -30,6 +31,7 @@ test("original client raw bytes, every function/guard and all seven exported typ
     assert.equal(hash(body), expected, consumer);
   }
   for (const [file, expected] of Object.entries(baseline.retained)) {
+    if (["src/app/api/shipments/route.ts", "src/app/api/shipments/[id]/orders/route.ts"].includes(file)) { assertShipmentHttpHistory(file, expected); continue; }
     if (file === "src/modules/shipments/contracts.ts") { assertShipmentEnumContractHistory(file, expected); continue; }
     if (file === "src/modules/orders/server.ts") assertOrdersDetailServerHistory(file, expected);
     else if (file === "src/app/api/shipments/[id]/route.ts") assertShipmentDriveRouteHistory(file, expected);

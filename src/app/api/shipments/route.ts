@@ -4,8 +4,8 @@ import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   createShipment,
   listShipments,
-  ShipmentStatus,
-} from "@/services/shipments";
+} from "@/modules/shipments/server";
+import { ShipmentStatus } from "@/modules/shipments/contracts";
 
 export const runtime = "nodejs";
 

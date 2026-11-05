@@ -1,3 +1,4 @@
+import { shipmentHttpFiles, assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
@@ -49,7 +50,7 @@ test("updated helper resolves only public contracts/status at runtime, erased Or
   const {assertShipmentValidationImportHistory}=await import("./helpers/shipments-validation-history.mjs");
   const {browserOwnership,ownershipEdges}=await import("./helpers/browser-ownership.mjs");
   assertShipmentValidationImportHistory(shipmentValidationFile,validationBefore.sha256);
-  for(const [file,expected]of Object.entries(validationBefore.preserved))assert.equal(validationHash(readFileSync(file)),expected,file);
+  for(const [file,expected]of Object.entries(validationBefore.preserved)){if(shipmentHttpFiles.has(file))assertShipmentHttpHistory(file,expected);else assert.equal(validationHash(readFileSync(file)),expected,file);}
   const {load,services}=helpers(),server=load("src/modules/shipments/server.ts");
   for(const name of ["createShipment","listShipments","getShipmentDetail","linkOrderToShipment","updateShipmentStatus"])assert.equal(services[name],server[name],name);
   assert.equal(services.LinkOrderToShipmentError,load("src/modules/shipments/application/link-order-to-shipment.ts").LinkOrderToShipmentError);

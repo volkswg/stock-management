@@ -1,0 +1,1143 @@
+{
+  "base": "37005935dcbfd0e32f50d7a84543ddfcdcee13dc",
+  "sources": {
+    "src/app/api/shipments/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/externals/google/sheet\";\nimport {\n  createShipment,\n  listShipments,\n  ShipmentStatus,\n} from \"@/services/shipments\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  const searchParams = new URL(request.url).searchParams;\n  const excludeStatuses = parseExcludedStatuses(searchParams);\n  if (!excludeStatuses) {\n    return NextResponse.json(\n      { error: \"excludeStatuses contains an invalid shipment status.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const includeOrders = searchParams.get(\"includeOrders\") !== \"false\";\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());\n    const shipments = await listShipments({\n      googleSheetsService,\n      includeOrders,\n      excludeStatuses,\n    });\n\n    return NextResponse.json({ shipments, total: shipments.length });\n  } catch (error) {\n    console.error(\"Failed to list shipments\", {\n      error: error instanceof Error ? error.message : String(error),\n    });\n\n    return NextResponse.json(\n      { error: \"Failed to load shipments.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction parseExcludedStatuses(\n  searchParams: URLSearchParams,\n): ShipmentStatus[] | undefined {\n  const value = searchParams.get(\"excludeStatuses\");\n  if (!value?.trim()) return [];\n\n  const statuses = value\n    .split(\",\")\n    .map((status) => status.trim())\n    .filter(Boolean);\n  if (!statuses.every(isShipmentStatus)) return undefined;\n\n  return [...new Set(statuses)];\n}\n\nfunction isShipmentStatus(value: string): value is ShipmentStatus {\n  return Object.values(ShipmentStatus).includes(value as ShipmentStatus);\n}\n\nexport async function POST(request: Request): Promise<NextResponse> {\n  let body: unknown;\n  try {\n    body = await request.json();\n  } catch {\n    return NextResponse.json(\n      { error: \"Request body must be valid JSON.\" },\n      { status: 400 },\n    );\n  }\n\n  const input = parseCreateShipmentInput(body);\n  if (!input) {\n    return NextResponse.json(\n      { error: \"PO number is required and carrier must be text.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());\n    const shipment = await createShipment({\n      googleSheetsService,\n      poNumber: input.poNumber,\n      carrier: input.carrier,\n      createdBy: \"web\",\n    });\n\n    return NextResponse.json({ shipment }, { status: 201 });\n  } catch (error) {\n    console.error(\"Failed to create shipment\", {\n      error: error instanceof Error ? error.message : String(error),\n    });\n\n    return NextResponse.json(\n      { error: \"Failed to create shipment.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction parseCreateShipmentInput(\n  value: unknown,\n): { poNumber: string; carrier?: string } | undefined {\n  if (!isRecord(value)) {\n    return undefined;\n  }\n\n  const poNumber = value.poNumber;\n  const carrier = value.carrier;\n  if (\n    typeof poNumber !== \"string\" ||\n    !poNumber.trim() ||\n    poNumber.length > 100 ||\n    (carrier !== undefined && typeof carrier !== \"string\") ||\n    (typeof carrier === \"string\" && carrier.length > 100)\n  ) {\n    return undefined;\n  }\n\n  return {\n    poNumber: poNumber.trim(),\n    carrier: typeof carrier === \"string\" ? carrier.trim() : undefined,\n  };\n}\n\nfunction isRecord(value: unknown): value is Record<string, unknown> {\n  return typeof value === \"object\" && value !== null && !Array.isArray(value);\n}\n",
+      "sha256": "b84c0b222cc8cd9f146d6f718538bd993a9940e5b3e0cf4e583d94e002751526",
+      "functions": {
+        "GET": "4789f2f7831372867664a4f074a05ad06070c8dc2172b5d88cad59d4b3918258",
+        "parseExcludedStatuses": "f5d10921c293b5e7a08acfb34806ce2b0da8cbbefb7b1d9f85777401656b3d07",
+        "isShipmentStatus": "b83e8bfcc6aaa5640ba8390d50854611887f02241992e582b64aa690d1ca954e",
+        "POST": "c4526a8e53081daf767bfd4bff46122b8b6f762fbafaafdeae71ea0f07fdbe36",
+        "parseCreateShipmentInput": "5dfd4bb648e76e1d2d1457b0ba0e52d57e274e1fc6420bfe49806de4f82134e8",
+        "isRecord": "d83d1e773cbe6139e882d0dbdf4f4c2af7251c7c1b52bb356b4252e59197fabf"
+      }
+    },
+    "src/app/api/shipments/[id]/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleDriveServiceFromConfig } from \"@/externals/google/drive\";\nimport { advanceShipmentStatusWithBill } from \"@/modules/shipments/server\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/externals/google/sheet\";\nimport { isRecord } from \"@/features/backend/shared/utils\";\nimport {\n  isUpdatableStatus,\n  isValidDeliveryFee,\n  isValidPoNumber,\n  readJsonBody,\n} from \"@/features/backend/shipments/utils\";\nimport {\n  getShipmentDetail,\n  ShipmentStatus,\n  updateShipmentStatus,\n} from \"@/services/shipments\";\n\nexport const runtime = \"nodejs\";\n\nconst ALLOWED_SHIPPING_BILL_TYPES = new Set([\n  \"application/pdf\",\n  \"image/jpeg\",\n  \"image/png\",\n  \"image/webp\",\n]);\nconst MAX_SHIPPING_BILL_SIZE_BYTES = 10 * 1024 * 1024;\n\nexport async function GET(\n  _request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const { id } = await params;\n  const shipmentId = id.trim();\n  if (!shipmentId) {\n    return NextResponse.json(\n      { error: \"Shipment ID is required.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(\n      getConfig(),\n    );\n    const shipment = await getShipmentDetail({\n      googleSheetsService,\n      shipmentId,\n    });\n\n    if (!shipment) {\n      return NextResponse.json(\n        { error: \"Shipment was not found.\" },\n        { status: 404 },\n      );\n    }\n\n    return NextResponse.json({ shipment });\n  } catch (error) {\n    console.error(\"Failed to load shipment\", {\n      error: error instanceof Error ? error.message : String(error),\n      shipmentId,\n    });\n    return NextResponse.json(\n      { error: \"Failed to load shipment.\" },\n      { status: 500 },\n    );\n  }\n}\n\nexport async function PATCH(\n  request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const { id } = await params;\n  const shipmentId = id.trim();\n  const body = await readShipmentUpdateBody(request);\n  if (!shipmentId || !isRecord(body) || !isUpdatableStatus(body.status)) {\n    return NextResponse.json(\n      { error: \"Shipment ID and a valid next status are required.\" },\n      { status: 400 },\n    );\n  }\n\n  let deliveryFee: number | undefined;\n  if (body.status === ShipmentStatus.Delivered) {\n    if (!isValidDeliveryFee(body.deliveryFee)) {\n      return NextResponse.json(\n        { error: \"Delivery fee must be a non-negative number.\" },\n        { status: 400 },\n      );\n    }\n    deliveryFee = body.deliveryFee;\n  }\n\n  let poNumber: string | undefined;\n  let shippingBill: File | undefined;\n  if (body.status === ShipmentStatus.Shipping) {\n    if (!isValidPoNumber(body.poNumber)) {\n      return NextResponse.json(\n        { error: \"PO number confirmation is required.\" },\n        { status: 400 },\n      );\n    }\n    poNumber = body.poNumber.trim();\n    if (body.shippingBill !== undefined) {\n      if (!isValidShippingBill(body.shippingBill)) {\n        return NextResponse.json(\n          { error: \"Select a PDF, JPEG, PNG, or WebP file up to 10 MB.\" },\n          { status: 400 },\n        );\n      }\n      shippingBill = body.shippingBill;\n    }\n  }\n\n  let workflow: Awaited<ReturnType<typeof advanceShipmentStatusWithBill>> | undefined;\n  try {\n    const config = getConfig();\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    workflow = await advanceShipmentStatusWithBill({\n      shipmentId,\n      shippingBill,\n      createDriveService: () => createGoogleDriveServiceFromConfig(config),\n      updateStatus: (shippingBillUrl) => updateShipmentStatus({\n        deliveryFee,\n        googleSheetsService,\n        poNumber,\n        shippingBillUrl,\n        shipmentId,\n        status: body.status as ShipmentStatus,\n      }),\n    });\n    if (workflow.outcome === \"drive_unavailable\") {\n      return NextResponse.json(\n        { error: \"Google Drive is not configured.\" },\n        { status: 503 },\n      );\n    }\n    const result = workflow.result;\n    if (result.outcome === \"not_found\") {\n      return NextResponse.json(\n        { error: \"Shipment was not found.\" },\n        { status: 404 },\n      );\n    }\n    if (result.outcome === \"invalid_transition\") {\n      return NextResponse.json(\n        { error: \"Shipment status has changed or cannot be advanced.\" },\n        { status: 409 },\n      );\n    }\n    if (result.outcome === \"invalid_delivery_fee\") {\n      return NextResponse.json(\n        { error: \"Delivery fee must be a non-negative number.\" },\n        { status: 400 },\n      );\n    }\n    if (result.outcome === \"invalid_po_number\") {\n      return NextResponse.json(\n        { error: \"Enter a valid PO number before starting shipping.\" },\n        { status: 400 },\n      );\n    }\n\n    return NextResponse.json({ shipment: result.shipment });\n  } catch (error) {\n    await workflow?.cleanupAfterFailure();\n    console.error(\"Failed to update shipment status\", {\n      error: error instanceof Error ? error.message : String(error),\n      shipmentId,\n    });\n    return NextResponse.json(\n      { error: \"Failed to update shipment status.\" },\n      { status: 500 },\n    );\n  }\n}\n\nasync function readShipmentUpdateBody(request: Request): Promise<unknown> {\n  if (!request.headers.get(\"content-type\")?.includes(\"multipart/form-data\")) {\n    return readJsonBody(request);\n  }\n\n  try {\n    const formData = await request.formData();\n    const shippingBill = formData.get(\"shippingBill\");\n    return {\n      status: formData.get(\"status\"),\n      poNumber: formData.get(\"poNumber\"),\n      shippingBill:\n        shippingBill instanceof File && shippingBill.size > 0\n          ? shippingBill\n          : undefined,\n    };\n  } catch {\n    return undefined;\n  }\n}\n\nfunction isValidShippingBill(value: unknown): value is File {\n  return (\n    value instanceof File &&\n    value.size > 0 &&\n    value.size <= MAX_SHIPPING_BILL_SIZE_BYTES &&\n    ALLOWED_SHIPPING_BILL_TYPES.has(value.type)\n  );\n}\n",
+      "sha256": "24ffbc46d8e57546480310aaeff5829223279db6c97dbc932c0f8112beab5d90",
+      "functions": {
+        "GET": "e810bc60b9cf89b2683b34c14e21755deb4551ea5f587fdfdcd24dde70ec6607",
+        "PATCH": "b6c6e2b0cc3503b4647b0070a693810349c5aee1e4b2f19e23b654a8d9c3667f",
+        "readShipmentUpdateBody": "7e11cf90b17ce260d1e8c7dbfd8068e99feb994ee09610def1cd9ef317b70310",
+        "isValidShippingBill": "15ea161eebe0d81f36369200b0aff819531aec27aa36077ab4f76f63ffbbb5c6"
+      }
+    },
+    "src/app/api/shipments/[id]/orders/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/externals/google/sheet\";\nimport {\n  linkOrderToShipment,\n  LinkOrderToShipmentError,\n} from \"@/services/shipments\";\n\nexport const runtime = \"nodejs\";\n\nexport async function POST(\n  request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const { id } = await params;\n  const shipmentId = id.trim();\n  const body = await readJsonBody(request);\n  if (!shipmentId || !isRecord(body) || !isValidId(body.orderId)) {\n    return NextResponse.json(\n      { error: \"Shipment ID and order ID are required.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());\n    const result = await linkOrderToShipment({\n      googleSheetsService,\n      shipmentId,\n      orderId: body.orderId.trim(),\n      createdBy: \"web\",\n    });\n\n    return NextResponse.json(result, { status: result.created ? 201 : 200 });\n  } catch (error) {\n    if (error instanceof LinkOrderToShipmentError) {\n      return NextResponse.json(\n        { error: error.message },\n        { status: getLinkErrorStatus(error) },\n      );\n    }\n\n    console.error(\"Failed to link order to shipment\", {\n      error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json(\n      { error: \"Failed to link order to shipment.\" },\n      { status: 500 },\n    );\n  }\n}\n\nasync function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nfunction isValidId(value: unknown): value is string {\n  return (\n    typeof value === \"string\" && Boolean(value.trim()) && value.length <= 100\n  );\n}\n\nfunction getLinkErrorStatus(error: LinkOrderToShipmentError): number {\n  switch (error.code) {\n    case \"shipment_not_found\":\n    case \"order_not_found\":\n      return 404;\n    case \"order_already_linked\":\n    case \"shipment_not_linkable\":\n      return 409;\n  }\n}\n\nfunction isRecord(value: unknown): value is Record<string, unknown> {\n  return typeof value === \"object\" && value !== null && !Array.isArray(value);\n}\n",
+      "sha256": "f870e3cc529c911a35eb7bfb1a0ef146ad49072096e0b647a83122fd9b04d610",
+      "functions": {
+        "POST": "85bd7505b517bd2f3d5910a8759087f688445e552364845bea826182188c9bec",
+        "readJsonBody": "4bae33b6462fcb849944d95fe7816a2f22831a9fa7bc98d34ec8c5889b582746",
+        "isValidId": "ef868cc9fdd4c8bb8a2ac36431d8676097dfb6bbea15d0fef82b326400052722",
+        "getLinkErrorStatus": "fd620f0d78b829096e2b946d301d09343d4d880ab682b6bb6f9d23a3fd8985ed",
+        "isRecord": "d83d1e773cbe6139e882d0dbdf4f4c2af7251c7c1b52bb356b4252e59197fabf"
+      }
+    },
+    "src/modules/shipments/server.ts": {
+      "source": "import \"server-only\";\nimport type { IGoogleSheetsService } from \"@/externals/google/sheet/types\";\nimport { createSortableId } from \"@/services/utils/createSortableId\";\nimport type { Shipment, ShipmentListItem, ShipmentStatus } from \"./contracts\";\nimport { createShipment as executeCreateShipment } from \"./application/create-shipment\";\nimport { GoogleSheetsShipmentWriter } from \"./infrastructure/google-sheets/shipment-writer\";\nimport {\n  listShipments as executeListShipments,\n  getShipmentDetail as executeGetShipmentDetail,\n} from \"./application/list-shipments\";\nimport { GoogleSheetsShipmentListReader } from \"./infrastructure/google-sheets/shipment-list-reader\";\n\nimport { linkOrderToShipment as executeLinkOrderToShipment, type LinkOrderToShipmentResult } from \"./application/link-order-to-shipment\";\nimport { GoogleSheetsShipmentOrderLinkStore } from \"./infrastructure/google-sheets/shipment-order-link-store\";\n\nimport { updateShipmentStatus as executeUpdateShipmentStatus, type UpdateShipmentStatusResult } from \"./application/update-shipment-status\";\nimport { GoogleSheetsShipmentStatusStore } from \"./infrastructure/google-sheets/shipment-status-store\";\n\nimport type { IGoogleDriveService } from \"@/externals/google/drive/types\";\nimport { advanceShipmentStatusWithBill as executeAdvanceShipmentStatusWithBill, type ShipmentStatusUpdater, type AdvanceShipmentStatusWithBillResult } from \"./application/advance-shipment-status-with-bill\";\nimport { GoogleDriveShipmentBillStorage } from \"./infrastructure/google-drive/shipment-bill-storage\";\n\nexport async function createShipment({\n  googleSheetsService,\n  poNumber,\n  carrier,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  poNumber: string;\n  carrier?: string;\n  createdBy: string;\n}): Promise<Shipment> {\n  return await executeCreateShipment({ poNumber, carrier, createdBy }, {\n    writer: new GoogleSheetsShipmentWriter(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}\n\nexport async function listShipments({\n  excludeStatuses = [],\n  googleSheetsService,\n  includeOrders = true,\n}: {\n  excludeStatuses?: readonly ShipmentStatus[];\n  googleSheetsService: IGoogleSheetsService;\n  includeOrders?: boolean;\n}): Promise<ShipmentListItem[]> {\n  return await executeListShipments(new GoogleSheetsShipmentListReader(googleSheetsService), {\n    excludeStatuses, includeOrders,\n  });\n}\n\nexport async function getShipmentDetail({\n  googleSheetsService,\n  shipmentId,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n}): Promise<ShipmentListItem | undefined> {\n  return await executeGetShipmentDetail(new GoogleSheetsShipmentListReader(googleSheetsService), shipmentId);\n}\n\nexport async function linkOrderToShipment({\n  googleSheetsService,\n  shipmentId,\n  orderId,\n  createdBy,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  shipmentId: string;\n  orderId: string;\n  createdBy: string;\n}): Promise<LinkOrderToShipmentResult> {\n  return await executeLinkOrderToShipment({ shipmentId, orderId, createdBy }, {\n    store: new GoogleSheetsShipmentOrderLinkStore(googleSheetsService),\n    now: () => new Date().toISOString(),\n    createId: createSortableId,\n  });\n}\n\nexport async function updateShipmentStatus({\n  deliveryFee,\n  googleSheetsService,\n  poNumber,\n  shippingBillUrl,\n  shipmentId,\n  status,\n}: {\n  deliveryFee?: number;\n  googleSheetsService: IGoogleSheetsService;\n  poNumber?: string;\n  shippingBillUrl?: string;\n  shipmentId: string;\n  status: ShipmentStatus;\n}): Promise<UpdateShipmentStatusResult> {\n  return await executeUpdateShipmentStatus({ deliveryFee, poNumber, shippingBillUrl, shipmentId, status }, {\n    store: new GoogleSheetsShipmentStatusStore(googleSheetsService),\n    now: () => new Date().toISOString(),\n  });\n}\n\nexport async function advanceShipmentStatusWithBill({\n  shipmentId,\n  shippingBill,\n  createDriveService,\n  updateStatus,\n}: {\n  shipmentId: string;\n  shippingBill?: File;\n  createDriveService: () => IGoogleDriveService | undefined;\n  updateStatus: ShipmentStatusUpdater;\n}): Promise<AdvanceShipmentStatusWithBillResult> {\n  return await executeAdvanceShipmentStatusWithBill({\n    storage: shippingBill\n      ? new GoogleDriveShipmentBillStorage(shipmentId, shippingBill, createDriveService)\n      : undefined,\n    updateStatus,\n  });\n}\n",
+      "sha256": "6722466f6ef1cde53fbe61388dbd62d8bf71b50376c3d2ec3d735cd017e9663b",
+      "functions": {
+        "createShipment": "e4aec970baa8aeb1508a73fbab0c1462b84b205289f92e89fe06baf2dd269335",
+        "listShipments": "dfef6d8ab57a180bd4c248428f28a71a61bcdbda3559c55a7c69caaa6642d7dd",
+        "getShipmentDetail": "f69e3d490515b8ba3ea41194afdaec6d408d3ea01e8481153d5da1494700a780",
+        "linkOrderToShipment": "79001ee757aa982e2ec09d4ff66cf24df89a244967bf0da7c2bc867303845d2c",
+        "updateShipmentStatus": "7f34278d9afe981b1cc3eab814e4cad6ce8cccbb75fdc954796dd1bb76e9f385",
+        "advanceShipmentStatusWithBill": "d8a6c8acc3cd2570c933217238ca5179c0b9049e950fae53b0c65626cd4b2c77"
+      }
+    }
+  },
+  "transforms": {
+    "src/app/api/shipments/route.ts": [
+      {
+        "from": "import {\n  createShipment,\n  listShipments,\n  ShipmentStatus,\n} from \"@/services/shipments\";",
+        "to": "import {\n  createShipment,\n  listShipments,\n} from \"@/modules/shipments/server\";\nimport { ShipmentStatus } from \"@/modules/shipments/contracts\";"
+      }
+    ],
+    "src/app/api/shipments/[id]/route.ts": [
+      {
+        "from": "import {\n  getShipmentDetail,\n  ShipmentStatus,\n  updateShipmentStatus,\n} from \"@/services/shipments\";",
+        "to": "import {\n  getShipmentDetail,\n  updateShipmentStatus,\n} from \"@/modules/shipments/server\";\nimport { ShipmentStatus } from \"@/modules/shipments/contracts\";"
+      }
+    ],
+    "src/app/api/shipments/[id]/orders/route.ts": [
+      {
+        "from": "import {\n  linkOrderToShipment,\n  LinkOrderToShipmentError,\n} from \"@/services/shipments\";",
+        "to": "import {\n  linkOrderToShipment,\n  LinkOrderToShipmentError,\n} from \"@/modules/shipments/server\";"
+      }
+    ],
+    "src/modules/shipments/server.ts": [
+      {
+        "from": "import { linkOrderToShipment as executeLinkOrderToShipment, type LinkOrderToShipmentResult } from \"./application/link-order-to-shipment\";",
+        "to": "import { linkOrderToShipment as executeLinkOrderToShipment, LinkOrderToShipmentError, type LinkOrderToShipmentResult } from \"./application/link-order-to-shipment\";\nexport { LinkOrderToShipmentError };"
+      }
+    ]
+  },
+  "classFile": "src/modules/shipments/application/link-order-to-shipment.ts",
+  "classSource": "import { ShipmentStatus, type ShipmentOrder } from \"../contracts\";\nimport type { ShipmentOrderLinkStore } from \"./ports/shipment-order-link-store\";\n\nexport type LinkOrderToShipmentResult = {\n  shipmentOrder: ShipmentOrder;\n  created: boolean;\n};\n\nexport type LinkOrderToShipmentErrorCode =\n  | \"shipment_not_found\"\n  | \"order_not_found\"\n  | \"order_already_linked\"\n  | \"shipment_not_linkable\";\n\nexport class LinkOrderToShipmentError extends Error {\n  constructor(\n    readonly code: LinkOrderToShipmentErrorCode,\n    message: string,\n  ) {\n    super(message);\n    this.name = \"LinkOrderToShipmentError\";\n  }\n}\n\nexport type LinkOrderInput = {\n  shipmentId: string;\n  orderId: string;\n  createdBy: string;\n};\n\nexport type LinkOrderDependencies = {\n  store: ShipmentOrderLinkStore;\n  now: () => string;\n  createId: () => string;\n};\n\nexport async function linkOrderToShipment(\n  { shipmentId, orderId, createdBy }: LinkOrderInput,\n  { store, now: readClock, createId }: LinkOrderDependencies,\n): Promise<LinkOrderToShipmentResult> {\n  const snapshot = await store.readLinkSnapshot();\n  const shipment = snapshot.findActiveShipment(shipmentId);\n  if (!shipment) {\n    throw new LinkOrderToShipmentError(\n      \"shipment_not_found\",\n      \"Shipment not found.\",\n    );\n  }\n\n  const orderExists = snapshot.hasActiveOrder(orderId);\n  if (!orderExists) {\n    throw new LinkOrderToShipmentError(\"order_not_found\", \"Order not found.\");\n  }\n\n  const existingLink = snapshot.findLatestActiveLink(orderId);\n  if (existingLink?.shipmentId === shipmentId) {\n    return { shipmentOrder: existingLink, created: false };\n  }\n  if (existingLink) {\n    throw new LinkOrderToShipmentError(\n      \"order_already_linked\",\n      \"Order is already linked to another shipment.\",\n    );\n  }\n\n  const shipmentStatus = shipment.readStatus();\n  if (\n    shipmentStatus !== ShipmentStatus.Draft &&\n    shipmentStatus !== ShipmentStatus.ReadyToShip\n  ) {\n    throw new LinkOrderToShipmentError(\n      \"shipment_not_linkable\",\n      \"Orders can only be linked to draft or ready-to-ship shipments.\",\n    );\n  }\n\n  const now = readClock();\n  const shipmentOrder: ShipmentOrder = {\n    id: createId(),\n    shipmentId,\n    orderId,\n    createdAt: now,\n    updatedAt: now,\n    deletedAt: \"\",\n    createdBy,\n  };\n\n  await store.appendShipmentOrder(shipmentOrder);\n\n  return { shipmentOrder, created: true };\n}\n",
+  "classHash": "03b9a887072cf1b0beb5fbc30adcbca34cb1c5c86fb939ee6448a43d8523c23b",
+  "cases": [
+    {
+      "name": "filtered list",
+      "group": "collection",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ],
+          [
+            "excluded",
+            "shipping",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "requests": [
+        {
+          "route": "collection",
+          "method": "GET",
+          "url": "https://example.test/api/shipments?includeOrders=false&excludeStatuses=shipping,shipping,canceled"
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 200,
+            "body": {
+              "shipments": [
+                {
+                  "id": "s/1",
+                  "status": "draft",
+                  "carrier": "Carrier",
+                  "poNumber": "PO-1",
+                  "shippingFee": null,
+                  "remark": "",
+                  "shippedAt": "",
+                  "deliveredAt": "",
+                  "createdAt": "created",
+                  "updatedAt": "updated",
+                  "createdBy": "web",
+                  "shippingBillUrl": "",
+                  "costSummary": null,
+                  "orders": []
+                }
+              ],
+              "total": 1
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "create and invalid filter",
+      "group": "collection",
+      "rows": {},
+      "requests": [
+        {
+          "route": "collection",
+          "method": "POST",
+          "body": {
+            "poNumber": " PO ",
+            "carrier": " Carrier "
+          }
+        },
+        {
+          "route": "collection",
+          "method": "GET",
+          "url": "https://example.test/api/shipments?excludeStatuses=unknown"
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 201,
+            "body": {
+              "shipment": {
+                "id": "synthetic-shipment-id",
+                "status": "draft",
+                "carrier": "Carrier",
+                "poNumber": "PO",
+                "shippingFee": null,
+                "remark": "",
+                "shippedAt": "",
+                "deliveredAt": "",
+                "createdAt": "2026-11-04T00:00:00.000Z",
+                "updatedAt": "2026-11-04T00:00:00.000Z",
+                "deletedAt": "",
+                "createdBy": "web",
+                "shippingBillUrl": ""
+              }
+            }
+          },
+          {
+            "status": 400,
+            "body": {
+              "error": "excludeStatuses contains an invalid shipment status."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "appendRows",
+            "shipments",
+            "A:M",
+            [
+              [
+                "synthetic-shipment-id",
+                "draft",
+                "Carrier",
+                "PO",
+                null,
+                "",
+                "",
+                "",
+                "2026-11-04T00:00:00.000Z",
+                "2026-11-04T00:00:00.000Z",
+                "",
+                "web",
+                ""
+              ]
+            ]
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "creation provider rejection",
+      "group": "collection",
+      "rows": {},
+      "fail": {
+        "failAppend": "shipments"
+      },
+      "requests": [
+        {
+          "route": "collection",
+          "method": "POST",
+          "body": {
+            "poNumber": "PO"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 500,
+            "body": {
+              "error": "Failed to create shipment."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "appendRows",
+            "shipments",
+            "A:M",
+            [
+              [
+                "synthetic-shipment-id",
+                "draft",
+                "",
+                "PO",
+                null,
+                "",
+                "",
+                "",
+                "2026-11-04T00:00:00.000Z",
+                "2026-11-04T00:00:00.000Z",
+                "",
+                "web",
+                ""
+              ]
+            ]
+          ]
+        ],
+        "errors": [
+          [
+            "Failed to create shipment",
+            {
+              "error": "synthetic append failure"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "name": "detail and JSON status",
+      "group": "detail",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "requests": [
+        {
+          "route": "detail",
+          "method": "GET",
+          "id": " s/1 "
+        },
+        {
+          "route": "detail",
+          "method": "PATCH",
+          "body": {
+            "status": "ready_to_ship"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 200,
+            "body": {
+              "shipment": {
+                "id": "s/1",
+                "status": "draft",
+                "carrier": "Carrier",
+                "poNumber": "PO-1",
+                "shippingFee": null,
+                "remark": "",
+                "shippedAt": "",
+                "deliveredAt": "",
+                "createdAt": "created",
+                "updatedAt": "updated",
+                "createdBy": "web",
+                "shippingBillUrl": "",
+                "costSummary": null,
+                "orders": []
+              }
+            }
+          },
+          {
+            "status": 200,
+            "body": {
+              "shipment": {
+                "status": "ready_to_ship",
+                "poNumber": "PO-1",
+                "shippingFee": null,
+                "shippedAt": "",
+                "deliveredAt": "",
+                "updatedAt": "2026-11-04T00:00:00.000Z",
+                "shippingBillUrl": ""
+              }
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ],
+          [
+            "readRows",
+            "shipmentOrders"
+          ],
+          [
+            "readRows",
+            "orders",
+            "A:I"
+          ],
+          [
+            "readRows",
+            "orderItems"
+          ],
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "updateRows",
+            "shipments",
+            "M1",
+            [
+              [
+                "shippingBillUrl"
+              ]
+            ]
+          ],
+          [
+            "readRows",
+            "shipments",
+            "A2:M"
+          ],
+          [
+            "updateRows",
+            "shipments",
+            "B2:M2",
+            [
+              [
+                "ready_to_ship",
+                "Carrier",
+                "PO-1",
+                null,
+                "",
+                "",
+                "",
+                "created",
+                "2026-11-04T00:00:00.000Z",
+                "",
+                "web",
+                ""
+              ]
+            ]
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "bill retained after shipping",
+      "group": "detail",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "ready_to_ship",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "requests": [
+        {
+          "route": "detail",
+          "method": "PATCH",
+          "bill": true,
+          "body": {
+            "status": "shipping",
+            "poNumber": " PO "
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 200,
+            "body": {
+              "shipment": {
+                "status": "shipping",
+                "poNumber": "PO",
+                "shippingFee": null,
+                "shippedAt": "2026-11-04T00:00:00.000Z",
+                "deliveredAt": "",
+                "updatedAt": "2026-11-04T00:00:00.000Z",
+                "shippingBillUrl": "url"
+              }
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "drive"
+          ],
+          [
+            "upload",
+            "shipment-bill-s_1-1793750400000.pdf",
+            "application/pdf",
+            4
+          ],
+          [
+            "updateRows",
+            "shipments",
+            "M1",
+            [
+              [
+                "shippingBillUrl"
+              ]
+            ]
+          ],
+          [
+            "readRows",
+            "shipments",
+            "A2:M"
+          ],
+          [
+            "updateRows",
+            "shipments",
+            "B2:M2",
+            [
+              [
+                "shipping",
+                "Carrier",
+                "PO",
+                null,
+                "",
+                "2026-11-04T00:00:00.000Z",
+                "",
+                "created",
+                "2026-11-04T00:00:00.000Z",
+                "",
+                "web",
+                "url"
+              ]
+            ]
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "bill cleanup after missing shipment",
+      "group": "detail",
+      "rows": {},
+      "requests": [
+        {
+          "route": "detail",
+          "method": "PATCH",
+          "bill": true,
+          "body": {
+            "status": "shipping",
+            "poNumber": "PO"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 404,
+            "body": {
+              "error": "Shipment was not found."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "drive"
+          ],
+          [
+            "upload",
+            "shipment-bill-s_1-1793750400000.pdf",
+            "application/pdf",
+            4
+          ],
+          [
+            "updateRows",
+            "shipments",
+            "M1",
+            [
+              [
+                "shippingBillUrl"
+              ]
+            ]
+          ],
+          [
+            "readRows",
+            "shipments",
+            "A2:M"
+          ],
+          [
+            "delete",
+            "bill/id"
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "Drive unavailable",
+      "group": "detail",
+      "rows": {},
+      "drive": "unavailable",
+      "requests": [
+        {
+          "route": "detail",
+          "method": "PATCH",
+          "bill": true,
+          "body": {
+            "status": "shipping",
+            "poNumber": "PO"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 503,
+            "body": {
+              "error": "Google Drive is not configured."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "drive"
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "bill cleanup after header failure",
+      "group": "detail",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "ready_to_ship",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "fail": {
+        "failUpdate": "M1"
+      },
+      "requests": [
+        {
+          "route": "detail",
+          "method": "PATCH",
+          "bill": true,
+          "body": {
+            "status": "shipping",
+            "poNumber": "PO"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 500,
+            "body": {
+              "error": "Failed to update shipment status."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "drive"
+          ],
+          [
+            "upload",
+            "shipment-bill-s_1-1793750400000.pdf",
+            "application/pdf",
+            4
+          ],
+          [
+            "updateRows",
+            "shipments",
+            "M1",
+            [
+              [
+                "shippingBillUrl"
+              ]
+            ]
+          ],
+          [
+            "delete",
+            "bill/id"
+          ]
+        ],
+        "errors": [
+          [
+            "Failed to update shipment status",
+            {
+              "error": "synthetic update failure",
+              "shipmentId": "s/1"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "name": "new and duplicate links",
+      "group": "links",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ],
+        "orders": [
+          [
+            "o/1"
+          ]
+        ]
+      },
+      "requests": [
+        {
+          "route": "links",
+          "method": "POST",
+          "id": " s/1 ",
+          "body": {
+            "orderId": " o/1 "
+          }
+        },
+        {
+          "route": "links",
+          "method": "POST",
+          "body": {
+            "orderId": "o/1"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 201,
+            "body": {
+              "shipmentOrder": {
+                "id": "synthetic-shipment-id",
+                "shipmentId": "s/1",
+                "orderId": "o/1",
+                "createdAt": "2026-11-04T00:00:00.000Z",
+                "updatedAt": "2026-11-04T00:00:00.000Z",
+                "deletedAt": "",
+                "createdBy": "web"
+              },
+              "created": true
+            }
+          },
+          {
+            "status": 200,
+            "body": {
+              "shipmentOrder": {
+                "id": "synthetic-shipment-id",
+                "shipmentId": "s/1",
+                "orderId": "o/1",
+                "createdAt": "2026-11-04T00:00:00.000Z",
+                "updatedAt": "2026-11-04T00:00:00.000Z",
+                "deletedAt": "",
+                "createdBy": "web"
+              },
+              "created": false
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ],
+          [
+            "readRows",
+            "orders",
+            "A:I"
+          ],
+          [
+            "readRows",
+            "shipmentOrders"
+          ],
+          [
+            "appendRows",
+            "shipmentOrders",
+            "A:G",
+            [
+              [
+                "synthetic-shipment-id",
+                "s/1",
+                "o/1",
+                "2026-11-04T00:00:00.000Z",
+                "2026-11-04T00:00:00.000Z",
+                "",
+                "web"
+              ]
+            ]
+          ],
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ],
+          [
+            "readRows",
+            "orders",
+            "A:I"
+          ],
+          [
+            "readRows",
+            "shipmentOrders"
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "shipment_not_found",
+      "group": "links",
+      "rows": {},
+      "requests": [
+        {
+          "route": "links",
+          "method": "POST",
+          "body": {
+            "orderId": "o/1"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 404,
+            "body": {
+              "error": "Shipment not found."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ],
+          [
+            "readRows",
+            "orders",
+            "A:I"
+          ],
+          [
+            "readRows",
+            "shipmentOrders"
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "order_not_found",
+      "group": "links",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "draft",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ]
+      },
+      "requests": [
+        {
+          "route": "links",
+          "method": "POST",
+          "body": {
+            "orderId": "o/1"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 404,
+            "body": {
+              "error": "Order not found."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ],
+          [
+            "readRows",
+            "orders",
+            "A:I"
+          ],
+          [
+            "readRows",
+            "shipmentOrders"
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "order_already_linked",
+      "group": "links",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "shipping",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ],
+        "orders": [
+          [
+            "o/1"
+          ]
+        ],
+        "shipmentOrders": [
+          [
+            "link",
+            "other",
+            "o/1"
+          ]
+        ]
+      },
+      "requests": [
+        {
+          "route": "links",
+          "method": "POST",
+          "body": {
+            "orderId": "o/1"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 409,
+            "body": {
+              "error": "Order is already linked to another shipment."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ],
+          [
+            "readRows",
+            "orders",
+            "A:I"
+          ],
+          [
+            "readRows",
+            "shipmentOrders"
+          ]
+        ],
+        "errors": []
+      }
+    },
+    {
+      "name": "shipment_not_linkable",
+      "group": "links",
+      "rows": {
+        "shipments": [
+          [
+            "s/1",
+            "shipping",
+            "Carrier",
+            "PO-1",
+            null,
+            "",
+            "",
+            "",
+            "created",
+            "updated",
+            "",
+            "web",
+            ""
+          ]
+        ],
+        "orders": [
+          [
+            "o/1"
+          ]
+        ]
+      },
+      "requests": [
+        {
+          "route": "links",
+          "method": "POST",
+          "body": {
+            "orderId": "o/1"
+          }
+        }
+      ],
+      "expected": {
+        "responses": [
+          {
+            "status": 409,
+            "body": {
+              "error": "Orders can only be linked to draft or ready-to-ship shipments."
+            }
+          }
+        ],
+        "trace": [
+          [
+            "config"
+          ],
+          [
+            "sheets"
+          ],
+          [
+            "readRows",
+            "shipments"
+          ],
+          [
+            "readRows",
+            "orders",
+            "A:I"
+          ],
+          [
+            "readRows",
+            "shipmentOrders"
+          ]
+        ],
+        "errors": []
+      }
+    }
+  ]
+}

@@ -103,3 +103,8 @@ The physical enum leaf is now `modules/shipments/status.ts` and permits no depen
 ## PR 16 current DTO forwarding direction
 
 Public Shipment contracts no longer depend on legacy types, even through erased edges. Their only dependencies are runtime `./status` and erased Orders OrderStatus; they physically own all eight existing DTO declarations. The legacy DTO leaf may forward only the exact public enum and eight erased DTOs from Shipment contracts, with no back edge. This is now safe because public → legacy forwarding is removed. Orders modules still import no Shipment contract/enum/implementation, including types; existing consumer-owned seams remain intact. Both graphs stay acyclic and ownership Shipments → Orders. Legacy leaf/barrel retirement remains separately scoped. [Full graph and historical transformations](shipments-dto-ownership.md).
+
+
+## PR 18 Shipment HTTP public entrypoints
+
+All three Shipment routes import operations/error identity only from guarded modules/shipments/server.ts and runtime status only from public contracts.ts. Server now additionally names the existing application LinkOrderToShipmentError through an existing named import/local export; class physical ownership stays in application, never browser contracts. Its identity is shared with legacy direct/barrel and HTTP instanceof checks. Six existing server operations and all legacy exports remain unchanged. No new feature edge or browser exception; no production mixed-barrel consumer remains. Retire old paths only in a separate compatibility review. [Scope, graph and source history](shipments-http-boundary.md).

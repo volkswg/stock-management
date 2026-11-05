@@ -89,7 +89,8 @@ export function shipmentRoutes(sheets, { drive, services: replacement } = {}) {
     "@/externals/google/sheet": { createGoogleSheetsServiceFromConfig: () => { events.push("sheets"); return sheets; } },
     "@/externals/google/drive": { createGoogleDriveServiceFromConfig: () => { events.push("drive"); return drive; } },
     "@/services/shipments": { ...services, ...replacement },
-    "@/modules/shipments/server": load("src/modules/shipments/server.ts"),
+    "@/modules/shipments/server": { ...load("src/modules/shipments/server.ts"), ...replacement },
+    "@/modules/shipments/contracts": load("src/modules/shipments/contracts.ts"),
     "@/features/backend/shared/utils": load("src/features/backend/shared/utils.ts"),
     "@/features/backend/shipments/utils": load("src/features/backend/shipments/utils.ts"),
   };
