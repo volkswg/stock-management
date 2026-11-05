@@ -2,6 +2,8 @@
 
 Status: Phase 1 preparation, based on `main` at `383cf5956b7e8a0705586936c78b7efd29ec6102`. Existing production code is unchanged. This guide is the target for incremental work, not a claim that current code already conforms.
 
+PR 15 completes only [physical ShipmentStatus ownership](shipments-enum-ownership.md): the original single enum now lives in pure `modules/shipments/status.ts`. Public contracts and the legacy types/barrel forward the same object; eight DTO declarations stay in the legacy leaf. Current ownership supersedes the temporary enum-owner statements in the historical PR summaries below. Orders picker/detail seams remain unchanged, with no reverse module dependency. DTO/barrel retirement and the full Shipments milestone remain incomplete.
+
 PR 2 established [Orders browser contracts](orders-contracts.md) at `src/modules/orders/contracts.ts`. PR 3 now consolidates all 15 Orders UI/client/style files under `src/modules/orders/ui/`; route wrappers and server use cases remain in place. See the [UI migration and consumer audit](orders-ui-migration.md). The Phase 1 statement above records the preparation baseline.
 
 PR 4 implements the [initial Orders use-case seam](orders-use-case-seam.md): `listOrders` and simple `createOrder` now use consumer-owned ports and feature Sheets adapters, composed through `modules/orders/server.ts`. Legacy exports remain; detail/images/drafts and other services stay in place. Contracts and UI are unchanged.

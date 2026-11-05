@@ -45,7 +45,7 @@ export function componentHarness(path, { api = {}, globals = {} } = {}) {
     "@ant-design/icons": new Proxy({}, { get: (_, name) => String(name) }),
     "next/navigation": { useRouter: () => ({ push: (url) => navigation.push(url) }) },
     "@/modules/orders/contracts": loadSource("src/modules/orders/contracts.ts"),
-    "@/modules/shipments/contracts": loadSource("src/services/shipments/types.ts"),
+    "@/modules/shipments/contracts": loadSource("src/modules/shipments/contracts.ts", { imports: { "./status": loadSource("src/modules/shipments/status.ts") } }),
   };
   const source = ts.createSourceFile(path, readFileSync(path, "utf8"), ts.ScriptTarget.Latest, true);
   for (const node of source.statements) {

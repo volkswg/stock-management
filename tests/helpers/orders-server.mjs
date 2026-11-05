@@ -18,7 +18,7 @@ export function ordersServer({ globals = {}, createId = () => "synthetic-order-i
     if (Object.hasOwn(overrides, file)) return overrides[file];
     if (cache.has(file)) return cache.get(file);
     if (file === "src/services/utils/createSortableId.ts") return { createSortableId: createId };
-    const detailFiles = ["src/modules/shipments/contracts.ts", "src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts"];
+    const detailFiles = ["src/modules/shipments/status.ts", "src/modules/shipments/contracts.ts", "src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts"];
     if (!detailFiles.includes(file) && !/^(src\/(modules\/orders|services\/orders)\/|src\/services\/shipments\/types\.ts$|src\/externals\/google\/sheet\/(?:.*\/)?const\.ts$)/.test(file)) {
       throw new Error(`Unapproved offline Orders dependency: ${file}`);
     }

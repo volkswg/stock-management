@@ -1,3 +1,4 @@
+import { assertShipmentEnumContractHistory } from "./helpers/shipments-enum-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -22,6 +23,7 @@ test("seven original Shipment source bodies/CSS and route wrapper metadata/JSX r
   }
   for (const entry of baseline.wrappers) assert.equal(bodyHash(entry.file), entry.hash, entry.file);
   for (const [file, expected] of Object.entries(baseline.retained)) {
+    if (file === "src/modules/shipments/contracts.ts") { assertShipmentEnumContractHistory(file, expected); continue; }
     if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
     else assert.equal(hash(readFileSync(baseline.files.find(e => e.from === file)?.to ?? file)), expected, file);
   }

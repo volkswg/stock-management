@@ -4,6 +4,17 @@ This is a planning inventory of every current src file at the audited base. **No
 
 Root files: package.json, yarn.lock, tsconfig.json, eslint.config.mjs, next.config.ts, next-env.d.ts and .env.example remain at root; preserve env and dependency names. public assets and existing workflow docs stay in place. Root config changes must be separately reviewed.
 
+## PR 15 — physical ShipmentStatus ownership implemented
+
+| Original / current file | Implemented ownership / remaining work |
+| --- | --- |
+| `src/services/shipments/types.ts:ShipmentStatus` | Exact original enum declaration moves to `src/modules/shipments/status.ts`; legacy named import/re-export preserves identity |
+| `src/modules/shipments/contracts.ts` | Runtime enum forwards from `./status`; eight type-only DTO forwards unchanged |
+| Eight DTO declarations in `src/services/shipments/types.ts` | Stay byte-equivalent AST declarations in place; no DTO move or barrel retirement |
+| All other production source files | Byte-identical, including Orders projection/picker and all applications/adapters/routes/clients/providers |
+
+Current table supersedes prior temporary enum ownership proposals below. [Source/AST/runtime/graph evidence and future cleanup](shipments-enum-ownership.md).
+
 ## PR 14 — Orders detail Shipment projection implemented
 
 | Existing / new file | Ownership / compatibility |
