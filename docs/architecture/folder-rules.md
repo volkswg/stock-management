@@ -71,3 +71,8 @@ PR 14 adds Orders `application/get-order-detail.ts`, its `ports/order-detail-rea
 ## PR 15 current enum ownership
 
 `modules/shipments/status.ts` owns only the single pure ShipmentStatus runtime enum, with no dependencies, IO or server marker. `modules/shipments/contracts.ts` forwards it by name and retains eight erased DTO exports from `services/shipments/types.ts`. That compatibility leaf keeps all eight exact DTO declarations, imports Orders OrderStatus as a type and imports/re-exports the same physical Shipment enum directly. It must not import Shipment contracts. The unchanged legacy barrel remains server compatibility, never a browser entrypoint. No domain folder or wider DTO migration. This supersedes earlier temporary physical ownership descriptions; [history, consumers and retirement criteria](shipments-enum-ownership.md).
+
+
+## PR 16 current Shipment DTO ownership
+
+`modules/shipments/contracts.ts` physically owns the eight existing DTO aliases, imports only erased Orders OrderStatus and its own pure status leaf, and exports only ShipmentStatus at runtime. `services/shipments/types.ts` now contains only explicit named public enum/type forwards; no DTO definitions, imports or business code. `status.ts` and the legacy barrel stay byte-identical. No module/browser graph depends back on the legacy DTO leaf. This supersedes PR15's temporary DTO ownership while retaining its enum ownership. [Exact declaration inventory and removal criteria](shipments-dto-ownership.md).

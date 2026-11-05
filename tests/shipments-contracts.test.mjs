@@ -27,12 +27,12 @@ test("Shipment public and legacy runtime exports share the original enum object 
   assert.deepEqual(Object.keys(contract), ["ShipmentStatus"]);
   assert.deepEqual(plain(contract.ShipmentStatus), { Draft: "draft", ReadyToShip: "ready_to_ship", Shipping: "shipping", Delivered: "delivered", Canceled: "canceled" });
   const source = parse("src/modules/shipments/contracts.ts");
-  const names = source.statements.filter(ts.isExportDeclaration).flatMap(n => n.exportClause?.elements.map(e => e.name.text) ?? []);
+  const names = source.statements.flatMap(n => ts.isExportDeclaration(n) ? n.exportClause?.elements.map(e => e.name.text) ?? [] : ts.isTypeAliasDeclaration(n) ? [n.name.text] : []);
   assert.deepEqual(names.sort(), ["ShipmentStatus", ...Object.keys(baseline.types)].sort());
 });
 
 test("all eight Shipment DTO declarations preserve original fields, optionality and nullability", () => {
-  const source = parse("src/services/shipments/types.ts");
+  const source = parse("src/modules/shipments/contracts.ts");
   for (const [name, expected] of Object.entries(baseline.types)) {
     const node = source.statements.find(n => ts.isTypeAliasDeclaration(n) && n.name.text === name);
     assert.ok(node, name);

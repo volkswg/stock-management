@@ -8,7 +8,7 @@ import ts from "typescript";
 
 const eslint = new ESLint(), contract = "src/modules/shipments/contracts.ts", leaf = "src/services/shipments/types.ts";
 const files = ["ShipmentListPage.tsx", "ShipmentMobileCard.tsx", "[id]/ShipmentDetailPage.tsx", "shipmentListFormat.ts", "api.ts"].map(f => `src/modules/shipments/ui/${f}`);
-const restricted = result => result.messages.some(m => ["no-restricted-imports", "no-restricted-syntax", "no-restricted-globals"].includes(m.ruleId));
+const restricted = result => result.messages.some(m => ["no-restricted-imports", "no-restricted-syntax", "no-restricted-globals", "shipment-contracts/shape"].includes(m.ruleId));
 
 test("Shipment lint permits the public contract/gallery/client and only the documented pure leaf exception", async () => {
   for (const filePath of files) {
@@ -17,7 +17,7 @@ test("Shipment lint permits the public contract/gallery/client and only the docu
     assert.equal(restricted(result), false, filePath);
     const [actual] = await eslint.lintFiles(filePath); assert.equal(restricted(actual), false, filePath);
   }
-  const [forward] = await eslint.lintText('export { ShipmentStatus } from "./status"; export type { Shipment, ShipmentListItem, ShipmentRelatedOrder, ShipmentRelatedProductImage, ShipmentQuantityCost, ShipmentCostSummary, ShipmentStatusUpdate, ShipmentOrder } from "@/services/shipments/types";', { filePath: contract });
+  const [forward] = await eslint.lintText(readFileSync(contract, "utf8"), { filePath: contract });
   assert.equal(restricted(forward), false);
   const [pure] = await eslint.lintText(readFileSync(leaf, "utf8"), { filePath: leaf });
   assert.equal(restricted(pure), false);
@@ -80,7 +80,7 @@ function graph(runtime) {
     assert.ok(!active.includes(file), `Dependency cycle: ${[...active, file].join(" -> ")}`);
     if (visited.has(file)) return;
     assert.ok(!/^src\/(config|externals|infrastructure|features\/backend)\//.test(file), file);
-    assert.ok(!file.startsWith("src/services/") || file === leaf, file);
+    assert.ok(!file.startsWith("src/services/"), file);
     assert.ok(!/\/modules\/[^/]+\/(application|infrastructure)\/|\/server\.[^/]+$/.test(file), file);
     assert.ok(!file.startsWith("src/app/"), file);
     active.push(file);
@@ -99,7 +99,7 @@ function graph(runtime) {
     active.pop(); visited.add(file);
   }
   [contract, ...files].forEach(visit);
-  assert.ok(visited.has(contract)); assert.ok(visited.has("src/modules/shipments/status.ts")); assert.equal(visited.has(leaf), !runtime, "DTO forwarding is erased; runtime now terminates at owned status leaf");
+  assert.ok(visited.has(contract)); assert.ok(visited.has("src/modules/shipments/status.ts")); assert.equal(visited.has(leaf), false, "Public contracts physically own all DTOs; neither graph reaches legacy forwarding");
 }
 test("Shipment runtime graph reaches only browser-safe project code and has no cycles", () => graph(true));
 test("Shipment graph including type-only edges has no cycles or server implementations", () => graph(false));

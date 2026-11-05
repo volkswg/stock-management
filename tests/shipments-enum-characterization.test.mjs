@@ -11,7 +11,7 @@ test("original enum source/AST, eight DTO declarations and captured sources reta
   const node = original.statements.find(ts.isEnumDeclaration);
   assert.equal(node.getText(original), enumBefore.enum.source);
   assert.equal(enumPrint(node, original), enumBefore.enum.ast); assert.equal(enumHash(enumPrint(node, original)), enumBefore.enum.sha256);
-  const current = enumParse(file);
+  const current = enumParse("src/modules/shipments/contracts.ts");
   for (const [name, saved] of Object.entries(enumBefore.dtos)) {
     const declaration = current.statements.find(n => ts.isTypeAliasDeclaration(n) && n.name.text === name);
     assert.equal(enumPrint(declaration, current), saved.ast, name); assert.equal(enumHash(saved.ast), saved.sha256);

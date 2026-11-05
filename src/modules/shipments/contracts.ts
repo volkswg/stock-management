@@ -1,13 +1,74 @@
-// Temporary physical ownership: the pure legacy leaf retains the single enum
-// while Orders uses its existing bridge. See docs/architecture/shipments-contracts.md.
-export { ShipmentStatus } from "./status";
-export type {
-  Shipment,
-  ShipmentListItem,
-  ShipmentRelatedOrder,
-  ShipmentRelatedProductImage,
-  ShipmentQuantityCost,
-  ShipmentCostSummary,
-  ShipmentStatusUpdate,
-  ShipmentOrder,
-} from "@/services/shipments/types";
+import type { OrderStatus } from "@/modules/orders/contracts";
+import { ShipmentStatus } from "./status";
+
+export { ShipmentStatus };
+
+export type Shipment = {
+  id: string;
+  status: ShipmentStatus;
+  carrier: string;
+  poNumber: string;
+  shippingFee: number | null;
+  remark: string;
+  shippedAt: string;
+  deliveredAt: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+  createdBy: string;
+  shippingBillUrl: string;
+};
+
+export type ShipmentRelatedOrder = {
+  id: string;
+  status: OrderStatus;
+  seller: string;
+  totalPrice: number | null;
+  createdAt: string;
+  productImages: ShipmentRelatedProductImage[];
+};
+
+export type ShipmentRelatedProductImage = {
+  id: string;
+  imageUrl: string;
+  quoteQuantity: string;
+  deliveredQuantity: string;
+  productCode: string;
+};
+
+export type ShipmentQuantityCost = {
+  totalQuantity: number;
+  averageLandedCostPerUnit: number;
+};
+
+export type ShipmentCostSummary = {
+  totalOrderPrice: number;
+  shippingFee: number;
+  quote: ShipmentQuantityCost | null;
+  delivered: ShipmentQuantityCost | null;
+};
+
+export type ShipmentListItem = Omit<Shipment, "deletedAt"> & {
+  costSummary: ShipmentCostSummary | null;
+  orders: ShipmentRelatedOrder[];
+};
+
+export type ShipmentStatusUpdate = {
+  status: ShipmentStatus;
+  poNumber: string;
+  shippingFee: number | null;
+  shippedAt: string;
+  deliveredAt: string;
+  updatedAt: string;
+  shippingBillUrl: string;
+};
+
+export type ShipmentOrder = {
+  id: string;
+  shipmentId: string;
+  orderId: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+  createdBy: string;
+};
