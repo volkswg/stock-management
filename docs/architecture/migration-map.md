@@ -497,3 +497,8 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 ## PR 19 — completed shared Google transport slice
 
 The fifteen transport/auth/provider files above are physically relocated with named compatibility forwards. Six generic type declarations move from `externals/google/sheet/types.ts` to `infrastructure/persistence/google-sheets/types.ts`; aggregate and feature contracts remain. GoogleSheetsService, its factory, worksheet registry/classes/headers and all consumers stay byte-identical. [Exact mapping, 115-edge audit and remaining work](google-shared-infrastructure.md).
+
+
+## Orders pure Sheet type-import prerequisite
+
+The four erased imports in Orders server/row-mapping/writer/list-reader change from the mixed Sheets index to its pure types leaf. All worksheet classes, header constants, registry/indexes and consumers outside those four imports remain unchanged. This prerequisite clears the type-inclusive reverse-edge blocker; the ten-file worksheet migration must start from the new reviewed merge SHA. [Exact inventory and evidence](orders-sheet-type-imports.md).

@@ -8,6 +8,8 @@ import { shipmentsServerBoundaries } from "./eslint/shipments-server-boundaries.
 
 import { googleInfrastructureBoundaries } from "./eslint/google-infrastructure-boundaries.mjs";
 
+import { ordersSheetTypeBoundaries } from "./eslint/orders-sheet-type-boundaries.mjs";
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -16,6 +18,7 @@ const eslintConfig = defineConfig([
   ...shipmentsBoundaries,
   ...shipmentsServerBoundaries,
   ...googleInfrastructureBoundaries,
+  ...ordersSheetTypeBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -1,3 +1,4 @@
+import { sheetTypeFiles, assertOrdersSheetTypeHistory } from "./helpers/orders-sheet-type-history.mjs";
 import { assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import { assertOrdersDetailServerHistory, assertOrdersDetailBoundaryHistory } from "./helpers/orders-detail-history.mjs";
 import { assertShipmentDriveRouteHistory } from "./helpers/shipments-drive-history.mjs";
@@ -57,6 +58,7 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     assert.equal(hash(printer.printNode(ts.EmitHint.Unspecified, node, source)), expected, key);
   }
   for (const [file, expected] of Object.entries(baseline.preserved)) {
+    if (sheetTypeFiles.has(file) && file !== "src/modules/orders/server.ts") { assertOrdersSheetTypeHistory(file, expected); continue; }
     if (["src/app/api/shipments/route.ts", "src/app/api/shipments/[id]/orders/route.ts"].includes(file)) { assertShipmentHttpHistory(file, expected); continue; }
     if (file === "eslint/orders-server-boundaries.mjs") assertOrdersDetailBoundaryHistory(file, expected);
     else if (file === "src/modules/orders/server.ts") assertOrdersDetailServerHistory(file, expected);
