@@ -1,6 +1,6 @@
 import { noDynamicServerBypass } from "./orders-boundaries.mjs";
 const transport="@/infrastructure/persistence/google-sheets/";
-const classes={orders:{orders:"OrdersSheet","order-items":"OrderItemsSheet","order-bills":"OrderBillsSheet"},shipments:{shipments:"ShipmentsSheet","shipment-orders":"ShipmentOrdersSheet"}};
+const classes={sales:{receipts:"SalesReceiptsSheet","receipt-items":"SalesReceiptItemsSheet","receipt-payments":"SalesReceiptPaymentsSheet","receipt-syncs":"SalesReceiptSyncsSheet","profit-cost-overrides":"SalesProfitCostOverridesSheet"},orders:{orders:"OrdersSheet","order-items":"OrderItemsSheet","order-bills":"OrderBillsSheet"},shipments:{shipments:"ShipmentsSheet","shipment-orders":"ShipmentOrdersSheet"}};
 export const worksheetBoundaries=Object.entries(classes).flatMap(([owner,sheets])=>Object.entries(sheets).flatMap(([folder,name])=>[`${name}.ts`,"const.ts"].map(file=>{
  const paths=file==="const.ts"?[]:[transport+"sheets/BaseGoogleSheet",transport+"types",...(name==="OrdersSheet"?[]:[transport+"const","./const"])];
  return {files:[`src/modules/${owner}/infrastructure/google-sheets/${folder}/${file}`],rules:{

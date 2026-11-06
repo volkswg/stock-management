@@ -50,3 +50,8 @@ PR 19 implements only the shared Google auth/Sheets transport/Drive ownership sl
 ## PR 21 — Orders and Shipments worksheet ownership
 
 PR21 implements only the five Orders/Shipment worksheet classes plus five headers. Ten exact named forwards preserve consumers and registry identity. Source/AST restoration, real transport/identity and actual runtime/type/browser graph tests pass; PR20 virtual evidence transitions to actual physical-file validation. All other worksheet ownership and aggregate registry retirement remain deferred. [Scope and exit evidence](orders-shipments-worksheet-ownership.md).
+
+
+## PR 22 — Sales worksheet ownership
+
+PR22 implements only five Sales worksheet classes and five mutable header arrays, with exact named forwards and source/identity/transport evidence. Sales sync/report/profit/API algorithms and aggregate registry/consumers remain byte-identical. Legacy Sales use cases and type-boundary cleanup, registry retirement and other feature worksheets remain separate reviewed work. [Exit evidence and limits](sales-worksheet-ownership.md).

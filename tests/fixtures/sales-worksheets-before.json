@@ -1,0 +1,2633 @@
+{
+  "base": "b0926e1321ce55869f87d3fa72852cc5e55ed693",
+  "moves": {
+    "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipts/SalesReceiptsSheet.ts",
+      "source": "import { lastColumnLetter } from \"../../../const\";\nimport type { GoogleSheetRow, IGoogleRowsSheet } from \"../../../types\";\nimport { BaseGoogleSheet } from \"../../BaseGoogleSheet\";\nimport { SALES_RECEIPT_HEADERS } from \"./const\";\n\nexport class SalesReceiptsSheet\n  extends BaseGoogleSheet\n  implements IGoogleRowsSheet\n{\n  async readRows(\n    range = `A:${lastColumnLetter(SALES_RECEIPT_HEADERS.length - 1)}`,\n  ): Promise<GoogleSheetRow[]> {\n    return this.read(range);\n  }\n\n  async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.append(range, values);\n  }\n\n  async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.update(range, values);\n  }\n}\n",
+      "sha256": "ea2bc46841d5afaaf5d1f8cf0192008eab79d8402861e5709b18878fb527d366",
+      "declarations": [
+        {
+          "ast": "export class SalesReceiptsSheet extends BaseGoogleSheet implements IGoogleRowsSheet {\n    async readRows(range = `A:${lastColumnLetter(SALES_RECEIPT_HEADERS.length - 1)}`): Promise<GoogleSheetRow[]> {\n        return this.read(range);\n    }\n    async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.append(range, values);\n    }\n    async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.update(range, values);\n    }\n}",
+          "sha256": "ab5aa96c4fb028185f2b7c7a7ca5d1df8e691d6984ae93387719b78ce4ec5198"
+        }
+      ],
+      "export": "SalesReceiptsSheet",
+      "imports": {
+        "../../BaseGoogleSheet": "@/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet",
+        "../../../types": "@/infrastructure/persistence/google-sheets/types",
+        "../../../const": "@/infrastructure/persistence/google-sheets/const"
+      }
+    },
+    "src/externals/google/sheet/sheets/sales/receipts/const.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipts/const.ts",
+      "source": "export const SALES_RECEIPT_HEADERS = [\n  \"id\",\n  \"salesDate\",\n  \"accountId\",\n  \"shopName\",\n  \"receiptNumber\",\n  \"receiptType\",\n  \"refundFor\",\n  \"order\",\n  \"receiptDate\",\n  \"createdAt\",\n  \"updatedAt\",\n  \"cancelledAt\",\n  \"source\",\n  \"storeId\",\n  \"employeeId\",\n  \"customerId\",\n  \"posDeviceId\",\n  \"diningOption\",\n  \"totalMoney\",\n  \"totalTax\",\n  \"totalDiscount\",\n  \"tip\",\n  \"surcharge\",\n  \"pointsEarned\",\n  \"pointsDeducted\",\n  \"syncedAt\",\n];\n",
+      "sha256": "763f39dc2389110ec2f1d7a8b9edb22d4582d54ddca72ca24addbcfbf9f7d79f",
+      "declarations": [
+        {
+          "ast": "export const SALES_RECEIPT_HEADERS = [\n    \"id\",\n    \"salesDate\",\n    \"accountId\",\n    \"shopName\",\n    \"receiptNumber\",\n    \"receiptType\",\n    \"refundFor\",\n    \"order\",\n    \"receiptDate\",\n    \"createdAt\",\n    \"updatedAt\",\n    \"cancelledAt\",\n    \"source\",\n    \"storeId\",\n    \"employeeId\",\n    \"customerId\",\n    \"posDeviceId\",\n    \"diningOption\",\n    \"totalMoney\",\n    \"totalTax\",\n    \"totalDiscount\",\n    \"tip\",\n    \"surcharge\",\n    \"pointsEarned\",\n    \"pointsDeducted\",\n    \"syncedAt\",\n];",
+          "sha256": "e2bfb69d8cb9fc237e751af38c8357ce95968bb88a09d121917f0fa1a1ecf701"
+        }
+      ],
+      "export": "SALES_RECEIPT_HEADERS",
+      "imports": {}
+    },
+    "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipt-items/SalesReceiptItemsSheet.ts",
+      "source": "import { lastColumnLetter } from \"../../../const\";\nimport type { GoogleSheetRow, IGoogleRowsSheet } from \"../../../types\";\nimport { BaseGoogleSheet } from \"../../BaseGoogleSheet\";\nimport { SALES_RECEIPT_ITEM_HEADERS } from \"./const\";\n\nexport class SalesReceiptItemsSheet\n  extends BaseGoogleSheet\n  implements IGoogleRowsSheet\n{\n  async readRows(\n    range = `A:${lastColumnLetter(SALES_RECEIPT_ITEM_HEADERS.length - 1)}`,\n  ): Promise<GoogleSheetRow[]> {\n    return this.read(range);\n  }\n\n  async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.append(range, values);\n  }\n\n  async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.update(range, values);\n  }\n}\n",
+      "sha256": "07188f97b01008360b392be3de90d8ab14ed01329dc13fe889137fa3c6da37ba",
+      "declarations": [
+        {
+          "ast": "export class SalesReceiptItemsSheet extends BaseGoogleSheet implements IGoogleRowsSheet {\n    async readRows(range = `A:${lastColumnLetter(SALES_RECEIPT_ITEM_HEADERS.length - 1)}`): Promise<GoogleSheetRow[]> {\n        return this.read(range);\n    }\n    async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.append(range, values);\n    }\n    async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.update(range, values);\n    }\n}",
+          "sha256": "167075218026a0ae31475b8920be48b339f46212aeedf7e7b46797fed3635f5e"
+        }
+      ],
+      "export": "SalesReceiptItemsSheet",
+      "imports": {
+        "../../BaseGoogleSheet": "@/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet",
+        "../../../types": "@/infrastructure/persistence/google-sheets/types",
+        "../../../const": "@/infrastructure/persistence/google-sheets/const"
+      }
+    },
+    "src/externals/google/sheet/sheets/sales/receipt-items/const.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipt-items/const.ts",
+      "source": "export const SALES_RECEIPT_ITEM_HEADERS = [\n  \"id\",\n  \"receiptId\",\n  \"lineItemId\",\n  \"itemId\",\n  \"variantId\",\n  \"itemName\",\n  \"variantName\",\n  \"sku\",\n  \"quantity\",\n  \"price\",\n  \"grossTotalMoney\",\n  \"totalDiscount\",\n  \"totalMoney\",\n  \"cost\",\n  \"costTotal\",\n  \"taxes\",\n  \"lineNote\",\n  \"lineDiscountsJson\",\n  \"lineTaxesJson\",\n  \"lineModifiersJson\",\n  \"syncedAt\",\n];\n",
+      "sha256": "0b4f84bf3a1ecde01a96d23be962395e5365afb47ac93b0c148bb921b7489859",
+      "declarations": [
+        {
+          "ast": "export const SALES_RECEIPT_ITEM_HEADERS = [\n    \"id\",\n    \"receiptId\",\n    \"lineItemId\",\n    \"itemId\",\n    \"variantId\",\n    \"itemName\",\n    \"variantName\",\n    \"sku\",\n    \"quantity\",\n    \"price\",\n    \"grossTotalMoney\",\n    \"totalDiscount\",\n    \"totalMoney\",\n    \"cost\",\n    \"costTotal\",\n    \"taxes\",\n    \"lineNote\",\n    \"lineDiscountsJson\",\n    \"lineTaxesJson\",\n    \"lineModifiersJson\",\n    \"syncedAt\",\n];",
+          "sha256": "6df5b4c471c6b8cd8da307bd46cc5f55b3b24adfd6918f31dd8c0485e9541dd9"
+        }
+      ],
+      "export": "SALES_RECEIPT_ITEM_HEADERS",
+      "imports": {}
+    },
+    "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipt-payments/SalesReceiptPaymentsSheet.ts",
+      "source": "import { lastColumnLetter } from \"../../../const\";\nimport type { GoogleSheetRow, IGoogleRowsSheet } from \"../../../types\";\nimport { BaseGoogleSheet } from \"../../BaseGoogleSheet\";\nimport { SALES_RECEIPT_PAYMENT_HEADERS } from \"./const\";\n\nexport class SalesReceiptPaymentsSheet\n  extends BaseGoogleSheet\n  implements IGoogleRowsSheet\n{\n  async readRows(\n    range = `A:${lastColumnLetter(SALES_RECEIPT_PAYMENT_HEADERS.length - 1)}`,\n  ): Promise<GoogleSheetRow[]> {\n    return this.read(range);\n  }\n\n  async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.append(range, values);\n  }\n\n  async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.update(range, values);\n  }\n}\n",
+      "sha256": "31a53e78c9fb960b41b71e5476c7f6d2be98d9fe4ad4c3f4dcabc875118b6798",
+      "declarations": [
+        {
+          "ast": "export class SalesReceiptPaymentsSheet extends BaseGoogleSheet implements IGoogleRowsSheet {\n    async readRows(range = `A:${lastColumnLetter(SALES_RECEIPT_PAYMENT_HEADERS.length - 1)}`): Promise<GoogleSheetRow[]> {\n        return this.read(range);\n    }\n    async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.append(range, values);\n    }\n    async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.update(range, values);\n    }\n}",
+          "sha256": "4b7fcf463dca02e06a68796ea0376ead5c318af88d24de9044bac8b6f141dbfd"
+        }
+      ],
+      "export": "SalesReceiptPaymentsSheet",
+      "imports": {
+        "../../BaseGoogleSheet": "@/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet",
+        "../../../types": "@/infrastructure/persistence/google-sheets/types",
+        "../../../const": "@/infrastructure/persistence/google-sheets/const"
+      }
+    },
+    "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipt-payments/const.ts",
+      "source": "export const SALES_RECEIPT_PAYMENT_HEADERS = [\n  \"id\",\n  \"receiptId\",\n  \"paymentIndex\",\n  \"paymentTypeId\",\n  \"paymentName\",\n  \"paymentType\",\n  \"moneyAmount\",\n  \"paidAt\",\n  \"paymentDetailsJson\",\n  \"syncedAt\",\n];\n",
+      "sha256": "b6ffb27c0983929a089eccbad1ec7d9bfffeb552eb0a5219860aa78961a7a017",
+      "declarations": [
+        {
+          "ast": "export const SALES_RECEIPT_PAYMENT_HEADERS = [\n    \"id\",\n    \"receiptId\",\n    \"paymentIndex\",\n    \"paymentTypeId\",\n    \"paymentName\",\n    \"paymentType\",\n    \"moneyAmount\",\n    \"paidAt\",\n    \"paymentDetailsJson\",\n    \"syncedAt\",\n];",
+          "sha256": "bd2338823ea841a7ac3b0556ae5562f87f32e468dc01b6ebc96e6d024ba8d4f2"
+        }
+      ],
+      "export": "SALES_RECEIPT_PAYMENT_HEADERS",
+      "imports": {}
+    },
+    "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipt-syncs/SalesReceiptSyncsSheet.ts",
+      "source": "import { lastColumnLetter } from \"../../../const\";\nimport type { GoogleSheetRow, IGoogleRowsSheet } from \"../../../types\";\nimport { BaseGoogleSheet } from \"../../BaseGoogleSheet\";\nimport { SALES_RECEIPT_SYNC_HEADERS } from \"./const\";\n\nexport class SalesReceiptSyncsSheet\n  extends BaseGoogleSheet\n  implements IGoogleRowsSheet\n{\n  async readRows(\n    range = `A:${lastColumnLetter(SALES_RECEIPT_SYNC_HEADERS.length - 1)}`,\n  ): Promise<GoogleSheetRow[]> {\n    return this.read(range);\n  }\n\n  async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.append(range, values);\n  }\n\n  async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.update(range, values);\n  }\n}\n",
+      "sha256": "b559bb27613911da9f683bff6925054cd6562f5b5d85fceb45eebb0cfdd82e57",
+      "declarations": [
+        {
+          "ast": "export class SalesReceiptSyncsSheet extends BaseGoogleSheet implements IGoogleRowsSheet {\n    async readRows(range = `A:${lastColumnLetter(SALES_RECEIPT_SYNC_HEADERS.length - 1)}`): Promise<GoogleSheetRow[]> {\n        return this.read(range);\n    }\n    async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.append(range, values);\n    }\n    async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.update(range, values);\n    }\n}",
+          "sha256": "51f52f8ee2095085759d1b39adde255984b71cd6406c2cb93cfb1b8356392013"
+        }
+      ],
+      "export": "SalesReceiptSyncsSheet",
+      "imports": {
+        "../../BaseGoogleSheet": "@/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet",
+        "../../../types": "@/infrastructure/persistence/google-sheets/types",
+        "../../../const": "@/infrastructure/persistence/google-sheets/const"
+      }
+    },
+    "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/receipt-syncs/const.ts",
+      "source": "export const SALES_RECEIPT_SYNC_HEADERS = [\n  \"id\",\n  \"salesDate\",\n  \"accountId\",\n  \"shopName\",\n  \"status\",\n  \"receiptCount\",\n  \"itemCount\",\n  \"paymentCount\",\n  \"syncedAt\",\n];\n",
+      "sha256": "76d880d9d2de3f4fda54f0262f5e2ffdaf1ce5f3593a3aa2d1e98fb7be34ad5e",
+      "declarations": [
+        {
+          "ast": "export const SALES_RECEIPT_SYNC_HEADERS = [\n    \"id\",\n    \"salesDate\",\n    \"accountId\",\n    \"shopName\",\n    \"status\",\n    \"receiptCount\",\n    \"itemCount\",\n    \"paymentCount\",\n    \"syncedAt\",\n];",
+          "sha256": "4d0d81851ba36516aa18f284ba2b20e685175d8b03975c694502c69c5e22796c"
+        }
+      ],
+      "export": "SALES_RECEIPT_SYNC_HEADERS",
+      "imports": {}
+    },
+    "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+      "source": "import { lastColumnLetter } from \"../../../const\";\nimport type { GoogleSheetRow, IGoogleRowsSheet } from \"../../../types\";\nimport { BaseGoogleSheet } from \"../../BaseGoogleSheet\";\nimport { SALES_PROFIT_COST_OVERRIDE_HEADERS } from \"./const\";\n\nexport class SalesProfitCostOverridesSheet\n  extends BaseGoogleSheet\n  implements IGoogleRowsSheet\n{\n  async readRows(\n    range = `A:${lastColumnLetter(\n      SALES_PROFIT_COST_OVERRIDE_HEADERS.length - 1,\n    )}`,\n  ): Promise<GoogleSheetRow[]> {\n    return this.read(range);\n  }\n\n  async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.append(range, values);\n  }\n\n  async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n    await this.update(range, values);\n  }\n}\n",
+      "sha256": "2c1cce2d54ee3d7be53fbaed497d22744e6e6b72154ed66a8ad90f9fe719869c",
+      "declarations": [
+        {
+          "ast": "export class SalesProfitCostOverridesSheet extends BaseGoogleSheet implements IGoogleRowsSheet {\n    async readRows(range = `A:${lastColumnLetter(SALES_PROFIT_COST_OVERRIDE_HEADERS.length - 1)}`): Promise<GoogleSheetRow[]> {\n        return this.read(range);\n    }\n    async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.append(range, values);\n    }\n    async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {\n        await this.update(range, values);\n    }\n}",
+          "sha256": "3f7e7976d58f66889c23311e37ff0a5a6f234bb1a03db01ce1a9d8deb83ec3a2"
+        }
+      ],
+      "export": "SalesProfitCostOverridesSheet",
+      "imports": {
+        "../../BaseGoogleSheet": "@/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet",
+        "../../../types": "@/infrastructure/persistence/google-sheets/types",
+        "../../../const": "@/infrastructure/persistence/google-sheets/const"
+      }
+    },
+    "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts": {
+      "to": "src/modules/sales/infrastructure/google-sheets/profit-cost-overrides/const.ts",
+      "source": "export const SALES_PROFIT_COST_OVERRIDE_HEADERS = [\n  \"id\",\n  \"month\",\n  \"accountId\",\n  \"averageItemCost\",\n  \"note\",\n  \"createdAt\",\n  \"updatedAt\",\n  \"createdBy\",\n];\n",
+      "sha256": "55e3b3c247836cfcf290fe59fdba4b900b8c2c86b940e1337dcd52d6f3f1340a",
+      "declarations": [
+        {
+          "ast": "export const SALES_PROFIT_COST_OVERRIDE_HEADERS = [\n    \"id\",\n    \"month\",\n    \"accountId\",\n    \"averageItemCost\",\n    \"note\",\n    \"createdAt\",\n    \"updatedAt\",\n    \"createdBy\",\n];",
+          "sha256": "eac3ba43dfc234bb655e844362d194f3e434b1064543847f033071f4e8a5e7a7"
+        }
+      ],
+      "export": "SALES_PROFIT_COST_OVERRIDE_HEADERS",
+      "imports": {}
+    }
+  },
+  "worksheets": [
+    {
+      "folder": "receipts",
+      "name": "SalesReceiptsSheet",
+      "header": "SALES_RECEIPT_HEADERS",
+      "range": "A:Z",
+      "headers": [
+        "id",
+        "salesDate",
+        "accountId",
+        "shopName",
+        "receiptNumber",
+        "receiptType",
+        "refundFor",
+        "order",
+        "receiptDate",
+        "createdAt",
+        "updatedAt",
+        "cancelledAt",
+        "source",
+        "storeId",
+        "employeeId",
+        "customerId",
+        "posDeviceId",
+        "diningOption",
+        "totalMoney",
+        "totalTax",
+        "totalDiscount",
+        "tip",
+        "surcharge",
+        "pointsEarned",
+        "pointsDeducted",
+        "syncedAt"
+      ],
+      "events": [
+        [
+          "get",
+          "Sales' Sheet",
+          "A:Z"
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "B2:C3"
+        ],
+        [
+          "append",
+          "Sales' Sheet",
+          "A:ZZ",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "update",
+          "Sales' Sheet",
+          "B2:C3",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "A:AA"
+        ]
+      ]
+    },
+    {
+      "folder": "receipt-items",
+      "name": "SalesReceiptItemsSheet",
+      "header": "SALES_RECEIPT_ITEM_HEADERS",
+      "range": "A:U",
+      "headers": [
+        "id",
+        "receiptId",
+        "lineItemId",
+        "itemId",
+        "variantId",
+        "itemName",
+        "variantName",
+        "sku",
+        "quantity",
+        "price",
+        "grossTotalMoney",
+        "totalDiscount",
+        "totalMoney",
+        "cost",
+        "costTotal",
+        "taxes",
+        "lineNote",
+        "lineDiscountsJson",
+        "lineTaxesJson",
+        "lineModifiersJson",
+        "syncedAt"
+      ],
+      "events": [
+        [
+          "get",
+          "Sales' Sheet",
+          "A:U"
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "B2:C3"
+        ],
+        [
+          "append",
+          "Sales' Sheet",
+          "A:ZZ",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "update",
+          "Sales' Sheet",
+          "B2:C3",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "A:V"
+        ]
+      ]
+    },
+    {
+      "folder": "receipt-payments",
+      "name": "SalesReceiptPaymentsSheet",
+      "header": "SALES_RECEIPT_PAYMENT_HEADERS",
+      "range": "A:J",
+      "headers": [
+        "id",
+        "receiptId",
+        "paymentIndex",
+        "paymentTypeId",
+        "paymentName",
+        "paymentType",
+        "moneyAmount",
+        "paidAt",
+        "paymentDetailsJson",
+        "syncedAt"
+      ],
+      "events": [
+        [
+          "get",
+          "Sales' Sheet",
+          "A:J"
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "B2:C3"
+        ],
+        [
+          "append",
+          "Sales' Sheet",
+          "A:ZZ",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "update",
+          "Sales' Sheet",
+          "B2:C3",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "A:K"
+        ]
+      ]
+    },
+    {
+      "folder": "receipt-syncs",
+      "name": "SalesReceiptSyncsSheet",
+      "header": "SALES_RECEIPT_SYNC_HEADERS",
+      "range": "A:I",
+      "headers": [
+        "id",
+        "salesDate",
+        "accountId",
+        "shopName",
+        "status",
+        "receiptCount",
+        "itemCount",
+        "paymentCount",
+        "syncedAt"
+      ],
+      "events": [
+        [
+          "get",
+          "Sales' Sheet",
+          "A:I"
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "B2:C3"
+        ],
+        [
+          "append",
+          "Sales' Sheet",
+          "A:ZZ",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "update",
+          "Sales' Sheet",
+          "B2:C3",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "A:J"
+        ]
+      ]
+    },
+    {
+      "folder": "profit-cost-overrides",
+      "name": "SalesProfitCostOverridesSheet",
+      "header": "SALES_PROFIT_COST_OVERRIDE_HEADERS",
+      "range": "A:H",
+      "headers": [
+        "id",
+        "month",
+        "accountId",
+        "averageItemCost",
+        "note",
+        "createdAt",
+        "updatedAt",
+        "createdBy"
+      ],
+      "events": [
+        [
+          "get",
+          "Sales' Sheet",
+          "A:H"
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "B2:C3"
+        ],
+        [
+          "append",
+          "Sales' Sheet",
+          "A:ZZ",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "update",
+          "Sales' Sheet",
+          "B2:C3",
+          [
+            [
+              "id",
+              0,
+              null,
+              false,
+              "=literal"
+            ]
+          ]
+        ],
+        [
+          "get",
+          "Sales' Sheet",
+          "A:I"
+        ]
+      ]
+    }
+  ],
+  "productionHashes": {
+    "src/app/AppBreadcrumb.tsx": "95c7c25cfe73e5b9dbbdd081a9ed56edf35d76119a765e5e4769b32136811a53",
+    "src/app/HomeMenuPage.tsx": "97eb4b5a09125ad08b6efebfb5902e0443883c26d8ada3ae4561bb1a64faad2a",
+    "src/app/api/employees/[id]/route.ts": "51ca66904ae2af337b7e40602bc01285151817727e72b7efc5613ba00c2970ab",
+    "src/app/api/employees/advances/route.ts": "47a461fb00c81d418e80886b1e435785a4b6b1343b437616f8535a6c503a6bb0",
+    "src/app/api/employees/payroll/route.ts": "3fd5f1e2b6e659fc5230b4bf5f6f5088e378b7d63dea7076a2b6bb2bde81b059",
+    "src/app/api/employees/payroll/settle/route.ts": "803b9fc3d8afd5825282b192209aef93a384726bd3716c0167a04fd8c07841e1",
+    "src/app/api/employees/route.ts": "5b66249c94220a69563e51a14a17df274e8a6fe15eedda4e973b848020dc05fc",
+    "src/app/api/employees/timesheets/[id]/route.ts": "63617ed49667b5856bf563426ed7cb3ddb74e58d2d848bdfd7d92de4e57c1aee",
+    "src/app/api/employees/timesheets/route.ts": "83d1c11875fa2e5d2c9883dfb51d2393619c369ddbcb40114d411496a45d8104",
+    "src/app/api/employees/timesheets/summary/route.ts": "cd684ec725c1ff8a5aa2654f099a786ac4b6726ed8add52998e36661f616af24",
+    "src/app/api/expenses/masters/[kind]/route.ts": "762f06de26a17e13e045029df3ea9cde8af996c3721d8bfcce43d7049557a0b5",
+    "src/app/api/expenses/route.ts": "c8eeb951ea18630be4ef239eded007870c917fd6d27c1d221ad9db7edb02f4fd",
+    "src/app/api/line/webhook/route.ts": "be17c93a5938257b2b375d6294120af9b80fbeb79002b2506ff366ed1991b7d4",
+    "src/app/api/loyverse/accounts/route.ts": "9b1c9c3edefa58c223c77d266325390f9ed4c95bfe28598214b03c144ac6abdd",
+    "src/app/api/loyverse/daily-sales/route.ts": "13848b173fbf2edfca9b7729f1c14500e247fc01e1be980b0baa131faa64ee2b",
+    "src/app/api/loyverse/daily-sales/sync/route.ts": "6bc06cec98431333ae4e91bbd98eb6031387dadfce9a856cb948f7667400e657",
+    "src/app/api/movements/[id]/items/[itemId]/image/route.ts": "2064d0d28fd2f1f545e8a155f988bf5d6468e0ea27cdb66d18adde68081ea842",
+    "src/app/api/movements/[id]/items/[itemId]/route.ts": "8358648449300175bc8cf1ac4e4e256fd83efd9d67e191a69c3631bdaf462e6e",
+    "src/app/api/movements/[id]/route.ts": "403235ce7b10c35043e67bd5cfae3f58685c1820ac5ea9aa355940de642d876d",
+    "src/app/api/movements/route.ts": "34aae24acec1c9512d50548842f0494355a45e11500fe0820fc39098ab918e20",
+    "src/app/api/orders/[id]/images/route.ts": "feb55d9fe5705343b9219d84a73c6e967824ca8a1be17231e82cd3cdf9e7b83c",
+    "src/app/api/orders/[id]/items/[itemId]/image/route.ts": "d9e407471e75a3a235c72db2f1dd26a18ce8da9bd8ca243c0f4c85556719db6c",
+    "src/app/api/orders/[id]/items/[itemId]/route.ts": "c6a312245c4696015249a50166b29e41151d5b728fcfc207806df47e04db2264",
+    "src/app/api/orders/[id]/items/route.ts": "cbf9819fbde8c5ed8b4f10f290b82b7711c74d6194d40f155e305d4f8dc5e57e",
+    "src/app/api/orders/[id]/route.ts": "e37c71a30a7aa84e0c77104dc40cd8410bc45763cda6356b1505e668124f99f6",
+    "src/app/api/orders/route.ts": "69d56b3c4e5e415190e345f546614ed0f7131b6551a8c993ce01ceffdde872ba",
+    "src/app/api/orders/with-images/route.ts": "b09c90a8d94fc972c41f8cc24d4015256a26deebb41d4a6e04307d83adf7cc49",
+    "src/app/api/sales/daily-sales/route.ts": "c47dd9c5369a060ee3add1071c2755776406b022e4666f12e53633218b701813",
+    "src/app/api/sales/dashboard/route.ts": "7972a231fe63bf6fb0b562031aceecff35d9e7b5077746ba95844413a02aaeac",
+    "src/app/api/sales/profit-summary/cost-overrides/route.ts": "730e7fee752f895d88921978633161de0e2ba90d8b4ed93306b3a47b7331dc86",
+    "src/app/api/sales/profit-summary/route.ts": "f6957ccd864d6031f8e5a82d45953a44ec517be28d90c53bf10f75d91e927bb8",
+    "src/app/api/sales/sync-status/route.ts": "527404a42d18a92206e36dfab985bac0925cabba80a3564fa28dbc4d485baf65",
+    "src/app/api/shipments/[id]/orders/route.ts": "5f3389d760ded35f62f1751b721906e469a64ef8ea25b9ad8c633290cb1d3887",
+    "src/app/api/shipments/[id]/route.ts": "05c70cf6c60941a27a42eb6ab4b8f1cb3f748ed96663fc3d485a9f2268ab2da6",
+    "src/app/api/shipments/route.ts": "4424b729e9c46f939ba49d386ce07aa978e3976367e02d05087e993d013e0303",
+    "src/app/api/stock-adjustments/route.ts": "fc09800cd9e97471e937603893f09272336c7509050bbe9b5cf945c0ac9194e8",
+    "src/app/api/stock-counts/route.ts": "ccf54ab5902b16c2786e647480a38b60ca35a1273ad420aedc52a69c306f2d9c",
+    "src/app/employees/EmployeesPage.tsx": "a5fbf52e2e4e975488bac44177e923367ab5f690fbafbf35903c32f1ee94f88a",
+    "src/app/employees/advances/SalaryAdvancesPage.tsx": "d94907777e5b834efa975be10e46fbe933d8aad1f4df08388a9b345c8e465a23",
+    "src/app/employees/advances/advances.module.css": "7595873985313dbbe5cbf168a8190c1ad14901653a18e06def575db5098cc0d3",
+    "src/app/employees/advances/page.tsx": "06e53ce86c736696b4119f027e65107e454361792f151b92ad3c00f2dde7faee",
+    "src/app/employees/employees.module.css": "c75f27cbbd14a3155de21d13e7dbbb645762098a42931ead025724a366ab7a95",
+    "src/app/employees/page.tsx": "cf804a6db7fd6777c5c74577d3885740395e1a240063befbe212a1bd362c7b94",
+    "src/app/employees/payroll/PayrollPage.tsx": "e8bc4efd5efd367d33a30c8826faa9c198d8514e2cbce324b14c86b133143819",
+    "src/app/employees/payroll/page.tsx": "9790b2bc78442087c29bbb0b0d55235be47c264b0d59be0eb97e131533b4afc7",
+    "src/app/employees/payroll/payroll.module.css": "1aff431897f23c372801ee721e83a232f973bbb200df143afd46f80e7ad463a0",
+    "src/app/employees/payroll/payrollPdf.ts": "51a61e16eee607350810e08af01eafda7b9e98acc143fd6795e118e7bffde1e5",
+    "src/app/expenses/ExpenseMasterPage.tsx": "42cb47f9493a8b667ab055eb5eea733d36ea695ac25afe325e0b9456ff33f1ba",
+    "src/app/expenses/ExpensesPage.tsx": "a1223134d3901213f5febdec51fbceedcf0924ec6d88f63569359dd294206d5f",
+    "src/app/expenses/categories/page.tsx": "252219650d433126328e12f7881736a45535fb9d84c5883aa49b611f81965e61",
+    "src/app/expenses/expenses.module.css": "6e5012b601ab7ac49418f9212b1661a2556562ebc386c2752cd9b94280edaeeb",
+    "src/app/expenses/page.tsx": "cacaff40519a9eb82a40f3d5da2442994e6da8e389c6bdc71b1eef391236872f",
+    "src/app/expenses/shops/page.tsx": "29ab225935776bcf3173c5e426c43b6382c3515bd9e87952bf707d26372a4fa5",
+    "src/app/globals.css": "29d42bb549c16ab9e9e47faba0ab62414ed8adb78d84869bc98bbc20b19efd44",
+    "src/app/icon.svg": "5c5c9e1e1b512e3aeba99bd96653d2231b441cd9cf40e55d47c791e6b1565e13",
+    "src/app/layout.tsx": "18c17aa0a613ec34ea8b10b97cbadb4a7eedf0971d07c4395937e4e71c98fff9",
+    "src/app/loyverse/daily-sales/LoyverseDailySalesPage.tsx": "e6b15dfdf9033fc87e19bffd8673f691da504be6b9ad87da9f299e23e1201414",
+    "src/app/loyverse/daily-sales/loyverseDailySales.module.css": "bc697e3bac3044336537dabdcf2cf95c2da4ec02ac39d8d764157c88682bfc49",
+    "src/app/loyverse/daily-sales/page.tsx": "54ce8acfaeceeda9f624a3c3ceffbcd62e2a7adbf824a7aab35b22816f9db51c",
+    "src/app/movements/MovementListPage.tsx": "a0063c20b988107eb43f2ab711c8a70b912175fd11a053c688cfdec054d35e6c",
+    "src/app/movements/[id]/MovementDetailPage.tsx": "f724cafdf22bd692774583de994a642fcb12f30834c6ae3b0c92e9220949bfde",
+    "src/app/movements/[id]/movementDetail.module.css": "3c98f104e25a322b83c0e80cd604dc149952af27e58083381e5965b5762c71a5",
+    "src/app/movements/[id]/page.tsx": "1b18bcd42be93658564355d2cf55a22daeab29460c52a90e9f58e19774badbb2",
+    "src/app/movements/api.ts": "330d82708d3958cf71209dcece74d22aadd2ce144590648037ef7bcae2f7296f",
+    "src/app/movements/format.ts": "84bc6ace6f68338308206828c3a4b380029f3b338d658582b4620f8531a7df64",
+    "src/app/movements/movements.module.css": "02c6f470f72d0895d65c18383b55029f18a00c0a77c07464795a08dadfc192a5",
+    "src/app/movements/page.tsx": "2cc8274b538b0209c46781ab5b0659eb7327e1d359234d8c14a32a73e6b37a86",
+    "src/app/orders/[id]/OrderDetailClient.tsx": "f702aeddc0dc7ce8eddf5089a8be3d739819a3fdd76ddc8d57eeb6e200e5f7b7",
+    "src/app/orders/[id]/page.tsx": "a94fe2ea565f7b77bad0f3b7c85ffa630f7a498f79033ba463e83eb98b77df7a",
+    "src/app/orders/create/page.tsx": "57d5f7b9c99b5d25c86dde69ad648f5eeb85ec0e69b836e8aee9714333bb8371",
+    "src/app/orders/loading.tsx": "d4ac5eb742e37f03b2ae588678f4805d004bae936c4646622e24dfa040e592cb",
+    "src/app/orders/page.tsx": "265a6ea23ff6746c3ebc309d0527f81ebe4139ee95ba1d4986b9c173939adca6",
+    "src/app/page.module.css": "07500069e3c29ebb8bfd5ef06500757c7d4dde1b502d29a4038d3ceb05af1419",
+    "src/app/page.tsx": "280a009a657f8b04198eccc2e170f7deed034bd1a2a9469ef9a23dcf8f8bd012",
+    "src/app/sales/SalesMenuPage.tsx": "14b1a6d11fc5bceb1671a15bdbcd40fad0b6a947520dc2de5dd6684fff4edca4",
+    "src/app/sales/SalesSyncStatusPage.tsx": "ea4dc1977935682db7bec36e1ab8852867bf1f8a323c573025e014537abb2d11",
+    "src/app/sales/daily-sales/SalesDailySalesPage.tsx": "1529b44a6be02734fde5362424ea63c6db36b40ca5bc06adfe6eaf0d4da37548",
+    "src/app/sales/daily-sales/page.tsx": "c09f14b84258331ba4685de07be39607905331250c2bb4a24c967e86173b6f25",
+    "src/app/sales/daily-sales/salesDailySales.module.css": "d9f6c8d6bc338cfa94973918ac6e1786bf559b25f719ebad733ece1302736d9b",
+    "src/app/sales/dashboard/DesktopDateRange.tsx": "d7bc12c3dcb0b2dfad10d9ec3b046b26add3553b9c1d20d53fd3ecbb9c1b3ef5",
+    "src/app/sales/dashboard/MobileDateRange.tsx": "411026fce5d934b87228ccf0240e325e5ea0cae52a95caecc3e5e2e740a932fb",
+    "src/app/sales/dashboard/SalesDashboardPage.tsx": "ad6b59eb06ecee900d14d387e89450861b0a63d492b3d4a51fff42712c50b8f1",
+    "src/app/sales/dashboard/page.tsx": "c1751e6045bb79ada75e57762eea05a879200550f15fd434c4cededa633f71af",
+    "src/app/sales/dashboard/salesDashboard.module.css": "f238576d498a16c0c6b5a077a638870c3e741612f8003d51a7cb4d866e1bc086",
+    "src/app/sales/page.tsx": "ae96b8cb4a16d61e70cd0696e0c85d08a015fee6ad84ec76750de0306c5b795f",
+    "src/app/sales/profit-summary/SalesProfitSummaryPage.tsx": "7b5922b19a743a2bbfc8c0c0ae605c540579bcd48ef4090ee28af44ce477c88c",
+    "src/app/sales/profit-summary/page.tsx": "fa8780dc7bcda8586fbeda82f5a8b176772b374e30f1a0022f07dcc585c9dc01",
+    "src/app/sales/profit-summary/salesProfitSummary.module.css": "602d6d621fabbce1d4b08e79ba8137bc18c01ec62f7f994bc57d5deb66b51bc1",
+    "src/app/sales/salesSyncStatus.module.css": "2d70794dfce5ff78b5f5cddb516201bad98469cc8ae4f6fe3a05046d20117926",
+    "src/app/sales/sync-status/page.tsx": "6457dbd7218536ae9a62aa0252bafd500068f7e970dc02eea9a2c8ea1ff03fab",
+    "src/app/shipments/[id]/loading.tsx": "69017cf4a15eb1ee68ddcf10507a49b75d590b0bf418f738d8bca0713de156d7",
+    "src/app/shipments/[id]/page.tsx": "932d3fe695965a6568123d98c4b288181feca7ed414deadbb20ef10c1a472697",
+    "src/app/shipments/loading.tsx": "1447b392322db1488389844bc72847cc5b9673d165685b77259d86a0a479adaa",
+    "src/app/shipments/page.tsx": "e5602098029b5e93f37dcd8287ac71f91660794b921914ab7d66faa590f03345",
+    "src/app/stock-counts/StockAdjustmentsPanel.tsx": "8bb23faf0761d55b0214a0bfda287193456dfb64b75adc790ad8c914365b9f0c",
+    "src/app/stock-counts/StockCountsPage.tsx": "f5d80b82270565f34f314bcfc89923e491297f60ae2d8e91a8df6eb426ed0e8e",
+    "src/app/stock-counts/adjustments.module.css": "7df915c6b522af3520e2fdf6e49c20033d9200a1f84e3b171ce069f06be83da1",
+    "src/app/stock-counts/page.tsx": "6aed65d40a544e66ba0d63345339bc029817bea35f9260b1e7527f5a339e9806",
+    "src/app/stock-counts/stockCounts.module.css": "c36140bc5a28a80911bb3d33b47ea6fe132b7ed575e9fc8f98173b614e7b6360",
+    "src/app/timesheets/TimesheetCalendarPage.tsx": "64eeb3c7d26a2691a90367497f601d80b32d3da357aa9c33133724dbab4ffa2f",
+    "src/app/timesheets/page.tsx": "7bef284dd4789693a4d8ea52b9ebfb54b5eef08294061ff4c3dac3ad0f952bbb",
+    "src/app/timesheets/timesheetCalendar.module.css": "6ea1228dae944f72d35f347b3c151ea29b073de4d6831b8836c9fdc054fdde9e",
+    "src/app/timesheets/tracker/TimesheetTrackerPage.tsx": "c57d5cd1b10161d866e20bda3ca1190dd301de6797f74a2591e0f3f1f5ab7d4a",
+    "src/app/timesheets/tracker/page.tsx": "6abe5f8bada0d1e4e2154ebe4d2ce8d112d176aaf66ee17b4ba1911051d97af7",
+    "src/app/timesheets/tracker/timesheetTracker.module.css": "bb66a5e9c415f8bbc4f8bab8e9f001c2032ba8abf49fde57713d980f852d733f",
+    "src/config/index.ts": "cfd579d0f69066b0fdf3af3d8b43df4c0e11b5f2ed623dbfbfe28fa33625cfc2",
+    "src/externals/google/auth/GoogleAccessTokenProvider.ts": "3f194eb883c2a57be0af4664bda4363175e446ddda89ccb0f36ce8bcbd923fa3",
+    "src/externals/google/auth/GoogleOAuthRefreshTokenAuth.ts": "b5baf67e755000affa7f09411f6ad5fd87bea15f3846c2167e0097ecaf509952",
+    "src/externals/google/auth/GoogleServiceAccountAuth.ts": "d1a89dbea46c78595af3e1613df833d319d315cb2538dfb2303f6414ba2671a5",
+    "src/externals/google/auth/const.ts": "f4bcbd009c295ab26bc95fed8547b546e973c7d73053effdbefbdd4c4d36f7dc",
+    "src/externals/google/auth/types.ts": "35bcc5a9b6579808e8a6b4a4eb5a9fad5965497f12f56a8e57d11a52b033dc15",
+    "src/externals/google/drive/GoogleDriveService.ts": "80e7365d670f40d357ec91be273bdde1668cd43625587b88ac47ca22eaef1640",
+    "src/externals/google/drive/const.ts": "9106f2898a120becf64dc499c51089eae1783cab46df0d3196fe2c5902a86263",
+    "src/externals/google/drive/createGoogleDriveServiceFromConfig.ts": "e03e49ba8ac5535277f1da7d9b912ef9f7d1e293398c4a2586a3391b92a33e4d",
+    "src/externals/google/drive/index.ts": "ed74f612c2c65363679fbd17138a4421605c982f722d044d10aba92fc3758a00",
+    "src/externals/google/drive/types.ts": "d7e8447d740358ed70ad24535f8a2c02e174bed54f3b11f410bed308ad79226d",
+    "src/externals/google/sheet/GoogleSheetsService.ts": "061cd1e977c2709449f0f78cb5acdacdc8ddf95e5a8f6e6751690bdb29f63bca",
+    "src/externals/google/sheet/client/GoogleSheetsClient.ts": "b715449655afeba9091d07c2f52bad6954c57d1ebbf25fcb0537971c8bf68f6b",
+    "src/externals/google/sheet/client/index.ts": "b488438affcee9ebf866f34851df6c4968d13c7ab9894784e9cf0ae31d17949d",
+    "src/externals/google/sheet/const.ts": "c0fdb31ffbb2ca4516d728422fe1fb147db1a72ea547942764f5c306e238ae6b",
+    "src/externals/google/sheet/createGoogleSheetsServiceFromConfig.ts": "c16d8c905f07f937f8a2f268dbcaacd37a1f83b21f391c0f4dacae7c65539877",
+    "src/externals/google/sheet/index.ts": "0d801a44eec7e1a853236773f0e5df13d91a1eca0212e8dfc3719a6a762f2699",
+    "src/externals/google/sheet/sheets/BaseGoogleSheet.ts": "0fcd46f9ec4a1d77c0aafa2bd5654b1eab17f34d1e394f6a837c046edc3a72c2",
+    "src/externals/google/sheet/sheets/employee-advances/PayrollRecordsSheet.ts": "235019a55d15201d7a4d3b8ab465a7e095c7347691aa22657fe40b08fe599c79",
+    "src/externals/google/sheet/sheets/employee-compensations/EmployeeCompensationsSheet.ts": "038294ffc670a343c8a449685d205aae5049e43127fa16da931179201b7b9a81",
+    "src/externals/google/sheet/sheets/employee-compensations/const.ts": "2bc10694cde66ba24acc8075601ab1fcf607e275823b13357c53b50cb687735e",
+    "src/externals/google/sheet/sheets/employee-timesheets/EmployeeTimesheetsSheet.ts": "c45d5cadfece9acea55226d2fa8d63c21ac3f1912b622a0812007c0ac3bf63dc",
+    "src/externals/google/sheet/sheets/employee-timesheets/const.ts": "f2f49b5589dce2a303b93d162445b01aa592a5cb87f503f7b43b2f24b807ac1a",
+    "src/externals/google/sheet/sheets/employees/EmployeesSheet.ts": "da56aca1c987e5471ed34c1a0f2ab8e8b34eb84a808c985a348ed568da22643d",
+    "src/externals/google/sheet/sheets/employees/const.ts": "e04345c4603395631d7950caa0e72c9de85d205502f0bed875d5364cf740ccea",
+    "src/externals/google/sheet/sheets/expenses/RecordsSheet.ts": "fac6cbe77e1ce7e92efd15f0e49772f1a9fb445c42fd207af84e115276cd0c97",
+    "src/externals/google/sheet/sheets/index.ts": "5fe3919ed28afdfb906778d39486a50a63f00d451b660c93ec356bf3c787c785",
+    "src/externals/google/sheet/sheets/movements/MovementSheet.ts": "bda5709d5e28e24f92f8cd9b986c48223a9a9418d93e0c2b28e2a4a86d12fd19",
+    "src/externals/google/sheet/sheets/order-bills/OrderBillsSheet.ts": "d5e356d9499390beccbde9370e5ee0b189df01aef7843623739daebc9af4296e",
+    "src/externals/google/sheet/sheets/order-bills/const.ts": "7e7a70a02fbe904ed3fac601e7d3c80c10db574ecb1da9c51d86244cbcaa4f51",
+    "src/externals/google/sheet/sheets/order-items/OrderItemsSheet.ts": "0667cbc97ea8c1ff1ba0b40d7e9e73e43fa311c4868a62e269dbb25138bab832",
+    "src/externals/google/sheet/sheets/order-items/const.ts": "4fd229c11b9d1f1a7d2d4d608be5cd1f73421c1cb46e676ac253ccba912f3a00",
+    "src/externals/google/sheet/sheets/orders/OrdersSheet.ts": "8cdeff3f7b0b49001d02aeed45e7f46d3949ce81427f0496c52e81b3f7f520a0",
+    "src/externals/google/sheet/sheets/orders/const.ts": "4b8912996504a6cfa357861fe30436448f9887e4b7f4e16c01e137079a86bc08",
+    "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts": "2c1cce2d54ee3d7be53fbaed497d22744e6e6b72154ed66a8ad90f9fe719869c",
+    "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts": "55e3b3c247836cfcf290fe59fdba4b900b8c2c86b940e1337dcd52d6f3f1340a",
+    "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts": "07188f97b01008360b392be3de90d8ab14ed01329dc13fe889137fa3c6da37ba",
+    "src/externals/google/sheet/sheets/sales/receipt-items/const.ts": "0b4f84bf3a1ecde01a96d23be962395e5365afb47ac93b0c148bb921b7489859",
+    "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts": "31a53e78c9fb960b41b71e5476c7f6d2be98d9fe4ad4c3f4dcabc875118b6798",
+    "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts": "b6ffb27c0983929a089eccbad1ec7d9bfffeb552eb0a5219860aa78961a7a017",
+    "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts": "b559bb27613911da9f683bff6925054cd6562f5b5d85fceb45eebb0cfdd82e57",
+    "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts": "76d880d9d2de3f4fda54f0262f5e2ffdaf1ce5f3593a3aa2d1e98fb7be34ad5e",
+    "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts": "ea2bc46841d5afaaf5d1f8cf0192008eab79d8402861e5709b18878fb527d366",
+    "src/externals/google/sheet/sheets/sales/receipts/const.ts": "763f39dc2389110ec2f1d7a8b9edb22d4582d54ddca72ca24addbcfbf9f7d79f",
+    "src/externals/google/sheet/sheets/shipment-orders/ShipmentOrdersSheet.ts": "3201c4ad4e666a647c5161a0508f2b9c5e9e506a9e5f298ada869c7cd1e52c4f",
+    "src/externals/google/sheet/sheets/shipment-orders/const.ts": "e1a715d0832c0820e113d9cdc14104ec9c383553af0ee0373a369f5eeb431c90",
+    "src/externals/google/sheet/sheets/shipments/ShipmentsSheet.ts": "b1ecbfdca82678f3c3b8e911304378f2bb0b5bffc37f1d2c0078e6d8b98c78cc",
+    "src/externals/google/sheet/sheets/shipments/const.ts": "36020e216880d0277ca3f25c41c68dd782765f509a08cb389cfa26418d3874b7",
+    "src/externals/google/sheet/sheets/stock-adjustments/StockAdjustmentsSheet.ts": "944a72fd56eda263053f879b66057b1312f44765a9a7c7c4834fa924acc4c065",
+    "src/externals/google/sheet/sheets/stock-counts/StockCountsSheet.ts": "a00b1640a58b22188f10424b9f3ea4be970112977ae982f267090ab85a5574cc",
+    "src/externals/google/sheet/sheets/stock-counts/const.ts": "5bb8eb73714fa3f96c8ed25e634bc77a7fc334f17aef3f00be08cce9bff48b50",
+    "src/externals/google/sheet/sheets/user-state/UserStateSheet.ts": "0d3681c2a64cf1bed663cbd84561c4383df8d3204c7ebbe567e426a0f58b8295",
+    "src/externals/google/sheet/sheets/user-state/const.ts": "cb396553a59f336603103812c3eb792797121334e69485cd3a860260fdad36eb",
+    "src/externals/google/sheet/types.ts": "c66fc7fd710b7a9e008c3869277f3ccdd6f9e41d235d828b1fc69e97932d0320",
+    "src/externals/google/utils/jwt.ts": "59d8d25599b524da273ce69a6a200f9de3aa7613fc2ab30cff32ea9a85bfd109",
+    "src/externals/line/LineBotService.ts": "ac8d659ee674b203bdd98d3f60c2005d54ba4b25e7c30cad61421f13591d1ba5",
+    "src/externals/line/const.ts": "2c41d80191cfee2762bcf9cd17bc9d95d92adcd2bd238453ab2601babc2b6a05",
+    "src/externals/line/enum.ts": "50a30914551ddcf8fe9a8e71113638ab33e7a787c4bfa9b98ad96224058f9086",
+    "src/externals/line/index.ts": "ca7654c85ae73c76b9e2dfab1896b5aeccc7d376a7999520010821fea818543e",
+    "src/externals/line/types.ts": "094f12a6aca8dfc12f03dd6ad38088df2b1bd0aafc6f91b9e249f09d12b70496",
+    "src/externals/line/utils/messageBuilder.ts": "a72763d6694a29daeae0b4de56de0bbfc8dc40fc9ea7ee1fe061da0a21f005b8",
+    "src/externals/loyverse/LoyverseService.ts": "5496246546cfcc6c230d351928ecda459c82780d8b8cd3f6d8cd957cc28e2642",
+    "src/externals/loyverse/const.ts": "3894eee71324452fc65307fab6b1e359ece63e6e9ce85f982a000a4223f2e848",
+    "src/externals/loyverse/createLoyverseServiceFromConfig.ts": "dacd4db5c3f6fc29b8c49dc117b68e52226e9728fed9ac06edfdad5e622aa476",
+    "src/externals/loyverse/index.ts": "ec9138b5dda2be43dd5e437cac34a0bed0baf70afbd7ad0c8d1848f3111d8dc8",
+    "src/externals/loyverse/types.ts": "858339fa2cf188d9c80b3ce9754918b4e4924001979dfff236d65b9d6dca1353",
+    "src/features/backend/line/enum/index.ts": "25840b8e49a36c1ab43bd0c1964faddc34a0c34e03d47934fd1ddc606d4d37f6",
+    "src/features/backend/line/services/movements/index.ts": "08bd2b4f8627687ab15cb2ac2f0e3f9aa61a321b13721bd200c91316a2a3788b",
+    "src/features/backend/line/services/movements/utils.ts": "2a5713f072434bbd50072dc76f7a357beaf5feba29dfe32b6155d4dea9a17295",
+    "src/features/backend/line/services/reply.ts": "85aa6548bf1c14ebaa7d6a3ab3c86184d00f0b1dbcdb9519f3fec5cdd65f71e1",
+    "src/features/backend/line/utils/index.ts": "1b45fcfa65d9ca371cc773205a7910e157bf56a2b667999c083ad10cdbca6a1c",
+    "src/features/backend/shared/utils.ts": "4fdfaaed5a8eb10774cb2a7219c0b8c6b4cabe4df8bebf5d91c85ada82331628",
+    "src/features/backend/shipments/utils.ts": "b2698b215c0cfd022dc838bb5ec59c93f33deb103ca78ea1c899ba56c2c0bdfb",
+    "src/infrastructure/files/google-drive/GoogleDriveService.ts": "5b413f9906eb290d92c17dc3869e9591ffbf76c04143e393ac702d77dc57028c",
+    "src/infrastructure/files/google-drive/const.ts": "55f6116bc05c69cd8913a88aa4650b88f9460fb425c6846e3eedeea1a1604456",
+    "src/infrastructure/files/google-drive/createGoogleDriveServiceFromConfig.ts": "434336bb1400aacc7ef23911a55b632bc1a96f8989825a18f5517d49dea3171a",
+    "src/infrastructure/files/google-drive/index.ts": "ac7f376eb62645bd3255b816bcaa83eb59e482fded13fe9ca330f5570e17bef9",
+    "src/infrastructure/files/google-drive/types.ts": "b9f58b5672ff3671d4e8469ebcb0a7fbca07bc0b400d74a27d102b43dd69189d",
+    "src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts": "2a3bc2860c7f4e5962ff27e9ca122ca2d338a55cd21d8dc08ce7fe2f7eb2272d",
+    "src/infrastructure/persistence/google-sheets/client/index.ts": "ec19da102206f24cb335030e337635fba13e3549856136fd715531100a4a05c0",
+    "src/infrastructure/persistence/google-sheets/const.ts": "c39fa41037c56506c32b8907a5828b540f342074a2f1ee0f35894a5dd0e45fc5",
+    "src/infrastructure/persistence/google-sheets/google-auth/GoogleAccessTokenProvider.ts": "f7a3ee1ba8899fb5de1407bb86ea7840f23bfd564c8af83ab65f9507acdcbb1e",
+    "src/infrastructure/persistence/google-sheets/google-auth/GoogleOAuthRefreshTokenAuth.ts": "449d839f4384108e79b08558a9168713aef0956a96b3c514dbd1eb3aeaf61cfd",
+    "src/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth.ts": "cffdf4e9b45f012ccb47abbb1fe0ab043e499fef3682574b31c80386c337839c",
+    "src/infrastructure/persistence/google-sheets/google-auth/const.ts": "b5eba3848b88192b5cdc21cf22342a81337ab5211431d602cc2d5193314ae610",
+    "src/infrastructure/persistence/google-sheets/google-auth/types.ts": "841038036b0f40c5c83b990e960fe2225d2bc89ef718dad1f749e09dc25bbbb1",
+    "src/infrastructure/persistence/google-sheets/google-auth/utils/jwt.ts": "e37192ac88de9b1e7450c5b1f5661aaaf3c585ff5a2f5d33ba97edaa59dd4df5",
+    "src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts": "0761a125b7818032dd2daa41df679b41624b6a060a42857eae401ef479a11678",
+    "src/infrastructure/persistence/google-sheets/types.ts": "a18d57c8397f487954aa8a6c6742beb1f190391377545ab2c12bfc545bb37c00",
+    "src/modules/orders/application/create-order.ts": "13fdfd446452ddd4abeabd0a90e9910c174f15aa78b45286ecd8b06247312a15",
+    "src/modules/orders/application/get-order-detail.ts": "09a9c828691313ac131e72d691b6ae6ed914c8c2a2504dbd9eed4f014dfd0560",
+    "src/modules/orders/application/list-orders.ts": "91129d08374b920abee604f87ae5076b12cf1206f14c005b7c408c19080fbc59",
+    "src/modules/orders/application/ports/created-order-writer.ts": "5c3741c2266417ed4fa06c8c5791db3b118572dcf902e914fdef1bae7975f081",
+    "src/modules/orders/application/ports/order-detail-reader.ts": "5ef8dfbb2b31559d63f513056dd9e36f190c80436276b02d3624d8f982611574",
+    "src/modules/orders/application/ports/order-detail-shipment-projection.ts": "95409b1151bee192d1891b645070dd488045cc5cc5003fe2a31e2069153f2535",
+    "src/modules/orders/application/ports/order-list-reader.ts": "9e4bb5793d2324acc25c52f1c979e346ab6e6ef9b44d07db4a4f88aea109a831",
+    "src/modules/orders/contracts.ts": "74aac05a20621fed1501101b4b17db79f6037caa56311e93bdefbafaef5f6f0b",
+    "src/modules/orders/infrastructure/google-sheets/order-bills/OrderBillsSheet.ts": "0f1426cbafcffaef1a3f99faf5948db33738cd11596122317701da3717b989ff",
+    "src/modules/orders/infrastructure/google-sheets/order-bills/const.ts": "e235fd27fe5bad2d652b6cb13c299141e7b7a43ff3689d096c052bbe3ae33676",
+    "src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts": "060a281c87b88e029c008e861f7d09553c69ff8183bc20ba3ca7be5a65c3857e",
+    "src/modules/orders/infrastructure/google-sheets/order-items/OrderItemsSheet.ts": "24ee5f2a6ff2e3717e2ac346bf24afff28f827a5c99f1f9fde00e65f02f598d4",
+    "src/modules/orders/infrastructure/google-sheets/order-items/const.ts": "dc15a3d5c8de1a5a6ac7076a4783ce586f7c68acbbaceb8e837bfc148a9a1245",
+    "src/modules/orders/infrastructure/google-sheets/order-list-reader.ts": "cf5b97a2b465a98aecf0049de3ad27111f14c5311791df7b908349d7c4de7053",
+    "src/modules/orders/infrastructure/google-sheets/order-row-mapping.ts": "f82765d92f5405f1153ca5f2ed2ad061fc85378fdfa702348af9637935c4c1be",
+    "src/modules/orders/infrastructure/google-sheets/order-writer.ts": "e8f1ef178c59d1a588e23a7aa97422d38d68cebda6a865c6c24af1e7c97da72b",
+    "src/modules/orders/infrastructure/google-sheets/orders/OrdersSheet.ts": "cf4f2b49c4878871741b888a743f56704d088d27e1b9770ed6969e7b518cef75",
+    "src/modules/orders/infrastructure/google-sheets/orders/const.ts": "87f9303c82199d5f279be3e23ac410260e7e49067f968a3ef1cd7534911d81cf",
+    "src/modules/orders/server.ts": "535dcda40f4c0915273eed13c951d62eb9eec08d3b47d244b3e3490d6e3b94b8",
+    "src/modules/orders/ui/OrderImageCard.tsx": "48272baf9bdd97ea2841efb67c8c05ce5520ffa72e1c035ebc4892c15abc5f5f",
+    "src/modules/orders/ui/OrderImageGallery.tsx": "43a0853b991ddadea6d92776ba258ee37ea8f3b5ed76f659d715ff84da8132aa",
+    "src/modules/orders/ui/OrderListPage.tsx": "8a64d4344125aabb84b5315bbfdffb8c90406f8e6716f18e62b3c088d2357c41",
+    "src/modules/orders/ui/OrderMobileCard.tsx": "8e60a18fa6b27b1d2b1656514671f6f37e2ab23e3bb35b26d70736b081878dd7",
+    "src/modules/orders/ui/OrderProductImageActions.tsx": "116054fec1f87be60a555091ad59096a44923a12e04dc96dedb2a885ea2d9196",
+    "src/modules/orders/ui/OrderProductImageUpload.tsx": "d699f218f839d7f232b607eb1a0bcc95084fce59f17f8f418b5dd51f87a910e9",
+    "src/modules/orders/ui/OrderQuantityStatus.tsx": "3c6c7771f8808f243db59d144fdd9673572bcc38b12b9408cfc04881b28663ad",
+    "src/modules/orders/ui/[id]/OrderDetailPage.tsx": "810c2fd0ca1e50d781b87557cacd5072eda221bdc9cd7c25731e0c4f37465bf4",
+    "src/modules/orders/ui/[id]/orderDetail.module.css": "bb23de4d623af55cb7584073fb4b40c8414ca0edc4350b305ee63f1b64d42318",
+    "src/modules/orders/ui/[id]/shipment-picker-port.ts": "3ad44688e654286e7927c3443362ef1bb7f9712575b4475166df94e296f24b5e",
+    "src/modules/orders/ui/api.ts": "7b388019ed69001310ee95663c2e4a9ed19c7307b20d878dcd229fed9eda325a",
+    "src/modules/orders/ui/create/OrderCreatePage.tsx": "0c2aaaf0c49617d67fca408143356d4ecfd4296bba85c1a6cf453a184ba61d97",
+    "src/modules/orders/ui/create/orderCreate.module.css": "a43c9b3b87cf065814cc881bed539281c4ce3d9a7ac067187da4e74081245845",
+    "src/modules/orders/ui/orderListFormat.ts": "a805594028d00c7d813b3d24dd5874330a55f06d6deeccd2c36293b50812b967",
+    "src/modules/orders/ui/orderQuantityStatus.module.css": "b5714cfc02f9902b8792436eef6dec22f415d66092665e82e32e69c0256b7de5",
+    "src/modules/orders/ui/orders.module.css": "96c61b1ec82e694c7f8abe919720b919414f0c0f997a484efe887c79e5962149",
+    "src/modules/shipments/application/advance-shipment-status-with-bill.ts": "54a5014d513bd0f1239d5ed6c2114cf1d651322777d638ffbcec297e87575049",
+    "src/modules/shipments/application/create-shipment.ts": "ba1d1df3f794d2910a440157258754677bf68015b7da9a533a31145b1a43ad50",
+    "src/modules/shipments/application/link-order-to-shipment.ts": "03b9a887072cf1b0beb5fbc30adcbca34cb1c5c86fb939ee6448a43d8523c23b",
+    "src/modules/shipments/application/list-shipments.ts": "7d114555181d9bf5f44cfc5e678511cfd8950d8479f9194ad9ffcb0ff6a992ab",
+    "src/modules/shipments/application/ports/created-shipment-writer.ts": "d4ad2fabf1a25dd372724dccc10f5be1fa4c4440bdd3a4188e01995de5711e27",
+    "src/modules/shipments/application/ports/shipment-bill-storage.ts": "785a69460d4a3e21825d7dd01dce88a3f7c5ff77c00824a745af8bf238d402fa",
+    "src/modules/shipments/application/ports/shipment-list-reader.ts": "5cddb4a681459cb9ea79dd183a06d8d5353c5488aced84d7217b7f31c64595cb",
+    "src/modules/shipments/application/ports/shipment-order-link-store.ts": "c96025d3abd179a02cbd4591775e3af518c6005df4902e2dfa5b1da42c18d861",
+    "src/modules/shipments/application/ports/shipment-status-store.ts": "c1bd0ae9b58a23d38ab2dedfeaa76a978675166dc457cdaff793e43e80b4e82f",
+    "src/modules/shipments/application/update-shipment-status.ts": "bd57ac74c77960b9f17e7ab2aa34a2a032dfc9d95886022cfda1c71c0e79c7d3",
+    "src/modules/shipments/contracts.ts": "97b893532718e3e622ac454f91eb0045e6087ea47c4afca35835267d383a6156",
+    "src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts": "f0256546f1595b2a955d06c4f8aabdc956d1004e00d50aaa42a79b0541f127ef",
+    "src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts": "c59f93c84a46bc45e5d4e79506f11bef2b0da5ec9f604add655a49c98740c6f2",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts": "f44609a3e9a5ef691abf0fba801da8bdaa851dcd9ebb61b933866cdd4712bd9c",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts": "1567b81c201d11b5a18bf04cbbed37849be89fddf81f082c3372c44bf1d9ebd1",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-orders/ShipmentOrdersSheet.ts": "8207a8dd24d48a88f9fced8a7b6dba950407c27fad425b54586cda26f13b4a1e",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-orders/const.ts": "8053bb89b16001ca7fe8068e2d4b79facbd1f2764ff04562082cc8dbbf5ba805",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts": "7035c0453042b04c6358da646dfb7f6ca5cd32205478aacf962e37b9a6c27997",
+    "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts": "a9a9ad0b298466e99821a9f7c9d8a562993af71b5d40ac77e5076a165a529fdd",
+    "src/modules/shipments/infrastructure/google-sheets/shipments/ShipmentsSheet.ts": "aae60400dfb54f43ce0cb5a83985145c9ff8e39cd193098e865e139ddd6dbf01",
+    "src/modules/shipments/infrastructure/google-sheets/shipments/const.ts": "3b61e71c99031646a1d3e735f7136e9db82d52173a9577eb0ed8bd5afc054c4a",
+    "src/modules/shipments/server.ts": "c03e517fe167e1ab7703dc723a380ff953d1a016ac2b8963374eb809ab8128b4",
+    "src/modules/shipments/status.ts": "5a11cb3efdeb811196076d64e91a9883e2dc4c1eaf0bd798ea6aa6f8bc37f4bc",
+    "src/modules/shipments/ui/ShipmentListPage.tsx": "f97d18e1446cc1fce53e5a4e98cc62fc3a40f26b1f94d2fde46ca9f2e38e9e96",
+    "src/modules/shipments/ui/ShipmentMobileCard.tsx": "c66bed409d81aa31d88d3f65b59a356c4d3b94fda9bc3cf9bad7cd5729cd5ec5",
+    "src/modules/shipments/ui/[id]/ShipmentDetailPage.tsx": "815d50bc4f811fa20a2f0c8bb8bd007b8f3ab307e18325f573bed1fe36d3baba",
+    "src/modules/shipments/ui/[id]/shipmentDetail.module.css": "f6b1c4e196ed75b3bcf1427e547ca575d60f9b6ff03437d48b1737430b860e79",
+    "src/modules/shipments/ui/api.ts": "7aa8e27b7928a27637ad8fcc0480c4c471bd4deeee25b7c4c314a95f709eb379",
+    "src/modules/shipments/ui/shipmentListFormat.ts": "64fee67e4d28de43242888004b28e113358533ba30c738112a390472d502cfa2",
+    "src/modules/shipments/ui/shipments.module.css": "9e7779e03d3a1a8459e0a6b2cc52efd883df72583f4fa35a37567f21b2b83888",
+    "src/scripts/line-rich-menu-client.ts": "bf754fd2cc65cbd60c82f733cc3c7df477326c6e18f1b6716fecbfad32ff9cb6",
+    "src/scripts/rich-menu.ts": "6e0111566a79371198932d13b0b3d4c5ba55fdc1f3fc012b399b9a41569656b9",
+    "src/scripts/setup-rich-menu.ts": "393f77143c249c82e88e40c4882b4b51d74de484555b8c48d8b09a8692030359",
+    "src/scripts/tsconfig.json": "14e781be5748e21bf2e8d03d2bbdee0f9528daca80a1d1191cd42ae72381fda5",
+    "src/services/employees/calculateEmployeePayroll.ts": "070ffef4cb11a9c1d39114dfae260e2f59a28c22923cccfb115327e9ea6129b1",
+    "src/services/employees/index.ts": "eff9793c39b6ee2927d05ada36058a0630dfccfa367a722a1a39d8743fea3a21",
+    "src/services/employees/manageEmployeeTimesheets.ts": "a8b2ece5d9914611b3a9395baeb670aee1b417bb224d936be1bdce492ab41c2c",
+    "src/services/employees/manageEmployees.ts": "b01b856e34bc8ddab49c3a431118cbf950f43429d2dae992034275ccb06b09ac",
+    "src/services/employees/manageSalaryAdvances.ts": "28b3ca6a35cf6b37ec3f3ebdbe0a07650881bc60a9eb64a811fb8f45389780a6",
+    "src/services/employees/settleEmployeePayroll.ts": "d7ad4c933e81a3021bf7594170f07590f1f38a178cfd478e67ae4fa28ddfe4f6",
+    "src/services/expenses/index.ts": "f6e25d2dbe34ff098e9bfb28c9104f48a2eaa8cc82f257f4ca68ac2739f6fbf3",
+    "src/services/expenses/manageExpenses.ts": "e15d441beed648ae6f3fa518d782b57770b95b28967bcfc4d70f1e89b44894aa",
+    "src/services/expenses/types.ts": "aeaf8259f7f570dd87138a65b06e449466558ea3d1576f5a14d0072464bbd52e",
+    "src/services/line/enum.ts": "1b8808109e7a5a99c5657e005951b872d76342a053d6f6f5d7a94e56df9f8a50",
+    "src/services/line/events.ts": "9360e6ece709df50ee1e4cf05d38645af4645be86f193eb4c5048f3037db7700",
+    "src/services/line/events/completeBill.ts": "d39dc83fa41a9068fd18ddde4abbffd136c0f94b7dca4f68a645817901d82b4f",
+    "src/services/line/events/completeProducts.ts": "5ac7327c338ee0a5f03eeda17985d9488db6b62c21bcd5c7a214fd1746a824cf",
+    "src/services/line/events/createOrder.ts": "b672160975349a2988c6503990d1e3b38643fc348cf388f8f2adae635a1a94b3",
+    "src/services/line/events/orderBillImage.ts": "4a24b901f9532e4603747f74888d61964948e5489b777823bbf491c839b31da0",
+    "src/services/line/events/orderProductImage.ts": "1457e14d9c0093a32e02f15a4f0a21f69e3014bdc112b53bfac78604c7357094",
+    "src/services/line/events/orderTotalPrice.ts": "78be063c01ceb7cd0b7eb49beaf586b8dd0144cd2172cfa11c4160b652c94ca9",
+    "src/services/line/index.ts": "a8b6081db1de85edbd8c215a6eb85a8f6bb9fe1098e5c9c8bcce45582df5433e",
+    "src/services/line/text.ts": "064e180676ef86381bb7df1e77dfe9a7207fee23cdb7dea075be7c76f1e9eae6",
+    "src/services/line/utils/resolveUserState.ts": "25b8d34a60b7bd0c6fa5dc9b1e55400e9d1cd3e11ecc76fda232e9d6b021c5bd",
+    "src/services/movements/index.ts": "467f08debbea366842738fd4eb601f0eca3c06d195c0e6225d878b259707ddac",
+    "src/services/movements/manageMovements.ts": "3f172923c0a60c56f824169abcd77a32c7aaf30b8b06e56f7eb0c632c0a03088",
+    "src/services/movements/state.ts": "414824a3223a5e6281e778ebe9baf14b82d1365598fbf0613e7954ca0d2a8fca",
+    "src/services/orders/OrderItemQuantityType.ts": "1123b9153cffbae905e5e74c9048b327ce4181a82874696f865b42b6c5353548",
+    "src/services/orders/completeOrderBill.ts": "e3e63834467cab6bc777aaa9d3f62c410cbfcbd0e99c5087508fdfc850fa1adc",
+    "src/services/orders/completeOrderProducts.ts": "2add43dafa1828574b8adbef0598f86015f5b122a888a165fc8108a6bfbd345f",
+    "src/services/orders/completeOrderTotalPrice.ts": "0cd6fd07edf45adee78e004d068904638e4dda767bcd8ced2baedc026d033e2a",
+    "src/services/orders/completeWebOrderPrice.ts": "2ab52f491869389cc36d733c281f0dac239f5050a13e2ad933edbad61d95a99f",
+    "src/services/orders/createDraftOrder.ts": "370b1b4d144906c1bcd6684c440a3bfacc62c8c20e7d009cc18e67383f6c018b",
+    "src/services/orders/createOrder.ts": "d8a26e40f5602db3312311c5b9968e01932d0faaca156324e8ed80bac12503ec",
+    "src/services/orders/createOrderBill.ts": "7fb9203b8b517b58c861b7dc1ea07d5f531fc640aaf5f967cdd535d59cf233b5",
+    "src/services/orders/createOrderItem.ts": "8b41395fe267c5d31517c25b910e0fa2ef653fae255e16b19cc7cf173b457e44",
+    "src/services/orders/createOrderWithImages.ts": "9d19d7636612169c4e711a72a1762f2040282b355fed4479b7bad9a296e0af09",
+    "src/services/orders/findOrderRowNumber.ts": "55c539f8dbbfab15284ef4297e7c0b70c8dfcb1bdf04dfd42f701fb29680b5fa",
+    "src/services/orders/index.ts": "d17e04caf58614caa55763d60057732d7b8332dfe6b118b910e595be251742f8",
+    "src/services/orders/isActiveOrderCreateState.ts": "cdefc09003d03786650f31fc76bfdd58b3e45cf30fb6cacf31d66cd287c39925",
+    "src/services/orders/isOrderImageUploadState.ts": "120fff9219d24f56c9707f9192a07055e8124ff30bf35c5446477e647275069f",
+    "src/services/orders/listOrders.ts": "b9c6f37c42243139725537ca6157a5459560e240940d3209c6e2ece0d15f66e0",
+    "src/services/orders/orderExists.ts": "704a47c3c52bd84c2ee36a5e72c7ea0f31212b5742c2cbaf7fa0f591240ff6a8",
+    "src/services/orders/replaceOrderProductImage.ts": "c2f002e831af5a8ad32f28db6b9d8d1957188a3f27ef41160b479089b2ceb56c",
+    "src/services/orders/updateOrderCreateState.ts": "a7edd91e72ab270fe6a8b40f2b060b592a597671f261f439c44a7b3c525ff2be",
+    "src/services/orders/updateOrderDetails.ts": "5c8e3d063e87914e38b00235109b49a102654f75a1083606f7c26876db445f64",
+    "src/services/orders/updateOrderItemProductCode.ts": "fa799380865a6fb0a071b3c365b813e908ba66eb2448608b673499d39f0b2063",
+    "src/services/orders/updateOrderItemQuantity.ts": "70a9e32602ee373f6d8c5ee912a8e985b1ee6b1f60c766c5405bd4b696f39ed6",
+    "src/services/orders/updateOrderProducts.ts": "3198824616bc347635d38b2d9bca6293f4863baebc68e909f6a343bccb119e7a",
+    "src/services/sales/getGoogleSheetsDailySales.ts": "c29e145ee49954f1cbf7ef464dd8a51f0de7e36d4700a47f6983f90dc9757626",
+    "src/services/sales/getLoyverseReceiptsForSalesDate.ts": "d86270c0f3ce2541bf115d59b21c82efe594adf2d9e5c387f8f1d6ab68a6c630",
+    "src/services/sales/idBuilders.ts": "342cb83928a7fb40741cb7898cf4875442f318feb7a42e3b926398682ae63335",
+    "src/services/sales/index.ts": "c6881aca9c26f3abeb17cb1adebb55d6daabb8548d0d433aade717cbb0586035",
+    "src/services/sales/listSalesSyncStatus.ts": "fe08950fd062acd4c259b889f61ae2cf150bd3a8aa019e911bf3eaee0feeb41c",
+    "src/services/sales/manageSalesProfitCostOverrides.ts": "5b4672569e2aec1844b721f75a0e9973c0deda0ea8db072ab0120f5fc6a38a6b",
+    "src/services/sales/rowMappers.ts": "f6eed7d3e0a678aff5067cfb1b678fda3eff171e40665784dd64f79038cbfb8f",
+    "src/services/sales/syncLoyverseDailySales.ts": "dc586278b4cbbac1bfd2faa5783103439fc462f32c4a35f1875aafebd48ba7dd",
+    "src/services/shipments/createShipment.ts": "adecb2339a6cf3436d1f6bfe638b771039254b578eb87049836034f11de90f9a",
+    "src/services/shipments/index.ts": "5279b74a84628f93b27109f1bd2294ba5502c168abbcae302f26756e83df5134",
+    "src/services/shipments/linkOrderToShipment.ts": "bdf2efec31eb7661d9a5620f14f2eed874df94bbcce1a54c37d844cb6cb35985",
+    "src/services/shipments/listShipments.ts": "3bb282c1e4ff631b4ddd407788e03dba9c3ef8fdee5b3ea05a03ef93d8253d2b",
+    "src/services/shipments/types.ts": "f8b693312153552368580d6b49dcea0fb9128b8232fd5f7ca109fe8a435fc9a4",
+    "src/services/shipments/updateShipmentStatus.ts": "c9d9ac98296b685b272ce0e3dd72640942e53fe69d94f96e987eaf0ca97f0393",
+    "src/services/stock-adjustments/manageStockAdjustments.ts": "53a0a5dc6938d574bdb611d8286771b268db21376bca6fcab8f93099b1e331e2",
+    "src/services/stock-adjustments/types.ts": "8e3dfadb9899650b0005b2849c93d5323d7600e86dfc9b209787f1f5fd754976",
+    "src/services/stock-counts/index.ts": "f7179357c6ee371d089597e74bb081cfae61b09dc07bde0a25e46601528fc012",
+    "src/services/stock-counts/manageStockCounts.ts": "c03233344db279ec409d9961d61e43760ca2abe1a24630098b11076b85a725f3",
+    "src/services/user-states/findLatestUserState.ts": "85d500d2f5572599cb431150fa2ba33fcaf890b9ad7c013e6d8e207a08d5692e",
+    "src/services/user-states/index.ts": "931cab4ddab427af45a2f53bbfe6ec4f007ce92ccc6b8bb998621299e2aaf8a2",
+    "src/services/utils/createSortableId.ts": "d01a2acab4cd6ce88b24550a1fcb22f316d65942e450fc25e691fd6567e3865d"
+  },
+  "fixtureHashes": {
+    "google-infrastructure-before.json": "8a840db4d19ce6caef46a2b6af62adc3272b5bdc0ea1d48c93b665657ba76034",
+    "google-infrastructure-consumers.json": "c23894cf3307b34e2ec9877abf08e24a5b646a2fa2190a783a6a215bb2c110ac",
+    "orders-detail-before.json": "f66cb601fc3279fdd3929212cd740625b05bfcbddc1d3f4ae730d19c8b27ab59",
+    "orders-picker-seam.json": "d61e119ff0710acdd0447ec976ad14124be2b519b635e37d5a07f41cb3d9a113",
+    "orders-read-model.json": "4f9f74473e11ba5c7c4f14909d9d903149082197e337c9ff3523602381ae23f2",
+    "orders-seam-list.json": "6046e60a459cf78a8ef89e3195f30f2c66546f3673983d5f6ab295fa4169c873",
+    "orders-seam-preserved.json": "d5a97e772bf9fed81c43f757a80c358ded7ad6405f2b41eb1709292c37d1f7cc",
+    "orders-sheet-types-before.json": "bcc38ae34b819d99d762c8ad97eb20eb5b23dc90d02ef4ed2372de9211730d1f",
+    "orders-type-shapes.json": "3e3760f14b3f5f9eb7cfb8c7f9c0c8a4760bd88e2913d92ecc76772e3e87c15c",
+    "orders-ui-structure.json": "53518ab9863a5843fccdb5fe2cf6b64b1b09cb676056b1bff109ff1cdcf0b006",
+    "route-contracts.json": "0c703c2032ebd353298d77f4553f610151270e900df8055365ca0d7d3e4b77eb",
+    "shipments-browser-client.json": "381df5f6fd75468097ed5c2892c88ca5097df2811c614ff3ff33d4c696648232",
+    "shipments-create-before.json": "d149cf0bb8c4ea57c60e8680a2adf39a0e897787a0650e09f20c1cae372a5eba",
+    "shipments-drive-before.json": "302d85a679e6292cfb1092e265eee7edd9a9acf8fd7b27333e678be3ffa89e17",
+    "shipments-dto-before.json": "c788c4b5655eb122615babec7d0f4d5c0c07c68ce8432c9babc965bebdc08024",
+    "shipments-enum-before.json": "8d3d9674f9532650299cade14abec692ee3cfbbd65bfbe968b4c26bcb027e78f",
+    "shipments-http-before.json": "6feb068fb15329ab3f880b938fcd03aada199345181cb4186fcea37c5ea1767d",
+    "shipments-link-before.json": "a95769b4b699da28a07f2fe129d475dcc5e2b065d622df8466aef845f74d1594",
+    "shipments-list-before.json": "2428c587bfb8dbac7a4a2161c14e3cd78df43c321c6c7ba733bcd788d9e61952",
+    "shipments-read.json": "d61a83e578239d71d8d765ba5d24d916d4146a9bf8b0c85c80ca18c1878f27b8",
+    "shipments-status-before.json": "ac130c6528e49b19efbcdd31efc4956c3c7edd552ea16155b63d5e725418343e",
+    "shipments-structure.json": "6cedf4321ef781c180132f27d347eae42e526721d27e00006a0cc3c437b91ce8",
+    "shipments-ui-relocation.json": "55eced0ac464be297058b4cc140772cbed9ee75332e4bd7beb2c7069232119fc",
+    "shipments-validation-before.json": "d06aa6b618c631c704eaaff30dad829e29da9859d6d9c0a1762fb9e20a2f3ccd",
+    "worksheet-ownership-before.json": "9e26b67739dcb1c94534164abdd85878c8a9aa10528e17ef78c987f2dc67be1d"
+  },
+  "audit": [
+    {
+      "file": "src/app/api/employees/[id]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/employees/advances/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/employees/payroll/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/employees/payroll/settle/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/employees/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/employees/timesheets/[id]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/employees/timesheets/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/employees/timesheets/summary/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/expenses/masters/[kind]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/expenses/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/line/webhook/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/app/api/loyverse/daily-sales/sync/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/movements/[id]/items/[itemId]/image/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/movements/[id]/items/[itemId]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/movements/[id]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/movements/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/orders/[id]/images/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/orders/[id]/items/[itemId]/image/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/orders/[id]/items/[itemId]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/orders/[id]/items/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/orders/[id]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/orders/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/orders/with-images/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/sales/daily-sales/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/sales/dashboard/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/sales/profit-summary/cost-overrides/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/sales/profit-summary/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/sales/sync-status/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/shipments/[id]/orders/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/shipments/[id]/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/shipments/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/stock-adjustments/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/app/api/stock-counts/route.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "createGoogleSheetsServiceFromConfig"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/GoogleSheetsService.ts",
+      "specifier": "./sheets",
+      "target": "src/externals/google/sheet/sheets/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "EmployeeCompensationsSheet",
+        "EmployeesSheet",
+        "EmployeeTimesheetsSheet",
+        "OrderBillsSheet",
+        "OrderItemsSheet",
+        "OrdersSheet",
+        "SalesReceiptItemsSheet",
+        "SalesProfitCostOverridesSheet",
+        "SalesReceiptPaymentsSheet",
+        "SalesReceiptsSheet",
+        "SalesReceiptSyncsSheet",
+        "ShipmentOrdersSheet",
+        "ShipmentsSheet",
+        "StockCountsSheet",
+        "UserStateSheet"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./sheets",
+      "target": "src/externals/google/sheet/sheets/index.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "BaseGoogleSheet",
+        "EmployeeCompensationsSheet",
+        "EmployeesSheet",
+        "EmployeeTimesheetsSheet",
+        "OrderBillsSheet",
+        "OrderItemsSheet",
+        "OrdersSheet",
+        "SalesReceiptItemsSheet",
+        "SalesProfitCostOverridesSheet",
+        "SalesReceiptPaymentsSheet",
+        "SalesReceiptsSheet",
+        "SalesReceiptSyncsSheet",
+        "ShipmentOrdersSheet",
+        "ShipmentsSheet",
+        "StockCountsSheet",
+        "UserStateSheet"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./sheets/sales/receipt-items/const",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_ITEM_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./sheets/sales/profit-cost-overrides/const",
+      "target": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_PROFIT_COST_OVERRIDE_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./sheets/sales/receipt-payments/const",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_PAYMENT_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./sheets/sales/receipt-syncs/const",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_SYNC_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/index.ts",
+      "specifier": "./sheets/sales/receipts/const",
+      "target": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/index.ts",
+      "specifier": "./sales/receipt-items/SalesReceiptItemsSheet",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SalesReceiptItemsSheet"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/index.ts",
+      "specifier": "./sales/profit-cost-overrides/SalesProfitCostOverridesSheet",
+      "target": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SalesProfitCostOverridesSheet"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/index.ts",
+      "specifier": "./sales/receipt-payments/SalesReceiptPaymentsSheet",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SalesReceiptPaymentsSheet"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/index.ts",
+      "specifier": "./sales/receipts/SalesReceiptsSheet",
+      "target": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SalesReceiptsSheet"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/index.ts",
+      "specifier": "./sales/receipt-syncs/SalesReceiptSyncsSheet",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+      "syntax": "ExportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SalesReceiptSyncsSheet"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_PROFIT_COST_OVERRIDE_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_ITEM_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_PAYMENT_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_SYNC_HEADERS"
+      ]
+    },
+    {
+      "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+      "specifier": "./const",
+      "target": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_HEADERS"
+      ]
+    },
+    {
+      "file": "src/features/backend/line/services/movements/index.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/features/backend/line/utils/index.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/employees/calculateEmployeePayroll.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/employees/manageEmployeeTimesheets.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "EMPLOYEE_TIMESHEET_HEADERS",
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/employees/manageEmployees.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "EMPLOYEE_COMPENSATION_HEADERS",
+        "EMPLOYEE_HEADERS",
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/employees/manageSalaryAdvances.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetRow",
+        "IGoogleRowsSheet",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/employees/settleEmployeePayroll.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/expenses/manageExpenses.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetRow",
+        "IGoogleRowsSheet",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/events.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/events/completeBill.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/events/completeProducts.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/events/createOrder.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/events/orderBillImage.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/events/orderProductImage.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/events/orderTotalPrice.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/line/utils/resolveUserState.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/movements/manageMovements.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/completeOrderBill.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/completeOrderProducts.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/completeOrderTotalPrice.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/completeWebOrderPrice.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/createDraftOrder.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "lastColumnLetter",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/createOrderBill.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "lastColumnLetter",
+        "ORDER_BILLS_SHEET_HEADERS",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/createOrderItem.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "lastColumnLetter",
+        "ORDER_ITEMS_SHEET_HEADERS",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/createOrderWithImages.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/findOrderRowNumber.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/orderExists.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/replaceOrderProductImage.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/updateOrderCreateState.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/updateOrderDetails.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/updateOrderItemProductCode.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/updateOrderItemQuantity.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/orders/updateOrderProducts.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetRangeUpdate",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/sales/getGoogleSheetsDailySales.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetCellValue",
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/sales/getGoogleSheetsDailySales.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_HEADERS",
+        "SALES_RECEIPT_ITEM_HEADERS",
+        "SALES_RECEIPT_PAYMENT_HEADERS",
+        "SALES_RECEIPT_SYNC_HEADERS"
+      ]
+    },
+    {
+      "file": "src/services/sales/listSalesSyncStatus.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/sales/manageSalesProfitCostOverrides.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_PROFIT_COST_OVERRIDE_HEADERS",
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/sales/syncLoyverseDailySales.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "SALES_RECEIPT_HEADERS",
+        "SALES_RECEIPT_ITEM_HEADERS",
+        "SALES_RECEIPT_PAYMENT_HEADERS",
+        "SALES_RECEIPT_SYNC_HEADERS",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/stock-adjustments/manageStockAdjustments.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "EMPLOYEE_HEADERS",
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/stock-counts/manageStockCounts.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": false,
+      "names": [
+        "STOCK_COUNT_HEADERS",
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "src/services/user-states/findLatestUserState.ts",
+      "specifier": "@/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "GoogleSheetRow",
+        "IGoogleSheetsService"
+      ]
+    },
+    {
+      "file": "tests/orders-seam.types.ts",
+      "specifier": "../src/externals/google/sheet",
+      "target": "src/externals/google/sheet/index.ts",
+      "syntax": "ImportDeclaration",
+      "typeOnly": true,
+      "names": [
+        "IGoogleSheetsService"
+      ]
+    }
+  ],
+  "operationalScripts": [
+    "src/scripts/line-rich-menu-client.ts",
+    "src/scripts/rich-menu.ts",
+    "src/scripts/setup-rich-menu.ts"
+  ],
+  "browserBaseline": [
+    {
+      "root": "src/app/employees/advances/SalaryAdvancesPage.tsx",
+      "types": true,
+      "found": [
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+          "path": [
+            "src/app/employees/advances/SalaryAdvancesPage.tsx",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "root": "src/app/employees/payroll/PayrollPage.tsx",
+      "types": true,
+      "found": [
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+          "path": [
+            "src/app/employees/payroll/PayrollPage.tsx",
+            "src/app/employees/payroll/payrollPdf.ts",
+            "src/services/employees/calculateEmployeePayroll.ts",
+            "src/services/employees/manageSalaryAdvances.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "root": "src/app/expenses/ExpenseMasterPage.tsx",
+      "types": true,
+      "found": [
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+          "path": [
+            "src/app/expenses/ExpenseMasterPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "root": "src/app/expenses/ExpensesPage.tsx",
+      "types": true,
+      "found": [
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+          "path": [
+            "src/app/expenses/ExpensesPage.tsx",
+            "src/services/expenses/index.ts",
+            "src/services/expenses/manageExpenses.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "root": "src/app/movements/MovementListPage.tsx",
+      "types": true,
+      "found": [
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+          "path": [
+            "src/app/movements/MovementListPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "root": "src/app/movements/[id]/MovementDetailPage.tsx",
+      "types": true,
+      "found": [
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-items/const.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/SalesReceiptItemsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-items/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/SalesProfitCostOverridesSheet.ts",
+            "src/externals/google/sheet/sheets/sales/profit-cost-overrides/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/SalesReceiptPaymentsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-payments/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipts/const.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/SalesReceiptsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipts/const.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts"
+          ]
+        },
+        {
+          "file": "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts",
+          "path": [
+            "src/app/movements/[id]/MovementDetailPage.tsx",
+            "src/services/movements/index.ts",
+            "src/services/movements/manageMovements.ts",
+            "src/externals/google/sheet/index.ts",
+            "src/externals/google/sheet/GoogleSheetsService.ts",
+            "src/externals/google/sheet/sheets/index.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/SalesReceiptSyncsSheet.ts",
+            "src/externals/google/sheet/sheets/sales/receipt-syncs/const.ts"
+          ]
+        }
+      ]
+    }
+  ]
+}
