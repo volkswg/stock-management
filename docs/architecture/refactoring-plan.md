@@ -55,3 +55,7 @@ PR21 implements only the five Orders/Shipment worksheet classes plus five header
 ## PR 22 — Sales worksheet ownership
 
 PR22 implements only five Sales worksheet classes and five mutable header arrays, with exact named forwards and source/identity/transport evidence. Sales sync/report/profit/API algorithms and aggregate registry/consumers remain byte-identical. Legacy Sales use cases and type-boundary cleanup, registry retirement and other feature worksheets remain separate reviewed work. [Exit evidence and limits](sales-worksheet-ownership.md).
+
+## Inventory employee-directory prerequisite
+
+The blocked HR worksheet move is preceded by the [Inventory-owned employee-directory seam](inventory-employee-directory.md): HR owns the exact existing read/header/projection, guarded legacy composition supplies Inventory's port and original failure factory, and old callers remain compatible. Supporting pure DTO/type-import cleanup closes direct Inventory mixed-Sheets dependencies without extracting other stock/HR algorithms. No worksheet/payroll move is included; retry the six HR files only after this prerequisite merges, a new main SHA is verified and the full consumer/graph audit is rerun.

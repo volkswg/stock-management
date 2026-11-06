@@ -1,3 +1,4 @@
+import { directoryFiles, directoryNewFiles, assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
 import { salesWorksheetFiles, salesWorksheetDestinations, assertSalesWorksheetHistory } from "./helpers/sales-worksheet-history.mjs";
 import { worksheetFiles, worksheetDestinations, assertWorksheetHistory } from "./helpers/worksheet-history.mjs";
 import { sheetTypeFiles, assertOrdersSheetTypeHistory } from "./helpers/orders-sheet-type-history.mjs";
@@ -49,9 +50,9 @@ test("physical, public, legacy leaf and unchanged barrel share one cached enum r
 });
 
 test("only the two reviewed existing production files change; all other source, routes, clients, DTO owners and provider bytes remain exact", () => {
-  const changes=Object.entries(enumBefore.productionHashes).filter(([file,hash])=>{if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return enumHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
+  const changes=Object.entries(enumBefore.productionHashes).filter(([file,hash])=>{if(directoryFiles.has(file)){assertDirectoryHistory(file,hash);return false;}if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return enumHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
   assert.deepEqual(changes,[contract,legacy].sort());
-  assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(enumBefore.productionHashes,f)&&!googleDestinations.includes(f)&&!worksheetDestinations.includes(f)&&!salesWorksheetDestinations.includes(f)),[physical]);
+  assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(enumBefore.productionHashes,f)&&!googleDestinations.includes(f)&&!worksheetDestinations.includes(f)&&!salesWorksheetDestinations.includes(f)&&!directoryNewFiles.includes(f)),[physical]);
   assert.equal(enumBefore.productionTypeScriptCount,277);
   assert.deepEqual(routeContracts(),enumBefore.routeContracts);
   assert.equal(routeContracts().filter(r=>r.kind==="page").length,23); assert.equal(routeContracts().filter(r=>r.kind==="api").length,35);

@@ -10,4 +10,4 @@ export type StockAdjustment = {
   itemDescription: string; photoUrl: string; note: string; reversesId: string; replacesId: string;
   createdAt: string; createdBy: string; notInLoyverse: boolean;
 };
-export type AdjustmentEmployee = { id: string; name: string; status: string; hiredDate: string; terminatedDate: string };
+export type { AdjustmentEmployee } from "@/modules/inventory/contracts";

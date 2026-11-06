@@ -1,3 +1,4 @@
+import { directoryFiles, directoryNewFiles, assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
 import { salesWorksheetFiles, salesWorksheetDestinations, assertSalesWorksheetHistory } from "./helpers/sales-worksheet-history.mjs";
 import { worksheetFiles, worksheetDestinations, assertWorksheetHistory } from "./helpers/worksheet-history.mjs";
 import { sheetTypeFiles, assertOrdersSheetTypeHistory } from "./helpers/orders-sheet-type-history.mjs";
@@ -55,10 +56,10 @@ test("all legacy named forwards evaluate the same cached runtime constructors/fu
 test("every reviewed physical move restores its entire original source and no other production bytes change",async()=>{
  const {assertGoogleHistory,googleFiles,googleDestinations}=await import("./helpers/google-infrastructure.mjs");
  for(const [file,expected] of Object.entries(googleBefore.productionHashes)){
-  if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,expected);else if(worksheetFiles.has(file))assertWorksheetHistory(file,expected);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,expected);else if(googleFiles.has(file))assertGoogleHistory(file,expected);else assert.equal(hash(readFileSync(file)),expected,file);
+  if(directoryFiles.has(file))assertDirectoryHistory(file,expected);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,expected);else if(worksheetFiles.has(file))assertWorksheetHistory(file,expected);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,expected);else if(googleFiles.has(file))assertGoogleHistory(file,expected);else assert.equal(hash(readFileSync(file)),expected,file);
  }
  const {readdirSync}=await import("node:fs");const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(googleBefore.productionHashes,f)).sort(),[...googleDestinations,...worksheetDestinations,...salesWorksheetDestinations].sort());
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(googleBefore.productionHashes,f)).sort(),[...googleDestinations,...worksheetDestinations,...salesWorksheetDestinations,...directoryNewFiles].sort());
 });
 
 for(const historical of [true,false])test(`${historical?"original":"production"} service-account validates lazily, signs exact claims and retains payload/cache failures`,async()=>{

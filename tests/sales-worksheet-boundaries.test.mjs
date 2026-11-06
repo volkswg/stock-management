@@ -1,3 +1,5 @@
+import { assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
+import { directoryBefore } from "./helpers/employee-directory.mjs";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve,relative} from "node:path";
@@ -18,13 +20,16 @@ for(const types of [false,true])test(`Sales leaves and all three module graphs a
  roots.filter(f=>/\/ui\/|\/contracts\.ts$/.test(f)).concat("src/app/loyverse/daily-sales/LoyverseDailySalesPage.tsx").forEach(safe);assert.deepEqual(ownershipEdges(browserOwnership({types})),["shipments->orders"]);
 });
 
-test("all existing client graphs gain no Sales runtime reachability; legacy erased mixed-barrel debt matches the original baseline exactly",()=>{
+test("all existing client graphs gain no Sales runtime reachability; legacy erased mixed-barrel debt retains its exact baseline except the two reviewed movement type-import removals",()=>{
  const reverse=new Map(Object.entries(salesWorksheetsBefore.moves).map(([old,e])=>[e.to,old]));const actual=[];
  for(const root of Object.keys(salesWorksheetsBefore.productionHashes).filter(p=>/\.tsx?$/.test(p)&&/^\s*["']use client["']/.test(readFileSync(p,"utf8"))))for(const types of [false,true]){
   const seen=new Set(),found=new Set();function visit(file){if(seen.has(file))return;seen.add(file);const original=reverse.get(file)??file;if(salesWorksheetsBefore.moves[original])found.add(original);dependencies(file,types).forEach(visit);}visit(root);
   if(found.size)actual.push({root,types,leaves:[...found].sort()});
  }
- const expected=salesWorksheetsBefore.browserBaseline.map(e=>({root:e.root,types:e.types,leaves:e.found.map(x=>x.file).sort()}));assert.deepEqual(actual,expected);assert.ok(actual.every(x=>x.types));
+ const removed=new Set(["src/app/movements/MovementListPage.tsx","src/app/movements/[id]/MovementDetailPage.tsx"]);
+ assertDirectoryHistory("src/services/movements/manageMovements.ts",directoryBefore.files["src/services/movements/manageMovements.ts"].sha256);
+ assert.equal(salesWorksheetsBefore.browserBaseline.filter(e=>removed.has(e.root)).length,2);
+ const expected=salesWorksheetsBefore.browserBaseline.filter(e=>!removed.has(e.root)).map(e=>({root:e.root,types:e.types,leaves:e.found.map(x=>x.file).sort()}));assert.deepEqual(actual,expected);assert.ok(actual.every(x=>x.types));
 });
 
 test("exact Sales import rules reject bypasses and the complete pre-move consumer/script audit still resolves unchanged legacy imports",async()=>{

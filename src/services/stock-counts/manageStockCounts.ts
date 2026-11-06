@@ -1,17 +1,12 @@
 import { listStockAdjustments, stockAdjustmentTotals, stockToday } from "@/services/stock-adjustments/manageStockAdjustments";
 import { randomUUID } from "node:crypto";
-import {
-  STOCK_COUNT_HEADERS,
-  type GoogleSheetRow,
-  type IGoogleSheetsService,
-} from "@/externals/google/sheet";
+import type { GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet/types";
+import { STOCK_COUNT_HEADERS } from "@/externals/google/sheet/sheets/stock-counts/const";
 import { listMovements } from "@/services/movements";
 import { getGoogleSheetsSalesDashboard } from "@/services/sales";
 
-export type StockCountAccount = {
-  id: string;
-  shopName: string;
-};
+import type { StockCountAccount } from "@/modules/inventory/contracts";
+export type { StockCountAccount } from "@/modules/inventory/contracts";
 
 export type StockCountRecord = {
   id: string;

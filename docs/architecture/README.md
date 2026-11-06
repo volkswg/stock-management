@@ -97,3 +97,8 @@ PR21 completes the [five Orders/Shipments worksheet classes and five header move
 ## PR 22 — Sales worksheet ownership
 
 PR22 completes the [five Sales worksheet/header pairs](sales-worksheet-ownership.md), preserving ten named legacy paths, registry/consumer behavior and all earlier ownership guards. Legacy Sales service/API extraction and other worksheet ownership remain deferred. The audit also records unchanged pre-existing legacy browser type-only debt without claiming the whole application is type-graph-clean.
+
+
+## Inventory employee-directory prerequisite
+
+The [Inventory employee-directory prerequisite](inventory-employee-directory.md) replaces direct employee-header/row ownership in stock adjustments with an Inventory-owned port and HR public query, wired through guarded legacy server composition. Original error identity/async phase and HTTP callers remain; no worksheet or payroll move is included.

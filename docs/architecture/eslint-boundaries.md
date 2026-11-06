@@ -122,3 +122,8 @@ PR21 adds `eslint/worksheet-boundaries.mjs` with exact paths for ten real class/
 ## PR 22 — Sales worksheet ownership
 
 PR22 extends only the exact worksheet path table in `eslint/worksheet-boundaries.mjs` for five Sales class/header pairs. Existing rule objects/restrictions and earlier feature scopes stay unchanged. The new paths admit only root base/types/constants and local headers, erased generic interfaces and no static/dynamic/type/relative/registry/provider/feature bypasses. [Audit and tests](sales-worksheet-ownership.md).
+
+
+## Inventory employee-directory prerequisite
+
+The exact `employee-directory-boundaries.mjs` scopes protect the new Inventory/HR contracts, consumer port/use case, reader/public query and legacy composition. Legacy adjustment/count/movement scopes reject mixed Sheets and HR private/header bypasses. Earlier scopes are unchanged. Runtime/type and virtual-HR-move DAGs plus all-client checks keep new employee IO outside browsers. [Tests and original-source reconciliation](inventory-employee-directory.md).

@@ -1,7 +1,7 @@
 import type {
   GoogleSheetRow,
   IGoogleSheetsService,
-} from "@/externals/google/sheet";
+} from "@/externals/google/sheet/types";
 import { DETAIL_HEADERS, ensureHeader, MASTER_HEADERS } from "./state";
 import { isValidMovementQuantity, parseQuantity } from "@/features/backend/line/services/movements/utils";
 
