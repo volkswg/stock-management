@@ -1,9 +1,1 @@
-export const SHIPMENT_ORDERS_SHEET_HEADERS = [
-  "id",
-  "shipmentId",
-  "orderId",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "createdBy",
-] as const;
+export { SHIPMENT_ORDERS_SHEET_HEADERS } from "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const";

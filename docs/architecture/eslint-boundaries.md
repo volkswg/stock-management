@@ -112,3 +112,8 @@ Only the public/legacy contract branches and import allowlists in shipments-boun
 ## PR 19 — Google shared infrastructure
 
 PR 19 registers `eslint/google-infrastructure-boundaries.mjs`: exact-path import allowlists for the sixteen real root files, no feature/legacy implementation edges, dynamic/require/import-type bypasses or broad forwards, and erased-only AppConfig at the Drive factory. Existing Orders/Shipments scopes remain intact. Resolved runtime/type/browser graph and negative lint tests accompany the rules. [Details](google-shared-infrastructure.md).
+
+
+## PR 21 — Orders and Shipments worksheet ownership
+
+PR21 adds `eslint/worksheet-boundaries.mjs` with exact paths for ten real class/header files, allowing only root BaseGoogleSheet/types/constants and own local headers, with erased interface imports and no cross-feature/provider/config/dynamic/require/import-type bypasses. Earlier root/application/adapter/PR20 rules are unchanged. Strict creation graph adds only the two moved Shipment header leaves; old fixture hashes remain checked via exact source restoration. [Details](orders-shipments-worksheet-ownership.md).

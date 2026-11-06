@@ -45,3 +45,8 @@ Supabase adapter design, schema/data migration, transactional semantics, tenant 
 ## PR 19 — Google shared infrastructure
 
 PR 19 implements only the shared Google auth/Sheets transport/Drive ownership slice. Existing named forwards, aggregate Sheets service/configuration and feature worksheet registry remain; this does not complete the broad shared-infrastructure/shell phase or authorize retiring compatibility paths. [Scope and exit evidence](google-shared-infrastructure.md).
+
+
+## PR 21 — Orders and Shipments worksheet ownership
+
+PR21 implements only the five Orders/Shipment worksheet classes plus five headers. Ten exact named forwards preserve consumers and registry identity. Source/AST restoration, real transport/identity and actual runtime/type/browser graph tests pass; PR20 virtual evidence transitions to actual physical-file validation. All other worksheet ownership and aggregate registry retirement remain deferred. [Scope and exit evidence](orders-shipments-worksheet-ownership.md).

@@ -1,9 +1,1 @@
-export const ORDER_BILLS_SHEET_HEADERS = [
-  "id",
-  "orderId",
-  "imageUrl",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "createdBy",
-]
+export { ORDER_BILLS_SHEET_HEADERS } from "@/modules/orders/infrastructure/google-sheets/order-bills/const";

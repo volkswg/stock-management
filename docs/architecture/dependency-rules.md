@@ -118,3 +118,8 @@ PR 19 root Google transports import only their own explicit transport dependenci
 ## Orders pure Sheet type-import prerequisite
 
 Orders server, row mapper, writer and list reader now import erased Sheet contracts only from the pure `externals/google/sheet/types.ts` leaf. Their mixed-index import exception is removed in four exact lint scopes. That leaf forwards only pure generic root types and contains aggregate interface declarations, not worksheet/provider implementations. The current and virtual worksheet ownership graphs remain Shipments → Orders. [Exact consumers and history](orders-sheet-type-imports.md).
+
+
+## PR 21 — Orders and Shipments worksheet ownership
+
+Physical Orders/Shipment worksheets import only root Google base/types/constants and their own local headers. Existing consumers/registry retain old paths through named forwards. PR20 pure Sheet type imports remain unchanged; the real post-move graph preserves Shipments → Orders with no reverse erased edge. Legacy aggregate composition may depend on both modules; feature modules do not import it. [Identity, actual graph and negative regression](orders-shipments-worksheet-ownership.md).

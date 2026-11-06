@@ -537,3 +537,28 @@ One new declaration/emitted-runtime characterization passed against untouched pr
 Historical PR15/16/19 inventories and old Shipment contract/client retained-file checks reconcile only these named import changes against original recorded hashes. Existing pre-PR14 Orders server/body history remains active. No prior fixture is regenerated and no closed loader is expanded. Initial introduced failures were retained raw-file hash assertions needing exact import reconciliation and new test configuration/virtual-directory setup; all resolved without runtime or expected-behavior changes. No baseline failure or final introduced failure remains; the one inherited lint warning is retained separately.
 
 [Exact four-file inventory, hashes, boundary and future migration prerequisite](orders-sheet-type-imports.md). Evidence is Codex-local, not independent GitHub/Vercel CI. No live integrations, credentials/production records, operational scripts, real-browser visual/concurrency verification, approval, merge or deploy. The physical ten-file worksheet move remains deferred until this prerequisite merges and a new base is verified.
+
+## PR 21 — Orders and Shipments worksheet ownership
+
+Verified base `77fb645e08a98d8fa6fe38028d6791b3396da41f`, exact remote main / merged PR20, clean starting tree. Branch `refactor/orders-shipments-worksheet-ownership`. Node 24.22.1, existing dependencies.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| `npm test` | 399 inherited tests pass; five new worksheet characterizations pass on untouched classes | 410 pass = 399 inherited + 11 new; zero failures/skips |
+| `npm run lint` | Exit 0; inherited unused shipmentRow warning, tests/shipments-read-seam.test.mjs:6 | Exit 0; same warning only |
+| `npm run typecheck` | Pass | Pass, including old/new constructor/instance/header types |
+| Credential-free isolated build | Pass, /tmp/ws21-baseline-safe exact base archive | Pass, /tmp/ws21-final-safe clean source copy |
+| Page / API source routes | 23 / 35 | Unchanged, all route source bytes and original fixture retained |
+| Next app-paths manifest | 32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e | Byte-identical, same SHA-256 |
+
+Both builds used `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`, with no application .env files or inherited integration credentials; only tracked .env.example. Filenames inspected only, no secrets read/deleted. Existing isolated dependencies hardlinked without installing packages. Final tests/lint/typecheck also pass in the clean isolated copy, and final production source matches that built copy.
+
+The eleven additions are five original worksheet defaults/payload/delegation/error characterizations, one exact ten-file source/AST/other-production/previous-fixture preservation test, one strict class/prototype/header/both-indexes/service-instance identity test, one saved-original/current real-client fake-fetch transport parity test, two runtime/type DAG and browser-isolation tests, and one exact positive/negative lint boundary test. The pre-existing PR20 virtual relocation regression now resolves actual physical files, visits all ten destinations, and retains its old mixed-index negative reverse-edge case. All 399 inherited tests remain active.
+
+No earlier fixture is changed. The fresh worksheet witness captures original source/raw/declaration hashes, headers and synthetic events before moving production. PR15–20 complete-source loops delegate only ten named legacy files to exact import-reversal/forward checks, preserving original expected hashes and all prior exceptions. The strict creation graph adds only two concrete moved Shipment header leaves. Loader additions are only exact recorded worksheet paths/forwards; feature-specific loaders and unapproved config/application/server rejection remain intact. No graph check is relaxed or hidden behind an aggregate intermediary.
+
+Runtime/type feature graphs retain only Shipments → Orders, with no cycles/reverse edge. Root infrastructure stays feature-agnostic and both browser graphs remain provider/server-free. PR20 pure type-import production files remain unchanged. All inherited actual HTTP/Sheets/Drive/create/read/link/status/Orders five-read/financial/picker/partial-failure regressions pass through the actual moved implementations.
+
+Only ten old class/header files become named forwards and ten physical owners are added. Aggregate GoogleSheetsService/factory/both indexes, existing consumers, all other worksheets/headers, provider/auth/config implementations, HTTP/UI/CSS/contracts/use cases and package/lockfile/env/schema/data remain unchanged. No baseline or final introduced failures; the inherited lint warning is separate.
+
+[Exact ten-file map, original hashes, header/range/identity/graph evidence and deferred worksheet ownership](orders-shipments-worksheet-ownership.md). Codex-local results, not independent GitHub/Vercel CI. No live Google/LINE/Loyverse, production credentials/data, operational scripts, browser visual/permission/availability/concurrency verification, approval, merge or deployment. Registry/compatibility retirement, other feature worksheets and broader provider/SaaS work remain deferred.
