@@ -1,3 +1,4 @@
+import { hrWorksheetFiles, hrWorksheetDestinations, assertHrWorksheetHistory } from "./helpers/hr-worksheet-history.mjs";
 import { directoryFiles, directoryNewFiles, assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
 import { salesWorksheetFiles, salesWorksheetDestinations, assertSalesWorksheetHistory } from "./helpers/sales-worksheet-history.mjs";
 import { worksheetFiles, worksheetDestinations, assertWorksheetHistory } from "./helpers/worksheet-history.mjs";
@@ -41,9 +42,9 @@ test("DTO erasure leaves only original enum exports; legacy direct/barrel/server
 
 test("two exact production edits and chained PR15/PR16 history preserve every earlier fixture, route and enum/provider/browser byte",()=>{
   assertShipmentDtoHistory();
-  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>{if(directoryFiles.has(file)){assertDirectoryHistory(file,hash);return false;}if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return dtoHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
+  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>{if(hrWorksheetFiles.has(file)){assertHrWorksheetHistory(file,hash);return false;}if(directoryFiles.has(file)){assertDirectoryHistory(file,hash);return false;}if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return dtoHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
   assert.deepEqual(changed,[dtoContract,dtoLegacy].sort());
-  assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(dtoBefore.productionHashes,f)&&!googleDestinations.includes(f)&&!worksheetDestinations.includes(f)&&!salesWorksheetDestinations.includes(f)&&!directoryNewFiles.includes(f)),[]);
+  assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(dtoBefore.productionHashes,f)&&!googleDestinations.includes(f)&&!worksheetDestinations.includes(f)&&!salesWorksheetDestinations.includes(f)&&!directoryNewFiles.includes(f)&&!hrWorksheetDestinations.includes(f)),[]);
   for(const [file,hash]of Object.entries(dtoBefore.fixtureHashes))assert.equal(dtoHash(readFileSync(file)),hash,file);
   assert.deepEqual(routeContracts(),dtoBefore.routeContracts);assert.equal(routeContracts().filter(r=>r.kind==="page").length,23);assert.equal(routeContracts().filter(r=>r.kind==="api").length,35);
   const old=JSON.parse(readFileSync("tests/fixtures/shipments-enum-before.json","utf8"));

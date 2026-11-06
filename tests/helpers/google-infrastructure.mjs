@@ -1,3 +1,4 @@
+import { hrWorksheetsBefore } from "./hr-worksheet-history.mjs";
 import { salesWorksheetsBefore } from "./sales-worksheet-history.mjs";
 import { worksheetBefore } from "./worksheet-history.mjs";
 import assert from "node:assert/strict";
@@ -29,12 +30,12 @@ export function assertGoogleHistory(file,expected) {
 // Closed provider graph. No configuration/authentication modules or ambient network.
 // Historical mode evaluates the saved original provider sources, not rewritten expectations.
 export function googleGraph({historical=false,globals={},crypto={}}={}) {
- const cache=new Map(),reverse=new Map(Object.entries({...googleBefore.moves,...worksheetBefore.moves,...salesWorksheetsBefore.moves}).map(([a,b])=>[b.to,a]));
+ const cache=new Map(),reverse=new Map(Object.entries({...googleBefore.moves,...worksheetBefore.moves,...salesWorksheetsBefore.moves,...hrWorksheetsBefore.moves}).map(([a,b])=>[b.to,a]));
  function load(file){
   const canonical=reverse.get(file)??file;
   const key=historical?canonical:file;
   if(cache.has(key))return cache.get(key);
-  const entry=googleBefore.moves[canonical] ?? worksheetBefore.moves[canonical] ?? salesWorksheetsBefore.moves[canonical];
+  const entry=googleBefore.moves[canonical] ?? worksheetBefore.moves[canonical] ?? salesWorksheetsBefore.moves[canonical] ?? hrWorksheetsBefore.moves[canonical];
   const registry = canonical.startsWith("src/externals/google/sheet/") && Object.hasOwn(googleBefore.productionHashes, canonical);
   assert.ok(entry || registry,`Unapproved provider dependency: ${file}`);
   const physical=historical?canonical:file;

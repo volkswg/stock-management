@@ -1,6 +1,6 @@
 # Architecture guide
 
-Current ownership verified against merged main `71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb` (PR23). This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
+Base ownership verified against merged main `02506658dd79a6432824df7c15b0292be4d15886` (PR24); the map includes this branch's proposed PR25 HR core worksheet move. This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
 
 | Read for | Canonical document |
 | --- | --- |
@@ -13,7 +13,7 @@ Current ownership verified against merged main `71dcfe145a4ae835dbd693b2ba6dce00
 | Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
 | Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
 
-Orders contracts/UI/list/simple-create/detail seams and Shipment contracts/UI/core server seams are implemented. Shared Google transports and ten Orders/Shipment/Sales worksheet classes have physical owners. Legacy facades, aggregate Sheets composition, other feature workflows and worksheets remain. PR23 delivered an Inventory employee-directory prerequisite, **not** the HR worksheet move. See the map and roadmap before choosing a slice.
+Orders contracts/UI/list/simple-create/detail seams and Shipment contracts/UI/core server seams are implemented. Shared Google transports and thirteen Orders/Shipment/Sales/HR worksheet classes have physical owners. Legacy facades, aggregate Sheets composition, other feature workflows and worksheets remain. PR23 delivered the Inventory employee-directory prerequisite; this branch moves only the three HR core worksheet/header pairs, retaining six legacy forwards and all consumers. See the map and roadmap before choosing a slice.
 
 ## Documentation maintenance
 

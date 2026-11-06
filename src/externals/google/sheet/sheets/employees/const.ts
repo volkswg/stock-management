@@ -1,11 +1,1 @@
-export const EMPLOYEE_HEADERS = [
-  "id",
-  "name",
-  "phone",
-  "status",
-  "hiredDate",
-  "terminatedDate",
-  "createdAt",
-  "updatedAt",
-  "createdBy",
-];
+export { EMPLOYEE_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employees/const";

@@ -1,6 +1,6 @@
 # Current ownership and remaining legacy
 
-Source verified at main `71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb`, after merged PR23. This replaces the original base-wide proposed destination list as the current map. The [progress/history index](../refactoring/progress.md#document-consolidation-index) preserves that original proposal and all PR-specific detail; a historical proposed path is not authorization to move a file.
+Base verified at main `02506658dd79a6432824df7c15b0292be4d15886`, after merged PR24. This branch adds only the three HR core worksheet/header pairs for proposed PR25. This replaces the original base-wide proposed destination list as the current map. The [progress/history index](../refactoring/progress.md#document-consolidation-index) preserves that original proposal and all PR-specific detail; a historical proposed path is not authorization to move a file.
 
 | Slice | Actual owner now | Compatibility / unfinished work |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ Source verified at main `71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb`, after merged
 | Shared Google | Root `infrastructure/persistence/google-sheets` auth/JWT/client/base/constants/generic types; `infrastructure/files/google-drive` provider/factory/types | Old externals leaves forward. Aggregate GoogleSheetsService, config factory and both Sheets indexes remain legacy composition |
 | Sales | Five worksheet/header pairs in own infrastructure | Sync/report/profit/API/UI and aggregate consumers remain legacy |
 | Inventory | Two pure DTOs, employee-directory port/application | Stock counts/adjustments/movements algorithms, UI and most services remain legacy |
-| HR | Pure directory DTO, employee reader and public query | Employee/compensation/timesheet worksheet ownership and payroll/advance/settlement/lifecycle extraction remain pending |
+| HR | Pure directory DTO, employee reader/public query, and three employee/compensation/timesheet worksheet/header pairs | Payroll records, advances, settlement/lifecycle/use-case extraction remain pending |
 | Expenses, LINE workflows, workspace | Target ownership defined, not broad migrations | Existing ledger/shop master, webhook/session and app shell remain until scoped work |
 
 ## Physical worksheet owners
@@ -28,6 +28,9 @@ Paths below are relative to `src/modules/<owner>/infrastructure/google-sheets/`.
 | orders / order-bills | OrderBillsSheet | ORDER_BILLS_SHEET_HEADERS | A:G |
 | shipments / shipments | ShipmentsSheet | SHIPMENTS_SHEET_HEADERS | A:M |
 | shipments / shipment-orders | ShipmentOrdersSheet | SHIPMENT_ORDERS_SHEET_HEADERS | A:G |
+| hr / employees | EmployeesSheet | EMPLOYEE_HEADERS | A:I |
+| hr / employee-compensations | EmployeeCompensationsSheet | EMPLOYEE_COMPENSATION_HEADERS | A:L |
+| hr / employee-timesheets | EmployeeTimesheetsSheet | EMPLOYEE_TIMESHEET_HEADERS | A:G |
 | sales / receipts | SalesReceiptsSheet | SALES_RECEIPT_HEADERS | A:Z |
 | sales / receipt-items | SalesReceiptItemsSheet | SALES_RECEIPT_ITEM_HEADERS | A:U |
 | sales / receipt-payments | SalesReceiptPaymentsSheet | SALES_RECEIPT_PAYMENT_HEADERS | A:J |
@@ -40,9 +43,9 @@ The six generic root Sheets declarations are GoogleSheetCellValue, GoogleSheetRo
 
 ## Pending worksheet ownership
 
-Still physically legacy: employees, employee-compensations, employee-timesheets, employee-advances/PayrollRecordsSheet, expenses/RecordsSheet, movements/MovementSheet, stock-adjustments/StockAdjustmentsSheet, stock-counts/StockCountsSheet and user-state/UserStateSheet with their associated headers. Do not infer that a feature's service has migrated because a worksheet has moved.
+Still physically legacy: employee-advances/PayrollRecordsSheet, expenses/RecordsSheet, movements/MovementSheet, stock-adjustments/StockAdjustmentsSheet, stock-counts/StockCountsSheet and user-state/UserStateSheet with their associated headers. Do not infer that a feature's service has migrated because a worksheet has moved.
 
-The proposed six HR class/header files were blocked by Inventory's direct employee-header dependency. PR23 removed that coupling through consumer-owned directory composition; **it did not move those files**. Reverify a new main, complete all direct/aggregate/runtime/type consumers and rerun the virtual-to-actual graph checks before attempting the HR move. PayrollRecordsSheet and expense RecordsSheet remain separate scopes.
+The six HR class/header files were originally blocked by Inventory's direct employee-header dependency. PR23 removed that coupling without moving worksheets. This branch completes only those six physical moves after reauditing direct/aggregate/runtime/type consumers. Six exact named forwards preserve all old paths. The directory reader's existing legacy-header import stays unchanged and resolves to its own HR header. PayrollRecordsSheet and expense RecordsSheet remain separate scopes; no aggregate service/factory/index or production consumer changes.
 
 ## Compatibility retirement gates
 
