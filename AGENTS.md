@@ -1,6 +1,6 @@
 # Engineering rules
 
-Read [the architecture guide](docs/architecture/README.md), [folder ownership](docs/architecture/folder-rules.md), and [dependency rules](docs/architecture/dependency-rules.md) before structural work. The [migration map](docs/architecture/migration-map.md) and [PR plan](docs/architecture/refactoring-plan.md) describe proposed work, not authorization to perform it all at once.
+Read [the architecture guide](docs/architecture/README.md), [folder ownership](docs/architecture/folder-rules.md), and [dependency rules](docs/architecture/dependency-rules.md) before structural work. The [migration map](docs/architecture/migration-map.md) records actual ownership and remaining legacy; the [roadmap](docs/refactoring/roadmap.md) describes proposed work, not authorization to perform it all at once.
 
 ## Preserve observable behavior
 
@@ -25,9 +25,17 @@ Read [the architecture guide](docs/architecture/README.md), [folder ownership](d
 ## Safe workflow
 
 - Work on a dedicated branch; never push directly to `main`. Open reviewable PRs and do not merge or deploy unless the task explicitly authorizes it.
-- Do not read production credentials, call live integrations, run rich-menu setup, or access/mutate production data for verification. Use synthetic fixtures and fake adapters. Run builds with integration credentials excluded; see [verification](docs/architecture/verification.md).
+- Do not read production credentials, call live integrations, run rich-menu setup, or access/mutate production data for verification. Use synthetic fixtures and fake adapters. Run builds with integration credentials excluded; see [verification](docs/refactoring/verification.md).
 - Before each move, add meaningful characterization tests for the affected behavior. Move one feature/layer at a time, update consumers, retain route entrypoints, and remove temporary compatibility exports only after all consumers migrate.
 - Run `npm test`, `npm run lint`, `npm run typecheck`, and an isolated `npm run build`; report baseline and new failures separately. The route fixture must not be regenerated just to make an unintended URL/method change pass.
 - Check the diff for accidental route/schema/env/dependency changes and client-to-server imports. Explain unverified UI or integration flows; passing static tests is not end-to-end verification.
 - Prefer existing tooling; add no dependency without a concrete need. Existing `yarn.lock` is the dependency lockfile. Do not introduce a second lockfile.
 - Keep docs, ownership mapping, contract registry, and applicable boundary checks current as code migrates. No generic repositories, dependency-injection container, speculative tenant model, or parallel persistence implementation without a real use case.
+
+
+## Documentation maintenance
+
+- Use the canonical architecture guide, one [roadmap](docs/refactoring/roadmap.md) and one [progress/evidence ledger](docs/refactoring/progress.md). Update existing sections instead of adding a Markdown file for every small PR.
+- Create standalone documentation only for a subject with lasting independent value and link it from the guide. Keep operational/user guides stable.
+- Distinguish actual current ownership from historical intermediate states and proposed work. Preserve original evidence through immutable PR/commit links and unchanged test fixtures, without repeating history across documents.
+- At cleanup milestones, audit repository/PR references, links, obsolete plans and duplicate content before removal. Keep precise safeguards, outstanding debt and prerequisites; provide an old-to-new evidence index and report historical URL tradeoffs.

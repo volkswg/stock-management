@@ -1,0 +1,131 @@
+# Architecture decisions and compatibility invariants
+
+These decisions record implemented boundaries. They are constraints on structural refactors, not authorization for behavior changes. Historical source, exact hashes and test provenance live in [progress](../refactoring/progress.md#historical-evidence); current code and fixtures remain authoritative for full declarations/error text.
+
+## Consumer ownership and composition
+
+Define the smallest port beside its application/UI consumer. Expose business records and operations, never Google rows/cells/ranges/indices, tokens, config, File/Buffer, SDK clients, HTTP responses or tenancy assumptions. Infrastructure implements it; app or named guarded server composition injects it. Constructor/composition must stay lazy: no provider getter access, reads, file bytes, clocks or validation earlier than the original workflow.
+
+Deferred business snapshots/opaque targets are intentional. Eagerly normalizing all rows can change getter/iterator failures and error precedence. Preserve synchronous invocation failures separately from async rejections, original error objects, pending writes, await boundaries and promise settlement ordering. Do not add retries, caching, rollback, transactions, locks or stronger idempotency guarantees.
+
+## Public contracts and single enum identity
+
+Orders contracts are self-contained, with OrderStatus, OrderItemQuantityType and the existing DTOs. OrderShipment owns its wire-string status union; it must not import a Shipment enum/type. Shipment contracts own eight aliases: Shipment, ShipmentListItem, ShipmentRelatedOrder, ShipmentRelatedProductImage, ShipmentQuantityCost, ShipmentCostSummary, ShipmentStatusUpdate and ShipmentOrder. They retain original fields, readonly/optional/nullability and Orders OrderStatus compatibility.
+
+ShipmentStatus is defined once in `modules/shipments/status.ts`:
+
+| Member in declaration/runtime enumeration order | Value |
+| --- | --- |
+| Draft | draft |
+| ReadyToShip | ready_to_ship |
+| Shipping | shipping |
+| Delivered | delivered |
+| Canceled | canceled |
+
+The separate dependency-free status leaf avoided a type cycle while DTOs temporarily remained legacy. DTOs now live in contracts; the legacy types leaf forwards the exact enum/eight erased aliases. Physical/public/legacy leaf/barrel enum objects remain strictly equal, as do existing operation/error-class exports. Public Shipment runtime export keys remain exactly `["ShipmentStatus"]`. No duplicated enum, union replacement, extra runtime export or broad server barrel in browser contracts.
+
+## Orders browser picker and UI
+
+Orders owns a picker projection `Pick<OrderShipment, "id" | "poNumber" | "carrier" | "status">` and three operations: listLinkableShipments({signal?}), createShipmentMaster({poNumber, carrier?}) and linkOrderToShipment(shipmentId, orderId): Promise<void>. The app client wrapper owns the stable module-scope adapter. The server page passes only orderId across React serialization; no function-valued server prop, visible wrapper DOM, provider or extra effect.
+
+List delegates to the real Shipment client with includeOrders=false and exclusions Shipping, Delivered, Canceled **in that order**, passing the same AbortSignal without sorting/mapping. Create retains input/result; link awaits the real client's response validation before resolving void. Preserve preselection, duplicate suppression, modal/PO/carrier/temporary-PO rules, state/remount keys, notifications, disabled/loading/error/retry behavior. The relocated client is the only implementation; there is no retired app-client shim. Orders/Shipment component non-import bodies, CSS, metadata/params, URLs and browser request/guard behavior remain compatibility evidence.
+
+## Orders list and simple creation
+
+OrderListReader.readOrderList returns a fresh mapped list in persistence order; application owns display reversal. CreatedOrderWriter.appendCreatedOrder accepts the business record. Existing create inputs/defaults, optional ID behavior, original sortable-ID utility, clock ordering, append payload and failure propagation remain unchanged. This does not extract draft/image/mutation/LINE workflows. Their original upload/write/partial-failure behavior remains separately characterized.
+
+## Orders detail and Shipment projection
+
+One **flat Promise.all** starts these operations in exact order, including for a missing Order:
+
+1. orders.readRows("A:I")
+2. orderItems.readRows() — no explicit argument
+3. orderBills.readRows() — no explicit argument
+4. shipmentOrders.readRows() — no explicit argument
+5. shipments.readRows() — no explicit argument
+
+Orders' reader exposes deferred findOrder/forOrder business handles. Its projection port exposes readLinks and readShipments returning deferred findShipmentIdForOrder and findShipmentById handles using **OrderShipment**. A Shipment-owned adapter implements that consumer port; app GET and legacy compatibility composition inject it. Orders server imports no Shipment module. Do not substitute Shipment list/detail APIs, sequential/nested reads, conditional reads, streaming finds or batchGet.
+
+Map the entire Orders collection before selecting its first qualifying matching ID. Missing Order returns undefined without inspecting links/images/Shipments. Then reverse-scan links, map/filter product images, map/filter bill images, and finally (only for a truthy shipmentId) map the **entire** Shipments collection before finding the first qualifying match. A later malformed row still rejects even after an earlier valid match.
+
+The newest active matching link wins; a newest match with a blank Shipment ID yields null, not fallback to an older link. Link lookup does not validate referenced Shipment existence. A non-null shipmentId can coexist with shipment:null. The nested Shipment retains all original thirteen fields including deletedAt, no orders/costSummary. Require nonblank ID/PO, recognized status and empty normalized deletion marker. Strings trim, numbers/booleans stringify, other values become empty. Prices preserve finite numbers, remove commas from nonempty strings before Number conversion, otherwise return null; zero stays zero, no rounding. Keep image order, quantities/product codes, original field order and totalPrice/shippingFee nullability. Do not import Orders private converters into Shipments; exact duplicated pure converters have historical AST evidence.
+
+## HTTP validation and response compatibility
+
+The backend Shipment helper retains readJsonBody (invalid JSON→undefined), isUpdatableStatus (`value is ShipmentStatus`, accepting only ReadyToShip/Shipping/Delivered), finite delivery-fee bounds 0–1,000,000,000 inclusive, and original PO whitespace/untrimmed-length rules. Draft/Canceled/unknown/nonstring statuses are rejected. Its runtime import reaches public contracts/status, never the mixed server barrel.
+
+Shipment collection/detail/link/status routes retain request/query parsing (including duplicate/invalid excluded statuses), ID trimming, JSON/multipart, config/factory timing, logging and response wrappers. Link maps new/idempotent to 201/200; Shipment/Order absence to 404; conflict/ineligible to 409; unexpected errors to 500. Original link messages remain Shipment not found.; Order not found.; Order is already linked to another shipment.; Orders can only be linked to draft or ready-to-ship shipments.
+
+PATCH preserves these outcome translations:
+
+| Outcome | HTTP / error (or success wrapper) |
+| --- | --- |
+| updated | 200 `{ shipment: result.shipment }` |
+| not_found | 404 `Shipment was not found.` |
+| invalid_transition | 409 `Shipment status has changed or cannot be advanced.` |
+| invalid_delivery_fee | 400 `Delivery fee must be a non-negative number.` |
+| invalid_po_number | 400 `Enter a valid PO number before starting shipping.` |
+| Drive unavailable | 503 `Google Drive is not configured.` |
+| unexpected failure | 500 `Failed to update shipment status.` |
+
+Preconfiguration PATCH validation retains Shipment ID and a valid next status are required.; PO number confirmation is required.; and Select a PDF, JPEG, PNG, or WebP file up to 10 MB. Orders detail GET retains 200 `{ order }`, 400 Order ID is required., 404 Order not found., and 500 Failed to load order. with original log fields. Orders detail PATCH behavior is a separate unchanged mutation; no HTTP wrapper, status, field or message is redesigned by these seams.
+
+## Shipment creation
+
+Application trims PO, throws exactly `Shipment PO number is required.` when empty, calls injected ISO clock once, then original sortable-ID generator once, constructs the original record, awaits one append, returns only after success. Invalid input invokes neither clock/ID nor writer. Carrier remains `carrier?.trim() || ""`; createdBy is untrimmed; status Draft, fee null, remark/timestamps/deletion/bill defaults unchanged.
+
+CreatedShipmentWriter.appendCreatedShipment accepts Shipment. Adapter maps exactly id, status, carrier, poNumber, shippingFee, remark, shippedAt, deliveredAt, createdAt, updatedAt, deletedAt, createdBy, shippingBillUrl to A:M, using the original header-length range expression. Do not change transport USER_ENTERED behavior or ID generator module state.
+
+## Shipment list and detail reads
+
+Reader starts four expressions in the original Promise.all evaluation order: shipments.readRows(); conditional shipmentOrders.readRows(); conditional orders.readRows("A:I"); conditional orderItems.readRows(). For includeOrders=false, the latter three expressions remain Promise.resolve([]), only Shipments is read, orders arrays are empty and costSummary null. Status exclusions do not reduce read volume. Reader snapshot contains normalized ordered shipments without deletedAt/orders/costSummary, ordered deduplicated link-ID groups and related Orders with ordered images; no worksheet types cross the port.
+
+Adapter excludes invalid/deleted Shipment/Order rows; within each Shipment group, links preserve first-occurrence order and deduplicate Order IDs. This is **not** global latest-link selection. Last valid duplicate Order row wins; images retain order without deduplication. Original string/number/status converters and malformed-iterable/row rejection phases remain exact.
+
+Application awaits snapshot, builds exclusion set, filters, attaches linked Orders, calculates costs, then reverses the completed array. Detail executes that full default four-read list once, then finds the first matching ID in the reversed result (including original duplicate selection), or returns undefined.
+
+CostSummary is null when fee is null, no related Orders or any Order price is null. Otherwise preserve reduce order, totalOrderPrice, landedTotal = price + fee, and independent quote/delivered quantity calculations. Quantities require positive finite numbers after original comma removal; empty images/invalid/zero/negative/nonfinite quantities produce null quantity results. Divide without rounding. Preserve `0.1 + 0.2`, 0.3 fee, zero totals/fees, nulls and floating-point quirks; no decimal library, toFixed, clamping or fallback price zero.
+
+## Shipment order linking
+
+ShipmentOrderLinkStore exposes readLinkSnapshot and appendShipmentOrder. Snapshot methods defer findActiveShipment, hasActiveOrder, findLatestActiveLink; candidate.readStatus defers eligibility inspection. Its adapter starts concurrently, in order: shipments.readRows(), orders.readRows("A:I"), shipmentOrders.readRows(). No eager mapping or extra read.
+
+Decision order is fixed: first active matching Shipment → active Order existence (no OrderStatus requirement) → reverse-scan latest valid active link → same-Shipment idempotent result → other-Shipment conflict → Shipment eligibility. Same link returns created:false even for Shipping/Delivered; conflict precedes status. Only Draft/ReadyToShip accept new links. Original single LinkOrderToShipmentError class/name/code/message survives direct/barrel/server/HTTP instanceof checks: shipment_not_found, order_not_found, order_already_linked, shipment_not_linkable.
+
+After checks, call clock once then ID once; preserve untrimmed IDs/actor and same createdAt/updatedAt. Await one A:G append: id, shipmentId, orderId, createdAt, updatedAt, deletedAt, createdBy. Return created:true only afterward. No writes/clocks/IDs on read-only outcomes; original errors propagate without retries. Sheet check/write remains nontransactional and is not concurrency-safe by this extraction.
+
+## Shipment status update
+
+Application returns exactly updated/not_found/invalid_transition/invalid_delivery_fee/invalid_po_number. Delivered fee precheck accepts finite 0 through 1,000,000,000 inclusive; invalid fee performs **no** Sheets operation or clock call. Other requests await M1 update `[["shippingBillUrl"]]`, then read A2:M, then optionally one B{row}:M{row} twelve-cell write. M1 must fulfill before read starts; missing row/invalid transition/invalid PO retain completed header+read side effects. Failures reject original errors without retry/rollback.
+
+Opaque ShipmentStatusTarget preserves adapter-owned findIndex/destructuring/raw cells and deferred field access. Select first active row where String(id ?? "").trim() equals the unmodified supplied ID and deletion string trims empty. Do not use stricter list mapping. Only Draft→ReadyToShip→Shipping→Delivered transitions exist; no repeats/backward/Canceled transition. Transition check precedes Shipping PO check: require nonblank trimmed PO and original untrimmed length ≤100.
+
+Clock is invoked once after valid selection/checks; same value sets updatedAt and relevant shippedAt/deliveredAt. No new ID. For non-Delivered fee, preserve finite number/comma-string parsing or null. Shipping saves trimmed supplied PO and bill URL; **omitted bill clears any previous URL**. Other transitions keep trimmed stored PO/URL/timestamps. DTO has exactly status, poNumber, shippingFee, shippedAt, deliveredAt, updatedAt, shippingBillUrl.
+
+B:M values stay: status, original carrier ?? "", updated PO, fee, original remark ?? "", shippedAt, deliveredAt, original createdAt ?? "", updatedAt, original deletedAt ?? "", original createdBy ?? "", updated bill URL. Untouched cells retain original types, not extra normalization. Column A is never written.
+
+## Shipping bill upload and cleanup
+
+HTTP retains params/body parsing, validation, getConfig then Sheets construction, response translation and top-level logging. Validate before factories: actual File, nonzero size ≤10 MiB inclusive, MIME exactly PDF/JPEG/PNG/WebP; zero-byte multipart files become absent, files on non-Shipping requests are ignored. JSON Shipping without file never evaluates Drive.
+
+Application port ShipmentBillStorage exposes lazy upload returning unavailable or original id/webViewLink metadata and cleanup(fileId). It exposes no File/Buffer/provider/HTTP type. Concrete adapter privately holds File and Drive factory. After Sheets construction, only a bill causes Drive factory evaluation; unavailable returns original 503 without status operations. Once available, construct `shipment-bill-${safeShipmentId}-${Date.now()}${extension}` with ID regex `/[^a-zA-Z0-9_-]/g`, original .pdf/.jpg/.png/.webp mapping; read type, await arrayBuffer, Buffer.from, await uploadImage. Filename time is called once at this phase. Do not copy getter-backed metadata: capture id before webViewLink. Upload/file-byte/factory failures prevent status operations.
+
+Call existing status updater exactly once after upload. For any nonupdated outcome, await best-effort cleanup then translate original HTTP outcome; exceptions clean up then propagate the original error. Falsy IDs/no service cause no delete. Exactly one deletion attempt where required; failure logs `Failed to clean up shipment bill upload` with fileId and original error-string conversion, preserving original outcome. Success retains file. The retained cleanupAfterFailure callback also covers errors during subsequent HTTP response translation. Preserve `Failed to update shipment status` log fields. Provider-internal permission-failure cleanup remains in the unchanged Drive provider, not duplicated in orchestration.
+
+Preserve original HTTP statuses/wrappers/error strings (200/400/404/409/500/503), upload-before-M1 order, partial header writes and possible orphaned files. No cross-provider atomicity or retries are promised.
+
+## Shared Google transport and feature worksheets
+
+Root transport/auth/Drive moves retained original bodies, signatures, caching/error behavior and explicit legacy forwards. Six generic Sheets types are root-owned; aggregate service/configuration/types remain legacy. Root infrastructure cannot import feature worksheets/headers. Feature classes import only root base/types/constants and own headers; pure erased interfaces must not come through mixed indexes. Registry instances, legacy exports and physical owners share constructor/prototype/header-array identities and mutation behavior.
+
+Preserve original default/explicit ranges, quoted worksheet names, URL encoding, HTTP methods, RAW/USER_ENTERED, INSERT_ROWS, batch ordering/partial failures and no retries. Auth retains OAuth-refresh-first Drive choice, service-account fallback, scopes, JWT/RS256/base64url, exact token cache boundary and errors. Drive retains multipart/related bytes/CRLF/boundary/content lengths, access-token timing, upload/permission/delete URLs, optional public/shared-drive behavior and provider-internal failed-permission cleanup. Do not replace providers or registry while moving ownership. Exact header/range table is in [migration map](migration-map.md#physical-worksheet-owners).
+
+## Inventory employee directory prerequisite
+
+Inventory port has listEmployees(): Promise<AdjustmentEmployee[]>; its application returns that original promise directly. HR owns independent five-field EmployeeDirectoryEntry, one lazy employees.readRows() and original header-prefix/row projection. Guarded legacy composition supplies HR's public query and an error factory for the original StockAdjustmentError("Employee storage headers do not match.", 503). HR never imports Inventory/error implementation.
+
+Keep exactly one async row await: public query, compatibility adapter, Inventory use case and old facade return its promise without additional async adoption. Extra wrappers change simultaneous error settlement precedence. Construct error only after original failed header check. Empty rows→[], extra trailing header columns allowed, filter only truthy raw IDs; preserve id/name/status/hiredDate/terminatedDate field order, String(v ?? "") without trimming/active filtering and malformed object-without-length→[] quirk. Existing employment eligibility remains in Inventory. No employee writes, time/ID calls or changed stock algorithm. Reaudit before HR worksheet relocation.
+
+## Deferred behavior and security work
+
+Existing sensitive routes have no new application authentication; this refactor adds none. Sheets read/check/write is not cross-instance transactional. Some legacy LINE failures log before success responses. Preserve these as known risks rather than silently fixing them in moves. Supabase/schema/data conversion, tenancy/IDs/membership/authorization, billing/subscriptions, concurrency/retries/queues and provider replacements need separately scoped requirements and migration review. Current shop master is not a tenant model; no fake tenant columns, dual writes or transactional promises.

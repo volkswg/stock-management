@@ -1,0 +1,70 @@
+# Verification procedure and current results
+
+## Offline checks
+
+Use Node 24 (verified 24.22.1) and existing dependencies/`yarn.lock`. Do not introduce another lockfile or install new dependencies for a structural move.
+
+```sh
+npm test
+npm run lint
+npm run typecheck
+```
+
+The test command uses built-in node:test with `--test-isolation=none` for managed-executor compatibility. Source loaders transpile with installed TypeScript, execute actual production functions in separate VM contexts with explicit fake dependencies, no process/env and throwing default fetch. This is an offline test aid, not a security sandbox; keep exact closed dependency allowlists, stub server-only only there, never load arbitrary config/providers. Transpilation is not type checking; retain compile-time fixtures and the separate TypeScript command.
+
+Run baseline **before** implementation and final checks, recording actual counts/failures/skips and introduced vs inherited issues. Characterize original affected source with synthetic cases first. Do not claim independent GitHub/Vercel CI from Codex-local output or infer test/type/lint success from a preview deployment.
+
+## Isolated credential-free production build
+
+Next reads application .env files even with a cleared process environment. Inspect filenames only; never read/delete someone else's secrets. Build a clean source archive/copy in a separate directory, exclude ignored/untracked credentials and generated outputs, and allow only tracked `.env.example`. Reuse existing dependencies (a separate hardlinked node_modules tree is acceptable); do not run operational scripts or live integrations.
+
+One way to prepare a committed source copy:
+
+```sh
+# From the reviewed checkout; choose a new, empty destination.
+git archive HEAD | tar -x -C /tmp/stock-verification
+# Provide the existing installed dependencies in that isolated directory.
+# Inspect .env filenames; do not print their contents.
+cd /tmp/stock-verification
+env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build
+```
+
+Create the destination first. For uncommitted final changes, copy only the reviewed tracked/new files instead, excluding deletions and all application .env files; verify copied source bytes against the implementation checkout. Do not use an archive of the old HEAD and claim it built uncommitted changes. Do not copy `.next`, TypeScript caches or ignored app env files. The tracked .env.example is documentation, not a credential requirement.
+
+The build currently prerenders UI without fetching production records. Clearing credentials is **not** a network sandbox; if a future page performs prerender IO, use explicit fake dependencies in an isolated checkout. Never run setup:rich-menu, LINE/Loyverse imports, production startup or provider permission checks as regression validation.
+
+## Compatibility and history gates
+
+- Capture original complete source/raw hashes, TypeScript declarations, runtime export keys/identity and synthetic JSON/event traces before moving code. Keep fixture values immutable; use exact named inverse import/declaration reconciliation for reviewed migrations. [Evidence registry](progress.md#historical-evidence) maps existing witnesses.
+- Run actual application + actual adapter + server/HTTP code with fake ports/Sheets/auth/fetch. Use deferred promises to prove pending read/write/upload/cleanup timing, synchronous call/getter short-circuiting, asynchronous rejection identity and no retries. Do not satisfy every test by mocking the use case itself.
+- Check default vs explicitly passed ranges, exact payload ordering/types, RAW/USER_ENTERED/INSERT_ROWS, partial writes, clock/ID ordering, enum/error/constructor/header identity and old direct/barrel signatures. Preserve money/quantity/nullability/floating-point quirks and Bangkok dates.
+- Run actual flat-config positive/negative import fixtures, TypeScript-resolved runtime **and** type-inclusive file/module graphs, re-export/alias resolution and browser reachability. Preserve known named legacy erased debt, not broad exemptions. Scoped graphs do not audit every package internals or unextracted legacy aggregation.
+- Compare `tests/fixtures/route-contracts.json` without regenerating it: 23 page entries / 35 API files, dynamic segments and explicit HTTP exports/re-exports. It does not model future rewrites/intercepting routes/middleware/implicit HEAD/OPTIONS or full response semantics. Compare build manifests too; Next-generated _not-found/icon entries are not extra page sources.
+- Compare original/final `.next/server/app-paths-manifest.json` byte-for-byte. Current expected SHA-256: `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
+- Review diff for unapproved route/UI/CSS/provider/schema/env/package/lockfile changes. Report unverified paths and discovered defects separately. Structural changes must not silently repair business behavior.
+
+## Documentation consolidation results
+
+Base: `71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb`, GitHub-verified latest main after merged PR23; tree matches the initial clean checkout. Dedicated branch `docs/consolidate-architecture`. Node 24.22.1, existing dependencies. Results here are Codex-local, not independent CI.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| npm test | 429 pass, zero failures/skips | 429 pass, zero failures/skips |
+| npm run lint | Exit 0, one inherited unused shipmentRow import warning at tests/shipments-read-seam.test.mjs:6 | Exit 0, same inherited warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free build | Pass in /tmp/docs-baseline-safe | Pass in /tmp/docs-final-safe |
+| Page / API contracts | 23 / 35 | Unchanged 23 / 35; original fixture retained |
+| App-paths manifest | Expected SHA-256 above | Byte-identical; same SHA-256 |
+| Tracked Markdown count | 35 (29 architecture) | 14 (5 architecture, 3 refactoring) |
+| Source/tests/fixtures/packages/env/assets | Reviewed unchanged base | All non-Markdown tracked files byte-identical to base |
+| Internal links/references | Audited old paths and PR1–23 bodies | 92 internal links/fragments pass; 29 immutable document paths verified; PR1–23 fetched |
+
+Original per-PR results, limitations, source witnesses and removed-document links are in the [progress ledger](progress.md). Tests remain 429 inherited + zero added; no test or fixture changes are needed for documentation cleanup.
+
+Final review: only Markdown changes (six modified existing files, twenty-five removed obsolete notes, four new canonical documents); four operational guides retain original paths/bytes. Every removed document is mapped to its canonical section and immutable original source in progress. Repository-wide reference search finds only that history index and two unchanged original-source fixture strings referring to removed paths. There are no executable source/test references to removed docs.
+
+All 53 unique external Markdown link destinations were classified: 29 original GitHub document paths verified against the GitHub-confirmed base tree, 23 PR URLs verified through GitHub metadata, and the existing localhost development URL (not probed). Published historical PR bodies were audited but not edited, so old unpinned links can remain stale; the history index supplies immutable replacements. No operational/provider endpoint was requested. No important evidence is deleted from Git history or historical fixtures; original full audit/proposal/verification records remain pinned. No baseline or final test/type/build errors, new lint warnings, source/fixture changes or unexplained skips.
+
+## Limits of evidence
+
+Fake-hook component tests exercise callbacks/state/request descriptors, not React DOM/Ant Design validation, focus/layout or native dialogs. Fake-auth/fetch provider tests do not establish live Google permissions/availability. No real browser visual equivalence, LINE delivery, Loyverse production sync, production payroll/stock writes, concurrent correctness, deployment or authentication security is established by this suite. No production credentials/records, live integrations, operational scripts, merge or deploy are used.

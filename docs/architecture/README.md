@@ -1,104 +1,24 @@
-# Architecture
+# Architecture guide
 
-Status: Phase 1 preparation, based on `main` at `383cf5956b7e8a0705586936c78b7efd29ec6102`. Existing production code is unchanged. This guide is the target for incremental work, not a claim that current code already conforms.
+Current ownership verified against merged main `71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb` (PR23). This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
 
-PR 16 completes [Shipment DTO physical ownership](shipments-dto-ownership.md): all eight original type declarations now live in browser-safe `modules/shipments/contracts.ts`. The legacy types leaf explicitly forwards the public enum/types; the unchanged status leaf remains the single runtime enum owner. Public runtime exports and all caller behavior are preserved. Current ownership supersedes temporary DTO-owner claims in historical PR summaries below. Legacy leaf/barrel retirement and the overall Shipments milestone remain incomplete.
+| Read for | Canonical document |
+| --- | --- |
+| Engineering workflow and behavior preservation | [AGENTS](../../AGENTS.md) |
+| Folder responsibilities and feature owners | [Folder rules](folder-rules.md) |
+| Allowed edges, public surfaces and scoped ESLint enforcement | [Dependency rules](dependency-rules.md) |
+| Actual owners, compatibility paths and remaining legacy | [Migration map](migration-map.md) |
+| Port decisions and exact workflow invariants | [Architecture decisions](decisions.md) |
+| Next work and prerequisite/exit gates | [Roadmap](../refactoring/roadmap.md) |
+| Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
+| Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
 
-PR 15 completes only [physical ShipmentStatus ownership](shipments-enum-ownership.md): the original single enum now lives in pure `modules/shipments/status.ts`. Public contracts and the legacy types/barrel forward the same object; eight DTO declarations stay in the legacy leaf. Current ownership supersedes the temporary enum-owner statements in the historical PR summaries below. Orders picker/detail seams remain unchanged, with no reverse module dependency. DTO/barrel retirement and the full Shipments milestone remain incomplete.
+Orders contracts/UI/list/simple-create/detail seams and Shipment contracts/UI/core server seams are implemented. Shared Google transports and ten Orders/Shipment/Sales worksheet classes have physical owners. Legacy facades, aggregate Sheets composition, other feature workflows and worksheets remain. PR23 delivered an Inventory employee-directory prerequisite, **not** the HR worksheet move. See the map and roadmap before choosing a slice.
 
-PR 2 established [Orders browser contracts](orders-contracts.md) at `src/modules/orders/contracts.ts`. PR 3 now consolidates all 15 Orders UI/client/style files under `src/modules/orders/ui/`; route wrappers and server use cases remain in place. See the [UI migration and consumer audit](orders-ui-migration.md). The Phase 1 statement above records the preparation baseline.
+## Documentation maintenance
 
-PR 4 implements the [initial Orders use-case seam](orders-use-case-seam.md): `listOrders` and simple `createOrder` now use consumer-owned ports and feature Sheets adapters, composed through `modules/orders/server.ts`. Legacy exports remain; detail/images/drafts and other services stay in place. Contracts and UI are unchanged.
+Update these canonical documents when ownership or behavior evidence changes. Do not create one Markdown file for each small PR. A standalone document requires lasting independent value (for example, an operational procedure), a clear owner and a link from this guide or the project README.
 
-PR 5 establishes [Shipment browser contracts and characterization](shipments-contracts.md), the first slice of the Shipments milestone. Five existing frontend/client files use named public contracts; the single enum remains in a restricted pure legacy leaf pending Orders/Shipments decoupling. The [UI/client relocation](shipments-ui-relocation.md) is now complete: six presentation/style files plus the byte-identical browser HTTP client live under `modules/shipments/ui`. The [Orders-owned picker seam](orders-shipment-picker.md) now removes both Orders browser imports through client-side app composition, eliminating the reverse browser module edge and allowing PR 8 to finish the client move with no forwarding shim. The full Shipments milestone remains incomplete; server projections, use cases, adapters and enum ownership remain deferred.
+Keep one authoritative roadmap and one progress ledger. Record completed work and verification provenance once in progress; link immutable original PR/commit evidence instead of repeating old status paragraphs throughout architecture pages. Current-state statements describe the current source, not an earlier PR's temporary exception. Never overwrite historical test fixtures or source hashes to match a refactor.
 
-PR 9 implements only the [Shipment creation seam](shipments-create-seam.md): a consumer-owned writer port, existing Sheets row adapter and named server composition replace the legacy creation body behind an unchanged API/barrel. Validation/clock/ID/append behavior is preserved. Drive, Orders server projection and enum ownership remain unmigrated after the read/link/status extractions below.
-
-PR 10 implements the [Shipment list/detail read seam](shipments-read-seam.md): a business snapshot reader port, one four-worksheet Sheets adapter and named server composition preserve the old read exports. Application owns filtering, associations, unchanged cost formulas and reverse/detail selection; storage mapping stays in the adapter. Only this read slice is complete, not the Shipments milestone.
-
-PR 11 implements the [Shipment order-linking seam](shipments-link-seam.md): a consumer-owned deferred snapshot/write port, existing three-sheet adapter and named server composition preserve original lookup/error precedence, one error class, idempotency and A:G append behavior. Only that linking slice is complete; Drive/projection/enum debt and the overall milestone remain open.
-
-PR 12 implements the [Shipment status-update seam](shipments-status-seam.md): a consumer-owned opaque target keeps row mechanics/raw cells in the Sheets adapter and transition/validation/clock decisions in application. Original M1-before-read/B:M behavior and PATCH/Drive ownership are retained. This completes only status updates, not the full milestone.
-
-PR 13 implements the [Shipment shipping-bill workflow seam](shipments-drive-seam.md): conditional upload/status coordination and cleanup are application-owned; a lazy Drive adapter reuses the existing provider. PATCH keeps validation/configuration/HTTP translation, with original getter/error/order and cleanup semantics. Orders server projection, enum ownership and legacy cleanup remain deferred; full milestone is incomplete.
-
-PR 14 implements [Orders detail Shipment projection decoupling](orders-detail-shipment-projection.md): Orders-owned business ports and a Shipment-owned adapter preserve five-read ordering and deferred mapping. App GET injects the projection; a narrow legacy-only composition keeps old callers compatible. No Orders-module reverse Shipment import is introduced. Enum physical ownership and broader legacy cleanup remain deferred.
-
-The application is a Next.js App Router shop operations workspace using React, Ant Design, Google Sheets, Google Drive, LINE, and Loyverse. Feature ownership should make changes local and make persistence replaceable without changing business behavior. Future SaaS and Supabase work is intentionally deferred: this phase introduces no provider, schema, auth, tenant context, subscription, or runtime abstraction.
-
-```text
-src/
-  app/                        Next.js entrypoints and composition
-  modules/
-    orders/                   Purchase orders, bills, product images, quantities
-    shipments/                Shipments, linked orders, delivery status
-    inventory/                Movements, stock counts, stock adjustments
-    sales/                    Receipt sync, daily sales, profit/cost reports
-    expenses/                 Expense ledger, categories, shop master data
-    hr/                       Employees, compensation, attendance, advances, payroll
-    line-workflows/           LINE journeys, commands, sessions, rich-menu content
-    workspace/                Home/navigation and workspace-level presentation
-  infrastructure/
-    persistence/              Shared Sheets transport; future storage transport
-    external/                 LINE and Loyverse protocol clients
-    files/                    Drive and future file storage transport
-  shared/
-    ui/                       Proven generic reusable UI
-    lib/                      Proven generic utilities
-    types/                    Small genuinely cross-cutting contracts
-  config/                     Existing environment-backed server configuration
-```
-
-Within a module, create `domain`, `application`, `infrastructure`, or `ui` only when needed. No empty target directories are created in Phase 1. Route URLs retain their current names even when the owner is different: `/employees` belongs to `hr`, `/stock-counts` and `/movements` to `inventory`, and `/loyverse/daily-sales` to `sales`.
-
-```mermaid
-flowchart TD
-  A[app: server composition / HTTP] --> U[module UI]
-  A --> C[module application]
-  A --> I[module infrastructure adapters]
-  I --> P[application ports]
-  I --> T[root infrastructure transports]
-  C --> P
-  C --> D[module domain]
-  U --> B[browser-safe module contracts]
-  U --> H[HTTP API]
-```
-
-Application ports are TypeScript interfaces owned by the use case that consumes them. A future repository migration can replace the adapter at composition points; it must not leak database rows, worksheet columns, tenant assumptions, or SDK types into business rules. Do not build those interfaces for every service now. First characterize one use case and extract the smallest interface it needs.
-
-Read next:
-
-- [Current structure and dependency audit](audit.md)
-- [Exact folder ownership](folder-rules.md)
-- [Import rules and public contracts](dependency-rules.md)
-- [Current file → proposed destination map](migration-map.md)
-- [Incremental PR plan](refactoring-plan.md)
-- [Regression baseline and verification](verification.md)
-- [ESLint enforcement rollout](eslint-boundaries.md)
-
-Repository-wide working rules live in [AGENTS.md](../../AGENTS.md).
-
-
-## PR 19 — Google shared infrastructure
-
-PR 19 completes only [shared Google transport/auth ownership](google-shared-infrastructure.md): root Sheets/auth/JWT and Drive implementations retain exact named legacy forwards and constructor identity. Generic row/base types have a root owner; feature worksheet registry/classes/headers and all consumers remain in place. No provider or business behavior changes.
-
-
-## Orders pure Sheet type-import prerequisite
-
-[Orders pure Sheet type-import prerequisite](orders-sheet-type-imports.md) removes four erased Orders imports from the mixed aggregate index in preparation for feature worksheet ownership. Runtime code is unchanged; no worksheet moves in this slice.
-
-
-## PR 21 — Orders and Shipments worksheet ownership
-
-PR21 completes the [five Orders/Shipments worksheet classes and five header moves](orders-shipments-worksheet-ownership.md), using root Google transport directly with ten named legacy forwards. PR20 pure type imports keep the actual runtime/type graphs one-way. Registry, consumers, business rules and other worksheet ownership remain unchanged.
-
-
-## PR 22 — Sales worksheet ownership
-
-PR22 completes the [five Sales worksheet/header pairs](sales-worksheet-ownership.md), preserving ten named legacy paths, registry/consumer behavior and all earlier ownership guards. Legacy Sales service/API extraction and other worksheet ownership remain deferred. The audit also records unchanged pre-existing legacy browser type-only debt without claiming the whole application is type-graph-clean.
-
-
-## Inventory employee-directory prerequisite
-
-The [Inventory employee-directory prerequisite](inventory-employee-directory.md) replaces direct employee-header/row ownership in stock adjustments with an Inventory-owned port and HR public query, wired through guarded legacy server composition. Original error identity/async phase and HTTP callers remain; no worksheet or payroll move is included.
+At cleanup milestones, review links, obsolete plans, duplicate evidence and remaining debt. Before removing a document, audit tracked source/tests/fixtures, other docs and published PR references; preserve required evidence and provide an old-to-new index. Do not delete merely to reduce a file count. Keep operational guides at stable paths unless a separate need justifies moving them.
