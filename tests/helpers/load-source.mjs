@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import vm from "node:vm";
 import ts from "typescript";
+import { googleBefore } from "./google-infrastructure.mjs";
 
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
@@ -25,6 +26,19 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     fetch: () => { throw new Error("Live network is forbidden in regression tests"); },
     ...globals,
     require: (specifier) => {
+      // Only the reviewed old provider forwards may follow their single new owner.
+      const move = googleBefore.moves[path];
+      if (move && specifier === "@/" + move.to.slice(4, -3)) {
+        const translated = new Proxy({}, {
+          getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
+          get: (_, key) => {
+            const old = Object.entries(move.imports).find(([, value]) => value === key)?.[0] ?? key;
+            if (!Object.hasOwn(imports, old)) throw new Error(`Unstubbed dependency ${String(old)} in ${path}`);
+            return imports[old];
+          },
+        });
+        return loadSource(move.to, { imports: translated, globals });
+      }
       if (!Object.hasOwn(imports, specifier)) {
         throw new Error(`Unstubbed dependency ${specifier} in ${path}`);
       }

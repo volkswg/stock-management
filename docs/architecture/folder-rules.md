@@ -76,3 +76,8 @@ PR 14 adds Orders `application/get-order-detail.ts`, its `ports/order-detail-rea
 ## PR 16 current Shipment DTO ownership
 
 `modules/shipments/contracts.ts` physically owns the eight existing DTO aliases, imports only erased Orders OrderStatus and its own pure status leaf, and exports only ShipmentStatus at runtime. `services/shipments/types.ts` now contains only explicit named public enum/type forwards; no DTO definitions, imports or business code. `status.ts` and the legacy barrel stay byte-identical. No module/browser graph depends back on the legacy DTO leaf. This supersedes PR15's temporary DTO ownership while retaining its enum ownership. [Exact declaration inventory and removal criteria](shipments-dto-ownership.md).
+
+
+## PR 19 — Google shared infrastructure
+
+PR 19: shared Google auth/JWT, Sheets client/constants/base/types physically live under `infrastructure/persistence/google-sheets`; Drive provider/factory/protocol types under `infrastructure/files/google-drive`. Legacy externals paths are explicit named forwards. Aggregate service/configuration and feature worksheets/headers remain legacy-owned; no parallel registry. [Exact file map](google-shared-infrastructure.md).

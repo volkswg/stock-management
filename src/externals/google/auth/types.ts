@@ -1,8 +1,1 @@
-export type GoogleAccessToken = {
-  accessToken: string;
-  expiresAt: number;
-};
-
-export interface IGoogleAccessTokenProvider {
-  getAccessToken(): Promise<string>;
-}
+export type { GoogleAccessToken, IGoogleAccessTokenProvider } from "@/infrastructure/persistence/google-sheets/google-auth/types";

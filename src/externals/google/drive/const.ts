@@ -1,5 +1,1 @@
-export const GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
-export const GOOGLE_DRIVE_UPLOAD_URL =
-  "https://www.googleapis.com/upload/drive/v3/files";
-export const GOOGLE_DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
-export const SHARED_DRIVE_SUPPORT_QUERY = "supportsAllDrives=true";
+export { GOOGLE_DRIVE_SCOPE, GOOGLE_DRIVE_UPLOAD_URL, GOOGLE_DRIVE_API_BASE, SHARED_DRIVE_SUPPORT_QUERY } from "@/infrastructure/files/google-drive/const";

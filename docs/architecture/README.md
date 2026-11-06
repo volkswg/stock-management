@@ -77,3 +77,8 @@ Read next:
 - [ESLint enforcement rollout](eslint-boundaries.md)
 
 Repository-wide working rules live in [AGENTS.md](../../AGENTS.md).
+
+
+## PR 19 — Google shared infrastructure
+
+PR 19 completes only [shared Google transport/auth ownership](google-shared-infrastructure.md): root Sheets/auth/JWT and Drive implementations retain exact named legacy forwards and constructor identity. Generic row/base types have a root owner; feature worksheet registry/classes/headers and all consumers remain in place. No provider or business behavior changes.

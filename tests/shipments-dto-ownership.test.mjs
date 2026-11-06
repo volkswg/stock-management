@@ -1,3 +1,4 @@
+import { googleFiles, googleDestinations, assertGoogleHistory } from "./helpers/google-infrastructure.mjs";
 import { shipmentHttpFiles, assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import { shipmentValidationFile, assertShipmentValidationImportHistory } from "./helpers/shipments-validation-history.mjs";
 import assert from "node:assert/strict";
@@ -36,9 +37,9 @@ test("DTO erasure leaves only original enum exports; legacy direct/barrel/server
 
 test("two exact production edits and chained PR15/PR16 history preserve every earlier fixture, route and enum/provider/browser byte",()=>{
   assertShipmentDtoHistory();
-  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>{if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return dtoHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
+  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>{if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return dtoHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
   assert.deepEqual(changed,[dtoContract,dtoLegacy].sort());
-  assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(dtoBefore.productionHashes,f)),[]);
+  assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(dtoBefore.productionHashes,f)&&!googleDestinations.includes(f)),[]);
   for(const [file,hash]of Object.entries(dtoBefore.fixtureHashes))assert.equal(dtoHash(readFileSync(file)),hash,file);
   assert.deepEqual(routeContracts(),dtoBefore.routeContracts);assert.equal(routeContracts().filter(r=>r.kind==="page").length,23);assert.equal(routeContracts().filter(r=>r.kind==="api").length,35);
   const old=JSON.parse(readFileSync("tests/fixtures/shipments-enum-before.json","utf8"));

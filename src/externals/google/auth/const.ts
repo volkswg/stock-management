@@ -1,1 +1,1 @@
-export const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+export { GOOGLE_TOKEN_URL } from "@/infrastructure/persistence/google-sheets/google-auth/const";

@@ -341,23 +341,23 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/app/timesheets/tracker/page.tsx` | `src/app/timesheets/tracker/page.tsx` | Keep Next entrypoint/asset; extract embedded feature logic later without changing routes. |
 | `src/app/timesheets/tracker/timesheetTracker.module.css` | `src/modules/hr/ui/tracker/timesheetTracker.module.css` | Feature UI/client/style; retain current route entrypoints. |
 | `src/config/index.ts` | `src/config/index.ts` | Keep config/env names; replace legacy helper import later. |
-| `src/externals/google/auth/GoogleAccessTokenProvider.ts` | `src/infrastructure/persistence/google-sheets/google-auth/GoogleAccessTokenProvider.ts` | Shared Google credential plumbing consumed by Sheets and Drive; no secret values moved. |
-| `src/externals/google/auth/GoogleOAuthRefreshTokenAuth.ts` | `src/infrastructure/persistence/google-sheets/google-auth/GoogleOAuthRefreshTokenAuth.ts` | Shared Google credential plumbing consumed by Sheets and Drive; no secret values moved. |
-| `src/externals/google/auth/GoogleServiceAccountAuth.ts` | `src/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth.ts` | Shared Google credential plumbing consumed by Sheets and Drive; no secret values moved. |
-| `src/externals/google/auth/const.ts` | `src/infrastructure/persistence/google-sheets/google-auth/const.ts` | Shared Google credential plumbing consumed by Sheets and Drive; no secret values moved. |
-| `src/externals/google/auth/types.ts` | `src/infrastructure/persistence/google-sheets/google-auth/types.ts` | Shared Google credential plumbing consumed by Sheets and Drive; no secret values moved. |
-| `src/externals/google/drive/GoogleDriveService.ts` | `src/infrastructure/files/google-drive/GoogleDriveService.ts` | File transport/factory/protocol types; depend on shared Google auth. |
-| `src/externals/google/drive/const.ts` | `src/infrastructure/files/google-drive/const.ts` | File transport/factory/protocol types; depend on shared Google auth. |
-| `src/externals/google/drive/createGoogleDriveServiceFromConfig.ts` | `src/infrastructure/files/google-drive/createGoogleDriveServiceFromConfig.ts` | File transport/factory/protocol types; depend on shared Google auth. |
-| `src/externals/google/drive/index.ts` | `src/infrastructure/files/google-drive/index.ts` | File transport/factory/protocol types; depend on shared Google auth. |
-| `src/externals/google/drive/types.ts` | `src/infrastructure/files/google-drive/types.ts` | File transport/factory/protocol types; depend on shared Google auth. |
+| `src/externals/google/auth/GoogleAccessTokenProvider.ts` | `src/infrastructure/persistence/google-sheets/google-auth/GoogleAccessTokenProvider.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/auth/GoogleOAuthRefreshTokenAuth.ts` | `src/infrastructure/persistence/google-sheets/google-auth/GoogleOAuthRefreshTokenAuth.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/auth/GoogleServiceAccountAuth.ts` | `src/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/auth/const.ts` | `src/infrastructure/persistence/google-sheets/google-auth/const.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/auth/types.ts` | `src/infrastructure/persistence/google-sheets/google-auth/types.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/drive/GoogleDriveService.ts` | `src/infrastructure/files/google-drive/GoogleDriveService.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/drive/const.ts` | `src/infrastructure/files/google-drive/const.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/drive/createGoogleDriveServiceFromConfig.ts` | `src/infrastructure/files/google-drive/createGoogleDriveServiceFromConfig.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/drive/index.ts` | `src/infrastructure/files/google-drive/index.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/drive/types.ts` | `src/infrastructure/files/google-drive/types.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
 | `src/externals/google/sheet/GoogleSheetsService.ts` | `app server composition + module ports/adapters + root Sheets transport contracts` | Split aggregate feature registry/exports; keep legacy facade until consumers migrate. |
-| `src/externals/google/sheet/client/GoogleSheetsClient.ts` | `src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts` | Shared Sheets transport/base operations; feature headers must not enter shared transport. |
-| `src/externals/google/sheet/client/index.ts` | `src/infrastructure/persistence/google-sheets/client/index.ts` | Shared Sheets transport/base operations; feature headers must not enter shared transport. |
-| `src/externals/google/sheet/const.ts` | `src/infrastructure/persistence/google-sheets/const.ts` | Shared Sheets transport/base operations; feature headers must not enter shared transport. |
+| `src/externals/google/sheet/client/GoogleSheetsClient.ts` | `src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/sheet/client/index.ts` | `src/infrastructure/persistence/google-sheets/client/index.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
+| `src/externals/google/sheet/const.ts` | `src/infrastructure/persistence/google-sheets/const.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
 | `src/externals/google/sheet/createGoogleSheetsServiceFromConfig.ts` | `app server composition + module ports/adapters + root Sheets transport contracts` | Split aggregate feature registry/exports; keep legacy facade until consumers migrate. |
 | `src/externals/google/sheet/index.ts` | `app server composition + module ports/adapters + root Sheets transport contracts` | Split aggregate feature registry/exports; keep legacy facade until consumers migrate. |
-| `src/externals/google/sheet/sheets/BaseGoogleSheet.ts` | `src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts` | Shared Sheets transport/base operations; feature headers must not enter shared transport. |
+| `src/externals/google/sheet/sheets/BaseGoogleSheet.ts` | `src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
 | `src/externals/google/sheet/sheets/employee-advances/PayrollRecordsSheet.ts` | `src/modules/hr/infrastructure/google-sheets/employee-advances/PayrollRecordsSheet.ts` | Feature worksheet adapter/schema; preserve columns and input modes. |
 | `src/externals/google/sheet/sheets/employee-compensations/EmployeeCompensationsSheet.ts` | `src/modules/hr/infrastructure/google-sheets/employee-compensations/EmployeeCompensationsSheet.ts` | Feature worksheet adapter/schema; preserve columns and input modes. |
 | `src/externals/google/sheet/sheets/employee-compensations/const.ts` | `src/modules/hr/infrastructure/google-sheets/employee-compensations/const.ts` | Feature worksheet adapter/schema; preserve columns and input modes. |
@@ -394,7 +394,7 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/externals/google/sheet/sheets/user-state/UserStateSheet.ts` | `src/modules/line-workflows/infrastructure/google-sheets/user-state/UserStateSheet.ts` | Feature worksheet adapter/schema; preserve columns and input modes. |
 | `src/externals/google/sheet/sheets/user-state/const.ts` | `src/modules/line-workflows/infrastructure/google-sheets/user-state/const.ts` | Feature worksheet adapter/schema; preserve columns and input modes. |
 | `src/externals/google/sheet/types.ts` | `app server composition + module ports/adapters + root Sheets transport contracts` | Split aggregate feature registry/exports; keep legacy facade until consumers migrate. |
-| `src/externals/google/utils/jwt.ts` | `src/infrastructure/persistence/google-sheets/google-auth/utils/jwt.ts` | Shared Google credential plumbing consumed by Sheets and Drive; no secret values moved. |
+| `src/externals/google/utils/jwt.ts` | `src/infrastructure/persistence/google-sheets/google-auth/utils/jwt.ts` | Implemented PR 19; old path retains named forwards to the single physical owner. |
 | `src/externals/line/LineBotService.ts` | `src/infrastructure/external/line/LineBotService.ts` | Provider transport/protocol only; preserve runtime behavior. |
 | `src/externals/line/const.ts` | `src/infrastructure/external/line/const.ts` | Provider transport/protocol only; preserve runtime behavior. |
 | `src/externals/line/enum.ts` | `src/infrastructure/external/line/enum.ts` | Provider transport/protocol only; preserve runtime behavior. |
@@ -493,3 +493,7 @@ Paths above are relative to `src/`. No image/draft/detail/shipment use case or o
 | `src/services/user-states/findLatestUserState.ts` | `src/modules/line-workflows/application/sessions/findLatestUserState.ts` | Split session DTOs/domain and row adapter into module infrastructure. |
 | `src/services/user-states/index.ts` | `src/modules/line-workflows/application/sessions/index.ts` | Split session DTOs/domain and row adapter into module infrastructure. |
 | `src/services/utils/createSortableId.ts` | `src/shared/lib/createSortableId.server.ts` | Node crypto utility; preserve IDs, sequence and clock behavior. |
+
+## PR 19 — completed shared Google transport slice
+
+The fifteen transport/auth/provider files above are physically relocated with named compatibility forwards. Six generic type declarations move from `externals/google/sheet/types.ts` to `infrastructure/persistence/google-sheets/types.ts`; aggregate and feature contracts remain. GoogleSheetsService, its factory, worksheet registry/classes/headers and all consumers stay byte-identical. [Exact mapping, 115-edge audit and remaining work](google-shared-infrastructure.md).
