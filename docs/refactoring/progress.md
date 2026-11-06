@@ -1,0 +1,111 @@
+# Refactoring progress and evidence
+
+## Verified current state
+
+GitHub confirms PRs 1–23 are merged. Latest reviewed main is `71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb` (PR23), tree `5bfe1a283d6bad987a8d2c58fc9855f1ebc022dd`. Source owners were checked against actual module/root files, compatibility forwards, server exports and remaining legacy worksheets, rather than inferred from PR titles alone.
+
+Completed **slices** and partially migrated features are separated in the [migration map](../architecture/migration-map.md). The [roadmap](roadmap.md) is the only forward plan. In particular, actual PR20 was the Orders type-import prerequisite and actual PR23 was the Inventory employee-directory prerequisite, despite earlier task proposals for larger worksheet moves. HR worksheet ownership is still pending. No feature-wide completion percentage or full Shipments milestone completion is claimed.
+
+## Merged implementation ledger
+
+Counts below are the original Codex-local final reports, traced to the original verification record and linked PRs; this documentation task did not independently rerun every historical checkout or certify external CI. Each row retains the exact merge SHA, not an unmerged implementation head. Current execution is recorded separately in [verification](verification.md#documentation-consolidation-results).
+
+| PR / merged SHA | Delivered slice | Original test count (inherited + added) |
+| --- | --- | --- |
+| [#1](https://github.com/volkswg/stock-management/pull/1) · `e77ddc1ce2b73a19e218a5d20353c5b04e23ff16` | Preparation: rules, audited targets, offline tests; no production migration. | 10 = 0 + 10 |
+| [#2](https://github.com/volkswg/stock-management/pull/2) · `d10d530a2052cfc10bdb71708af267ccd8db91bb` | Orders browser-safe contracts and original enum/type compatibility. | 32 = 10 + 22 |
+| [#3](https://github.com/volkswg/stock-management/pull/3) · `a29396dc5d597b8ac7e40e95d9bb2ab652e59e4c` | 15 Orders UI/client/style moves, unchanged route wrappers. | 44 = 32 + 12 |
+| [#4](https://github.com/volkswg/stock-management/pull/4) · `60408c3e91ebecd0dc550bbf00464b9e6ce708d2` | Orders list and simple creation application/ports/Sheets adapters. | 68 = 44 + 24 |
+| [#5](https://github.com/volkswg/stock-management/pull/5) · `a0ff4127b68419d15a7836cdb130a3a33c87d21d` | Shipment public contracts and original behavior characterization; temporary legacy definitions. | 139 = 68 + 71 |
+| [#6](https://github.com/volkswg/stock-management/pull/6) · `c58669b7a00e8c9169423228fa6f18ab782c358a` | Six safe Shipment UI/style moves; browser client deliberately held pending picker dependency. | 148 = 139 + 9 |
+| [#7](https://github.com/volkswg/stock-management/pull/7) · `a3241ecd7ae3bdf14b0c1ede8681bf28e80e850a` | Orders-owned browser picker and stable client app composition. | 175 = 148 + 27 |
+| [#8](https://github.com/volkswg/stock-management/pull/8) · `7900bc93c8de47cf435fa14b07a76eb8710b9348` | Seventh Shipment UI/client move; original client bytes, no app shim. | 188 = 175 + 13 |
+| [#9](https://github.com/volkswg/stock-management/pull/9) · `1d6392abfcc117de1c70a966e78cabe41c0cc9ab` | Shipment creation use case, writer port and A:M adapter. | 212 = 188 + 24 |
+| [#10](https://github.com/volkswg/stock-management/pull/10) · `d4e512bc2f3d5273231f174dd117ea507ccb4850` | Shipment list/detail use cases, four-sheet reader and original cost formulas. | 235 = 212 + 23 |
+| [#11](https://github.com/volkswg/stock-management/pull/11) · `ffb14fa63842efdc705de6709ae1efd3df13cd25` | Shipment linking, deferred business snapshot/A:G writer and original error identity. | 261 = 235 + 26 |
+| [#12](https://github.com/volkswg/stock-management/pull/12) · `c1f5678b88b162856f7754b889bf4667c22fccf1` | Shipment status use case/opaque target; M1→A2:M→conditional B:M. | 291 = 261 + 30 |
+| [#13](https://github.com/volkswg/stock-management/pull/13) · `b16df0fff494b01357c318b65cc5e586656c028b` | Shipping-bill coordination/cleanup seam; existing Drive provider unchanged. | 317 = 291 + 26 |
+| [#14](https://github.com/volkswg/stock-management/pull/14) · `d405fa9333780d6b32abd3df8efaccabf7fc7d20` | Orders detail deferred projection port, Shipment adapter and flat five-read app injection. | 339 = 317 + 22 |
+| [#15](https://github.com/volkswg/stock-management/pull/15) · `703d55f5c67dab8392fcc29a757cef4b2766a975` | Physical single ShipmentStatus definition in pure status leaf; DTOs temporarily legacy. | 355 = 339 + 16 |
+| [#16](https://github.com/volkswg/stock-management/pull/16) · `7dbf3d4824a2b6d5cd38ee6b959c2c9f805f30b2` | Eight DTO declarations move verbatim to public contracts; legacy leaf becomes forwards. | 366 = 355 + 11 |
+| [#17](https://github.com/volkswg/stock-management/pull/17) · `37005935dcbfd0e32f50d7a84543ddfcdcee13dc` | Backend validation helper import only: public contract replaces mixed Shipment barrel. | 370 = 366 + 4 |
+| [#18](https://github.com/volkswg/stock-management/pull/18) · `9388f8a89f23e7547731ee649baf84af92c892e6` | Three Shipment route imports use public server/contracts; original error class exported. | 375 = 370 + 5 |
+| [#19](https://github.com/volkswg/stock-management/pull/19) · `5d01209f9c241a5c6b4f07702b9684e7e2a2f79a` | Shared Google auth/JWT/Sheets/Drive physical owners, generic types, explicit legacy forwards. | 395 = 375 + 20 |
+| [#20](https://github.com/volkswg/stock-management/pull/20) · `77fb645e08a98d8fa6fe38028d6791b3396da41f` | Orders pure Sheet type-import prerequisite; **no worksheets moved**. | 399 = 395 + 4 |
+| [#21](https://github.com/volkswg/stock-management/pull/21) · `b0926e1321ce55869f87d3fa72852cc5e55ed693` | Five Orders/Shipment class/header pairs physically moved with ten legacy forwards. | 410 = 399 + 11 |
+| [#22](https://github.com/volkswg/stock-management/pull/22) · `d59ea160309f92feed88878cc3f05811222db21d` | Five Sales class/header pairs physically moved with ten legacy forwards; services remain legacy. | 419 = 410 + 9 |
+| [#23](https://github.com/volkswg/stock-management/pull/23) · `71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb` | Inventory employee-directory prerequisite via HR public query; **no HR worksheet move**. | 429 = 419 + 10 |
+
+Historical reports record successful baseline/final lint/typecheck and isolated builds with unchanged 23-page/35-API contracts and app-paths manifests. Later reports retain one unused shipmentRow import warning in `tests/shipments-read-seam.test.mjs:6`. Details, intermediate corrected failures, original limitations and precise baseline/head provenance remain in the immutable [original verification record](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/verification.md). Do not treat those past reports as substitutes for executing checks at a new base.
+
+## Historical evidence
+
+Historical test fixtures remain in [tests/fixtures](../../tests/fixtures) unchanged. They contain complete original sources, raw SHA-256 values, printed TypeScript AST declarations, JSON samples, consumer inventories and event traces. Existing `tests/helpers/*-history.mjs` helpers retain exact, named inverse-source reconciliation; no fixture regeneration, broad inventory exclusion or skipped inherited test is authorized.
+
+| Migration | Authoritative original evidence / treatment |
+| --- | --- |
+| Initial routes/Orders contracts/UI/list/create | route-contracts.json, orders-type-shapes.json, orders-read-model.json, orders-ui-structure.json, orders-seam-list.json and orders-seam-preserved.json; original body/CSS/export assertions remain |
+| Shipment UI/picker/client | shipments-structure.json, shipments-ui-relocation.json, shipments-browser-client.json, orders-picker-seam.json; original raw/body/CSS values retained, only reviewed injection/import structures reconciled |
+| Shipment creation | shipments-create-before.json: exactly createShipment/getShipmentsAppendRange history cases; original inputs/clock-ID/append parity, other declarations unchanged |
+| Shipment reads | shipments-list-before.json and shipments-read.json: thirteen original declarations retained; eleven helpers exact, two orchestration declarations behaviorally reconciled |
+| Shipment linking | shipments-link-before.json: five original declarations retained; four helpers exact, one orchestration parity case, single unchanged error class |
+| Shipment status | shipments-status-before.json: exactly updateShipmentStatus/isValidTransition/toNumber history cases; two pure helpers exact, original orchestration/event parity |
+| Shipment Drive | shipments-drive-before.json: original route raw source/PATCH and unchanged/moved helper AST witnesses; exact route-only migration case |
+| Orders detail | orders-detail-before.json plus orders-seam-preserved.json: original getOrderDetail body `7a863b4ebdd1220a8e7f250978f5fc644f19656f95a286b2fe88e3abdadff293` remains authoritative; moved helpers/server/PATCH witnesses retained |
+| Enum then DTO ownership | shipments-enum-before.json and shipments-dto-before.json: exact original enum/eight aliases, prior contract raw fingerprint reconstructed through two reviewed stages; all other source inventory keys stay active |
+| Validation and HTTP imports | shipments-validation-before.json, shipments-http-before.json: exact inverse import substitution restores full original helper/routes, including original helper hash `5a7eee8047a280c4c01df65457cd809de71b581ae565d1bbae1034a298e4d4df`; real handler parity/class identity remains |
+| Shared Google transport | google-infrastructure-before.json and google-infrastructure-consumers.json: original providers/generic/aggregate types, production inventories and sixteen physical paths; exact restoration/identity/transport tests |
+| Orders pure Sheet types | orders-sheet-types-before.json: four exact type-import substitutions and emitted-runtime equivalence; old mixed-index negative reverse-edge check remains |
+| Orders/Shipment worksheets | worksheet-ownership-before.json: ten original files/headers, exact import restoration, class/prototype/header/index/registry identity; virtual move test now resolves actual owners, negative reverse edge retained |
+| Sales worksheets | sales-worksheets-before.json: ten exact sources, consumer/operational-script/type/browser audit, original/current fake-transport traces; no service rewrite |
+| Inventory employee directory | inventory-employee-directory-before.json: four changed legacy source witnesses, two verbatim DTOs, original directory body/error/async/HTTP behavior, seven exact new files; PR15–22 inventories reconcile only this named delta |
+
+The fixtures still embed `docs/architecture/shipments-contracts.md` inside two captured original-source strings (enum/DTO history). They remain immutable; that original document is preserved by the pinned link in the index below. No executable source/test reads the removed Markdown paths. Old fixture references describe historical source and must not be rewritten to the new guide.
+
+## Document consolidation index
+
+Before: 35 tracked Markdown files, 29 in architecture. After: 14 total, five in architecture and three in refactoring; four operational guides stay at their original paths byte-for-byte. Twenty-five old architecture documents are consolidated/removed; four new canonical documents are added (decisions, roadmap, progress, verification), and existing authoritative ownership paths are reused.
+
+The original descriptions below are retained at the verified immutable base commit, including full per-file maps/hashes, old proposal/audit tables and historical caveats. **Current** rules are the canonical destinations, not superseded statements inside an old PR note. This avoids duplicating a second full archive in the working tree.
+
+Published PR bodies were audited across #1–23. They contain old document path references. Those PR bodies/comments were not rewritten: branch-relative/default-main URLs to removed paths can stop resolving, while commit-pinned links and PR file/diff views preserve evidence. Use this complete index to recover the old text. Do not claim external historical links were all rewritten or that these notes can be discarded from Git history.
+
+| Original document at immutable base | Canonical destination / disposition |
+| --- | --- |
+| [README.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/README.md) | [Architecture guide](../architecture/README.md) |
+| [audit.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/audit.md) | [Current map](../architecture/migration-map.md), [dependency rules](../architecture/dependency-rules.md) and [roadmap](roadmap.md); original snapshot only in history |
+| [dependency-rules.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/dependency-rules.md) | [Dependency rules](../architecture/dependency-rules.md) |
+| [eslint-boundaries.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/eslint-boundaries.md) | [Scoped enforcement](../architecture/dependency-rules.md#scoped-enforcement) |
+| [folder-rules.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/folder-rules.md) | [Folder rules](../architecture/folder-rules.md) |
+| [google-shared-infrastructure.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/google-shared-infrastructure.md) | [Shared transport](../architecture/decisions.md#shared-google-transport-and-feature-worksheets), [map](../architecture/migration-map.md) |
+| [inventory-employee-directory.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/inventory-employee-directory.md) | [Directory prerequisite](../architecture/decisions.md#inventory-employee-directory-prerequisite), [pending HR move](roadmap.md#next-bounded-work) |
+| [migration-map.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/migration-map.md) | [Current ownership map](../architecture/migration-map.md); original whole-repository proposed paths in history |
+| [orders-contracts.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-contracts.md) | [Public contracts](../architecture/decisions.md#public-contracts-and-single-enum-identity) |
+| [orders-detail-shipment-projection.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-detail-shipment-projection.md) | [Detail projection](../architecture/decisions.md#orders-detail-and-shipment-projection) |
+| [orders-sheet-type-imports.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-sheet-type-imports.md) | [Shared transport/worksheet boundary](../architecture/decisions.md#shared-google-transport-and-feature-worksheets) |
+| [orders-shipment-picker.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-shipment-picker.md) | [Browser picker](../architecture/decisions.md#orders-browser-picker-and-ui) |
+| [orders-shipments-worksheet-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-shipments-worksheet-ownership.md) | [Actual worksheet owners](../architecture/migration-map.md#physical-worksheet-owners) |
+| [orders-ui-migration.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-ui-migration.md) | [Folders](../architecture/folder-rules.md) and [UI/picker](../architecture/decisions.md#orders-browser-picker-and-ui) |
+| [orders-use-case-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-use-case-seam.md) | [Orders list/creation](../architecture/decisions.md#orders-list-and-simple-creation) |
+| [refactoring-plan.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/refactoring-plan.md) | [Single roadmap](roadmap.md) and merged ledger above |
+| [sales-worksheet-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/sales-worksheet-ownership.md) | [Actual worksheet owners](../architecture/migration-map.md#physical-worksheet-owners), [pending Sales work](roadmap.md) |
+| [shipments-contracts.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-contracts.md) | [Contracts/enum](../architecture/decisions.md#public-contracts-and-single-enum-identity) |
+| [shipments-create-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-create-seam.md) | [Shipment creation](../architecture/decisions.md#shipment-creation) |
+| [shipments-drive-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-drive-seam.md) | [Bill upload/cleanup](../architecture/decisions.md#shipping-bill-upload-and-cleanup) |
+| [shipments-dto-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-dto-ownership.md) | [Contracts/DTO ownership](../architecture/decisions.md#public-contracts-and-single-enum-identity) |
+| [shipments-enum-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-enum-ownership.md) | [Contracts/enum identity](../architecture/decisions.md#public-contracts-and-single-enum-identity) |
+| [shipments-http-boundary.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-http-boundary.md) | [Public server surfaces](../architecture/dependency-rules.md#actual-public-surfaces-and-directions), historical import restoration above |
+| [shipments-link-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-link-seam.md) | [Linking](../architecture/decisions.md#shipment-order-linking) |
+| [shipments-read-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-read-seam.md) | [Shipment reads/costs](../architecture/decisions.md#shipment-list-and-detail-reads) |
+| [shipments-status-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-status-seam.md) | [Status update](../architecture/decisions.md#shipment-status-update) |
+| [shipments-ui-relocation.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-ui-relocation.md) | [UI/picker](../architecture/decisions.md#orders-browser-picker-and-ui), [actual map](../architecture/migration-map.md) |
+| [shipments-validation-import.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-validation-import.md) | [Public surfaces](../architecture/dependency-rules.md#actual-public-surfaces-and-directions), historical witness above |
+| [verification.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/verification.md) | [Safe procedure/current results](verification.md) and original ledger evidence above |
+
+Retained operational/user guides: [expenses](../expenses.md), [movement migration](../movement-migration.md), [LINE rich-menu links](../rich-menu-links.md), [shop stock adjustments](../shop-stock-adjustments.md). Root README retains the existing movement-mode and salary-advance/settlement guidance. These are instructions for separately authorized operations, **not** verification commands.
+
+## Documentation debt and tradeoffs
+
+The original 244-TS-file preparation audit and huge proposed destination inventory are historical snapshots, not a live repository-wide graph/status report. Current canonical docs cover verified owners and known debt without pretending every unmigrated file has been reclassified. Preserve the immutable full map for future file-level planning and refresh only the slice being migrated.
+
+Historical branch-relative URLs are a compatibility tradeoff of removing obsolete documents; this index gives immutable replacements. External operational URLs were not contacted. No new CI/browser/integration/concurrency evidence is inferred from documentation cleanup. Future changes must update current canonical ownership/roadmap and append evidence here rather than reintroducing one note per small PR.
