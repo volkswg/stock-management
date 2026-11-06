@@ -1,3 +1,4 @@
+import { inventoryWorksheetFiles, assertInventoryWorksheetHistory } from "./helpers/inventory-worksheet-history.mjs";
 import { hrWorksheetFiles, assertHrWorksheetHistory } from "./helpers/hr-worksheet-history.mjs";
 import { directoryFiles, assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
 import { salesWorksheetFiles, assertSalesWorksheetHistory } from "./helpers/sales-worksheet-history.mjs";
@@ -15,7 +16,7 @@ test("four Orders Sheet type imports retain original complete declarations and i
 
 test("exact import reversal preserves original hashes and every other production file remains byte-identical",async()=>{
  const {sheetTypeFiles,assertOrdersSheetTypeHistory}=await import("./helpers/orders-sheet-type-history.mjs");
- for(const [file,hash]of Object.entries(sheetTypesBefore.productionHashes)){if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,hash);else assert.equal(sheetTypeHash(readFileSync(file)),hash,file);}
+ for(const [file,hash]of Object.entries(sheetTypesBefore.productionHashes)){if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,hash);else assert.equal(sheetTypeHash(readFileSync(file)),hash,file);}
 });
 
 test("the four exact lint scopes require erased pure types and reject aggregate, relative, value, re-export and dynamic bypasses",async()=>{

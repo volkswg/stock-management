@@ -129,3 +129,12 @@ Keep exactly one async row await: public query, compatibility adapter, Inventory
 ## Deferred behavior and security work
 
 Existing sensitive routes have no new application authentication; this refactor adds none. Sheets read/check/write is not cross-instance transactional. Some legacy LINE failures log before success responses. Preserve these as known risks rather than silently fixing them in moves. Supabase/schema/data conversion, tenancy/IDs/membership/authorization, billing/subscriptions, concurrency/retries/queues and provider replacements need separately scoped requirements and migration review. Current shop master is not a tenant model; no fake tenant columns, dual writes or transactional promises.
+
+
+## Inventory core worksheet ownership
+
+PR26 transfers only StockCountsSheet, STOCK_COUNT_HEADERS and MovementSheet. The old leaves explicitly forward the same class/header objects. StockCountsSheet retains the nine original headers (id, month, accountId, shopName, physicalCount, note, countedAt, updatedAt, updatedBy), their mutability and dynamic A:I calculation. MovementSheet retains literal A:N, readRows/appendRows/updateRows/deleteRow and direct client.deleteRow(worksheetName, rowNumber) delegation; no new validation or Movement header file. Original-source inverse substitutions preserve complete class/header declarations, not just similar output.
+
+StockCountsSheet identity is retained through both indexes and real registry instances. MovementSheet is not a baseline aggregate export; preserve that absence while proving leaf/physical/real movement-master/detail instance identity. Preserve original readMovementRanges mapping/order, legacy master/detail schemas, default/explicit ranges, USER_ENTERED/RAW/INSERT_ROWS, payload identities, await/error timing and no retries. Existing business services and HTTP routes do not change. Synthetic old/current tests execute stock equations, save-ID reuse, adjustment reversals, movement delivery/deletion and partial-write/HTTP outcomes; they do not make these processes transactional.
+
+The new Inventory worksheet graph imports only root generic Google transport/types and its own header. It has no LINE workflow dependency, including erased edges. The pre-existing legacy movement service still calls LINE quantity helpers; extracting that use case/parser is future work. Inventory/HR directory seams and the four known erased client debts stay unchanged. Source witness: tests/fixtures/inventory-worksheets-before.json; older history fixtures remain authoritative.
