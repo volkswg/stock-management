@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet";
+import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
 import { createSortableId } from "@/services/utils/createSortableId";
 import type { CreatedOrder, OrderListItem, OrderDetail } from "./contracts";
 import { createOrder as executeCreateOrder, type CreateOrderInput } from "./application/create-order";

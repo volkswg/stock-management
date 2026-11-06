@@ -113,3 +113,8 @@ All three Shipment routes import operations/error identity only from guarded mod
 ## PR 19 — Google shared infrastructure
 
 PR 19 root Google transports import only their own explicit transport dependencies; Drive uses root shared auth, never legacy externals or feature implementations. The Drive factory retains only erased AppConfig; its pre-existing config/pure-helper type trace is documented. Feature adapters and consumers retain their existing paths through named forwards. Runtime/type graphs are acyclic and browser graphs exclude transports. [Rules and evidence](google-shared-infrastructure.md).
+
+
+## Orders pure Sheet type-import prerequisite
+
+Orders server, row mapper, writer and list reader now import erased Sheet contracts only from the pure `externals/google/sheet/types.ts` leaf. Their mixed-index import exception is removed in four exact lint scopes. That leaf forwards only pure generic root types and contains aggregate interface declarations, not worksheet/provider implementations. The current and virtual worksheet ownership graphs remain Shipments → Orders. [Exact consumers and history](orders-sheet-type-imports.md).

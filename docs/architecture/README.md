@@ -82,3 +82,8 @@ Repository-wide working rules live in [AGENTS.md](../../AGENTS.md).
 ## PR 19 — Google shared infrastructure
 
 PR 19 completes only [shared Google transport/auth ownership](google-shared-infrastructure.md): root Sheets/auth/JWT and Drive implementations retain exact named legacy forwards and constructor identity. Generic row/base types have a root owner; feature worksheet registry/classes/headers and all consumers remain in place. No provider or business behavior changes.
+
+
+## Orders pure Sheet type-import prerequisite
+
+[Orders pure Sheet type-import prerequisite](orders-sheet-type-imports.md) removes four erased Orders imports from the mixed aggregate index in preparation for feature worksheet ownership. Runtime code is unchanged; no worksheet moves in this slice.
