@@ -12,6 +12,8 @@ import { ordersSheetTypeBoundaries } from "./eslint/orders-sheet-type-boundaries
 
 import { worksheetBoundaries } from "./eslint/worksheet-boundaries.mjs";
 
+import { employeeDirectoryBoundaries } from "./eslint/employee-directory-boundaries.mjs";
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -22,6 +24,7 @@ const eslintConfig = defineConfig([
   ...googleInfrastructureBoundaries,
   ...ordersSheetTypeBoundaries,
   ...worksheetBoundaries,
+  ...employeeDirectoryBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

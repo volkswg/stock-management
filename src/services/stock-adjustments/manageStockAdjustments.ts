@@ -1,5 +1,7 @@
-import { EMPLOYEE_HEADERS, type GoogleSheetRow, type IGoogleSheetsService } from "@/externals/google/sheet";
-import type { StockCountAccount } from "@/services/stock-counts";
+import type { GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet/types";
+import { listAdjustmentEmployees as executeListAdjustmentEmployees } from "@/modules/inventory/application/list-adjustment-employees";
+import { createEmployeeDirectory } from "./employee-directory";
+import type { StockCountAccount } from "@/modules/inventory/contracts";
 import { ADJUSTMENT_HEADERS, ADJUSTMENT_REASONS, type AdjustmentEmployee, type StockAdjustment } from "./types";
 export class StockAdjustmentError extends Error {
   constructor(message: string, public status = 400) { super(message); }
@@ -32,11 +34,8 @@ async function readRows(service: IGoogleSheetsService): Promise<GoogleSheetRow[]
   if (rows.length && rows[0]?.slice(0, ADJUSTMENT_HEADERS.length).join("|") !== ADJUSTMENT_HEADERS.join("|")) throw new StockAdjustmentError("Stock adjustment headers do not match. No history was changed.", 503);
   return rows;
 }
-export async function listAdjustmentEmployees(service: IGoogleSheetsService): Promise<AdjustmentEmployee[]> {
-  const rows = await service.employees.readRows();
-  if (!rows.length) return [];
-  if (rows[0]?.slice(0, EMPLOYEE_HEADERS.length).join("|") !== EMPLOYEE_HEADERS.join("|")) throw new StockAdjustmentError("Employee storage headers do not match.", 503);
-  return rows.slice(1).filter(r => r[0]).map(r => ({ id: text(r[0]), name: text(r[1]), status: text(r[3]), hiredDate: text(r[4]), terminatedDate: text(r[5]) }));
+export function listAdjustmentEmployees(service: IGoogleSheetsService): Promise<AdjustmentEmployee[]> {
+  return executeListAdjustmentEmployees(createEmployeeDirectory(service, () => new StockAdjustmentError("Employee storage headers do not match.", 503)));
 }
 export async function listStockAdjustments(service: IGoogleSheetsService): Promise<StockAdjustment[]> {
   const rows = await readRows(service), unique = new Map<string, StockAdjustment>();

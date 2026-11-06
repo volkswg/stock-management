@@ -91,3 +91,8 @@ PR21 places real Orders worksheet/header pairs under `modules/orders/infrastruct
 ## PR 22 — Sales worksheet ownership
 
 Sales classes/header arrays physically live under `modules/sales/infrastructure/google-sheets/{receipts,receipt-items,receipt-payments,receipt-syncs,profit-cost-overrides}`. They use only root Google base/types/constants and own headers; ten old paths remain named forwards. Aggregate registry and legacy Sales services remain unchanged. [Exact inventory](sales-worksheet-ownership.md).
+
+
+## Inventory employee-directory prerequisite
+
+Actual Inventory contracts/application/port files and HR contracts/server/employee-directory reader now exist for the real stock-adjustment directory consumer. The legacy employee-directory composer stays outside both modules for old callers. No empty domain layer, worksheet relocation, generic repository/container or other HR use-case extraction. [Exact file responsibilities](inventory-employee-directory.md).

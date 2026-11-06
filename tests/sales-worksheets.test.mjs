@@ -1,3 +1,4 @@
+import { directoryFiles, directoryNewFiles, assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import {loadSource,plain} from "./helpers/load-source.mjs";
@@ -16,8 +17,8 @@ test("original five Sales worksheets preserve header order/mutability, dynamic d
 
 test("exact ten-file Sales history and declarations restore original bytes while all other production and earlier fixtures remain authoritative",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs");const {salesWorksheetFiles,salesWorksheetDestinations,salesWorksheetHash,assertSalesWorksheetHistory}=await import("./helpers/sales-worksheet-history.mjs");
- for(const [file,hash]of Object.entries(salesWorksheetsBefore.productionHashes)){if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else assert.equal(salesWorksheetHash(readFileSync(file)),hash,file);}
- const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(salesWorksheetsBefore.productionHashes,f)).sort(),salesWorksheetDestinations.sort());
+ for(const [file,hash]of Object.entries(salesWorksheetsBefore.productionHashes)){if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else assert.equal(salesWorksheetHash(readFileSync(file)),hash,file);}
+ const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(salesWorksheetsBefore.productionHashes,f)).sort(),[...salesWorksheetDestinations,...directoryNewFiles].sort());
  for(const [file,hash]of Object.entries(salesWorksheetsBefore.fixtureHashes))assert.equal(salesWorksheetHash(readFileSync(`tests/fixtures/${file}`)),hash,file);
 });
 

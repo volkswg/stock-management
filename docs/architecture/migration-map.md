@@ -510,3 +510,8 @@ Five worksheet classes and their five header files now live at the feature desti
 ## PR 22 — completed Sales worksheet slice
 
 Five Sales classes and five header arrays now live at the module destinations above, with ten exact old named forwards. Registry/factory/indexes, existing Sales/other consumers and all business/provider behavior remain unchanged. Other feature worksheets, use-case extraction, legacy type-boundary debt and compatibility retirement remain deferred. [Source/hash/consumer/graph evidence](sales-worksheet-ownership.md).
+
+
+## Inventory employee-directory prerequisite
+
+listAdjustmentEmployees now delegates to Inventory application/port and guarded legacy composition of the HR public employee query. HR infrastructure owns the existing prefix-header/five-column projection. Exact AdjustmentEmployee and StockCountAccount types move to Inventory contracts with old forwards; direct Inventory Sheet imports become pure types/own headers. Other stock/HR algorithms and all worksheets remain unchanged. The HR core worksheet move must restart on a newly verified merge base. [Inventory/HR prerequisite map](inventory-employee-directory.md).

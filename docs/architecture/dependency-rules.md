@@ -128,3 +128,8 @@ Physical Orders/Shipment worksheets import only root Google base/types/constants
 ## PR 22 — Sales worksheet ownership
 
 Migrated Sales worksheet leaves import no mixed registry or feature/private/app/config implementations; root transport remains feature-agnostic. Legacy Sales services still consume aggregate headers/types outside this module slice. Sales/Orders/Shipments module graphs stay acyclic with only Shipments → Orders. Global runtime client isolation and unchanged six legacy erased mixed-index traces are checked separately from clean migrated browser graphs. [Exact graph/debt audit](sales-worksheet-ownership.md).
+
+
+## Inventory employee-directory prerequisite
+
+Inventory owns the EmployeeDirectory port and its pure employee/account DTOs. HR owns the public employee read query and private header/row mapping, imports no Inventory, and receives a consumer error factory solely at server composition to preserve the original error/await phase. Legacy composition depends on both public surfaces; neither feature imports it. Direct Inventory mixed Sheet imports are closed. Broader legacy public-query aggregation remains deferred; [exact boundary, graph and limits](inventory-employee-directory.md).
