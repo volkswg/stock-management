@@ -1,11 +1,1 @@
-export const SALES_RECEIPT_SYNC_HEADERS = [
-  "id",
-  "salesDate",
-  "accountId",
-  "shopName",
-  "status",
-  "receiptCount",
-  "itemCount",
-  "paymentCount",
-  "syncedAt",
-];
+export { SALES_RECEIPT_SYNC_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-syncs/const";

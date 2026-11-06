@@ -86,3 +86,8 @@ PR 19: shared Google auth/JWT, Sheets client/constants/base/types physically liv
 ## PR 21 — Orders and Shipments worksheet ownership
 
 PR21 places real Orders worksheet/header pairs under `modules/orders/infrastructure/google-sheets/{orders,order-items,order-bills}` and Shipment pairs under `modules/shipments/infrastructure/google-sheets/{shipments,shipment-orders}`. Existing externals paths are named compatibility forwards; root BaseGoogleSheet/client/types stay feature-agnostic. No registry or other worksheet relocation. [Exact ten-file ownership](orders-shipments-worksheet-ownership.md).
+
+
+## PR 22 — Sales worksheet ownership
+
+Sales classes/header arrays physically live under `modules/sales/infrastructure/google-sheets/{receipts,receipt-items,receipt-payments,receipt-syncs,profit-cost-overrides}`. They use only root Google base/types/constants and own headers; ten old paths remain named forwards. Aggregate registry and legacy Sales services remain unchanged. [Exact inventory](sales-worksheet-ownership.md).

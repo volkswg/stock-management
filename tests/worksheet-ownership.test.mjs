@@ -1,3 +1,4 @@
+import { salesWorksheetFiles, salesWorksheetDestinations, assertSalesWorksheetHistory } from "./helpers/sales-worksheet-history.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import {loadSource,plain} from "./helpers/load-source.mjs";
@@ -16,9 +17,9 @@ for(const spec of worksheetBefore.worksheets)test(`original worksheet ${spec.nam
 
 test("all ten physical files restore original bytes/declarations and all other production/previous fixture bytes remain unchanged",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs");const {worksheetFiles,worksheetDestinations,worksheetHash,assertWorksheetHistory}=await import("./helpers/worksheet-history.mjs");
- for(const [file,hash]of Object.entries(worksheetBefore.productionHashes)){if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else assert.equal(worksheetHash(readFileSync(file)),hash,file);}
+ for(const [file,hash]of Object.entries(worksheetBefore.productionHashes)){if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else assert.equal(worksheetHash(readFileSync(file)),hash,file);}
  const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(worksheetBefore.productionHashes,f)).sort(),worksheetDestinations.sort());
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(worksheetBefore.productionHashes,f)).sort(),[...worksheetDestinations,...salesWorksheetDestinations].sort());
  for(const [file,hash]of Object.entries(worksheetBefore.fixtureHashes))assert.equal(worksheetHash(readFileSync(`tests/fixtures/${file}`)),hash,file);
 });
 

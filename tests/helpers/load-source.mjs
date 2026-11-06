@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import vm from "node:vm";
 import ts from "typescript";
+import { salesWorksheetsBefore } from "./sales-worksheet-history.mjs";
 import { worksheetBefore } from "./worksheet-history.mjs";
 import { googleBefore } from "./google-infrastructure.mjs";
 
@@ -28,7 +29,7 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     ...globals,
     require: (specifier) => {
       // Only the reviewed old provider forwards may follow their single new owner.
-      const move = worksheetBefore.moves[path] ?? googleBefore.moves[path];
+      const move = salesWorksheetsBefore.moves[path] ?? worksheetBefore.moves[path] ?? googleBefore.moves[path];
       if (move && specifier === "@/" + move.to.slice(4, -3)) {
         const translated = new Proxy({}, {
           getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),

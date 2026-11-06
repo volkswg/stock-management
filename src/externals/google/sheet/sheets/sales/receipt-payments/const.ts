@@ -1,12 +1,1 @@
-export const SALES_RECEIPT_PAYMENT_HEADERS = [
-  "id",
-  "receiptId",
-  "paymentIndex",
-  "paymentTypeId",
-  "paymentName",
-  "paymentType",
-  "moneyAmount",
-  "paidAt",
-  "paymentDetailsJson",
-  "syncedAt",
-];
+export { SALES_RECEIPT_PAYMENT_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-payments/const";

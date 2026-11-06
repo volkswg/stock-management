@@ -123,3 +123,8 @@ Orders server, row mapper, writer and list reader now import erased Sheet contra
 ## PR 21 — Orders and Shipments worksheet ownership
 
 Physical Orders/Shipment worksheets import only root Google base/types/constants and their own local headers. Existing consumers/registry retain old paths through named forwards. PR20 pure Sheet type imports remain unchanged; the real post-move graph preserves Shipments → Orders with no reverse erased edge. Legacy aggregate composition may depend on both modules; feature modules do not import it. [Identity, actual graph and negative regression](orders-shipments-worksheet-ownership.md).
+
+
+## PR 22 — Sales worksheet ownership
+
+Migrated Sales worksheet leaves import no mixed registry or feature/private/app/config implementations; root transport remains feature-agnostic. Legacy Sales services still consume aggregate headers/types outside this module slice. Sales/Orders/Shipments module graphs stay acyclic with only Shipments → Orders. Global runtime client isolation and unchanged six legacy erased mixed-index traces are checked separately from clean migrated browser graphs. [Exact graph/debt audit](sales-worksheet-ownership.md).

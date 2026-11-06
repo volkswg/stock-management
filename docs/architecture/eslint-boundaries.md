@@ -117,3 +117,8 @@ PR 19 registers `eslint/google-infrastructure-boundaries.mjs`: exact-path import
 ## PR 21 — Orders and Shipments worksheet ownership
 
 PR21 adds `eslint/worksheet-boundaries.mjs` with exact paths for ten real class/header files, allowing only root BaseGoogleSheet/types/constants and own local headers, with erased interface imports and no cross-feature/provider/config/dynamic/require/import-type bypasses. Earlier root/application/adapter/PR20 rules are unchanged. Strict creation graph adds only the two moved Shipment header leaves; old fixture hashes remain checked via exact source restoration. [Details](orders-shipments-worksheet-ownership.md).
+
+
+## PR 22 — Sales worksheet ownership
+
+PR22 extends only the exact worksheet path table in `eslint/worksheet-boundaries.mjs` for five Sales class/header pairs. Existing rule objects/restrictions and earlier feature scopes stay unchanged. The new paths admit only root base/types/constants and local headers, erased generic interfaces and no static/dynamic/type/relative/registry/provider/feature bypasses. [Audit and tests](sales-worksheet-ownership.md).

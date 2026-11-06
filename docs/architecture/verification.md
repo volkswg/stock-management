@@ -562,3 +562,28 @@ Runtime/type feature graphs retain only Shipments → Orders, with no cycles/rev
 Only ten old class/header files become named forwards and ten physical owners are added. Aggregate GoogleSheetsService/factory/both indexes, existing consumers, all other worksheets/headers, provider/auth/config implementations, HTTP/UI/CSS/contracts/use cases and package/lockfile/env/schema/data remain unchanged. No baseline or final introduced failures; the inherited lint warning is separate.
 
 [Exact ten-file map, original hashes, header/range/identity/graph evidence and deferred worksheet ownership](orders-shipments-worksheet-ownership.md). Codex-local results, not independent GitHub/Vercel CI. No live Google/LINE/Loyverse, production credentials/data, operational scripts, browser visual/permission/availability/concurrency verification, approval, merge or deployment. Registry/compatibility retirement, other feature worksheets and broader provider/SaaS work remain deferred.
+
+## PR 22 — Sales worksheet ownership
+
+Verified base `b0926e1321ce55869f87d3fa72852cc5e55ed693`, exact remote main / merged PR21, clean starting tree. Branch `refactor/sales-worksheet-ownership`. Node 24.22.1 and existing dependencies.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| `npm test` | 410 inherited pass; one new table-driven characterization passes all five untouched Sales worksheets | 419 pass = 410 inherited + 9 new; no failures/skips |
+| `npm run lint` | Exit 0; inherited unused shipmentRow warning, tests/shipments-read-seam.test.mjs:6 | Exit 0; same warning only |
+| `npm run typecheck` | Pass | Pass, including exact constructor/instance/mutable-header type parity |
+| Isolated credential-free build | Pass, /tmp/sales22-baseline-safe base archive | Pass, /tmp/sales22-final-safe clean source copy |
+| Page / API source contracts | 23 / 35 | Unchanged, original route fixture retained |
+| Next app-paths manifest | 32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e | Byte-identical, same SHA-256 |
+
+Both builds use existing hardlinked dependencies, no application .env files/inherited integration credentials, and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. Only tracked .env.example; filenames inspected, no secrets read or removed. Final tests/lint/typecheck also pass in the clean isolated copy. Final production bytes match built source.
+
+Nine added tests cover all five defaults/header mutation/recalculation/delegation/await/errors, exact ten-file source/AST/history/all-other-production/earlier-fixture parity, strict physical/leaf/both-index/service/prototype/header/runtime-key identity, real original/current client/fake-fetch request parity, unchanged actual Sales sync/refund-report/cost-override and partial-failure sequencing with fake Loyverse and worksheets, runtime and type-inclusive module/legacy-composition graphs, all-client before/after Sales reachability, and actual precise lint plus full 92-edge consumer audit resolution. Type fixtures retain exact constructor/instance/header compatibility. All 410 inherited regressions and PR20 actual/negative graph/PR21 history/identity tests stay enabled.
+
+All earlier fixtures retain original bytes/hashes. Only ten named old Sales files and ten new owners gain exact history reconciliation in PR15–21 inventory loops. Only those ten recorded paths are added to provider/worksheet offline loading; historical mode reads captured original classes, current mode follows actual old forwards. No config/application/server/Sales-service permission is added to that loader. The separate legacy service scenario loads only exact unchanged sources with explicit fake clock/UUID/IO dependencies. Existing scoped worksheet rule adds only Sales path entries, retaining earlier rule objects and guards.
+
+Module/runtime/type graphs are acyclic: Sales leaves use only root transport and own headers; Orders → Shipments remains absent and Shipments → Orders remains permitted. Sales daily-sales UI plus Orders/Shipments browser graphs remain clean. The audit explicitly finds **pre-existing erased mixed-registry reachability in six unmigrated legacy client roots** (salary advances, payroll, expense master/expenses, movement list/detail); captured before traces and after leaf sets match exactly under physical identity normalization. No client has runtime Sales worksheet reachability. No global claim of erased browser cleanliness is made, and no existing guard is relaxed. Those legacy type-only debts remain separately scoped.
+
+Only ten old Sales files become exact named forwards and ten new owners are added. Every other production file, Sales sync/dashboard/report/override/API/client, registry/factory/both indexes, Orders/Shipment/root provider behavior, other worksheets, package/lockfile/env/schema/data remains unchanged. No baseline or final introduced failure; one inherited lint warning only.
+
+[Exact source hashes, header/ranges, complete consumer/graph/debt inventory and limitations](sales-worksheet-ownership.md). Results are Codex-local, not independent GitHub/Vercel CI. No live Google/LINE/Loyverse, production credentials/records, operational scripts, provider-permission/availability/browser-visual/concurrency verification, merge/approval/deploy. Synthetic legacy Sales scenarios cover the focused sync/daily-refund report/cost paths, not every dashboard/profit/live integration scenario; source and header parity preserve those untouched algorithms. Sales use-case extraction, remaining legacy worksheet/type ownership, registry/barrel retirement and broader provider/SaaS work are deferred.
