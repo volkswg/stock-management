@@ -1,0 +1,24 @@
+import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const";
+import type { GoogleSheetRangeUpdate, GoogleSheetRow, IGoogleBatchRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
+import { BaseGoogleSheet } from "@/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet";
+import { ORDER_ITEMS_SHEET_HEADERS } from "./const";
+
+export class OrderItemsSheet extends BaseGoogleSheet implements IGoogleBatchRowsSheet {
+  async readRows(
+    range = `A:${lastColumnLetter(ORDER_ITEMS_SHEET_HEADERS.length - 1)}`,
+  ): Promise<GoogleSheetRow[]> {
+    return this.read(range);
+  }
+
+  async appendRows(range: string, values: GoogleSheetRow[]): Promise<void> {
+    await this.append(range, values);
+  }
+
+  async updateRows(range: string, values: GoogleSheetRow[]): Promise<void> {
+    await this.update(range, values);
+  }
+
+  async batchUpdateRows(updates: GoogleSheetRangeUpdate[]): Promise<void> {
+    await this.client.batchUpdateValues(this.worksheetName, updates);
+  }
+}

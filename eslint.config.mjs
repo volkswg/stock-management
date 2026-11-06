@@ -10,6 +10,8 @@ import { googleInfrastructureBoundaries } from "./eslint/google-infrastructure-b
 
 import { ordersSheetTypeBoundaries } from "./eslint/orders-sheet-type-boundaries.mjs";
 
+import { worksheetBoundaries } from "./eslint/worksheet-boundaries.mjs";
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -19,6 +21,7 @@ const eslintConfig = defineConfig([
   ...shipmentsServerBoundaries,
   ...googleInfrastructureBoundaries,
   ...ordersSheetTypeBoundaries,
+  ...worksheetBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

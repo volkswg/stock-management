@@ -81,3 +81,8 @@ PR 14 adds Orders `application/get-order-detail.ts`, its `ports/order-detail-rea
 ## PR 19 — Google shared infrastructure
 
 PR 19: shared Google auth/JWT, Sheets client/constants/base/types physically live under `infrastructure/persistence/google-sheets`; Drive provider/factory/protocol types under `infrastructure/files/google-drive`. Legacy externals paths are explicit named forwards. Aggregate service/configuration and feature worksheets/headers remain legacy-owned; no parallel registry. [Exact file map](google-shared-infrastructure.md).
+
+
+## PR 21 — Orders and Shipments worksheet ownership
+
+PR21 places real Orders worksheet/header pairs under `modules/orders/infrastructure/google-sheets/{orders,order-items,order-bills}` and Shipment pairs under `modules/shipments/infrastructure/google-sheets/{shipments,shipment-orders}`. Existing externals paths are named compatibility forwards; root BaseGoogleSheet/client/types stay feature-agnostic. No registry or other worksheet relocation. [Exact ten-file ownership](orders-shipments-worksheet-ownership.md).

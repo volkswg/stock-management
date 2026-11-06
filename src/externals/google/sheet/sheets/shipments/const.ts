@@ -1,15 +1,1 @@
-export const SHIPMENTS_SHEET_HEADERS = [
-  "id",
-  "status",
-  "carrier",
-  "poNumber",
-  "shippingFee",
-  "remark",
-  "shippedAt",
-  "deliveredAt",
-  "createdAt",
-  "updatedAt",
-  "deletedAt",
-  "createdBy",
-  "shippingBillUrl",
-] as const;
+export { SHIPMENTS_SHEET_HEADERS } from "@/modules/shipments/infrastructure/google-sheets/shipments/const";
