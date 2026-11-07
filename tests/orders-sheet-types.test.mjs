@@ -1,3 +1,4 @@
+import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { completionExtraFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { hrFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
 import { expensesFiles, assertExpensesHistory } from "./helpers/expenses-business-history.mjs";
@@ -18,7 +19,7 @@ import {sheetTypesBefore,sheetTypeHash} from "./helpers/orders-sheet-type-histor
 test("four Orders Sheet type imports retain original complete declarations and identical emitted runtime code",()=>{
  const printer=ts.createPrinter();const emit=(file,text)=>ts.transpileModule(text,{fileName:file,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
  const body=(file,text)=>{const ast=ts.createSourceFile(file,text,ts.ScriptTarget.Latest,true);return ast.statements.filter(n=>!ts.isImportDeclaration(n)).map(n=>printer.printNode(ts.EmitHint.Unspecified,n,ast));};
- for(const [file,saved]of Object.entries(sheetTypesBefore.files)){assert.equal(sheetTypeHash(saved.source),saved.sha256);const current=readFileSync(file,"utf8");assert.deepEqual(body(file,current),body(file,saved.source));assert.equal(emit(file,current),emit(file,saved.source));}
+ for(const [file,saved]of Object.entries(sheetTypesBefore.files)){assert.equal(sheetTypeHash(saved.source),saved.sha256);const current=restoreOrdersLineSource(file);assert.deepEqual(body(file,current),body(file,saved.source));assert.equal(emit(file,current),emit(file,saved.source));}
 });
 
 test("exact import reversal preserves original hashes and every other production file remains byte-identical",async()=>{
@@ -29,7 +30,7 @@ test("exact import reversal preserves original hashes and every other production
 test("the four exact lint scopes require erased pure types and reject aggregate, relative, value, re-export and dynamic bypasses",async()=>{
  const {ESLint}=await import("eslint");const eslint=new ESLint();
  for(const file of Object.keys(sheetTypesBefore.files)){
-  const [actual]=await eslint.lintText(readFileSync(file,"utf8"),{filePath:file});assert.equal(actual.errorCount,0,JSON.stringify(actual.messages));
+  const [actual]=await eslint.lintText(restoreOrdersLineSource(file),{filePath:file});assert.equal(actual.errorCount,0,JSON.stringify(actual.messages));
   const [valid]=await eslint.lintText('import type { IGoogleSheetsService } from "@/externals/google/sheet/types"; export type T = IGoogleSheetsService;',{filePath:file});assert.equal(valid.errorCount,0,JSON.stringify(valid.messages));
   for(const source of [
    'import type { IGoogleSheetsService } from "@/externals/google/sheet"; export type T=IGoogleSheetsService;',
@@ -51,7 +52,7 @@ test("actual relocated worksheet type graph avoids the mixed index and stays one
   const host=ts.sys;
   const edges=new Set(),seen=new Set(),active=[],reached=new Set();
   function visit(file,from){assert.ok(!active.includes(file),[...active,file].join(" -> "));const owner=/^src\/modules\/(orders|shipments)\//.exec(file)?.[1]??from;if(owner&&from&&owner!==from)edges.add(`${from}->${owner}`);const key=`${owner}:${file}`;if(seen.has(key))return;active.push(file);reached.add(file);
-   const ast=ts.createSourceFile(file,source[file]??readFileSync(file,"utf8"),ts.ScriptTarget.Latest,true);
+   const ast=ts.createSourceFile(file,source[file]??restoreOrdersLineSource(file),ts.ScriptTarget.Latest,true);
    for(const n of ast.statements){if(!(ts.isImportDeclaration(n)||ts.isExportDeclaration(n))||!n.moduleSpecifier)continue;const target=ts.resolveModuleName(n.moduleSpecifier.text,resolve(file),options,host).resolvedModule?.resolvedFileName;const dep=target&&relative(process.cwd(),target).replaceAll("\\","/");if(dep?.startsWith("src/"))visit(dep,owner);}
    active.pop();seen.add(key);
   }

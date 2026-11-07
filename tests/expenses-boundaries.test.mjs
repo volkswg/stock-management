@@ -29,7 +29,7 @@ test('Expenses contracts/rules and legacy forwards retain original declarations 
 test('Expenses runtime/type graphs enforce pure application, public HR shop contract, browser debt reduction and unchanged legacy cycle',()=>{
  const graph=userStateGraph(),provider=p=>p.startsWith('src/services/')||p.startsWith('src/externals/')||p.startsWith('src/config/')||p.startsWith('src/app/');
  for(const types of [false,true]){
-  assert.deepEqual(graph.modules(types).sort(),types?['hr->expenses','inventory->hr','inventory->sales','sales->expenses','shipments->orders']:['inventory->hr','inventory->sales','shipments->orders']);
+  assert.deepEqual(graph.modules(types).sort(),types?['hr->expenses','inventory->hr','inventory->sales','line-workflows->inventory','line-workflows->orders','sales->expenses','shipments->orders']:['inventory->hr','inventory->sales','line-workflows->inventory','line-workflows->orders','shipments->orders']);
   for(const file of expensesNewFiles.filter(f=>f.startsWith('src/modules/expenses/'))){assert.equal(graph.trace(file,types,provider),null,file);assert.equal(graph.trace(file,types,p=>p.startsWith('src/modules/')&&!p.startsWith('src/modules/expenses/')),null,file);}
   for(const file of graph.all.filter(f=>f.startsWith('src/infrastructure/')))assert.equal(graph.trace(file,types,p=>p.startsWith('src/modules/')),null,file);
   for(const root of expenseBrowserFixed)assert.equal(graph.trace(root,types,p=>provider(p)&&p!==root||/\/modules\/expenses\/(?:server|application|infrastructure)/.test(p)),null,root);

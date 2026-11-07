@@ -1,6 +1,1 @@
-export enum LineTextCommand {
-  CreateOrder = "create-order",
-  CompleteBill = "complete-bill",
-  CompleteProducts = "complete-products",
-  Unknown = "unknown",
-}
+export {LineTextCommand}from "@/modules/line-workflows/contracts";

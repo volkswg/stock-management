@@ -1,4 +1,5 @@
-import type { LineMessageType } from "./enum";
+import type { LineReplyMessage } from "@/shared/types/line-protocol";
+export type { LineQuickReply, LineReplyMessage, MessageQuickReplyAction, LineWebhookPayload, LineEvent } from "@/shared/types/line-protocol";
 
 export interface ILineBotService {
   sendPush(userId: string, messages: LineReplyMessage[]): Promise<void>;
@@ -30,58 +31,6 @@ export interface ILineBotService {
     richMenuAliasId: string;
     richMenuId: string;
   }): Promise<void>;
-}
-
-export interface LineQuickReply {
-  items: Array<{
-    type: "action";
-    action: {
-      type: "message";
-      label: string;
-      text: string;
-    };
-  }>;
-}
-
-export type LineReplyMessage =
-  | {
-      type: "text";
-      text: string;
-      quickReply?: LineQuickReply;
-    }
-  | {
-      type: "template";
-      altText: string;
-      template:
-        | {
-            type: "buttons";
-            title?: string;
-            text: string;
-            actions: Array<{
-              type: "message" | "uri";
-              label: string;
-              text?: string;
-              uri?: string;
-            }>;
-          }
-        | {
-            type: "carousel";
-            columns: Array<{
-              title: string;
-              text: string;
-              actions: Array<{
-                type: "message" | "uri";
-                label: string;
-                text?: string;
-                uri?: string;
-              }>;
-            }>;
-          };
-    };
-
-export interface MessageQuickReplyAction {
-  label: string;
-  text: string;
 }
 
 export interface DownloadedMessageContent {
@@ -123,28 +72,3 @@ export interface RichMenuRequest {
         };
   }>;
 }
-
-export type LineWebhookPayload = {
-  events?: LineEvent[];
-};
-
-export type LineEvent = {
-  type: string;
-  replyToken?: string;
-  timestamp?: number;
-  webhookEventId?: string;
-  source?: {
-    userId?: string;
-    groupId?: string;
-  };
-  message?: {
-    id: string;
-    type: LineMessageType;
-    text?: string;
-    contentProvider?: {
-      type: string;
-      originalContentUrl?: string;
-      previewImageUrl?: string;
-    };
-  };
-};

@@ -64,7 +64,7 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
     if (file === "src/services/orders/createDraftOrder.ts") return load("src/modules/orders/contracts.ts");
     if (file === "src/services/utils/createSortableId.ts") return { createSortableId: createId };
     if (cache.has(file)) return cache.get(file);
-    if (!seamFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
+    if (file!=="src/shared/lib/is-record.ts" && !seamFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
     const imports = new Proxy({}, {
       getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
       get(_, specifier) {

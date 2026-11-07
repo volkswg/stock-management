@@ -1,10 +1,1 @@
-export enum MovementStartCommandEnum {
-  CreateMovement = "create:movement",
-  CreateNewMovement = "create:new-movement",
-  ResumeMovement = "resume:movement",
-}
-
-export enum EventKindEnum {
-    Movement = "movement",
-    Order = "order",
-}
+export {MovementStartCommandEnum,EventKindEnum}from "@/modules/line-workflows/contracts";

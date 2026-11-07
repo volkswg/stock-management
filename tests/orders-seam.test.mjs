@@ -1,3 +1,4 @@
+import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { assertOrderDetailHistory } from "./helpers/orders-detail-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -72,7 +73,7 @@ test("write adapter uses the existing OrdersSheet transport with one USER_ENTERE
 
 test("unmigrated image/draft implementations, barrel exports and detail orchestration remain unchanged", () => {
   const expected = JSON.parse(readFileSync(new URL("./fixtures/orders-seam-preserved.json", import.meta.url), "utf8"));
-  for (const [file, hash] of Object.entries(expected.files)) assert.equal(createHash("sha256").update(readFileSync(file)).digest("hex"), hash, file);
+  for (const [file, hash] of Object.entries(expected.files)) assert.equal(createHash("sha256").update(restoreOrdersLineSource(file)).digest("hex"), hash, file);
   assertOrderDetailHistory(expected.detailBodyHash);
 });
 

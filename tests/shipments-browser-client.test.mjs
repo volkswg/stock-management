@@ -1,3 +1,4 @@
+import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { sheetTypeFiles, assertOrdersSheetTypeHistory } from "./helpers/orders-sheet-type-history.mjs";
 import { assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import { assertShipmentEnumContractHistory } from "./helpers/shipments-enum-history.mjs";
@@ -21,7 +22,7 @@ const one = (tree, name, predicate = () => true) => { const e = elements(tree, n
 
 test("original client raw bytes, every function/guard and all seven exported types remain identical", () => {
   const file = apiPath(), source = parse(file), exported = n => n.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
-  assert.equal(hash(readFileSync(file)), baseline.rawHash);
+  assert.equal(hash(restoreOrdersLineSource(file)), baseline.rawHash);
   const body = source.statements.filter(n => !ts.isImportDeclaration(n) && !ts.isExportDeclaration(n)).map(n => printer.printNode(ts.EmitHint.Unspecified, n, source)).join("\n");
   assert.equal(hash(body), baseline.bodyHash);
   assert.deepEqual(Object.keys(api(() => assert.fail("No HTTP during module loading"))).sort(), baseline.exports.toSorted());
@@ -37,7 +38,7 @@ test("original client raw bytes, every function/guard and all seven exported typ
     if (file === "src/modules/shipments/contracts.ts") { assertShipmentEnumContractHistory(file, expected); continue; }
     if (file === "src/modules/orders/server.ts") assertOrdersDetailServerHistory(file, expected);
     else if (file === "src/app/api/shipments/[id]/route.ts") assertShipmentDriveRouteHistory(file, expected);
-    else assert.equal(hash(readFileSync(file)), expected, file);
+    else assert.equal(hash(restoreOrdersLineSource(file)), expected, file);
   }
 });
 

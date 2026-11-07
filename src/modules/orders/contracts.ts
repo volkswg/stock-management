@@ -102,3 +102,70 @@ export type ReplacedOrderProductImage = {
   imageUrl: string;
   updatedAt: string;
 };
+
+export type Order = {
+  id: string;
+  status: OrderStatus;
+  seller: string;
+  totalPrice: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+  createdBy: string;
+  remark: string;
+};
+
+export type OrderItem = {
+  id: string;
+  orderId: string;
+  imageUrl: string;
+  quoteQuantity: string;
+  deliveredQuantity: string;
+  productCode: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+  createdBy: string;
+};
+
+export type OrderBill = {
+  id: string;
+  orderId: string;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+  createdBy: string;
+};
+
+export type UpdateOrderItemQuantityResult =
+  | { outcome: "updated"; quantity: string; updatedAt: string }
+  | { outcome: "not_found" };
+
+export type UpdateOrderItemProductCodeResult =
+  | { outcome: "updated"; productCode: string; updatedAt: string }
+  | { outcome: "not_found" };
+
+export type OrderDetailsUpdate = {
+  status: OrderStatus;
+  totalPrice: number | null;
+  remark: string;
+  updatedAt: string;
+};
+
+export type UpdateOrderDetailsResult =
+  | { outcome: "updated"; order: OrderDetailsUpdate }
+  | { outcome: "not_found" }
+  | { outcome: "invalid_status" };
+
+export type CompleteWebOrderPriceResult =
+  | {
+      outcome: "updated";
+      status: OrderStatus.Complete;
+      totalPrice: number;
+      updatedAt: string;
+    }
+  | { outcome: "not_found" }
+  | { outcome: "invalid_status" };
+
+export type OrderImageType = "bill" | "product";

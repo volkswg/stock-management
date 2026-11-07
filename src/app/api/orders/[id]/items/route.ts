@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { isRecord } from "@/features/backend/shared/utils";
-import { updateOrderProducts, type OrderProductUpdate } from "@/services/orders";
+import { updateOrderProducts } from "@/modules/orders/server";
+import type {OrderProductUpdate}from "@/modules/orders/contracts";
 
 export const runtime = "nodejs";
 
