@@ -1,6 +1,6 @@
 # Architecture guide
 
-Base ownership verified against merged main `4952644f06fcfc216c9351c347dcc806d887bb09` (PR26); this branch adds only the movement schema prerequisite, not the blocked LINE user-state worksheet move. This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
+Base ownership verified against merged main `72204e095d4b1e9425eb4f573bbe23c620bc99a7` (PR27); this branch adds only the Inventory/Sales query dependency prerequisite. The physical LINE user-state worksheet move is deferred to PR29. This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
 
 | Read for | Canonical document |
 | --- | --- |

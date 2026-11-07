@@ -2,15 +2,13 @@ import type {
   GoogleSheetCellValue,
   GoogleSheetRow,
   IGoogleSheetsService,
-} from "@/externals/google/sheet";
-import {
-  SALES_RECEIPT_HEADERS,
-  SALES_RECEIPT_ITEM_HEADERS,
-  SALES_RECEIPT_PAYMENT_HEADERS,
-  SALES_RECEIPT_SYNC_HEADERS,
-} from "@/externals/google/sheet";
-import type { Expense } from "@/services/expenses";
-import type { SalesProfitCostOverride } from "./manageSalesProfitCostOverrides";
+} from "@/externals/google/sheet/types";
+import { SALES_RECEIPT_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipts/const";
+import { SALES_RECEIPT_ITEM_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-items/const";
+import { SALES_RECEIPT_PAYMENT_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-payments/const";
+import { SALES_RECEIPT_SYNC_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-syncs/const";
+import type { Expense } from "@/services/expenses/types";
+import type { SalesProfitCostOverride } from "@/modules/sales/contracts";
 
 export type GoogleSheetsDailySalesItemRow = {
   itemId: string;

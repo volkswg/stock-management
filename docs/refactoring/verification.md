@@ -129,3 +129,22 @@ One original helper characterization passes before edits. The source witness and
 Final build ran `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` in a clean source copy with only tracked .env.example and existing hardlinked dependencies. No application env files/inherited provider credentials, credential reads/deletions or installs. Final built production bytes match this branch. App-paths SHA-256 remains `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`. All 23 page/35 API source contracts and previous fixture bytes remain unchanged. Seventy-seven changed-document local links/fragments resolve.
 
 Only two existing production files change and one legacy-local schema leaf is added; every other production byte is identical to base. Five added tests cover original header/await/error behavior, exact full-source/AST/history restoration, shared arrays/function/export descriptors, original real workflow golden, and actual/virtual graphs plus strict import bypasses. No inherited test is removed or skipped. No baseline or final test/type/build error or new lint warning. UserStateSheet relocation remains deferred pending a fresh main/consumer audit, including the explicitly retained legacy Sales/registry aggregation.
+
+
+## PR28 Inventory Sales-query dependency prerequisite
+
+Verified base `72204e095d4b1e9425eb4f573bbe23c620bc99a7`, exact main / merged PR27, clean starting tree. Branch `refactor/inventory-sales-query-dependency`; Node 24.22.1, existing dependencies. The physical worksheet move is not implemented: preflight found the forbidden Inventory/Sales/registry/LINE edge and selected the separately authorized prerequisite.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| npm test | 447 pass; one added original characterization separately passes before edits | 452 = 447 inherited + 5 new; zero failures/skips |
+| npm run lint | Exit 0, inherited unused shipmentRow warning | Exit 0; same inherited warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free build | Pass, /tmp/pr28-baseline-safe | Pass, /tmp/pr28-final-safe |
+| Route contracts / app-paths | 23/35; original expected hash | Unchanged fixture/routes and byte-identical manifest |
+
+The immutable inventory-sales-query-before fixture preserves original source/AST/output/read-order and export evidence. Current/legacy queries and actual stock-count HTTP run with fake Sheets; runtime/type and negative regression graphs include the proposed future worksheet move. Existing baseline warning is separate; checks are Codex-local, not independent CI. No live providers, credentials, production records, operational scripts, deployment or browser/concurrency verification.
+
+Both isolated builds used existing hardlinked dependencies, only tracked .env.example and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`, excluding application env files and inherited provider credentials. Filenames inspected only; no credential reads/deletions or installs. Final production bytes match the built copy. Manifest SHA-256 remains `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`; all 23 page/35 API source contracts and original fixtures stay unchanged. Seventy-eight changed-doc local links/fragments resolve.
+
+Five added tests cover original/current daily/dashboard/profit outputs and four-read/error/pending parity, exact source/DTO/declaration/fixture preservation, legacy function/header identity and import evaluation, actual stock-count HTTP 200/500 behavior with real queries, and runtime/type/browser/negative import graphs. No inherited test removed or skipped. All unrelated production bytes, PR27 fix, physical worksheets and provider/config/env/package/schema/UI/API sources remain unchanged. No baseline or final test/type/build errors or new lint warnings. Independent GitHub/Vercel CI, live provider permissions, real-browser visuals and concurrency safety are not claimed.

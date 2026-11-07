@@ -1,3 +1,4 @@
+import { salesQueryFiles, salesQueryNewFiles, assertSalesQueryHistory } from "./helpers/inventory-sales-query-history.mjs";
 import { movementSchemaFiles, movementSchemaNewFiles, assertMovementSchemaHistory } from "./helpers/movement-schema-history.mjs";
 import { inventoryWorksheetFiles, inventoryWorksheetDestinations, assertInventoryWorksheetHistory } from "./helpers/inventory-worksheet-history.mjs";
 import assert from "node:assert/strict";
@@ -19,8 +20,8 @@ test("original three HR worksheets retain headers, dynamic default/explicit rang
 test("six exact HR moves reconstruct original declarations/bytes; unique owners, all other production and earlier fixtures remain unchanged",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs"),{hrWorksheetFiles,hrWorksheetDestinations,hrWorksheetHash,assertHrWorksheetHistory}=await import("./helpers/hr-worksheet-history.mjs");
  const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);
- for(const [file,hash]of Object.entries(hrWorksheetsBefore.productionHashes)){if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else assert.equal(hrWorksheetHash(readFileSync(file)),hash,file);}
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(hrWorksheetsBefore.productionHashes,f)).sort(),[...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles].sort());
+ for(const [file,hash]of Object.entries(hrWorksheetsBefore.productionHashes)){if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else assert.equal(hrWorksheetHash(readFileSync(file)),hash,file);}
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(hrWorksheetsBefore.productionHashes,f)).sort(),[...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles].sort());
  for(const [file,hash]of Object.entries(hrWorksheetsBefore.fixtureHashes))assert.equal(hrWorksheetHash(readFileSync(file)),hash,file);
  const sources=walk("src").filter(f=>f.endsWith(".ts")).map(f=>readFileSync(f,"utf8")).join("\n");
  for(const e of Object.values(hrWorksheetsBefore.moves))assert.equal((sources.match(new RegExp(`export ${e.to.endsWith("const.ts")?"const":"class"} ${e.export}\\b`,"g"))??[]).length,1,e.export);

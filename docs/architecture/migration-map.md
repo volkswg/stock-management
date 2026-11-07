@@ -1,6 +1,6 @@
 # Current ownership and remaining legacy
 
-Base verified at main `4952644f06fcfc216c9351c347dcc806d887bb09`, after merged PR26. This branch adds only the movement schema prerequisite; all physical worksheet owners remain unchanged. This replaces the original base-wide proposed destination list as the current map. The [progress/history index](../refactoring/progress.md#document-consolidation-index) preserves that original proposal and all PR-specific detail; a historical proposed path is not authorization to move a file.
+Base verified at main `72204e095d4b1e9425eb4f573bbe23c620bc99a7`, after merged PR27. This branch adds only the Inventory/Sales query dependency prerequisite; all physical worksheet owners remain unchanged. This replaces the original base-wide proposed destination list as the current map. The [progress/history index](../refactoring/progress.md#document-consolidation-index) preserves that original proposal and all PR-specific detail; a historical proposed path is not authorization to move a file.
 
 | Slice | Actual owner now | Compatibility / unfinished work |
 | --- | --- | --- |
@@ -62,3 +62,10 @@ PR26 moves exactly three Inventory files with three explicit named old-path forw
 On base `4952644f06fcfc216c9351c347dcc806d887bb09` (merged PR26), this branch separates MASTER_HEADERS, DETAIL_HEADERS and ensureHeader into the legacy-local Inventory leaf `services/movements/worksheet-schema.ts`. `manageMovements.ts` imports that leaf; `state.ts` retains aliases to the exact same arrays/function. This removes Inventory movement business → mixed session state → future LINE-private user-state header and the two movement-page erased paths. No worksheet moves, public DTO migration, state/context algorithm or provider changes occur.
 
 The user-state worksheet remains at its original physical location. Its next move needs a fresh base/full consumer audit. Stock counts still calls legacy Sales queries which reach the complete aggregate Sheets registry; that unchanged chain remains explicit debt, not an ownership firewall. Physical RecordsSheet and its payroll/stock-adjustment subclasses remain legacy. Broader LINE/Inventory use-case, quantity-helper, compatibility and registry cleanup are deferred.
+
+
+## Inventory Sales-query dependency prerequisite
+
+PR28's mandatory preflight confirms stock-counts → legacy Sales barrel → daily/dashboard query → mixed Sheets registry → future LINE-private UserStateSheet. The direct movement schema path was already fixed in PR27 and stays intact. This branch changes the stock-count import to the direct existing Sales query and replaces that query's mixed Sheets imports with four explicit Sales header leaves and erased pure Sheet types.
+
+The query also replaces erased Expense-barrel and override-implementation dependencies with the existing pure Expense types leaf and a new browser-safe Sales contracts leaf. Only the existing SalesProfitCostOverride alias moves verbatim there; its old implementation file/barrel retain erased compatibility exports. This type move is necessary to close the type-inclusive registry path, not a broader Sales DTO/use-case migration. Every function body, worksheet and other consumer stays unchanged. The physical UserStateSheet/header move is explicitly deferred to PR29 after review/merge and a fresh consumer audit.
