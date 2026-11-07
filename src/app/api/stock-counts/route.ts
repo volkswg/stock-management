@@ -5,7 +5,7 @@ import { isRecord } from "@/features/backend/shared/utils";
 import {
   getMonthlyStockCounts,
   saveMonthlyStockCount,
-} from "@/services/stock-counts";
+} from "@/modules/inventory/server";
 
 export const runtime = "nodejs";
 

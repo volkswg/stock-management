@@ -1,3 +1,5 @@
+import { inventoryApplicationBoundaries } from "./eslint/inventory-application-boundaries.mjs";
+import { salesApplicationBoundaries } from "./eslint/sales-application-boundaries.mjs";
 import { hrWorkforceBoundaries } from "./eslint/hr-workforce-boundaries.mjs";
 import { hrPayrollBoundaries } from "./eslint/hr-payroll-boundaries.mjs";
 import { expensesBoundaries } from "./eslint/expenses-boundaries.mjs";
@@ -31,6 +33,8 @@ const eslintConfig = defineConfig([
   ...expensesBoundaries,
   ...hrPayrollBoundaries,
   ...hrWorkforceBoundaries,
+  ...salesApplicationBoundaries,
+  ...inventoryApplicationBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

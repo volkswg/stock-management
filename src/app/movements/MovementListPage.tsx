@@ -28,7 +28,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import type { ProductMovementMasterRecord } from "@/services/movements";
+import type { ProductMovementMasterRecord } from "@/modules/inventory/contracts";
 import { getMovements } from "./api";
 import {
   formatBangkokDate,

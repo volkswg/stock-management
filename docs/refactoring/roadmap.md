@@ -2,16 +2,16 @@
 
 This is the single authoritative forward plan, based on [current ownership](../architecture/migration-map.md). Completed PRs belong in [progress](progress.md), not as competing numbered future PRs. A target is not authorization to implement all layers at once.
 
-## Next bounded work
+## Authorized completion sequence
 
-1. Review complete current HR business ownership: employee/compensation/attendance applications, semantic persistence ports/adapters and owned payroll readers, alongside the merged payroll/advance/settlement milestone. All eight HTTP routes use named HR entrypoints; the prior cycle/browser fixes remain closed. No implementation blocker remains.
-2. Next large milestone: Sales query/report/sync application ownership and a public payroll-dashboard seam, chosen from actual consumers. Keep concrete Sales/Expenses composition outside HR core. Retain HR aliases, index and aggregate registry until the separately authorized PR36 compatibility audit proves retirement safe. Do not automatically start another milestone from this plan.
-3. Continue Sales query/sync/report application ownership and remaining Orders/Inventory business seams from actual consumers. Reduce aggregate registry composition only after explicit injected ports cover its callers. Preserve compatibility exports until a complete external/type/script audit permits retirement.
-4. Keep runtime/type browser isolation and an empty full-source file-cycle baseline. The formerly inherited payroll cycle and four registered erased browser paths are historical negative witnesses, not allowances for new debt. Preserve original fixtures and prove restored forbidden paths still fail.
-5. Migrate LINE command/reply/session journeys after Orders/Inventory public contracts exist. Move pure quantity rules to Inventory first; preserve signatures, both movement modes, replies, state/retry/partial-failure behavior and rich-menu opt-in operations. Workspace shell/true generic shared cleanup follows proven ownership.
-6. Retire named legacy forwards/barrels/registry only after full consumer and identity audits (including scripts/types/external compatibility). Separate provider replacement, if authorized, from compatibility retirement.
+The owner has authorized a continuous multi-PR assignment. Each later branch starts at the exact previous head and targets that parent branch; publication does not authorize merge or deployment.
 
-No full Orders, Shipments, Sales, Inventory or HR milestone is declared complete by a contract, worksheet or single-use-case move.
+1. Sales + Inventory: business applications, semantic persistence ports/adapters and public Sales dashboard consumers are complete with 510 passing tests and successful lint/typecheck/isolated build; publication is the review gate. HR applications are reused unchanged.
+2. Orders + LINE workflows: complete remaining mutations/image/bill coordination; move journeys and sessions through public Orders/Inventory operations. The public Inventory quantity prerequisite is complete. Do not move raw Inventory persistence into LINE application.
+3. External infrastructure: move LINE/Loyverse protocol clients/factories into root external infrastructure, preserving constructor/export identities, HTTP/pagination/error behavior and provider configuration.
+4. Final cleanup: audit obsolete implementations/barrels/forwards and aggregate composition against every runtime/type/script/test/external consumer; retire only proven unnecessary surfaces, enforce final boundaries and consolidate canonical documentation.
+
+All milestones preserve source routes, calculations and existing concurrency/partial-failure limits. Keep original fixtures and historical negatives intact. Continue independent safe work if a concrete dependency blocker requires a split; document the exact affected surface rather than claiming completion.
 
 ## Required behavior evidence by future slice
 

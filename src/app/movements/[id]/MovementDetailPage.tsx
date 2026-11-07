@@ -30,8 +30,8 @@ import {
 } from "antd";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import type { ProductMovementRecord } from "@/services/movements";
-import { isValidMovementQuantity, parseQuantity } from "@/features/backend/line/services/movements/utils";
+import type { ProductMovementRecord } from "@/modules/inventory/contracts";
+import { isValidMovementQuantity, parseQuantity } from "@/modules/inventory/quantity";
 import {
   deliverMovement,
   getMovement,

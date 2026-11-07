@@ -17,6 +17,7 @@ export function createHRSourceLoader({imports={},globals={}}={}){
    if(spec==='@/externals/google/sheet/sheets/employees/const')return load('src/modules/hr/infrastructure/google-sheets/employees/const.ts');
    if(spec==='./manageEmployees')return {listEmployees:forbidden,listEmployeeCompensations:forbidden};
    if(spec==='./manageEmployeeTimesheets')return {listEmployeeTimesheetsForMonth:forbidden};
+   if(spec==='@/modules/sales/server')return {createSalesDashboardReader:service=>({readSales:input=>(imports['@/services/sales/getGoogleSheetsDailySales']?.getGoogleSheetsSalesDashboard??forbidden)({...input,googleSheetsService:service})})};
    if(spec==='@/services/sales/getGoogleSheetsDailySales')return {getGoogleSheetsSalesDashboard:forbidden};
    if(spec==='./salary-advance-shops')return {createSalaryAdvanceShops:service=>({listShops:()=>{const expense=imports['@/modules/expenses/server']??imports['@/services/expenses'];assert.ok(expense,'Unstubbed HR shop reader');return expense.listExpenseShops(service);}})};
    let target=spec.startsWith('@/')?'src/'+spec.slice(2):posix.normalize(posix.dirname(file)+'/'+spec);target+=existsSync(target+'.ts')?'.ts':'/index.ts';return load(target);

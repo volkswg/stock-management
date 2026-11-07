@@ -1,7 +1,7 @@
 import type {
   ProductMovementMasterRecord,
   ProductMovementRecord,
-} from "@/services/movements";
+} from "@/modules/inventory/contracts";
 
 export async function getMovements(
   filters: { date?: string; fromDate?: string; toDate?: string },

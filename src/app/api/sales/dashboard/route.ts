@@ -4,7 +4,7 @@ import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   getGoogleSheetsSalesDashboard,
   isValidBangkokSalesDate,
-} from "@/services/sales";
+} from "@/modules/sales/server";
 
 export const runtime = "nodejs";
 

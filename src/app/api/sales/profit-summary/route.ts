@@ -4,7 +4,7 @@ import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   getGoogleSheetsProfitSummary,
   listSalesProfitCostOverrides,
-} from "@/services/sales";
+} from "@/modules/sales/server";
 
 import { listExpenses, listExpenseShops } from "@/modules/expenses/server";
 
