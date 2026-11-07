@@ -18,10 +18,11 @@ export function assertMovementSchemaHistory(file,expected){
 }
 // Closed original/current state graph; no config/provider implementations or network.
 export function movementSchemaGraph({original=false,globals={}}={}){
+ const owner="src/modules/line-workflows/infrastructure/google-sheets/user-state/const.ts";
  const state="src/services/movements/state.ts",header="src/externals/google/sheet/sheets/user-state/const.ts",leaf=movementSchemaBefore.newFile,cache=new Map();
- function load(file){assert.ok([state,header,leaf].includes(file),`Unapproved schema dependency: ${file}`);if(cache.has(file))return cache.get(file);const source=original&&file===state?movementSchemaBefore.files[state].source:readFileSync(file,"utf8"),exports={};cache.set(file,exports);
+ function load(file){assert.ok([state,header,leaf,owner].includes(file),`Unapproved schema dependency: ${file}`);if(cache.has(file))return cache.get(file);const source=original&&file===state?movementSchemaBefore.files[state].source:readFileSync(file,"utf8"),exports={};cache.set(file,exports);
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-  const context=vm.createContext({exports,Error,Date,JSON,fetch:()=>assert.fail("Live network forbidden"),...globals,require(specifier){if(file===state&&specifier==="./worksheet-schema")return load(leaf);if(file===state&&specifier==="@/externals/google/sheet/sheets/user-state/const")return load(header);if(file===state&&specifier==="@/services/utils/createSortableId")return {createSortableId:()=>"synthetic-id"};throw Error(`Unapproved schema import: ${file}: ${specifier}`);}});
+  const context=vm.createContext({exports,Error,Date,JSON,fetch:()=>assert.fail("Live network forbidden"),...globals,require(specifier){if(file===header&&specifier==="@/modules/line-workflows/infrastructure/google-sheets/user-state/const")return load(owner);if(file===state&&specifier==="./worksheet-schema")return load(leaf);if(file===state&&specifier==="@/externals/google/sheet/sheets/user-state/const")return load(header);if(file===state&&specifier==="@/services/utils/createSortableId")return {createSortableId:()=>"synthetic-id"};throw Error(`Unapproved schema import: ${file}: ${specifier}`);}});
   new vm.Script(code,{filename:file}).runInContext(context);return exports;
  }return {load,state:()=>load(state),cache};
 }

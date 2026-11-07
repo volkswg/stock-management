@@ -148,3 +148,26 @@ The immutable inventory-sales-query-before fixture preserves original source/AST
 Both isolated builds used existing hardlinked dependencies, only tracked .env.example and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`, excluding application env files and inherited provider credentials. Filenames inspected only; no credential reads/deletions or installs. Final production bytes match the built copy. Manifest SHA-256 remains `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`; all 23 page/35 API source contracts and original fixtures stay unchanged. Seventy-eight changed-doc local links/fragments resolve.
 
 Five added tests cover original/current daily/dashboard/profit outputs and four-read/error/pending parity, exact source/DTO/declaration/fixture preservation, legacy function/header identity and import evaluation, actual stock-count HTTP 200/500 behavior with real queries, and runtime/type/browser/negative import graphs. No inherited test removed or skipped. All unrelated production bytes, PR27 fix, physical worksheets and provider/config/env/package/schema/UI/API sources remain unchanged. No baseline or final test/type/build errors or new lint warnings. Independent GitHub/Vercel CI, live provider permissions, real-browser visuals and concurrency safety are not claimed.
+
+## PR29 LINE user-state worksheet ownership
+
+Verified base `48cf8d6d011544206cafa7ac35eeeafde5f22be9`, exact main after merged PR28; clean initial tree. Branch `refactor/line-user-state-worksheet-ownership`; Node 24.22.1, existing dependencies. Git fetch failed at the configured proxy; GitHub connector metadata verified the exact signed commit/tree instead. No main changes. Results are Codex-local, not independent GitHub/Vercel CI.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| npm test | 452 pass, zero failures/skips | 458 = 452 inherited + 6 new; zero failures/skips |
+| npm run lint | Exit 0; inherited unused shipmentRow warning | Exit 0; same warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free build | Pass, /tmp/pr29-baseline-safe | Pass, /tmp/pr29-final-safe |
+| Page / API source contracts | 23 / 35 | Unchanged; original fixture retained |
+| App-paths manifest | Original expected hash | Byte-identical |
+
+Both builds use only tracked .env.example and existing dependencies with `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. The initial hardlink attempt from the mounted repository dependency directory hit a cross-device boundary; it was replaced by hardlinks from the existing isolated dependency tree on the same filesystem. No install, new lockfile or application secret access. Only environment filenames were inspected. Final built production source matches the reviewed branch byte-for-byte.
+
+Manifest SHA-256 stays `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`. Only the two legacy worksheet leaves and their two physical destinations change under src. PR27 schema aliases and PR28 direct query/pure imports remain exact. All prior fixture hashes are unchanged; historical inventories reconcile just these two named moves through inverse import reconstruction.
+
+Six new tests exercise actual original/current worksheet and client functions, mutable call-time A:H ranges, explicit arguments/payload identity, deleteRow indices, pending/error behavior, real movement session creation/read/update/delete, header repair and original conditional retry/provisioning, strict class/header/index/registry identity, source/AST/history, compile-time compatibility and exact lint/resolved graph guards. A new-test assumption that the inner worksheets index exported the header was corrected to assert its original absence; the index remains untouched. No inherited test was removed, skipped or weakened.
+
+Protected module closures are runtime/type file-acyclic with only Shipments→Orders, no new Inventory→LINE/private or root→feature edge. Full browser closure sets match after canonicalizing only the two relocated paths, retaining exactly four erased debts and no runtime provider path. The full-source audit separately records an inherited erased cycle: calculateEmployeePayroll → manageSalaryAdvances → calculateEmployeePayroll. Its exact before/after trace is asserted; no cycle is introduced or silently excused. Broader legacy cycle/debt cleanup is deferred.
+
+No live Google/LINE/Loyverse requests, production credentials/data, operational scripts, deployment, real-browser visual or concurrency verification. Synthetic session/transport tests do not establish live permissions/availability or stronger failure atomicity. All changed canonical Markdown links/fragments are validated; no standalone PR report is added.
