@@ -156,3 +156,14 @@ The PR28 gate fails on the unchanged stock-counts→Sales barrel→read query→
 Erased imports matter: the old Expense barrel and SalesProfitCostOverride implementation would still lead back to provider composition in the type graph. Use Expense's existing pure leaf and transfer the single original override DTO declaration verbatim to Sales contracts, forwarding its old type export. No copied DTO, changed signature, new runtime contract export, report/financial calculation, worksheet/provider move or service barrel retirement. All original non-import query declarations/functions remain exact; only the reviewed DTO declaration relocates.
 
 New regression tests retain original complete sources, ASTs, reports and read events; restore the exact preflight failure, then prove direct/barrel/type-only regressions fail the dependency gate. Existing PR27 assertions retain their old source-backed Sales trace and now assert its named removal instead of regenerating old evidence. Four inherited erased browser debts remain; other legacy Sales/Expense/HR aggregations are still future work.
+
+
+## LINE user-state physical ownership
+
+After PR27's legacy-local movement schema separation and PR28's direct Inventory/Sales query prerequisite, PR29 moves only UserStateSheet and its const.ts to LINE infrastructure. Root Google transport stays feature-neutral. The old two paths forward the unique class/array; no provider, service, registry or business code moves.
+
+Keep all four method bodies verbatim and change only the three necessary external import strings. Headers remain mutable; readRows computes A:H from their current length on every call. deleteRow delegates the original row number without extra validation. Constructors remain lazy and share BaseGoogleSheet/prototype identity through legacy leaves, indexes and GoogleSheetsService. The inner index does not gain a header export it never had.
+
+Actual original/current fake-client and real-client/fake-fetch tests preserve explicit/default ranges, payload identity, pending operations, original errors, USER_ENTERED/INSERT_ROWS, quoted URLs and deleteDimension indices. Existing movement session tests retain header repair, conditional provisioning only on the original Sheets 400 invalid-range failure, batch/fallback ordering, context/save/read/delete outcomes and quota failure propagation. No new retry, stronger concurrency claim, validation or server-only marker is introduced.
+
+The immutable `tests/fixtures/user-state-worksheet-before.json` records original sources/declarations/hashes, operations, consumer edges and prior evidence. Exact inverse imports reconcile only two historical inventory entries; all prior fixture bytes remain authoritative. Broader LINE service/quantity-rule extraction, RecordsSheet inheritance, registry retirement, four erased browser debts and the inherited payroll type cycle require separate review.

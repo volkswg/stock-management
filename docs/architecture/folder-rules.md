@@ -43,3 +43,5 @@ The movement worksheet-schema prerequisite is a narrow legacy-local split: the e
 
 
 Sales contracts now own the one existing SalesProfitCostOverride alias required by the legacy read query. Its old service path forwards the type. Other Sales report aliases remain in their current query file; there is no new Sales application layer. Legacy Sales queries own their explicit feature header dependencies, while Inventory uses the named direct query until a separately scoped use-case/port migration.
+
+LINE user-state persistence now owns only `modules/line-workflows/infrastructure/google-sheets/user-state/{UserStateSheet.ts,const.ts}`. The original leaves are named compatibility forwards; session workflows and aggregate service/factory/indexes stay legacy. The worksheet depends only on root BaseGoogleSheet, erased generic types, the range helper and its own header. This does not move LINE business services.

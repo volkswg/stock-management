@@ -1,3 +1,4 @@
+import { userStateFiles, userStateDestinations, assertUserStateHistory } from "./helpers/user-state-worksheet-history.mjs";
 import { salesQueryFiles, salesQueryNewFiles, assertSalesQueryHistory } from "./helpers/inventory-sales-query-history.mjs";
 import { movementSchemaFiles, movementSchemaNewFiles, assertMovementSchemaHistory } from "./helpers/movement-schema-history.mjs";
 import { inventoryWorksheetFiles, inventoryWorksheetDestinations, assertInventoryWorksheetHistory } from "./helpers/inventory-worksheet-history.mjs";
@@ -22,9 +23,9 @@ for(const spec of worksheetBefore.worksheets)test(`original worksheet ${spec.nam
 
 test("all ten physical files restore original bytes/declarations and all other production/previous fixture bytes remain unchanged",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs");const {worksheetFiles,worksheetDestinations,worksheetHash,assertWorksheetHistory}=await import("./helpers/worksheet-history.mjs");
- for(const [file,hash]of Object.entries(worksheetBefore.productionHashes)){if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else assert.equal(worksheetHash(readFileSync(file)),hash,file);}
+ for(const [file,hash]of Object.entries(worksheetBefore.productionHashes)){if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else assert.equal(worksheetHash(readFileSync(file)),hash,file);}
  const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(worksheetBefore.productionHashes,f)).sort(),[...worksheetDestinations,...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles].sort());
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(worksheetBefore.productionHashes,f)).sort(),[...worksheetDestinations,...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(worksheetBefore.fixtureHashes))assert.equal(worksheetHash(readFileSync(`tests/fixtures/${file}`)),hash,file);
 });
 

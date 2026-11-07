@@ -1,3 +1,4 @@
+import { userStateFiles, userStateDestinations, assertUserStateHistory } from "./helpers/user-state-worksheet-history.mjs";
 import { salesQueryFiles, salesQueryNewFiles, assertSalesQueryHistory } from "./helpers/inventory-sales-query-history.mjs";
 import { movementSchemaFiles, movementSchemaNewFiles, assertMovementSchemaHistory } from "./helpers/movement-schema-history.mjs";
 import { inventoryWorksheetFiles, inventoryWorksheetDestinations, assertInventoryWorksheetHistory } from "./helpers/inventory-worksheet-history.mjs";
@@ -60,10 +61,10 @@ test("all legacy named forwards evaluate the same cached runtime constructors/fu
 test("every reviewed physical move restores its entire original source and no other production bytes change",async()=>{
  const {assertGoogleHistory,googleFiles,googleDestinations}=await import("./helpers/google-infrastructure.mjs");
  for(const [file,expected] of Object.entries(googleBefore.productionHashes)){
-  if(salesQueryFiles.has(file))assertSalesQueryHistory(file,expected);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,expected);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,expected);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,expected);else if(directoryFiles.has(file))assertDirectoryHistory(file,expected);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,expected);else if(worksheetFiles.has(file))assertWorksheetHistory(file,expected);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,expected);else if(googleFiles.has(file))assertGoogleHistory(file,expected);else assert.equal(hash(readFileSync(file)),expected,file);
+  if(userStateFiles.has(file))assertUserStateHistory(file,expected);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,expected);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,expected);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,expected);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,expected);else if(directoryFiles.has(file))assertDirectoryHistory(file,expected);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,expected);else if(worksheetFiles.has(file))assertWorksheetHistory(file,expected);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,expected);else if(googleFiles.has(file))assertGoogleHistory(file,expected);else assert.equal(hash(readFileSync(file)),expected,file);
  }
  const {readdirSync}=await import("node:fs");const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(googleBefore.productionHashes,f)).sort(),[...googleDestinations,...worksheetDestinations,...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles].sort());
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(googleBefore.productionHashes,f)).sort(),[...googleDestinations,...worksheetDestinations,...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...userStateDestinations].sort());
 });
 
 for(const historical of [true,false])test(`${historical?"original":"production"} service-account validates lazily, signs exact claims and retains payload/cache failures`,async()=>{

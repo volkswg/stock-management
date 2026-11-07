@@ -2,7 +2,7 @@
 
 ## Verified current state
 
-GitHub confirms PRs 1–27 are merged. Latest reviewed main is `72204e095d4b1e9425eb4f573bbe23c620bc99a7` (PR27), tree `05493ac91c26c0084238fd762a7ed437288d679f`. Source owners were checked against actual module/root files, compatibility forwards, server exports and remaining legacy worksheets, rather than inferred from PR titles alone.
+GitHub confirms PRs 1–28 are merged. Latest reviewed main is `48cf8d6d011544206cafa7ac35eeeafde5f22be9` (PR28), tree `6e6f0fc15d44ab5b5227c513f342bdd4caf7a61f`. Source owners were checked against actual module/root files, compatibility forwards, server exports and remaining legacy worksheets, rather than inferred from PR titles alone.
 
 Completed **slices** and partially migrated features are separated in the [migration map](../architecture/migration-map.md). The [roadmap](roadmap.md) is the only forward plan. In particular, actual PR20 was the Orders type-import prerequisite and actual PR23 was the Inventory employee-directory prerequisite, despite earlier task proposals for larger worksheet moves. PR25 completed the six core HR worksheet files; PR26 completed three Inventory worksheet files. This branch proposes only the movement schema prerequisite. Payroll/other HR and broader Inventory ownership remain pending. No feature-wide completion percentage or full Shipments milestone completion is claimed.
 
@@ -148,7 +148,7 @@ Base `4952644f06fcfc216c9351c347dcc806d887bb09`, merged PR26; branch `refactor/m
 Actual and virtual future user-state graphs show the direct Inventory movement path and two movement client erased paths removed, with protected runtime/type module direction still Shipments→Orders. Four mixed-registry browser debts remain. Stock counts still reaches the aggregate registry through unchanged legacy Sales queries; that path is explicitly asserted, not treated as a firewall or silently migrated. Worksheet relocation, RecordsSheet hierarchy, wider services/DTOs/quantity helper/registry retirement remain deferred. Final checks: 447 tests = 442 inherited + 5 new, zero failures/skips; lint exits zero with the inherited warning, typecheck/build pass, routes remain 23/35 and manifest is byte-identical. [Verification](verification.md#movement-worksheet-schema-prerequisite).
 
 
-## Proposed PR28 — Inventory Sales-query dependency prerequisite
+## PR28 — Inventory Sales-query dependency prerequisite
 
 Verified exact main `72204e095d4b1e9425eb4f573bbe23c620bc99a7`, merged PR27, clean initial tree; branch `refactor/inventory-sales-query-dependency`. Mandatory virtual relocation preflight confirms the recorded runtime and erased stock-counts→Sales→registry→LINE private edge. Scope therefore switches only to the permitted prerequisite; UserStateSheet and its header remain physically legacy and relocation is deferred to PR29.
 
@@ -157,3 +157,16 @@ Only three existing production files change: stock-counts' one Sales import; the
 `inventory-sales-query-before.json` captures the original three sources/hashes/declarations, single DTO AST/hash, production/older-fixture inventories, 86 affected resolved edges, three script paths, blocked runtime/type traces, original runtime export keys and actual daily/dashboard/profit/read-event golden. One original query characterization passes before edits. New tests execute real queries/Stock Counts HTTP with synthetic Sheets, preserving read order, nullable/financial/refund results, pending/errors and legacy callable/header identity. Exact inverse witnesses compose the earlier PR23 stock-count change only where necessary; all previous fixture bytes remain authoritative.
 
 Runtime/type current and virtual-next-move graphs remove the registry path from stock counts. Restoring the Sales barrel, query mixed import or either erased implementation/barrel import reintroduces it and fails a targeted regression. Protected module direction stays Shipments→Orders, root infrastructure remains feature-neutral, and four inherited browser erased debts stay exact. Existing PR27 trace assertions are reconciled against the saved original source, not skipped. Final Codex-local checks: 452 tests = 447 inherited + 5 new with zero failures/skips, lint exits zero with the inherited warning, typecheck and isolated build pass. Routes remain 23/35 and manifest is byte-identical. [Execution evidence](verification.md#pr28-inventory-sales-query-dependency-prerequisite).
+
+
+## PR29 — LINE user-state worksheet ownership
+
+Verified base `48cf8d6d011544206cafa7ac35eeeafde5f22be9`, exact GitHub main after merged PR28; clean initial tree, branch `refactor/line-user-state-worksheet-ownership`. Git transport could not reach the configured proxy; GitHub's connector independently confirmed the signed merge commit/tree and the local commit was reconstructed and hash-verified. PR27/28 production prerequisites are unchanged.
+
+UserStateSheet.ts and const.ts move to `modules/line-workflows/infrastructure/google-sheets/user-state/`; the two old leaves become exact one-line named forwards. Only three external class import paths change. Original method/header declarations reconstruct exactly; constructor/prototype/header identities remain strict across owners/leaves/available index exports/real service instances. No aggregate registry/factory/index or business consumer changes.
+
+The original-source witness records both complete files, declaration text/hashes, header contents, synthetic worksheet/session events, all production hashes/prior fixture hashes, resolved import/export forms and scripts without execution. Six targeted tests cover original/current worksheet arguments/mutability/pending/errors, actual session/header recovery, real SheetsClient/fake-fetch deletion/transport, exact source/history, identities and actual runtime/type/browser/lint graphs. Previous virtual-move regressions now also assert their reviewed future source equals the actual physical move, retaining restored-import and forbidden reverse-edge negatives.
+
+The fresh full-source graph audit found no runtime cycle. It records one inherited erased cycle between calculateEmployeePayroll and manageSalaryAdvances; before/after paths are identical. Migrated module closures are acyclic with only Shipments→Orders; Inventory/Sales do not reach LINE-private persistence and all client reachable sets/four erased debts remain exact after the two-path canonicalization. No blanket allowlist or earlier fixture update.
+
+Final Codex-local results are recorded in [verification](verification.md#pr29-line-user-state-worksheet-ownership). RecordsSheet/payroll/stock-adjustment ownership, LINE business-use-case/quantity-rule extraction, compatibility/registry retirement, inherited payroll type cycle and erased browser debts remain deferred. No whole LINE or repository milestone is marked complete.
