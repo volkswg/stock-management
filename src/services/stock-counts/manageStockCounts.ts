@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet/types";
 import { STOCK_COUNT_HEADERS } from "@/externals/google/sheet/sheets/stock-counts/const";
 import { listMovements } from "@/services/movements";
-import { getGoogleSheetsSalesDashboard } from "@/services/sales";
+import { getGoogleSheetsSalesDashboard } from "@/services/sales/getGoogleSheetsDailySales";
 
 import type { StockCountAccount } from "@/modules/inventory/contracts";
 export type { StockCountAccount } from "@/modules/inventory/contracts";

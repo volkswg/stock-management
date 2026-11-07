@@ -147,3 +147,12 @@ Separate the existing MASTER_HEADERS, DETAIL_HEADERS and ensureHeader declaratio
 State retains const aliases to the shared arrays and function, preserving mutability, function identity/name/signature, runtime export-key order and property descriptor flags. The business service changes one import. All other state/context/delivery/deletion/financial/HTTP bodies and physical worksheets remain unchanged. New tests retain original full sources/ASTs and a pre-edit real workflow/event golden; older fixtures are reconciled only through exact inverse substitutions, including the earlier PR23 type-import step.
 
 The direct movement→state→future LINE-header dependency and two movement client erased traces disappear. The four known mixed-registry browser debts remain; a separate stock-counts→Sales→registry chain is deliberately not hidden or extracted. This is one prerequisite, not a claim that all future user-state relocation/legacy consumers are clean.
+
+
+## Inventory Sales-query registry prerequisite
+
+The PR28 gate fails on the unchanged stock-counts→Sales barrel→read query→Sheets registry→future LINE worksheet path. Implement only the dependency prerequisite and defer physical relocation to PR29. Stock counts imports the existing query leaf directly; the query imports four same-object Sales header leaves and erased pure types, so no mixed registry is evaluated through that closure.
+
+Erased imports matter: the old Expense barrel and SalesProfitCostOverride implementation would still lead back to provider composition in the type graph. Use Expense's existing pure leaf and transfer the single original override DTO declaration verbatim to Sales contracts, forwarding its old type export. No copied DTO, changed signature, new runtime contract export, report/financial calculation, worksheet/provider move or service barrel retirement. All original non-import query declarations/functions remain exact; only the reviewed DTO declaration relocates.
+
+New regression tests retain original complete sources, ASTs, reports and read events; restore the exact preflight failure, then prove direct/barrel/type-only regressions fail the dependency gate. Existing PR27 assertions retain their old source-backed Sales trace and now assert its named removal instead of regenerating old evidence. Four inherited erased browser debts remain; other legacy Sales/Expense/HR aggregations are still future work.

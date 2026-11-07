@@ -40,3 +40,6 @@ These are responsibilities, not claims all implementation is already in modules.
 
 
 The movement worksheet-schema prerequisite is a narrow legacy-local split: the existing Inventory master/detail header arrays and supplied-sheet header helper live in `services/movements/worksheet-schema.ts`, with only an erased root generic Sheet type import. It is not a generic shared utility or a new module/domain scaffold. Session persistence stays in `state.ts`; old schema exports remain aliases for compatibility. Future use-case ownership and public-port extraction require separate scope.
+
+
+Sales contracts now own the one existing SalesProfitCostOverride alias required by the legacy read query. Its old service path forwards the type. Other Sales report aliases remain in their current query file; there is no new Sales application layer. Legacy Sales queries own their explicit feature header dependencies, while Inventory uses the named direct query until a separately scoped use-case/port migration.

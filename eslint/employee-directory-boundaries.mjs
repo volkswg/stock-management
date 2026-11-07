@@ -28,3 +28,18 @@ const legacyInventoryImportPatterns=employeeDirectoryBoundaries.find(scope=>scop
 employeeDirectoryBoundaries.push({files:["src/services/movements/manageMovements.ts"],rules:{
  "no-restricted-imports":["error",{patterns:[...legacyInventoryImportPatterns,{regex:"(?:^|/)state(?:\\.ts)?$",message:"Movement business operations consume worksheet-schema, not LINE session state."}]}],
 }});
+// Inventory's Sales read dependency must not evaluate the aggregate Sheets registry.
+const salesHeaderLeaves=["receipts","receipt-items","receipt-payments","receipt-syncs"].map(folder=>`@/modules/sales/infrastructure/google-sheets/${folder}/const`);
+const salesQueryImports=["@/externals/google/sheet/types","@/services/expenses/types","@/modules/sales/contracts",...salesHeaderLeaves];
+employeeDirectoryBoundaries.push({files:["src/services/sales/getGoogleSheetsDailySales.ts"],rules:{
+ "no-restricted-imports":["error",{patterns:[{regex:`^(?!(?:${salesQueryImports.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")})$).+`,message:"Sales queries consume exact headers and erased pure types, never mixed registries."}]}],
+ "no-restricted-syntax":[...noDynamicServerBypass,{selector:"ExportAllDeclaration",message:"Keep query exports explicit."},{selector:"ExportNamedDeclaration[source]",message:"Do not forward implementation dependencies."},...salesQueryImports.slice(0,3).map(path=>({selector:`ImportDeclaration[source.value='${path}']:not([importKind='type'])`,message:"Query type dependencies must be erased."}))],
+ "no-restricted-globals":["error","process","Buffer","fetch","crypto"],
+}});
+const stockCountImports=employeeDirectoryBoundaries.find(scope=>scope.files.includes("src/services/stock-counts/manageStockCounts.ts")).rules["no-restricted-imports"][1].patterns;
+employeeDirectoryBoundaries.push({files:["src/services/stock-counts/manageStockCounts.ts"],rules:{"no-restricted-imports":["error",{patterns:[...stockCountImports,{regex:"(?:^|/)sales(?:/index(?:\\.ts)?)?$",message:"Stock counts use the direct Sales query, not its mixed service barrel."}]}]}});
+employeeDirectoryBoundaries.push({files:["src/modules/sales/contracts.ts"],rules:{
+ "no-restricted-imports":["error",{patterns:[{regex:".+",message:"This exact Sales DTO leaf has no dependencies."}]}],
+ "no-restricted-syntax":[...noDynamicServerBypass,{selector:"ExportAllDeclaration",message:"No broad contract forwarding."},{selector:"ExportNamedDeclaration[source]",message:"Define the canonical DTO here."},{selector:"VariableDeclaration",message:"This contract exports only its erased DTO."},{selector:"FunctionDeclaration",message:"No runtime contract exports."},{selector:"ClassDeclaration",message:"No runtime contract exports."},{selector:"TSEnumDeclaration",message:"No runtime contract exports."},{selector:"ExpressionStatement",message:"No side effects in Sales contracts."}],
+ "no-restricted-globals":["error","Date","process","Buffer","fetch","crypto"],
+}});

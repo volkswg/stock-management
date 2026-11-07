@@ -5,16 +5,8 @@ import {
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
 
-export type SalesProfitCostOverride = {
-  id: string;
-  month: string;
-  accountId: string;
-  averageItemCost: number;
-  note: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-};
+import type { SalesProfitCostOverride } from "@/modules/sales/contracts";
+export type { SalesProfitCostOverride } from "@/modules/sales/contracts";
 
 export async function listSalesProfitCostOverrides({
   googleSheetsService,
