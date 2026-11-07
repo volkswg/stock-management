@@ -18,3 +18,13 @@ employeeDirectoryBoundaries.push({files:["src/services/stock-adjustments/manageS
  "no-restricted-imports":["error",{patterns:[{regex:"(?:externals/google/sheet$|externals/google/sheet/index|modules/hr/(?:infrastructure|application)|sheets/employees/const|modules/hr/infrastructure)",message:"Inventory consumes the employee directory, never HR headers/private adapters or mixed Sheet barrels."}]}],
  "no-restricted-syntax":noDynamicServerBypass,
 }});
+// Legacy-local movement schema prerequisite: no LINE/session dependency in the leaf.
+employeeDirectoryBoundaries.push({files:["src/services/movements/worksheet-schema.ts"],rules:{
+ "no-restricted-imports":["error",{patterns:[{regex:"^(?!@/infrastructure/persistence/google-sheets/types$).+",message:"Movement worksheet schemas use only erased root Sheet interfaces."}]}],
+ "no-restricted-syntax":[...noDynamicServerBypass,{selector:"ImportDeclaration:not([importKind='type'])",message:"The schema leaf has no runtime imports."},{selector:"ExportAllDeclaration",message:"Keep schema exports explicit."},{selector:"ExportNamedDeclaration[source]",message:"Do not forward implementation dependencies from schemas."}],
+ "no-restricted-globals":["error","Date","process","Buffer","fetch","crypto","performance"],
+}});
+const legacyInventoryImportPatterns=employeeDirectoryBoundaries.find(scope=>scope.files.includes("src/services/movements/manageMovements.ts")).rules["no-restricted-imports"][1].patterns;
+employeeDirectoryBoundaries.push({files:["src/services/movements/manageMovements.ts"],rules:{
+ "no-restricted-imports":["error",{patterns:[...legacyInventoryImportPatterns,{regex:"(?:^|/)state(?:\\.ts)?$",message:"Movement business operations consume worksheet-schema, not LINE session state."}]}],
+}});

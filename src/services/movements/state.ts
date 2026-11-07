@@ -1,17 +1,11 @@
 import type { GoogleSheetRow, IGoogleRowsSheet, IGoogleSheetsService, MovementWorksheet } from "@/externals/google/sheet/types";
 import { USER_STATE_SHEET_HEADERS } from "@/externals/google/sheet/sheets/user-state/const";
 import { createSortableId } from "@/services/utils/createSortableId";
+import * as worksheetSchema from "./worksheet-schema";
 
 export const MOVEMENT_FLOW = "MovementCreate";
-export const MASTER_HEADERS = [
-  "id", "userId", "packingDate", "deliverDateTime", "status",
-  "totalQuantity", "createdAt", "updatedAt",
-];
-export const DETAIL_HEADERS = [
-  "id", "movementMasterId", "shopName", "quantity", "remark",
-  "fromLocation", "toLocation", "productImageUrl", "purchaseDetailId",
-  "status", "createdAt", "updatedAt", "stockCounted", "isNewArrival",
-];
+export const MASTER_HEADERS = worksheetSchema.MASTER_HEADERS;
+export const DETAIL_HEADERS = worksheetSchema.DETAIL_HEADERS;
 export type MovementStep = "shop" | "quantity" | "product_image" | "close_bag" | "bag_closed" | "complete";
 export type MovementState = {
   masterId: string;
@@ -26,13 +20,7 @@ export type MovementState = {
   lastEventId: string;
 };
 
-export async function ensureHeader(sheet: IGoogleRowsSheet, headers: string[], end: string): Promise<void> {
-  await sheet.ensureExists?.();
-  const rows = await sheet.readRows(`A1:${end}1`);
-  if (JSON.stringify(rows[0] || []) !== JSON.stringify(headers)) {
-    await sheet.updateRows(`A1:${end}1`, [headers]);
-  }
-}
+export const ensureHeader = worksheetSchema.ensureHeader;
 
 // Header validation shares the data read. No mutable rows are cached across events.
 export async function readMovementTables(

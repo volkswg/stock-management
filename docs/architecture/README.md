@@ -1,6 +1,6 @@
 # Architecture guide
 
-Base ownership verified against merged main `2e9fe4a6cb734a1d796d91f8e0805febf7273b70` (PR25); the map includes this branch's proposed PR26 Inventory core worksheet move. This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
+Base ownership verified against merged main `4952644f06fcfc216c9351c347dcc806d887bb09` (PR26); this branch adds only the movement schema prerequisite, not the blocked LINE user-state worksheet move. This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
 
 | Read for | Canonical document |
 | --- | --- |
@@ -13,7 +13,7 @@ Base ownership verified against merged main `2e9fe4a6cb734a1d796d91f8e0805febf72
 | Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
 | Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
 
-Orders contracts/UI/list/simple-create/detail seams and Shipment contracts/UI/core server seams are implemented. Shared Google transports and fifteen Orders/Shipment/Sales/HR/Inventory worksheet classes have physical owners. Legacy facades, aggregate Sheets composition, other feature workflows and worksheets remain. PR23 delivered the Inventory employee-directory prerequisite and PR25 moved the three HR core worksheet/header pairs. This branch moves only StockCountsSheet, its headers and MovementSheet, retaining three legacy forwards and all consumers. See the map and roadmap before choosing a slice.
+Orders contracts/UI/list/simple-create/detail seams and Shipment contracts/UI/core server seams are implemented. Shared Google transports and fifteen Orders/Shipment/Sales/HR/Inventory worksheet classes have physical owners. Legacy facades, aggregate Sheets composition, other feature workflows and worksheets remain. PR23 delivered the Inventory employee-directory prerequisite and PR25 moved the three HR core worksheet/header pairs. PR26 moved only StockCountsSheet, its headers and MovementSheet. This branch detaches movement worksheet schemas from mixed session state; legacy forwards/consumers remain and the LINE worksheet move is deferred. See the map and roadmap before choosing a slice.
 
 ## Documentation maintenance
 

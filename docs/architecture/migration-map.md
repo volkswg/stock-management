@@ -1,6 +1,6 @@
 # Current ownership and remaining legacy
 
-Base verified at main `2e9fe4a6cb734a1d796d91f8e0805febf7273b70`, after merged PR25. This branch adds only StockCountsSheet, its headers and MovementSheet for proposed PR26. This replaces the original base-wide proposed destination list as the current map. The [progress/history index](../refactoring/progress.md#document-consolidation-index) preserves that original proposal and all PR-specific detail; a historical proposed path is not authorization to move a file.
+Base verified at main `4952644f06fcfc216c9351c347dcc806d887bb09`, after merged PR26. This branch adds only the movement schema prerequisite; all physical worksheet owners remain unchanged. This replaces the original base-wide proposed destination list as the current map. The [progress/history index](../refactoring/progress.md#document-consolidation-index) preserves that original proposal and all PR-specific detail; a historical proposed path is not authorization to move a file.
 
 | Slice | Actual owner now | Compatibility / unfinished work |
 | --- | --- | --- |
@@ -55,3 +55,10 @@ Keep original paths until direct/aggregate callers, erased types, scripts, publi
 
 
 PR26 moves exactly three Inventory files with three explicit named old-path forwards. Stock Counts retains its nine mutable headers and call-time A:I range; Movement retains literal A:N, read/append/update/deleteRow and original one-based row-number delegation. No Movement const.ts is created. StockCountsSheet stays exported by both legacy indexes; MovementSheet was not exported by either index and that absence stays unchanged. Both real service movement instances share the single physical class. Existing readMovementRanges, legacy movement master/detail schemas, all business services and consumers remain byte-identical.
+
+
+## Movement schema prerequisite
+
+On base `4952644f06fcfc216c9351c347dcc806d887bb09` (merged PR26), this branch separates MASTER_HEADERS, DETAIL_HEADERS and ensureHeader into the legacy-local Inventory leaf `services/movements/worksheet-schema.ts`. `manageMovements.ts` imports that leaf; `state.ts` retains aliases to the exact same arrays/function. This removes Inventory movement business → mixed session state → future LINE-private user-state header and the two movement-page erased paths. No worksheet moves, public DTO migration, state/context algorithm or provider changes occur.
+
+The user-state worksheet remains at its original physical location. Its next move needs a fresh base/full consumer audit. Stock counts still calls legacy Sales queries which reach the complete aggregate Sheets registry; that unchanged chain remains explicit debt, not an ownership firewall. Physical RecordsSheet and its payroll/stock-adjustment subclasses remain legacy. Broader LINE/Inventory use-case, quantity-helper, compatibility and registry cleanup are deferred.

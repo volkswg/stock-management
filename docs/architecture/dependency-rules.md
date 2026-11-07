@@ -51,3 +51,6 @@ Aggregate IGoogleSheetsService/registry and legacy Sales/Expense/HR queries rema
 
 
 Inventory worksheet scopes admit only root BaseGoogleSheet/erased generic types; StockCountsSheet additionally admits root lastColumnLetter and its own header. MovementSheet admits neither a header nor a range helper. Actual runtime/type graphs preserve only Shipments→Orders and reject new Inventory→LINE/private feature edges, including legacy-service and mixed-Sheets-barrel intermediaries. The existing legacy movement service's LINE quantity-helper dependency is not migrated into the new worksheet graph; business/use-case ownership cleanup remains separate.
+
+
+The movement business service must not import `services/movements/state.ts`, including alias/relative/type/re-export/dynamic bypasses. It consumes the schema leaf, which permits only erased root IGoogleRowsSheet and no runtime dependencies. Existing employee-directory restrictions remain in force. Tests demonstrate the original forbidden future-LINE path, its removal from movement operations/client erased graphs, and unchanged protected module runtime/type DAGs. Legacy stock-counts → Sales → mixed Sheets registry aggregation remains separately recorded debt and is not claimed isolated.

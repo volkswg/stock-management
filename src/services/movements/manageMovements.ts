@@ -2,7 +2,7 @@ import type {
   GoogleSheetRow,
   IGoogleSheetsService,
 } from "@/externals/google/sheet/types";
-import { DETAIL_HEADERS, ensureHeader, MASTER_HEADERS } from "./state";
+import { DETAIL_HEADERS, ensureHeader, MASTER_HEADERS } from "./worksheet-schema";
 import { isValidMovementQuantity, parseQuantity } from "@/features/backend/line/services/movements/utils";
 
 export class MovementQuantityRequiredError extends Error {

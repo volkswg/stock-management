@@ -37,3 +37,6 @@ Root configuration/dependency files, `public` assets and existing operational gu
 | Workspace | Home/breadcrumb/navigation; Sales owns its menu shell; global Next layout remains app-owned |
 
 These are responsibilities, not claims all implementation is already in modules. [Migration map](migration-map.md) records actual files. Mixed payroll, LINE session and aggregate Sheets code needs split/characterization before physical relocation. No generic repository, DI container, speculative tenant model, parallel persistence or domain scaffolding.
+
+
+The movement worksheet-schema prerequisite is a narrow legacy-local split: the existing Inventory master/detail header arrays and supplied-sheet header helper live in `services/movements/worksheet-schema.ts`, with only an erased root generic Sheet type import. It is not a generic shared utility or a new module/domain scaffold. Session persistence stays in `state.ts`; old schema exports remain aliases for compatibility. Future use-case ownership and public-port extraction require separate scope.
