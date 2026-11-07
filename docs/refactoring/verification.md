@@ -88,3 +88,25 @@ Source witness: tests/fixtures/hr-worksheets-before.json. Exact inverse import s
 Both isolated builds used only tracked .env.example, existing hardlinked dependencies and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`; no application env files or inherited provider credentials. Filename checks only; no secrets read/deleted. Final built production source is byte-identical to this branch. All 23 page/35 API source contracts and the original route fixture remain unchanged; app-paths SHA-256 stays `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
 
 There were no baseline or introduced test/type/build errors or new lint warnings. The targeted original/current tests and actual post-move runtime/type graph checks pass. PR15–23 inventories retain their old expected hashes, reconciled only through six exact source witnesses and six new owners. All earlier fixture bytes, aggregate registry/factory/indexes, existing production consumers and other business/provider/UI/API sources remain unchanged. Seventy-four local links/fragments in changed canonical Markdown resolve; no standalone PR document is added. Independent GitHub/Vercel checks, live integration permissions, browser visuals and concurrent correctness were not verified.
+
+
+## PR26 Inventory core worksheet ownership
+
+Base: `2e9fe4a6cb734a1d796d91f8e0805febf7273b70`, exact GitHub main after merged PR25; clean initial tree. Branch `refactor/inventory-core-worksheet-ownership`; Node 24.22.1 and existing dependencies. These are Codex-local results, not independent CI.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| npm test | 435 pass; three new original characterizations separately pass before move | 442 = 435 inherited + 7 new; zero failures/skips |
+| npm run lint | Exit 0, inherited unused shipmentRow warning at tests/shipments-read-seam.test.mjs:6 | Exit 0; same inherited warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free build | Pass, /tmp/inv26-baseline-safe | Pass, /tmp/inv26-final-safe |
+| Page/API source contracts | 23 / 35 | Unchanged, original fixture retained |
+| App-paths manifest | Existing SHA-256 above | Byte-identical; same SHA-256 |
+
+Source witness: tests/fixtures/inventory-worksheets-before.json. Exact inverse import substitutions reconstruct all three complete original files/declarations, preserving the old hashes. Prior inventories reconcile only three named cases and three exact new destinations. Closed loaders add only these named paths. All older fixtures, unrelated production and aggregate/consumer/provider/HTTP/UI/package/env/schema files stay unchanged. No standalone architecture document is added.
+
+Original characterization corrected test-only wiring: MovementSheet and StockAdjustmentsSheet are not aggregate exports and must be loaded through their actual leaves. A new negative mixed-registry assertion correctly detects a file cycle before the ownership assertion; its expected diagnostic now names that cycle. These are new-test assumptions, not baseline failures or production fixes. Actual stock equations, stable count IDs, reversals, delivery/delete partial failures and HTTP parity are exercised with real services/worksheets and fake dependencies. Live permissions/availability, production data, real-browser visuals and concurrency safety remain unverified.
+
+Both builds used clean isolated source copies, only tracked .env.example, existing hardlinked dependencies, and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. Only filenames were inspected; no application env files or inherited integration credentials, no secret reads/deletions, no install/lockfile change. Final built production bytes match the implementation checkout. App-paths manifest is byte-identical with SHA-256 `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`; all 23 page/35 API source contracts and old fixtures remain unchanged.
+
+Seven added tests cover worksheet/default/delete/mutability/await/error parity, actual stock-count/movement/adjustment/HTTP success and partial-failure scenarios, exact source/AST/history inventories, constructor/header/index/registry identities and unchanged batch mapping, actual original/current GoogleSheetsClient requests, and exact lint/runtime/type/browser/consumer audits. The source audit records 79 affected edges and three operational-script paths without execution. Both graph modes are acyclic, retain only Shipments→Orders and no Inventory→LINE/private edge; four inherited erased client debts remain exact. Seventy-five changed-doc local links/fragments resolve. No baseline or final test/type/build errors, unexplained skips or new lint warnings remain. Results are Codex-local, not independent GitHub/Vercel CI; live integration, browser visual and concurrent correctness are not claimed.

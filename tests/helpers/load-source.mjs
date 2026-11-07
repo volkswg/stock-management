@@ -1,3 +1,4 @@
+import { inventoryWorksheetsBefore } from "./inventory-worksheet-history.mjs";
 import { hrWorksheetsBefore } from "./hr-worksheet-history.mjs";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -30,7 +31,7 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     ...globals,
     require: (specifier) => {
       // Only the reviewed old provider forwards may follow their single new owner.
-      const move = hrWorksheetsBefore.moves[path] ?? salesWorksheetsBefore.moves[path] ?? worksheetBefore.moves[path] ?? googleBefore.moves[path];
+      const move = inventoryWorksheetsBefore.moves[path] ?? hrWorksheetsBefore.moves[path] ?? salesWorksheetsBefore.moves[path] ?? worksheetBefore.moves[path] ?? googleBefore.moves[path];
       if (move && specifier === "@/" + move.to.slice(4, -3)) {
         const translated = new Proxy({}, {
           getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
