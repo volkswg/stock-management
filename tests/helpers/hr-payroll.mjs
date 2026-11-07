@@ -1,3 +1,4 @@
+import { completionNewFiles } from "./hr-application-history.mjs";
 import { restoreHRSource } from "./hr-payroll-history.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
@@ -10,7 +11,7 @@ import {loadSource,plain} from './load-source.mjs';
 export const payrollBefore=JSON.parse(readFileSync('tests/fixtures/hr-payroll-before.json','utf8'));
 export const salaryFile='src/services/employees/manageSalaryAdvances.ts',calculationFile='src/services/employees/calculateEmployeePayroll.ts',settlementFile='src/services/employees/settleEmployeePayroll.ts';
 export function hrPayrollGraph({original=false,events=[],service,employees=[],compensations=[],attendance=[],sales={shopSeries:[]},failure,globals={},overrides={},realReaders=false}={}){
- const allowed=new Set(['src/services/employees/manageEmployees.ts','src/services/employees/manageEmployeeTimesheets.ts','src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts',salaryFile,calculationFile,settlementFile,'src/services/employees/payroll-composition.ts',...['contracts.ts','payroll-server.ts','domain/salary-rules.ts','domain/payroll-calculation.ts','application/salary-advances.ts','application/calculate-payroll.ts','application/settle-payroll.ts','infrastructure/google-sheets/salary-store.ts','infrastructure/payroll-revision.ts'].map(f=>'src/modules/hr/'+f),'src/app/api/employees/advances/route.ts','src/app/api/employees/payroll/route.ts','src/app/api/employees/payroll/settle/route.ts']);
+ const allowed=new Set([...completionNewFiles,"src/modules/hr/server.ts","src/modules/hr/infrastructure/google-sheets/employee-directory-reader.ts","src/modules/hr/infrastructure/google-sheets/employees/const.ts","src/modules/hr/infrastructure/google-sheets/employee-compensations/const.ts","src/modules/hr/infrastructure/google-sheets/employee-timesheets/const.ts",'src/services/employees/manageEmployees.ts','src/services/employees/manageEmployeeTimesheets.ts','src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts',salaryFile,calculationFile,settlementFile,'src/services/employees/payroll-composition.ts',...['contracts.ts','payroll-server.ts','domain/salary-rules.ts','domain/payroll-calculation.ts','application/salary-advances.ts','application/calculate-payroll.ts','application/settle-payroll.ts','infrastructure/google-sheets/salary-store.ts','infrastructure/payroll-revision.ts'].map(f=>'src/modules/hr/'+f),'src/app/api/employees/advances/route.ts','src/app/api/employees/payroll/route.ts','src/app/api/employees/payroll/settle/route.ts']);
  const headers=loadSource('src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts'),cache=new Map();
  class Clock extends Date {constructor(...args){super(...(args.length?args:['2026-11-07T00:00:00Z']));if(!args.length)events.push(['clock']);}static now(){events.push(['now']);return Date.parse('2026-11-07T00:00:00Z');}}
  const read=(name,value)=>(...args)=>{events.push([name,...args]);if(failure?.name===name)return Promise.reject(failure.error);return Promise.resolve(value);};
@@ -19,10 +20,12 @@ export function hrPayrollGraph({original=false,events=[],service,employees=[],co
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date:Clock,Request,Response,URL,fetch:()=>assert.fail('Live IO forbidden'),console:{error:(...a)=>events.push(['log',...a])},...globals,require(spec){
    if(spec==='server-only')return {};
-   if(spec==='node:crypto')return {createHash};
+   if(spec==='node:crypto')return {createHash,randomUUID:()=>assert.fail('No workforce ID generation expected')};
    if(spec==='next/server')return {NextResponse:Response};
    if(spec==='@/config')return {getConfig:()=>{events.push(['config']);return {};}};
    if(spec==='@/externals/google/sheet')return {...(realReaders?googleGraph({historical:original}).load('src/externals/google/sheet/index.ts'):{}),createGoogleSheetsServiceFromConfig:()=>{events.push(['factory']);return service;}};
+   if(spec==='@/modules/hr/server' && !realReaders)return {...load('src/modules/hr/contracts.ts'),...load('src/modules/hr/domain/attendance-rules.ts'),createHRPayrollReaders:(service,sales)=>({employees:{listEmployees:()=>employeeFunctions.listEmployees({googleSheetsService:service})},compensations:{listCompensations:()=>employeeFunctions.listEmployeeCompensations({googleSheetsService:service})},attendance:{listAttendance:month=>timesheetFunctions.listEmployeeTimesheetsForMonth({googleSheetsService:service,month})},sales}),...employeeFunctions};
+   if(spec==='@/externals/google/sheet/sheets/employees/const')return load('src/modules/hr/infrastructure/google-sheets/employees/const.ts');
    if(spec==='./manageEmployees')return realReaders?load('src/services/employees/manageEmployees.ts'):employeeFunctions;
    if(spec==='@/services/employees')return {...employeeFunctions,...load(calculationFile)};
    if(spec==='./manageEmployeeTimesheets')return realReaders?load('src/services/employees/manageEmployeeTimesheets.ts'):timesheetFunctions;

@@ -1,3 +1,4 @@
+import { restoreWorkforceSource } from "./hr-application-history.mjs";
 import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';
 import {restoreExpensesSource} from './expenses-business-history.mjs';
 export const hrBefore=JSON.parse(readFileSync('tests/fixtures/hr-payroll-before.json','utf8'));
@@ -6,6 +7,7 @@ export const hrNewFiles=['src/services/employees/payroll-composition.ts',...['pa
 const hash=s=>createHash('sha256').update(s).digest('hex');
 export function expectedHRContracts(){const a=hrBefore.files['src/services/employees/manageSalaryAdvances.ts'].source,p=hrBefore.files['src/services/employees/calculateEmployeePayroll.ts'].source;return hrBefore.files['src/modules/hr/contracts.ts'].source+'\n'+Object.values(hrBefore.types).map(e=>e.source).join('\n')+a.slice(a.indexOf('export type SalaryAdvance'),a.indexOf('export class SalaryAdvanceError'))+'\n'+p.slice(p.indexOf('export type EmployeePayrollDailyCommission'),p.indexOf('export async function calculateEmployeePayroll'))+'\nexport type PayrollSalesDashboard = { shopSeries: { accountId: string; shopName: string; dailySales: { salesDate: string; netSales: number }[] }[] };\n';}
 export function restoreHRSource(file,source=readFileSync(file,'utf8')){
+ source=restoreWorkforceSource(file,source);
  if(hrBefore.edits[file]){const e=hrBefore.edits[file];assert.equal(source.split('"'+e.to+'"').length,2,file);source=source.replace('"'+e.to+'"','"'+e.from+'"');assert.equal(hash(source),e.sha256,file);return source;}
  if(hrBefore.types[file]){const e=hrBefore.types[file],timesheet=file.includes('Timesheets'),types=timesheet?'EmployeeTimesheet, EmployeeWorkdayType':'EmployeeStatus, EmployeeCompensationType, EmployeeCommissionType, Employee, EmployeeCompensation, EmployeeInput';const block=(timesheet?'import { EmployeeTimesheetStatus } from "@/modules/hr/contracts";\nexport { EmployeeTimesheetStatus } from "@/modules/hr/contracts";\n':'')+`import type { ${timesheet?types:types.replace("EmployeeStatus, ","")} } from "@/modules/hr/contracts";\nexport type { ${types} } from "@/modules/hr/contracts";\n\n`;assert.equal(source.split(block).length,2,file);source=source.replace(block,e.source);assert.equal(hash(source),e.sha256,file);return source;}
  const e=hrBefore.files[file];if(!e)return source;assert.equal(hash(e.source),e.sha256,file);let expected=e.source;

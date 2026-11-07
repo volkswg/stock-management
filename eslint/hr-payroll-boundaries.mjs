@@ -10,7 +10,7 @@ const paths={
  [h+'infrastructure/google-sheets/salary-store.ts']:['server-only','@/infrastructure/persistence/google-sheets/types','../../contracts','../../domain/salary-rules','../../application/ports/payroll','./employee-advances/const'],
  [h+'infrastructure/payroll-revision.ts']:['server-only','node:crypto','../contracts'],
  [h+'payroll-server.ts']:['server-only','./application/ports/salary-advance-shops','./application/ports/payroll','./infrastructure/google-sheets/salary-store','./application/salary-advances','./application/calculate-payroll','./application/settle-payroll','./infrastructure/payroll-revision','./domain/salary-rules'],
- 'src/services/employees/payroll-composition.ts':['server-only','@/externals/google/sheet/types','@/modules/hr/application/ports/salary-advance-shops','@/modules/hr/application/ports/payroll','@/modules/hr/payroll-server','./manageEmployees','./manageEmployeeTimesheets','@/services/sales/getGoogleSheetsDailySales','./salary-advance-shops'],
+ 'src/services/employees/payroll-composition.ts':['server-only','@/externals/google/sheet/types','@/modules/hr/application/ports/salary-advance-shops','@/modules/hr/application/ports/payroll','@/modules/hr/payroll-server','@/modules/hr/server','@/services/sales/getGoogleSheetsDailySales','./salary-advance-shops'],
 };
 export const hrPayrollBoundaries=Object.entries(paths).map(([file,allowed])=>({files:[file],rules:{
  'no-restricted-imports':['error',{patterns:[{regex:`^(?!(?:${allowed.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$).+`,message:'HR payroll uses only explicit pure contracts, consumer ports and own adapters; legacy reads are composed outside the feature core.'}]}],

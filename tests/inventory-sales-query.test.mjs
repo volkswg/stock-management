@@ -1,3 +1,4 @@
+import { completionExtraFiles, completionNewFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { expectedHRDebts } from "./helpers/hr-payroll-history.mjs";
 import { hrFiles, hrNewFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
 import { expectedExpensesDebts } from "./helpers/expenses-business-history.mjs";
@@ -20,8 +21,8 @@ export {runQueries};
 
 test("exact query import/type history restores every original byte and preserves all other declarations, production and prior fixtures",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs"),{default:ts}=await import("typescript"),{salesQueryFiles,salesQueryNewFiles,salesQueryHash,assertSalesQueryHistory}=await import("./helpers/inventory-sales-query-history.mjs");
- for(const [file,hash]of Object.entries(salesQueryBefore.productionHashes)){if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else assert.equal(salesQueryHash(readFileSync(file)),hash,file);}
- const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(salesQueryBefore.productionHashes,f)).sort(),[...salesQueryNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
+ for(const [file,hash]of Object.entries(salesQueryBefore.productionHashes)){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else assert.equal(salesQueryHash(readFileSync(file)),hash,file);}
+ const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(salesQueryBefore.productionHashes,f)).sort(),[...salesQueryNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(salesQueryBefore.fixtureHashes))assert.equal(salesQueryHash(readFileSync(file)),hash,file);
  const printer=ts.createPrinter(),decls=(file)=>{const ast=ts.createSourceFile(file,readFileSync(file,"utf8"),ts.ScriptTarget.Latest,true);return ast.statements.filter(n=>!ts.isImportDeclaration(n)&&!ts.isExportDeclaration(n)).map(n=>printer.printNode(ts.EmitHint.Unspecified,n,ast));};
  for(const [file,e]of Object.entries(salesQueryBefore.files)){const saved=e.declarations.filter(d=>!d.startsWith("export type SalesProfitCostOverride ="));assert.deepEqual(decls(file),saved,file);}

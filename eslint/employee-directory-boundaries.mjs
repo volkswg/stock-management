@@ -5,7 +5,7 @@ const files={
  "src/modules/inventory/application/ports/employee-directory.ts":["../../contracts"],
  "src/modules/inventory/application/list-adjustment-employees.ts":["../contracts","./ports/employee-directory"],
  "src/modules/hr/infrastructure/google-sheets/employee-directory-reader.ts":["server-only","@/externals/google/sheet/types","@/externals/google/sheet/sheets/employees/const","../../contracts"],
- "src/modules/hr/server.ts":["server-only","@/externals/google/sheet/types","./contracts","./infrastructure/google-sheets/employee-directory-reader"],
+ "src/modules/hr/server.ts":["server-only","@/externals/google/sheet/types","./contracts","./infrastructure/google-sheets/employee-directory-reader","./application/ports/payroll","./application/employees","./application/attendance","./infrastructure/google-sheets/workforce-store","./infrastructure/workforce-runtime","./domain/attendance-rules"],
  "src/services/stock-adjustments/employee-directory.ts":["server-only","@/externals/google/sheet/types","@/modules/inventory/application/ports/employee-directory","@/modules/hr/server"],
 };
 export const employeeDirectoryBoundaries=Object.entries(files).map(([file,allowed])=>({files:[file],rules:{
