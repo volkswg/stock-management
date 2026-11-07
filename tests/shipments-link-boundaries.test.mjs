@@ -1,5 +1,5 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { ESLint } from "eslint";
 import ts from "typescript";
@@ -15,7 +15,7 @@ test("link scopes permit only actual application/port/adapter/composition import
   for (const [file, code] of [
     [application, 'import { ShipmentStatus } from "../contracts"; import type { ShipmentOrderLinkStore } from "./ports/shipment-order-link-store"; export type Store = ShipmentOrderLinkStore; export const draft = ShipmentStatus.Draft;'],
     [port, 'import type { ShipmentOrder } from "../../contracts"; export interface Store { appendShipmentOrder(record: ShipmentOrder): Promise<void> }'],
-    [adapter, 'import "server-only"; import type { IGoogleSheetsService, GoogleSheetRow } from "@/externals/google/sheet/types"; import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const"; export type Types = [IGoogleSheetsService, GoogleSheetRow]; export const range = lastColumnLetter(6);'],
+    [adapter, 'import "server-only"; import type { IGoogleSheetsService, GoogleSheetRow } from "@/infrastructure/persistence/google-sheets/service-contracts"; import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const"; export type Types = [IGoogleSheetsService, GoogleSheetRow]; export const range = lastColumnLetter(6);'],
     [server, 'import "server-only"; import { linkOrderToShipment } from "./application/link-order-to-shipment"; import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-sheets/shipment-order-link-store"; export const operations = [linkOrderToShipment, GoogleSheetsShipmentOrderLinkStore];'],
   ]) await check(file, code, false);
 });
@@ -54,10 +54,10 @@ test("link adapter/server reject private Orders, app/config/provider imports, un
 test("link allowances do not widen creation/read scopes and the port has no storage dependency", async () => {
   for (const file of ["src/modules/shipments/application/create-shipment.ts", "src/modules/shipments/application/list-shipments.ts"]) await check(file, 'import type { ShipmentOrderLinkStore } from "./ports/shipment-order-link-store";', true);
   for (const file of ["src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts", "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts"]) await check(file, 'import type { Store } from "../../application/ports/shipment-order-link-store";', true);
-  const source = ts.createSourceFile(port, readFileSync(port, "utf8"), ts.ScriptTarget.Latest, true);
+  const source = ts.createSourceFile(port, readArchive(port, "utf8"), ts.ScriptTarget.Latest, true);
   assert.ok(source.statements.filter(ts.isImportDeclaration).every(n => n.importClause.isTypeOnly && n.moduleSpecifier.text === "../../contracts"));
-  assert.doesNotMatch(readFileSync(port, "utf8"), /GoogleSheet|readRows|appendRows|config|process|Date/);
-  for (const file of [adapter, server]) assert.ok(readFileSync(file, "utf8").startsWith('import "server-only";'));
+  assert.doesNotMatch(readArchive(port, "utf8"), /GoogleSheet|readRows|appendRows|config|process|Date/);
+  for (const file of [adapter, server]) assert.ok(readArchive(file, "utf8").startsWith('import "server-only";'));
 });
 
 test("browser scopes reject new linking application/port/adapter and ownership remains one-way with runtime and type edges", async () => {

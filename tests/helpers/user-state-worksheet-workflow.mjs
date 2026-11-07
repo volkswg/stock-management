@@ -4,7 +4,7 @@ import { plain } from './load-source.mjs';
 export async function userStateWorkflow(historical=false) {
  const g=googleGraph({historical}),events=[],rows=[];
  class Clock extends Date { constructor(...args){super(...(args.length?args:['2026-11-07T00:00:00.000Z']));} }
- const state=movementSchemaGraph({globals:{Date:Clock}}).state(),{UserStateSheet}=g.load('src/externals/google/sheet/sheets/user-state/UserStateSheet.ts');
+ const state=movementSchemaGraph({globals:{Date:Clock}}).state(),{UserStateSheet}=g.load("src/modules/line-workflows/infrastructure/google-sheets/user-state/UserStateSheet.ts");
  let failure;
  const client={getValues:async(...args)=>{events.push(['read',...args]);if(failure){const e=failure;failure=undefined;throw e;}return rows.map(r=>r.slice());},updateValues:async(name,range,values)=>{events.push(['update',name,range,plain(values)]);const at=Number(/\d+/.exec(range)[0])-1;values.forEach((r,i)=>{rows[at+i]=Array.from(r);});},appendValues:async(name,range,values)=>{events.push(['append',name,range,plain(values)]);rows.push(...values.map(r=>Array.from(r)));},deleteRow:async(name,row)=>{events.push(['delete',name,row]);rows.splice(row-1,1);},ensureWorksheet:async name=>events.push(['ensure',name])};
  const sheets={userState:new UserStateSheet(client,'Session')},input={masterId:'M',itemId:'I',userId:'U',step:'shop',startedAt:'start',shop:'',quantity:'',remark:'',imageUrl:'',lastEventId:'E'};

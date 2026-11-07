@@ -19,7 +19,7 @@ test('Expenses validation precedes IO and failures preserve identities, concurre
 });
 test('original/current real Expense HTTP retains response contracts, status codes and composition order',async()=>{
  for(const [method,url,body] of [['GET','?month=2026-11'],['GET','?month=bad'],['POST','',expenseInput],['POST','',{amount:'12'}],['DELETE','',{id:'missing'}]]){
-  const results=[];for(const original of [true,false]){const events=[],d=expenseData({original,events}),route=expenseGraph({original,service:d.service,events}).load('src/app/api/expenses/route.ts'),request=new Request('https://example.test/api/expenses'+url,{method,...(body?{body:JSON.stringify(body),headers:{'content-type':'application/json'}}:{})}),response=await route[method](request);results.push(plain({status:response.status,body:await response.json(),events}));}assert.deepEqual(results[1],results[0]);
+  const results=[];for(const original of [true,false]){const events=[],d=expenseData({original,events}),route=expenseGraph({original,service:d.service,events}).load("src/app/api/expenses/route.ts"),request=new Request('https://example.test/api/expenses'+url,{method,...(body?{body:JSON.stringify(body),headers:{'content-type':'application/json'}}:{})}),response=await route[method](request);results.push(plain({status:response.status,body:await response.json(),events}));}assert.deepEqual(results[1],results[0]);
  }
 });
 
@@ -45,9 +45,9 @@ test('Expense read/getter failures preserve phase, simultaneous-rejection preced
 test('actual original/current HR advance creation uses Expenses shops with identical money, idempotency, storage and validation traces',async()=>{
  const {googleGraph}=await import('./helpers/google-infrastructure.mjs');const results=[];
  for(const original of [true,false]){
-  const events=[],d=expenseData({original,events}),provider=googleGraph({historical:original}),{PayrollRecordsSheet}=provider.load('src/externals/google/sheet/sheets/employee-advances/PayrollRecordsSheet.ts');
+  const events=[],d=expenseData({original,events}),provider=googleGraph({historical:original}),{PayrollRecordsSheet}=provider.load("src/modules/hr/infrastructure/google-sheets/employee-advances/PayrollRecordsSheet.ts");
   const headers=(await import('./helpers/load-source.mjs')).loadSource('src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts');d.data.advances=[Array.from(headers.ADVANCE_HEADERS)];d.data.settlements=[Array.from(headers.SETTLEMENT_HEADERS)];d.service.employeeAdvances=new PayrollRecordsSheet(d.client,'advances');d.service.payrollSettlements=new PayrollRecordsSheet(d.client,'settlements');
-  const graph=expenseGraph({original,events,service:d.service,externals:{'./manageEmployees':{listEmployees:async()=>{events.push(['employees']);return [{id:'E',status:'active',hiredDate:'2020-01-01',terminatedDate:''}];}}}}),api=graph.load('src/services/employees/manageSalaryAdvances.ts');
+  const graph=expenseGraph({original,events,service:d.service,externals:{'./manageEmployees':{listEmployees:async()=>{events.push(['employees']);return [{id:'E',status:'active',hiredDate:'2020-01-01',terminatedDate:''}];}}}}),api=graph.load("src/services/employees/manageSalaryAdvances.ts");
   const input={requestId:'00000000-0000-0000-0000-000000000000',employeeId:'E',shopId:'S',paidDate:'2026-11-06',payrollMonth:'2026-11',paidAmount:12.34,reference:' ref ',note:' note '};
   const advance=plain(await api.createSalaryAdvance(d.service,input));assert.equal(advance.paidAmount,12.34);assert.deepEqual(plain(await api.createSalaryAdvance(d.service,input)),advance);await assert.rejects(api.createSalaryAdvance(d.service,{...input,paidAmount:1}),e=>e.status===409);
   d.data.shops[1][2]=false;await assert.rejects(api.createSalaryAdvance(d.service,{...input,requestId:'10000000-0000-0000-0000-000000000000'}),e=>e.status===400);results.push(plain({advance,data:d.data,events}));
@@ -59,14 +59,14 @@ test('Sales profit HTTP uses actual Expenses reads and actual unchanged Sales re
  for(const fail of [false,true]){const results=[];for(const original of [true,false]){
   const events=[],d=expenseData({original,events}),sales=salesQueryGraph({original}),salesData=salesQueryData(sales.provider,events);Object.assign(d.service,salesData.service);d.data.shops[1][3]='shop';
   if(fail)d.setFailure((op,name)=>op==='read'&&name==='expenses');
-  const query=sales.query(),graph=expenseGraph({original,events,service:d.service,externals:{'@/services/sales':{getGoogleSheetsProfitSummary:query.getGoogleSheetsProfitSummary,listSalesProfitCostOverrides:async()=>{events.push(['overrides']);return [];}}}}),response=await graph.load('src/app/api/sales/profit-summary/route.ts').GET(new Request('https://example.test/api/sales/profit-summary?year=2026'));
+  const query=sales.query(),graph=expenseGraph({original,events,service:d.service,externals:{'@/services/sales':{getGoogleSheetsProfitSummary:query.getGoogleSheetsProfitSummary,listSalesProfitCostOverrides:async()=>{events.push(['overrides']);return [];}}}}),response=await graph.load("src/app/api/sales/profit-summary/route.ts").GET(new Request('https://example.test/api/sales/profit-summary?year=2026'));
   assert.equal(response.status,fail?500:200);results.push(plain({status:response.status,body:await response.json(),events}));
  }assert.deepEqual(results[1],results[0]);}
 });
 
 test('master HTTP preserves category/shop operations, mapping exceptions, validation and 404/409/500 responses',async()=>{
  for(const [method,kind,body]of [['GET','shops'],['GET','categories'],['GET','bad'],['POST','shops',{name:'New',active:true,loyverseAccountId:'account'}],['POST','shops',{id:'S',name:'Edited',active:true,loyverseAccountId:'old-account'}],['POST','shops',{name:'New',active:true,loyverseAccountId:'unknown'}],['POST','categories',{name:'Category',active:true}],['POST','categories',{name:'',active:true}],['POST','shops',null]]){
-  const results=[];for(const original of [true,false]){const events=[],d=expenseData({original,events});d.data.shops[1][3]='old-account';const graph=expenseGraph({original,service:d.service,events}),route=graph.load('src/app/api/expenses/masters/[kind]/route.ts');const response=await route[method](new Request('https://example.test/api/expenses/masters/'+kind,{method,...(method==='POST'?{body:JSON.stringify(body)}:{})}),{params:Promise.resolve({kind})});results.push(plain({status:response.status,body:await response.json(),events}));}assert.deepEqual(results[1],results[0]);
+  const results=[];for(const original of [true,false]){const events=[],d=expenseData({original,events});d.data.shops[1][3]='old-account';const graph=expenseGraph({original,service:d.service,events}),route=graph.load("src/app/api/expenses/masters/[kind]/route.ts");const response=await route[method](new Request('https://example.test/api/expenses/masters/'+kind,{method,...(method==='POST'?{body:JSON.stringify(body)}:{})}),{params:Promise.resolve({kind})});results.push(plain({status:response.status,body:await response.json(),events}));}assert.deepEqual(results[1],results[0]);
  }
 });
 
@@ -86,11 +86,11 @@ test('HR advances HTTP retains GET projections and POST/PATCH status/error contr
  const {googleGraph}=await import('./helpers/google-infrastructure.mjs');
  for(const method of ['GET','POST','PATCH'])for(const invalid of [false,true]){
   const results=[];for(const original of [true,false]){
-   const events=[],d=expenseData({original,events}),provider=googleGraph({historical:original}),{PayrollRecordsSheet}=provider.load('src/externals/google/sheet/sheets/employee-advances/PayrollRecordsSheet.ts');
+   const events=[],d=expenseData({original,events}),provider=googleGraph({historical:original}),{PayrollRecordsSheet}=provider.load("src/modules/hr/infrastructure/google-sheets/employee-advances/PayrollRecordsSheet.ts");
    const headers=(await import('./helpers/load-source.mjs')).loadSource('src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts');d.data.advances=[Array.from(headers.ADVANCE_HEADERS)];d.data.settlements=[Array.from(headers.SETTLEMENT_HEADERS)];d.service.employeeAdvances=new PayrollRecordsSheet(d.client,'advances');d.service.payrollSettlements=new PayrollRecordsSheet(d.client,'settlements');
    if(invalid&&method==='GET')d.data.shops[0]=['wrong'];
    const employees={listEmployees:async()=>{events.push(['employees']);return [{id:'E',name:'Employee',status:'active',hiredDate:'2020-01-01',terminatedDate:''}];}};
-   const graph=expenseGraph({original,service:d.service,events,externals:{'./manageEmployees':employees,'@/services/employees':employees}}),route=graph.load('src/app/api/employees/advances/route.ts');
+   const graph=expenseGraph({original,service:d.service,events,externals:{'./manageEmployees':employees,'@/services/employees':employees}}),route=graph.load("src/app/api/employees/advances/route.ts");
    const input=invalid?{}:{requestId:'00000000-0000-0000-0000-000000000000',employeeId:'E',shopId:'S',paidDate:'2026-11-06',payrollMonth:'2026-11',paidAmount:12.34,reference:'ref',note:'note'};
    const response=await route[method](new Request('https://example.test/api/employees/advances',{method,...(method==='GET'?{}:{body:JSON.stringify(input)})}));
    results.push(plain({status:response.status,body:await response.json(),events}));

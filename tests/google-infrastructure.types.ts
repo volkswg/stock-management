@@ -1,10 +1,10 @@
-import type * as Legacy from "../src/externals/google/sheet/types";
+import type * as Legacy from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type * as Root from "../src/infrastructure/persistence/google-sheets/types";
-import { GoogleSheetsClient as OldClient } from "../src/externals/google/sheet/client";
+import { GoogleSheetsClient as OldClient } from "@/infrastructure/persistence/google-sheets/client/index";
 import { GoogleSheetsClient as NewClient } from "../src/infrastructure/persistence/google-sheets/client";
-import { GoogleServiceAccountAuth as OldAuth } from "../src/externals/google/auth/GoogleServiceAccountAuth";
+import { GoogleServiceAccountAuth as OldAuth } from "@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth";
 import { GoogleServiceAccountAuth as NewAuth } from "../src/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth";
-import { GoogleDriveService as OldDrive, createGoogleDriveServiceFromConfig as oldFactory } from "../src/externals/google/drive";
+import { GoogleDriveService as OldDrive, createGoogleDriveServiceFromConfig as oldFactory } from "@/infrastructure/files/google-drive/index";
 import { GoogleDriveService as NewDrive, createGoogleDriveServiceFromConfig as newFactory } from "../src/infrastructure/files/google-drive";
 type Equal<A,B> = (<T>()=>T extends A?1:2) extends (<T>()=>T extends B?1:2)?true:false;
 type Assert<T extends true> = T;

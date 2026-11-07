@@ -1,5 +1,6 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
@@ -9,7 +10,7 @@ import { deferred } from "./helpers/component-harness.mjs";
 import { shipmentReadBefore as before, migratedReadFunctions, assertShipmentReadHistory } from "./helpers/shipments-read-history.mjs";
 const appPath = "src/modules/shipments/application/list-shipments.ts", adapterPath = "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts";
 const { load, services } = shipmentServices(), app = load(appPath), { GoogleSheetsShipmentListReader } = load(adapterPath);
-const fixture = JSON.parse(readFileSync(new URL("./fixtures/shipments-read.json", import.meta.url), "utf8"));
+const fixture = JSON.parse(readArchive(new URL("./fixtures/shipments-read.json", import.meta.url), "utf8"));
 function originalRead() {
   const exports = {}, output = ts.transpileModule(before.source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   new vm.Script(output).runInNewContext({ exports, require: name => {
@@ -95,7 +96,7 @@ test("malformed worksheet and mixed failure precedence matches original executin
 });
 
 test("original eleven helper declarations retain their exact AST hashes; only two read orchestrations change", () => {
-  const baseline = JSON.parse(readFileSync("tests/fixtures/shipments-structure.json", "utf8"));
+  const baseline = JSON.parse(readArchive("tests/fixtures/shipments-structure.json", "utf8"));
   assert.equal(migratedReadFunctions.size, 13);
   for (const key of migratedReadFunctions) assertShipmentReadHistory(key, baseline.functions[key]);
 });
@@ -124,12 +125,12 @@ test("actual existing GET handlers execute new reads, preserving wrappers, queri
 
 test("actual four worksheet classes and Google transport preserve default A:M/A:G/A:J and explicit Orders A:I reads", async () => {
   const constants = load("src/externals/google/sheet/const.ts"), requests = [], auth = [];
-  const { GoogleSheetsClient } = loadSource("src/externals/google/sheet/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => { requests.push({ url, init }); const worksheet = decodeURIComponent(new URL(url).pathname.split("/values/")[1]).split("!")[0].slice(1, -1); return Response.json({ values: fixture.rows[worksheet] }); } } });
-  const { BaseGoogleSheet } = loadSource("src/externals/google/sheet/sheets/BaseGoogleSheet.ts"), sheets = {};
+  const { GoogleSheetsClient } = loadSource("src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => { requests.push({ url, init }); const worksheet = decodeURIComponent(new URL(url).pathname.split("/values/")[1]).split("!")[0].slice(1, -1); return Response.json({ values: fixture.rows[worksheet] }); } } });
+  const { BaseGoogleSheet } = loadSource("src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts"), sheets = {};
   for (const [property, folder, name] of [["shipments", "shipments", "ShipmentsSheet"], ["shipmentOrders", "shipment-orders", "ShipmentOrdersSheet"], ["orders", "orders", "OrdersSheet"], ["orderItems", "order-items", "OrderItemsSheet"]]) {
     const imports = { "../BaseGoogleSheet": { BaseGoogleSheet }, "../../const": constants };
-    if (folder !== "orders") imports["./const"] = loadSource(`src/externals/google/sheet/sheets/${folder}/const.ts`);
-    const Class = loadSource(`src/externals/google/sheet/sheets/${folder}/${name}.ts`, { imports })[name];
+    if (folder !== "orders") imports["./const"] = loadSource(canonicalPath(`src/externals/google/sheet/sheets/${folder}/const.ts`));
+    const Class = loadSource(canonicalPath(`src/externals/google/sheet/sheets/${folder}/${name}.ts`), { imports })[name];
     const client = new GoogleSheetsClient({ getAccessToken: async () => { auth.push(property); return "fake-token"; } }, "synthetic-sheet");
     sheets[property] = new Class(client, property);
   }
@@ -159,6 +160,6 @@ test("synchronous worksheet access/read failures preserve original short-circuit
 });
 
 test("existing creation composition function stays byte-identical to merged PR 9", () => {
-  const source = ts.createSourceFile("server.ts", readFileSync("src/modules/shipments/server.ts", "utf8"), ts.ScriptTarget.Latest, true);
+  const source = ts.createSourceFile("server.ts", readArchive("src/modules/shipments/server.ts", "utf8"), ts.ScriptTarget.Latest, true);
   assert.equal(source.statements.find(n => ts.isFunctionDeclaration(n) && n.name.text === "createShipment").getText(source), before.creationComposition);
 });

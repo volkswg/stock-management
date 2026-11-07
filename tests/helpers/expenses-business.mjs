@@ -12,7 +12,7 @@ export const legacyExpense='src/services/expenses/manageExpenses.ts';
 export function expenseGraph({original=false,service,events=[],overrides={},externals={}}={}){
  const allowed=new Set(["src/composition/hr-payroll.ts","src/composition/salary-advance-shops.ts",'contracts.ts','server.ts','domain/rules.ts','application/manage-expenses.ts','infrastructure/google-sheets/expense-store.ts','infrastructure/google-sheets/expenses/const.ts'].map(f=>'src/modules/expenses/'+f));
  let hrLoad;
- const cache=new Map(),headers=loadSource('src/modules/expenses/infrastructure/google-sheets/expenses/const.ts');
+ const cache=new Map(),headers=loadSource("src/modules/expenses/infrastructure/google-sheets/expenses/const.ts");
  class Clock extends Date{constructor(...args){super(...(args.length?args:['2026-11-07T00:00:00Z']));if(!args.length)events.push(['clock']);}}
  function load(file){
   if(!original && hrSourceFiles.has(file)){
@@ -40,7 +40,7 @@ export function expenseGraph({original=false,service,events=[],overrides={},exte
  return {load,api:()=>load(legacyExpense),headers};
 }
 export function expenseData({original=false,events=[]}={}){
- const g=googleGraph({historical:original}),{RecordsSheet}=g.load('src/externals/google/sheet/sheets/expenses/RecordsSheet.ts'),headers=loadSource('src/modules/expenses/infrastructure/google-sheets/expenses/const.ts');
+ const g=googleGraph({historical:original}),{RecordsSheet}=g.load("src/modules/expenses/infrastructure/google-sheets/expenses/RecordsSheet.ts"),headers=loadSource("src/modules/expenses/infrastructure/google-sheets/expenses/const.ts");
  const row=(id,month,amount,deleted='')=>[id,month,month+'-06','S','SHOP','C',id,amount,'note','created','updated','actor',deleted];
  const data={expenses:[Array.from(headers.EXPENSE_HEADERS),row('old','2025-12',99),row('deleted','2026-11',99,'deleted'),row('first','2026-10',0.1),row('second','2026-11',0.2)],shops:[Array.from(headers.SHOP_HEADERS),['S','Shop',true,'account','c','u']],categories:[Array.from(headers.CATEGORY_HEADERS),['C','Category',true,'c','u']]};
  let failure,pending;const client={ensureWorksheet:async name=>events.push(['ensure',name]),getValues:async(name,range)=>{events.push(['read',name,range]);if(failure?.('read',name))throw marker;if(pending?.name===name)await pending.promise;return data[name].map(r=>r.slice());},appendValues:async(name,range,values)=>{events.push(['append',name,range,plain(values)]);if(failure?.('append',name))throw marker;if(pending?.name===name)await pending.promise;data[name].push(...plain(values));},updateValues:async(name,range,values)=>{events.push(['update',name,range,plain(values)]);if(failure?.('update',name))throw marker;const at=Number(/\d+/.exec(range)[0])-1;data[name].splice(at,values.length,...plain(values));}};

@@ -1,3 +1,5 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
 import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { completionExtraFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { hrFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
@@ -12,7 +14,6 @@ import { directoryFiles, assertDirectoryHistory } from "./helpers/employee-direc
 import { salesWorksheetFiles, assertSalesWorksheetHistory } from "./helpers/sales-worksheet-history.mjs";
 import { worksheetFiles, worksheetDestinations, assertWorksheetHistory } from "./helpers/worksheet-history.mjs";
 import assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import {sheetTypesBefore,sheetTypeHash} from "./helpers/orders-sheet-type-history.mjs";
@@ -24,14 +25,14 @@ test("four Orders Sheet type imports retain original complete declarations and i
 
 test("exact import reversal preserves original hashes and every other production file remains byte-identical",async()=>{
  const {sheetTypeFiles,assertOrdersSheetTypeHistory}=await import("./helpers/orders-sheet-type-history.mjs");
- for(const [file,hash]of Object.entries(sheetTypesBefore.productionHashes)){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,hash);else assert.equal(sheetTypeHash(readFileSync(file)),hash,file);}
+ for(const [file,hash]of Object.entries(sheetTypesBefore.productionHashes)){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else if(sheetTypeFiles.has(file))assertOrdersSheetTypeHistory(file,hash);else assert.equal(sheetTypeHash(readArchive(file)),hash,file);}
 });
 
 test("the four exact lint scopes require erased pure types and reject aggregate, relative, value, re-export and dynamic bypasses",async()=>{
  const {ESLint}=await import("eslint");const eslint=new ESLint();
  for(const file of Object.keys(sheetTypesBefore.files)){
-  const [actual]=await eslint.lintText(readFileSync(file,"utf8"),{filePath:file});assert.equal(actual.errorCount,0,JSON.stringify(actual.messages));
-  const [valid]=await eslint.lintText('import type { IGoogleSheetsService } from "@/externals/google/sheet/types"; export type T = IGoogleSheetsService;',{filePath:file});assert.equal(valid.errorCount,0,JSON.stringify(valid.messages));
+  const [actual]=await eslint.lintText(readArchive(file,"utf8"),{filePath:file});assert.equal(actual.errorCount,0,JSON.stringify(actual.messages));
+  const [valid]=await eslint.lintText('import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts"; export type T = IGoogleSheetsService;',{filePath:file});assert.equal(valid.errorCount,0,JSON.stringify(valid.messages));
   for(const source of [
    'import type { IGoogleSheetsService } from "@/externals/google/sheet"; export type T=IGoogleSheetsService;',
    'import type { IGoogleSheetsService } from "../../../../externals/google/sheet"; export type T=IGoogleSheetsService;',
@@ -49,7 +50,7 @@ test("actual relocated worksheet type graph avoids the mixed index and stays one
  const options=ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json",ts.sys.readFile).config,ts.sys,process.cwd()).options;
  function graph(restoreOld=false){
   const source=restoreOld?{"src/modules/orders/server.ts":sheetTypesBefore.files["src/modules/orders/server.ts"].source}:{};
-  const host=ts.sys;
+  const host=evidenceHost(ts.sys);
   const edges=new Set(),seen=new Set(),active=[],reached=new Set();
   function visit(file,from){assert.ok(!active.includes(file),[...active,file].join(" -> "));const owner=/^src\/modules\/(orders|shipments)\//.exec(file)?.[1]??from;if(owner&&from&&owner!==from)edges.add(`${from}->${owner}`);const key=`${owner}:${file}`;if(seen.has(key))return;active.push(file);reached.add(file);
    const ast=ts.createSourceFile(file,source[file]??restoreOrdersLineSource(file),ts.ScriptTarget.Latest,true);

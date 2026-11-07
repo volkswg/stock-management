@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const";
 import { ORDERS_SHEET_HEADERS } from "@/modules/orders/infrastructure/google-sheets/orders/const";
 import type { CreatedOrder } from "../../contracts";

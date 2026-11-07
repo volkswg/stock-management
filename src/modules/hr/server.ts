@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { EmployeeDirectoryEntry } from "./contracts";
 import { GoogleSheetsEmployeeDirectoryReader } from "./infrastructure/google-sheets/employee-directory-reader";
 

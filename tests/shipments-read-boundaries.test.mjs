@@ -1,5 +1,5 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { ESLint } from "eslint";
 import ts from "typescript";
@@ -17,7 +17,7 @@ test("real read application/port/reader/composition pass strict scopes and exact
   for (const [file, code] of [
     [application, 'import type { ShipmentListItem } from "../contracts"; import type { ShipmentListReader } from "./ports/shipment-list-reader"; export type Output = [ShipmentListItem, ShipmentListReader];'],
     [port, 'import type { ShipmentRelatedOrder } from "../../contracts"; export type Orders = ReadonlyMap<string, ShipmentRelatedOrder>;'],
-    [adapter, 'import "server-only"; import type { IGoogleSheetsService, GoogleSheetRow } from "@/externals/google/sheet/types"; import { OrderStatus } from "@/modules/orders/contracts"; export type Row = GoogleSheetRow; export type Sheets = IGoogleSheetsService; export const status = OrderStatus.Complete;'],
+    [adapter, 'import "server-only"; import type { IGoogleSheetsService, GoogleSheetRow } from "@/infrastructure/persistence/google-sheets/service-contracts"; import { OrderStatus } from "@/modules/orders/contracts"; export type Row = GoogleSheetRow; export type Sheets = IGoogleSheetsService; export const status = OrderStatus.Complete;'],
     [server, 'import "server-only"; import { listShipments, getShipmentDetail } from "./application/list-shipments"; import { GoogleSheetsShipmentListReader } from "./infrastructure/google-sheets/shipment-list-reader"; export const operations = [listShipments, getShipmentDetail, GoogleSheetsShipmentListReader];'],
   ]) await check(file, code, false);
 });
@@ -75,7 +75,7 @@ test("both browser graphs reject all new read implementation entrypoints and ret
     'import { Reader } from "../infrastructure/google-sheets/shipment-list-reader";',
   ]) await check(file, code, true);
   for (const types of [false, true]) assert.deepEqual(ownershipEdges(browserOwnership({ types })), ["shipments->orders"]);
-  for (const file of [adapter, server]) assert.ok(readFileSync(file, "utf8").startsWith('import "server-only";'));
-  const source = ts.createSourceFile(port, readFileSync(port, "utf8"), ts.ScriptTarget.Latest, true);
+  for (const file of [adapter, server]) assert.ok(readArchive(file, "utf8").startsWith('import "server-only";'));
+  const source = ts.createSourceFile(port, readArchive(port, "utf8"), ts.ScriptTarget.Latest, true);
   assert.ok(source.statements.filter(ts.isImportDeclaration).every(n => n.importClause.isTypeOnly && n.moduleSpecifier.text === "../../contracts"));
 });

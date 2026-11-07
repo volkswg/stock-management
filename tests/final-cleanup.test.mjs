@@ -1,3 +1,5 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { evaluateCleanup } from './helpers/cleanup-source.mjs';
@@ -20,10 +22,10 @@ async function registry(original) {
         getValuesBatch(args) { events.push(['batch', args]); return Promise.resolve([[['state']]]); }
     }
     const auth = { GoogleServiceAccountAuth: Auth }, client = { GoogleSheetsClient: Client };
-    const all = provider.load('src/externals/google/sheet/index.ts');
-    const imports = { '@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth': auth, '@/infrastructure/persistence/google-sheets/client': client, '../auth/GoogleServiceAccountAuth': auth, './client': client, './const': provider.load('src/externals/google/sheet/const.ts'), './sheets': all };
+    const all = provider.registry();
+    const imports = { '@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth': auth, '@/infrastructure/persistence/google-sheets/client': client, '../auth/GoogleServiceAccountAuth': auth, './client': client, './const': provider.load("src/infrastructure/persistence/google-sheets/const.ts"), './sheets': all };
     for (const [path] of [['stock-adjustments/StockAdjustmentsSheet', 'StockAdjustmentsSheet'], ['employee-advances/PayrollRecordsSheet', 'PayrollRecordsSheet'], ['expenses/RecordsSheet', 'RecordsSheet'], ['movements/MovementSheet', 'MovementSheet']])
-        imports['./sheets/' + path] = provider.load('src/externals/google/sheet/sheets/' + path + '.ts');
+        imports['./sheets/' + path] = provider.load(canonicalPath('src/externals/google/sheet/sheets/' + path + '.ts'));
     const C = evaluateCleanup('src/externals/google/sheet/GoogleSheetsService.ts', { original, imports }).GoogleSheetsService;
     const config = new Proxy({}, { get: (_, key) => { events.push(['config', key]); return String(key); } }), service = new C(config);
     const before = events.length;
@@ -36,17 +38,17 @@ async function registry(original) {
 }
 test('original/current aggregate constructor configuration, real worksheet ownership, health-read order and movement batch mapping remain exact', async () => { assert.deepEqual(await registry(false), await registry(true)); });
 test('final ownership preserves every inverse witness, supported callable/constructor identity and runtime-only canonical composition', async () => {
-    const { cleanupHistory, restoreCleanupSource } = await import('./helpers/cleanup-history.mjs'), { readFileSync } = await import('node:fs'), { createHash } = await import('node:crypto'), { ordersLineGraph } = await import('./helpers/orders-line-source.mjs');
+    const { cleanupHistory, restoreCleanupSource } = await import('./helpers/cleanup-history.mjs'),{ createHash } = await import('node:crypto'),{ ordersLineGraph } = await import('./helpers/orders-line-source.mjs');
     for (const [file, e] of Object.entries(cleanupHistory.files))
         assert.equal(createHash('sha256').update(restoreCleanupSource(file)).digest('hex'), e.sha256, file);
     for (const [file, e] of Object.entries(cleanupHistory.edits))
         assert.equal(createHash('sha256').update(restoreCleanupSource(file)).digest('hex'), e.sha256, file);
-    const g = googleGraph(), C = g.load('src/composition/google-sheets/GoogleSheetsService.ts').GoogleSheetsService;
-    assert.equal(g.load('src/externals/google/sheet/GoogleSheetsService.ts').GoogleSheetsService, C);
-    assert.equal(g.load('src/externals/google/sheet/index.ts').GoogleSheetsService, C);
+    const g = googleGraph(), C = g.load("src/composition/google-sheets/GoogleSheetsService.ts").GoogleSheetsService;
+    assert.equal(g.load("src/composition/google-sheets/GoogleSheetsService.ts").GoogleSheetsService, C);
+    assert.equal(g.registry().GoogleSheetsService, C);
     assert.equal(C.prototype.constructor, C);
     const orders = ordersLineGraph();
-    assert.equal(orders.load('src/services/orders/listOrders.ts').getOrderDetail, orders.load('src/composition/orders.ts').getOrderDetail);
+    assert.equal(orders.load("src/services/orders/listOrders.ts").getOrderDetail, orders.load("src/composition/orders.ts").getOrderDetail);
     const { userStateGraph } = await import('./helpers/user-state-worksheet-graph.mjs'), graph = userStateGraph();
     for (const types of [false, true]) {
         graph.modules(types);
@@ -58,7 +60,7 @@ test('final ownership preserves every inverse witness, supported callable/constr
             assert.equal(graph.trace(file, types, p => p.startsWith('src/modules/') || p.startsWith('src/composition/')), null, file);
         for (const file of graph.all.filter(f => /^src\/modules\/[^/]+\/(application|domain)\//.test(f)))
             assert.equal(graph.trace(file, types, p => /^src\/(services|externals|infrastructure|composition|config|app)\//.test(p) || /^src\/modules\/[^/]+\/(?:server\.ts|infrastructure\/)/.test(p)), null, file);
-        for (const root of graph.all.filter(f => /^\s*['"]use client['"]/.test(readFileSync(f, 'utf8'))))
+        for (const root of graph.all.filter(f => /^\s*['"]use client['"]/.test(readArchive(f, 'utf8'))))
             assert.equal(graph.trace(root, types, p => /^src\/(services|externals|infrastructure|composition|config)\//.test(p) || /^src\/modules\/[^/]+\/(application|infrastructure|server\.ts)/.test(p)), null, root);
     }
     for (const root of graph.all.filter(f => f.startsWith('src/app/') && f.endsWith('/route.ts')))

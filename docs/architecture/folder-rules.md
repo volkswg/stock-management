@@ -1,6 +1,6 @@
 # Folder ownership
 
-Apply these rules to new and migrated code. `services`, `externals` and backend feature leaves now retain reviewed compatibility surfaces. Do not scaffold empty layers or blindly move mixed files.
+Apply these rules to new and migrated code. `services` and backend feature leaves retain reviewed compatibility surfaces. `src/externals/` is retired and must not be recreated. Do not scaffold empty layers or blindly move mixed files.
 
 | Location under `src/` | Owns | Excludes |
 | --- | --- | --- |
@@ -40,4 +40,4 @@ Root configuration/dependency files, `public` assets and existing operational gu
 
 [Migration map](migration-map.md) records actual completed ownership and intentionally retained compatibility. Workspace/Next shell remains app-owned. Legacy business paths contain named forwards or identity bindings; concrete bridge functions now live in composition. Inventory owns movement schemas/quantity decisions, LINE owns sessions/journeys and external transport has root owners. All canonical adapters keep row/range mapping out of application ports.
 
-The aggregate Sheets service remains a single composition object with its original constructor/health-check behavior. Its old pure full-service types and export indexes remain compatibility contracts. Do not move feature registry construction into root infrastructure or remove tested exports without a new consumer/identity audit.
+The aggregate Sheets service remains a single composition object with its original constructor/health-check behavior. Its pure full-service declarations live in root `infrastructure/persistence/google-sheets/service-contracts.ts`; generic row types remain in `types.ts`. The former external indexes have no production replacements mixing transport and worksheets. Import concrete owners or named composition entrypoints. Do not move feature registry construction into root infrastructure.

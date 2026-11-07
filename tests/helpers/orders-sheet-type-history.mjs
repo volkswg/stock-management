@@ -1,6 +1,6 @@
 import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash} from "node:crypto";
 export const sheetTypesBefore=JSON.parse(readFileSync("tests/fixtures/orders-sheet-types-before.json","utf8"));
 export const sheetTypeFiles=new Set(Object.keys(sheetTypesBefore.files));

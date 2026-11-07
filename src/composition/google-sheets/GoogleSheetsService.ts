@@ -20,7 +20,7 @@ import { ShipmentsSheet } from "@/modules/shipments/infrastructure/google-sheets
 import { StockCountsSheet } from "@/modules/inventory/infrastructure/google-sheets/stock-counts/StockCountsSheet";
 import { UserStateSheet } from "@/modules/line-workflows/infrastructure/google-sheets/user-state/UserStateSheet";
 import { MovementSheet } from "@/modules/inventory/infrastructure/google-sheets/movements/MovementSheet";
-import type { GoogleSheetsConfig, GoogleSheetRow, MovementRange, MovementWorksheet, IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { GoogleSheetsConfig, GoogleSheetRow, MovementRange, MovementWorksheet, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
   readonly employeeCompensations: EmployeeCompensationsSheet;

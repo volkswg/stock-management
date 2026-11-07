@@ -13,7 +13,7 @@ export class DirectoryClock extends Date{constructor(...args){super(args.length?
 export function directoryGraph({original=false,service,events=[],globals={}}={}){
  const cache=new Map(),options=ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json",ts.sys.readFile).config,ts.sys,process.cwd()).options;
  const allowed=new Set(["src/composition/employee-directory.ts","src/infrastructure/persistence/google-sheets/read-and-repair-rows.ts",...inventoryOwners,...completionNewFiles,"src/modules/hr/application/ports/payroll.ts","src/modules/hr/infrastructure/google-sheets/employees/const.ts","src/modules/hr/infrastructure/google-sheets/employee-compensations/const.ts","src/modules/hr/infrastructure/google-sheets/employee-timesheets/const.ts","src/modules/inventory/infrastructure/google-sheets/stock-adjustments/const.ts",directoryLegacy,"src/services/stock-adjustments/types.ts","src/app/api/stock-adjustments/route.ts",...directoryNewFiles]);
- const headers=loadSource("src/externals/google/sheet/sheets/employees/const.ts");
+ const headers=loadSource("src/modules/hr/infrastructure/google-sheets/employees/const.ts");
  function load(file){if(cache.has(file))return cache.get(file);if(!allowed.has(file))throw Error(`Unapproved directory dependency ${file}`);
   const source=original?(directoryBefore.files[file]?.source??(file==="src/app/api/stock-adjustments/route.ts"?directoryBefore.routeSource:readFileSync(file,"utf8"))):readFileSync(file,"utf8");
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,exports={};cache.set(file,exports);

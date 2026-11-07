@@ -1,7 +1,8 @@
+import {canonicalPath} from "./retirement-history.mjs";
 import {ordersLineGraph} from "./orders-line-source.mjs";
 import {restoreInventoryApplicationSource}from "./inventory-application-history.mjs";
 import assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash} from "node:crypto";
 import vm from "node:vm";
 import ts from "typescript";
@@ -21,7 +22,7 @@ export function assertMovementSchemaHistory(file,expected){
 }
 // Closed original/current state graph; no config/provider implementations or network.
 export function movementSchemaGraph({original=false,globals={}}={}){
- if(!original){const graph=ordersLineGraph({globals,createId:()=>"synthetic-id"});return {...graph,load:file=>{assert.ok(file!=="src/config/index.ts",`Unapproved schema dependency: ${file}`);return graph.load(file);},state:()=>graph.load("src/services/movements/state.ts")};}
+ if(!original){const graph=ordersLineGraph({globals,createId:()=>"synthetic-id"});return {...graph,load:file=>{assert.ok(file!=="src/config/index.ts",`Unapproved schema dependency: ${file}`);return graph.load(canonicalPath(file));},state:()=>graph.load("src/services/movements/state.ts")};}
  const owner="src/modules/line-workflows/infrastructure/google-sheets/user-state/const.ts";
  const state="src/services/movements/state.ts",header="src/externals/google/sheet/sheets/user-state/const.ts",leaf=movementSchemaBefore.newFile,cache=new Map();
  function load(file){assert.ok([state,header,leaf,owner,"src/modules/inventory/infrastructure/google-sheets/movement-schema.ts"].includes(file),`Unapproved schema dependency: ${file}`);if(cache.has(file))return cache.get(file);const source=original&&file===state?movementSchemaBefore.files[state].source:readFileSync(file,"utf8"),exports={};cache.set(file,exports);

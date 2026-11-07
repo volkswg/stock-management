@@ -1,10 +1,10 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { shipmentRoutes, fakeShipmentSheets, shipmentRow, shipmentParams, jsonRequest, ShipmentClock, SHIPMENT_TIME } from "./helpers/shipments.mjs";
 import { loadSource } from "./helpers/load-source.mjs";
 
-const fixture = JSON.parse(readFileSync(new URL("./fixtures/shipments-read.json", import.meta.url), "utf8"));
+const fixture = JSON.parse(readArchive(new URL("./fixtures/shipments-read.json", import.meta.url), "utf8"));
 async function response(result, status, body) { assert.equal(result.status, status); assert.deepEqual(await result.json(), body); }
 
 test("collection GET preserves wrappers, query filtering, includeOrders flag, invalid statuses and read failures", async () => {

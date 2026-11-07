@@ -1,5 +1,6 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { shipmentServices } from "./helpers/shipments.mjs";
 import { plain, loadSource } from "./helpers/load-source.mjs";
@@ -19,7 +20,7 @@ test("pure creation uses only a fake business writer and reproduces all captured
 });
 
 test("application validation is independent of all IO and append must finish before returning the same record", async () => {
-  const { createShipment } = shipmentServices().load(application), pendingWrite = deferred(), events = []; let received, success = false;
+  const { createShipment } = shipmentServices().load(canonicalPath(application)), pendingWrite = deferred(), events = []; let received, success = false;
   const deps = { now: () => { events.push("clock"); return before.time; }, createId: () => { events.push("id"); return before.id; }, writer: { appendCreatedShipment: async record => { events.push("append"); received = record; await pendingWrite.promise; } } };
   await assert.rejects(createShipment({ poNumber: "  ", createdBy: "web" }, deps), error => error.message === "Shipment PO number is required."); assert.deepEqual(events, []);
   const pending = createShipment({ poNumber: " PO ", createdBy: " actor " }, deps); pending.then(() => { success = true; }); await flush(); assert.equal(success, false);
@@ -29,7 +30,7 @@ test("application validation is independent of all IO and append must finish bef
 });
 
 test("actual adapter is lazy and writes each captured thirteen-field A:M payload once", async () => {
-  const { GoogleSheetsShipmentWriter } = shipmentServices().load(adapter);
+  const { GoogleSheetsShipmentWriter } = shipmentServices().load(canonicalPath(adapter));
   const noAccess = { get shipments() { assert.fail("Adapter construction must not read a worksheet property"); } };
   new GoogleSheetsShipmentWriter(noAccess);
   for (const fixture of before.cases) {
@@ -43,7 +44,7 @@ test("direct legacy and unchanged barrel export the same named server-only compo
   const direct = load("src/services/shipments/createShipment.ts"), server = load("src/modules/shipments/server.ts");
   assert.deepEqual(Object.keys(server).sort(), ["LinkOrderToShipmentError", "advanceShipmentStatusWithBill", "createShipment", "getShipmentDetail", "linkOrderToShipment", "listShipments", "updateShipmentStatus"]); assert.deepEqual(Object.keys(direct), ["createShipment"]);
   assert.equal(services.createShipment, direct.createShipment); assert.equal(direct.createShipment, server.createShipment);
-  for (const f of [adapter, "src/modules/shipments/server.ts"]) assert.ok(readFileSync(f, "utf8").startsWith('import "server-only";'));
+  for (const f of [adapter, "src/modules/shipments/server.ts"]) assert.ok(readArchive(f, "utf8").startsWith('import "server-only";'));
   await assert.rejects(server.createShipment({ poNumber: " ", createdBy: "web", googleSheetsService: { get shipments() { assert.fail("Validation must precede worksheet access"); } } }), error => error.message === "Shipment PO number is required.");
   assert.equal(services.ShipmentStatus, load("src/modules/shipments/contracts.ts").ShipmentStatus);
 });
@@ -57,9 +58,9 @@ test("offline loader stays closed to config/auth/Drive/provider implementations"
 
 test("actual writer through ShipmentsSheet/BaseGoogleSheet/GoogleSheetsClient retains one USER_ENTERED transport append", async () => {
   const { load } = shipmentServices(), { GoogleSheetsShipmentWriter } = load(adapter), requests = [];
-  const { GoogleSheetsClient } = loadSource("src/externals/google/sheet/client/GoogleSheetsClient.ts", { imports: { "../const": load("src/externals/google/sheet/const.ts") }, globals: { fetch: async (url, init) => { requests.push({ url, init }); return Response.json({}); } } });
-  const { BaseGoogleSheet } = loadSource("src/externals/google/sheet/sheets/BaseGoogleSheet.ts");
-  const { ShipmentsSheet } = loadSource("src/externals/google/sheet/sheets/shipments/ShipmentsSheet.ts", { imports: { "../../const": load("src/externals/google/sheet/const.ts"), "../BaseGoogleSheet": { BaseGoogleSheet }, "./const": load("src/externals/google/sheet/sheets/shipments/const.ts") } });
+  const { GoogleSheetsClient } = loadSource("src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts", { imports: { "../const": load("src/externals/google/sheet/const.ts") }, globals: { fetch: async (url, init) => { requests.push({ url, init }); return Response.json({}); } } });
+  const { BaseGoogleSheet } = loadSource("src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts");
+  const { ShipmentsSheet } = loadSource("src/modules/shipments/infrastructure/google-sheets/shipments/ShipmentsSheet.ts", { imports: { "../../const": load("src/externals/google/sheet/const.ts"), "../BaseGoogleSheet": { BaseGoogleSheet }, "./const": load("src/externals/google/sheet/sheets/shipments/const.ts") } });
   const client = new GoogleSheetsClient({ getAccessToken: async () => "fake-token" }, "fake-sheet");
   const writer = new GoogleSheetsShipmentWriter({ shipments: new ShipmentsSheet(client, "Synthetic Shipments") });
   assert.equal(requests.length, 0); await writer.appendCreatedShipment(before.cases[0].shipment);

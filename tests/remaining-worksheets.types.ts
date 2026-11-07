@@ -1,4 +1,4 @@
-import { RecordsSheet as LegacyRecords } from '../src/externals/google/sheet/sheets/expenses/RecordsSheet';
+import { RecordsSheet as LegacyRecords } from "@/modules/expenses/infrastructure/google-sheets/expenses/RecordsSheet";
 import { RecordsSheet } from '../src/modules/expenses/infrastructure/google-sheets/expenses/RecordsSheet';
 import { RecordsSheet as RootRecords } from '../src/infrastructure/persistence/google-sheets/sheets/RecordsSheet';
 import { StockAdjustmentsSheet } from '../src/modules/inventory/infrastructure/google-sheets/stock-adjustments/StockAdjustmentsSheet';

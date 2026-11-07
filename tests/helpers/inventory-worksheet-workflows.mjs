@@ -5,10 +5,10 @@ import {DirectoryClock,directoryGraph} from "./employee-directory.mjs";
 
 // Exact production business/HTTP files with synthetic collaborators; no general source loader.
 export function inventoryWorkflow(historical){
- const events=[],g=googleGraph({historical}),registry=g.load("src/externals/google/sheet/index.ts");
+ const events=[],g=googleGraph({historical}),registry=g.registry();
  const globals={Date:DirectoryClock,Error,Request,Response,console:{error:(...args)=>events.push(["log",...plain(args)])}};
  const schema=loadSource("src/services/movements/worksheet-schema.ts");
- const state=loadSource("src/services/movements/state.ts",{imports:{"./worksheet-schema":schema,"@/externals/google/sheet/sheets/user-state/const":g.load("src/externals/google/sheet/sheets/user-state/const.ts"),"@/services/utils/createSortableId":{createSortableId:()=>assert.fail("No movement ID generation expected")}},globals});
+ const state=loadSource("src/services/movements/state.ts",{imports:{"./worksheet-schema":schema,"@/externals/google/sheet/sheets/user-state/const":g.load("src/modules/line-workflows/infrastructure/google-sheets/user-state/const.ts"),"@/services/utils/createSortableId":{createSortableId:()=>assert.fail("No movement ID generation expected")}},globals});
  const data={counts:[Array.from(registry.STOCK_COUNT_HEADERS),["previous","2026-10","shop","Shop",10,"","old","old","actor"]],masters:[Array.from(state.MASTER_HEADERS),["M","user","2026-11-06","","created","5","created","updated"]],details:[Array.from(state.DETAIL_HEADERS),["I1","M","Shop","3","","from","to","image1","","created","c","u",false,false],["I2","M","Shop","2","","from","to","image2","","created","c","u",false,false]],adjustments:[]};
  let failure;const marker=new Error("synthetic write/read failure"),client={
   ensureWorksheet:async(name)=>events.push(["ensure",name]),
@@ -17,7 +17,7 @@ export function inventoryWorkflow(historical){
   updateValues:async(name,range,values,mode)=>{events.push(["update",name,range,plain(values),mode??"USER_ENTERED"]);if(failure?.("update",name,range))throw marker;const at=Number(/\d+/.exec(range)?.[0]??1)-1;values.forEach((row,i)=>{data[name][at+i]=Array.from(row);});},
   deleteRow:async(name,row)=>{events.push(["delete",name,row]);if(failure?.("delete",name,row))throw marker;data[name].splice(row-1,1);},
  };
- const {MovementSheet}=g.load("src/externals/google/sheet/sheets/movements/MovementSheet.ts"),{StockAdjustmentsSheet}=g.load("src/externals/google/sheet/sheets/stock-adjustments/StockAdjustmentsSheet.ts");
+ const {MovementSheet}=g.load("src/modules/inventory/infrastructure/google-sheets/movements/MovementSheet.ts"),{StockAdjustmentsSheet}=g.load("src/modules/inventory/infrastructure/google-sheets/stock-adjustments/StockAdjustmentsSheet.ts");
  const service={stockCounts:new registry.StockCountsSheet(client,"counts"),movementMasters:new MovementSheet(client,"masters"),movementDetails:new MovementSheet(client,"details"),stockAdjustments:new StockAdjustmentsSheet(client,"adjustments")};
  const movement=loadSource("src/services/movements/manageMovements.ts",{imports:{"./worksheet-schema":schema,"@/features/backend/line/services/movements/utils":loadSource("src/features/backend/line/services/movements/utils.ts")},globals});
  const adjustments=directoryGraph({service}).legacy();

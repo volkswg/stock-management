@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { Expense } from "@/modules/expenses/contracts";
 import type { GoogleSheetsDailySalesReport, GoogleSheetsSalesDashboardReport, GoogleSheetsProfitSummary, SalesProfitCostOverride } from "./contracts";
 import { createSalesReports } from "./application/reports";

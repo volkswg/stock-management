@@ -1,4 +1,4 @@
-import type { IGoogleSheetsService } from "../src/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { ShipmentListItem, ShipmentStatus } from "../src/modules/shipments/contracts";
 import type { listShipments as Direct, getShipmentDetail as DirectDetail } from "../src/services/shipments/listShipments";
 import type { listShipments as Barrel, getShipmentDetail as BarrelDetail } from "../src/services/shipments";

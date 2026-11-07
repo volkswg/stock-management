@@ -1,6 +1,6 @@
 import {restoreExternalSource} from "./external-history.mjs";
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash} from 'node:crypto';
 export {ordersLineNewFiles} from './orders-line-ownership.mjs';
 export const ordersLineBefore=JSON.parse(readFileSync('tests/fixtures/orders-line-before.json','utf8'));

@@ -11,8 +11,8 @@ const staticExports = [
 ];
 const serverRules = {
   "no-restricted-syntax": [...staticExports,
-    { selector: "ImportDeclaration[source.value='@/externals/google/drive/types']:not([importKind='type'])", message: "Drive interfaces must be erased type imports." },
-    { selector: "ImportDeclaration[source.value='@/externals/google/sheet/types']:not([importKind='type'])", message: "Sheet interfaces must be erased type imports; runtime mapping imports explicit constants only." }],
+    { selector: "ImportDeclaration[source.value='@/infrastructure/files/google-drive/types']:not([importKind='type'])", message: "Drive interfaces must be erased type imports." },
+    { selector: "ImportDeclaration[source.value='@/infrastructure/persistence/google-sheets/service-contracts']:not([importKind='type'])", message: "Sheet interfaces must be erased type imports; runtime mapping imports explicit constants only." }],
   "no-restricted-globals": ["error", "process", "Buffer", "fetch"],
 };
 
@@ -31,8 +31,8 @@ export const shipmentsServerBoundaries = [
     rules: {
       ...serverRules,
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet/types", "@/externals/google/sheet/const",
-        "@/externals/google/sheet/sheets/shipments/const", "../../contracts",
+        "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "@/infrastructure/persistence/google-sheets/const",
+        "@/modules/shipments/infrastructure/google-sheets/shipments/const", "../../contracts",
         "../../application/ports/created-shipment-writer",
       ]),
       "no-restricted-globals": ["error", "Date", "process", "Buffer", "fetch"],
@@ -54,7 +54,7 @@ export const shipmentsServerBoundaries = [
     files: ["src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts"],
     rules: {
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet/types", "@/modules/orders/contracts",
+        "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "@/modules/orders/contracts",
         "../../contracts", "../../application/ports/shipment-list-reader",
       ]),
     },
@@ -75,8 +75,8 @@ export const shipmentsServerBoundaries = [
     files: ["src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts"],
     rules: {
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet/types", "@/externals/google/sheet/const",
-        "@/externals/google/sheet/sheets/shipment-orders/const", "../../contracts",
+        "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "@/infrastructure/persistence/google-sheets/const",
+        "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const", "../../contracts",
         "../../application/ports/shipment-order-link-store",
       ]),
     },
@@ -97,7 +97,7 @@ export const shipmentsServerBoundaries = [
     files: ["src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts"],
     rules: {
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet/types", "../../contracts",
+        "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "../../contracts",
         "../../application/ports/shipment-status-store",
       ]),
     },
@@ -124,9 +124,9 @@ export const shipmentsServerBoundaries = [
     files: ["src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts"],
     rules: {
       ...serverRules,
-      "no-restricted-imports": onlyImports(["server-only", "@/externals/google/drive/types", "../../application/ports/shipment-bill-storage"]),
+      "no-restricted-imports": onlyImports(["server-only", "@/infrastructure/files/google-drive/types", "../../application/ports/shipment-bill-storage"]),
       "no-restricted-syntax": [...staticExports,
-        { selector: "ImportDeclaration[source.value='@/externals/google/drive/types']:not([importKind='type'])", message: "Drive interfaces must be erased imports." }],
+        { selector: "ImportDeclaration[source.value='@/infrastructure/files/google-drive/types']:not([importKind='type'])", message: "Drive interfaces must be erased imports." }],
       "no-restricted-globals": ["error", "process", "fetch"],
     },
   },
@@ -134,7 +134,7 @@ export const shipmentsServerBoundaries = [
     files: ["src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts"],
     rules: {
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet/types", "../../contracts",
+        "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "../../contracts",
         "@/modules/orders/contracts", "@/modules/orders/application/ports/order-detail-shipment-projection",
       ]),
     },
@@ -144,12 +144,12 @@ export const shipmentsServerBoundaries = [
     rules: {
       ...serverRules,
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet/types", "@/services/utils/createSortableId", "./contracts",
+        "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "@/services/utils/createSortableId", "./contracts",
         "./application/create-shipment", "./infrastructure/google-sheets/shipment-writer",
         "./application/list-shipments", "./infrastructure/google-sheets/shipment-list-reader",
         "./application/link-order-to-shipment", "./infrastructure/google-sheets/shipment-order-link-store",
         "./application/update-shipment-status", "./infrastructure/google-sheets/shipment-status-store",
-        "@/externals/google/drive/types", "./application/advance-shipment-status-with-bill",
+        "@/infrastructure/files/google-drive/types", "./application/advance-shipment-status-with-bill",
         "./infrastructure/google-drive/shipment-bill-storage",
       ]),
     },

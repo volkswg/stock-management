@@ -1,3 +1,5 @@
+import {retirement} from "./retirement-history.mjs";
+import {canonicalPath} from "./retirement-history.mjs";
 import {cleanupHistory} from "./cleanup-history.mjs";
 import {legacySpecifier} from "./cleanup-history.mjs";
 import {externalHistory} from "./external-history.mjs";
@@ -21,8 +23,9 @@ import { googleBefore } from "./google-infrastructure.mjs";
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
 export function loadSource(path, { imports = {}, globals = {} } = {}) {
-  if(externalHistory.moves[path])return loadSource(externalHistory.moves[path].to,{imports,globals});
-  if(path.startsWith("src/services/orders/")||path.startsWith("src/services/line/")||path.startsWith("src/services/user-states/")||path==="src/services/movements/state.ts"||path==="src/features/backend/line/services/movements/index.ts"||["src/externals/line/enum.ts","src/externals/line/utils/messageBuilder.ts","src/features/backend/shared/utils.ts"].includes(path))return ordersLineGraph({imports,globals}).load(path);
+  if(retirement.files[path])throw new Error(`Retired current source path: ${path}`);
+  if(externalHistory.moves[path])return loadSource(canonicalPath(externalHistory.moves[path].to),{imports,globals});
+  if(path.startsWith("src/services/orders/")||path.startsWith("src/services/line/")||path.startsWith("src/services/user-states/")||path==="src/services/movements/state.ts"||path==="src/features/backend/line/services/movements/index.ts"||["src/externals/line/enum.ts","src/externals/line/utils/messageBuilder.ts","src/features/backend/shared/utils.ts"].includes(path))return ordersLineGraph({imports,globals}).load(canonicalPath(path));
   if(["src/services/stock-adjustments/manageStockAdjustments.ts","src/services/stock-counts/manageStockCounts.ts","src/services/movements/manageMovements.ts","src/services/movements/worksheet-schema.ts","src/features/backend/line/services/movements/utils.ts"].includes(path)) return loadInventorySource(path,{imports,globals});
   if(path.startsWith("src/services/sales/")) return loadSalesSource(path,{imports,globals});
   if(["src/services/employees/manageSalaryAdvances.ts","src/services/employees/calculateEmployeePayroll.ts","src/services/employees/settleEmployeePayroll.ts"].includes(path)) return createHRSourceLoader({imports,globals})(path);
@@ -46,6 +49,10 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     fetch: () => { throw new Error("Live network is forbidden in regression tests"); },
     ...globals,
     require: (specifier) => {
+      if(path===expenseRecords && specifier==='@/infrastructure/persistence/google-sheets/sheets/RecordsSheet'){
+        const translated=new Proxy({}, {getOwnPropertyDescriptor:()=>({configurable:true,enumerable:true}),get:(_,key)=>key==='./BaseGoogleSheet'?imports['../BaseGoogleSheet']:imports[key]});
+        return loadSource('src/infrastructure/persistence/google-sheets/sheets/RecordsSheet.ts',{imports:translated,globals});
+      }
       const cleanup=cleanupHistory.moves[path];
       if(cleanup && (specifier==='@/'+cleanup.to.slice(4,-3)||specifier==='../'+cleanup.to.slice(4))){
         const translated=new Proxy({}, {
@@ -57,7 +64,7 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
             return imports[old];
           },
         });
-        return loadSource(cleanup.to,{imports:translated,globals});
+        return loadSource(canonicalPath(cleanup.to),{imports:translated,globals});
       }
       // Only the reviewed old provider forwards may follow their single new owner.
       const move = remainingBefore.moves[path] ?? userStateBefore.moves[path] ?? inventoryWorksheetsBefore.moves[path] ?? hrWorksheetsBefore.moves[path] ?? salesWorksheetsBefore.moves[path] ?? worksheetBefore.moves[path] ?? googleBefore.moves[path];
@@ -70,20 +77,23 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
             return imports[old];
           },
         });
-        return loadSource(move.to, { imports: translated, globals });
+        return loadSource(canonicalPath(move.to), { imports: translated, globals });
       }
       if(path === "src/services/employees/manageSalaryAdvances.ts" && specifier === "./salary-advance-shops") {
         if (!Object.hasOwn(imports,"@/services/expenses")) throw new Error("Unstubbed advance shop reader");
         return {createSalaryAdvanceShops: service => ({listShops: () => imports["@/services/expenses"].listExpenseShops(service)})};
       }
       const split=remainingBefore.splits[path];
-      if(split?.contracts && legacySpecifier(specifier)==="@/modules/inventory/contracts" && !Object.hasOwn(imports,specifier)) return loadSource(split.contracts);
-      if(split && specifier === "@/"+split.to.slice(4,-3) && !Object.hasOwn(imports,specifier)) return loadSource(split.to);
+      if(split?.contracts && legacySpecifier(specifier)==="@/modules/inventory/contracts" && !Object.hasOwn(imports,specifier)) return loadSource(canonicalPath(split.contracts));
+      if(split && specifier === "@/"+split.to.slice(4,-3) && !Object.hasOwn(imports,specifier)) return loadSource(canonicalPath(split.to));
       if(path.startsWith("src/app/api/") && legacySpecifier(specifier)==="@/modules/inventory/server") { const old=["@/services/movements","@/services/stock-counts","@/services/stock-adjustments/manageStockAdjustments"].filter(key=>Object.hasOwn(imports,key)); if(old.length) return Object.assign({},...old.map(key=>imports[key])); }
       if(path.startsWith("src/app/api/") && legacySpecifier(specifier)==="@/modules/sales/server" && Object.hasOwn(imports,"@/services/sales")) return imports["@/services/sales"];
       if(path.startsWith("src/app/api/orders") && legacySpecifier(specifier)==="@/modules/orders/server" && Object.hasOwn(imports,"@/services/orders")) return {...imports[specifier],...imports["@/services/orders"]};
       const oldExternal=specifier.replace("@/infrastructure/external/","@/externals/");
       if(oldExternal!==specifier&&Object.hasOwn(imports,oldExternal))return imports[oldExternal];
+      const moved=Object.values({...remainingBefore.moves,...userStateBefore.moves,...inventoryWorksheetsBefore.moves,...hrWorksheetsBefore.moves,...salesWorksheetsBefore.moves,...worksheetBefore.moves,...googleBefore.moves}).find(e=>e.to===path);
+      const prior=moved&&Object.entries(moved.imports).find(([,to])=>to===specifier)?.[0];
+      if(prior&&Object.hasOwn(imports,prior))return imports[prior];
       if(Object.hasOwn(imports,specifier))return imports[specifier];
       if(legacySpecifier(specifier)!==specifier&&Object.hasOwn(imports,legacySpecifier(specifier)))return imports[legacySpecifier(specifier)];
       if (!Object.hasOwn(imports, specifier)) {

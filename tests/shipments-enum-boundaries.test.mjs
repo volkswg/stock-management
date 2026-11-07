@@ -1,5 +1,5 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { ESLint } from "eslint";
 import { enumBefore } from "./helpers/shipments-enum-history.mjs";
@@ -28,7 +28,7 @@ test("physical status leaf accepts only the original exact enum; aliases, type i
 });
 
 test("public contract owns exactly eight DTOs and rejects reverse/relative forwarding and erased/runtime swaps",async()=>{
-  const code=readFileSync(contract,"utf8");
+  const code=readArchive(contract,"utf8");
   for(const bad of [
     code.replace('"./status"','"@/services/shipments/types"'), code.replace('"./status"','"@/modules/shipments/status"'),
     code.replace('import type { OrderStatus }','import { OrderStatus }'), code.replace('export { ShipmentStatus }','export { type ShipmentStatus }'),
@@ -40,7 +40,7 @@ test("public contract owns exactly eight DTOs and rejects reverse/relative forwa
 });
 
 test("legacy DTO leaf permits only public named forwards; reverse/type/value/re-export bypasses fail",async()=>{
-  const code=readFileSync(legacy,"utf8");
+  const code=readArchive(legacy,"utf8");
   for(const bad of [
     code.replaceAll('"@/modules/shipments/contracts"','"@/modules/shipments/status"'),
     code.replaceAll('"@/modules/shipments/contracts"','"../../modules/shipments/contracts"'),

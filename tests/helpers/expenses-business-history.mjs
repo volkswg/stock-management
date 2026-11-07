@@ -1,3 +1,4 @@
+import {retirementChanged,retirementNewFiles} from "./retirement-history.mjs";
 import {shipmentValidationFile,validationBefore,assertShipmentValidationImportHistory} from "./shipments-validation-history.mjs";
 import {shipmentHttpBefore,assertShipmentHttpHistory} from "./shipments-http-history.mjs";
 import {assertOrdersSheetTypeHistory,sheetTypesBefore} from "./orders-sheet-type-history.mjs";
@@ -8,12 +9,12 @@ import {ordersLineNewFiles,ordersLineChanged} from "./orders-line-history.mjs";
 import {inventoryApplicationChanged,assertInventoryApplicationHistory}from "./inventory-application-history.mjs";
 import { restoreSalesApplicationSource, salesApplicationFiles, salesApplicationBefore } from "./sales-application-history.mjs";
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash} from 'node:crypto';
 export const expensesHistory=JSON.parse(readFileSync('tests/fixtures/expenses-business-before.json','utf8'));
-export const expensesFiles=new Set([...Object.keys(expensesHistory.files),...Object.keys(salesApplicationBefore.files),...Object.keys(salesApplicationBefore.edits),...inventoryApplicationChanged,...ordersLineChanged,...externalChanged,...cleanupChanged]);
+export const expensesFiles=new Set([...Object.keys(expensesHistory.files),...Object.keys(salesApplicationBefore.files),...Object.keys(salesApplicationBefore.edits),...inventoryApplicationChanged,...ordersLineChanged,...externalChanged,...cleanupChanged,...retirementChanged]);
 export const expensesNewFiles=[
- ...cleanupNewFiles,...externalNewFiles,...ordersLineNewFiles,...salesApplicationFiles,
+ ...retirementNewFiles,...cleanupNewFiles,...externalNewFiles,...ordersLineNewFiles,...salesApplicationFiles,
  'src/modules/expenses/contracts.ts','src/modules/expenses/server.ts','src/modules/expenses/domain/rules.ts','src/modules/expenses/application/manage-expenses.ts','src/modules/expenses/application/ports/expense-store.ts','src/modules/expenses/infrastructure/google-sheets/expense-store.ts','src/modules/hr/application/ports/salary-advance-shops.ts','src/services/employees/salary-advance-shops.ts',
 ];
 const hash=s=>createHash('sha256').update(s).digest('hex');

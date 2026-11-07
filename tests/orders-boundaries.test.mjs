@@ -1,5 +1,7 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import {readdirSync} from "node:fs";
 import { resolve, relative } from "node:path";
 import { builtinModules } from "node:module";
 import test from "node:test";
@@ -94,7 +96,7 @@ function browserGraph(runtime = true) {
     assert.ok(!/\/server\.[^/]+$/.test(file), file);
     assert.ok(!file.startsWith("src/app/"), file);
     active.add(file);
-    const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+    const source = ts.createSourceFile(file, readArchive(file, "utf8"), ts.ScriptTarget.Latest, true);
     function check(node) {
       if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
         const clause = node.importClause;
@@ -103,7 +105,7 @@ function browserGraph(runtime = true) {
         if (runtime && typeOnly) return;
         const specifier = node.moduleSpecifier.text;
         assert.ok(!serverPackages.has(specifier), `${specifier} in ${file}`);
-        const resolved = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
+        const resolved = ts.resolveModuleName(specifier, resolve(file), options, evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;
         if (resolved) {
           const target = relative(process.cwd(), resolved).replaceAll("\\", "/");
           if (target.startsWith("src/")) visit(target);

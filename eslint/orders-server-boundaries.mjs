@@ -10,9 +10,9 @@ function onlyImports(paths) {
 const serverRules = {
   "no-restricted-syntax": [
     ...noDynamicServerBypass,
-    { selector: "ImportDeclaration[source.value='@/externals/google/sheet']:not([importKind='type'])", message: "Use only sheet interface types from the legacy aggregate; runtime adapters import explicit constants." },
+    { selector: "ImportDeclaration[source.value='@/infrastructure/persistence/google-sheets/service-contracts']:not([importKind='type'])", message: "Use only sheet interface types from the legacy aggregate; runtime adapters import explicit constants." },
     { selector: "ExportAllDeclaration", message: "Expose explicit named Orders operations, not a broad server/provider barrel." },
-    { selector: "ExportNamedDeclaration[source.value='@/externals/google/sheet']:not([exportKind='type'])", message: "Do not re-export provider implementations through Orders adapters or server composition." },
+    { selector: "ExportNamedDeclaration[source.value='@/infrastructure/persistence/google-sheets/service-contracts']:not([exportKind='type'])", message: "Do not re-export provider implementations through Orders adapters or server composition." },
   ],
   "no-restricted-globals": ["error", "process", "Buffer", "fetch"],
 };
@@ -34,8 +34,8 @@ export const ordersServerBoundaries = [
     rules: {
       ...serverRules,
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet", "@/externals/google/sheet/const",
-        "@/externals/google/sheet/sheets/orders/const", "../../contracts",
+        "server-only", "@/infrastructure/persistence/google-sheets/const",
+        "@/modules/orders/infrastructure/google-sheets/orders/const", "../../contracts",
         "../../application/ports/order-list-reader", "../../application/ports/created-order-writer",
         "./order-row-mapping",
       ]),
@@ -61,8 +61,8 @@ export const ordersServerBoundaries = [
   {
     files: ["src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts"],
     rules: {
-      "no-restricted-imports": onlyImports(["server-only", "@/externals/google/sheet/types", "../../contracts", "../../application/ports/order-detail-reader", "./order-row-mapping"]),
-      "no-restricted-syntax": [...serverRules["no-restricted-syntax"], { selector: "ImportDeclaration[source.value='@/externals/google/sheet/types']:not([importKind='type'])", message: "Erase Sheets interface imports." }],
+      "no-restricted-imports": onlyImports(["server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "../../contracts", "../../application/ports/order-detail-reader", "./order-row-mapping"]),
+      "no-restricted-syntax": [...serverRules["no-restricted-syntax"], { selector: "ImportDeclaration[source.value='@/infrastructure/persistence/google-sheets/service-contracts']:not([importKind='type'])", message: "Erase Sheets interface imports." }],
     },
   },
   {
@@ -70,7 +70,7 @@ export const ordersServerBoundaries = [
     rules: {
       ...serverRules,
       "no-restricted-imports": onlyImports([
-        "server-only", "@/externals/google/sheet", "@/services/utils/createSortableId", "./contracts",
+        "server-only", "@/services/utils/createSortableId", "./contracts",
         "./application/create-order", "./application/list-orders",
         "./application/get-order-detail", "./application/ports/order-detail-shipment-projection",
         "./infrastructure/google-sheets/order-detail-reader",

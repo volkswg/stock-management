@@ -1,5 +1,5 @@
 import "server-only";
-import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const";
 import { SHIPMENT_ORDERS_SHEET_HEADERS } from "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const";
 import type { ShipmentOrder } from "../../contracts";

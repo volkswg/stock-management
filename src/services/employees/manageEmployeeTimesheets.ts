@@ -1,4 +1,4 @@
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { EmployeeTimesheet, EmployeeWorkdayType } from "@/modules/hr/contracts";
 import { EmployeeTimesheetDateConflictError as Conflict, EmployeeTimesheetValidationError as Validation, updateEmployeeTimesheet as ownedUpdate, listEmployeeTimesheets as ownedList, listEmployeeTimesheetsForMonth as ownedMonth, clockInEmployee as ownedClockIn, addEmployeeLeave as ownedLeave, clockOutEmployee as ownedClockOut } from "@/modules/hr/server";
 export type { EmployeeTimesheet, EmployeeWorkdayType } from "@/modules/hr/contracts";

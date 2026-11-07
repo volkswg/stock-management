@@ -2,22 +2,15 @@
 
 This is the authoritative forward plan; [migration map](../architecture/migration-map.md) describes current source and [progress](progress.md) retains immutable execution evidence.
 
-## Authorized completion sequence
+## Completed architecture milestones
 
-The owner authorized four cohesive stacked PRs, each based on its exact parent head. Publication does not authorize merges, auto-merge or deployment.
+PR34–37 (Sales/Inventory, Orders/LINE, external infrastructure and final composition) are merged. Their original evidence remains in [progress](progress.md) and [verification](verification.md).
 
-| Milestone | Branch / review | Status |
-| --- | --- | --- |
-| Sales + Inventory | refactor/sales-inventory-application / [PR34](https://github.com/volkswg/stock-management/pull/34), base main | Published; 510 tests and lint/typecheck/isolated build pass |
-| Orders + LINE | refactor/orders-line-workflows / [PR35](https://github.com/volkswg/stock-management/pull/35), base PR34 branch | Published; 520 tests and all gates pass |
-| External infrastructure | refactor/external-infrastructure / [PR36](https://github.com/volkswg/stock-management/pull/36), base PR35 branch | Published; 526 tests and all gates pass |
-| Final cleanup | refactor/final-architecture-cleanup, base exact PR36 head | Completed; 531 tests and all gates pass. Evidence in progress/verification; review link supplied at publication |
+## Current bounded work: issue #39
 
-No remaining safe implementation milestone in this assignment should be inferred from earlier historical follow-up suggestions. Review and merge the dependency chain only after independent System Architect review and owner authorization. Do not rebase/force-push reviewed branches or push to main.
+Retire all 65 `src/externals/` files in one PR against main. Migrate remaining full-service types to a pure root contract leaf and all active consumers/tests to canonical owners. Preserve every inherited fixture, behavior comparison and negative guard. Exact historical overlays remain test-only; actual current imports/graphs cannot resolve the removed namespace. Publication awaits independent System Architect review; no merge/deploy is authorized.
 
-## Next bounded work
-
-The remaining aggregate construction and legacy full-service contracts/forwards are intentionally supported. Retiring them requires an explicit compatibility decision and new consumer audit; changing lazy construction/connection checks would change observable behavior. No business implementation remains in services/backend compatibility paths. Workspace shell ownership was explicitly outside this task.
+The aggregate construction/connection behavior and services/backend/standalone-script compatibility remain intentionally supported. No additional retirement is implied: each surface needs its own consumer/identity audit. Workspace shell ownership remains outside scope.
 
 Supabase/PostgreSQL/storage migration, authentication/authorization, tenancy/subscriptions/billing, Purchase Order Master, transaction/concurrency/retry/queue/reconciliation policy and provider replacement remain separately scoped product decisions. Existing partial-write and concurrency behavior is preserved, not repaired by this refactor.
 

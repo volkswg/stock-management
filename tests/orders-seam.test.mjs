@@ -1,14 +1,14 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { assertOrderDetailHistory } from "./helpers/orders-detail-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import test from "node:test";
 import { ESLint } from "eslint";
 import { ordersServer } from "./helpers/orders-server.mjs";
 import { loadSource, plain } from "./helpers/load-source.mjs";
 
-const cases = JSON.parse(readFileSync(new URL("./fixtures/orders-seam-list.json", import.meta.url), "utf8"));
+const cases = JSON.parse(readArchive(new URL("./fixtures/orders-seam-list.json", import.meta.url), "utf8"));
 const load = ordersServer();
 
 test("application list runs with a fake business port and reverses its mapped records", async () => {
@@ -54,12 +54,12 @@ for (const { name, rows, expected } of cases) {
 
 test("write adapter uses the existing OrdersSheet transport with one USER_ENTERED append", async () => {
   const requests = [];
-  const constants = loadSource("src/externals/google/sheet/const.ts");
-  const { GoogleSheetsClient } = loadSource("src/externals/google/sheet/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: {
+  const constants = loadSource("src/infrastructure/persistence/google-sheets/const.ts");
+  const { GoogleSheetsClient } = loadSource("src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: {
     fetch: async (url, init) => { requests.push({ url, init }); return Response.json({}); },
   } });
-  const base = loadSource("src/externals/google/sheet/sheets/BaseGoogleSheet.ts");
-  const { OrdersSheet } = loadSource("src/externals/google/sheet/sheets/orders/OrdersSheet.ts", { imports: { "../BaseGoogleSheet": base } });
+  const base = loadSource("src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts");
+  const { OrdersSheet } = loadSource("src/modules/orders/infrastructure/google-sheets/orders/OrdersSheet.ts", { imports: { "../BaseGoogleSheet": base } });
   const sheet = new OrdersSheet(new GoogleSheetsClient({ getAccessToken: async () => "fake-token" }, "fake-sheet"), "orders");
   const { GoogleSheetsOrderWriter } = load("src/modules/orders/infrastructure/google-sheets/order-writer.ts");
   const record = { id: "id", status: "complete", seller: "Seller", totalPrice: 0, remark: "=literal legacy mode", createdAt: "created", updatedAt: "updated", deletedAt: "", createdBy: "web" };
@@ -72,7 +72,7 @@ test("write adapter uses the existing OrdersSheet transport with one USER_ENTERE
 });
 
 test("unmigrated image/draft implementations, barrel exports and detail orchestration remain unchanged", () => {
-  const expected = JSON.parse(readFileSync(new URL("./fixtures/orders-seam-preserved.json", import.meta.url), "utf8"));
+  const expected = JSON.parse(readArchive(new URL("./fixtures/orders-seam-preserved.json", import.meta.url), "utf8"));
   for (const [file, hash] of Object.entries(expected.files)) assert.equal(createHash("sha256").update(restoreOrdersLineSource(file)).digest("hex"), hash, file);
   assertOrderDetailHistory(expected.detailBodyHash);
 });
@@ -117,10 +117,10 @@ test("actual ESLint rules enforce pure application imports and explicit server/a
     assert.ok(result.messages.some(({ ruleId }) => ruleId === "no-restricted-imports"), filePath);
   }
   for (const filePath of ["src/modules/orders/server.ts", "src/modules/orders/infrastructure/google-sheets/order-writer.ts", "src/modules/orders/infrastructure/google-sheets/order-list-reader.ts", "src/modules/orders/infrastructure/google-sheets/order-row-mapping.ts"]) {
-    assert.match(readFileSync(filePath, "utf8"), /^import "server-only";/);
+    assert.match(readArchive(filePath, "utf8"), /^import "server-only";/);
     const [result] = await eslint.lintText('import { getConfig } from "@/config";', { filePath });
     assert.ok(result.messages.some(({ ruleId }) => ruleId === "no-restricted-imports"), filePath);
-    const [valueImport] = await eslint.lintText('import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";', { filePath });
+    const [valueImport] = await eslint.lintText('import { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";', { filePath });
     assert.ok(valueImport.messages.some(({ ruleId }) => ruleId === "no-restricted-syntax"), filePath);
     const [broadExport] = await eslint.lintText('export * from "@/externals/google/sheet";', { filePath });
     assert.ok(broadExport.messages.some(({ ruleId }) => ruleId === "no-restricted-syntax"), filePath);

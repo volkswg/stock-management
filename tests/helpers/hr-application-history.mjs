@@ -1,5 +1,5 @@
 import {restoreSalesApplicationSource}from "./sales-application-history.mjs";
-import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';
+import assert from'node:assert/strict';import {readEvidence as readFileSync} from "./retirement-history.mjs";import{createHash}from'node:crypto';
 export const workforceBefore=JSON.parse(readFileSync('tests/fixtures/hr-application-before.json','utf8'));
 export const completionNewFiles=['application/employees.ts','application/attendance.ts','application/ports/workforce.ts','domain/compensation.ts','domain/attendance-rules.ts','infrastructure/google-sheets/workforce-store.ts','infrastructure/workforce-runtime.ts'].map(f=>'src/modules/hr/'+f);
 export const completionFiles=new Set([...Object.keys(workforceBefore.files),...Object.keys(workforceBefore.routes)]);

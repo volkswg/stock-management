@@ -1,3 +1,4 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { sheetTypeFiles, assertOrdersSheetTypeHistory } from "./helpers/orders-sheet-type-history.mjs";
 import { assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
@@ -8,7 +9,6 @@ import { migratedLinkFunctions, assertShipmentLinkHistory } from "./helpers/ship
 import { migratedReadFunctions, assertShipmentReadHistory } from "./helpers/shipments-read-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { migratedCreationFunctions, assertShipmentCreationHistory } from "./helpers/shipments-create-history.mjs";
@@ -17,9 +17,9 @@ import { plain } from "./helpers/load-source.mjs";
 import { assertPickerDetailParity, assertPickerStaticLintParity } from "./helpers/orders-picker-structure.mjs";
 import { restoreRelocationImports } from "./helpers/shipment-ui-paths.mjs";
 
-const baseline = JSON.parse(readFileSync(new URL("./fixtures/shipments-structure.json", import.meta.url), "utf8"));
+const baseline = JSON.parse(readArchive(new URL("./fixtures/shipments-structure.json", import.meta.url), "utf8"));
 const hash = value => createHash("sha256").update(value).digest("hex");
-const parse = file => ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+const parse = file => ts.createSourceFile(file, readArchive(file, "utf8"), ts.ScriptTarget.Latest, true);
 const printer = ts.createPrinter();
 
 test("Shipment public and legacy runtime exports share the original enum object and strings", () => {

@@ -3,10 +3,10 @@ import test from "node:test";
 import { loadSource } from "./helpers/load-source.mjs";
 import { driveRoute, shippingBillRequest } from "./helpers/shipments-drive.mjs";
 import { ShipmentClock, shipmentParams } from "./helpers/shipments.mjs";
-const constants = loadSource("src/externals/google/drive/const.ts");
+const constants = loadSource("src/infrastructure/files/google-drive/const.ts");
 function provider({ publicLink = false, fetch, events = [], errors = [] }) {
   class Clock extends ShipmentClock { static now() { events.push("boundary"); return 123; } }
-  const { GoogleDriveService } = loadSource("src/externals/google/drive/GoogleDriveService.ts", { imports: { "./const": constants }, globals: { Error, Date: Clock, fetch, console: { error: (...args) => errors.push(args) } } });
+  const { GoogleDriveService } = loadSource("src/infrastructure/files/google-drive/GoogleDriveService.ts", { imports: { "./const": constants }, globals: { Error, Date: Clock, fetch, console: { error: (...args) => errors.push(args) } } });
   return new GoogleDriveService({ folderId: "folder/id", makeFilesReadableByLink: publicLink, auth: { getAccessToken: async () => { events.push("token"); return "fake-token"; } } });
 }
 test("real unchanged Drive provider builds exact multipart/related bytes/headers/URL before token and preserves returned object", async () => {

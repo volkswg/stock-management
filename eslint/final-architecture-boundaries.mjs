@@ -1,11 +1,5 @@
 import { noDynamicServerBypass } from './orders-boundaries.mjs';
 const scopes = {
-    "src/externals/google/sheet/GoogleSheetsService.ts": [
-        "@/composition/google-sheets/GoogleSheetsService"
-    ],
-    "src/externals/google/sheet/createGoogleSheetsServiceFromConfig.ts": [
-        "@/composition/google-sheets/createGoogleSheetsServiceFromConfig"
-    ],
     "src/services/employees/payroll-composition.ts": [
         "server-only",
         "@/composition/hr-payroll"
@@ -54,7 +48,7 @@ const scopes = {
         "@/modules/inventory/infrastructure/google-sheets/stock-counts/StockCountsSheet",
         "@/modules/line-workflows/infrastructure/google-sheets/user-state/UserStateSheet",
         "@/modules/inventory/infrastructure/google-sheets/movements/MovementSheet",
-        "@/externals/google/sheet/types"
+        "@/infrastructure/persistence/google-sheets/service-contracts"
     ],
     "src/composition/google-sheets/createGoogleSheetsServiceFromConfig.ts": [
         "@/config",
@@ -62,7 +56,7 @@ const scopes = {
     ],
     "src/composition/hr-payroll.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/modules/hr/application/ports/salary-advance-shops",
         "@/modules/hr/application/ports/payroll",
         "@/modules/hr/payroll-server",
@@ -72,19 +66,19 @@ const scopes = {
     ],
     "src/composition/salary-advance-shops.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/modules/hr/application/ports/salary-advance-shops",
         "@/modules/expenses/server"
     ],
     "src/composition/employee-directory.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/modules/inventory/application/ports/employee-directory",
         "@/modules/hr/server"
     ],
     "src/composition/orders.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/modules/orders/contracts",
         "@/modules/orders/server",
         "@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection"
@@ -101,11 +95,11 @@ const scopes = {
     "src/composition/google-sheets/index.ts": [
         "./GoogleSheetsService",
         "./createGoogleSheetsServiceFromConfig",
-        "@/externals/google/sheet/types"
+        "@/infrastructure/persistence/google-sheets/service-contracts"
     ],
     "src/modules/line-workflows/server.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/files/google-drive/types",
         "@/infrastructure/external/line",
         "@/shared/types/line-protocol",
@@ -137,7 +131,7 @@ const scopes = {
     ],
     "src/modules/orders/server.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/runtime/create-sortable-id",
         "./contracts",
         "./application/create-order",
@@ -159,7 +153,7 @@ const scopes = {
     ],
     "src/modules/shipments/server.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/runtime/create-sortable-id",
         "./contracts",
         "./application/create-shipment",
@@ -176,13 +170,13 @@ const scopes = {
     ],
     "src/modules/hr/infrastructure/google-sheets/employee-directory-reader.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/modules/hr/infrastructure/google-sheets/employees/const",
         "../../contracts"
     ],
     "src/modules/orders/infrastructure/google-sheets/order-writer.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/persistence/google-sheets/const",
         "@/modules/orders/infrastructure/google-sheets/orders/const",
         "../../contracts",
@@ -195,7 +189,7 @@ const scopes = {
     ],
     "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/persistence/google-sheets/const",
         "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const",
         "../../contracts",
@@ -203,14 +197,14 @@ const scopes = {
     ],
     "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts": [
         "server-only",
-        "@/externals/google/sheet/types",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/persistence/google-sheets/const",
         "@/modules/shipments/infrastructure/google-sheets/shipments/const",
         "../../contracts",
         "../../application/ports/created-shipment-writer"
     ]
 };
-const only = paths => ['error', { paths: paths.includes('@/externals/google/sheet/types') ? [{ name: '@/externals/google/sheet/types', allowTypeImports: true, message: 'Erase aggregate compatibility interfaces.' }] : [], patterns: [{ regex: paths.length ? `^(?!(?:${paths.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})$).+` : '.+', message: 'Use canonical composition/transport and exact named dependencies.' }] }];
+const only = paths => ['error', { paths: paths.includes('@/infrastructure/persistence/google-sheets/service-contracts') ? [{ name: '@/infrastructure/persistence/google-sheets/service-contracts', allowTypeImports: true, message: 'Erase aggregate compatibility interfaces.' }] : [], patterns: [{ regex: paths.length ? `^(?!(?:${paths.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})$).+` : '.+', message: 'Use canonical composition/transport and exact named dependencies.' }] }];
 export const finalArchitectureBoundaries = [...Object.entries(scopes).map(([file, paths]) => ({ files: [file], rules: { 'no-restricted-imports': only(paths) } })),
     { plugins: { 'final-architecture': { rules: { imports: { create(context) { const file = context.filename; return { ImportDeclaration(node) { check(node.source, node); }, ExportNamedDeclaration(node) { if (node.source)
                                 check(node.source, node); } }; function check(source, node) { const spec = source.value; const core = /\/(application|domain)\//.test(file), active = /\/(app|config)\//.test(file); if ((core && /(^|\/)(services|externals|config|composition|infrastructure)(\/|$)|(^|\/)server$/.test(spec)) || (active && /(^|\/)(services|externals)(\/|$)|features\/backend\//.test(spec)))

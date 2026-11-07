@@ -1,6 +1,6 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
 import { ESLint } from "eslint";
 import { browserOwnership, ownershipEdges } from "./helpers/browser-ownership.mjs";
 const eslint = new ESLint(), application = "src/modules/shipments/application/advance-shipment-status-with-bill.ts", port = "src/modules/shipments/application/ports/shipment-bill-storage.ts", adapter = "src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts", server = "src/modules/shipments/server.ts";
@@ -19,7 +19,7 @@ test("bill application/port reject File/Buffer/providers/config/frameworks/IO an
     'const x = new File([], "bill");', 'type X = File;', 'const x = new Date();', 'const x = Math.random();', 'const x = process.env.SECRET;', 'const x = Buffer.from("secret");', 'fetch("https://example.test");',
     'export * from "../contracts";', 'export { ShipmentStatus } from "../contracts";', 'const x = import("../server");', 'const x = require("@/config");', 'type X = import("@/externals/google/drive/types").IGoogleDriveService;',
   ]) await check(file, code, true);
-  assert.doesNotMatch(readFileSync(port, "utf8"), /\b(File|Buffer|IGoogle|HTTP|token|tenant|readRows|Request|Response)\b/);
+  assert.doesNotMatch(readArchive(port, "utf8"), /\b(File|Buffer|IGoogle|HTTP|token|tenant|readRows|Request|Response)\b/);
 });
 test("bill adapter/server reject real providers/config/route/UI and value-interface/dynamic/type forwarding", async () => {
   for (const file of [adapter, server]) for (const code of [
@@ -28,7 +28,7 @@ test("bill adapter/server reject real providers/config/route/UI and value-interf
     'import { IGoogleDriveService } from "@/externals/google/drive/types";', 'export * from "../../contracts";', 'export { Drive } from "@/externals/google/drive";',
     'const x = import("@/config");', 'const x = require("@/externals/google/drive");', 'type X = import("@/externals/google/drive/types").IGoogleDriveService;',
   ]) await check(file, code, true);
-  assert.ok(readFileSync(adapter, "utf8").startsWith('import "server-only";'));
+  assert.ok(readArchive(adapter, "utf8").startsWith('import "server-only";'));
 });
 test("earlier application/adapters keep their import scopes and browsers reject every new bill implementation", async () => {
   for (const name of ["create-shipment", "list-shipments", "link-order-to-shipment", "update-shipment-status"]) await check(`src/modules/shipments/application/${name}.ts`, 'import type { ShipmentBillStorage } from "./ports/shipment-bill-storage";', true);

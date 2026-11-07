@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import { createHash } from 'node:crypto';
 export const userStateBefore = JSON.parse(readFileSync('tests/fixtures/user-state-worksheet-before.json', 'utf8'));
 export const userStateFiles = new Set(Object.keys(userStateBefore.moves));

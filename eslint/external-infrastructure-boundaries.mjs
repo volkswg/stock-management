@@ -2,7 +2,7 @@ import {noDynamicServerBypass} from './orders-boundaries.mjs';
 const scopes={
   "src/modules/sales/server.ts": [
     "server-only",
-    "@/externals/google/sheet/types",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "@/modules/expenses/contracts",
     "./contracts",
     "./application/reports",
@@ -20,7 +20,7 @@ const scopes={
   ],
   "src/modules/line-workflows/server.ts": [
     "server-only",
-    "@/externals/google/sheet/types",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "@/infrastructure/files/google-drive/types",
     "@/infrastructure/external/line",
     "@/shared/types/line-protocol",

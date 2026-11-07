@@ -3,7 +3,7 @@ import { restoreInventoryApplicationSource, inventoryApplicationFiles, inventory
 export {inventoryApplicationChanged};
 import { salesOwners } from "./sales-source.mjs";
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash} from 'node:crypto';
 export const salesApplicationBefore=JSON.parse(readFileSync('tests/fixtures/sales-application-before.json','utf8'));
 const priorSources=new Map();

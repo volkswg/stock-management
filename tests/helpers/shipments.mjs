@@ -1,3 +1,4 @@
+import {canonicalPath} from "./retirement-history.mjs";
 import {legacySpecifier} from "./cleanup-history.mjs";
 import { relative, resolve } from "node:path";
 import ts from "typescript";
@@ -57,9 +58,9 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
     "src/externals/google/sheet/sheets/shipments/const.ts",
   ]);
   const options = ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json", ts.sys.readFile).config, ts.sys, process.cwd()).options;
-  const constants = { ...loadSource("src/externals/google/sheet/const.ts"),
-    ...loadSource("src/externals/google/sheet/sheets/shipments/const.ts"),
-    ...loadSource("src/externals/google/sheet/sheets/shipment-orders/const.ts") };
+  const constants = { ...loadSource("src/infrastructure/persistence/google-sheets/const.ts"),
+    ...loadSource("src/modules/shipments/infrastructure/google-sheets/shipments/const.ts"),
+    ...loadSource("src/modules/shipments/infrastructure/google-sheets/shipment-orders/const.ts") };
   function load(path) {
     const file = relative(process.cwd(), resolve(path)).replaceAll("\\", "/");
     if (file === "src/services/orders/createDraftOrder.ts") return load("src/modules/orders/contracts.ts");
@@ -76,7 +77,7 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
         return load(target);
       },
     });
-    const result = loadSource(file, { imports, globals: { Date: ShipmentClock, Error, ...globals } });
+    const result = loadSource(canonicalPath(file), { imports, globals: { Date: ShipmentClock, Error, ...globals } });
     cache.set(file, result); return result;
   }
   return { load, services: load("src/services/shipments/index.ts") };
@@ -96,7 +97,7 @@ export function shipmentRoutes(sheets, { drive, services: replacement } = {}) {
     "@/features/backend/shipments/utils": load("src/features/backend/shipments/utils.ts"),
   };
   const globals = { Date: ShipmentClock, Error, File, console: { error: (...args) => errors.push(args) } };
-  const route = (file) => loadSource(file, { imports, globals });
+  const route = (file) => loadSource(canonicalPath(file), { imports, globals });
   return { collection: route("src/app/api/shipments/route.ts"), detail: route("src/app/api/shipments/[id]/route.ts"), links: route("src/app/api/shipments/[id]/orders/route.ts"), errors, events };
 }
 export const shipmentParams = (id = "s/1") => ({ params: Promise.resolve({ id }) });

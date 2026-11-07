@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { SalaryAdvanceShops } from "@/modules/hr/application/ports/salary-advance-shops";
 import type { PayrollReaders } from "@/modules/hr/application/ports/payroll";
 import { calculateEmployeePayroll as executePayroll, createSalaryAdvance as executeAdvance, settleEmployeePayroll as executeSettlement } from "@/modules/hr/payroll-server";

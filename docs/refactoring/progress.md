@@ -2,6 +2,12 @@
 
 ## Verified current state
 
+Main `5867348d86d57cc98322362fa175140626c7f5d7` includes merged PR34–37. Issue [#39](https://github.com/volkswg/stock-management/issues/39), branch `refactor/retire-externals`, removes all 65 external compatibility files. The four remaining service/config declarations move byte-for-byte into root Sheets `service-contracts.ts`; 24 production files change only erased import/export paths. All other production bytes remain unchanged. Canonical constructors, headers, provider/business implementations, aggregate construction and callable signatures stay intact.
+
+The audit includes static/dynamic/erased imports, scripts, barrels, type fixtures and runtime loaders. No known required external consumer was found in this private application. The task explicitly retires those source paths; unknown out-of-repository deep imports cannot be certified. Other services/backend/script compatibility remains. Tests now load physical canonical owners; original sources, export keys and exact source/ESLint inverses are archived in `externals-retirement-before.json`. All older fixture bytes and assertions are retained. Three new retirement tests verify source inventory, strict current graphs and actual lint bypass protection. See [verification](verification.md#external-namespace-retirement-issue-39) for results and limitations.
+
+## Prior HR completion evidence
+
 Verified main is merged PR32, `f90e7bdeb3d7c9815148c3011d217e07b1a80b19`. The requested PR31 SHA was stale: GitHub confirmed PR32 merged, its tree matched the reviewed financial implementation exactly and no conflicting implementation PR was open. Work therefore starts from that audited main on `refactor/hr-application-completion`, preserving the merged work.
 
 This completion owns employee/compensation list/create/update/history/effective dates and all attendance list/clock/leave/update operations in HR applications/rules, with semantic ports and one feature-owned workforce adapter. Public server composition supplies the payroll workforce readers; the legacy bridge no longer imports legacy HR business services. Original full-service callable types, argument getter order, runtime export keys and enum/error/function identities remain through typed aliases. All prior financial behavior, schemas/providers/UI and the closed cycle/browser safeguards remain intact. Necessary compatibility stays for PR36.
@@ -10,7 +16,7 @@ The limited hr-application-before witness captures the two original implementati
 
 ## Merged implementation ledger
 
-Counts below are the original Codex-local final reports, traced to the original verification record and linked PRs; this documentation task did not independently rerun every historical checkout or certify external CI. Each row retains the exact merge SHA, not an unmerged implementation head. Current execution is recorded separately in [verification](verification.md#documentation-consolidation-results).
+Counts below are the original Codex-local final reports, traced to the original verification record and linked PRs; this documentation task did not independently rerun every historical checkout or certify external CI. Each row retains the exact merge SHA, not an unmerged implementation head. Current execution is recorded separately in [verification](verification.md#external-namespace-retirement-issue-39).
 
 | PR / merged SHA | Delivered slice | Original test count (inherited + added) |
 | --- | --- | --- |

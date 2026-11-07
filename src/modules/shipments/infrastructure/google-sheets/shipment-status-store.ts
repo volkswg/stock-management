@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { ShipmentStatusUpdate } from "../../contracts";
 import type { ShipmentStatusStore, ShipmentStatusTarget } from "../../application/ports/shipment-status-store";
 

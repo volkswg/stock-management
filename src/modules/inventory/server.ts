@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { StockCountAccount, AdjustmentEmployee } from "./contracts";
 import { readEmployeeDirectory } from "@/modules/hr/server";
 import { listAdjustmentEmployees as executeListAdjustmentEmployees } from "./application/list-adjustment-employees";
