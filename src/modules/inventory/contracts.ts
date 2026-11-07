@@ -90,3 +90,9 @@ export type MovementDateFilter = {
   fromDate?: string;
   toDate?: string;
 };
+
+// Uncoerced semantic projection for existing LINE movement checkpoints and summaries.
+export type MovementJourneyValue=string|number|boolean|null|undefined;
+export type MovementJourneyItem={id:MovementJourneyValue;masterId:MovementJourneyValue;shop:MovementJourneyValue;quantity:MovementJourneyValue;remark:MovementJourneyValue;fromLocation:MovementJourneyValue;toLocation:MovementJourneyValue;imageUrl:MovementJourneyValue;purchaseDetailId:MovementJourneyValue;status:MovementJourneyValue;createdAt:MovementJourneyValue;updatedAt:MovementJourneyValue;stockCounted:MovementJourneyValue;isNewArrival:MovementJourneyValue};
+export type MovementJourneyMaster={id:MovementJourneyValue;userId:MovementJourneyValue;packingDate:MovementJourneyValue;deliveredAt:MovementJourneyValue;status:MovementJourneyValue;quantity:MovementJourneyValue;createdAt:MovementJourneyValue;updatedAt:MovementJourneyValue};
+export type MovementJourneyIdentity={masterId:string;userId:string;startedAt:string};

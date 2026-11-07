@@ -1,3 +1,4 @@
+import {restoreOrdersLineSource} from "./orders-line-history.mjs";
 import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';
 import{inventoryOwners}from'./inventory-source.mjs';
 export const inventoryApplicationBefore=JSON.parse(readFileSync('tests/fixtures/inventory-application-before.json','utf8'));
@@ -8,18 +9,19 @@ export const inventoryApplicationFiles=inventoryOwners.filter(f=>Object.hasOwn(i
 export const inventoryApplicationChanged=new Set([...Object.keys(inventoryApplicationBefore.files),...Object.keys(inventoryApplicationBefore.edits)]);
 const hash=x=>createHash('sha256').update(x).digest('hex');
 export function restoreInventoryApplicationSource(file,source=readFileSync(file,'utf8')){
+ source=restoreOrdersLineSource(file,source);
  const edit=inventoryApplicationBefore.edits?.[file];
  if(edit) {
-  assert.equal(createHash('sha256').update(readFileSync(file)).digest('hex'),inventoryApplicationBefore.changedHashes[file],file);
+  assert.equal(createHash('sha256').update(restoreOrdersLineSource(file)).digest('hex'),inventoryApplicationBefore.changedHashes[file],file);
   if(createHash('sha256').update(source).digest('hex')===edit.sha256||priorSources.get(file)?.has(source))return source;
   for(const change of edit.changes.toReversed()){assert.equal(source.split(change.to).length-1,1,file);source=source.replace(change.to,change.from);}
   assert.equal(createHash('sha256').update(source).digest('hex'),edit.sha256,file);return source;
  }
  const saved=inventoryApplicationBefore.files[file];if(!saved)return source;
  assert.equal(hash(saved.source),saved.sha256,file);
- if(source===saved.source||priorSources.get(file)?.has(source)){assert.equal(hash(readFileSync(file)),inventoryApplicationBefore.changedHashes[file],file);return source;}
+ if(source===saved.source||priorSources.get(file)?.has(source)){assert.equal(hash(restoreOrdersLineSource(file)),inventoryApplicationBefore.changedHashes[file],file);return source;}
  assert.equal(hash(source),inventoryApplicationBefore.changedHashes[file],file);
- for(const [owner,expected]of Object.entries(inventoryApplicationBefore.ownerHashes))assert.equal(hash(readFileSync(owner)),expected,owner);
+ for(const [owner,expected]of Object.entries(inventoryApplicationBefore.ownerHashes))assert.equal(hash(restoreOrdersLineSource(owner)),expected,owner);
  return saved.source;
 }
 export function assertInventoryApplicationHistory(file,expected){

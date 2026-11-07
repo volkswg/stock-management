@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { createOrder, listOrders } from "@/services/orders";
+import { createOrder, listOrders } from "@/modules/orders/server";
 
 export const runtime = "nodejs";
 

@@ -1,3 +1,4 @@
+import {restoreOrdersLineSource} from "./orders-line-history.mjs";
 import { restoreInventoryApplicationSource, inventoryApplicationFiles, inventoryApplicationChanged } from "./inventory-application-history.mjs";
 export {inventoryApplicationChanged};
 import { salesOwners } from "./sales-source.mjs";
@@ -12,17 +13,18 @@ export const salesApplicationFiles=[...salesOwners.filter(f=>!f.endsWith('/contr
 const reportApp='src/modules/sales/application/reports.ts', reportAdapter='src/modules/sales/infrastructure/google-sheets/sales-reader.ts';
 const query='src/services/sales/getGoogleSheetsDailySales.ts';
 export function restoreSalesApplicationSource(file,source=readFileSync(file,'utf8')){
+ source=restoreOrdersLineSource(file,source);
  source=restoreInventoryApplicationSource(file,source);
  const edit=salesApplicationBefore.edits?.[file];
  if(edit) {
-  assert.equal(createHash('sha256').update(readFileSync(file)).digest('hex'),salesApplicationBefore.changedHashes[file],file);
+  assert.equal(createHash('sha256').update(restoreOrdersLineSource(file)).digest('hex'),salesApplicationBefore.changedHashes[file],file);
   if(createHash('sha256').update(source).digest('hex')===edit.sha256||priorSources.get(file)?.has(source))return source;
   for(const change of edit.changes.toReversed()){assert.equal(source.split(change.to).length-1,1,file);source=source.replace(change.to,change.from);}
   assert.equal(createHash('sha256').update(source).digest('hex'),edit.sha256,file);return source;
  }
  const saved=salesApplicationBefore.files[file];if(!saved)return source;
  assert.equal(createHash('sha256').update(saved.source).digest('hex'),saved.sha256);
- if(source===saved.source||priorSources.get(file)?.has(source)){assert.equal(createHash('sha256').update(readFileSync(file)).digest('hex'),salesApplicationBefore.changedHashes[file],file);return source;}
+ if(source===saved.source||priorSources.get(file)?.has(source)){assert.equal(createHash('sha256').update(restoreOrdersLineSource(file)).digest('hex'),salesApplicationBefore.changedHashes[file],file);return source;}
  if(file.endsWith('/contracts.ts')){const original=salesApplicationBefore.files[query].source;assert.equal(source,(saved.source+'\nimport type { Expense } from "@/modules/expenses/contracts";\n\n'+original.slice(original.indexOf('export type GoogleSheetsDailySalesItemRow'),original.indexOf('type SheetRecord'))+(()=>{const status=salesApplicationBefore.files['src/services/sales/listSalesSyncStatus.ts'].source;return status.slice(status.indexOf('export type'),status.indexOf('export async function'));})()).replace(/\n+$/,'\n'));}
  else if(file.startsWith('src/app/')) assert.equal(source,saved.source.replaceAll('from "@/services/sales"','from "@/modules/sales/server"'));
  else if(file==='src/services/employees/payroll-composition.ts') assert.equal(source,saved.source.replace('import { getGoogleSheetsSalesDashboard } from "@/services/sales/getGoogleSheetsDailySales";','import { createSalesDashboardReader } from "@/modules/sales/server";').replace('{ readSales: input => getGoogleSheetsSalesDashboard({...input, googleSheetsService: service}) }','createSalesDashboardReader(service)'));
@@ -41,6 +43,6 @@ export function restoreSalesApplicationSource(file,source=readFileSync(file,'utf
   expected='export function createSalesReports<Context>(createReader: (context: Context) => SalesReader) {\n'+operations+'return { getGoogleSheetsDailySales, getGoogleSheetsSalesDashboard, getGoogleSheetsProfitSummary };\n}\n\n'+expected.slice(split);
   assert.equal(app.slice(app.indexOf('export function createSalesReports')),expected);
  }
- if(file!==query&&!file.endsWith("/contracts.ts")&&!file.startsWith("src/app/")&&file!=="src/services/employees/payroll-composition.ts"){assert.equal(source,salesApplicationBefore.facades[file],file);for(const [owner,expected]of Object.entries(salesApplicationBefore.ownerHashes))assert.equal(createHash("sha256").update(readFileSync(owner)).digest("hex"),expected,owner);}
+ if(file!==query&&!file.endsWith("/contracts.ts")&&!file.startsWith("src/app/")&&file!=="src/services/employees/payroll-composition.ts"){assert.equal(source,salesApplicationBefore.facades[file],file);for(const [owner,expected]of Object.entries(salesApplicationBefore.ownerHashes))assert.equal(createHash("sha256").update(restoreOrdersLineSource(owner)).digest("hex"),expected,owner);}
  return saved.source;
 }

@@ -6,8 +6,8 @@ This is the single authoritative forward plan, based on [current ownership](../a
 
 The owner has authorized a continuous multi-PR assignment. Each later branch starts at the exact previous head and targets that parent branch; publication does not authorize merge or deployment.
 
-1. Sales + Inventory: business applications, semantic persistence ports/adapters and public Sales dashboard consumers are complete with 510 passing tests and successful lint/typecheck/isolated build; publication is the review gate. HR applications are reused unchanged.
-2. Orders + LINE workflows: complete remaining mutations/image/bill coordination; move journeys and sessions through public Orders/Inventory operations. The public Inventory quantity prerequisite is complete. Do not move raw Inventory persistence into LINE application.
+1. Sales + Inventory: business applications, semantic persistence ports/adapters and public Sales dashboard consumers are complete with 510 passing tests and successful lint/typecheck/isolated build; published as PR34 for review. HR applications are reused unchanged.
+2. Orders + LINE workflows: implemented on refactor/orders-line-workflows, stacked on PR34. Orders mutations/images/attachments and LINE sessions/journeys/webhook orchestration use owned applications and semantic adapters, with public Inventory journey decisions. Verification/publication gates precede the external milestone.
 3. External infrastructure: move LINE/Loyverse protocol clients/factories into root external infrastructure, preserving constructor/export identities, HTTP/pagination/error behavior and provider configuration.
 4. Final cleanup: audit obsolete implementations/barrels/forwards and aggregate composition against every runtime/type/script/test/external consumer; retire only proven unnecessary surfaces, enforce final boundaries and consolidate canonical documentation.
 

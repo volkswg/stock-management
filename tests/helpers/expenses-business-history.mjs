@@ -1,12 +1,14 @@
+import {assertOrdersDetailServerHistory} from "./orders-detail-history.mjs";
+import {ordersLineNewFiles,ordersLineChanged} from "./orders-line-history.mjs";
 import {inventoryApplicationChanged,assertInventoryApplicationHistory}from "./inventory-application-history.mjs";
 import { restoreSalesApplicationSource, salesApplicationFiles, salesApplicationBefore } from "./sales-application-history.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 export const expensesHistory=JSON.parse(readFileSync('tests/fixtures/expenses-business-before.json','utf8'));
-export const expensesFiles=new Set([...Object.keys(expensesHistory.files),...Object.keys(salesApplicationBefore.files),...Object.keys(salesApplicationBefore.edits),...inventoryApplicationChanged]);
+export const expensesFiles=new Set([...Object.keys(expensesHistory.files),...Object.keys(salesApplicationBefore.files),...Object.keys(salesApplicationBefore.edits),...inventoryApplicationChanged,...ordersLineChanged]);
 export const expensesNewFiles=[
- ...salesApplicationFiles,
+ ...ordersLineNewFiles,...salesApplicationFiles,
  'src/modules/expenses/contracts.ts','src/modules/expenses/server.ts','src/modules/expenses/domain/rules.ts','src/modules/expenses/application/manage-expenses.ts','src/modules/expenses/application/ports/expense-store.ts','src/modules/expenses/infrastructure/google-sheets/expense-store.ts','src/modules/hr/application/ports/salary-advance-shops.ts','src/services/employees/salary-advance-shops.ts',
 ];
 const hash=s=>createHash('sha256').update(s).digest('hex');
@@ -30,6 +32,13 @@ export function assertExpensesHistory(file,expected){
   const remaining=JSON.parse(readFileSync('tests/fixtures/remaining-worksheets-before.json','utf8')).splits[file];
   if(remaining){
    const declarations=remaining.names.map(n=>remaining.source.match(new RegExp('export const '+n+' = .*;\\n'))[0]);let rest=remaining.source;for(const d of declarations)rest=rest.replace(d,'');const alias='@/'+remaining.to.slice(4,-3),prefix=(file.includes('manageSalaryAdvances')?`import { ${remaining.names.join(', ')} } from "${alias}";\n`:'')+`export { ${remaining.names.join(', ')} } from "${alias}";\n`;assert.equal(source,prefix+rest,file);source=remaining.source;
+  }else if(file==='src/modules/orders/server.ts'){
+   const e=JSON.parse(readFileSync('tests/fixtures/orders-sheet-types-before.json','utf8')).files[file];
+   const restored=source.replace('"@/externals/google/sheet/types"','"@/externals/google/sheet"');assert.equal(restored,e.source,file);
+   if(hash(restored)===expected)return;return assertOrdersDetailServerHistory(file,expected);
+  }else if(file==='src/services/movements/state.ts'){
+   const e=JSON.parse(readFileSync('tests/fixtures/movement-schema-before.json','utf8')).files[file];
+   for(const c of e.changes.toReversed()){assert.equal(source.split(c.to).length-1,1,file);source=source.replace(c.to,c.from);}assert.equal(source,e.source,file);
   }else{const prior=JSON.parse(readFileSync('tests/fixtures/inventory-sales-query-before.json','utf8')).files[file];assert.ok(prior,file);for(const c of prior.changes.toReversed()){assert.equal(source.split(c.to).length,2,file);source=source.replace(c.to,c.from);}assert.equal(source,prior.source,file);}
  }
  assert.equal(hash(source),expected,file);

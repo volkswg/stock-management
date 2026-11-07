@@ -1,9 +1,1 @@
-export enum LineMessageType {
-  Text = "text",
-  Image = "image",
-  Video = "video",
-  Audio = "audio",
-  File = "file",
-  Location = "location",
-  Sticker = "sticker",
-}
+export { LineMessageType } from "@/shared/types/line-protocol";

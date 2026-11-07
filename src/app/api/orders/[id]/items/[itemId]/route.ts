@@ -1,11 +1,11 @@
+import {OrderItemQuantityType}from "@/modules/orders/contracts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
-  OrderItemQuantityType,
   updateOrderItemProductCode,
   updateOrderItemQuantity,
-} from "@/services/orders";
+} from "@/modules/orders/server";
 
 export const runtime = "nodejs";
 

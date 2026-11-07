@@ -5,7 +5,7 @@ import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   createOrderWithImages,
   type OrderImageUpload,
-} from "@/services/orders";
+} from "@/modules/orders/server";
 
 export const runtime = "nodejs";
 

@@ -98,3 +98,13 @@ export async function markMovementDelivered({ googleSheetsService, movementMaste
     return movements.markMovementDelivered({ store: createMovementStore(googleSheetsService), movementMasterId, runtime });
 }
 export type { MovementDateFilter } from "./contracts";
+import { createMovementJourneyAdapter } from "./infrastructure/google-sheets/movement-journeys";
+import * as movementJourneys from "./application/movement-journeys";
+import type { MovementJourneyIdentity, MovementJourneyItem } from "./contracts";
+// Server-only batch participants/projection for the existing LINE + Inventory snapshot read.
+export { createMovementJourneyAdapter } from "./infrastructure/google-sheets/movement-journeys";
+export { MASTER_HEADERS, DETAIL_HEADERS, ensureHeader } from "./infrastructure/google-sheets/movement-schema";
+export async function movementJourneyItems(sheets: IGoogleSheetsService, masterId: string) { return movementJourneys.movementJourneyItems(createMovementJourneyAdapter(sheets).store, masterId); }
+export async function synchronizeMovementJourney(sheets: IGoogleSheetsService, state: MovementJourneyIdentity, complete = false) { return movementJourneys.synchronizeMovementJourney(createMovementJourneyAdapter(sheets).store, state, complete, () => new Date().toISOString()); }
+export async function findResumableMovementJourney(sheets: IGoogleSheetsService, userId: string) { return movementJourneys.findResumableMovementJourney(createMovementJourneyAdapter(sheets).store, userId); }
+export async function appendMovementJourneyItem(sheets: IGoogleSheetsService, readItem: () => MovementJourneyItem) { return movementJourneys.appendMovementJourneyItem(createMovementJourneyAdapter(sheets).store, readItem); }

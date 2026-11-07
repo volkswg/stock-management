@@ -1,3 +1,4 @@
+import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { sheetTypeFiles, assertOrdersSheetTypeHistory } from "./helpers/orders-sheet-type-history.mjs";
 import { assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import { assertOrdersDetailServerHistory, assertOrdersDetailBoundaryHistory } from "./helpers/orders-detail-history.mjs";
@@ -65,6 +66,6 @@ test("Shipment frontend changes imports only; routes, CSS, Orders code and serve
     else if (file === "src/app/api/shipments/[id]/route.ts") assertShipmentDriveRouteHistory(file, expected);
     else if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
     else if (file === "eslint/orders-boundaries.mjs") assertPickerStaticLintParity();
-    else assert.equal(hash(restoreRelocationImports(file, readFileSync(file, "utf8"))), expected, file);
+    else assert.equal(hash(restoreRelocationImports(file, restoreOrdersLineSource(file))), expected, file);
   }
 });

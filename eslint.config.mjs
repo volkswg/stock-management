@@ -1,3 +1,4 @@
+import {ordersLineWorkflowBoundaries} from "./eslint/orders-line-workflows-boundaries.mjs";
 import { inventoryApplicationBoundaries } from "./eslint/inventory-application-boundaries.mjs";
 import { salesApplicationBoundaries } from "./eslint/sales-application-boundaries.mjs";
 import { hrWorkforceBoundaries } from "./eslint/hr-workforce-boundaries.mjs";
@@ -35,6 +36,7 @@ const eslintConfig = defineConfig([
   ...hrWorkforceBoundaries,
   ...salesApplicationBoundaries,
   ...inventoryApplicationBoundaries,
+  ...ordersLineWorkflowBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

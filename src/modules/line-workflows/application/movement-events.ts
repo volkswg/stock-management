@@ -1,0 +1,270 @@
+import { LineMessageType, type LineEvent } from "@/shared/types/line-protocol";
+import { isActiveOrderCreateState } from "@/modules/orders/rules";
+import { parseQuantity, summarizeMovementJourney } from "@/modules/inventory/quantity";
+import type { MovementJourneyItem } from "@/modules/inventory/contracts";
+import { MovementStartCommandEnum, UserStateFlowName, type MovementState, type MovementImageUploadProgress, type MovementCreateMode, type MovementEventClassification } from "../contracts";
+import type { WorkflowContext, WorkflowImages, WorkflowLine, WorkflowRuntime } from "./ports/workflows";
+import { isMovementStartCommand } from "./classify-event";
+import { resumeLegacyMovement, saveMovementState } from "./sessions";
+import { replyText } from "./reply";
+const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinished", "resume:movement"]];
+function savedPhotoCounts(items: MovementJourneyItem[], shop: string) {
+    // Count unique confirmed image-bearing rows, not delivery order or image-set index.
+    const photos = new Map(items.filter((row) => row.id && String(row.imageUrl || "").trim())
+        .map((row) => [String(row.id), row]));
+    return {
+        shopPhotosSaved: [...photos.values()].filter((row) => row.shop === shop).length,
+        movementPhotosSaved: photos.size,
+    };
+}
+// Routing has already resolved the movement session for this event.
+export async function handleMovementEvent<Bytes>({ event, session, context, drive, line, publicBaseUrl, createMode = "quantity_photo", imageUpload, runtime, }: {
+    runtime: WorkflowRuntime;
+    event: MovementEventClassification["event"];
+    session: MovementEventClassification["session"];
+    context: WorkflowContext;
+    drive: () => WorkflowImages<Bytes> | undefined;
+    line: WorkflowLine<Bytes>;
+    publicBaseUrl: string;
+    createMode?: MovementCreateMode;
+    imageUpload?: MovementImageUploadProgress;
+}): Promise<void> {
+    const photoOnly = createMode === "photo_only";
+    const prompt = (line: WorkflowLine<Bytes>, event: LineEvent, state: MovementState, prefix = "") => promptMovement(line, event, state, prefix, createMode);
+    const userId = event.source.userId;
+    const text = event.message.text?.trim() || "";
+    const command = text.toLowerCase();
+    const eventId = event.webhookEventId || event.message.id;
+    const { state, processed } = session;
+    if (state && processed) {
+        if (state.step === "complete") {
+            await summary(line, event, context, state, publicBaseUrl);
+        }
+        else {
+            // Repair the master if the current state saved but its master sync failed.
+            const items = await context.inventory.sync(state);
+            if (imageUpload && state.step === "close_bag") {
+                Object.assign(imageUpload, { alreadySaved: true, shop: state.shop, ...savedPhotoCounts(items, state.shop) });
+            }
+            const photoSummary = imageUpload?.alreadySaved
+                ? `✅ Photo already saved\nPhotos saved for ${state.shop} in this movement: ${imageUpload.shopPhotosSaved}\nMovement photos saved: ${imageUpload.movementPhotosSaved}\n\n`
+                : "";
+            await prompt(line, event, state, photoSummary);
+        }
+        if (imageUpload)
+            imageUpload.completed = true;
+        return;
+    }
+    if (isMovementStartCommand(command)) {
+        const orderState = await context.sessions.findLatest(userId, UserStateFlowName.OrderCreate);
+        if (orderState && isActiveOrderCreateState(orderState.state)) {
+            await replyText(line, event, "Please complete your pending order before creating a movement.");
+            return;
+        }
+        if (command === MovementStartCommandEnum.CreateMovement) {
+            await replyText(line, event, "📦 Stock movement\nMove products from Home to a shop.\n\nTap Create New to start, or Resume Unfinished to continue.", START_CHOICES);
+            return;
+        }
+        if (command === MovementStartCommandEnum.ResumeMovement) {
+            let resumed = state && state.step !== "complete" ? state : await resumeLegacyMovement(context, userId, runtime);
+            if (resumed && photoOnly && ["quantity", "product_image"].includes(resumed.step)) {
+                resumed = { ...resumed, step: "close_bag", quantity: "", remark: "", imageUrl: "" };
+            }
+            if (!resumed) {
+                await replyText(line, event, "No unfinished movement was found.", START_CHOICES.slice(0, 1));
+            }
+            else {
+                await saveMovementState(context.movements, { ...resumed, lastEventId: eventId }, runtime);
+                await prompt(line, event, resumed, `↩️ Movement resumed\nRef: ${resumed.masterId}\n\n`);
+            }
+            return;
+        }
+        const masterId = `MOVE-${runtime.createId()}`;
+        const next: MovementState = {
+            masterId, itemId: `MOVED-${runtime.createId()}`, userId, step: "shop",
+            startedAt: runtime.eventTime(() => event.timestamp), shop: "",
+            quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
+        };
+        await saveMovementState(context.movements, next, runtime);
+        await context.inventory.sync(next);
+        await prompt(line, event, next, `📦 New movement started\nRef: ${masterId}\n\n`);
+        return;
+    }
+    if (!state || state.step === "complete") {
+        if (imageUpload)
+            imageUpload.ignored = true;
+        return;
+    }
+    if (command === "create:order" || command === "create:purchase-order") {
+        await prompt(line, event, state, "Please complete your movement before starting an order.\n");
+        return;
+    }
+    if (event.message.type === LineMessageType.Image) {
+        const acceptsPhoto = photoOnly
+            ? Boolean(state.shop) && ["quantity", "product_image", "close_bag"].includes(state.step)
+            : state.step === "product_image";
+        if (!acceptsPhoto) {
+            if (imageUpload)
+                imageUpload.ignored = true;
+            await prompt(line, event, state);
+            return;
+        }
+        // Photo-only IDs belong to the incoming image, not the shared session cursor.
+        // Distinct images can never consume the same item ID or pending quantity.
+        const imageState = photoOnly ? {
+            ...state, itemId: `MOVED-LINE-${event.message.id}`, quantity: "", remark: "", imageUrl: "",
+        } : state;
+        await saveImage({ state: imageState, event, eventId, context, drive: drive(), line, createMode, existingItems: session.photoItems, imageUpload, runtime });
+        return;
+    }
+    let next: MovementState = { ...state, lastEventId: eventId };
+    if (state.step === "shop") {
+        const shop = text.toUpperCase();
+        if (shop !== "NJ" && shop !== "YY") {
+            await prompt(line, event, state);
+            return;
+        }
+        next = { ...next, shop, step: photoOnly ? "close_bag" : "quantity" };
+    }
+    else if (state.step === "quantity" || state.step === "close_bag") {
+        if ((photoOnly || state.step === "close_bag") && command === "close bag") {
+            next.step = "bag_closed";
+        }
+        else {
+            if (photoOnly) {
+                await prompt(line, event, state, "Set quantities and notes on the movement web page.\n\n");
+                return;
+            }
+            const parsed = parseQuantity(text);
+            if (!parsed) {
+                await prompt(line, event, state, "⚠️ Quantity not accepted. Send a number greater than 0.\n\n");
+                return;
+            }
+            next = { ...next, ...parsed, step: "product_image", imageUrl: "" };
+        }
+    }
+    else if (state.step === "bag_closed" && command === "another shop") {
+        next = { ...next, step: "shop", itemId: `MOVED-${runtime.createId()}`, shop: "", quantity: "", remark: "", imageUrl: "" };
+    }
+    else if (state.step === "bag_closed" && ["summary", "movement summary"].includes(command)) {
+        await context.inventory.sync(state, true);
+        next.step = "complete";
+        await saveMovementState(context.movements, next, runtime);
+        await summary(line, event, context, next, publicBaseUrl);
+        return;
+    }
+    else {
+        await prompt(line, event, state);
+        return;
+    }
+    await saveMovementState(context.movements, next, runtime);
+    await prompt(line, event, next);
+}
+async function saveImage<Bytes>({ state, event, eventId, context, drive, line, createMode, existingItems, imageUpload, runtime }: {
+    runtime: WorkflowRuntime;
+    state: MovementState;
+    event: LineEvent;
+    eventId: string;
+    context: WorkflowContext;
+    drive: WorkflowImages<Bytes> | undefined;
+    line: WorkflowLine<Bytes>;
+    createMode: MovementCreateMode;
+    existingItems?: MovementJourneyItem[];
+    imageUpload?: MovementImageUploadProgress;
+}): Promise<void> {
+    // A stable item ID makes a retry after an uncertain Sheets response idempotent.
+    const existing = (existingItems ?? await context.inventory.items(state.masterId)).find((row) => row.id === state.itemId);
+    const savedShop = String(existing?.shop || state.shop);
+    if (imageUpload)
+        Object.assign(imageUpload, { shop: savedShop, alreadySaved: Boolean(existing) });
+    let imageUrl = state.imageUrl;
+    if (!existing && !imageUrl) {
+        if (!drive) {
+            if (imageUpload)
+                imageUpload.failed = true;
+            await replyText(line, event, `⚠️ Photo upload is unavailable\nShop: ${state.shop} | Quantity: ${state.quantity}\nYour progress is saved, but this item is not saved yet.\n\nAsk an administrator to configure Google Drive, then resend the photo.`);
+            return;
+        }
+        try {
+            const image = await line.downloadMessageContent(event.message!.id);
+            const extension = image.contentType === "image/png" ? ".png" : image.contentType === "image/webp" ? ".webp" : ".jpg";
+            const file = await drive.uploadImage({ fileName: `${state.itemId}${extension}`, contentType: image.contentType, bytes: image.bytes });
+            if (!file.webViewLink?.trim())
+                throw new Error("Google Drive returned no image URL.");
+            imageUrl = file.webViewLink;
+            if (imageUpload)
+                imageUpload.uploaded = true;
+        }
+        catch {
+            if (imageUpload)
+                imageUpload.failed = true;
+            await replyText(line, event, `⚠️ Photo upload failed\nShop: ${state.shop} | Quantity: ${state.quantity}\nThis item is not saved yet. Your entered quantity is kept.\n\n➡️ Send the product photo again to save this item.`);
+            return;
+        }
+        // Persist the upload URL before writing the item so a retry can reuse it.
+        if (createMode !== "photo_only") {
+            await saveMovementState(context.movements, { ...state, imageUrl }, runtime);
+        }
+    }
+    if (!existing) {
+        const now = runtime.eventTime(() => event.timestamp);
+        if (imageUpload)
+            imageUpload.saveUncertain = true;
+        await context.inventory.append(() => ({ id: state.itemId, masterId: state.masterId, shop: state.shop, quantity: state.quantity, remark: state.remark, fromLocation: "Home", toLocation: state.shop, imageUrl, purchaseDetailId: "", status: "created", createdAt: now, updatedAt: now, stockCounted: false, isNewArrival: false }));
+        if (imageUpload)
+            Object.assign(imageUpload, { saved: true, saveUncertain: false });
+    }
+    const savedItems = await context.inventory.sync(state);
+    const counts = savedPhotoCounts(savedItems, savedShop);
+    if (imageUpload)
+        Object.assign(imageUpload, counts);
+    const photoCountText = `Photos saved for ${savedShop} in this movement: ${counts.shopPhotosSaved}\nMovement photos saved: ${counts.movementPhotosSaved}`;
+    if (createMode === "photo_only") {
+        // Do not overwrite session progress after a slow upload. Another event may
+        // already have closed the bag or selected the next shop.
+        await promptMovement(line, event, { ...state, step: "close_bag" }, `✅ ${existing ? "Photo already saved" : "Photo saved"}\nRoute: Home → ${savedShop}\n${photoCountText}\nSet this item's quantity and note on the web page.\n\n`, createMode);
+        if (imageUpload)
+            imageUpload.completed = true;
+        return;
+    }
+    const next: MovementState = {
+        ...state, itemId: `MOVED-${runtime.createId()}`, step: "close_bag",
+        quantity: "", remark: "", imageUrl: "", lastEventId: eventId,
+    };
+    await saveMovementState(context.movements, next, runtime);
+    await promptMovement(line, event, next, `✅ Item saved\nRoute: Home → ${savedShop}\nQuantity: ${state.quantity}\nPhoto: saved\n${photoCountText}${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n`);
+    if (imageUpload)
+        imageUpload.completed = true;
+}
+async function summary<Bytes>(line: WorkflowLine<Bytes>, event: LineEvent, context: WorkflowContext, state: MovementState, publicBaseUrl: string): Promise<void> {
+    const rows = await context.inventory.items(state.masterId);
+    const totals = summarizeMovementJourney(rows), { quantities, totalQuantity } = totals;
+    const shopTotals = Array.from(quantities, ([shop, quantity]) => `• Home → ${shop}: ${quantity}`).join("\n");
+    const missingQuantity = totals.missingQuantity();
+    const pendingNote = missingQuantity ? `\n\n⚠️ ${missingQuantity} item(s) need quantities. Open the web page to enter notes / quantities.` : "";
+    const text = `✅ Movement completed\nRef: ${state.masterId}\n\n${shopTotals || "No items saved."}\n\nItems saved: ${rows.length}\nTotal quantity: ${totalQuantity}${pendingNote}`;
+    if (!publicBaseUrl) {
+        await replyText(line, event, text);
+        return;
+    }
+    await line.sendReply(event.replyToken, [{ type: "text", text }, {
+            type: "template", altText: `Movement summary ${state.masterId}`,
+            template: { type: "buttons", title: "Movement completed", text: "View saved items, quantities and product photos.",
+                actions: [{ type: "uri", label: "Open detail", uri: `${publicBaseUrl.replace(/\/$/, "")}/movements/${encodeURIComponent(state.masterId)}` }],
+            },
+        }]);
+}
+async function promptMovement<Bytes>(line: WorkflowLine<Bytes>, event: LineEvent, state: MovementState, prefix = "", createMode: MovementCreateMode = "quantity_photo"): Promise<void> {
+    if (createMode === "photo_only" && ["quantity", "product_image", "close_bag"].includes(state.step)) {
+        await replyText(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send product photos. Set quantities and notes on the web page afterward.\n➡️ Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
+        return;
+    }
+    switch (state.step) {
+        case "shop": return replyText(line, event, prefix + "📍 Choose destination shop\nFrom: Home\n\n➡️ Tap NJ or YY.", [["NJ", "NJ"], ["YY", "YY"]]);
+        case "quantity": return replyText(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send the quantity for one product photo.\nExample: 12\n\nFor a breakdown, put each quantity on a new line:\nขาว 5\nดำ 5\nThe quantities will be added together.`);
+        case "product_image": return replyText(line, event, prefix + `📍 Home → ${state.shop}\nQuantity entered: ${state.quantity}${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n⏳ Item not saved yet.\n➡️ Send a product photo to save this item.`);
+        case "close_bag": return replyText(line, event, prefix + `Next for ${state.shop}:\n• Add another item: send its quantity, then its photo.\n• Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
+        case "bag_closed": return replyText(line, event, prefix + `✅ Bag closed for ${state.shop}\n\n➡️ Another Shop: choose a shop and add more items.\n➡️ Summary: finish this movement and view totals.`, [["Another Shop", "another shop"], ["Summary", "summary"]]);
+        case "complete": return replyText(line, event, prefix + "✅ Movement completed\nAll saved items are included.\n\n➡️ Tap Create New to start another movement.", START_CHOICES);
+    }
+}

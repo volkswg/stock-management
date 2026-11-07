@@ -22,3 +22,5 @@ export class MovementQuantityRequiredError extends Error {
   }
 }
 
+
+export {summarizeMovementJourney}from "./domain/journey-quantities";
