@@ -1,10 +1,11 @@
+import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
 export const shipmentDriveBefore = JSON.parse(readFileSync(new URL("../fixtures/shipments-drive-before.json", import.meta.url), "utf8"));
 const printer = ts.createPrinter(), hash = text => createHash("sha256").update(text).digest("hex");
-const parse = (file, source = readFileSync(file, "utf8")) => ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+const parse = (file, source = restoreCleanupSource(file)) => ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
 export function assertShipmentDriveRouteHistory(file, expected) {
   assert.equal(file, "src/app/api/shipments/[id]/route.ts"); assert.equal(shipmentDriveBefore.file, file);
   assert.equal(hash(shipmentDriveBefore.source), expected); assert.equal(shipmentDriveBefore.rawHash, expected);
@@ -23,7 +24,7 @@ export function assertShipmentDriveRouteHistory(file, expected) {
   assert.deepEqual(beforeTry(current), beforeTry(old), "Original params/parser/validation before workflow state remain exact");
   const constants = current.statements.filter(n => ts.isVariableStatement(n) && n.declarationList.declarations.some(d => ["ALLOWED_SHIPPING_BILL_TYPES", "MAX_SHIPPING_BILL_SIZE_BYTES"].includes(d.name.text))).map(n => print(n, current));
   assert.deepEqual(constants, shipmentDriveBefore.constants);
-  assert.match(readFileSync(file, "utf8"), /export const runtime = "nodejs"/);
+  assert.match(restoreCleanupSource(file), /export const runtime = "nodejs"/);
   const server = parse("src/modules/shipments/server.ts");
   for (const [name, text] of Object.entries(shipmentDriveBefore.serverFunctions)) assert.equal(server.statements.find(n => ts.isFunctionDeclaration(n) && n.name.text === name).getText(server), text);
 }

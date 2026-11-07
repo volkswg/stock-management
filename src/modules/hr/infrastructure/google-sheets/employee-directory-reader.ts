@@ -1,6 +1,6 @@
 import "server-only";
 import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
-import { EMPLOYEE_HEADERS } from "@/externals/google/sheet/sheets/employees/const";
+import { EMPLOYEE_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employees/const";
 import type { EmployeeDirectoryEntry } from "../../contracts";
 
 export class GoogleSheetsEmployeeDirectoryReader {

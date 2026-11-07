@@ -1,3 +1,4 @@
+import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -8,7 +9,7 @@ export const migratedLinkFunctions = new Set([
   "linkOrderToShipment", "findLatestShipmentOrder", "mapShipmentOrderRow", "getShipmentOrdersAppendRange", "toStringValue",
 ].map(name => `${shipmentLinkBefore.file}:${name}`));
 const hash = text => createHash("sha256").update(text).digest("hex"), printer = ts.createPrinter();
-const parse = (file, source = readFileSync(file, "utf8")) => ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+const parse = (file, source = restoreCleanupSource(file)) => ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
 export const linkFacade = `export { linkOrderToShipment } from "@/modules/shipments/server";
 export { LinkOrderToShipmentError } from "@/modules/shipments/application/link-order-to-shipment";
 export type {

@@ -1,10 +1,11 @@
+import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import ts from "typescript";
 export const orderDetailBefore = JSON.parse(readFileSync(new URL("../fixtures/orders-detail-before.json", import.meta.url), "utf8"));
 const hash = text => createHash("sha256").update(text).digest("hex"), printer = ts.createPrinter();
-const parse = (file, text = readFileSync(file, "utf8")) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
+const parse = (file, text = restoreCleanupSource(file)) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
 const print = (node, source) => printer.printNode(ts.EmitHint.Unspecified, node, source);
 const fn = (source, name) => source.statements.find(n => ts.isFunctionDeclaration(n) && n.name.text === name);
 export function assertOrderDetailHistory(expectedBodyHash) {
@@ -34,7 +35,7 @@ export function assertOrdersDetailServerHistory(file, expectedRawHash) {
   const original = parse(file, orderDetailBefore.serverSource), current = parse(file);
   for (const name of ["listOrders", "createOrder"]) assert.equal(fn(current, name).getText(current), fn(original, name).getText(original));
   assert.ok(fn(current, "getOrderDetail"));
-  assert.doesNotMatch(readFileSync(file, "utf8"), /from ["'][^"']*(?:modules\/shipments|services\/shipments|\.\.\/shipments)/);
+  assert.doesNotMatch(restoreCleanupSource(file), /from ["'][^"']*(?:modules\/shipments|services\/shipments|\.\.\/shipments)/);
   assertOrderDetailHistory(orderDetailBefore.bodyHash);
 }
 

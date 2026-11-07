@@ -1,3 +1,4 @@
+import {legacySpecifier} from "./cleanup-history.mjs";
 import { createHRSourceLoader, hrSourceFiles } from "./hr-payroll-source.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
@@ -9,7 +10,7 @@ import {loadSource,plain} from './load-source.mjs';
 export const expensesBefore=JSON.parse(readFileSync('tests/fixtures/expenses-business-before.json','utf8'));
 export const legacyExpense='src/services/expenses/manageExpenses.ts';
 export function expenseGraph({original=false,service,events=[],overrides={},externals={}}={}){
- const allowed=new Set(['contracts.ts','server.ts','domain/rules.ts','application/manage-expenses.ts','infrastructure/google-sheets/expense-store.ts','infrastructure/google-sheets/expenses/const.ts'].map(f=>'src/modules/expenses/'+f));
+ const allowed=new Set(["src/composition/hr-payroll.ts","src/composition/salary-advance-shops.ts",'contracts.ts','server.ts','domain/rules.ts','application/manage-expenses.ts','infrastructure/google-sheets/expense-store.ts','infrastructure/google-sheets/expenses/const.ts'].map(f=>'src/modules/expenses/'+f));
  let hrLoad;
  const cache=new Map(),headers=loadSource('src/modules/expenses/infrastructure/google-sheets/expenses/const.ts');
  class Clock extends Date{constructor(...args){super(...(args.length?args:['2026-11-07T00:00:00Z']));if(!args.length)events.push(['clock']);}}
@@ -25,14 +26,14 @@ export function expenseGraph({original=false,service,events=[],overrides={},exte
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date:Clock,Request,Response,URL,console:{error:(...a)=>events.push(['log',...a])},require(spec){
    if(Object.hasOwn(externals,spec))return externals[spec];
-   if(file==='src/app/api/sales/profit-summary/route.ts'&&spec==='@/modules/sales/server'&&externals['@/services/sales'])return externals['@/services/sales'];
+   if(file==='src/app/api/sales/profit-summary/route.ts'&&legacySpecifier(spec)==='@/modules/sales/server'&&externals['@/services/sales'])return externals['@/services/sales'];
    if(spec==='server-only')return {};
    if(spec==='node:crypto')return {randomUUID:()=>{events.push(['uuid']);return 'fixed-id';}};
    if(spec==='next/server')return {NextResponse:Response};
-   if(spec==='@/config')return {getConfig:()=>{events.push(['config']);return {loyverse:{accounts:[{id:'account',shopName:'Shop'}]}};}};
-   if(spec==='@/externals/google/sheet')return {createGoogleSheetsServiceFromConfig:()=>{events.push(['factory']);return service;}};
-   if(spec==='@/features/backend/shared/utils')return {isRecord:value=>!!value&&typeof value==='object'&&!Array.isArray(value)};
-   if(spec==='@/modules/expenses/infrastructure/google-sheets/expenses/const')return headers;
+   if(legacySpecifier(spec)==='@/config')return {getConfig:()=>{events.push(['config']);return {loyverse:{accounts:[{id:'account',shopName:'Shop'}]}};}};
+   if(legacySpecifier(spec)==='@/externals/google/sheet')return {createGoogleSheetsServiceFromConfig:()=>{events.push(['factory']);return service;}};
+   if(legacySpecifier(spec)==='@/features/backend/shared/utils')return {isRecord:value=>!!value&&typeof value==='object'&&!Array.isArray(value)};
+   if(legacySpecifier(spec)==='@/modules/expenses/infrastructure/google-sheets/expenses/const')return headers;
    let target=spec.startsWith('@/')?'src/'+spec.slice(2):posix.normalize(posix.dirname(file)+'/'+spec);target+=existsSync(target+'.ts')?'.ts':'/index.ts';return load(target);
   }});return exports;
  }

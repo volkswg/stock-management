@@ -1,7 +1,7 @@
 import {OrderItemQuantityType}from "@/modules/orders/contracts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
 import {
   updateOrderItemProductCode,
   updateOrderItemQuantity,

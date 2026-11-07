@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
 import { listMovements, type MovementDateFilter } from "@/modules/inventory/server";
 
 export const runtime = "nodejs";

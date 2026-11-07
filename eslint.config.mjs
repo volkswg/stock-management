@@ -1,3 +1,4 @@
+import {finalArchitectureBoundaries} from "./eslint/final-architecture-boundaries.mjs";
 import {externalInfrastructureBoundaries} from "./eslint/external-infrastructure-boundaries.mjs";
 import {ordersLineWorkflowBoundaries} from "./eslint/orders-line-workflows-boundaries.mjs";
 import { inventoryApplicationBoundaries } from "./eslint/inventory-application-boundaries.mjs";
@@ -39,6 +40,7 @@ const eslintConfig = defineConfig([
   ...inventoryApplicationBoundaries,
   ...ordersLineWorkflowBoundaries,
   ...externalInfrastructureBoundaries,
+  ...finalArchitectureBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -1,0 +1,756 @@
+{
+  "base": "4d786cedab11842940346e009684539a114820b3",
+  "files": {
+    "src/externals/google/sheet/GoogleSheetsService.ts": {
+      "source": "import { StockAdjustmentsSheet } from \"./sheets/stock-adjustments/StockAdjustmentsSheet\";\nimport { PayrollRecordsSheet } from \"./sheets/employee-advances/PayrollRecordsSheet\";\nimport { RecordsSheet } from \"./sheets/expenses/RecordsSheet\";\nimport { GoogleServiceAccountAuth } from \"../auth/GoogleServiceAccountAuth\";\nimport { GoogleSheetsClient } from \"./client\";\nimport { GOOGLE_SHEETS_SCOPE } from \"./const\";\nimport {\n  EmployeeCompensationsSheet,\n  EmployeesSheet,\n  EmployeeTimesheetsSheet,\n  OrderBillsSheet,\n  OrderItemsSheet,\n  OrdersSheet,\n  SalesReceiptItemsSheet,\n  SalesProfitCostOverridesSheet,\n  SalesReceiptPaymentsSheet,\n  SalesReceiptsSheet,\n  SalesReceiptSyncsSheet,\n  ShipmentOrdersSheet,\n  ShipmentsSheet,\n  StockCountsSheet,\n  UserStateSheet,\n} from \"./sheets\";\nimport { MovementSheet } from \"./sheets/movements/MovementSheet\";\nimport type { GoogleSheetsConfig, GoogleSheetRow, MovementRange, MovementWorksheet, IGoogleSheetsService } from \"./types\";\n\nexport class GoogleSheetsService implements IGoogleSheetsService {\n  readonly employeeCompensations: EmployeeCompensationsSheet;\n  readonly employees: EmployeesSheet;\n  readonly employeeTimesheets: EmployeeTimesheetsSheet;\n  readonly employeeAdvances: PayrollRecordsSheet;\n  readonly payrollSettlements: PayrollRecordsSheet;\n  readonly orders: OrdersSheet;\n  readonly orderBills: OrderBillsSheet;\n  readonly orderItems: OrderItemsSheet;\n  readonly salesReceiptItems: SalesReceiptItemsSheet;\n  readonly salesProfitCostOverrides: SalesProfitCostOverridesSheet;\n  readonly salesReceiptPayments: SalesReceiptPaymentsSheet;\n  readonly expenses: RecordsSheet;\n  readonly expenseCategories: RecordsSheet;\n  readonly shops: RecordsSheet;\n  readonly salesReceipts: SalesReceiptsSheet;\n  readonly salesReceiptSyncs: SalesReceiptSyncsSheet;\n  readonly shipmentOrders: ShipmentOrdersSheet;\n  readonly shipments: ShipmentsSheet;\n  readonly stockCounts: StockCountsSheet;\n  readonly stockAdjustments: StockAdjustmentsSheet;\n  readonly movementMasters: MovementSheet;\n  readonly movementDetails: MovementSheet;\n  readonly userState: UserStateSheet;\n\n  private readonly client: GoogleSheetsClient;\n  private readonly movementWorksheetNames: Record<MovementWorksheet, string>;\n\n  constructor(config: GoogleSheetsConfig) {\n    if (!config.spreadsheetId.trim()) {\n      throw new Error(\"Google Sheets spreadsheet id is required.\");\n    }\n\n    const auth = new GoogleServiceAccountAuth({\n      serviceAccountEmail: config.serviceAccountEmail,\n      serviceAccountPrivateKey: config.serviceAccountPrivateKey,\n      scopes: [GOOGLE_SHEETS_SCOPE],\n    });\n    this.client = new GoogleSheetsClient(auth, config.spreadsheetId);\n    this.movementWorksheetNames = {\n      userState: config.userStateWorksheetName,\n      movementDetails: config.movementDetailWorksheetName,\n      movementMasters: config.movementMasterWorksheetName,\n    };\n    this.employeeAdvances = new PayrollRecordsSheet(this.client, config.employeeAdvancesWorksheetName);\n    this.payrollSettlements = new PayrollRecordsSheet(this.client, config.payrollSettlementsWorksheetName);\n    this.stockAdjustments = new StockAdjustmentsSheet(this.client, config.stockAdjustmentsWorksheetName);\n    this.expenses = new RecordsSheet(this.client, config.expensesWorksheetName);\n    this.expenseCategories = new RecordsSheet(this.client, config.expenseCategoriesWorksheetName);\n    this.shops = new RecordsSheet(this.client, config.shopsWorksheetName);\n    this.employeeCompensations = new EmployeeCompensationsSheet(\n      this.client,\n      config.employeeCompensationsWorksheetName,\n    );\n    this.employees = new EmployeesSheet(\n      this.client,\n      config.employeesWorksheetName,\n    );\n    this.employeeTimesheets = new EmployeeTimesheetsSheet(\n      this.client,\n      config.employeeTimesheetsWorksheetName,\n    );\n    this.orders = new OrdersSheet(this.client, config.ordersWorksheetName);\n    this.orderBills = new OrderBillsSheet(\n      this.client,\n      config.orderBillsWorksheetName,\n    );\n    this.orderItems = new OrderItemsSheet(\n      this.client,\n      config.orderItemsWorksheetName,\n    );\n    this.salesReceipts = new SalesReceiptsSheet(\n      this.client,\n      config.salesReceiptsWorksheetName,\n    );\n    this.salesReceiptItems = new SalesReceiptItemsSheet(\n      this.client,\n      config.salesReceiptItemsWorksheetName,\n    );\n    this.salesProfitCostOverrides = new SalesProfitCostOverridesSheet(\n      this.client,\n      config.salesProfitCostOverridesWorksheetName,\n    );\n    this.salesReceiptPayments = new SalesReceiptPaymentsSheet(\n      this.client,\n      config.salesReceiptPaymentsWorksheetName,\n    );\n    this.salesReceiptSyncs = new SalesReceiptSyncsSheet(\n      this.client,\n      config.salesReceiptSyncsWorksheetName,\n    );\n    this.shipmentOrders = new ShipmentOrdersSheet(\n      this.client,\n      config.shipmentOrdersWorksheetName,\n    );\n    this.shipments = new ShipmentsSheet(\n      this.client,\n      config.shipmentsWorksheetName,\n    );\n    this.stockCounts = new StockCountsSheet(\n      this.client,\n      config.stockCountsWorksheetName,\n    );\n    this.movementMasters = new MovementSheet(this.client, config.movementMasterWorksheetName);\n    this.movementDetails = new MovementSheet(this.client, config.movementDetailWorksheetName);\n    this.userState = new UserStateSheet(\n      this.client,\n      config.userStateWorksheetName,\n    );\n  }\n\n  async readMovementRanges(ranges: MovementRange[]): Promise<GoogleSheetRow[][]> {\n    return this.client.getValuesBatch(ranges.map(({ sheet, range }) => ({\n      worksheetName: this.movementWorksheetNames[sheet], range,\n    })));\n  }\n\n  async checkConnection(): Promise<void> {\n    await Promise.all([\n      this.employees.checkConnection(),\n      this.employeeTimesheets.checkConnection(),\n      this.orders.checkConnection(),\n      this.orderBills.checkConnection(),\n      this.orderItems.checkConnection(),\n      this.salesReceiptItems.checkConnection(),\n      this.salesProfitCostOverrides.checkConnection(),\n      this.salesReceiptPayments.checkConnection(),\n      this.expenses.checkConnection(),\n      this.expenseCategories.checkConnection(),\n      this.shops.checkConnection(),\n      this.salesReceipts.checkConnection(),\n      this.salesReceiptSyncs.checkConnection(),\n      this.shipmentOrders.checkConnection(),\n      this.shipments.checkConnection(),\n      this.userState.checkConnection(),\n    ]);\n  }\n}\n",
+      "sha256": "061cd1e977c2709449f0f78cb5acdacdc8ddf95e5a8f6e6751690bdb29f63bca"
+    },
+    "src/externals/google/sheet/createGoogleSheetsServiceFromConfig.ts": {
+      "source": "import type { AppConfig } from \"../../../config\";\nimport { GoogleSheetsService } from \"./GoogleSheetsService\";\n\nexport function createGoogleSheetsServiceFromConfig(\n  config: AppConfig,\n): GoogleSheetsService {\n  return new GoogleSheetsService({\n    spreadsheetId: config.googleSheets.spreadsheetId,\n    employeeAdvancesWorksheetName: config.googleSheets.employeeAdvancesWorksheetName,\n    payrollSettlementsWorksheetName: config.googleSheets.payrollSettlementsWorksheetName,\n    expensesWorksheetName: config.googleSheets.expensesWorksheetName,\n    expenseCategoriesWorksheetName: config.googleSheets.expenseCategoriesWorksheetName,\n    shopsWorksheetName: config.googleSheets.shopsWorksheetName,\n    employeeCompensationsWorksheetName:\n      config.googleSheets.employeeCompensationsWorksheetName,\n    employeesWorksheetName: config.googleSheets.employeesWorksheetName,\n    employeeTimesheetsWorksheetName:\n      config.googleSheets.employeeTimesheetsWorksheetName,\n    ordersWorksheetName: config.googleSheets.ordersWorksheetName,\n    orderBillsWorksheetName: config.googleSheets.orderBillsWorksheetName,\n    orderItemsWorksheetName: config.googleSheets.orderItemsWorksheetName,\n    salesReceiptItemsWorksheetName:\n      config.googleSheets.salesReceiptItemsWorksheetName,\n    salesProfitCostOverridesWorksheetName:\n      config.googleSheets.salesProfitCostOverridesWorksheetName,\n    salesReceiptPaymentsWorksheetName:\n      config.googleSheets.salesReceiptPaymentsWorksheetName,\n    salesReceiptsWorksheetName: config.googleSheets.salesReceiptsWorksheetName,\n    salesReceiptSyncsWorksheetName:\n      config.googleSheets.salesReceiptSyncsWorksheetName,\n    shipmentOrdersWorksheetName:\n      config.googleSheets.shipmentOrdersWorksheetName,\n    shipmentsWorksheetName: config.googleSheets.shipmentsWorksheetName,\n    stockAdjustmentsWorksheetName: config.googleSheets.stockAdjustmentsWorksheetName,\n    stockCountsWorksheetName: config.googleSheets.stockCountsWorksheetName,\n    movementMasterWorksheetName: config.googleSheets.movementMasterWorksheetName,\n    movementDetailWorksheetName: config.googleSheets.movementDetailWorksheetName,\n    userStateWorksheetName: config.googleSheets.userStateWorksheetName,\n    serviceAccountEmail: config.googleService.accountEmail,\n    serviceAccountPrivateKey: config.googleService.accountPrivateKey,\n  });\n}\n",
+      "sha256": "c16d8c905f07f937f8a2f268dbcaacd37a1f83b21f391c0f4dacae7c65539877"
+    },
+    "src/services/employees/payroll-composition.ts": {
+      "source": "import \"server-only\";\nimport type { IGoogleSheetsService } from \"@/externals/google/sheet/types\";\nimport type { SalaryAdvanceShops } from \"@/modules/hr/application/ports/salary-advance-shops\";\nimport type { PayrollReaders } from \"@/modules/hr/application/ports/payroll\";\nimport { calculateEmployeePayroll as executePayroll, createSalaryAdvance as executeAdvance, settleEmployeePayroll as executeSettlement } from \"@/modules/hr/payroll-server\";\nimport { createHRPayrollReaders } from \"@/modules/hr/server\";\nimport { createSalesDashboardReader } from \"@/modules/sales/server\";\nimport { createSalaryAdvanceShops } from \"./salary-advance-shops\";\n\n// Only Sales transport composition remains outside HR; HR owns its workforce readers.\nexport function createPayrollReaders(service: IGoogleSheetsService): PayrollReaders {\n  return createHRPayrollReaders(service, createSalesDashboardReader(service));\n}\nexport async function calculateEmployeePayroll({googleSheetsService,month}: {googleSheetsService: IGoogleSheetsService; month: string}) {\n  return executePayroll({googleSheetsService,month,readers:createPayrollReaders(googleSheetsService)});\n}\nexport async function createSalaryAdvance(service: IGoogleSheetsService, input: unknown, shopsReader: SalaryAdvanceShops = createSalaryAdvanceShops(service)) {\n  return executeAdvance(service,input,createPayrollReaders(service).employees,shopsReader);\n}\nexport async function settleEmployeePayroll(service: IGoogleSheetsService, input: unknown) {\n  return executeSettlement(service,input,createPayrollReaders(service));\n}\n",
+      "sha256": "46eb11c7c5903480531ecd6782259b2afb259d1d4b3c7f9d401db4b1db354c83"
+    },
+    "src/services/employees/salary-advance-shops.ts": {
+      "source": "import \"server-only\";\nimport type { IGoogleSheetsService } from \"@/externals/google/sheet/types\";\nimport type { SalaryAdvanceShops } from \"@/modules/hr/application/ports/salary-advance-shops\";\nimport { listExpenseShops } from \"@/modules/expenses/server\";\n\n// Legacy compatibility composition stays outside both feature cores.\nexport function createSalaryAdvanceShops(service: IGoogleSheetsService): SalaryAdvanceShops {\n  return { listShops: () => listExpenseShops(service) };\n}\n",
+      "sha256": "f06ebe18ddb9b2f19335889245a20f72314aaf632213468ddbd6c44b90caf95c"
+    },
+    "src/services/stock-adjustments/employee-directory.ts": {
+      "source": "import \"server-only\";\nimport type { IGoogleSheetsService } from \"@/externals/google/sheet/types\";\nimport type { EmployeeDirectory } from \"@/modules/inventory/application/ports/employee-directory\";\nimport { readEmployeeDirectory } from \"@/modules/hr/server\";\n\nexport function createEmployeeDirectory(googleSheetsService: IGoogleSheetsService, unavailableError: () => Error): EmployeeDirectory {\n  return { listEmployees: () => readEmployeeDirectory({ googleSheetsService, unavailableError }) };\n}\n",
+      "sha256": "790a1c4a91c886bb3c6f6136b31d293e8f48501c4f36dff46268e05e3a5ef434"
+    },
+    "src/services/orders/listOrders.ts": {
+      "source": "import \"server-only\";\nimport type { IGoogleSheetsService } from \"@/externals/google/sheet/types\";\nimport type { OrderDetail } from \"@/modules/orders/contracts\";\nimport { getOrderDetail as executeGetOrderDetail } from \"@/modules/orders/server\";\nimport { GoogleSheetsOrderDetailShipmentProjection } from \"@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection\";\nexport { type OrderListItem, type OrderProductImage, type OrderBillImage, type OrderDetail } from \"@/modules/orders/contracts\";\nexport { listOrders } from \"@/modules/orders/server\";\n\n// Temporary legacy-only composition; Orders module never imports Shipments.\nexport async function getOrderDetail({\n  googleSheetsService,\n  orderId,\n}: {\n  googleSheetsService: IGoogleSheetsService;\n  orderId: string;\n}): Promise<OrderDetail | undefined> {\n  return await executeGetOrderDetail({\n    googleSheetsService,\n    orderId,\n    shipmentProjection: new GoogleSheetsOrderDetailShipmentProjection(googleSheetsService),\n  });\n}\n",
+      "sha256": "b9c6f37c42243139725537ca6157a5459560e240940d3209c6e2ece0d15f66e0"
+    },
+    "src/services/utils/createSortableId.ts": {
+      "source": "import { randomBytes } from \"node:crypto\";\n\nlet lastTimestamp = 0;\nlet sequence = 0;\n\nexport function createSortableId(): string {\n  const now = Date.now();\n  if (now > lastTimestamp) {\n    lastTimestamp = now;\n    sequence = randomBytes(2).readUInt16BE() & 0x0fff;\n  } else {\n    sequence += 1;\n    if (sequence > 0x0fff) {\n      lastTimestamp += 1;\n      sequence = 0;\n    }\n  }\n\n  const bytes = randomBytes(16);\n  bytes.writeUIntBE(lastTimestamp, 0, 6);\n  bytes[6] = 0x70 | (sequence >> 8);\n  bytes[7] = sequence & 0xff;\n  bytes[8] = 0x80 | (bytes[8] & 0x3f);\n\n  const hex = bytes.toString(\"hex\");\n  return [\n    hex.slice(0, 8),\n    hex.slice(8, 12),\n    hex.slice(12, 16),\n    hex.slice(16, 20),\n    hex.slice(20),\n  ].join(\"-\");\n}\n",
+      "sha256": "d01a2acab4cd6ce88b24550a1fcb22f316d65942e450fc25e691fd6567e3865d"
+    },
+    "src/features/backend/shipments/utils.ts": {
+      "source": "import { ShipmentStatus } from \"@/modules/shipments/contracts\";\n\nexport async function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nexport function isUpdatableStatus(value: unknown): value is ShipmentStatus {\n  return (\n    value === ShipmentStatus.ReadyToShip ||\n    value === ShipmentStatus.Shipping ||\n    value === ShipmentStatus.Delivered\n  );\n}\n\nexport function isValidDeliveryFee(value: unknown): value is number {\n  return (\n    typeof value === \"number\" &&\n    Number.isFinite(value) &&\n    value >= 0 &&\n    value <= 1_000_000_000\n  );\n}\n\nexport function isValidPoNumber(value: unknown): value is string {\n  return (\n    typeof value === \"string\" && Boolean(value.trim()) && value.length <= 100\n  );\n}\n",
+      "sha256": "b2698b215c0cfd022dc838bb5ec59c93f33deb103ca78ea1c899ba56c2c0bdfb"
+    },
+    "src/scripts/line-rich-menu-client.ts": {
+      "source": "const LINE_API_BASE_URL = \"https://api.line.me/v2/bot\";\nconst LINE_RICH_MENU_IMAGE_BASE_URL = `${LINE_API_BASE_URL}/richmenu`;\nconst LINE_RICH_MENU_IMAGE_UPLOAD_URL = (richMenuId: string) =>\n  `https://api-data.line.me/v2/bot/richmenu/${encodeURIComponent(\n    richMenuId,\n  )}/content`;\n\nexport interface RichMenuRequest {\n  size: {\n    width: number;\n    height: number;\n  };\n  selected: boolean;\n  name: string;\n  chatBarText: string;\n  areas: Array<{\n    bounds: {\n      x: number;\n      y: number;\n      width: number;\n      height: number;\n    };\n    action:\n      | {\n          type: \"message\";\n          label: string;\n          text: string;\n        }\n      | {\n          type: \"uri\";\n          label: string;\n          uri: string;\n        }\n      | {\n          type: \"richmenuswitch\";\n          label: string;\n          richMenuAliasId: string;\n          data: string;\n        };\n  }>;\n}\n\nexport class LineRichMenuClient {\n  private readonly channelAccessToken: string;\n\n  constructor(channelAccessToken: string) {\n    this.channelAccessToken = channelAccessToken;\n  }\n\n  async createRichMenu(richMenu: RichMenuRequest): Promise<string> {\n    const response = await fetch(LINE_RICH_MENU_IMAGE_BASE_URL, {\n      method: \"POST\",\n      headers: {\n        Authorization: `Bearer ${this.channelAccessToken}`,\n        \"Content-Type\": \"application/json\",\n      },\n      body: JSON.stringify(richMenu),\n    });\n\n    await verifyLineApiResponseSucceeded(\n      response,\n      \"LINE rich menu creation failed\",\n    );\n\n    const payload = (await response.json()) as { richMenuId: string };\n    return payload.richMenuId;\n  }\n\n  async uploadRichMenuImage({\n    richMenuId,\n    image,\n    contentType,\n  }: {\n    richMenuId: string;\n    image: Buffer;\n    contentType: string;\n  }): Promise<void> {\n    const response = await fetch(LINE_RICH_MENU_IMAGE_UPLOAD_URL(richMenuId), {\n      method: \"POST\",\n      headers: {\n        Authorization: `Bearer ${this.channelAccessToken}`,\n        \"Content-Type\": contentType,\n      },\n      body: new Uint8Array(image),\n    });\n\n    await verifyLineApiResponseSucceeded(\n      response,\n      \"LINE rich menu image upload failed\",\n    );\n  }\n\n  async setDefaultRichMenu(richMenuId: string): Promise<void> {\n    const response = await fetch(\n      `${LINE_API_BASE_URL}/user/all/richmenu/${encodeURIComponent(richMenuId)}`,\n      {\n        method: \"POST\",\n        headers: {\n          Authorization: `Bearer ${this.channelAccessToken}`,\n        },\n      },\n    );\n\n    await verifyLineApiResponseSucceeded(\n      response,\n      \"LINE default rich menu setup failed\",\n    );\n  }\n\n  async createRichMenuAlias({\n    richMenuAliasId,\n    richMenuId,\n  }: {\n    richMenuAliasId: string;\n    richMenuId: string;\n  }): Promise<void> {\n    const response = await fetch(`${LINE_API_BASE_URL}/richmenu/alias`, {\n      method: \"POST\",\n      headers: {\n        Authorization: `Bearer ${this.channelAccessToken}`,\n        \"Content-Type\": \"application/json\",\n      },\n      body: JSON.stringify({ richMenuAliasId, richMenuId }),\n    });\n\n    await verifyLineApiResponseSucceeded(\n      response,\n      \"LINE rich menu alias creation failed\",\n    );\n  }\n\n  async updateRichMenuAlias({\n    richMenuAliasId,\n    richMenuId,\n  }: {\n    richMenuAliasId: string;\n    richMenuId: string;\n  }): Promise<void> {\n    const response = await fetch(\n      `${LINE_API_BASE_URL}/richmenu/alias/${encodeURIComponent(\n        richMenuAliasId,\n      )}`,\n      {\n        method: \"POST\",\n        headers: {\n          Authorization: `Bearer ${this.channelAccessToken}`,\n          \"Content-Type\": \"application/json\",\n        },\n        body: JSON.stringify({ richMenuId }),\n      },\n    );\n\n    await verifyLineApiResponseSucceeded(\n      response,\n      \"LINE rich menu alias update failed\",\n    );\n  }\n\n  async upsertRichMenuAlias({\n    richMenuAliasId,\n    richMenuId,\n  }: {\n    richMenuAliasId: string;\n    richMenuId: string;\n  }): Promise<void> {\n    try {\n      await this.updateRichMenuAlias({\n        richMenuAliasId,\n        richMenuId,\n      });\n    } catch (error: unknown) {\n      if (!isLineNotFoundError(error)) throw error;\n\n      await this.createRichMenuAlias({\n        richMenuAliasId,\n        richMenuId,\n      });\n    }\n  }\n}\n\nasync function verifyLineApiResponseSucceeded(\n  response: Response,\n  failureMessage: string,\n): Promise<void> {\n  if (response.ok) return;\n\n  const body = await response.text();\n  throw new Error(`${failureMessage}: ${response.status} ${body}`);\n}\n\nfunction isLineNotFoundError(error: unknown): boolean {\n  return error instanceof Error && error.message.includes(\": 404 \");\n}\n",
+      "sha256": "bf754fd2cc65cbd60c82f733cc3c7df477326c6e18f1b6716fecbfad32ff9cb6"
+    }
+  },
+  "moves": {
+    "src/externals/google/sheet/GoogleSheetsService.ts": {
+      "to": "src/composition/google-sheets/GoogleSheetsService.ts",
+      "forward": "export { GoogleSheetsService } from \"@/composition/google-sheets/GoogleSheetsService\";\n",
+      "changes": [
+        {
+          "from": "import { StockAdjustmentsSheet } from \"./sheets/stock-adjustments/StockAdjustmentsSheet\";",
+          "to": "import { StockAdjustmentsSheet } from \"@/modules/inventory/infrastructure/google-sheets/stock-adjustments/StockAdjustmentsSheet\";"
+        },
+        {
+          "from": "import { PayrollRecordsSheet } from \"./sheets/employee-advances/PayrollRecordsSheet\";",
+          "to": "import { PayrollRecordsSheet } from \"@/modules/hr/infrastructure/google-sheets/employee-advances/PayrollRecordsSheet\";"
+        },
+        {
+          "from": "import { RecordsSheet } from \"./sheets/expenses/RecordsSheet\";",
+          "to": "import { RecordsSheet } from \"@/modules/expenses/infrastructure/google-sheets/expenses/RecordsSheet\";"
+        },
+        {
+          "from": "import {\n  EmployeeCompensationsSheet,\n  EmployeesSheet,\n  EmployeeTimesheetsSheet,\n  OrderBillsSheet,\n  OrderItemsSheet,\n  OrdersSheet,\n  SalesReceiptItemsSheet,\n  SalesProfitCostOverridesSheet,\n  SalesReceiptPaymentsSheet,\n  SalesReceiptsSheet,\n  SalesReceiptSyncsSheet,\n  ShipmentOrdersSheet,\n  ShipmentsSheet,\n  StockCountsSheet,\n  UserStateSheet,\n} from \"./sheets\";",
+          "to": "import { EmployeeCompensationsSheet } from \"@/modules/hr/infrastructure/google-sheets/employee-compensations/EmployeeCompensationsSheet\";\nimport { EmployeesSheet } from \"@/modules/hr/infrastructure/google-sheets/employees/EmployeesSheet\";\nimport { EmployeeTimesheetsSheet } from \"@/modules/hr/infrastructure/google-sheets/employee-timesheets/EmployeeTimesheetsSheet\";\nimport { OrderBillsSheet } from \"@/modules/orders/infrastructure/google-sheets/order-bills/OrderBillsSheet\";\nimport { OrderItemsSheet } from \"@/modules/orders/infrastructure/google-sheets/order-items/OrderItemsSheet\";\nimport { OrdersSheet } from \"@/modules/orders/infrastructure/google-sheets/orders/OrdersSheet\";\nimport { SalesReceiptItemsSheet } from \"@/modules/sales/infrastructure/google-sheets/receipt-items/SalesReceiptItemsSheet\";\nimport { SalesProfitCostOverridesSheet } from \"@/modules/sales/infrastructure/google-sheets/profit-cost-overrides/SalesProfitCostOverridesSheet\";\nimport { SalesReceiptPaymentsSheet } from \"@/modules/sales/infrastructure/google-sheets/receipt-payments/SalesReceiptPaymentsSheet\";\nimport { SalesReceiptsSheet } from \"@/modules/sales/infrastructure/google-sheets/receipts/SalesReceiptsSheet\";\nimport { SalesReceiptSyncsSheet } from \"@/modules/sales/infrastructure/google-sheets/receipt-syncs/SalesReceiptSyncsSheet\";\nimport { ShipmentOrdersSheet } from \"@/modules/shipments/infrastructure/google-sheets/shipment-orders/ShipmentOrdersSheet\";\nimport { ShipmentsSheet } from \"@/modules/shipments/infrastructure/google-sheets/shipments/ShipmentsSheet\";\nimport { StockCountsSheet } from \"@/modules/inventory/infrastructure/google-sheets/stock-counts/StockCountsSheet\";\nimport { UserStateSheet } from \"@/modules/line-workflows/infrastructure/google-sheets/user-state/UserStateSheet\";"
+        },
+        {
+          "from": "import { MovementSheet } from \"./sheets/movements/MovementSheet\";",
+          "to": "import { MovementSheet } from \"@/modules/inventory/infrastructure/google-sheets/movements/MovementSheet\";"
+        },
+        {
+          "from": "\"../auth/GoogleServiceAccountAuth\"",
+          "to": "\"@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth\""
+        },
+        {
+          "from": "\"./client\"",
+          "to": "\"@/infrastructure/persistence/google-sheets/client\""
+        },
+        {
+          "from": "\"./const\"",
+          "to": "\"@/infrastructure/persistence/google-sheets/const\""
+        },
+        {
+          "from": "\"./types\"",
+          "to": "\"@/externals/google/sheet/types\""
+        }
+      ],
+      "ownerHash": "12338b514005328dc9fb3cb7a3dce667a7157dbbbe8cb8fccdd14e45089fd94e"
+    },
+    "src/externals/google/sheet/createGoogleSheetsServiceFromConfig.ts": {
+      "to": "src/composition/google-sheets/createGoogleSheetsServiceFromConfig.ts",
+      "forward": "export { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets/createGoogleSheetsServiceFromConfig\";\n",
+      "changes": [
+        {
+          "from": "\"../../../config\"",
+          "to": "\"@/config\""
+        }
+      ],
+      "ownerHash": "5ddb6017f46962bc84c237e1baf80fc51480d6156333f65e4a314136e8fd3405"
+    },
+    "src/services/employees/payroll-composition.ts": {
+      "to": "src/composition/hr-payroll.ts",
+      "forward": "import \"server-only\";\nexport { createPayrollReaders, calculateEmployeePayroll, createSalaryAdvance, settleEmployeePayroll } from \"@/composition/hr-payroll\";\n",
+      "changes": [],
+      "ownerHash": "46eb11c7c5903480531ecd6782259b2afb259d1d4b3c7f9d401db4b1db354c83"
+    },
+    "src/services/employees/salary-advance-shops.ts": {
+      "to": "src/composition/salary-advance-shops.ts",
+      "forward": "import \"server-only\";\nexport { createSalaryAdvanceShops } from \"@/composition/salary-advance-shops\";\n",
+      "changes": [],
+      "ownerHash": "f06ebe18ddb9b2f19335889245a20f72314aaf632213468ddbd6c44b90caf95c"
+    },
+    "src/services/stock-adjustments/employee-directory.ts": {
+      "to": "src/composition/employee-directory.ts",
+      "forward": "import \"server-only\";\nexport { createEmployeeDirectory } from \"@/composition/employee-directory\";\n",
+      "changes": [],
+      "ownerHash": "790a1c4a91c886bb3c6f6136b31d293e8f48501c4f36dff46268e05e3a5ef434"
+    },
+    "src/services/orders/listOrders.ts": {
+      "to": "src/composition/orders.ts",
+      "forward": "import \"server-only\";\nexport { listOrders, getOrderDetail } from \"@/composition/orders\";\nexport type { OrderListItem, OrderProductImage, OrderBillImage, OrderDetail } from \"@/composition/orders\";\n",
+      "changes": [],
+      "ownerHash": "b9c6f37c42243139725537ca6157a5459560e240940d3209c6e2ece0d15f66e0"
+    },
+    "src/services/utils/createSortableId.ts": {
+      "to": "src/infrastructure/runtime/create-sortable-id.ts",
+      "forward": "export { createSortableId } from \"@/infrastructure/runtime/create-sortable-id\";\n",
+      "changes": [],
+      "ownerHash": "d01a2acab4cd6ce88b24550a1fcb22f316d65942e450fc25e691fd6567e3865d"
+    },
+    "src/features/backend/shipments/utils.ts": {
+      "to": "src/modules/shipments/http.ts",
+      "forward": "export { readJsonBody, isUpdatableStatus, isValidDeliveryFee, isValidPoNumber } from \"@/modules/shipments/http\";\n",
+      "changes": [
+        {
+          "from": "\"@/modules/shipments/contracts\"",
+          "to": "\"./contracts\""
+        }
+      ],
+      "ownerHash": "50e398a1417b9c4532ad6f02e333d851c58037fd4c065c249775a0b27fdc41ed"
+    },
+    "src/scripts/line-rich-menu-client.ts": {
+      "to": "src/infrastructure/external/line/LineRichMenuClient.ts",
+      "forward": "export { LineRichMenuClient } from \"../infrastructure/external/line/LineRichMenuClient.ts\";\nexport type { RichMenuRequest } from \"../infrastructure/external/line/LineRichMenuClient.ts\";\n",
+      "changes": [
+        {
+          "from": "export interface RichMenuRequest {\n  size: {\n    width: number;\n    height: number;\n  };\n  selected: boolean;\n  name: string;\n  chatBarText: string;\n  areas: Array<{\n    bounds: {\n      x: number;\n      y: number;\n      width: number;\n      height: number;\n    };\n    action:\n      | {\n          type: \"message\";\n          label: string;\n          text: string;\n        }\n      | {\n          type: \"uri\";\n          label: string;\n          uri: string;\n        }\n      | {\n          type: \"richmenuswitch\";\n          label: string;\n          richMenuAliasId: string;\n          data: string;\n        };\n  }>;\n}",
+          "to": "import type { RichMenuRequest } from \"./types\";\nexport type { RichMenuRequest } from \"./types\";"
+        }
+      ],
+      "ownerHash": "1ea14bb3b7f83dde5d077805e8ae1e94fa198dc236b2d957da36c216ed36f305"
+    }
+  },
+  "edits": {
+    "src/app/api/employees/[id]/route.ts": {
+      "sha256": "e5104c00886c8f2424fe7e89256f7c4a9493f2e6b0ee22c01422389d91bc3d79",
+      "afterHash": "6e7d29a4cfb0207809138a1267e178312933802db35354c0956ce32f4b29e35c",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/employees/advances/route.ts": {
+      "sha256": "5e1cb0e9cc48bed2f241ec84d2549d771cc7ef979bf08499e64eea552e327ef0",
+      "afterHash": "6b6cb717ae41f903d2bcf590c33c958a4e93c4fe451fbf03be6254ae2cc0b196",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/services/employees/payroll-composition\"",
+          "to": "\"@/composition/hr-payroll\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/services/employees/salary-advance-shops\"",
+          "to": "\"@/composition/salary-advance-shops\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/employees/payroll/route.ts": {
+      "sha256": "13482e8618cc666aa59cc26fa63846a14f8c5f13078c47f6495d078468da23d5",
+      "afterHash": "cbe20b6754dbeaf48594357fb318607e0f1b56aa181bd6687655a0b87bb238fc",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/services/employees/payroll-composition\"",
+          "to": "\"@/composition/hr-payroll\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/employees/payroll/settle/route.ts": {
+      "sha256": "27696a87dd0fe46378943adac66aac6682cefce1e8023150e2cda977e7d1c725",
+      "afterHash": "0cc3aa2c1157dcb3d852bcd70a9a89dfcd0b5293c6715a68b445f2b843a2fea7",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/services/employees/payroll-composition\"",
+          "to": "\"@/composition/hr-payroll\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/employees/route.ts": {
+      "sha256": "7affdfb074597f1c198bea04214e199d66c9b3784739abb44af2c146880c7306",
+      "afterHash": "e5bcc7365cc7e399932fd251d7e91c0fea8f32bfaeb8ef3bf86a390bad898ae6",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/employees/timesheets/[id]/route.ts": {
+      "sha256": "ba82b0cbb9b5fac79b5ef6a6a07717b4f44ddaa13f25c86b7b79765c62b6d14d",
+      "afterHash": "a2bca36d0d6495415a597750bd46c408d0d0e1ee24b5a9f6916344134fe450ac",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/employees/timesheets/route.ts": {
+      "sha256": "00377293778d945f25d6c23543cd0bb4c25a487b974e411be6d827e20c4ca5b8",
+      "afterHash": "46c5372f82fa92a170cf41340ff235d5040b8d46b8f9770bc1251992c81e64c8",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/employees/timesheets/summary/route.ts": {
+      "sha256": "ea75205070bec28b6aa477179d42326ac0133874af29266afac8d0fe48996637",
+      "afterHash": "c0e281bbda179e6bb7f4174caa264374dfc8b390d3d02830fa2139377a606017",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/expenses/masters/[kind]/route.ts": {
+      "sha256": "6331a523d319ec8c75f2e5480e41ea60256688feb649d1bfa415a6b3e098230f",
+      "afterHash": "bc9b5bbf12d8e6ab92e8ec659f46c65fd42f9f29aa5ad1f815ae5be65bd7e616",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/expenses/route.ts": {
+      "sha256": "5e07629d0e2ab7aab876d2f48bcea6e6e42346370e7f1e3adeaa35e7f3c91b62",
+      "afterHash": "392c5f98b293c674e8ed86dbf633aadc2ea65c87dc2845ba1fea685f446c5ade",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/line/webhook/route.ts": {
+      "sha256": "770b035148e6bca16f8f59136725175832e272d7a1c64ca52393c2a3e08c328c",
+      "afterHash": "82822a2f7b8a470dd119e4c29510f1a7eafcdbd0f98cc9ec15fa3270065c9183",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/drive\"",
+          "to": "\"@/infrastructure/files/google-drive\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/loyverse/daily-sales/sync/route.ts": {
+      "sha256": "df6d8be4bb36df48c123cead38e0cb5ad9e198caaed4e907839b91016cee6ea9",
+      "afterHash": "ae8c7a868704c1e99d35f08a100fa4183a5e56a6eada8059255f85cec990c2d3",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/movements/[id]/items/[itemId]/image/route.ts": {
+      "sha256": "bf162e324db33eb325ab5a27dc4df5cfbb9338eec65f2f890fb3265d0489cb17",
+      "afterHash": "1747327c215d7c82621b7a5b87d1183f6119e59f9f847f1dd864ca41c7259954",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/drive\"",
+          "to": "\"@/infrastructure/files/google-drive\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/movements/[id]/items/[itemId]/route.ts": {
+      "sha256": "b0ecc726d7cc7220f6dc833f35d6e952b472764188b73a667d5ba60be31315c1",
+      "afterHash": "38c2cbcc24a3112d797e33239c73ed2ee36c501a967c8e3584623727c2dfc187",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/movements/[id]/route.ts": {
+      "sha256": "041117c47eacd91473fa9e0ef7cbfc8ef7491be788da5bb0b9c5123816cab810",
+      "afterHash": "68dd02354d4f3ad38a565e9e4de57b9eea6873c3c7fdcb20ce75109923ba166d",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/movements/route.ts": {
+      "sha256": "13efeac7ffa9a4aec438f4fb77670fb0fabbabd714da7700de04e8f00638f93d",
+      "afterHash": "4ac8980d1d00e1bc9dcce34c1026411e4964dfa05925aa6fe24dc19c49d95c3c",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/orders/[id]/images/route.ts": {
+      "sha256": "6677dd9572daa3c2d1777484a2ec5a077c27ead7c409c94afe6b578cd3cdcc8a",
+      "afterHash": "e4e5c22ede4904ce5413c8b3ebc735454bf5d16d5d290de5affe8da46414228b",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/drive\"",
+          "to": "\"@/infrastructure/files/google-drive\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/orders/[id]/items/[itemId]/image/route.ts": {
+      "sha256": "6bbb49f314f23a9a3a7e90020e41e5ade0b3f51209a6dc8fb7f7dffa1b0671e8",
+      "afterHash": "002ca439fb5bbef975b203426caeb3b334f084b46072f18badfe3906f4271734",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/drive\"",
+          "to": "\"@/infrastructure/files/google-drive\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/orders/[id]/items/[itemId]/route.ts": {
+      "sha256": "e28921614fd36a0a92279342bb80ae2497d388f7dfdfa9c184f19d1c1aad8562",
+      "afterHash": "256433d873d697febf7ff9151dc14e93dba76ad1b74e4e06942a0282f04897b0",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/orders/[id]/items/route.ts": {
+      "sha256": "77112517afcf1f07ba0697328227ff1d6e39292b77bf887d7566eb2c6e02df0d",
+      "afterHash": "07a9cad744bc59225644951fb4b5734ee81c41fcb486ba6826bb18ad14ce114f",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/orders/[id]/route.ts": {
+      "sha256": "ffd2d478a33be8edf7cbd18cfac117ad5b193c56edb1b9fb84a5962c4acdb4e4",
+      "afterHash": "3227bcb3984df03192f19a34e9ad1d6418655abb4e52adee1e3a1cd8a1591b8c",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/orders/route.ts": {
+      "sha256": "252b2499aa453c67500044af7806ebf81557aba0bde3ea07d1ba0859039d5a4b",
+      "afterHash": "7e0a6d05c4c1dabe5e26d431e9b88ab8fc543dbae6ed7daf60d65e9571100ef6",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/orders/with-images/route.ts": {
+      "sha256": "1bf5ee9552e1bb7e84e4cdd8a68dbe901a564466bae7cfd2f6142a9b788f4fa7",
+      "afterHash": "8c21cff9ba03ddee29d0e61f29dbea1c571e6c28e0dec112be30fbaee363d095",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/drive\"",
+          "to": "\"@/infrastructure/files/google-drive\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/sales/daily-sales/route.ts": {
+      "sha256": "01ad193d6d5a8cdf4ee95e97085232f9a3414f4cb6bf5d55972516e596f771e1",
+      "afterHash": "836c7d9734b63a101e45112f8b9a6d32955613db781ee1804672c8c5c1932795",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/sales/dashboard/route.ts": {
+      "sha256": "b3e09db0ca9cd4f2520a4f360d8cf0d56a84e6b4e30fa4546453b015d4267bee",
+      "afterHash": "7d2ad6212d59052feaae2a68a8988250d54c8705c9a7fd02ac328cf3a5273993",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/sales/profit-summary/cost-overrides/route.ts": {
+      "sha256": "b7e2cf74575bc6850b83369751f58bb89ecf087d884ce132bd3f9384228ecd4c",
+      "afterHash": "0a0c190b9270ad7cf92ed8697c8ec18ee2cf2093fc0ac0aafa8ca96cc89120c9",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/sales/profit-summary/route.ts": {
+      "sha256": "1e4e0c50a80ca14a2358236dc3f9aa1fc7661954c44fddf92d264aa24c494df3",
+      "afterHash": "ebc1cf07edce61c369c0397b25ebc20c9f289350344dc82e762aef2dd4d58770",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/sales/sync-status/route.ts": {
+      "sha256": "3e7e3a407d6168cb80ff25b668bc29243a4b4dd61361d7d47be3339197a74b8d",
+      "afterHash": "ba0334ddcaeb5bdb6e3fb79b44618ff36ba73599acac1a84a83fbbb80e085b00",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/shipments/[id]/orders/route.ts": {
+      "sha256": "5f3389d760ded35f62f1751b721906e469a64ef8ea25b9ad8c633290cb1d3887",
+      "afterHash": "e22e7fdba6b44c30664329803ab38dc65121d013c09721ffe73183d9e52d7d70",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/shipments/[id]/route.ts": {
+      "sha256": "05c70cf6c60941a27a42eb6ab4b8f1cb3f748ed96663fc3d485a9f2268ab2da6",
+      "afterHash": "2f87b7fc45a06dd745fa152604aea999dfdca23ccdf7f61bbb70cf76ddad4a11",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/drive\"",
+          "to": "\"@/infrastructure/files/google-drive\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shipments/utils\"",
+          "to": "\"@/modules/shipments/http\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/shipments/route.ts": {
+      "sha256": "4424b729e9c46f939ba49d386ce07aa978e3976367e02d05087e993d013e0303",
+      "afterHash": "5d3e3ce2307d6d9a247dbd8dd90994cb908c1a079110a684913ecf9dc6a478fa",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/stock-adjustments/route.ts": {
+      "sha256": "092e907cfe74ca3ea23f2308a0b886465baca5e46b0ac74f72e810cd932f9bbb",
+      "afterHash": "18fe73eb58f1080c97de40e9b579dcc12e0e54d0b89c075b8c232cbe50ad0b97",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/app/api/stock-counts/route.ts": {
+      "sha256": "f8cb69bd9c520d7e4255ff637d5333bf00dbedb86ff2e6befc2663aad49c300f",
+      "afterHash": "299e61a167493eee7357843b06a3f3807d9dcd8a78bb29e853cc1b9a6603bb54",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet\"",
+          "to": "\"@/composition/google-sheets\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/config/index.ts": {
+      "sha256": "cfd579d0f69066b0fdf3af3d8b43df4c0e11b5f2ed623dbfbfe28fa33625cfc2",
+      "afterHash": "98a942aaf5651417b8f53d49ff978cd573b2e5e3b1803203246fa656d6277315",
+      "changes": [
+        {
+          "from": "\"@/features/backend/shared/utils\"",
+          "to": "\"@/shared/lib/is-record\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/modules/line-workflows/server.ts": {
+      "sha256": "c68c07366dbe25a7690e8c0eb5b061aa38bf9f01aec87ef36df92970828fcdee",
+      "afterHash": "26f33edcc77d6f8e70091b9ddc5008c9edf9df18735dd0f88b42664a240d6b72",
+      "changes": [
+        {
+          "from": "\"@/services/utils/createSortableId\"",
+          "to": "\"@/infrastructure/runtime/create-sortable-id\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/modules/orders/server.ts": {
+      "sha256": "13a5ff88f50e7f484e3e610cdbe92067b1e91114fef252f40aa7a462dbe584ad",
+      "afterHash": "16344e4b0732d866bd4584f6cf80464e000f412152a19bca0b4d5fa83f676046",
+      "changes": [
+        {
+          "from": "\"@/services/utils/createSortableId\"",
+          "to": "\"@/infrastructure/runtime/create-sortable-id\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/modules/shipments/server.ts": {
+      "sha256": "c03e517fe167e1ab7703dc723a380ff953d1a016ac2b8963374eb809ab8128b4",
+      "afterHash": "3c685d986aabc9f64e87a7bd99bffe64f5f50f529726e3d6430948b9e95b00e2",
+      "changes": [
+        {
+          "from": "\"@/services/utils/createSortableId\"",
+          "to": "\"@/infrastructure/runtime/create-sortable-id\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/drive/types\"",
+          "to": "\"@/infrastructure/files/google-drive/types\"",
+          "count": 1
+        }
+      ]
+    },
+    "src/modules/hr/infrastructure/google-sheets/employee-directory-reader.ts": {
+      "sha256": "5cd32e432243060fc02961f2d2014568e476956d2c66affed369152cbc6d3e2d",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet/sheets/employees/const\"",
+          "to": "\"@/modules/hr/infrastructure/google-sheets/employees/const\"",
+          "count": 1
+        }
+      ],
+      "afterHash": "c4e855509dfac2534f5ae9c9c3bc65816ed8d786e2c7348b9d184b749e732da0"
+    },
+    "src/modules/orders/infrastructure/google-sheets/order-writer.ts": {
+      "sha256": "e8f1ef178c59d1a588e23a7aa97422d38d68cebda6a865c6c24af1e7c97da72b",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet/const\"",
+          "to": "\"@/infrastructure/persistence/google-sheets/const\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/sheet/sheets/orders/const\"",
+          "to": "\"@/modules/orders/infrastructure/google-sheets/orders/const\"",
+          "count": 1
+        }
+      ],
+      "afterHash": "b23aeed585e1b05cb80d733ba0e08cfc03127ddb37e75e6b012e4ca8ce713649"
+    },
+    "src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts": {
+      "sha256": "f0256546f1595b2a955d06c4f8aabdc956d1004e00d50aaa42a79b0541f127ef",
+      "changes": [
+        {
+          "from": "\"@/externals/google/drive/types\"",
+          "to": "\"@/infrastructure/files/google-drive/types\"",
+          "count": 1
+        }
+      ],
+      "afterHash": "6a9efbbdd311a52cb03bf5d208da386f572ace8856811f221bb68caee34544ed"
+    },
+    "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts": {
+      "sha256": "1567b81c201d11b5a18bf04cbbed37849be89fddf81f082c3372c44bf1d9ebd1",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet/const\"",
+          "to": "\"@/infrastructure/persistence/google-sheets/const\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/sheet/sheets/shipment-orders/const\"",
+          "to": "\"@/modules/shipments/infrastructure/google-sheets/shipment-orders/const\"",
+          "count": 1
+        }
+      ],
+      "afterHash": "851897432c61b396bd4cf6a2827add84c7c9e2e10cf20398feab675bde8906f2"
+    },
+    "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts": {
+      "sha256": "a9a9ad0b298466e99821a9f7c9d8a562993af71b5d40ac77e5076a165a529fdd",
+      "changes": [
+        {
+          "from": "\"@/externals/google/sheet/const\"",
+          "to": "\"@/infrastructure/persistence/google-sheets/const\"",
+          "count": 1
+        },
+        {
+          "from": "\"@/externals/google/sheet/sheets/shipments/const\"",
+          "to": "\"@/modules/shipments/infrastructure/google-sheets/shipments/const\"",
+          "count": 1
+        }
+      ],
+      "afterHash": "258b3dce5ffd9c30bfc16194634da91e79a7e2c89c1aaeee6412f34a97e899f5"
+    }
+  },
+  "newFiles": [
+    "src/composition/google-sheets/index.ts"
+  ],
+  "specifiers": {
+    "@/externals/google/sheet": "@/composition/google-sheets",
+    "@/externals/google/drive": "@/infrastructure/files/google-drive",
+    "@/services/employees/payroll-composition": "@/composition/hr-payroll",
+    "@/services/employees/salary-advance-shops": "@/composition/salary-advance-shops",
+    "@/services/utils/createSortableId": "@/infrastructure/runtime/create-sortable-id",
+    "@/features/backend/shared/utils": "@/shared/lib/is-record",
+    "@/features/backend/shipments/utils": "@/modules/shipments/http",
+    "@/externals/google/sheet/const": "@/infrastructure/persistence/google-sheets/const",
+    "@/externals/google/sheet/sheets/orders/const": "@/modules/orders/infrastructure/google-sheets/orders/const",
+    "@/externals/google/sheet/sheets/shipments/const": "@/modules/shipments/infrastructure/google-sheets/shipments/const",
+    "@/externals/google/sheet/sheets/shipment-orders/const": "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const",
+    "@/externals/google/sheet/sheets/employees/const": "@/modules/hr/infrastructure/google-sheets/employees/const",
+    "@/externals/google/drive/types": "@/infrastructure/files/google-drive/types"
+  }
+}

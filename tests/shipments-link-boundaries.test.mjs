@@ -15,7 +15,7 @@ test("link scopes permit only actual application/port/adapter/composition import
   for (const [file, code] of [
     [application, 'import { ShipmentStatus } from "../contracts"; import type { ShipmentOrderLinkStore } from "./ports/shipment-order-link-store"; export type Store = ShipmentOrderLinkStore; export const draft = ShipmentStatus.Draft;'],
     [port, 'import type { ShipmentOrder } from "../../contracts"; export interface Store { appendShipmentOrder(record: ShipmentOrder): Promise<void> }'],
-    [adapter, 'import "server-only"; import type { IGoogleSheetsService, GoogleSheetRow } from "@/externals/google/sheet/types"; import { lastColumnLetter } from "@/externals/google/sheet/const"; export type Types = [IGoogleSheetsService, GoogleSheetRow]; export const range = lastColumnLetter(6);'],
+    [adapter, 'import "server-only"; import type { IGoogleSheetsService, GoogleSheetRow } from "@/externals/google/sheet/types"; import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const"; export type Types = [IGoogleSheetsService, GoogleSheetRow]; export const range = lastColumnLetter(6);'],
     [server, 'import "server-only"; import { linkOrderToShipment } from "./application/link-order-to-shipment"; import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-sheets/shipment-order-link-store"; export const operations = [linkOrderToShipment, GoogleSheetsShipmentOrderLinkStore];'],
   ]) await check(file, code, false);
 });

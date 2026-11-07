@@ -8,7 +8,7 @@ async function check(filePath, code, expected) { const [r] = await eslint.lintTe
 test("bill application, import-free port, adapter and composition pass exact scopes with erased provider interfaces", async () => {
   for (const file of [application, port, adapter, server]) { const [r] = await eslint.lintFiles(file); assert.equal(r.errorCount, 0, JSON.stringify(r.messages)); }
   await check(application, 'import type { UpdateShipmentStatusResult } from "./update-shipment-status"; import type { ShipmentBillStorage } from "./ports/shipment-bill-storage"; export type Types = [UpdateShipmentStatusResult, ShipmentBillStorage];', false);
-  await check(adapter, 'import "server-only"; import type { IGoogleDriveService } from "@/externals/google/drive/types"; export type Drive = IGoogleDriveService; export const bytes = () => Buffer.from("x"); export const clock = () => Date.now();', false);
+  await check(adapter, 'import "server-only"; import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types"; export type Drive = IGoogleDriveService; export const bytes = () => Buffer.from("x"); export const clock = () => Date.now();', false);
 });
 test("bill application/port reject File/Buffer/providers/config/frameworks/IO and alias/relative/type/export/dynamic bypasses", async () => {
   for (const file of [application, port]) for (const code of [

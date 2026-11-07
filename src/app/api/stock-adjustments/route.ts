@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
 import { createStockAdjustment, listAdjustmentEmployees, listStockAdjustments, reverseStockAdjustment, StockAdjustmentError, validStockMonth } from "@/modules/inventory/server";
 export const runtime = "nodejs";
 function fail(error: unknown) {

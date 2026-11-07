@@ -1,8 +1,8 @@
 import { payrollRevision, calculateEmployeePayroll } from "@/modules/hr/payroll-server";
-import { createPayrollReaders } from "@/services/employees/payroll-composition";
+import { createPayrollReaders } from "@/composition/hr-payroll";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
 
 export const runtime = "nodejs";
 

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
 import { createLoyverseAccountsFromConfig } from "@/infrastructure/external/loyverse";
-import { isRecord } from "@/features/backend/shared/utils";
+import { isRecord } from "@/shared/lib/is-record";
 import { syncLoyverseDailySales } from "@/modules/sales/server";
 
 export const runtime = "nodejs";

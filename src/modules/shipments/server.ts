@@ -1,6 +1,6 @@
 import "server-only";
 import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
-import { createSortableId } from "@/services/utils/createSortableId";
+import { createSortableId } from "@/infrastructure/runtime/create-sortable-id";
 import type { Shipment, ShipmentListItem, ShipmentStatus } from "./contracts";
 import { createShipment as executeCreateShipment } from "./application/create-shipment";
 import { GoogleSheetsShipmentWriter } from "./infrastructure/google-sheets/shipment-writer";
@@ -17,7 +17,7 @@ import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-shee
 import { updateShipmentStatus as executeUpdateShipmentStatus, type UpdateShipmentStatusResult } from "./application/update-shipment-status";
 import { GoogleSheetsShipmentStatusStore } from "./infrastructure/google-sheets/shipment-status-store";
 
-import type { IGoogleDriveService } from "@/externals/google/drive/types";
+import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
 import { advanceShipmentStatusWithBill as executeAdvanceShipmentStatusWithBill, type ShipmentStatusUpdater, type AdvanceShipmentStatusWithBillResult } from "./application/advance-shipment-status-with-bill";
 import { GoogleDriveShipmentBillStorage } from "./infrastructure/google-drive/shipment-bill-storage";
 

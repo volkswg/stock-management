@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { isRecord } from "@/features/backend/shared/utils";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { isRecord } from "@/shared/lib/is-record";
 import { ExpenseError, listExpenses, listExpenseCategories, listExpenseShops, removeExpense, saveExpense, validMonth } from "@/modules/expenses/server";
 import type { ExpenseInput } from "@/modules/expenses/contracts";
 export const runtime = "nodejs";

@@ -1,8 +1,8 @@
-import { createPayrollReaders } from "@/services/employees/payroll-composition";
-import { createSalaryAdvanceShops } from "@/services/employees/salary-advance-shops";
+import { createPayrollReaders } from "@/composition/hr-payroll";
+import { createSalaryAdvanceShops } from "@/composition/salary-advance-shops";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
 import { listEmployees } from "@/modules/hr/server";
 import { listExpenseShops } from "@/modules/expenses/server";
 import { createSalaryAdvance, readSalaryLedger, recoveredAmount, SalaryAdvanceError, transitionSalaryAdvance, money } from "@/modules/hr/payroll-server";

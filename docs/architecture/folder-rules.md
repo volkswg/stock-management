@@ -1,6 +1,6 @@
 # Folder ownership
 
-Apply these rules to new and migrated code. `services`, `externals` and `features` remain legacy until individually reviewed migrations. Do not scaffold empty layers or blindly move mixed files.
+Apply these rules to new and migrated code. `services`, `externals` and backend feature leaves now retain reviewed compatibility surfaces. Do not scaffold empty layers or blindly move mixed files.
 
 | Location under `src/` | Owns | Excludes |
 | --- | --- | --- |
@@ -15,7 +15,9 @@ Apply these rules to new and migrated code. `services`, `externals` and `feature
 | `modules/<feature>/ui` | Components/hooks, co-located CSS, formatters/PDFs and same-origin HTTP clients | Config, credentials, SDK/provider IO, server/application implementation imports |
 | `infrastructure/persistence/google-sheets` | Shared Sheets client/base/row delegates/constants/types and Google auth/JWT plumbing | Feature rules, worksheet schema or aggregate feature registry |
 | `infrastructure/files/google-drive` | Drive provider/factory/protocol types, using shared Google auth | Order/movement policy |
-| Future `infrastructure/external/{line,loyverse}` | Provider HTTP/signature protocols after scoped migration | Journey decisions and business calculations |
+| `infrastructure/external/{line,loyverse}` | Existing provider HTTP/signature/protocol/factory clients, including standalone operational LINE client | Feature journeys, worksheet reports and new providers |
+| `infrastructure/runtime` | Existing stateful sortable identifier implementation | Feature rules or duplicated sequence state |
+| `composition` | Concrete aggregate construction and compatibility consumer wiring outside feature cores | Business algorithms, browser contracts, generic DI frameworks |
 | `shared/{ui,lib,types}` | Proven generic reuse, small explicit utilities/value contracts | Feature dumping ground, config/infrastructure/module/legacy dependencies |
 | `config` | Server configuration parsing/types | Feature rules, UI access, env renaming during moves |
 | `scripts` | Explicit opt-in operational entrypoints | Automatic execution during verification |
@@ -36,12 +38,6 @@ Root configuration/dependency files, `public` assets and existing operational gu
 | LINE workflows | Commands/replies/session/journeys; calls business use cases, never exports tokens or persistence details |
 | Workspace | Home/breadcrumb/navigation; Sales owns its menu shell; global Next layout remains app-owned |
 
-These are responsibilities, not claims all implementation is already in modules. [Migration map](migration-map.md) records actual files. Mixed payroll, LINE session and aggregate Sheets code needs split/characterization before physical relocation. No generic repository, DI container, speculative tenant model, parallel persistence or domain scaffolding.
+[Migration map](migration-map.md) records actual completed ownership and intentionally retained compatibility. Workspace/Next shell remains app-owned. Legacy business paths contain named forwards or identity bindings; concrete bridge functions now live in composition. Inventory owns movement schemas/quantity decisions, LINE owns sessions/journeys and external transport has root owners. All canonical adapters keep row/range mapping out of application ports.
 
-
-The movement schema prerequisite originally separated master/detail headers from LINE session state. Its physical owner is now Inventory `infrastructure/google-sheets/movement-schema.ts`; the old schema path is an identity forward. Legacy session persistence remains in `services/movements/state.ts` until the workflow extraction replaces its Inventory table access with public operations. Inventory use cases never import that session implementation.
-
-
-Sales owns report contracts, applications/ports, receipt identifiers/projections, persistence adapters and named server composition. Inventory owns count, adjustment/reversal and movement use cases plus their semantic adapters. HR payroll and Inventory reconciliation consume the public Sales dashboard reader; Inventory directory composition consumes the HR public directory query. Public Inventory quantity rules replace the old LINE-owned helper. Legacy facade and aggregate composition retirement still requires the final consumer audit.
-
-LINE user-state persistence now owns only `modules/line-workflows/infrastructure/google-sheets/user-state/{UserStateSheet.ts,const.ts}`. The original leaves are named compatibility forwards; session workflows and aggregate service/factory/indexes stay legacy. The worksheet depends only on root BaseGoogleSheet, erased generic types, the range helper and its own header. This does not move LINE business services.
+The aggregate Sheets service remains a single composition object with its original constructor/health-check behavior. Its old pure full-service types and export indexes remain compatibility contracts. Do not move feature registry construction into root infrastructure or remove tested exports without a new consumer/identity audit.

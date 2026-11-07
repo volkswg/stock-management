@@ -1,3 +1,7 @@
+import {shipmentValidationFile,validationBefore,assertShipmentValidationImportHistory} from "./shipments-validation-history.mjs";
+import {shipmentHttpBefore,assertShipmentHttpHistory} from "./shipments-http-history.mjs";
+import {assertOrdersSheetTypeHistory,sheetTypesBefore} from "./orders-sheet-type-history.mjs";
+import {cleanupNewFiles,cleanupChanged} from "./cleanup-history.mjs";
 import {externalNewFiles,externalChanged} from "./external-history.mjs";
 import {assertOrdersDetailServerHistory} from "./orders-detail-history.mjs";
 import {ordersLineNewFiles,ordersLineChanged} from "./orders-line-history.mjs";
@@ -7,9 +11,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 export const expensesHistory=JSON.parse(readFileSync('tests/fixtures/expenses-business-before.json','utf8'));
-export const expensesFiles=new Set([...Object.keys(expensesHistory.files),...Object.keys(salesApplicationBefore.files),...Object.keys(salesApplicationBefore.edits),...inventoryApplicationChanged,...ordersLineChanged,...externalChanged]);
+export const expensesFiles=new Set([...Object.keys(expensesHistory.files),...Object.keys(salesApplicationBefore.files),...Object.keys(salesApplicationBefore.edits),...inventoryApplicationChanged,...ordersLineChanged,...externalChanged,...cleanupChanged]);
 export const expensesNewFiles=[
- ...externalNewFiles,...ordersLineNewFiles,...salesApplicationFiles,
+ ...cleanupNewFiles,...externalNewFiles,...ordersLineNewFiles,...salesApplicationFiles,
  'src/modules/expenses/contracts.ts','src/modules/expenses/server.ts','src/modules/expenses/domain/rules.ts','src/modules/expenses/application/manage-expenses.ts','src/modules/expenses/application/ports/expense-store.ts','src/modules/expenses/infrastructure/google-sheets/expense-store.ts','src/modules/hr/application/ports/salary-advance-shops.ts','src/services/employees/salary-advance-shops.ts',
 ];
 const hash=s=>createHash('sha256').update(s).digest('hex');
@@ -27,7 +31,10 @@ export function restoreExpensesSource(file,source=readFileSync(file,'utf8')){
  assert.equal(source,expected,file);return e.source;
 }
 export function assertExpensesHistory(file,expected){
+ if(file===shipmentValidationFile&&validationBefore.sha256===expected)return assertShipmentValidationImportHistory(file,expected);
+ if(shipmentHttpBefore.sources[file]?.sha256===expected)return assertShipmentHttpHistory(file,expected);
  if(inventoryApplicationChanged.has(file))return assertInventoryApplicationHistory(file,expected);
+ if(file!=="src/modules/orders/server.ts"&&sheetTypesBefore.files[file]?.sha256===expected)return assertOrdersSheetTypeHistory(file,expected);
  let source=restoreExpensesSource(file);
  if(hash(source)!==expected){
   const remaining=JSON.parse(readFileSync('tests/fixtures/remaining-worksheets-before.json','utf8')).splits[file];

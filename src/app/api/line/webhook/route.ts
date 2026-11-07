@@ -7,11 +7,11 @@ import {
 import {
   createGoogleDriveServiceFromConfig,
   type IGoogleDriveService,
-} from "@/externals/google/drive";
+} from "@/infrastructure/files/google-drive";
 import {
   createGoogleSheetsServiceFromConfig,
   type IGoogleSheetsService,
-} from "@/externals/google/sheet";
+} from "@/composition/google-sheets";
 import {parseLineWebhookPayload,processLineWebhook}from "@/modules/line-workflows/server";
 
 export const runtime = "nodejs";

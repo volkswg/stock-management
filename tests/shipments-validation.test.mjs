@@ -1,3 +1,4 @@
+import {restoreCleanupSource} from "./helpers/cleanup-history.mjs";
 import { shipmentHttpFiles, assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -19,7 +20,7 @@ test("original and current validation declarations/status outputs preserve four 
   for(const path of ["src/modules/shipments/contracts.ts","src/services/shipments/types.ts","src/services/shipments/index.ts"])assert.equal(load(path).ShipmentStatus,enumObject);
   assert.deepEqual(Object.keys(load("src/modules/shipments/contracts.ts")),["ShipmentStatus"]);assert.equal(services.ShipmentStatus,enumObject);
   assert.deepEqual(Object.keys(current),Object.keys(original));
-  const source=ts.createSourceFile(shipmentValidationFile,readFileSync(shipmentValidationFile,"utf8"),ts.ScriptTarget.Latest,true),printer=ts.createPrinter();
+  const source=ts.createSourceFile(shipmentValidationFile,restoreCleanupSource(shipmentValidationFile),ts.ScriptTarget.Latest,true),printer=ts.createPrinter();
   for(const node of source.statements.filter(ts.isFunctionDeclaration))assert.equal(printer.printNode(ts.EmitHint.Unspecified,node,source),validationBefore.functions[node.name.text].ast);
   const values=[...Object.values(enumObject),"unknown"," shipping ","SHIPPING","",null,undefined,false,true,0,1,NaN,Infinity,{},[],new String("shipping"),Symbol("shipping"),1n,{valueOf(){assert.fail("No status coercion");}}];
   for(const value of values){const expected=["ready_to_ship","shipping","delivered"].includes(value);assert.equal(original.isUpdatableStatus(value),expected);assert.equal(current.isUpdatableStatus(value),expected);}
@@ -50,7 +51,7 @@ test("updated helper resolves only public contracts/status at runtime, erased Or
   const {assertShipmentValidationImportHistory}=await import("./helpers/shipments-validation-history.mjs");
   const {browserOwnership,ownershipEdges}=await import("./helpers/browser-ownership.mjs");
   assertShipmentValidationImportHistory(shipmentValidationFile,validationBefore.sha256);
-  for(const [file,expected]of Object.entries(validationBefore.preserved)){if(shipmentHttpFiles.has(file))assertShipmentHttpHistory(file,expected);else assert.equal(validationHash(readFileSync(file)),expected,file);}
+  for(const [file,expected]of Object.entries(validationBefore.preserved)){if(shipmentHttpFiles.has(file))assertShipmentHttpHistory(file,expected);else assert.equal(validationHash(restoreCleanupSource(file)),expected,file);}
   const {load,services}=helpers(),server=load("src/modules/shipments/server.ts");
   for(const name of ["createShipment","listShipments","getShipmentDetail","linkOrderToShipment","updateShipmentStatus"])assert.equal(services[name],server[name],name);
   assert.equal(services.LinkOrderToShipmentError,load("src/modules/shipments/application/link-order-to-shipment.ts").LinkOrderToShipmentError);
@@ -66,7 +67,7 @@ test("updated helper resolves only public contracts/status at runtime, erased Or
         visit(relative(process.cwd(),target).replaceAll("\\","/"));
       }active.pop();seen.add(file);
     }visit(shipmentValidationFile);
-    assert.deepEqual([...seen].sort(),[shipmentValidationFile,"src/modules/shipments/contracts.ts","src/modules/shipments/status.ts",...(types?["src/modules/orders/contracts.ts"]:[])].sort());
+    assert.deepEqual([...seen].sort(),[shipmentValidationFile,"src/modules/shipments/http.ts","src/modules/shipments/contracts.ts","src/modules/shipments/status.ts",...(types?["src/modules/orders/contracts.ts"]:[])].sort());
     assert.deepEqual(ownershipEdges(browserOwnership({types})),["shipments->orders"]);
   }
 });

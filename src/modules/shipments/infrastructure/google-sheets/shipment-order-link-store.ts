@@ -1,7 +1,7 @@
 import "server-only";
 import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet/types";
-import { lastColumnLetter } from "@/externals/google/sheet/const";
-import { SHIPMENT_ORDERS_SHEET_HEADERS } from "@/externals/google/sheet/sheets/shipment-orders/const";
+import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const";
+import { SHIPMENT_ORDERS_SHEET_HEADERS } from "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const";
 import type { ShipmentOrder } from "../../contracts";
 import type { ShipmentOrderLinkStore, ShipmentLinkSnapshot } from "../../application/ports/shipment-order-link-store";
 
