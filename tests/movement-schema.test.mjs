@@ -1,3 +1,4 @@
+import { remainingFiles, remainingDestinations, assertRemainingHistory } from "./helpers/remaining-worksheet-history.mjs";
 import { userStateBefore, userStateFiles, userStateDestinations, assertUserStateHistory } from "./helpers/user-state-worksheet-history.mjs";
 import { salesQueryFiles, salesQueryNewFiles, assertSalesQueryHistory } from "./helpers/inventory-sales-query-history.mjs";
 import assert from "node:assert/strict";
@@ -15,8 +16,8 @@ test("original movement header helper preserves mutable schemas, ensure/read/wri
 
 test("exact schema source/declaration restoration preserves every unrelated production byte and historical fixture",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs"),{default:ts}=await import("typescript"),{movementSchemaFiles,movementSchemaHash,assertMovementSchemaHistory}=await import("./helpers/movement-schema-history.mjs");
- for(const [file,hash]of Object.entries(movementSchemaBefore.productionHashes)){if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else assert.equal(movementSchemaHash(readFileSync(file)),hash,file);}
- const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(movementSchemaBefore.productionHashes,f)),[movementSchemaBefore.newFile,...salesQueryNewFiles,...userStateDestinations].sort());
+ for(const [file,hash]of Object.entries(movementSchemaBefore.productionHashes)){if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else assert.equal(movementSchemaHash(readFileSync(file)),hash,file);}
+ const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(movementSchemaBefore.productionHashes,f)),[movementSchemaBefore.newFile,...salesQueryNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(movementSchemaBefore.fixtureHashes))assert.equal(movementSchemaHash(readFileSync(file)),hash,file);
  assert.equal(readFileSync(movementSchemaBefore.newFile,"utf8"),movementSchemaBefore.newSource);
  const printer=ts.createPrinter(),parse=file=>ts.createSourceFile(file,readFileSync(file,"utf8"),ts.ScriptTarget.Latest,true),name=n=>n.name?.text??(ts.isVariableStatement(n)?n.declarationList.declarations[0].name.text:undefined),leaf=parse(movementSchemaBefore.newFile);

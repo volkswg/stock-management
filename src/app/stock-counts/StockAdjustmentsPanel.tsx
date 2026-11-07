@@ -1,7 +1,7 @@
 "use client";
 import { Alert, Button, Input, Modal, Select, Spin, Tag } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ADJUSTMENT_REASONS, type AdjustmentEmployee, type AdjustmentReason, type StockAdjustment } from "@/services/stock-adjustments/types";
+import { ADJUSTMENT_REASONS, type AdjustmentEmployee, type AdjustmentReason, type StockAdjustment } from "@/modules/inventory/contracts";
 import styles from "./adjustments.module.css";
 
 type Shop = { accountId: string; shopName: string; calculatedStock: number; physicalCount: number | null; warnings?: string[] };

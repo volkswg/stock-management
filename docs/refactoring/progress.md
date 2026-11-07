@@ -2,9 +2,11 @@
 
 ## Verified current state
 
-GitHub confirms PRs 1–28 are merged. Latest reviewed main is `48cf8d6d011544206cafa7ac35eeeafde5f22be9` (PR28), tree `6e6f0fc15d44ab5b5227c513f342bdd4caf7a61f`. Source owners were checked against actual module/root files, compatibility forwards, server exports and remaining legacy worksheets, rather than inferred from PR titles alone.
+Starting baseline is merged PR29, main `57064008a0add0603e790f64983b797eaf4e92de`. Current source ownership is recorded in the [migration map](../architecture/migration-map.md); broader service extraction remains pending.
 
-Completed **slices** and partially migrated features are separated in the [migration map](../architecture/migration-map.md). The [roadmap](roadmap.md) is the only forward plan. In particular, actual PR20 was the Orders type-import prerequisite and actual PR23 was the Inventory employee-directory prerequisite, despite earlier task proposals for larger worksheet moves. PR25 completed the six core HR worksheet files; PR26 completed three Inventory worksheet files. This branch proposes only the movement schema prerequisite. Payroll/other HR and broader Inventory ownership remain pending. No feature-wide completion percentage or full Shipments milestone completion is claimed.
+This branch completes Inventory StockAdjustmentsSheet, HR PayrollRecordsSheet, Expenses' shared RecordsSheet surface and six associated header arrays. The original generic RecordsSheet body moves into root infrastructure; Expenses aliases it to preserve subclass prototype/constructor identity. Inventory adjustment labels/DTOs move verbatim into its public contracts and the panel consumes that leaf, preventing a new browser-to-header dependency. No provider, registry ordering, financial algorithm, persistence path or schema changes.
+
+The small `remaining-worksheets-before.json` witness captures only affected original sources. Existing immutable fixtures remain untouched. Historical guards reconcile the exact new moves/splits (including earlier employee-directory history) instead of accepting changed hashes. Shared offline loaders admit only the reviewed owner paths and schema leaves. New behavioral/identity/transport/schema/graph tests supplement existing Inventory/HR and historical regression coverage. Verification results are recorded in [verification](verification.md#remaining-worksheet-milestone).
 
 ## Merged implementation ledger
 
@@ -39,6 +41,8 @@ Counts below are the original Codex-local final reports, traced to the original 
 | [#25](https://github.com/volkswg/stock-management/pull/25) · `2e9fe4a6cb734a1d796d91f8e0805febf7273b70` | Three HR core worksheet/header pairs with six named forwards; no payroll/other business extraction | 435 = 429 + 6 |
 | [#26](https://github.com/volkswg/stock-management/pull/26) · `4952644f06fcfc216c9351c347dcc806d887bb09` | Stock Counts worksheet/header and Movement worksheet, three legacy forwards; no business extraction | 442 = 435 + 7 |
 | [#27](https://github.com/volkswg/stock-management/pull/27) · `72204e095d4b1e9425eb4f573bbe23c620bc99a7` | Movement worksheet-schema prerequisite; direct session coupling removed, no worksheet relocation | 447 = 442 + 5 |
+| [#28](https://github.com/volkswg/stock-management/pull/28) · `48cf8d6d011544206cafa7ac35eeeafde5f22be9` | Inventory/Sales query dependency prerequisite | 452 = 447 + 5 |
+| [#29](https://github.com/volkswg/stock-management/pull/29) · `57064008a0add0603e790f64983b797eaf4e92de` | LINE user-state worksheet/header ownership | 458 = 452 + 6 |
 
 Historical reports record successful baseline/final lint/typecheck and isolated builds with unchanged 23-page/35-API contracts and app-paths manifests. Later reports retain one unused shipmentRow import warning in `tests/shipments-read-seam.test.mjs:6`. Details, intermediate corrected failures, original limitations and precise baseline/head provenance remain in the immutable [original verification record](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/verification.md). Do not treat those past reports as substitutes for executing checks at a new base.
 

@@ -9,7 +9,7 @@ export const directoryNewFiles=["src/modules/inventory/contracts.ts","src/module
 export class DirectoryClock extends Date{constructor(...args){super(args.length?args[0]:"2026-11-06T12:00:00.000Z");}}
 export function directoryGraph({original=false,service,events=[],globals={}}={}){
  const cache=new Map(),options=ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json",ts.sys.readFile).config,ts.sys,process.cwd()).options;
- const allowed=new Set([directoryLegacy,"src/services/stock-adjustments/types.ts","src/app/api/stock-adjustments/route.ts",...directoryNewFiles]);
+ const allowed=new Set(["src/modules/inventory/infrastructure/google-sheets/stock-adjustments/const.ts",directoryLegacy,"src/services/stock-adjustments/types.ts","src/app/api/stock-adjustments/route.ts",...directoryNewFiles]);
  const headers=loadSource("src/externals/google/sheet/sheets/employees/const.ts");
  function load(file){if(cache.has(file))return cache.get(file);if(!allowed.has(file))throw Error(`Unapproved directory dependency ${file}`);
   const source=original?(directoryBefore.files[file]?.source??(file==="src/app/api/stock-adjustments/route.ts"?directoryBefore.routeSource:readFileSync(file,"utf8"))):readFileSync(file,"utf8");

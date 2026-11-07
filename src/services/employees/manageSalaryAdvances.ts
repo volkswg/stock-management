@@ -1,3 +1,5 @@
+import { ADVANCE_HEADERS, SETTLEMENT_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employee-advances/const";
+export { ADVANCE_HEADERS, SETTLEMENT_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employee-advances/const";
 import type { GoogleSheetRow, IGoogleRowsSheet, IGoogleSheetsService } from "@/externals/google/sheet";
 import { listEmployees } from "./manageEmployees";
 import { listExpenseShops } from "@/services/expenses";
@@ -5,8 +7,6 @@ import type { EmployeePayroll } from "./calculateEmployeePayroll";
 
 // Keep the worksheet layout compatible with existing records. New entries are paid
 // immediately; requestedDate/requestedAmount are storage-only compatibility fields.
-export const ADVANCE_HEADERS = ["id", "employeeId", "shopId", "requestedDate", "payrollMonth", "requestedAmount", "paidAmount", "status", "paidDate", "reference", "note", "createdAt", "updatedAt"];
-export const SETTLEMENT_HEADERS = ["id", "employeeId", "month", "paidDate", "reference", "createdAt", "snapshot"];
 export type SalaryAdvance = {
   id: string; employeeId: string; shopId: string; requestedDate: string; payrollMonth: string;
   requestedAmount: number; paidAmount: number; status: "requested" | "approved" | "paid" | "cancelled";

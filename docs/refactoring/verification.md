@@ -171,3 +171,22 @@ Six new tests exercise actual original/current worksheet and client functions, m
 Protected module closures are runtime/type file-acyclic with only Shipments→Orders, no new Inventory→LINE/private or root→feature edge. Full browser closure sets match after canonicalizing only the two relocated paths, retaining exactly four erased debts and no runtime provider path. The full-source audit separately records an inherited erased cycle: calculateEmployeePayroll → manageSalaryAdvances → calculateEmployeePayroll. Its exact before/after trace is asserted; no cycle is introduced or silently excused. Broader legacy cycle/debt cleanup is deferred.
 
 No live Google/LINE/Loyverse requests, production credentials/data, operational scripts, deployment, real-browser visual or concurrency verification. Synthetic session/transport tests do not establish live permissions/availability or stronger failure atomicity. All changed canonical Markdown links/fragments are validated; no standalone PR report is added.
+
+## Remaining worksheet milestone
+
+Base: merged PR29, main `57064008a0add0603e790f64983b797eaf4e92de`; dedicated branch `refactor/remaining-feature-worksheets`. Node 24.22.1, existing dependencies/lockfile. Baseline checks ran in a pristine source archive; final checks ran against the completed branch. Results are Codex-local.
+
+| Check | Baseline | Final |
+| --- | --- | --- |
+| npm test | 458 pass, zero failures/skips | 465 = 458 inherited + 7 new; zero failures/skips |
+| npm run lint | Exit 0; inherited unused shipmentRow warning | Exit 0; same warning only |
+| npm run typecheck | Pass | Pass, including legacy/root/feature constructor compatibility fixture |
+| Credential-free production build | Pass, /tmp/worksheets-baseline | Pass, /tmp/worksheets-final |
+| Page/API contracts | 23/35 | Unchanged; original fixture retained |
+| app-paths manifest | Original expected hash | Byte-identical, SHA-256 `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e` |
+
+Both builds excluded application env files and ran with `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. Existing dependencies were copied, without installation. All production source bytes match the isolated final build. No config/provider/package/lockfile/API/schema changes, live integration calls, production data, deployment or operational scripts. The sole UI change is the adjustment panel's public-contract import.
+
+Seven new tests cover row ranges/payload identity/pending/error behavior; legacy/feature/root/registry constructor and prototype equality; real SheetsClient requests with fake fetch; mutable schema/export identity and exact inverse source restoration; runtime/type ownership and forbidden import fixtures; actual Expense filtering/cents/order/idempotency/delete/failures through original/current record classes; and actual payroll ledger/deductions/export order through original/current payroll classes. Existing Inventory adjustment/reversal/idempotency/HTTP, HR financial, architecture, browser and historical regression guards remain enabled. Every inherited fixture remains byte-identical. The new witness is limited to affected sources; historical tests reconcile exact transformations rather than updating old hashes.
+
+Runtime and type-inclusive migrated graphs retain only the existing Shipments→Orders module direction. Root transport reaches no feature implementation. New worksheet closures reach no legacy service or other feature's private infrastructure. No client reaches any new worksheet or header leaf at runtime; the adjustment panel consumes pure public contracts. Existing payroll's erased cycle and four legacy erased browser debts remain recorded and unchanged. No scope blocker remains. Browser visuals, real provider permissions, production concurrency and independent external CI are not claimed verified. Recommended next milestone: extract Expenses shop/category read contracts and consumer ports for HR/Sales before reducing aggregate registry composition.
