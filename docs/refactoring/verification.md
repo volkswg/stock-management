@@ -110,3 +110,22 @@ Original characterization corrected test-only wiring: MovementSheet and StockAdj
 Both builds used clean isolated source copies, only tracked .env.example, existing hardlinked dependencies, and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. Only filenames were inspected; no application env files or inherited integration credentials, no secret reads/deletions, no install/lockfile change. Final built production bytes match the implementation checkout. App-paths manifest is byte-identical with SHA-256 `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`; all 23 page/35 API source contracts and old fixtures remain unchanged.
 
 Seven added tests cover worksheet/default/delete/mutability/await/error parity, actual stock-count/movement/adjustment/HTTP success and partial-failure scenarios, exact source/AST/history inventories, constructor/header/index/registry identities and unchanged batch mapping, actual original/current GoogleSheetsClient requests, and exact lint/runtime/type/browser/consumer audits. The source audit records 79 affected edges and three operational-script paths without execution. Both graph modes are acyclic, retain only Shipments→Orders and no Inventory→LINE/private edge; four inherited erased client debts remain exact. Seventy-five changed-doc local links/fragments resolve. No baseline or final test/type/build errors, unexplained skips or new lint warnings remain. Results are Codex-local, not independent GitHub/Vercel CI; live integration, browser visual and concurrent correctness are not claimed.
+
+
+## Movement worksheet-schema prerequisite
+
+Verified base: `4952644f06fcfc216c9351c347dcc806d887bb09`, merged PR26. Branch `refactor/movement-worksheet-schema-prerequisite`; Node 24.22.1 and existing dependencies. The unchanged clean base's commands were already executed during the immediately preceding worksheet audit; their matching SHA/results are reused instead of rerunning identical checks. No independent CI claim.
+
+| Check | Executed base | Final |
+| --- | --- | --- |
+| npm test | 442 pass, no failures/skips | 447 = 442 inherited + 5 new; zero failures/skips |
+| npm run lint | Exit 0; inherited unused shipmentRow warning | Exit 0; same inherited warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free build | Pass, /tmp/line27-baseline-safe | Pass, /tmp/schema-final-safe |
+| Routes / app-paths | 23/35; expected original manifest hash | Unchanged routes, fixture and byte-identical manifest |
+
+One original helper characterization passes before edits. The source witness and original real workflow golden are captured before implementation. New tests distinguish removal of the direct mixed-state path from unchanged stock-count/Sales aggregate debt; an initial new assertion expecting the latter to disappear was corrected to verify its precise inherited trace. No production expansion or guard relaxation was used. Final results below are Codex-local; no live provider/credential/data/operational/browser/concurrency verification.
+
+Final build ran `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` in a clean source copy with only tracked .env.example and existing hardlinked dependencies. No application env files/inherited provider credentials, credential reads/deletions or installs. Final built production bytes match this branch. App-paths SHA-256 remains `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`. All 23 page/35 API source contracts and previous fixture bytes remain unchanged. Seventy-seven changed-document local links/fragments resolve.
+
+Only two existing production files change and one legacy-local schema leaf is added; every other production byte is identical to base. Five added tests cover original header/await/error behavior, exact full-source/AST/history restoration, shared arrays/function/export descriptors, original real workflow golden, and actual/virtual graphs plus strict import bypasses. No inherited test is removed or skipped. No baseline or final test/type/build error or new lint warning. UserStateSheet relocation remains deferred pending a fresh main/consumer audit, including the explicitly retained legacy Sales/registry aggregation.

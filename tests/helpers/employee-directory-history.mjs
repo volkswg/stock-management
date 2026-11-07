@@ -1,3 +1,4 @@
+import { restoreMovementSchemaSource } from "./movement-schema-history.mjs";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {createHash} from "node:crypto";
@@ -5,4 +6,4 @@ import {directoryBefore} from "./employee-directory.mjs";
 export const directoryFiles=new Set(Object.keys(directoryBefore.files));
 export const directoryNewFiles=directoryBefore.newFiles;
 export const directoryHash=x=>createHash("sha256").update(x).digest("hex");
-export function assertDirectoryHistory(file,expected){const saved=directoryBefore.files[file];assert.ok(saved,file);assert.equal(saved.sha256,expected);assert.equal(directoryHash(saved.source),expected);let source=readFileSync(file,"utf8");for(const change of saved.changes.toReversed()){assert.equal(source.split(change.to).length-1,1,file);source=source.replace(change.to,change.from);}assert.equal(source,saved.source,file);}
+export function assertDirectoryHistory(file,expected){const saved=directoryBefore.files[file];assert.ok(saved,file);assert.equal(saved.sha256,expected);assert.equal(directoryHash(saved.source),expected);let source=restoreMovementSchemaSource(file,readFileSync(file,"utf8"));for(const change of saved.changes.toReversed()){assert.equal(source.split(change.to).length-1,1,file);source=source.replace(change.to,change.from);}assert.equal(source,saved.source,file);}

@@ -1,3 +1,4 @@
+import { movementSchemaFiles, movementSchemaNewFiles, assertMovementSchemaHistory } from "./helpers/movement-schema-history.mjs";
 import { inventoryWorksheetFiles, inventoryWorksheetDestinations, assertInventoryWorksheetHistory } from "./helpers/inventory-worksheet-history.mjs";
 import { hrWorksheetFiles, hrWorksheetDestinations, assertHrWorksheetHistory } from "./helpers/hr-worksheet-history.mjs";
 import { directoryFiles, directoryNewFiles, assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
@@ -19,8 +20,8 @@ test("original five Sales worksheets preserve header order/mutability, dynamic d
 
 test("exact ten-file Sales history and declarations restore original bytes while all other production and earlier fixtures remain authoritative",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs");const {salesWorksheetFiles,salesWorksheetDestinations,salesWorksheetHash,assertSalesWorksheetHistory}=await import("./helpers/sales-worksheet-history.mjs");
- for(const [file,hash]of Object.entries(salesWorksheetsBefore.productionHashes)){if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else assert.equal(salesWorksheetHash(readFileSync(file)),hash,file);}
- const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(salesWorksheetsBefore.productionHashes,f)).sort(),[...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations].sort());
+ for(const [file,hash]of Object.entries(salesWorksheetsBefore.productionHashes)){if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else assert.equal(salesWorksheetHash(readFileSync(file)),hash,file);}
+ const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(salesWorksheetsBefore.productionHashes,f)).sort(),[...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles].sort());
  for(const [file,hash]of Object.entries(salesWorksheetsBefore.fixtureHashes))assert.equal(salesWorksheetHash(readFileSync(`tests/fixtures/${file}`)),hash,file);
 });
 
