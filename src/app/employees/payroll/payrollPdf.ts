@@ -1,6 +1,6 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 
-import type { EmployeePayroll } from "@/services/employees/calculateEmployeePayroll";
+import type { EmployeePayroll } from "@/modules/hr/contracts";
 export type PayrollRecord = EmployeePayroll & { revision?: string };
 
 const money = (value: number) => new Intl.NumberFormat("en-TH", {

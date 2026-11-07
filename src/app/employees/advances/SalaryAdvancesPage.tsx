@@ -1,7 +1,7 @@
 "use client";
 import { Alert, Button, ConfigProvider, Input, Modal, Select, Spin, Tag } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SalaryAdvance } from "@/services/employees/manageSalaryAdvances";
+import type { SalaryAdvance } from "@/modules/hr/contracts";
 import styles from "./advances.module.css";
 
 type Advance = SalaryAdvance & { recoveredAmount: number; outstandingAmount: number };

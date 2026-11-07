@@ -1,3 +1,5 @@
+import { expectedHRDebts } from "./helpers/hr-payroll-history.mjs";
+import { hrFiles, hrNewFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
 import { expectedExpensesDebts } from "./helpers/expenses-business-history.mjs";
 import { expensesFiles, expensesNewFiles, assertExpensesHistory } from "./helpers/expenses-business-history.mjs";
 import { remainingFiles, remainingDestinations, assertRemainingHistory } from "./helpers/remaining-worksheet-history.mjs";
@@ -50,8 +52,8 @@ test("original/current real Inventory handlers preserve validation, rejection id
 test("three Inventory moves restore exact original sources/ASTs, single owners and every unrelated production/earlier fixture byte",async()=>{
  const {readFileSync,readdirSync,existsSync}=await import("node:fs"),{inventoryWorksheetFiles,inventoryWorksheetDestinations,inventoryWorksheetHash,assertInventoryWorksheetHistory}=await import("./helpers/inventory-worksheet-history.mjs");
  const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);
- for(const [file,hash]of Object.entries(inventoryWorksheetsBefore.productionHashes)){if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else assert.equal(inventoryWorksheetHash(readFileSync(file)),hash,file);}
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(inventoryWorksheetsBefore.productionHashes,f)).sort(),[...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
+ for(const [file,hash]of Object.entries(inventoryWorksheetsBefore.productionHashes)){if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else assert.equal(inventoryWorksheetHash(readFileSync(file)),hash,file);}
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(inventoryWorksheetsBefore.productionHashes,f)).sort(),[...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(inventoryWorksheetsBefore.fixtureHashes))assert.equal(inventoryWorksheetHash(readFileSync(file)),hash,file);
  const sources=walk("src").filter(f=>f.endsWith(".ts")).map(f=>readFileSync(f,"utf8")).join("\n");for(const e of Object.values(inventoryWorksheetsBefore.moves))assert.equal((sources.match(new RegExp(`export ${e.to.endsWith("const.ts")?"const":"class"} ${e.export}\\b`,"g"))??[]).length,1,e.export);
  assert.equal(existsSync("src/modules/inventory/infrastructure/google-sheets/movements/const.ts"),false);
@@ -124,5 +126,5 @@ test("Inventory exact lint and resolved runtime/type graphs reject LINE/private/
  for(const client of Object.keys(inventoryWorksheetsBefore.productionHashes).filter(f=>/\.tsx?$/.test(f)&&/^\s*["']use client["']/.test(readFileSync(f,"utf8"))))for(const types of [false,true]){
   const seen=new Set(),leaves=new Set();function visit(file){if(seen.has(file))return;seen.add(file);const from=reverse.get(file)??file;if(Object.hasOwn(inventoryWorksheetsBefore.moves,from))leaves.add(from);deps(file,types).forEach(visit);}visit(client);if(leaves.size)actual.push({root:client,types,leaves:[...leaves].sort()});
  }
- assert.deepEqual(actual,expectedExpensesDebts(inventoryWorksheetsBefore.browserBaseline));assert.equal(actual.length,2);assert.ok(actual.every(e=>e.types));assert.equal(inventoryWorksheetsBefore.operationalScripts.length,3);
+ assert.deepEqual(actual,expectedHRDebts(expectedExpensesDebts(inventoryWorksheetsBefore.browserBaseline)));assert.equal(actual.length,0);assert.ok(actual.every(e=>e.types));assert.equal(inventoryWorksheetsBefore.operationalScripts.length,3);
 });

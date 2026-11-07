@@ -6,23 +6,10 @@ import {
 } from "@/externals/google/sheet";
 import { listEmployees } from "./manageEmployees";
 
-export enum EmployeeTimesheetStatus {
-  Work = "work",
-  Leave = "leave",
-}
-
-export type EmployeeWorkdayType = "full" | "half";
-
-export type EmployeeTimesheet = {
-  id: string;
-  employeeId: string;
-  shopId: string;
-  status: EmployeeTimesheetStatus;
-  isOpen: boolean;
-  createdAt: string;
-  updatedAt: string;
-  workdayType: EmployeeWorkdayType | null;
-};
+import { EmployeeTimesheetStatus } from "@/modules/hr/contracts";
+export { EmployeeTimesheetStatus } from "@/modules/hr/contracts";
+import type { EmployeeTimesheet, EmployeeWorkdayType } from "@/modules/hr/contracts";
+export type { EmployeeTimesheet, EmployeeWorkdayType } from "@/modules/hr/contracts";
 
 export class EmployeeTimesheetDateConflictError extends Error {}
 export class EmployeeTimesheetValidationError extends Error {}
