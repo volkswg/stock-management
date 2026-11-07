@@ -1,3 +1,4 @@
+import { completionExtraFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { hrFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,7 +9,7 @@ import {expensesFiles,expensesNewFiles,expensesHistory,assertExpensesHistory,exp
 import {expenseGraph} from './helpers/expenses-business.mjs';
 
 test('Expenses contracts/rules and legacy forwards retain original declarations and a single error/function identity',()=>{
- for(const file of expensesFiles){if(hrFiles.has(file))assertHRHistory(file,expensesHistory.files[file].sha256);else assertExpensesHistory(file,expensesHistory.files[file].sha256);}
+ for(const file of expensesFiles){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,expensesHistory.files[file].sha256);else assertExpensesHistory(file,expensesHistory.files[file].sha256);}
  const original=expensesHistory.files['src/services/expenses/manageExpenses.ts'].source;
  const rules=readFileSync('src/modules/expenses/domain/rules.ts','utf8');
  assert.ok(rules.includes(original.slice(original.indexOf('export class ExpenseError'),original.indexOf('const text'))));

@@ -4,7 +4,7 @@ import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import {
   listEmployees,
   listEmployeeTimesheetsForMonth,
-} from "@/services/employees";
+} from "@/modules/hr/server";
 
 export const runtime = "nodejs";
 

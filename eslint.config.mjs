@@ -1,3 +1,4 @@
+import { hrWorkforceBoundaries } from "./eslint/hr-workforce-boundaries.mjs";
 import { hrPayrollBoundaries } from "./eslint/hr-payroll-boundaries.mjs";
 import { expensesBoundaries } from "./eslint/expenses-boundaries.mjs";
 import { defineConfig, globalIgnores } from "eslint/config";
@@ -29,6 +30,7 @@ const eslintConfig = defineConfig([
   ...employeeDirectoryBoundaries,
   ...expensesBoundaries,
   ...hrPayrollBoundaries,
+  ...hrWorkforceBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

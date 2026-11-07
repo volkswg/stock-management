@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { isRecord } from "@/features/backend/shared/utils";
-import { createEmployee, listEmployees } from "@/services/employees";
+import { createEmployee, listEmployees } from "@/modules/hr/server";
 
 export const runtime = "nodejs";
 

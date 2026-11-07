@@ -16,7 +16,8 @@ export function expenseGraph({original=false,service,events=[],overrides={},exte
  function load(file){
   if(!original && hrSourceFiles.has(file)){
    hrLoad??=createHRSourceLoader({imports:{...externals,'@/modules/expenses/server':load('src/modules/expenses/server.ts')},globals:{Date:Clock,Error}});
-   return hrLoad(file);
+   const result=hrLoad(file);
+   return file==='src/modules/hr/server.ts' && externals['@/services/employees'] ? {...result,...externals['@/services/employees']} : result;
   }
   if(cache.has(file))return cache.get(file);
   assert.ok(allowed.has(file)||['src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts','src/services/employees/manageSalaryAdvances.ts','src/services/employees/salary-advance-shops.ts','src/app/api/employees/advances/route.ts','src/app/api/sales/profit-summary/route.ts',legacyExpense,'src/services/expenses/types.ts','src/services/expenses/index.ts','src/app/api/expenses/route.ts','src/app/api/expenses/masters/[kind]/route.ts'].includes(file),`Unapproved expense dependency: ${file}`);
