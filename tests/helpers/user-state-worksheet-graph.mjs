@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import ts from 'typescript';
 import { userStateBefore } from './user-state-worksheet-history.mjs';
 const options = ts.parseJsonConfigFileContent(ts.readConfigFile('tsconfig.json', ts.sys.readFile).config, ts.sys, process.cwd()).options;
 export function userStateGraph(overrides = {}) {
   const host = { ...ts.sys, fileExists: f => Object.hasOwn(overrides, relative(process.cwd(), f)) || ts.sys.fileExists(f), directoryExists: d => Object.keys(overrides).some(f => resolve(f).startsWith(resolve(d) + '/')) || ts.sys.directoryExists(d) };
-  const all = [...new Set([...Object.keys(userStateBefore.productionHashes), ...Object.keys(overrides), ...Object.values(userStateBefore.moves).map(e=>e.to).filter(existsSync)])].filter(f=>/\.tsx?$/.test(f));
+  const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);
+  const all = [...new Set([...walk("src"),...Object.keys(userStateBefore.productionHashes), ...Object.keys(overrides), ...Object.values(userStateBefore.moves).map(e=>e.to).filter(existsSync)])].filter(f=>/\.tsx?$/.test(f));
   const cache = new Map();
   function deps(file, types) {
     const key = `${types}:${file}`; if (cache.has(key)) return cache.get(key);
@@ -21,6 +22,6 @@ export function userStateGraph(overrides = {}) {
     }visit(ast);cache.set(key,result);return result;
   }
   function trace(root, types, match) { const seen=new Set();function visit(file,path){if(seen.has(file))return;seen.add(file);if(match(file))return [...path,file];for(const dep of deps(file,types)){const p=visit(dep,[...path,file]);if(p)return p;}}return visit(root,[])??null; }
-  function modules(types) { const seen=new Set(),active=[],edges=new Set();function visit(file,from){assert.ok(!active.includes(file),`Cycle: ${[...active,file].join(' -> ')}`);const owner=/^src\/modules\/([^/]+)\//.exec(file)?.[1]??from;if(from&&owner!==from)edges.add(`${from}->${owner}`);const key=`${owner}:${file}`;if(seen.has(key))return;active.push(file);deps(file,types).forEach(dep=>visit(dep,owner));active.pop();seen.add(key);}all.filter(f=>f.startsWith('src/modules/')).forEach(f=>visit(f));assert.deepEqual([...edges].sort(),['shipments->orders']);return [...edges]; }
+  function modules(types) { const seen=new Set(),active=[],edges=new Set();function visit(file,from){assert.ok(!active.includes(file),`Cycle: ${[...active,file].join(' -> ')}`);const owner=/^src\/modules\/([^/]+)\//.exec(file)?.[1]??from;if(from&&owner!==from)edges.add(`${from}->${owner}`);const key=`${owner}:${file}`;if(seen.has(key))return;active.push(file);deps(file,types).forEach(dep=>visit(dep,owner));active.pop();seen.add(key);}all.filter(f=>f.startsWith('src/modules/')).forEach(f=>visit(f));assert.deepEqual([...edges].sort(),types?['hr->expenses','shipments->orders']:['shipments->orders']);return [...edges]; }
   return {all,deps,trace,modules};
 }

@@ -7,7 +7,7 @@ import { SALES_RECEIPT_HEADERS } from "@/modules/sales/infrastructure/google-she
 import { SALES_RECEIPT_ITEM_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-items/const";
 import { SALES_RECEIPT_PAYMENT_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-payments/const";
 import { SALES_RECEIPT_SYNC_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipt-syncs/const";
-import type { Expense } from "@/services/expenses/types";
+import type { Expense } from "@/modules/expenses/contracts";
 import type { SalesProfitCostOverride } from "@/modules/sales/contracts";
 
 export type GoogleSheetsDailySalesItemRow = {

@@ -4,7 +4,7 @@ import { DownOutlined, MoreOutlined, PlusOutlined, ReloadOutlined } from "@ant-d
 import { Alert, Button, ConfigProvider, DatePicker, Dropdown, Empty, Form, Input, InputNumber, Modal, Select, Spin, Typography } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useState } from "react";
-import type { Expense, ExpenseCategory, ExpenseShop } from "@/services/expenses";
+import type { Expense, ExpenseCategory, ExpenseShop } from "@/modules/expenses/contracts";
 import styles from "./expenses.module.css";
 
 const { Title, Text } = Typography;

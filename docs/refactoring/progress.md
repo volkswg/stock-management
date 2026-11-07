@@ -2,11 +2,11 @@
 
 ## Verified current state
 
-Starting baseline is merged PR29, main `57064008a0add0603e790f64983b797eaf4e92de`. Current source ownership is recorded in the [migration map](../architecture/migration-map.md); broader service extraction remains pending.
+Starting baseline is merged PR30, main `5c72e122b54d296cedc3d0f16a1e466128d63aaf`. Current ownership is in the [migration map](../architecture/migration-map.md).
 
-This branch completes Inventory StockAdjustmentsSheet, HR PayrollRecordsSheet, Expenses' shared RecordsSheet surface and six associated header arrays. The original generic RecordsSheet body moves into root infrastructure; Expenses aliases it to preserve subclass prototype/constructor identity. Inventory adjustment labels/DTOs move verbatim into its public contracts and the panel consumes that leaf, preventing a new browser-to-header dependency. No provider, registry ordering, financial algorithm, persistence path or schema changes.
+This branch completes the Expenses business layer: four exact public DTOs, six application operations, semantic persistence ports, deterministic validation/error identity, an adapter over existing worksheet/header owners, and named server/API composition. Legacy callables/types remain named forwards. HR advances gain a consumer-owned shop reader with explicit POST injection and a backward-compatible default; Sales consumes public Expense types and receives Expenses/shop data through route composition. There is no private cross-feature infrastructure edge or worksheet/provider/schema migration. Two Expenses erased browser debts are removed; the two inherited HR debts and payroll type cycle remain.
 
-The small `remaining-worksheets-before.json` witness captures only affected original sources. Existing immutable fixtures remain untouched. Historical guards reconcile the exact new moves/splits (including earlier employee-directory history) instead of accepting changed hashes. Shared offline loaders admit only the reviewed owner paths and schema leaves. New behavioral/identity/transport/schema/graph tests supplement existing Inventory/HR and historical regression coverage. Verification results are recorded in [verification](verification.md#remaining-worksheet-milestone).
+The limited `expenses-business-before.json` witness captures only affected original sources. Existing immutable fixtures stay byte-identical. Historical guards reverse exact new import/facade/injection changes before applying their older reconciliations. Restored-original graph negatives still prove the old aggregation paths; precise current expectations remove only the two source-backed browser debts. New tests compare actual original/current operations, HTTP, adapter flows, HR advances and Sales refunds/profit totals with synthetic dependencies. See [verification](verification.md#expenses-business-milestone) for final results and limitations.
 
 ## Merged implementation ledger
 
@@ -43,6 +43,7 @@ Counts below are the original Codex-local final reports, traced to the original 
 | [#27](https://github.com/volkswg/stock-management/pull/27) · `72204e095d4b1e9425eb4f573bbe23c620bc99a7` | Movement worksheet-schema prerequisite; direct session coupling removed, no worksheet relocation | 447 = 442 + 5 |
 | [#28](https://github.com/volkswg/stock-management/pull/28) · `48cf8d6d011544206cafa7ac35eeeafde5f22be9` | Inventory/Sales query dependency prerequisite | 452 = 447 + 5 |
 | [#29](https://github.com/volkswg/stock-management/pull/29) · `57064008a0add0603e790f64983b797eaf4e92de` | LINE user-state worksheet/header ownership | 458 = 452 + 6 |
+| [#30](https://github.com/volkswg/stock-management/pull/30) · `5c72e122b54d296cedc3d0f16a1e466128d63aaf` | Remaining Inventory/Expenses/HR worksheet ownership with shared constructor and browser prerequisites | 465 = 458 + 7 |
 
 Historical reports record successful baseline/final lint/typecheck and isolated builds with unchanged 23-page/35-API contracts and app-paths manifests. Later reports retain one unused shipmentRow import warning in `tests/shipments-read-seam.test.mjs:6`. Details, intermediate corrected failures, original limitations and precise baseline/head provenance remain in the immutable [original verification record](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/verification.md). Do not treat those past reports as substitutes for executing checks at a new base.
 

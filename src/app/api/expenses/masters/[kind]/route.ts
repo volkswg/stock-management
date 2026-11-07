@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { isRecord } from "@/features/backend/shared/utils";
-import { ExpenseError, listExpenseCategories, listExpenseShops, saveExpenseMaster } from "@/services/expenses";
+import { ExpenseError, listExpenseCategories, listExpenseShops, saveExpenseMaster } from "@/modules/expenses/server";
 export const runtime = "nodejs";
 type Context = { params: Promise<{ kind: string }> };
 function fail(error: unknown) { return NextResponse.json({ ok: false, error: error instanceof ExpenseError ? error.message : "Master data operation failed. Please retry." }, { status: error instanceof ExpenseError ? error.status : 500 }); }

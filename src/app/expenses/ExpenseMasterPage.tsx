@@ -1,7 +1,7 @@
 "use client";
 import { Alert, Button, Card, ConfigProvider, Empty, Form, Input, Modal, Select, Spin, Switch, Tag, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
-import type { ExpenseCategory, ExpenseShop } from "@/services/expenses";
+import type { ExpenseCategory, ExpenseShop } from "@/modules/expenses/contracts";
 import styles from "./expenses.module.css";
 type Row = ExpenseCategory | ExpenseShop;
 type Values = { name: string; active: boolean; loyverseAccountId?: string };

@@ -1,3 +1,5 @@
+import { expectedExpensesDebts } from "./helpers/expenses-business-history.mjs";
+import { expensesFiles, expensesNewFiles, assertExpensesHistory } from "./helpers/expenses-business-history.mjs";
 import { remainingFiles, remainingDestinations, assertRemainingHistory } from "./helpers/remaining-worksheet-history.mjs";
 import { userStateFiles, userStateDestinations, assertUserStateHistory } from "./helpers/user-state-worksheet-history.mjs";
 import { salesQueryFiles, salesQueryNewFiles, assertSalesQueryHistory } from "./helpers/inventory-sales-query-history.mjs";
@@ -22,8 +24,8 @@ test("original three HR worksheets retain headers, dynamic default/explicit rang
 test("six exact HR moves reconstruct original declarations/bytes; unique owners, all other production and earlier fixtures remain unchanged",async()=>{
  const {readFileSync,readdirSync}=await import("node:fs"),{hrWorksheetFiles,hrWorksheetDestinations,hrWorksheetHash,assertHrWorksheetHistory}=await import("./helpers/hr-worksheet-history.mjs");
  const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);
- for(const [file,hash]of Object.entries(hrWorksheetsBefore.productionHashes)){if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else assert.equal(hrWorksheetHash(readFileSync(file)),hash,file);}
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(hrWorksheetsBefore.productionHashes,f)).sort(),[...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...remainingDestinations,...userStateDestinations].sort());
+ for(const [file,hash]of Object.entries(hrWorksheetsBefore.productionHashes)){if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else assert.equal(hrWorksheetHash(readFileSync(file)),hash,file);}
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(hrWorksheetsBefore.productionHashes,f)).sort(),[...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(hrWorksheetsBefore.fixtureHashes))assert.equal(hrWorksheetHash(readFileSync(file)),hash,file);
  const sources=walk("src").filter(f=>f.endsWith(".ts")).map(f=>readFileSync(f,"utf8")).join("\n");
  for(const e of Object.values(hrWorksheetsBefore.moves))assert.equal((sources.match(new RegExp(`export ${e.to.endsWith("const.ts")?"const":"class"} ${e.export}\\b`,"g"))??[]).length,1,e.export);
@@ -90,5 +92,5 @@ test("exact HR lint/import allowlists and resolved consumer/browser graphs prese
  for(const client of Object.keys(hrWorksheetsBefore.productionHashes).filter(f=>/\.tsx?$/.test(f)&&/^\s*["']use client["']/.test(readFileSync(f,"utf8"))))for(const types of [false,true]){
   const seen=new Set(),leaves=new Set();function visit(file){if(seen.has(file))return;seen.add(file);const old=reverse.get(file)??file;if(Object.hasOwn(hrWorksheetsBefore.moves,old))leaves.add(old);deps(file,types).forEach(visit);}visit(client);if(leaves.size)actual.push({root:client,types,leaves:[...leaves].sort()});
  }
- assert.deepEqual(actual,hrWorksheetsBefore.browserBaseline);assert.equal(actual.length,4);assert.ok(actual.every(e=>e.types));assert.equal(hrWorksheetsBefore.operationalScripts.length,3);
+ assert.deepEqual(actual,expectedExpensesDebts(hrWorksheetsBefore.browserBaseline));assert.equal(actual.length,2);assert.ok(actual.every(e=>e.types));assert.equal(hrWorksheetsBefore.operationalScripts.length,3);
 });

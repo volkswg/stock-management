@@ -1,8 +1,9 @@
+import { createSalaryAdvanceShops } from "@/services/employees/salary-advance-shops";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { listEmployees } from "@/services/employees";
-import { listExpenseShops } from "@/services/expenses";
+import { listExpenseShops } from "@/modules/expenses/server";
 import { createSalaryAdvance, readSalaryLedger, recoveredAmount, SalaryAdvanceError, transitionSalaryAdvance, money } from "@/services/employees/manageSalaryAdvances";
 export const runtime = "nodejs";
 function service() { return createGoogleSheetsServiceFromConfig(getConfig()); }
@@ -15,7 +16,7 @@ export async function GET() {
   } catch (error) { return fail(error); }
 }
 export async function POST(request: Request) {
-  try { const advance = await createSalaryAdvance(service(), await request.json().catch(() => null)); return NextResponse.json({ ok: true, advance }, { status: 201 }); } catch (error) { return fail(error); }
+  try { const sheets = service(); const advance = await createSalaryAdvance(sheets, await request.json().catch(() => null), createSalaryAdvanceShops(sheets)); return NextResponse.json({ ok: true, advance }, { status: 201 }); } catch (error) { return fail(error); }
 }
 export async function PATCH(request: Request) {
   try { const advance = await transitionSalaryAdvance(service(), await request.json().catch(() => null)); return NextResponse.json({ ok: true, advance }); } catch (error) { return fail(error); }
