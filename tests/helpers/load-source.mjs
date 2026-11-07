@@ -1,3 +1,4 @@
+import { createHRSourceLoader } from "./hr-payroll-source.mjs";
 import { loadExpenseSource } from "./expenses-source.mjs";
 import { remainingBefore, expenseRecords } from "./remaining-worksheet-history.mjs";
 import { userStateBefore } from "./user-state-worksheet-history.mjs";
@@ -14,6 +15,7 @@ import { googleBefore } from "./google-infrastructure.mjs";
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
 export function loadSource(path, { imports = {}, globals = {} } = {}) {
+  if(["src/services/employees/manageSalaryAdvances.ts","src/services/employees/calculateEmployeePayroll.ts","src/services/employees/settleEmployeePayroll.ts"].includes(path)) return createHRSourceLoader({imports,globals})(path);
   if(path === "src/services/expenses/manageExpenses.ts") return loadExpenseSource(path,{imports,globals});
   const filename = resolve(path);
   const { outputText } = ts.transpileModule(readFileSync(filename, "utf8"), {

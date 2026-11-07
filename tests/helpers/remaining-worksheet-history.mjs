@@ -1,3 +1,4 @@
+import { restoreHRSource } from "./hr-payroll-history.mjs";
 import { restoreExpensesSource } from "./expenses-business-history.mjs";
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -13,9 +14,9 @@ export function assertRemainingHistory(file,expected){
  if(e.after){
   const split=remainingBefore.splits['src/services/stock-adjustments/types.ts'];
   const exact=file===split.contracts?e.source+'\n'+split.contractDeclarations:e.source.replace('"@/services/stock-adjustments/types"','"@/modules/inventory/contracts"');
-  assert.equal(e.after,exact,file);assert.equal(restoreExpensesSource(file,readFileSync(file,'utf8')),exact,file);return;
+  assert.equal(e.after,exact,file);assert.equal(restoreExpensesSource(file,restoreHRSource(file,readFileSync(file,'utf8'))),exact,file);return;
  }
- if(e.export){let restored=readFileSync(e.to,'utf8');for(const [a,b]of Object.entries(e.imports)){assert.equal(restored.split('"'+b+'"').length,2);restored=restored.replace('"'+b+'"','"'+a+'"');}assert.equal(restored,e.source,file);const owner=file.includes('/expenses/')?expenseRecords:e.to;assert.equal(restoreExpensesSource(file,readFileSync(file,'utf8')),`export { ${e.export} } from "@/${owner.slice(4,-3)}";\n`);}
- else{const declarations=e.names.map(name=>e.source.match(new RegExp('export const '+name+' = .*;\\n'))[0]);assert.equal(readFileSync(e.to,'utf8'),declarations.join(''));if(e.contracts){assert.equal(readFileSync(e.contracts,'utf8'),remainingBefore.edits[e.contracts].source+'\n'+e.contractDeclarations);assert.equal(restoreExpensesSource(file,readFileSync(file,'utf8')),`export { ADJUSTMENT_HEADERS } from "@/${e.to.slice(4,-3)}";\nexport { ADJUSTMENT_REASONS } from "@/modules/inventory/contracts";\nexport type { AdjustmentReason, StockAdjustment, AdjustmentEmployee } from "@/modules/inventory/contracts";\n`);return;}
- let original=e.source;for(const d of declarations)original=original.replace(d,'');const alias='@/'+e.to.slice(4,-3);const prefix=(file.includes('manageSalaryAdvances')?`import { ${e.names.join(', ')} } from "${alias}";\n`:'')+`export { ${e.names.join(', ')} } from "${alias}";\n`;assert.equal(restoreExpensesSource(file,readFileSync(file,'utf8')),prefix+original,file);}
+ if(e.export){let restored=readFileSync(e.to,'utf8');for(const [a,b]of Object.entries(e.imports)){assert.equal(restored.split('"'+b+'"').length,2);restored=restored.replace('"'+b+'"','"'+a+'"');}assert.equal(restored,e.source,file);const owner=file.includes('/expenses/')?expenseRecords:e.to;assert.equal(restoreExpensesSource(file,restoreHRSource(file,readFileSync(file,'utf8'))),`export { ${e.export} } from "@/${owner.slice(4,-3)}";\n`);}
+ else{const declarations=e.names.map(name=>e.source.match(new RegExp('export const '+name+' = .*;\\n'))[0]);assert.equal(readFileSync(e.to,'utf8'),declarations.join(''));if(e.contracts){assert.equal(readFileSync(e.contracts,'utf8'),remainingBefore.edits[e.contracts].source+'\n'+e.contractDeclarations);assert.equal(restoreExpensesSource(file,restoreHRSource(file,readFileSync(file,'utf8'))),`export { ADJUSTMENT_HEADERS } from "@/${e.to.slice(4,-3)}";\nexport { ADJUSTMENT_REASONS } from "@/modules/inventory/contracts";\nexport type { AdjustmentReason, StockAdjustment, AdjustmentEmployee } from "@/modules/inventory/contracts";\n`);return;}
+ let original=e.source;for(const d of declarations)original=original.replace(d,'');const alias='@/'+e.to.slice(4,-3);const prefix=(file.includes('manageSalaryAdvances')?`import { ${e.names.join(', ')} } from "${alias}";\n`:'')+`export { ${e.names.join(', ')} } from "${alias}";\n`;assert.equal(restoreExpensesSource(file,restoreHRSource(file,readFileSync(file,'utf8'))),prefix+original,file);}
 }

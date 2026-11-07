@@ -6,53 +6,8 @@ import {
   type IGoogleSheetsService,
 } from "@/externals/google/sheet";
 
-export type EmployeeStatus = "active" | "inactive";
-export type EmployeeCompensationType = "daily" | "monthly";
-export type EmployeeCommissionType = "none" | "sales_bucket";
-
-export type Employee = {
-  id: string;
-  name: string;
-  phone: string;
-  status: EmployeeStatus;
-  hiredDate: string;
-  terminatedDate: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  compensation: EmployeeCompensation | null;
-};
-
-export type EmployeeCompensation = {
-  employeeId: string;
-  baseSalary: number;
-  commission: number;
-  createdAt: string;
-  updatedAt: string;
-  updatedBy: string;
-  effectiveFrom: string;
-  compensationType: EmployeeCompensationType;
-  commissionType: EmployeeCommissionType;
-  commissionBucketSales: number;
-  commissionBucketAmount: number;
-  commissionRoundupThreshold: number;
-};
-
-export type EmployeeInput = {
-  name: string;
-  phone: string;
-  status: EmployeeStatus;
-  hiredDate: string;
-  terminatedDate: string;
-  baseSalary: number;
-  commission: number;
-  compensationEffectiveFrom: string;
-  compensationType: EmployeeCompensationType;
-  commissionType: EmployeeCommissionType;
-  commissionBucketSales: number;
-  commissionBucketAmount: number;
-  commissionRoundupThreshold: number;
-};
+import type { EmployeeCompensationType, EmployeeCommissionType, Employee, EmployeeCompensation, EmployeeInput } from "@/modules/hr/contracts";
+export type { EmployeeStatus, EmployeeCompensationType, EmployeeCommissionType, Employee, EmployeeCompensation, EmployeeInput } from "@/modules/hr/contracts";
 
 export async function listEmployees({
   googleSheetsService,

@@ -1,3 +1,4 @@
+import { createHRSourceLoader, hrSourceFiles } from "./hr-payroll-source.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {posix} from 'node:path';
@@ -9,9 +10,15 @@ export const expensesBefore=JSON.parse(readFileSync('tests/fixtures/expenses-bus
 export const legacyExpense='src/services/expenses/manageExpenses.ts';
 export function expenseGraph({original=false,service,events=[],overrides={},externals={}}={}){
  const allowed=new Set(['contracts.ts','server.ts','domain/rules.ts','application/manage-expenses.ts','infrastructure/google-sheets/expense-store.ts','infrastructure/google-sheets/expenses/const.ts'].map(f=>'src/modules/expenses/'+f));
+ let hrLoad;
  const cache=new Map(),headers=loadSource('src/modules/expenses/infrastructure/google-sheets/expenses/const.ts');
  class Clock extends Date{constructor(...args){super(...(args.length?args:['2026-11-07T00:00:00Z']));if(!args.length)events.push(['clock']);}}
- function load(file){if(cache.has(file))return cache.get(file);
+ function load(file){
+  if(!original && hrSourceFiles.has(file)){
+   hrLoad??=createHRSourceLoader({imports:{...externals,'@/modules/expenses/server':load('src/modules/expenses/server.ts')},globals:{Date:Clock,Error}});
+   return hrLoad(file);
+  }
+  if(cache.has(file))return cache.get(file);
   assert.ok(allowed.has(file)||['src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts','src/services/employees/manageSalaryAdvances.ts','src/services/employees/salary-advance-shops.ts','src/app/api/employees/advances/route.ts','src/app/api/sales/profit-summary/route.ts',legacyExpense,'src/services/expenses/types.ts','src/services/expenses/index.ts','src/app/api/expenses/route.ts','src/app/api/expenses/masters/[kind]/route.ts'].includes(file),`Unapproved expense dependency: ${file}`);
   const source=overrides[file]??(original?expensesBefore.files[file]?.source:undefined)??readFileSync(file,'utf8'),exports={};cache.set(file,exports);
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;

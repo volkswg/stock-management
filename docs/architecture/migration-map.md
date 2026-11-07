@@ -1,6 +1,6 @@
 # Current ownership and remaining legacy
 
-Base verified at merged PR30, main `5c72e122b54d296cedc3d0f16a1e466128d63aaf`. Worksheet/header owners from PR30 remain unchanged. This branch gives Expenses its public contracts, business application, consumer-shaped persistence ports, Sheets adapter and named server entrypoint. Legacy type and callable paths retain explicit named compatibility forwards.
+Base verified at merged PR31, main `b3b55a806c7dcf2fe636b10f56d5db90ff19ebc3`. This branch migrates HR payroll, advances and immutable settlements into feature contracts/domain/application/infrastructure with named payroll server composition. Expenses and all worksheet/header owners remain unchanged.
 
 | Slice | Actual owner now | Compatibility / unfinished work |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ Base verified at merged PR30, main `5c72e122b54d296cedc3d0f16a1e466128d63aaf`. W
 | Shared Google | Root `infrastructure/persistence/google-sheets` auth/JWT/client/base/constants/generic types; `infrastructure/files/google-drive` provider/factory/types | Old externals leaves forward. Aggregate GoogleSheetsService, config factory and both Sheets indexes remain legacy composition |
 | Sales | Five worksheet/header pairs in own infrastructure | Sync/report/profit/API/UI and aggregate consumers remain legacy |
 | Inventory | Two pure DTOs, employee-directory port/application, StockCountsSheet/header, MovementSheet, StockAdjustmentsSheet/header and browser-safe adjustment contracts | Stock counts/adjustments/movements algorithms, UI and most services remain legacy |
-| HR | Pure directory DTO, employee reader/public query, three employee/compensation/timesheet worksheet/header pairs, PayrollRecordsSheet and advance/settlement headers | Advance, settlement/lifecycle/use-case extraction remains pending |
+| HR | Pure employee/compensation/attendance/payroll/advance contracts, original attendance enum, salary/commission/deduction rules, financial applications/ports, salary store and payroll-server entrypoint, plus existing directory/worksheet owners | Employee lifecycle/compensation/attendance business workflows and their read implementations remain legacy; explicit reader composition is outside the feature core |
 | LINE workflows | UserStateSheet and its mutable header under own infrastructure | Session/journey/webhook business implementations remain legacy |
 | Expenses | Public Expense/ExpenseShop/ExpenseCategory/ExpenseInput contracts, application operations/ports/rules, Sheets adapter, named server composition and existing worksheets/headers | Old services are named compatibility forwards; aggregate registry remains legacy composition |
 | Workspace | Target ownership defined | App shell remains until scoped work |
@@ -55,7 +55,7 @@ No physical worksheet implementation remains in legacy externals. StockAdjustmen
 
 Headers remain separate mutable arrays; default ranges, schemas and persistence paths do not change. Old service type/header exports alias their physical owner. Inventory's existing adjustment reasons/DTOs move verbatim into its public contracts so StockAdjustmentsPanel reaches no worksheet implementation or header leaf. Aggregate GoogleSheetsService, factory and indexes remain legacy server composition, with original construction/check order and export surfaces.
 
-The HR directory reader still resolves its old employee-header path to HR's owner. Business/use-case migration, payroll's existing erased cycle and four legacy erased browser debts remain separately scoped work.
+The HR directory reader still resolves its old employee-header path to HR's owner. Payroll/advance/settlement use cases and their contract-cycle/browser prerequisites are now owned as described below; broader employee/attendance business workflows remain scoped work.
 
 ## Expenses business ownership and consumers
 
@@ -65,7 +65,17 @@ The HR directory reader still resolves its old employee-header path to HR's owne
 
 Expenses routes and Sales profit composition call the named Expenses server entrypoint. Sales' query consumes only the public Expense type and receives Expenses data through its existing input; profit/refund algorithms are untouched. HR's SalaryAdvanceShops port consumes only the public ExpenseShop identity/active fields. The advance POST route injects its reader; the old two-argument callable retains a default adapter in explicit legacy composition outside both feature cores. No HR/Sales implementation imports legacy Expenses services or private Expenses infrastructure.
 
-Two old erased browser debts (Expenses and ExpenseMasterPage) are closed. Salary advances/payroll's two erased paths and their pre-existing type cycle remain. Broader HR/Sales service extraction and aggregate retirement remain pending.
+Two old erased browser debts (Expenses and ExpenseMasterPage) are closed. This HR milestone subsequently removes salary advances/payroll’s two erased paths and their type cycle. Broader HR/Sales service extraction and aggregate retirement remain pending.
+
+## HR financial ownership and reader composition
+
+`modules/hr/contracts.ts` owns SalaryAdvance, AdvanceDeduction, PayrollSettlement, EmployeePayroll, EmployeePayrollDailyCommission and their existing employee/compensation/attendance DTO dependencies verbatim. The original EmployeeTimesheetStatus enum has one canonical object here; legacy paths retain named type/value forwards. SalaryAdvancesPage and payrollPdf use this pure leaf, removing both old HR browser paths. The mutual legacy Payroll/Advance file dependency is gone.
+
+`domain/salary-rules.ts` owns original validation/error/money/recovery/deduction functions. `domain/payroll-calculation.ts` contains the original numerical body and deterministic supplied-date helpers. Applications orchestrate payroll, salary reads/mutations and immutable settlements through narrow salary, employee, compensation, attendance and Sales projection ports. `infrastructure/google-sheets/salary-store.ts` uses existing HR worksheets/headers, retains exact salary header recovery/initialization and serializes the original RAW writes; revision hashing is an HR adapter. No rows/ranges/providers/config enter application/domain.
+
+`payroll-server.ts` exposes named operations and injects the clock/hash/store. It is separate from the existing directory server entrypoint. `services/employees/payroll-composition.ts` is explicit, lazy compatibility composition outside the feature core: it adapts existing employee/compensation/attendance reads and the direct Sales dashboard query to HR-owned ports. APIs inject those readers; legacy callables preserve original signatures, including PR31's optional SalaryAdvanceShops reader. This bridge is not a feature ownership firewall and is never imported by HR core. Original read initialization/order and financial behavior remain intact.
+
+Salary mapping and settlement views retain coercion/error phases. Duplicate advance updates remain sequential and nontransactional. Settlement fields are evaluated after preparation and sheet/method lookup as before; snapshots remain immutable and size/revision/idempotency checks are unchanged. Aggregate registry and legacy employee/attendance business operations remain for a separately audited milestone. Current full-source runtime/type graphs have no file cycles; protected module directions remain Shipments→Orders plus the existing erased HR→Expenses public contract edge.
 
 ## Compatibility retirement gates
 

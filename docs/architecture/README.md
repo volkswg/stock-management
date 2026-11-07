@@ -1,6 +1,6 @@
 # Architecture guide
 
-Base verified at merged PR30, main `5c72e122b54d296cedc3d0f16a1e466128d63aaf`. This branch migrates the Expenses business layer, adds its public browser contracts and cleans up the actual HR/Sales consumers. Worksheet ownership is already complete and is unchanged.
+Base verified at merged PR31, main `b3b55a806c7dcf2fe636b10f56d5db90ff19ebc3`. This branch completes the HR payroll/advance/settlement architecture milestone. Expenses and worksheet ownership are unchanged. The inherited payroll type cycle and the two remaining HR browser paths are removed.
 
 | Read for | Canonical document |
 | --- | --- |
@@ -13,7 +13,7 @@ Base verified at merged PR30, main `5c72e122b54d296cedc3d0f16a1e466128d63aaf`. T
 | Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
 | Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
 
-Orders and Shipment browser/server seams remain as recorded in the map. All existing worksheet implementations now have feature or shared transport owners. StockAdjustmentsSheet belongs to Inventory; PayrollRecordsSheet belongs to HR. Expenses owns ledger/category/shop headers and exposes the shared RecordsSheet constructor. Its generic read/write implementation lives in root Google infrastructure, preserving the original superclass identity for all three consumers. Expenses now owns listing, saves, soft deletion, shop/category reads and master operations through application ports, a Sheets adapter and named server composition. Legacy facades, aggregate Sheets composition and other feature workflows remain.
+Orders and Shipment browser/server seams remain as recorded in the map. All existing worksheet implementations now have feature or shared transport owners. StockAdjustmentsSheet belongs to Inventory; PayrollRecordsSheet belongs to HR. Expenses owns ledger/category/shop headers and exposes the shared RecordsSheet constructor. Its generic read/write implementation lives in root Google infrastructure, preserving the original superclass identity for all three consumers. Expenses now owns listing, saves, soft deletion, shop/category reads and master operations through application ports, a Sheets adapter and named server composition. HR now owns pure employee/payroll/advance contracts, financial domain rules, payroll/advance/settlement applications, salary persistence and named payroll server composition. Explicit injected readers keep existing employee/compensation/attendance/Sales read implementations outside the migrated core. Legacy facades, aggregate Sheets composition and other feature workflows remain.
 
 ## Documentation maintenance
 

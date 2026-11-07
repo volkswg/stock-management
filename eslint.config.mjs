@@ -1,3 +1,4 @@
+import { hrPayrollBoundaries } from "./eslint/hr-payroll-boundaries.mjs";
 import { expensesBoundaries } from "./eslint/expenses-boundaries.mjs";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -27,6 +28,7 @@ const eslintConfig = defineConfig([
   ...worksheetBoundaries,
   ...employeeDirectoryBoundaries,
   ...expensesBoundaries,
+  ...hrPayrollBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

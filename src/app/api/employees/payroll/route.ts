@@ -1,8 +1,8 @@
-import { payrollRevision } from "@/services/employees/settleEmployeePayroll";
+import { payrollRevision, calculateEmployeePayroll } from "@/modules/hr/payroll-server";
+import { createPayrollReaders } from "@/services/employees/payroll-composition";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { calculateEmployeePayroll } from "@/services/employees";
 
 export const runtime = "nodejs";
 
@@ -16,8 +16,10 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
 
   try {
+    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
     const payroll = await calculateEmployeePayroll({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      googleSheetsService,
+      readers: createPayrollReaders(googleSheetsService),
       month,
     });
     return NextResponse.json({ ok: true, month, payroll: payroll.map(record => ({ ...record, revision: payrollRevision(record) })) });
