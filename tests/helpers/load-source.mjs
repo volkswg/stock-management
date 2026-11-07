@@ -1,3 +1,4 @@
+import { remainingBefore, expenseRecords } from "./remaining-worksheet-history.mjs";
 import { userStateBefore } from "./user-state-worksheet-history.mjs";
 import { inventoryWorksheetsBefore } from "./inventory-worksheet-history.mjs";
 import { hrWorksheetsBefore } from "./hr-worksheet-history.mjs";
@@ -32,8 +33,8 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     ...globals,
     require: (specifier) => {
       // Only the reviewed old provider forwards may follow their single new owner.
-      const move = userStateBefore.moves[path] ?? inventoryWorksheetsBefore.moves[path] ?? hrWorksheetsBefore.moves[path] ?? salesWorksheetsBefore.moves[path] ?? worksheetBefore.moves[path] ?? googleBefore.moves[path];
-      if (move && specifier === "@/" + move.to.slice(4, -3)) {
+      const move = remainingBefore.moves[path] ?? userStateBefore.moves[path] ?? inventoryWorksheetsBefore.moves[path] ?? hrWorksheetsBefore.moves[path] ?? salesWorksheetsBefore.moves[path] ?? worksheetBefore.moves[path] ?? googleBefore.moves[path];
+      if (move && (specifier === "@/" + move.to.slice(4, -3) || (path.endsWith("/expenses/RecordsSheet.ts") && specifier === "@/" + expenseRecords.slice(4,-3)))) {
         const translated = new Proxy({}, {
           getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
           get: (_, key) => {
@@ -44,6 +45,9 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
         });
         return loadSource(move.to, { imports: translated, globals });
       }
+      const split=remainingBefore.splits[path];
+      if(split?.contracts && specifier === "@/modules/inventory/contracts" && !Object.hasOwn(imports,specifier)) return loadSource(split.contracts);
+      if(split && specifier === "@/"+split.to.slice(4,-3) && !Object.hasOwn(imports,specifier)) return loadSource(split.to);
       if (!Object.hasOwn(imports, specifier)) {
         throw new Error(`Unstubbed dependency ${specifier} in ${path}`);
       }

@@ -1,0 +1,1 @@
+export const ADJUSTMENT_HEADERS = ["id", "accountId", "shopName", "date", "direction", "reason", "employeeId", "employeeName", "quantity", "itemDescription", "photoUrl", "note", "reversesId", "replacesId", "createdAt", "createdBy", "notInLoyverse"];

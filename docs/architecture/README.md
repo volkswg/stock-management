@@ -1,6 +1,6 @@
 # Architecture guide
 
-Base ownership verified against merged main `48cf8d6d011544206cafa7ac35eeeafde5f22be9` (PR28); this branch moves only the LINE UserStateSheet and its mutable headers after the PR27/28 dependency prerequisites. This guide separates implemented slices from remaining work; it does not claim the repository fully conforms to the target architecture.
+Base ownership verified against merged PR29, main `57064008a0add0603e790f64983b797eaf4e92de`. This branch completes the remaining Inventory, Expenses and HR worksheet ownership milestone, including the shared row transport and browser-contract prerequisites. The map distinguishes actual ownership from remaining service extraction.
 
 | Read for | Canonical document |
 | --- | --- |
@@ -13,7 +13,7 @@ Base ownership verified against merged main `48cf8d6d011544206cafa7ac35eeeafde5f
 | Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
 | Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
 
-Orders contracts/UI/list/simple-create/detail seams and Shipment contracts/UI/core server seams are implemented. Shared Google transports and sixteen Orders/Shipment/Sales/HR/Inventory/LINE worksheet classes have physical owners. Legacy facades, aggregate Sheets composition, other feature workflows and worksheets remain. PR23 delivered the Inventory employee-directory prerequisite and PR25 moved the three HR core worksheet/header pairs. PR26 moved only StockCountsSheet, its headers and MovementSheet. PR27 detached movement schemas from session state and PR28 isolated the Inventory Sales query. User-state persistence now has a LINE-owned physical class/header; legacy forwards and business consumers remain. See the map and roadmap before choosing a slice.
+Orders and Shipment browser/server seams remain as recorded in the map. All existing worksheet implementations now have feature or shared transport owners. StockAdjustmentsSheet belongs to Inventory; PayrollRecordsSheet belongs to HR. Expenses owns ledger/category/shop headers and exposes the shared RecordsSheet constructor. Its generic read/write implementation lives in root Google infrastructure, preserving the original superclass identity for all three consumers. Legacy facades, aggregate Sheets composition and broader feature workflows remain.
 
 ## Documentation maintenance
 

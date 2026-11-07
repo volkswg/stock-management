@@ -13,7 +13,7 @@ Apply these rules to new and migrated code. `services`, `externals` and `feature
 | `modules/<feature>/infrastructure` | Port implementations, feature worksheets/headers and row/response mapping | Duplicated generic transports or other features' private adapters |
 | `modules/<feature>/server.ts` | Guarded, explicit named server composition | Browser exports or broad all-layer barrels |
 | `modules/<feature>/ui` | Components/hooks, co-located CSS, formatters/PDFs and same-origin HTTP clients | Config, credentials, SDK/provider IO, server/application implementation imports |
-| `infrastructure/persistence/google-sheets` | Shared Sheets client/base/constants/types and Google auth/JWT plumbing | Feature rules, worksheet schema or aggregate feature registry |
+| `infrastructure/persistence/google-sheets` | Shared Sheets client/base/row delegates/constants/types and Google auth/JWT plumbing | Feature rules, worksheet schema or aggregate feature registry |
 | `infrastructure/files/google-drive` | Drive provider/factory/protocol types, using shared Google auth | Order/movement policy |
 | Future `infrastructure/external/{line,loyverse}` | Provider HTTP/signature protocols after scoped migration | Journey decisions and business calculations |
 | `shared/{ui,lib,types}` | Proven generic reuse, small explicit utilities/value contracts | Feature dumping ground, config/infrastructure/module/legacy dependencies |
