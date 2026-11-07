@@ -29,6 +29,7 @@ export function hrPayrollGraph({original=false,events=[],service,employees=[],co
    if(spec==='./manageEmployees')return realReaders?load('src/services/employees/manageEmployees.ts'):employeeFunctions;
    if(spec==='@/services/employees')return {...employeeFunctions,...load(calculationFile)};
    if(spec==='./manageEmployeeTimesheets')return realReaders?load('src/services/employees/manageEmployeeTimesheets.ts'):timesheetFunctions;
+   if(spec==='@/modules/sales/server')return {createSalesDashboardReader:service=>({readSales:input=>salesFunctions.getGoogleSheetsSalesDashboard({...input,googleSheetsService:service})})};
    if(spec==='@/services/sales'||spec==='@/services/sales/getGoogleSheetsDailySales')return salesFunctions;
    if(spec==='@/modules/expenses/server')return {listExpenseShops:()=>shops.listShops()};
    if(spec==='./salary-advance-shops'||spec==='@/services/employees/salary-advance-shops')return {createSalaryAdvanceShops:()=>shops};

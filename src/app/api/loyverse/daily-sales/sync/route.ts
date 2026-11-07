@@ -3,7 +3,7 @@ import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { createLoyverseAccountsFromConfig } from "@/externals/loyverse";
 import { isRecord } from "@/features/backend/shared/utils";
-import { syncLoyverseDailySales } from "@/services/sales";
+import { syncLoyverseDailySales } from "@/modules/sales/server";
 
 export const runtime = "nodejs";
 

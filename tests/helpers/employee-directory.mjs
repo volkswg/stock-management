@@ -1,3 +1,4 @@
+import { inventoryOwners } from "./inventory-source.mjs";
 import { completionNewFiles } from "./hr-application-history.mjs";
 import {readFileSync} from "node:fs";
 import {resolve,relative} from "node:path";
@@ -10,7 +11,7 @@ export const directoryNewFiles=["src/modules/inventory/contracts.ts","src/module
 export class DirectoryClock extends Date{constructor(...args){super(args.length?args[0]:"2026-11-06T12:00:00.000Z");}}
 export function directoryGraph({original=false,service,events=[],globals={}}={}){
  const cache=new Map(),options=ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json",ts.sys.readFile).config,ts.sys,process.cwd()).options;
- const allowed=new Set([...completionNewFiles,"src/modules/hr/application/ports/payroll.ts","src/modules/hr/infrastructure/google-sheets/employees/const.ts","src/modules/hr/infrastructure/google-sheets/employee-compensations/const.ts","src/modules/hr/infrastructure/google-sheets/employee-timesheets/const.ts","src/modules/inventory/infrastructure/google-sheets/stock-adjustments/const.ts",directoryLegacy,"src/services/stock-adjustments/types.ts","src/app/api/stock-adjustments/route.ts",...directoryNewFiles]);
+ const allowed=new Set([...inventoryOwners,...completionNewFiles,"src/modules/hr/application/ports/payroll.ts","src/modules/hr/infrastructure/google-sheets/employees/const.ts","src/modules/hr/infrastructure/google-sheets/employee-compensations/const.ts","src/modules/hr/infrastructure/google-sheets/employee-timesheets/const.ts","src/modules/inventory/infrastructure/google-sheets/stock-adjustments/const.ts",directoryLegacy,"src/services/stock-adjustments/types.ts","src/app/api/stock-adjustments/route.ts",...directoryNewFiles]);
  const headers=loadSource("src/externals/google/sheet/sheets/employees/const.ts");
  function load(file){if(cache.has(file))return cache.get(file);if(!allowed.has(file))throw Error(`Unapproved directory dependency ${file}`);
   const source=original?(directoryBefore.files[file]?.source??(file==="src/app/api/stock-adjustments/route.ts"?directoryBefore.routeSource:readFileSync(file,"utf8"))):readFileSync(file,"utf8");
@@ -18,6 +19,7 @@ export function directoryGraph({original=false,service,events=[],globals={}}={})
   const context=vm.createContext({exports,URL,Error,Date:DirectoryClock,Request,Response,console:{error(){}},fetch:()=>{throw Error("Live IO forbidden");},...globals,require(specifier){
    if(specifier==="node:crypto")return {randomUUID:()=>{throw Error("No directory ID generation expected");}};
    if(specifier==="server-only")return {};
+   if(specifier==="@/modules/sales/server")return {createSalesDashboardReader:()=>({readSales:()=>{throw Error("No Sales read expected");}})};
    if(specifier==="next/server")return {NextResponse:Response};
    if(specifier==="@/config")return {getConfig:()=>{events.push(["config"]);return {loyverse:{accounts:[{id:"shop",shopName:"Shop"}]}};}};
    if(specifier==="@/externals/google/sheet")return {...headers,createGoogleSheetsServiceFromConfig:()=>{events.push(["factory"]);return service;}};

@@ -1,13 +1,17 @@
+import {inventoryApplicationChanged,assertInventoryApplicationHistory}from "./inventory-application-history.mjs";
+import { restoreSalesApplicationSource, salesApplicationFiles, salesApplicationBefore } from "./sales-application-history.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 export const expensesHistory=JSON.parse(readFileSync('tests/fixtures/expenses-business-before.json','utf8'));
-export const expensesFiles=new Set(Object.keys(expensesHistory.files));
+export const expensesFiles=new Set([...Object.keys(expensesHistory.files),...Object.keys(salesApplicationBefore.files),...Object.keys(salesApplicationBefore.edits),...inventoryApplicationChanged]);
 export const expensesNewFiles=[
+ ...salesApplicationFiles,
  'src/modules/expenses/contracts.ts','src/modules/expenses/server.ts','src/modules/expenses/domain/rules.ts','src/modules/expenses/application/manage-expenses.ts','src/modules/expenses/application/ports/expense-store.ts','src/modules/expenses/infrastructure/google-sheets/expense-store.ts','src/modules/hr/application/ports/salary-advance-shops.ts','src/services/employees/salary-advance-shops.ts',
 ];
 const hash=s=>createHash('sha256').update(s).digest('hex');
 export function restoreExpensesSource(file,source=readFileSync(file,'utf8')){
+ source=restoreSalesApplicationSource(file,source);
  const e=expensesHistory.files[file];if(!e)return source;assert.equal(hash(e.source),e.sha256,file);let expected=e.source;
  if(file==='src/services/expenses/types.ts'){
   const i=expected.indexOf('export type Expense');assert.equal(readFileSync('src/modules/expenses/contracts.ts','utf8'),expected.slice(i));expected=expected.slice(0,i)+'export type { Expense, ExpenseCategory, ExpenseShop, ExpenseInput } from "@/modules/expenses/contracts";\n';
@@ -20,6 +24,7 @@ export function restoreExpensesSource(file,source=readFileSync(file,'utf8')){
  assert.equal(source,expected,file);return e.source;
 }
 export function assertExpensesHistory(file,expected){
+ if(inventoryApplicationChanged.has(file))return assertInventoryApplicationHistory(file,expected);
  let source=restoreExpensesSource(file);
  if(hash(source)!==expected){
   const remaining=JSON.parse(readFileSync('tests/fixtures/remaining-worksheets-before.json','utf8')).splits[file];

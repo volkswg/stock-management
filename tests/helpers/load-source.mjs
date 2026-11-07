@@ -1,3 +1,5 @@
+import { loadInventorySource } from "./inventory-source.mjs";
+import { loadSalesSource } from "./sales-source.mjs";
 import { createHRSourceLoader } from "./hr-payroll-source.mjs";
 import { loadExpenseSource } from "./expenses-source.mjs";
 import { remainingBefore, expenseRecords } from "./remaining-worksheet-history.mjs";
@@ -15,6 +17,8 @@ import { googleBefore } from "./google-infrastructure.mjs";
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
 export function loadSource(path, { imports = {}, globals = {} } = {}) {
+  if(["src/services/stock-adjustments/manageStockAdjustments.ts","src/services/stock-counts/manageStockCounts.ts","src/services/movements/manageMovements.ts","src/services/movements/worksheet-schema.ts","src/features/backend/line/services/movements/utils.ts"].includes(path)) return loadInventorySource(path,{imports,globals});
+  if(path.startsWith("src/services/sales/")) return loadSalesSource(path,{imports,globals});
   if(["src/services/employees/manageSalaryAdvances.ts","src/services/employees/calculateEmployeePayroll.ts","src/services/employees/settleEmployeePayroll.ts"].includes(path)) return createHRSourceLoader({imports,globals})(path);
   if(path === "src/services/expenses/manageExpenses.ts") return loadExpenseSource(path,{imports,globals});
   const filename = resolve(path);
@@ -56,6 +60,8 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
       const split=remainingBefore.splits[path];
       if(split?.contracts && specifier === "@/modules/inventory/contracts" && !Object.hasOwn(imports,specifier)) return loadSource(split.contracts);
       if(split && specifier === "@/"+split.to.slice(4,-3) && !Object.hasOwn(imports,specifier)) return loadSource(split.to);
+      if(path.startsWith("src/app/api/") && specifier === "@/modules/inventory/server") { const old=["@/services/movements","@/services/stock-counts","@/services/stock-adjustments/manageStockAdjustments"].filter(key=>Object.hasOwn(imports,key)); if(old.length) return Object.assign({},...old.map(key=>imports[key])); }
+      if(path.startsWith("src/app/api/") && specifier === "@/modules/sales/server" && Object.hasOwn(imports,"@/services/sales")) return imports["@/services/sales"];
       if (!Object.hasOwn(imports, specifier)) {
         throw new Error(`Unstubbed dependency ${specifier} in ${path}`);
       }

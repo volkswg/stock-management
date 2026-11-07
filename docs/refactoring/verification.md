@@ -253,3 +253,22 @@ One fresh baseline and one final build used source-only copies excluding app env
 Seven new operation/HTTP tests exercise actual old/new employee creation, status/compensation updates and partial writes; history/effective-date/tie/future decisions; half/full attendance, leave/conflicts, open shifts, updates and repeated clock-out; pending append/failure propagation; argument getter order; all eight HR HTTP routes, malformed JSON, 400/404/409/500 translation; and real existing Sales refund queries through payroll and settlement success/retry/later-month blocking. Three architecture tests verify strict legacy/index/public function, enum and error identities/export order, original parser/header/date bodies, semantic ports, complete runtime/type graphs and real flat-config bypass negatives. Existing financial, historical and other-feature guards stay enabled.
 
 Current runtime/type file cycles remain empty. HR application/domain has no legacy/config/provider/other-feature private dependency. Browser graphs remain clean in both modes. Runtime module direction remains Shipments→Orders, with only the existing erased HR→Expenses public-contract edge. Payroll uses HR-owned workforce readers; only concrete Sales composition remains in its compatibility bridge. Necessary aliases/index/service-shaped signatures and the aggregate registry remain for the PR36 audit. No material regression or scope blocker remains; inherited concurrency/nontransactional-write limits are preserved. External CI, real provider permissions and browser visuals are not claimed verified. Recommend SA review; the next large milestone is Sales business ownership and its public payroll-dashboard seam, without automatically proceeding to it.
+
+## Sales + Inventory business completion
+
+Verified base: PR33/main `9ab9f2095342c66f30acf9612d79ed92063b8597`. Branch `refactor/sales-inventory-application`. Node/dependencies are the existing environment; all evidence is Codex-local, synthetic and offline.
+
+| Check | Pristine baseline | Final |
+| --- | --- | --- |
+| npm test | 500 pass, zero failures/skips | 510 = 500 inherited + 10 new; zero failures/skips |
+| npm run lint | Exit 0, inherited unused shipmentRow warning | Exit 0, same warning only |
+| npm run typecheck | Pass in pristine isolated copy | Pass, including public/legacy full-service callable fixtures |
+| Isolated credential-free build | Pass, /tmp/refactor-chain-baseline | Pass, /tmp/sales-inventory-final |
+| Page/API source contracts | 23/35 | Unchanged original fixture |
+| app-paths manifest | Original expected SHA-256 | Byte-identical; `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e` |
+
+Both builds exclude application env files, reuse existing dependencies and run `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. The final copy matches all 422 production source files, excluding generated TypeScript cache artifacts. All inherited fixtures are unchanged. No live providers/data, operational scripts, merge or deployment.
+
+Original/current executable comparisons cover daily/dashboard/profit/refunds, payroll integration, sync projections/IDs/retries/live counts/partial writes, cost overrides/status, movement image/item/delivery/delete/retry behavior, monthly balances/variance/count writes, adjustment integrity/reversals/replacements and HTTP errors. A rejection-order regression required preserving native composed report promises instead of adding an async wrapper. Historical overlays retain original negative/count evidence; separate actual-current runtime/type DAG, core-port/private-import and browser checks pass.
+
+Runtime module edges are Inventory→HR, Inventory→Sales, Shipments→Orders; erased public contracts add HR→Expenses and Sales→Expenses. No file cycle in either mode or browser→server/provider reachability remains. Legacy compatibility, aggregate construction and LINE session persistence remain for the next authorized milestones. Existing nontransactional/race limits remain; external CI, live permissions and visual flows are unverified.

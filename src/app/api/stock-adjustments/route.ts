@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { createStockAdjustment, listAdjustmentEmployees, listStockAdjustments, reverseStockAdjustment, StockAdjustmentError, validStockMonth } from "@/services/stock-adjustments/manageStockAdjustments";
+import { createStockAdjustment, listAdjustmentEmployees, listStockAdjustments, reverseStockAdjustment, StockAdjustmentError, validStockMonth } from "@/modules/inventory/server";
 export const runtime = "nodejs";
 function fail(error: unknown) {
   return NextResponse.json({ ok: false, error: error instanceof StockAdjustmentError ? error.message : "Stock adjustment operation failed. Please retry." }, { status: error instanceof StockAdjustmentError ? error.status : 500 });

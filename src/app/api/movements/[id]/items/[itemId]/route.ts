@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { deleteMovementItem, updateMovementItem } from "@/services/movements";
+import { deleteMovementItem, updateMovementItem } from "@/modules/inventory/server";
 
 export const runtime = "nodejs";
 
