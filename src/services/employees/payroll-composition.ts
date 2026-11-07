@@ -4,12 +4,12 @@ import type { SalaryAdvanceShops } from "@/modules/hr/application/ports/salary-a
 import type { PayrollReaders } from "@/modules/hr/application/ports/payroll";
 import { calculateEmployeePayroll as executePayroll, createSalaryAdvance as executeAdvance, settleEmployeePayroll as executeSettlement } from "@/modules/hr/payroll-server";
 import { createHRPayrollReaders } from "@/modules/hr/server";
-import { getGoogleSheetsSalesDashboard } from "@/services/sales/getGoogleSheetsDailySales";
+import { createSalesDashboardReader } from "@/modules/sales/server";
 import { createSalaryAdvanceShops } from "./salary-advance-shops";
 
 // Only Sales transport composition remains outside HR; HR owns its workforce readers.
 export function createPayrollReaders(service: IGoogleSheetsService): PayrollReaders {
-  return createHRPayrollReaders(service, { readSales: input => getGoogleSheetsSalesDashboard({...input, googleSheetsService: service}) });
+  return createHRPayrollReaders(service, createSalesDashboardReader(service));
 }
 export async function calculateEmployeePayroll({googleSheetsService,month}: {googleSheetsService: IGoogleSheetsService; month: string}) {
   return executePayroll({googleSheetsService,month,readers:createPayrollReaders(googleSheetsService)});

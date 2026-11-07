@@ -1,3 +1,4 @@
+import {restoreSalesApplicationSource}from "./helpers/sales-application-history.mjs";
 import { completionExtraFiles, completionNewFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { expectedHRDebts } from "./helpers/hr-payroll-history.mjs";
 import { hrFiles, hrNewFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
@@ -68,12 +69,12 @@ test('actual resolved runtime/type graphs retain prerequisites, browser debts an
   for(const file of current.all.filter(f=>f.startsWith('src/infrastructure/')))assert.equal(current.trace(file,types,p=>p.startsWith('src/modules/')),null,file);
   // A legacy mixed index is traversed, never accepted as a boundary.
   const query='src/services/sales/getGoogleSheetsDailySales.ts',saved=JSON.parse(readFileSync('tests/fixtures/inventory-sales-query-before.json','utf8'));
-  const regression=userStateGraph({[query]:saved.files[query].source});assert.ok(regression.trace(roots[0],types,target));
+  const regression=userStateGraph({[roots[0]]:JSON.parse(readFileSync('tests/fixtures/inventory-application-before.json','utf8')).files[roots[0]].source,[query]:saved.files[query].source});assert.ok(regression.trace(roots[0],types,target));
   const physical=userStateDestinations.find(f=>f.endsWith('UserStateSheet.ts'));
   for(const source of ['export { StockCountsSheet } from "@/modules/inventory/infrastructure/google-sheets/stock-counts/StockCountsSheet";','export { getOrderDetail } from "@/modules/orders/server";'])assert.throws(()=>userStateGraph({[physical]:source}).modules(types),/line-workflows->(?:inventory|orders)|Cycle/);
   assert.throws(()=>userStateGraph({[physical]:`export { UserStateSheet } from "@/externals/google/sheet/sheets/user-state/UserStateSheet";`}).modules(types),/Cycle/);
  }
- assert.match(readFileSync('src/services/movements/manageMovements.ts','utf8'),/from "\.\/worksheet-schema"/);assert.match(readFileSync(roots[0],'utf8'),/from "@\/services\/sales\/getGoogleSheetsDailySales"/);
+ assert.match(restoreSalesApplicationSource('src/services/movements/manageMovements.ts'),/from "\.\/worksheet-schema"/);assert.match(restoreSalesApplicationSource(roots[0]),/from "@\/services\/sales\/getGoogleSheetsDailySales"/);
  const eslint=new ESLint(),bad=['import type { IGoogleSheetsService } from "@/externals/google/sheet"; export type X=IGoogleSheetsService;','import { x } from "../../../../../../modules/inventory/server"; export {x};','export { x } from "@/config";','const x=import("@/config"); export {x};','const x=require("node:fs"); export {x};','export type X=import("@/externals/google/sheet/types").GoogleSheetRow;','import { GoogleSheetRow } from "@/infrastructure/persistence/google-sheets/types"; export const x=GoogleSheetRow;','export const x=Date.now();','import x = require("@/config"); export {x};'];
  for(const file of userStateDestinations){const [ok]=await eslint.lintText(readFileSync(file,'utf8'),{filePath:file});assert.equal(ok.errorCount,0,JSON.stringify(ok.messages));for(const source of bad){const [r]=await eslint.lintText(source,{filePath:file});assert.ok(r.errorCount>0,`${file}: ${source}`);}}
 });

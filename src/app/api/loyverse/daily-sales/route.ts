@@ -8,7 +8,7 @@ import {
 import {
   getLoyverseReceiptsForSalesDate,
   isValidBangkokSalesDate,
-} from "@/services/sales";
+} from "@/modules/sales/server";
 
 export const runtime = "nodejs";
 

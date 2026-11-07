@@ -5,7 +5,7 @@ import { isRecord } from "@/features/backend/shared/utils";
 import {
   removeSalesProfitCostOverride,
   setSalesProfitCostOverride,
-} from "@/services/sales";
+} from "@/modules/sales/server";
 
 export const runtime = "nodejs";
 

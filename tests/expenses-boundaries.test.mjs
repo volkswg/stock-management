@@ -5,11 +5,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ESLint} from 'eslint';
 import {userStateGraph} from './helpers/user-state-worksheet-graph.mjs';
-import {expensesFiles,expensesNewFiles,expensesHistory,assertExpensesHistory,expenseBrowserFixed} from './helpers/expenses-business-history.mjs';
+import {expensesNewFiles,expensesHistory,assertExpensesHistory,expenseBrowserFixed} from './helpers/expenses-business-history.mjs';
 import {expenseGraph} from './helpers/expenses-business.mjs';
 
 test('Expenses contracts/rules and legacy forwards retain original declarations and a single error/function identity',()=>{
- for(const file of expensesFiles){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,expensesHistory.files[file].sha256);else assertExpensesHistory(file,expensesHistory.files[file].sha256);}
+ for(const file of Object.keys(expensesHistory.files)){if(completionExtraFiles.has(file))assertCompletionHistory(file,expensesHistory.files[file].sha256);else if(hrFiles.has(file))assertHRHistory(file,expensesHistory.files[file].sha256);else assertExpensesHistory(file,expensesHistory.files[file].sha256);}
  const original=expensesHistory.files['src/services/expenses/manageExpenses.ts'].source;
  const rules=readFileSync('src/modules/expenses/domain/rules.ts','utf8');
  assert.ok(rules.includes(original.slice(original.indexOf('export class ExpenseError'),original.indexOf('const text'))));
@@ -29,7 +29,7 @@ test('Expenses contracts/rules and legacy forwards retain original declarations 
 test('Expenses runtime/type graphs enforce pure application, public HR shop contract, browser debt reduction and unchanged legacy cycle',()=>{
  const graph=userStateGraph(),provider=p=>p.startsWith('src/services/')||p.startsWith('src/externals/')||p.startsWith('src/config/')||p.startsWith('src/app/');
  for(const types of [false,true]){
-  assert.deepEqual(graph.modules(types).sort(),types?['hr->expenses','shipments->orders']:['shipments->orders']);
+  assert.deepEqual(graph.modules(types).sort(),types?['hr->expenses','inventory->hr','inventory->sales','sales->expenses','shipments->orders']:['inventory->hr','inventory->sales','shipments->orders']);
   for(const file of expensesNewFiles.filter(f=>f.startsWith('src/modules/expenses/'))){assert.equal(graph.trace(file,types,provider),null,file);assert.equal(graph.trace(file,types,p=>p.startsWith('src/modules/')&&!p.startsWith('src/modules/expenses/')),null,file);}
   for(const file of graph.all.filter(f=>f.startsWith('src/infrastructure/')))assert.equal(graph.trace(file,types,p=>p.startsWith('src/modules/')),null,file);
   for(const root of expenseBrowserFixed)assert.equal(graph.trace(root,types,p=>provider(p)&&p!==root||/\/modules\/expenses\/(?:server|application|infrastructure)/.test(p)),null,root);

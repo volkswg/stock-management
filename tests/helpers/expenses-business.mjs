@@ -25,6 +25,7 @@ export function expenseGraph({original=false,service,events=[],overrides={},exte
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date:Clock,Request,Response,URL,console:{error:(...a)=>events.push(['log',...a])},require(spec){
    if(Object.hasOwn(externals,spec))return externals[spec];
+   if(file==='src/app/api/sales/profit-summary/route.ts'&&spec==='@/modules/sales/server'&&externals['@/services/sales'])return externals['@/services/sales'];
    if(spec==='server-only')return {};
    if(spec==='node:crypto')return {randomUUID:()=>{events.push(['uuid']);return 'fixed-id';}};
    if(spec==='next/server')return {NextResponse:Response};

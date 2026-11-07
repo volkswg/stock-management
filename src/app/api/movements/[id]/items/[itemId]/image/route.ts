@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/externals/google/drive";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { updateMovementImage } from "@/services/movements";
+import { updateMovementImage } from "@/modules/inventory/server";
 
 export const runtime = "nodejs";
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
