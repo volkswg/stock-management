@@ -1,3 +1,4 @@
+import { expectedExpensesDebts } from "./helpers/expenses-business-history.mjs";
 import { assertDirectoryHistory } from "./helpers/employee-directory-history.mjs";
 import { directoryBefore } from "./helpers/employee-directory.mjs";
 import assert from "node:assert/strict";
@@ -29,7 +30,7 @@ test("all existing client graphs gain no Sales runtime reachability; legacy eras
  const removed=new Set(["src/app/movements/MovementListPage.tsx","src/app/movements/[id]/MovementDetailPage.tsx"]);
  assertDirectoryHistory("src/services/movements/manageMovements.ts",directoryBefore.files["src/services/movements/manageMovements.ts"].sha256);
  assert.equal(salesWorksheetsBefore.browserBaseline.filter(e=>removed.has(e.root)).length,2);
- const expected=salesWorksheetsBefore.browserBaseline.filter(e=>!removed.has(e.root)).map(e=>({root:e.root,types:e.types,leaves:e.found.map(x=>x.file).sort()}));assert.deepEqual(actual,expected);assert.ok(actual.every(x=>x.types));
+ const expected=expectedExpensesDebts(salesWorksheetsBefore.browserBaseline).filter(e=>!removed.has(e.root)).map(e=>({root:e.root,types:e.types,leaves:e.found.map(x=>x.file).sort()}));assert.deepEqual(actual,expected);assert.ok(actual.every(x=>x.types));
 });
 
 test("exact Sales import rules reject bypasses and the complete pre-move consumer/script audit still resolves unchanged legacy imports",async()=>{

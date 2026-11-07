@@ -1,6 +1,6 @@
 # Current ownership and remaining legacy
 
-Base verified at merged PR29, main `57064008a0add0603e790f64983b797eaf4e92de`. This branch moves the remaining Inventory/HR worksheet implementations and all six associated Inventory/Expenses/HR header arrays. Expenses exposes the original shared row constructor through its own infrastructure alias; root infrastructure owns its feature-neutral implementation. Legacy paths remain named compatibility forwards.
+Base verified at merged PR30, main `5c72e122b54d296cedc3d0f16a1e466128d63aaf`. Worksheet/header owners from PR30 remain unchanged. This branch gives Expenses its public contracts, business application, consumer-shaped persistence ports, Sheets adapter and named server entrypoint. Legacy type and callable paths retain explicit named compatibility forwards.
 
 | Slice | Actual owner now | Compatibility / unfinished work |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ Base verified at merged PR29, main `57064008a0add0603e790f64983b797eaf4e92de`. T
 | Inventory | Two pure DTOs, employee-directory port/application, StockCountsSheet/header, MovementSheet, StockAdjustmentsSheet/header and browser-safe adjustment contracts | Stock counts/adjustments/movements algorithms, UI and most services remain legacy |
 | HR | Pure directory DTO, employee reader/public query, three employee/compensation/timesheet worksheet/header pairs, PayrollRecordsSheet and advance/settlement headers | Advance, settlement/lifecycle/use-case extraction remains pending |
 | LINE workflows | UserStateSheet and its mutable header under own infrastructure | Session/journey/webhook business implementations remain legacy |
-| Expenses | Ledger/category/shop headers and RecordsSheet alias in own infrastructure | Generic row implementation is root-owned; ledger/shop business services remain legacy |
+| Expenses | Public Expense/ExpenseShop/ExpenseCategory/ExpenseInput contracts, application operations/ports/rules, Sheets adapter, named server composition and existing worksheets/headers | Old services are named compatibility forwards; aggregate registry remains legacy composition |
 | Workspace | Target ownership defined | App shell remains until scoped work |
 
 ## Physical worksheet owners
@@ -56,6 +56,16 @@ No physical worksheet implementation remains in legacy externals. StockAdjustmen
 Headers remain separate mutable arrays; default ranges, schemas and persistence paths do not change. Old service type/header exports alias their physical owner. Inventory's existing adjustment reasons/DTOs move verbatim into its public contracts so StockAdjustmentsPanel reaches no worksheet implementation or header leaf. Aggregate GoogleSheetsService, factory and indexes remain legacy server composition, with original construction/check order and export surfaces.
 
 The HR directory reader still resolves its old employee-header path to HR's owner. Business/use-case migration, payroll's existing erased cycle and four legacy erased browser debts remain separately scoped work.
+
+## Expenses business ownership and consumers
+
+`modules/expenses/contracts.ts` owns the four original DTO aliases verbatim and has no runtime dependencies. Expenses pages import only this leaf. Old `services/expenses/types.ts` retains header aliases plus named type forwards; the old direct implementation and barrel retain callable/error/helper compatibility. `readTable` remains available from its old direct path and now lives in the feature adapter.
+
+`application/manage-expenses.ts` owns listing/filtering/reference projection, validation, idempotency, save/remove and master decisions. Its ports expose semantic uncoerced entries, master/expense writes, deletion and injected time/ID functions; they expose no Sheets types, columns or ranges. `infrastructure/google-sheets/expense-store.ts` owns header checks, deferred field access and private location metadata. This preserves coercion/error phases, read order, master sheet selection, full-row soft deletion and exact persistence payloads. The public server accepts the existing service shape without importing the mixed aggregate registry type. Every operation constructs one adapter; no alternate storage or shared mutable request state.
+
+Expenses routes and Sales profit composition call the named Expenses server entrypoint. Sales' query consumes only the public Expense type and receives Expenses data through its existing input; profit/refund algorithms are untouched. HR's SalaryAdvanceShops port consumes only the public ExpenseShop identity/active fields. The advance POST route injects its reader; the old two-argument callable retains a default adapter in explicit legacy composition outside both feature cores. No HR/Sales implementation imports legacy Expenses services or private Expenses infrastructure.
+
+Two old erased browser debts (Expenses and ExpenseMasterPage) are closed. Salary advances/payroll's two erased paths and their pre-existing type cycle remain. Broader HR/Sales service extraction and aggregate retirement remain pending.
 
 ## Compatibility retirement gates
 

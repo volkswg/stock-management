@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
 import { isRecord } from "@/features/backend/shared/utils";
-import { ExpenseError, listExpenses, listExpenseCategories, listExpenseShops, removeExpense, saveExpense, validMonth } from "@/services/expenses";
-import type { ExpenseInput } from "@/services/expenses";
+import { ExpenseError, listExpenses, listExpenseCategories, listExpenseShops, removeExpense, saveExpense, validMonth } from "@/modules/expenses/server";
+import type { ExpenseInput } from "@/modules/expenses/contracts";
 export const runtime = "nodejs";
 const string = (value: unknown) => typeof value === "string" ? value.trim() : "";
 function failed(error: unknown) {

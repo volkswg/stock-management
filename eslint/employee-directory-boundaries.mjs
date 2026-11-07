@@ -30,7 +30,7 @@ employeeDirectoryBoundaries.push({files:["src/services/movements/manageMovements
 }});
 // Inventory's Sales read dependency must not evaluate the aggregate Sheets registry.
 const salesHeaderLeaves=["receipts","receipt-items","receipt-payments","receipt-syncs"].map(folder=>`@/modules/sales/infrastructure/google-sheets/${folder}/const`);
-const salesQueryImports=["@/externals/google/sheet/types","@/services/expenses/types","@/modules/sales/contracts",...salesHeaderLeaves];
+const salesQueryImports=["@/externals/google/sheet/types","@/modules/expenses/contracts","@/modules/sales/contracts",...salesHeaderLeaves];
 employeeDirectoryBoundaries.push({files:["src/services/sales/getGoogleSheetsDailySales.ts"],rules:{
  "no-restricted-imports":["error",{patterns:[{regex:`^(?!(?:${salesQueryImports.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")})$).+`,message:"Sales queries consume exact headers and erased pure types, never mixed registries."}]}],
  "no-restricted-syntax":[...noDynamicServerBypass,{selector:"ExportAllDeclaration",message:"Keep query exports explicit."},{selector:"ExportNamedDeclaration[source]",message:"Do not forward implementation dependencies."},...salesQueryImports.slice(0,3).map(path=>({selector:`ImportDeclaration[source.value='${path}']:not([importKind='type'])`,message:"Query type dependencies must be erased."}))],

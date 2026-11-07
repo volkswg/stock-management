@@ -6,7 +6,7 @@ import {
   listSalesProfitCostOverrides,
 } from "@/services/sales";
 
-import { listExpenses, listExpenseShops } from "@/services/expenses";
+import { listExpenses, listExpenseShops } from "@/modules/expenses/server";
 
 export const runtime = "nodejs";
 

@@ -1,3 +1,4 @@
+import { loadExpenseSource } from "./expenses-source.mjs";
 import { remainingBefore, expenseRecords } from "./remaining-worksheet-history.mjs";
 import { userStateBefore } from "./user-state-worksheet-history.mjs";
 import { inventoryWorksheetsBefore } from "./inventory-worksheet-history.mjs";
@@ -13,6 +14,7 @@ import { googleBefore } from "./google-infrastructure.mjs";
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
 export function loadSource(path, { imports = {}, globals = {} } = {}) {
+  if(path === "src/services/expenses/manageExpenses.ts") return loadExpenseSource(path,{imports,globals});
   const filename = resolve(path);
   const { outputText } = ts.transpileModule(readFileSync(filename, "utf8"), {
     compilerOptions: {
@@ -44,6 +46,10 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
           },
         });
         return loadSource(move.to, { imports: translated, globals });
+      }
+      if(path === "src/services/employees/manageSalaryAdvances.ts" && specifier === "./salary-advance-shops") {
+        if (!Object.hasOwn(imports,"@/services/expenses")) throw new Error("Unstubbed advance shop reader");
+        return {createSalaryAdvanceShops: service => ({listShops: () => imports["@/services/expenses"].listExpenseShops(service)})};
       }
       const split=remainingBefore.splits[path];
       if(split?.contracts && specifier === "@/modules/inventory/contracts" && !Object.hasOwn(imports,specifier)) return loadSource(split.contracts);

@@ -1,3 +1,5 @@
+import { expectedExpensesDebts } from "./helpers/expenses-business-history.mjs";
+import { expensesFiles, expensesNewFiles, assertExpensesHistory } from "./helpers/expenses-business-history.mjs";
 import { remainingFiles, remainingDestinations, assertRemainingHistory } from "./helpers/remaining-worksheet-history.mjs";
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -32,8 +34,8 @@ test('original/current real UserStateSheet and GoogleSheetsClient preserve quote
 
 test('two exact moves reconstruct complete original sources/ASTs and retain every other production and historical fixture byte',async()=>{
  const {readFileSync,readdirSync}=await import('node:fs'),{default:ts}=await import('typescript'),{userStateHash,assertUserStateHistory,userStateFiles,userStateDestinations}=await import('./helpers/user-state-worksheet-history.mjs');
- for(const [file,hash]of Object.entries(userStateBefore.productionHashes)){if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else assert.equal(userStateHash(readFileSync(file)),hash,file);}
- const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk('src').filter(f=>!f.endsWith('.tsbuildinfo')&&!Object.hasOwn(userStateBefore.productionHashes,f)).sort(),[...remainingDestinations,...userStateDestinations].sort());
+ for(const [file,hash]of Object.entries(userStateBefore.productionHashes)){if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else assert.equal(userStateHash(readFileSync(file)),hash,file);}
+ const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk('src').filter(f=>!f.endsWith('.tsbuildinfo')&&!Object.hasOwn(userStateBefore.productionHashes,f)).sort(),[...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(userStateBefore.fixtureHashes))assert.equal(userStateHash(readFileSync(file)),hash,file);
  const all=walk('src').filter(f=>f.endsWith('.ts')).map(f=>readFileSync(f,'utf8')).join('\n'),printer=ts.createPrinter();for(const e of Object.values(userStateBefore.moves)){const ast=ts.createSourceFile(e.to,readFileSync(e.to,'utf8'),ts.ScriptTarget.Latest,true);assert.deepEqual(ast.statements.filter(n=>!ts.isImportDeclaration(n)).map(n=>printer.printNode(ts.EmitHint.Unspecified,n,ast)),e.declarations);assert.equal((all.match(new RegExp(`export ${e.export==='UserStateSheet'?'class':'const'} ${e.export}\\b`,'g'))??[]).length,1);}
 });
@@ -52,7 +54,7 @@ test('actual resolved runtime/type graphs retain prerequisites, browser debts an
  const {readFileSync}=await import('node:fs'),{userStateGraph}=await import('./helpers/user-state-worksheet-graph.mjs'),{userStateDestinations}=await import('./helpers/user-state-worksheet-history.mjs'),{ESLint}=await import('eslint'),current=userStateGraph(),before=userStateGraph(Object.fromEntries(Object.entries(userStateBefore.moves).map(([f,e])=>[f,e.source])));
  const target=p=>p.startsWith('src/modules/line-workflows/'),roots=['src/services/stock-counts/manageStockCounts.ts','src/services/movements/manageMovements.ts','src/services/stock-adjustments/manageStockAdjustments.ts','src/services/sales/getGoogleSheetsDailySales.ts'];
  function cycles(g,types){const seen=new Set(),active=[],out=[];function visit(f){if(active.includes(f)){out.push([...active.slice(active.indexOf(f)),f]);return;}if(seen.has(f))return;active.push(f);g.deps(f,types).forEach(visit);active.pop();seen.add(f);}g.all.forEach(visit);return out;}
- const clients=current.all.filter(f=>/^\s*['"]use client['"]/.test(readFileSync(f,'utf8'))),known=JSON.parse(readFileSync('tests/fixtures/inventory-worksheets-before.json','utf8')).browserBaseline.map(e=>e.root).sort();
+ const clients=current.all.filter(f=>/^\s*['"]use client['"]/.test(readFileSync(f,'utf8'))),known=JSON.parse(readFileSync('tests/fixtures/inventory-worksheets-before.json','utf8')).browserBaseline.map(e=>e.root).filter(root=>expectedExpensesDebts([root]).length).sort();
  for(const types of [false,true]){
   current.modules(types);assert.deepEqual(cycles(current,types),cycles(before,types));assert.deepEqual(cycles(current,types),userStateBefore.graphBaseline[types?'typeCycles':'runtimeCycles']);
   for(const root of roots)assert.equal(current.trace(root,types,target),null,root);

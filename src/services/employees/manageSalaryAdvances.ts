@@ -2,7 +2,8 @@ import { ADVANCE_HEADERS, SETTLEMENT_HEADERS } from "@/modules/hr/infrastructure
 export { ADVANCE_HEADERS, SETTLEMENT_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employee-advances/const";
 import type { GoogleSheetRow, IGoogleRowsSheet, IGoogleSheetsService } from "@/externals/google/sheet";
 import { listEmployees } from "./manageEmployees";
-import { listExpenseShops } from "@/services/expenses";
+import { createSalaryAdvanceShops } from "./salary-advance-shops";
+import type { SalaryAdvanceShops } from "@/modules/hr/application/ports/salary-advance-shops";
 import type { EmployeePayroll } from "./calculateEmployeePayroll";
 
 // Keep the worksheet layout compatible with existing records. New entries are paid
@@ -114,12 +115,12 @@ export function calculateAdvanceDeductions(advances: SalaryAdvance[], settlement
 function assertOpenMonth(settlements: PayrollSettlement[], employeeId: string, month: string) {
   if (settlements.some(s => s.employeeId === employeeId && s.month >= month)) throw new SalaryAdvanceError("This or a later payroll month is settled. Choose an open month after the latest settlement.", 409);
 }
-export async function createSalaryAdvance(service: IGoogleSheetsService, input: unknown): Promise<SalaryAdvance> {
+export async function createSalaryAdvance(service: IGoogleSheetsService, input: unknown, shopsReader: SalaryAdvanceShops = createSalaryAdvanceShops(service)): Promise<SalaryAdvance> {
   record(input);
   if (typeof input.requestId !== "string" || !/^[a-f0-9-]{36}$/i.test(input.requestId) || typeof input.employeeId !== "string" || typeof input.shopId !== "string" || !validAdvanceDate(input.paidDate) || input.paidDate > bangkokToday() || !validPayrollMonth(input.payrollMonth) || input.payrollMonth < input.paidDate.slice(0, 7) || !validMoney(input.paidAmount) || input.paidAmount <= 0) throw new SalaryAdvanceError("Select an employee, shop, payment date, deduction month and positive paid amount (up to two decimals).");
   const note = field(input.note ?? "", 500);
   const reference = field(input.reference ?? "", 200);
-  const [{ advances, settlements }, employees, shops] = await Promise.all([readSalaryLedger(service), listEmployees({ googleSheetsService: service }), listExpenseShops(service)]);
+  const [{ advances, settlements }, employees, shops] = await Promise.all([readSalaryLedger(service), listEmployees({ googleSheetsService: service }), shopsReader.listShops()]);
   const id = `ADV-${input.requestId}`;
   const existing = advances.find(a => a.id === id);
   if (existing) {
