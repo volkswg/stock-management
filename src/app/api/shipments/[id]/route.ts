@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleDriveServiceFromConfig } from "@/externals/google/drive";
+import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
 import { advanceShipmentStatusWithBill } from "@/modules/shipments/server";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { isRecord } from "@/features/backend/shared/utils";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { isRecord } from "@/shared/lib/is-record";
 import {
   isUpdatableStatus,
   isValidDeliveryFee,
   isValidPoNumber,
   readJsonBody,
-} from "@/features/backend/shipments/utils";
+} from "@/modules/shipments/http";
 import {
   getShipmentDetail,
   updateShipmentStatus,

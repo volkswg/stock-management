@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleDriveServiceFromConfig } from "@/externals/google/drive";
-import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
+import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
+import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
 import {
   createOrderWithImages,
   type OrderImageUpload,

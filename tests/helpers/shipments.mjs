@@ -1,3 +1,4 @@
+import {legacySpecifier} from "./cleanup-history.mjs";
 import { relative, resolve } from "node:path";
 import ts from "typescript";
 import { loadSource, plain } from "./load-source.mjs";
@@ -33,7 +34,7 @@ export function fakeShipmentSheets(initial = {}, { failRead, failUpdate, failApp
 // Config, transport/auth and Drive implementations are never evaluated.
 export function shipmentServices({ globals = {}, createId = () => "synthetic-shipment-id" } = {}) {
   const cache = new Map();
-  const seamFiles = new Set([
+  const seamFiles = new Set(["src/infrastructure/persistence/google-sheets/const.ts","src/modules/shipments/infrastructure/google-sheets/shipments/const.ts","src/modules/shipments/infrastructure/google-sheets/shipment-orders/const.ts",
     "src/modules/shipments/status.ts",
     "src/modules/shipments/application/create-shipment.ts",
     "src/modules/shipments/application/ports/created-shipment-writer.ts",
@@ -62,14 +63,14 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
   function load(path) {
     const file = relative(process.cwd(), resolve(path)).replaceAll("\\", "/");
     if (file === "src/services/orders/createDraftOrder.ts") return load("src/modules/orders/contracts.ts");
-    if (file === "src/services/utils/createSortableId.ts") return { createSortableId: createId };
+    if ((file === "src/services/utils/createSortableId.ts" || file === "src/infrastructure/runtime/create-sortable-id.ts")) return { createSortableId: createId };
     if (cache.has(file)) return cache.get(file);
-    if (file!=="src/shared/lib/is-record.ts" && !seamFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
+    if (!["src/shared/lib/is-record.ts","src/modules/shipments/http.ts"].includes(file) && !seamFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
     const imports = new Proxy({}, {
       getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
       get(_, specifier) {
         if (specifier === "server-only") return {};
-        if (specifier === "@/externals/google/sheet") return constants;
+        if (legacySpecifier(specifier)==="@/externals/google/sheet") return constants;
         const target = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
         if (!target) throw new Error(`Unknown shipment dependency ${specifier}`);
         return load(target);

@@ -16,7 +16,7 @@ test('full runtime/type graphs retain empty cycles and pure HR core with a named
   const active=[],seen=new Set();function visit(file){assert.ok(!active.includes(file),[...active,file].join(' -> '));if(seen.has(file))return;active.push(file);graph.deps(file,types).forEach(visit);active.pop();seen.add(file);}graph.all.forEach(visit);
   for(const root of graph.all.filter(f=>f.startsWith('src/app/employees/')&&/^\s*['"]use client['"]/.test(readFileSync(f,'utf8'))))assert.equal(graph.trace(root,types,p=>p.startsWith('src/services/')||p.startsWith('src/externals/')||p.startsWith('src/infrastructure/')||/^src\/modules\/[^/]+\/(?:application|infrastructure|.*server\.ts)/.test(p)),null,root);
  }
- const bridge=readFileSync('src/services/employees/payroll-composition.ts','utf8');assert.doesNotMatch(bridge,/from "\.\/manageEmployees"|from "\.\/manageEmployeeTimesheets"/);assert.match(bridge,/createHRPayrollReaders/);
+ const bridge=readFileSync('src/composition/hr-payroll.ts','utf8');assert.doesNotMatch(bridge,/from "\.\/manageEmployees"|from "\.\/manageEmployeeTimesheets"/);assert.match(bridge,/createHRPayrollReaders/);
  for(const path of ['@/services/employees/manageEmployees','@/services/employees/manageEmployeeTimesheets'])assert.throws(()=>userStateGraph({'src/modules/hr/application/employees.ts':`export {listEmployees} from "${path}";`}).modules(true));
 });
 test('exact workforce lint rejects legacy/private, erased/relative/dynamic and implicit clock/provider bypasses',async()=>{

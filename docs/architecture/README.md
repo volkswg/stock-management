@@ -1,6 +1,6 @@
 # Architecture guide
 
-Verified base: merged PR33, main `9ab9f2095342c66f30acf9612d79ed92063b8597`. HR financial/workforce ownership is complete. This branch completes Sales reporting/sync and Inventory business ownership; Orders/LINE, external clients and final compatibility/composition cleanup follow as separately reviewable stacked PRs under the current assignment.
+The completion stack starts at merged PR33/main `9ab9f2095342c66f30acf9612d79ed92063b8597`. Sales/Inventory (PR34), Orders/LINE (PR35) and external transport (PR36) are published for review; this stacked branch completes the compatibility/composition audit. These branches have not been merged or deployed by Codex.
 
 | Read for | Canonical document |
 | --- | --- |
@@ -13,7 +13,7 @@ Verified base: merged PR33, main `9ab9f2095342c66f30acf9612d79ed92063b8597`. HR 
 | Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
 | Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
 
-Orders and Shipment browser/server seams remain as recorded in the map. All existing worksheet implementations now have feature or shared transport owners. StockAdjustmentsSheet belongs to Inventory; PayrollRecordsSheet belongs to HR. Expenses owns ledger/category/shop headers and exposes the shared RecordsSheet constructor. Its generic read/write implementation lives in root Google infrastructure, preserving the original superclass identity for all three consumers. Expenses now owns listing, saves, soft deletion, shop/category reads and master operations through application ports, a Sheets adapter and named server composition. HR now owns pure employee/payroll/advance contracts, financial domain rules, payroll/advance/settlement applications, salary persistence and named payroll server composition. HR workforce applications and persistence are also owned. Payroll consumes the public Sales dashboard reader through its existing injected consumer port. Sales reports/sync and Inventory reconciliation/adjustments/movements now have applications and semantic persistence adapters. Legacy facades, aggregate Sheets composition and the remaining Orders/LINE workflows await their next audited milestones.
+All scoped business use cases and worksheets now have feature owners. Google/Drive/LINE/Loyverse transport and the existing ID runtime have root infrastructure owners; pure protocol/message helpers live in shared. Explicit composition wires the unchanged aggregate Sheets registry and consumer readers outside feature cores. Active HTTP paths use canonical imports. Supported legacy callables/types/constructors/headers retain named aliases and one physical implementation. Workspace/Next shell and unrelated product work remain unchanged.
 
 ## Documentation maintenance
 

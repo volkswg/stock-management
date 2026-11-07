@@ -1,3 +1,4 @@
+import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {createHash} from "node:crypto";
@@ -8,7 +9,7 @@ export const httpHash=value=>createHash("sha256").update(value).digest("hex");
 export function assertShipmentHttpHistory(file,expected){
  assert.ok(shipmentHttpFiles.has(file),file);const saved=shipmentHttpBefore.sources[file];
  assert.equal(httpHash(saved.source),saved.sha256);if(expected!==undefined)assert.equal(saved.sha256,expected);
- const current=readFileSync(file,"utf8");let forward=saved.source,restored=current;
+ const current=restoreCleanupSource(file);let forward=saved.source,restored=current;
  for(const {from,to}of shipmentHttpBefore.transforms[file]){assert.equal(forward.split(from).length,2);assert.equal(restored.split(to).length,2);forward=forward.replace(from,to);restored=restored.replace(to,from);}
  assert.equal(current,forward,`${file}: only reviewed imports/named class forwarding`);assert.equal(restored,saved.source,`${file}: exact original bytes restored`);assert.equal(httpHash(restored),saved.sha256);
  const source=ts.createSourceFile(file,current,ts.ScriptTarget.Latest,true),printer=ts.createPrinter();

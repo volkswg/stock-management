@@ -1,3 +1,4 @@
+import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -15,7 +16,7 @@ export const readFunctionDestinations = {
 };
 export const migratedReadFunctions = new Set(Object.keys(readFunctionDestinations).map(name => `${shipmentReadBefore.file}:${name}`));
 const hash = value => createHash("sha256").update(value).digest("hex"), printer = ts.createPrinter();
-const parse = (file, text = readFileSync(file, "utf8")) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
+const parse = (file, text = restoreCleanupSource(file)) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
 export function assertShipmentReadHistory(key, expected) {
   assert.ok(migratedReadFunctions.has(key), key);
   assert.equal(hash(shipmentReadBefore.source), shipmentReadBefore.rawHash);

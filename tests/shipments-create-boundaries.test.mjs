@@ -1,3 +1,4 @@
+import {restoreCleanupSource} from "./helpers/cleanup-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve, relative } from "node:path";
@@ -16,8 +17,8 @@ test("actual creation application/port, adapter and composition pass their narro
   for (const [filePath, code] of [
     [application, 'import { ShipmentStatus } from "../contracts"; import type { CreatedShipmentWriter } from "./ports/created-shipment-writer"; export const status = ShipmentStatus.Draft; export type Writer = CreatedShipmentWriter;'],
     [port, 'import type { Shipment } from "../../contracts"; export interface Writer { append(record: Shipment): Promise<void> }'],
-    [adapter, 'import "server-only"; import type { IGoogleSheetsService } from "@/externals/google/sheet/types"; import { lastColumnLetter } from "@/externals/google/sheet/const"; export type Sheets = IGoogleSheetsService; export const range = lastColumnLetter(12);'],
-    [server, 'import "server-only"; import { createSortableId } from "@/services/utils/createSortableId"; export const id = createSortableId; export const clock = () => new Date().toISOString();'],
+    [adapter, 'import "server-only"; import type { IGoogleSheetsService } from "@/externals/google/sheet/types"; import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const"; export type Sheets = IGoogleSheetsService; export const range = lastColumnLetter(12);'],
+    [server, 'import "server-only"; import { createSortableId } from "@/infrastructure/runtime/create-sortable-id"; export const id = createSortableId; export const clock = () => new Date().toISOString();'],
   ]) { const [result] = await eslint.lintText(code, { filePath }); assert.equal(restricted(result), false, JSON.stringify(result.messages)); }
 });
 
@@ -64,7 +65,7 @@ for (const runtime of [true, false]) test(`creation project graph is file-acycli
   function visit(file) {
     assert.ok(!active.includes(file), `File cycle: ${[...active, file].join(" -> ")}`); if (visited.has(file)) return;
     assert.ok(common.includes(file), `Unexpected dependency ${file}`); active.push(file);
-    const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+    const source = ts.createSourceFile(file, restoreCleanupSource(file), ts.ScriptTarget.Latest, true);
     for (const n of source.statements) {
       if (!(ts.isImportDeclaration(n) || ts.isExportDeclaration(n)) || !n.moduleSpecifier) continue;
       const clause = n.importClause, elements = clause?.namedBindings && ts.isNamedImports(clause.namedBindings) ? clause.namedBindings.elements : undefined;
@@ -88,7 +89,7 @@ test("type-erased Sheets interfaces are pure, server markers are explicit, and b
   const source = readFileSync("src/externals/google/sheet/types.ts", "utf8");
   const ast = ts.createSourceFile("types.ts", source, ts.ScriptTarget.Latest, true); assert.equal(ast.statements.filter(ts.isImportDeclaration).length, 1);
   assert.ok(ast.statements.filter(ts.isImportDeclaration).every(n => n.importClause.isTypeOnly && n.moduleSpecifier.text === "@/infrastructure/persistence/google-sheets/types"));
-  for (const file of [adapter, server]) assert.ok(readFileSync(file, "utf8").startsWith('import "server-only";'));
+  for (const file of [adapter, server]) assert.ok(restoreCleanupSource(file).startsWith('import "server-only";'));
   for (const filePath of ["src/modules/shipments/ui/ShipmentListPage.tsx", "src/modules/orders/ui/[id]/OrderDetailPage.tsx"]) {
     for (const code of ['import { createShipment } from "@/modules/shipments/server";', 'import type { CreateShipmentInput } from "@/modules/shipments/application/create-shipment";', 'import { GoogleSheetsShipmentWriter } from "@/modules/shipments/infrastructure/google-sheets/shipment-writer";']) {
       const [result] = await eslint.lintText(code, { filePath }); assert.ok(restricted(result), `${filePath}: ${code}`);

@@ -1,3 +1,4 @@
+import {cleanupHistory} from "./cleanup-history.mjs";
 import { remainingBefore, expenseRecords } from "./remaining-worksheet-history.mjs";
 import { userStateBefore } from "./user-state-worksheet-history.mjs";
 import { inventoryWorksheetsBefore } from "./inventory-worksheet-history.mjs";
@@ -33,7 +34,7 @@ export function assertGoogleHistory(file,expected) {
 // Closed provider graph. No configuration/authentication modules or ambient network.
 // Historical mode evaluates the saved original provider sources, not rewritten expectations.
 export function googleGraph({historical=false,globals={},crypto={}}={}) {
- const cache=new Map(),reverse=new Map(Object.entries({...googleBefore.moves,...worksheetBefore.moves,...salesWorksheetsBefore.moves,...hrWorksheetsBefore.moves,...inventoryWorksheetsBefore.moves,...userStateBefore.moves,...remainingBefore.moves}).map(([a,b])=>[b.to,a]));
+ const cache=new Map(),reverse=new Map(Object.entries({...cleanupHistory.moves,...googleBefore.moves,...worksheetBefore.moves,...salesWorksheetsBefore.moves,...hrWorksheetsBefore.moves,...inventoryWorksheetsBefore.moves,...userStateBefore.moves,...remainingBefore.moves}).map(([a,b])=>[b.to,a]));
  function load(file){
   const canonical=file===expenseRecords?"src/externals/google/sheet/sheets/expenses/RecordsSheet.ts":reverse.get(file)??file;
   const key=historical?canonical:file;
@@ -42,7 +43,7 @@ export function googleGraph({historical=false,globals={},crypto={}}={}) {
   const registry = canonical.startsWith("src/externals/google/sheet/") && Object.hasOwn(googleBefore.productionHashes, canonical);
   assert.ok(entry || registry,`Unapproved provider dependency: ${file}`);
   const physical=historical?canonical:file;
-  const source=historical&&entry?entry.source:readFileSync(physical,"utf8"),exports={};cache.set(key,exports);
+  const source=historical&&cleanupHistory.files[canonical]?cleanupHistory.files[canonical].source:historical&&entry?entry.source:readFileSync(physical,"utf8"),exports={};cache.set(key,exports);
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   const context=vm.createContext({exports,Buffer,URL,URLSearchParams,Error,Date,console,fetch:()=>assert.fail("Live provider IO forbidden"),...globals,require(specifier){
    if(specifier==="node:crypto")return { default: crypto };

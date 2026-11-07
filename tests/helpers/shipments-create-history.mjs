@@ -1,3 +1,4 @@
+import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -10,7 +11,7 @@ export const migratedCreationFunctions = new Set([
 ]);
 const hash = text => createHash("sha256").update(text).digest("hex");
 const printer = ts.createPrinter();
-const parse = (file, text = readFileSync(file, "utf8")) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
+const parse = (file, text = restoreCleanupSource(file)) => ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
 
 // These TWO historical declarations intentionally split into application/mapping.
 // Keep original fixture hashes and source authoritative, not a blanket skip.

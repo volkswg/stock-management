@@ -1,3 +1,5 @@
+import {cleanupHistory} from "./cleanup-history.mjs";
+import {legacySpecifier} from "./cleanup-history.mjs";
 import {externalHistory} from "./external-history.mjs";
 import {ordersLineGraph} from "./orders-line-source.mjs";
 import { loadInventorySource } from "./inventory-source.mjs";
@@ -44,6 +46,19 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     fetch: () => { throw new Error("Live network is forbidden in regression tests"); },
     ...globals,
     require: (specifier) => {
+      const cleanup=cleanupHistory.moves[path];
+      if(cleanup && (specifier==='@/'+cleanup.to.slice(4,-3)||specifier==='../'+cleanup.to.slice(4))){
+        const translated=new Proxy({}, {
+          getOwnPropertyDescriptor:()=>({configurable:true,enumerable:true}),
+          get:(_,key)=>{
+            const change=cleanup.changes.find(c=>c.to.startsWith('"')&&c.to.endsWith('"')&&c.to.slice(1,-1)===key);
+            const old=change?change.from.slice(1,-1):key;
+            if(!Object.hasOwn(imports,old))throw new Error(`Unstubbed cleanup dependency ${String(old)} in ${path}`);
+            return imports[old];
+          },
+        });
+        return loadSource(cleanup.to,{imports:translated,globals});
+      }
       // Only the reviewed old provider forwards may follow their single new owner.
       const move = remainingBefore.moves[path] ?? userStateBefore.moves[path] ?? inventoryWorksheetsBefore.moves[path] ?? hrWorksheetsBefore.moves[path] ?? salesWorksheetsBefore.moves[path] ?? worksheetBefore.moves[path] ?? googleBefore.moves[path];
       if (move && (specifier === "@/" + move.to.slice(4, -3) || (path.endsWith("/expenses/RecordsSheet.ts") && specifier === "@/" + expenseRecords.slice(4,-3)))) {
@@ -62,13 +77,15 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
         return {createSalaryAdvanceShops: service => ({listShops: () => imports["@/services/expenses"].listExpenseShops(service)})};
       }
       const split=remainingBefore.splits[path];
-      if(split?.contracts && specifier === "@/modules/inventory/contracts" && !Object.hasOwn(imports,specifier)) return loadSource(split.contracts);
+      if(split?.contracts && legacySpecifier(specifier)==="@/modules/inventory/contracts" && !Object.hasOwn(imports,specifier)) return loadSource(split.contracts);
       if(split && specifier === "@/"+split.to.slice(4,-3) && !Object.hasOwn(imports,specifier)) return loadSource(split.to);
-      if(path.startsWith("src/app/api/") && specifier === "@/modules/inventory/server") { const old=["@/services/movements","@/services/stock-counts","@/services/stock-adjustments/manageStockAdjustments"].filter(key=>Object.hasOwn(imports,key)); if(old.length) return Object.assign({},...old.map(key=>imports[key])); }
-      if(path.startsWith("src/app/api/") && specifier === "@/modules/sales/server" && Object.hasOwn(imports,"@/services/sales")) return imports["@/services/sales"];
-      if(path.startsWith("src/app/api/orders") && specifier === "@/modules/orders/server" && Object.hasOwn(imports,"@/services/orders")) return {...imports[specifier],...imports["@/services/orders"]};
+      if(path.startsWith("src/app/api/") && legacySpecifier(specifier)==="@/modules/inventory/server") { const old=["@/services/movements","@/services/stock-counts","@/services/stock-adjustments/manageStockAdjustments"].filter(key=>Object.hasOwn(imports,key)); if(old.length) return Object.assign({},...old.map(key=>imports[key])); }
+      if(path.startsWith("src/app/api/") && legacySpecifier(specifier)==="@/modules/sales/server" && Object.hasOwn(imports,"@/services/sales")) return imports["@/services/sales"];
+      if(path.startsWith("src/app/api/orders") && legacySpecifier(specifier)==="@/modules/orders/server" && Object.hasOwn(imports,"@/services/orders")) return {...imports[specifier],...imports["@/services/orders"]};
       const oldExternal=specifier.replace("@/infrastructure/external/","@/externals/");
       if(oldExternal!==specifier&&Object.hasOwn(imports,oldExternal))return imports[oldExternal];
+      if(Object.hasOwn(imports,specifier))return imports[specifier];
+      if(legacySpecifier(specifier)!==specifier&&Object.hasOwn(imports,legacySpecifier(specifier)))return imports[legacySpecifier(specifier)];
       if (!Object.hasOwn(imports, specifier)) {
         throw new Error(`Unstubbed dependency ${specifier} in ${path}`);
       }

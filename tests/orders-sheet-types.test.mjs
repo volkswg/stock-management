@@ -30,7 +30,7 @@ test("exact import reversal preserves original hashes and every other production
 test("the four exact lint scopes require erased pure types and reject aggregate, relative, value, re-export and dynamic bypasses",async()=>{
  const {ESLint}=await import("eslint");const eslint=new ESLint();
  for(const file of Object.keys(sheetTypesBefore.files)){
-  const [actual]=await eslint.lintText(restoreOrdersLineSource(file),{filePath:file});assert.equal(actual.errorCount,0,JSON.stringify(actual.messages));
+  const [actual]=await eslint.lintText(readFileSync(file,"utf8"),{filePath:file});assert.equal(actual.errorCount,0,JSON.stringify(actual.messages));
   const [valid]=await eslint.lintText('import type { IGoogleSheetsService } from "@/externals/google/sheet/types"; export type T = IGoogleSheetsService;',{filePath:file});assert.equal(valid.errorCount,0,JSON.stringify(valid.messages));
   for(const source of [
    'import type { IGoogleSheetsService } from "@/externals/google/sheet"; export type T=IGoogleSheetsService;',

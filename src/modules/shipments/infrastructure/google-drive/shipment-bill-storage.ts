@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleDriveService } from "@/externals/google/drive/types";
+import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
 import type { ShipmentBillStorage, ShipmentBillUploadResult } from "../../application/ports/shipment-bill-storage";
 
 export class GoogleDriveShipmentBillStorage implements ShipmentBillStorage {

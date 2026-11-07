@@ -1,4 +1,4 @@
-import { isRecord } from "@/features/backend/shared/utils";
+import { isRecord } from "@/shared/lib/is-record";
 
 export type LoyverseAccountConfig = {
   id: string;

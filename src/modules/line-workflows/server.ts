@@ -4,7 +4,7 @@ import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/ty
 import type { LineBotService, ILineBotService } from "@/infrastructure/external/line";
 import type { LineEvent } from "@/shared/types/line-protocol";
 import type { AppConfig } from "@/config";
-import { createSortableId } from "@/services/utils/createSortableId";
+import { createSortableId } from "@/infrastructure/runtime/create-sortable-id";
 import { OrderStatus, type Order } from "@/modules/orders/contracts";
 import { createDraftRecord, createOrderBill, createOrderItem, prepareOrderTransition, orderExists } from "@/modules/orders/server";
 import { createMovementJourneyAdapter, movementJourneyItems, synchronizeMovementJourney, findResumableMovementJourney, appendMovementJourneyItem } from "@/modules/inventory/server";
