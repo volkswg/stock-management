@@ -1,0 +1,57 @@
+import {noDynamicServerBypass} from './orders-boundaries.mjs';
+const scopes={
+  "src/modules/sales/server.ts": [
+    "server-only",
+    "@/externals/google/sheet/types",
+    "@/modules/expenses/contracts",
+    "./contracts",
+    "./application/reports",
+    "./infrastructure/google-sheets/sales-reader",
+    "@/infrastructure/external/loyverse",
+    "./application/sync-receipts",
+    "./infrastructure/google-sheets/receipt-sync",
+    "./application/ports/receipt-sync",
+    "node:crypto",
+    "./application/cost-overrides",
+    "./infrastructure/google-sheets/cost-overrides",
+    "./application/sync-status",
+    "./infrastructure/google-sheets/sync-status",
+    "./application/receipts-for-date"
+  ],
+  "src/modules/line-workflows/server.ts": [
+    "server-only",
+    "@/externals/google/sheet/types",
+    "@/infrastructure/files/google-drive/types",
+    "@/infrastructure/external/line",
+    "@/shared/types/line-protocol",
+    "@/config",
+    "@/services/utils/createSortableId",
+    "@/modules/orders/contracts",
+    "@/modules/orders/server",
+    "@/modules/inventory/server",
+    "./contracts",
+    "./application/ports/workflows",
+    "./infrastructure/google-sheets/sessions",
+    "./infrastructure/runtime",
+    "./application/sessions",
+    "./application/order-events",
+    "./application/movement-events",
+    "./application/classify-event",
+    "./application/resolve-user-state",
+    "./application/reply",
+    "./application/order-events/complete-bill",
+    "./application/order-events/complete-products",
+    "./application/order-events/create-order",
+    "./application/order-events/bill-image",
+    "./application/order-events/product-image",
+    "./application/order-events/total-price",
+    "./infrastructure/payload",
+    "./domain/payload",
+    "./commands",
+    "./application/webhook"
+  ]
+};
+export const externalInfrastructureBoundaries=[...Object.entries(scopes).map(([file,paths])=>({files:[file],rules:{'no-restricted-imports':['error',{patterns:[{regex:`^(?!(?:${paths.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$).+`,message:'Keep composition dependencies explicit; use canonical external transport.'}]}]}})),{files:['src/infrastructure/external/**/*.ts'],rules:{
+'no-restricted-imports':['error',{patterns:[{regex:'^(?!\\./(?:const|types|LineBotService|LoyverseService|createLoyverseServiceFromConfig)$|@/shared/(?:types/line-protocol|lib/line-messages)$|node:crypto$|@/config$).+',message:'Provider infrastructure depends only on its protocol, pure helpers and supplied configuration.'}]}],
+'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Keep client exports named.'},{selector:"ImportDeclaration[source.value='@/config']:not([importKind='type'])",message:'Configuration is injected; import only its type.'}],
+'no-restricted-globals':['error','process']}}];

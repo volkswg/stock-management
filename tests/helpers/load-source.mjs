@@ -1,3 +1,4 @@
+import {externalHistory} from "./external-history.mjs";
 import {ordersLineGraph} from "./orders-line-source.mjs";
 import { loadInventorySource } from "./inventory-source.mjs";
 import { loadSalesSource } from "./sales-source.mjs";
@@ -18,6 +19,7 @@ import { googleBefore } from "./google-infrastructure.mjs";
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
 export function loadSource(path, { imports = {}, globals = {} } = {}) {
+  if(externalHistory.moves[path])return loadSource(externalHistory.moves[path].to,{imports,globals});
   if(path.startsWith("src/services/orders/")||path.startsWith("src/services/line/")||path.startsWith("src/services/user-states/")||path==="src/services/movements/state.ts"||path==="src/features/backend/line/services/movements/index.ts"||["src/externals/line/enum.ts","src/externals/line/utils/messageBuilder.ts","src/features/backend/shared/utils.ts"].includes(path))return ordersLineGraph({imports,globals}).load(path);
   if(["src/services/stock-adjustments/manageStockAdjustments.ts","src/services/stock-counts/manageStockCounts.ts","src/services/movements/manageMovements.ts","src/services/movements/worksheet-schema.ts","src/features/backend/line/services/movements/utils.ts"].includes(path)) return loadInventorySource(path,{imports,globals});
   if(path.startsWith("src/services/sales/")) return loadSalesSource(path,{imports,globals});
@@ -65,6 +67,8 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
       if(path.startsWith("src/app/api/") && specifier === "@/modules/inventory/server") { const old=["@/services/movements","@/services/stock-counts","@/services/stock-adjustments/manageStockAdjustments"].filter(key=>Object.hasOwn(imports,key)); if(old.length) return Object.assign({},...old.map(key=>imports[key])); }
       if(path.startsWith("src/app/api/") && specifier === "@/modules/sales/server" && Object.hasOwn(imports,"@/services/sales")) return imports["@/services/sales"];
       if(path.startsWith("src/app/api/orders") && specifier === "@/modules/orders/server" && Object.hasOwn(imports,"@/services/orders")) return {...imports[specifier],...imports["@/services/orders"]};
+      const oldExternal=specifier.replace("@/infrastructure/external/","@/externals/");
+      if(oldExternal!==specifier&&Object.hasOwn(imports,oldExternal))return imports[oldExternal];
       if (!Object.hasOwn(imports, specifier)) {
         throw new Error(`Unstubbed dependency ${specifier} in ${path}`);
       }

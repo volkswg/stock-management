@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/externals/google/sheet";
-import { createLoyverseAccountsFromConfig } from "@/externals/loyverse";
+import { createLoyverseAccountsFromConfig } from "@/infrastructure/external/loyverse";
 import { isRecord } from "@/features/backend/shared/utils";
 import { syncLoyverseDailySales } from "@/modules/sales/server";
 

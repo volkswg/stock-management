@@ -1,3 +1,4 @@
+import {restoreExternalSource} from "./external-history.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -11,11 +12,12 @@ for(const name of ['expenses-business-before','inventory-sales-query-before','mo
  for(const [file,e] of Object.entries({...d.files,...d.edits,...d.splits,...d.moves})) if(e.source){const values=prior.get(file)??new Set();values.add(e.source);if(e.after)values.add(e.after);prior.set(file,values);}
 }
 export function restoreOrdersLineSource(file,source=readFileSync(file,'utf8')){
+ source=restoreExternalSource(file,source);
  const saved=ordersLineBefore.files[file],edit=ordersLineBefore.edits[file];
  if(!saved&&!edit)return source;
- assert.equal(hash(readFileSync(file)),ordersLineBefore.changedHashes[file],file);
+ assert.equal(hash(restoreExternalSource(file)),ordersLineBefore.changedHashes[file],file);
  if(prior.get(file)?.has(source))return source;
- if(saved){assert.equal(hash(saved.source),saved.sha256,file);if(source===saved.source)return source;assert.equal(hash(source),ordersLineBefore.changedHashes[file],file);for(const [owner,expected]of Object.entries(ordersLineBefore.ownerHashes))assert.equal(hash(readFileSync(owner)),expected,owner);return saved.source;}
+ if(saved){assert.equal(hash(saved.source),saved.sha256,file);if(source===saved.source)return source;assert.equal(hash(source),ordersLineBefore.changedHashes[file],file);for(const [owner,expected]of Object.entries(ordersLineBefore.ownerHashes))assert.equal(hash(restoreExternalSource(owner)),expected,owner);return saved.source;}
  if(hash(source)===edit.sha256)return source;
  for(const c of edit.changes.toReversed()){assert.ok(c.to.length>0);assert.equal(source.split(c.to).length-1,1,file);source=source.replace(c.to,c.from);}
  assert.equal(hash(source),edit.sha256,file);return source;

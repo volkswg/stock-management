@@ -3,7 +3,7 @@ import { getConfig } from "@/config";
 import {
   LineBotService,
   type LineWebhookPayload,
-} from "@/externals/line";
+} from "@/infrastructure/external/line";
 import {
   createGoogleDriveServiceFromConfig,
   type IGoogleDriveService,

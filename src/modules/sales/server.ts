@@ -26,7 +26,7 @@ export const getGoogleSheetsProfitSummary: (input: {
     googleSheetsService: IGoogleSheetsService;
     year: string;
 }) => Promise<GoogleSheetsProfitSummary> = reports.getGoogleSheetsProfitSummary;
-import type { ConfiguredLoyverseAccount } from "@/externals/loyverse";
+import type { ConfiguredLoyverseAccount } from "@/infrastructure/external/loyverse";
 import { syncReceipts } from "./application/sync-receipts";
 import { createReceiptSync } from "./infrastructure/google-sheets/receipt-sync";
 import type { SyncLoyverseDailySalesResult } from "./application/ports/receipt-sync";
@@ -78,7 +78,7 @@ export async function listSalesSyncStatus({ accountId, googleSheetsService, mont
     return executeSyncStatus({ accountId, reader: createSyncStatusReader(googleSheetsService), month });
 }
 import type { SalesSheets } from "./infrastructure/google-sheets/sales-reader";
-import type { ILoyverseService, LoyverseReceipt } from "@/externals/loyverse";
+import type { ILoyverseService, LoyverseReceipt } from "@/infrastructure/external/loyverse";
 import { getLoyverseReceiptsForSalesDate as readReceiptsForDate } from "./application/receipts-for-date";
 export { isValidBangkokSalesDate } from "./application/receipts-for-date";
 export async function getLoyverseReceiptsForSalesDate({ loyverseService, salesDate, storeId }: {
