@@ -4,7 +4,7 @@ import {
   aggregateSalesByItem,
   createLoyverseAccountsFromConfig,
   type LoyverseReceipt,
-} from "@/externals/loyverse";
+} from "@/infrastructure/external/loyverse";
 import {
   getLoyverseReceiptsForSalesDate,
   isValidBangkokSalesDate,

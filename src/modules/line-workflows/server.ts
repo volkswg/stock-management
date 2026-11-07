@@ -1,7 +1,7 @@
 import "server-only";
 import type { IGoogleSheetsService, GoogleSheetRow, MovementWorksheet } from "@/externals/google/sheet/types";
 import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
-import type { LineBotService, ILineBotService } from "@/externals/line";
+import type { LineBotService, ILineBotService } from "@/infrastructure/external/line";
 import type { LineEvent } from "@/shared/types/line-protocol";
 import type { AppConfig } from "@/config";
 import { createSortableId } from "@/services/utils/createSortableId";

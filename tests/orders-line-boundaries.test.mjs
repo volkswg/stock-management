@@ -1,3 +1,4 @@
+import {restoreExternalSource} from "./helpers/external-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -12,7 +13,7 @@ test('Orders/LINE physical ownership, source witnesses and legacy enum/helper/fu
  const hash=s=>createHash('sha256').update(s).digest('hex');
  for(const [file,e]of Object.entries(ordersLineBefore.files))assert.equal(hash(restoreOrdersLineSource(file)),e.sha256,file);
  for(const [file,e]of Object.entries(ordersLineBefore.edits))assert.equal(hash(restoreOrdersLineSource(file)),e.sha256,file);
- for(const [file,expected]of Object.entries(ordersLineBefore.ownerHashes))assert.equal(hash(readFileSync(file)),expected,file);
+ for(const [file,expected]of Object.entries(ordersLineBefore.ownerHashes))assert.equal(hash(restoreExternalSource(file)),expected,file);
  const g=ordersLineGraph(),orders=g.load('src/modules/orders/server.ts'),line=g.load('src/modules/line-workflows/server.ts');
  for(const file of Object.keys(ordersLineBefore.files).filter(f=>f.startsWith('src/services/orders/'))){for(const [name,value]of Object.entries(g.load(file))){const owner=['isActiveOrderCreateState','isOrderImageUploadState'].includes(name)?g.load('src/modules/orders/rules.ts'):name==='OrderStatus'||name==='OrderItemQuantityType'?g.load('src/modules/orders/contracts.ts'):name==='UserStateFlowName'?g.load('src/modules/line-workflows/contracts.ts'):Object.hasOwn(orders,name)?orders:line;assert.equal(value,owner[name],`${file}:${name}`);}}
  assert.equal(g.load('src/services/line/enum.ts').LineTextCommand,g.load('src/modules/line-workflows/contracts.ts').LineTextCommand);
