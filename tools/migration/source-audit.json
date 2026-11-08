@@ -1,0 +1,1334 @@
+{
+  "orders": {
+    "configProperty": "ordersWorksheetName",
+    "headerSource": "src/modules/orders/infrastructure/google-sheets/orders/const.ts",
+    "columns": {
+      "id": "text",
+      "status": "text",
+      "seller": "text",
+      "totalPrice": "numeric",
+      "remark": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          87,
+          146
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/line-workflows/server.ts",
+        "lines": [
+          36
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/line-workflows/application/sessions.ts",
+        "lines": [
+          41,
+          48,
+          67
+        ],
+        "operations": [
+          "draft",
+          "transition"
+        ]
+      },
+      {
+        "file": "src/modules/line-workflows/application/order-events/bill-image.ts",
+        "lines": [
+          74
+        ],
+        "operations": [
+          "bill"
+        ]
+      },
+      {
+        "file": "src/modules/line-workflows/application/order-events/product-image.ts",
+        "lines": [
+          69
+        ],
+        "operations": [
+          "item"
+        ]
+      },
+      {
+        "file": "src/modules/orders/ui/api.ts",
+        "lines": [
+          311
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-attachments.ts",
+        "lines": [
+          42
+        ],
+        "operations": [
+          "appendRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts",
+        "lines": [
+          12
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-list-reader.ts",
+        "lines": [
+          12
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-mutations.ts",
+        "lines": [
+          17,
+          40,
+          50,
+          51,
+          52
+        ],
+        "operations": [
+          "readRows",
+          "updateRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-writer.ts",
+        "lines": [
+          12
+        ],
+        "operations": [
+          "appendRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/ui/api.ts",
+        "lines": [
+          215
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts",
+        "lines": [
+          26
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts",
+        "lines": [
+          16
+        ],
+        "operations": [
+          "readRows"
+        ]
+      }
+    ]
+  },
+  "order_items": {
+    "configProperty": "orderItemsWorksheetName",
+    "headerSource": "src/modules/orders/infrastructure/google-sheets/order-items/const.ts",
+    "columns": {
+      "id": "text",
+      "orderId": "text",
+      "imageUrl": "text",
+      "quoteQuantity": "numeric",
+      "deliveredQuantity": "numeric",
+      "productCode": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "relationships": {
+      "orderId": "orders"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          92,
+          148
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-attachments.ts",
+        "lines": [
+          28,
+          68
+        ],
+        "operations": [
+          "appendRows",
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts",
+        "lines": [
+          18
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-list-reader.ts",
+        "lines": [
+          13
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-mutations.ts",
+        "lines": [
+          26,
+          36,
+          37,
+          38
+        ],
+        "operations": [
+          "batchUpdateRows",
+          "readRows",
+          "updateRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts",
+        "lines": [
+          29
+        ],
+        "operations": [
+          "readRows"
+        ]
+      }
+    ]
+  },
+  "order_bills": {
+    "configProperty": "orderBillsWorksheetName",
+    "headerSource": "src/modules/orders/infrastructure/google-sheets/order-bills/const.ts",
+    "columns": {
+      "id": "text",
+      "orderId": "text",
+      "imageUrl": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "relationships": {
+      "orderId": "orders"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          88,
+          147
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-attachments.ts",
+        "lines": [
+          17,
+          61
+        ],
+        "operations": [
+          "appendRows",
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-detail-reader.ts",
+        "lines": [
+          25
+        ],
+        "operations": [
+          "readRows"
+        ]
+      }
+    ]
+  },
+  "shipments": {
+    "configProperty": "shipmentsWorksheetName",
+    "headerSource": "src/modules/shipments/infrastructure/google-sheets/shipments/const.ts",
+    "columns": {
+      "id": "text",
+      "status": "text",
+      "carrier": "text",
+      "poNumber": "text",
+      "shippingFee": "numeric",
+      "remark": "text",
+      "shippedAt": "text",
+      "deliveredAt": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text",
+      "shippingBillUrl": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          120,
+          158
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/ui/api.ts",
+        "lines": [
+          200
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts",
+        "lines": [
+          18
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts",
+        "lines": [
+          21
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts",
+        "lines": [
+          15
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts",
+        "lines": [
+          10,
+          13,
+          48
+        ],
+        "operations": [
+          "readRows",
+          "updateRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-writer.ts",
+        "lines": [
+          12
+        ],
+        "operations": [
+          "appendRows"
+        ]
+      }
+    ]
+  },
+  "shipment_orders": {
+    "configProperty": "shipmentOrdersWorksheetName",
+    "headerSource": "src/modules/shipments/infrastructure/google-sheets/shipment-orders/const.ts",
+    "columns": {
+      "id": "text",
+      "shipmentId": "text",
+      "orderId": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "relationships": {
+      "orderId": "orders",
+      "shipmentId": "shipments"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          116,
+          157
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/orders/infrastructure/google-sheets/order-list-reader.ts",
+        "lines": [
+          14
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts",
+        "lines": [
+          12
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts",
+        "lines": [
+          23
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts",
+        "lines": [
+          17,
+          40
+        ],
+        "operations": [
+          "appendRows",
+          "readRows"
+        ]
+      }
+    ]
+  },
+  "employees": {
+    "configProperty": "employeesWorksheetName",
+    "headerSource": "src/modules/hr/infrastructure/google-sheets/employees/const.ts",
+    "columns": {
+      "id": "text",
+      "name": "text",
+      "phone": "text",
+      "status": "text",
+      "hiredDate": "text",
+      "terminatedDate": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "createdBy": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/hr-payroll.ts",
+        "lines": [
+          18
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/app/api/employees/advances/route.ts",
+        "lines": [
+          20
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          79,
+          144
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/hr/application/calculate-payroll.ts",
+        "lines": [
+          7
+        ],
+        "operations": [
+          "listEmployees"
+        ]
+      },
+      {
+        "file": "src/modules/hr/infrastructure/google-sheets/employee-directory-reader.ts",
+        "lines": [
+          13
+        ],
+        "operations": [
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/hr/infrastructure/google-sheets/workforce-store.ts",
+        "lines": [
+          19,
+          35,
+          36,
+          56,
+          58
+        ],
+        "operations": [
+          "appendRows",
+          "readRows",
+          "updateRows"
+        ]
+      }
+    ]
+  },
+  "employee_compensations": {
+    "configProperty": "employeeCompensationsWorksheetName",
+    "headerSource": "src/modules/hr/infrastructure/google-sheets/employee-compensations/const.ts",
+    "columns": {
+      "employeeId": "text",
+      "baseSalary": "numeric",
+      "commission": "numeric",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "updatedBy": "text",
+      "effectiveFrom": "text",
+      "compensationType": "text",
+      "commissionType": "text",
+      "commissionBucketSales": "numeric",
+      "commissionBucketAmount": "numeric",
+      "commissionRoundupThreshold": "numeric"
+    },
+    "relationships": {
+      "employeeId": "employees"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          75
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/hr/infrastructure/google-sheets/workforce-store.ts",
+        "lines": [
+          30,
+          37,
+          84,
+          85,
+          87
+        ],
+        "operations": [
+          "appendRows",
+          "ensureExists",
+          "readRows",
+          "updateRows"
+        ]
+      }
+    ]
+  },
+  "employee_timesheets": {
+    "configProperty": "employeeTimesheetsWorksheetName",
+    "headerSource": "src/modules/hr/infrastructure/google-sheets/employee-timesheets/const.ts",
+    "columns": {
+      "id": "text",
+      "employeeId": "text",
+      "shopId": "text",
+      "status": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "workdayType": "text"
+    },
+    "relationships": {
+      "employeeId": "employees",
+      "shopId": "shops"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          83,
+          145
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/hr/infrastructure/google-sheets/workforce-store.ts",
+        "lines": [
+          39,
+          50,
+          51,
+          155,
+          157
+        ],
+        "operations": [
+          "appendRows",
+          "readRows",
+          "updateRows"
+        ]
+      }
+    ]
+  },
+  "employee_advances": {
+    "configProperty": "employeeAdvancesWorksheetName",
+    "headerSource": "src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts",
+    "columns": {
+      "id": "text",
+      "employeeId": "text",
+      "shopId": "text",
+      "requestedDate": "text",
+      "payrollMonth": "text",
+      "requestedAmount": "numeric",
+      "paidAmount": "numeric",
+      "status": "text",
+      "paidDate": "text",
+      "reference": "text",
+      "note": "text",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "relationships": {
+      "employeeId": "employees",
+      "shopId": "shops"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          69
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/hr/infrastructure/google-sheets/salary-store.ts",
+        "lines": [
+          29,
+          48,
+          50,
+          52,
+          54
+        ],
+        "operations": [
+          "appendRows",
+          "updateRows"
+        ]
+      }
+    ]
+  },
+  "payroll_settlements": {
+    "configProperty": "payrollSettlementsWorksheetName",
+    "headerSource": "src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts",
+    "columns": {
+      "id": "text",
+      "employeeId": "text",
+      "month": "text",
+      "paidDate": "text",
+      "reference": "text",
+      "createdAt": "text",
+      "snapshot": "jsonb"
+    },
+    "relationships": {
+      "employeeId": "employees"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          70
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/hr/infrastructure/google-sheets/salary-store.ts",
+        "lines": [
+          38,
+          49,
+          58
+        ],
+        "operations": [
+          "appendRows"
+        ]
+      }
+    ]
+  },
+  "expenses": {
+    "configProperty": "expensesWorksheetName",
+    "headerSource": "src/modules/expenses/infrastructure/google-sheets/expenses/const.ts",
+    "columns": {
+      "id": "text",
+      "month": "text",
+      "expenseDate": "text",
+      "shopId": "text",
+      "scope": "text",
+      "categoryId": "text",
+      "name": "text",
+      "amount": "numeric",
+      "note": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "createdBy": "text",
+      "deletedAt": "text"
+    },
+    "relationships": {
+      "shopId": "shops",
+      "categoryId": "expense_categories"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          72,
+          152
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/expenses/infrastructure/google-sheets/expense-store.ts",
+        "lines": [
+          25,
+          47,
+          48,
+          53
+        ],
+        "operations": [
+          "appendRows",
+          "updateRows"
+        ]
+      },
+      {
+        "file": "src/modules/sales/application/reports.ts",
+        "lines": [
+          264,
+          511,
+          518,
+          552,
+          577
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "expense_categories": {
+    "configProperty": "expenseCategoriesWorksheetName",
+    "headerSource": "src/modules/expenses/infrastructure/google-sheets/expenses/const.ts",
+    "columns": {
+      "id": "text",
+      "name": "text",
+      "active": "boolean",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          73,
+          153
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/expenses/infrastructure/google-sheets/expense-store.ts",
+        "lines": [
+          33
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "shops": {
+    "configProperty": "shopsWorksheetName",
+    "headerSource": "src/modules/expenses/infrastructure/google-sheets/expenses/const.ts",
+    "columns": {
+      "id": "text",
+      "name": "text",
+      "active": "boolean",
+      "loyverseAccountId": "text",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          74,
+          154
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/expenses/infrastructure/google-sheets/expense-store.ts",
+        "lines": [
+          32
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/sales/application/reports.ts",
+        "lines": [
+          245
+        ],
+        "operations": [
+          "map"
+        ]
+      }
+    ]
+  },
+  "sales_receipts": {
+    "configProperty": "salesReceiptsWorksheetName",
+    "headerSource": "src/modules/sales/infrastructure/google-sheets/receipts/const.ts",
+    "columns": {
+      "id": "text",
+      "salesDate": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "receiptNumber": "text",
+      "receiptType": "text",
+      "refundFor": "text",
+      "order": "text",
+      "receiptDate": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "cancelledAt": "text",
+      "source": "text",
+      "storeId": "text",
+      "employeeId": "text",
+      "customerId": "text",
+      "posDeviceId": "text",
+      "diningOption": "text",
+      "totalMoney": "numeric",
+      "totalTax": "numeric",
+      "totalDiscount": "numeric",
+      "tip": "numeric",
+      "surcharge": "numeric",
+      "pointsEarned": "numeric",
+      "pointsDeducted": "numeric",
+      "syncedAt": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          96,
+          155
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/receipt-sync.ts",
+        "lines": [
+          80,
+          94
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/sales-reader.ts",
+        "lines": [
+          15
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "sales_receipt_items": {
+    "configProperty": "salesReceiptItemsWorksheetName",
+    "headerSource": "src/modules/sales/infrastructure/google-sheets/receipt-items/const.ts",
+    "columns": {
+      "id": "text",
+      "receiptId": "text",
+      "lineItemId": "text",
+      "itemId": "text",
+      "variantId": "text",
+      "itemName": "text",
+      "variantName": "text",
+      "sku": "text",
+      "quantity": "numeric",
+      "price": "numeric",
+      "grossTotalMoney": "numeric",
+      "totalDiscount": "numeric",
+      "totalMoney": "numeric",
+      "cost": "numeric",
+      "costTotal": "numeric",
+      "taxes": "numeric",
+      "lineNote": "text",
+      "lineDiscountsJson": "jsonb",
+      "lineTaxesJson": "jsonb",
+      "lineModifiersJson": "jsonb",
+      "syncedAt": "text"
+    },
+    "relationships": {
+      "receiptId": "sales_receipts"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          100,
+          149
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/receipt-sync.ts",
+        "lines": [
+          80,
+          99
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/sales-reader.ts",
+        "lines": [
+          15
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "sales_receipt_payments": {
+    "configProperty": "salesReceiptPaymentsWorksheetName",
+    "headerSource": "src/modules/sales/infrastructure/google-sheets/receipt-payments/const.ts",
+    "columns": {
+      "id": "text",
+      "receiptId": "text",
+      "paymentIndex": "bigint",
+      "paymentTypeId": "text",
+      "paymentName": "text",
+      "paymentType": "text",
+      "moneyAmount": "numeric",
+      "paidAt": "text",
+      "paymentDetailsJson": "jsonb",
+      "syncedAt": "text"
+    },
+    "relationships": {
+      "receiptId": "sales_receipts"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          108,
+          151
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/receipt-sync.ts",
+        "lines": [
+          80,
+          104
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/sales-reader.ts",
+        "lines": [
+          15
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "sales_receipt_syncs": {
+    "configProperty": "salesReceiptSyncsWorksheetName",
+    "headerSource": "src/modules/sales/infrastructure/google-sheets/receipt-syncs/const.ts",
+    "columns": {
+      "id": "text",
+      "salesDate": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "status": "text",
+      "receiptCount": "bigint",
+      "itemCount": "bigint",
+      "paymentCount": "bigint",
+      "syncedAt": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          112,
+          156
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/receipt-sync.ts",
+        "lines": [
+          74,
+          83,
+          109
+        ],
+        "operations": [
+          "appendRows",
+          "readRows"
+        ]
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/sales-reader.ts",
+        "lines": [
+          15
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/sync-status.ts",
+        "lines": [
+          8
+        ],
+        "operations": [
+          "readRows"
+        ]
+      }
+    ]
+  },
+  "sales_profit_cost_overrides": {
+    "configProperty": "salesProfitCostOverridesWorksheetName",
+    "headerSource": "src/modules/sales/infrastructure/google-sheets/profit-cost-overrides/const.ts",
+    "columns": {
+      "id": "text",
+      "month": "text",
+      "accountId": "text",
+      "averageItemCost": "numeric",
+      "note": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "createdBy": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          104,
+          150
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/sales/infrastructure/google-sheets/cost-overrides.ts",
+        "lines": [
+          13,
+          20,
+          24,
+          31,
+          33,
+          35
+        ],
+        "operations": [
+          "appendRows",
+          "ensureExists",
+          "readRows",
+          "updateRows"
+        ]
+      }
+    ]
+  },
+  "stock_counts": {
+    "configProperty": "stockCountsWorksheetName",
+    "headerSource": "src/modules/inventory/infrastructure/google-sheets/stock-counts/const.ts",
+    "columns": {
+      "id": "text",
+      "month": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "physicalCount": "numeric",
+      "note": "text",
+      "countedAt": "text",
+      "updatedAt": "text",
+      "updatedBy": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          124
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/inventory/infrastructure/google-sheets/stock-counts.ts",
+        "lines": [
+          11,
+          15,
+          17,
+          23,
+          24,
+          26
+        ],
+        "operations": [
+          "appendRows",
+          "ensureExists",
+          "readRows",
+          "updateRows"
+        ]
+      }
+    ]
+  },
+  "stock_adjustments": {
+    "configProperty": "stockAdjustmentsWorksheetName",
+    "headerSource": "src/modules/inventory/infrastructure/google-sheets/stock-adjustments/const.ts",
+    "columns": {
+      "id": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "date": "text",
+      "direction": "text",
+      "reason": "text",
+      "employeeId": "text",
+      "employeeName": "text",
+      "quantity": "numeric",
+      "itemDescription": "text",
+      "photoUrl": "text",
+      "note": "text",
+      "reversesId": "text",
+      "replacesId": "text",
+      "createdAt": "text",
+      "createdBy": "text",
+      "notInLoyverse": "boolean"
+    },
+    "relationships": {
+      "employeeId": "employees",
+      "reversesId": "stock_adjustments",
+      "replacesId": "stock_adjustments"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          71
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/inventory/infrastructure/google-sheets/adjustments.ts",
+        "lines": [
+          24,
+          32,
+          34,
+          35
+        ],
+        "operations": [
+          "appendRows",
+          "ensureExists",
+          "readRows",
+          "updateRows"
+        ]
+      }
+    ]
+  },
+  "movements": {
+    "configProperty": "movementMasterWorksheetName",
+    "headerSource": "src/modules/inventory/infrastructure/google-sheets/movement-schema.ts",
+    "columns": {
+      "id": "text",
+      "userId": "text",
+      "packingDate": "text",
+      "deliverDateTime": "text",
+      "status": "text",
+      "totalQuantity": "numeric",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          128
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/inventory/infrastructure/google-sheets/movement-journeys.ts",
+        "lines": [
+          23,
+          36,
+          37
+        ],
+        "operations": [
+          "appendRows",
+          "updateRows"
+        ]
+      },
+      {
+        "file": "src/modules/inventory/infrastructure/google-sheets/movements.ts",
+        "lines": [
+          25,
+          28,
+          29,
+          31
+        ],
+        "operations": [
+          "readRows",
+          "updateRows"
+        ]
+      },
+      {
+        "file": "src/modules/line-workflows/infrastructure/google-sheets/sessions.ts",
+        "lines": [
+          32
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "movement_details": {
+    "configProperty": "movementDetailWorksheetName",
+    "headerSource": "src/modules/inventory/infrastructure/google-sheets/movement-schema.ts",
+    "columns": {
+      "id": "text",
+      "movementMasterId": "text",
+      "shopName": "text",
+      "quantity": "numeric",
+      "remark": "text",
+      "fromLocation": "text",
+      "toLocation": "text",
+      "productImageUrl": "text",
+      "purchaseDetailId": "text",
+      "status": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "stockCounted": "boolean",
+      "isNewArrival": "boolean"
+    },
+    "relationships": {
+      "movementMasterId": "movements",
+      "purchaseDetailId": "order_items"
+    },
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          129
+        ],
+        "operations": []
+      },
+      {
+        "file": "src/modules/inventory/infrastructure/google-sheets/movement-journeys.ts",
+        "lines": [
+          23,
+          35
+        ],
+        "operations": [
+          "appendRows"
+        ]
+      },
+      {
+        "file": "src/modules/inventory/infrastructure/google-sheets/movements.ts",
+        "lines": [
+          13,
+          18,
+          28,
+          38,
+          43
+        ],
+        "operations": [
+          "readRows",
+          "updateRows"
+        ]
+      },
+      {
+        "file": "src/modules/line-workflows/infrastructure/google-sheets/sessions.ts",
+        "lines": [
+          32
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "user_state": {
+    "configProperty": "userStateWorksheetName",
+    "headerSource": "src/modules/line-workflows/infrastructure/google-sheets/user-state/const.ts",
+    "columns": {
+      "id": "text",
+      "userId": "text",
+      "flowname": "text",
+      "referenceId": "text",
+      "state": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "context": "jsonb"
+    },
+    "relationships": {},
+    "readersAndWriters": [
+      {
+        "file": "src/composition/google-sheets/GoogleSheetsService.ts",
+        "lines": [
+          130,
+          159
+        ],
+        "operations": [
+          "checkConnection"
+        ]
+      },
+      {
+        "file": "src/modules/line-workflows/infrastructure/google-sheets/sessions.ts",
+        "lines": [
+          32,
+          41,
+          43,
+          45,
+          49,
+          50,
+          51,
+          52
+        ],
+        "operations": [
+          "appendRows",
+          "readRows",
+          "updateRows"
+        ]
+      }
+    ]
+  }
+}

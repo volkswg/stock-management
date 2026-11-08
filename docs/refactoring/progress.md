@@ -223,3 +223,28 @@ The aggregate remains one unchanged composition object because existing callers 
 Three pre-move characterizations and two final ownership/lint guards supplement inherited coverage. Actual original/current ID rollover/clock rollback, aggregate configuration/real worksheet health/batch traces and standalone fake LINE HTTP errors remain identical. Current full runtime/type file cycles are empty; public module directions and provider-free browser graphs pass. New independent lint rules supplement inherited scopes; exact positive import/owner assertions follow canonical paths, including the one new public Shipment HTTP leaf. Historical fixtures remain byte-identical, with exact inverse source/body/hash checks and original negative guards retained.
 
 Final Codex-local results: **531 = 526 inherited + 5 new**, zero failures/skips; lint exit 0 with only inherited shipmentRow warning; typecheck and isolated credential-free build pass. All 482 production source files match final build copy; 23 pages/35 APIs and manifest remain identical. Canonical current-state docs are consolidated and local links verified. No product/schema/provider/config-key/env/package/lockfile/auth/UI change, production access/live provider calls, setup scripts, merge or deployment. Existing concurrency/partial-write limitations remain. [Final verification](verification.md#final-architecture-cleanup). All four authorized milestones are prepared for independent System Architect review in dependency order; no further implementation PR is automatically authorized.
+
+## Database migration preparation (2026-11-08)
+
+Separately authorized migration implementation; no architectural refactoring or
+runtime persistence change. Source audit: 23 business worksheets plus the excluded
+credential configuration worksheet. Private SQL schema, offline/export planning,
+append-only transactional import SQL, exact reconciliation, synthetic integrity
+and PostgreSQL backup/restore verification are in the
+[database migration runbook](../database-migration.md). All existing application
+ports/composition and prior fixtures remain unchanged. Hosted inspection is
+read-only; no production/live record import or Supabase DDL was performed.
+
+Local acceptance evidence: `npm test` 553/553 pass; migration suite 11/11 pass;
+real PostgreSQL 17.7 extraction/reconciliation reports `match: true` with no
+differences; repeated imports, conflicting identity rollback, FK/unique checks,
+RLS/grant checks and 24-table logical backup/restore fingerprints pass.
+`npm run typecheck` passes; lint has only the inherited unused `shipmentRow`
+warning. Credential-free isolated Next build passes using a copied dependency
+folder (initial isolation attempts rejected an external symlink/cross-filesystem
+hardlinks; corrected by copying). An unnecessary package script briefly caused
+two historical hash tests to fail; package.json was restored unchanged and the
+full suite then passed. Existing Supabase project inspected read-only; security
+advisor returns no findings. Live source inventory, hosted DDL/import/restore and
+production recovery time remain unverified. Network policy blocked direct
+changelog retrieval; current import/backup documentation was read via Supabase MCP.

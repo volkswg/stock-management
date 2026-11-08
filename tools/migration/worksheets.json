@@ -1,0 +1,780 @@
+{
+  "orders": {
+    "headers": [
+      "id",
+      "status",
+      "seller",
+      "totalPrice",
+      "remark",
+      "createdAt",
+      "updatedAt",
+      "deletedAt",
+      "createdBy"
+    ],
+    "source": "src/modules/orders/infrastructure/google-sheets/orders/const.ts",
+    "columns": {
+      "id": "text",
+      "status": "text",
+      "seller": "text",
+      "totalPrice": "numeric",
+      "remark": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "order_items": {
+    "headers": [
+      "id",
+      "orderId",
+      "imageUrl",
+      "quoteQuantity",
+      "deliveredQuantity",
+      "productCode",
+      "createdAt",
+      "updatedAt",
+      "deletedAt",
+      "createdBy"
+    ],
+    "source": "src/modules/orders/infrastructure/google-sheets/order-items/const.ts",
+    "columns": {
+      "id": "text",
+      "orderId": "text",
+      "imageUrl": "text",
+      "quoteQuantity": "numeric",
+      "deliveredQuantity": "numeric",
+      "productCode": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "references": {
+      "orderId": "orders"
+    },
+    "key": "id",
+    "required": [
+      "orderId"
+    ]
+  },
+  "order_bills": {
+    "headers": [
+      "id",
+      "orderId",
+      "imageUrl",
+      "createdAt",
+      "updatedAt",
+      "deletedAt",
+      "createdBy"
+    ],
+    "source": "src/modules/orders/infrastructure/google-sheets/order-bills/const.ts",
+    "columns": {
+      "id": "text",
+      "orderId": "text",
+      "imageUrl": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "references": {
+      "orderId": "orders"
+    },
+    "key": "id",
+    "required": [
+      "orderId"
+    ]
+  },
+  "shipments": {
+    "headers": [
+      "id",
+      "status",
+      "carrier",
+      "poNumber",
+      "shippingFee",
+      "remark",
+      "shippedAt",
+      "deliveredAt",
+      "createdAt",
+      "updatedAt",
+      "deletedAt",
+      "createdBy",
+      "shippingBillUrl"
+    ],
+    "source": "src/modules/shipments/infrastructure/google-sheets/shipments/const.ts",
+    "columns": {
+      "id": "text",
+      "status": "text",
+      "carrier": "text",
+      "poNumber": "text",
+      "shippingFee": "numeric",
+      "remark": "text",
+      "shippedAt": "text",
+      "deliveredAt": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text",
+      "shippingBillUrl": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "shipment_orders": {
+    "headers": [
+      "id",
+      "shipmentId",
+      "orderId",
+      "createdAt",
+      "updatedAt",
+      "deletedAt",
+      "createdBy"
+    ],
+    "source": "src/modules/shipments/infrastructure/google-sheets/shipment-orders/const.ts",
+    "columns": {
+      "id": "text",
+      "shipmentId": "text",
+      "orderId": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "deletedAt": "text",
+      "createdBy": "text"
+    },
+    "references": {
+      "orderId": "orders",
+      "shipmentId": "shipments"
+    },
+    "key": "id",
+    "required": [
+      "orderId",
+      "shipmentId"
+    ]
+  },
+  "employees": {
+    "headers": [
+      "id",
+      "name",
+      "phone",
+      "status",
+      "hiredDate",
+      "terminatedDate",
+      "createdAt",
+      "updatedAt",
+      "createdBy"
+    ],
+    "source": "src/modules/hr/infrastructure/google-sheets/employees/const.ts",
+    "columns": {
+      "id": "text",
+      "name": "text",
+      "phone": "text",
+      "status": "text",
+      "hiredDate": "text",
+      "terminatedDate": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "createdBy": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "employee_compensations": {
+    "headers": [
+      "employeeId",
+      "baseSalary",
+      "commission",
+      "createdAt",
+      "updatedAt",
+      "updatedBy",
+      "effectiveFrom",
+      "compensationType",
+      "commissionType",
+      "commissionBucketSales",
+      "commissionBucketAmount",
+      "commissionRoundupThreshold"
+    ],
+    "source": "src/modules/hr/infrastructure/google-sheets/employee-compensations/const.ts",
+    "columns": {
+      "employeeId": "text",
+      "baseSalary": "numeric",
+      "commission": "numeric",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "updatedBy": "text",
+      "effectiveFrom": "text",
+      "compensationType": "text",
+      "commissionType": "text",
+      "commissionBucketSales": "numeric",
+      "commissionBucketAmount": "numeric",
+      "commissionRoundupThreshold": "numeric"
+    },
+    "references": {
+      "employeeId": "employees"
+    },
+    "key": "migration_id",
+    "required": [
+      "employeeId"
+    ]
+  },
+  "employee_timesheets": {
+    "headers": [
+      "id",
+      "employeeId",
+      "shopId",
+      "status",
+      "createdAt",
+      "updatedAt",
+      "workdayType"
+    ],
+    "source": "src/modules/hr/infrastructure/google-sheets/employee-timesheets/const.ts",
+    "columns": {
+      "id": "text",
+      "employeeId": "text",
+      "shopId": "text",
+      "status": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "workdayType": "text"
+    },
+    "references": {
+      "employeeId": "employees",
+      "shopId": "shops"
+    },
+    "key": "id",
+    "required": [
+      "employeeId"
+    ]
+  },
+  "employee_advances": {
+    "headers": [
+      "id",
+      "employeeId",
+      "shopId",
+      "requestedDate",
+      "payrollMonth",
+      "requestedAmount",
+      "paidAmount",
+      "status",
+      "paidDate",
+      "reference",
+      "note",
+      "createdAt",
+      "updatedAt"
+    ],
+    "source": "src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts",
+    "columns": {
+      "id": "text",
+      "employeeId": "text",
+      "shopId": "text",
+      "requestedDate": "text",
+      "payrollMonth": "text",
+      "requestedAmount": "numeric",
+      "paidAmount": "numeric",
+      "status": "text",
+      "paidDate": "text",
+      "reference": "text",
+      "note": "text",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "references": {
+      "employeeId": "employees",
+      "shopId": "shops"
+    },
+    "key": "id",
+    "required": [
+      "employeeId"
+    ]
+  },
+  "payroll_settlements": {
+    "headers": [
+      "id",
+      "employeeId",
+      "month",
+      "paidDate",
+      "reference",
+      "createdAt",
+      "snapshot"
+    ],
+    "source": "src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts",
+    "columns": {
+      "id": "text",
+      "employeeId": "text",
+      "month": "text",
+      "paidDate": "text",
+      "reference": "text",
+      "createdAt": "text",
+      "snapshot": "jsonb"
+    },
+    "references": {
+      "employeeId": "employees"
+    },
+    "key": "id",
+    "required": [
+      "employeeId"
+    ]
+  },
+  "expenses": {
+    "headers": [
+      "id",
+      "month",
+      "expenseDate",
+      "shopId",
+      "scope",
+      "categoryId",
+      "name",
+      "amount",
+      "note",
+      "createdAt",
+      "updatedAt",
+      "createdBy",
+      "deletedAt"
+    ],
+    "source": "src/modules/expenses/infrastructure/google-sheets/expenses/const.ts",
+    "columns": {
+      "id": "text",
+      "month": "text",
+      "expenseDate": "text",
+      "shopId": "text",
+      "scope": "text",
+      "categoryId": "text",
+      "name": "text",
+      "amount": "numeric",
+      "note": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "createdBy": "text",
+      "deletedAt": "text"
+    },
+    "references": {
+      "shopId": "shops",
+      "categoryId": "expense_categories"
+    },
+    "key": "id",
+    "required": []
+  },
+  "expense_categories": {
+    "headers": [
+      "id",
+      "name",
+      "active",
+      "createdAt",
+      "updatedAt"
+    ],
+    "source": "src/modules/expenses/infrastructure/google-sheets/expenses/const.ts",
+    "columns": {
+      "id": "text",
+      "name": "text",
+      "active": "boolean",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "shops": {
+    "headers": [
+      "id",
+      "name",
+      "active",
+      "loyverseAccountId",
+      "createdAt",
+      "updatedAt"
+    ],
+    "source": "src/modules/expenses/infrastructure/google-sheets/expenses/const.ts",
+    "columns": {
+      "id": "text",
+      "name": "text",
+      "active": "boolean",
+      "loyverseAccountId": "text",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "sales_receipts": {
+    "headers": [
+      "id",
+      "salesDate",
+      "accountId",
+      "shopName",
+      "receiptNumber",
+      "receiptType",
+      "refundFor",
+      "order",
+      "receiptDate",
+      "createdAt",
+      "updatedAt",
+      "cancelledAt",
+      "source",
+      "storeId",
+      "employeeId",
+      "customerId",
+      "posDeviceId",
+      "diningOption",
+      "totalMoney",
+      "totalTax",
+      "totalDiscount",
+      "tip",
+      "surcharge",
+      "pointsEarned",
+      "pointsDeducted",
+      "syncedAt"
+    ],
+    "source": "src/modules/sales/infrastructure/google-sheets/receipts/const.ts",
+    "columns": {
+      "id": "text",
+      "salesDate": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "receiptNumber": "text",
+      "receiptType": "text",
+      "refundFor": "text",
+      "order": "text",
+      "receiptDate": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "cancelledAt": "text",
+      "source": "text",
+      "storeId": "text",
+      "employeeId": "text",
+      "customerId": "text",
+      "posDeviceId": "text",
+      "diningOption": "text",
+      "totalMoney": "numeric",
+      "totalTax": "numeric",
+      "totalDiscount": "numeric",
+      "tip": "numeric",
+      "surcharge": "numeric",
+      "pointsEarned": "numeric",
+      "pointsDeducted": "numeric",
+      "syncedAt": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "sales_receipt_items": {
+    "headers": [
+      "id",
+      "receiptId",
+      "lineItemId",
+      "itemId",
+      "variantId",
+      "itemName",
+      "variantName",
+      "sku",
+      "quantity",
+      "price",
+      "grossTotalMoney",
+      "totalDiscount",
+      "totalMoney",
+      "cost",
+      "costTotal",
+      "taxes",
+      "lineNote",
+      "lineDiscountsJson",
+      "lineTaxesJson",
+      "lineModifiersJson",
+      "syncedAt"
+    ],
+    "source": "src/modules/sales/infrastructure/google-sheets/receipt-items/const.ts",
+    "columns": {
+      "id": "text",
+      "receiptId": "text",
+      "lineItemId": "text",
+      "itemId": "text",
+      "variantId": "text",
+      "itemName": "text",
+      "variantName": "text",
+      "sku": "text",
+      "quantity": "numeric",
+      "price": "numeric",
+      "grossTotalMoney": "numeric",
+      "totalDiscount": "numeric",
+      "totalMoney": "numeric",
+      "cost": "numeric",
+      "costTotal": "numeric",
+      "taxes": "numeric",
+      "lineNote": "text",
+      "lineDiscountsJson": "jsonb",
+      "lineTaxesJson": "jsonb",
+      "lineModifiersJson": "jsonb",
+      "syncedAt": "text"
+    },
+    "references": {
+      "receiptId": "sales_receipts"
+    },
+    "key": "id",
+    "required": [
+      "receiptId"
+    ]
+  },
+  "sales_receipt_payments": {
+    "headers": [
+      "id",
+      "receiptId",
+      "paymentIndex",
+      "paymentTypeId",
+      "paymentName",
+      "paymentType",
+      "moneyAmount",
+      "paidAt",
+      "paymentDetailsJson",
+      "syncedAt"
+    ],
+    "source": "src/modules/sales/infrastructure/google-sheets/receipt-payments/const.ts",
+    "columns": {
+      "id": "text",
+      "receiptId": "text",
+      "paymentIndex": "bigint",
+      "paymentTypeId": "text",
+      "paymentName": "text",
+      "paymentType": "text",
+      "moneyAmount": "numeric",
+      "paidAt": "text",
+      "paymentDetailsJson": "jsonb",
+      "syncedAt": "text"
+    },
+    "references": {
+      "receiptId": "sales_receipts"
+    },
+    "key": "id",
+    "required": [
+      "receiptId"
+    ]
+  },
+  "sales_receipt_syncs": {
+    "headers": [
+      "id",
+      "salesDate",
+      "accountId",
+      "shopName",
+      "status",
+      "receiptCount",
+      "itemCount",
+      "paymentCount",
+      "syncedAt"
+    ],
+    "source": "src/modules/sales/infrastructure/google-sheets/receipt-syncs/const.ts",
+    "columns": {
+      "id": "text",
+      "salesDate": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "status": "text",
+      "receiptCount": "bigint",
+      "itemCount": "bigint",
+      "paymentCount": "bigint",
+      "syncedAt": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "sales_profit_cost_overrides": {
+    "headers": [
+      "id",
+      "month",
+      "accountId",
+      "averageItemCost",
+      "note",
+      "createdAt",
+      "updatedAt",
+      "createdBy"
+    ],
+    "source": "src/modules/sales/infrastructure/google-sheets/profit-cost-overrides/const.ts",
+    "columns": {
+      "id": "text",
+      "month": "text",
+      "accountId": "text",
+      "averageItemCost": "numeric",
+      "note": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "createdBy": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "stock_counts": {
+    "headers": [
+      "id",
+      "month",
+      "accountId",
+      "shopName",
+      "physicalCount",
+      "note",
+      "countedAt",
+      "updatedAt",
+      "updatedBy"
+    ],
+    "source": "src/modules/inventory/infrastructure/google-sheets/stock-counts/const.ts",
+    "columns": {
+      "id": "text",
+      "month": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "physicalCount": "numeric",
+      "note": "text",
+      "countedAt": "text",
+      "updatedAt": "text",
+      "updatedBy": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "stock_adjustments": {
+    "headers": [
+      "id",
+      "accountId",
+      "shopName",
+      "date",
+      "direction",
+      "reason",
+      "employeeId",
+      "employeeName",
+      "quantity",
+      "itemDescription",
+      "photoUrl",
+      "note",
+      "reversesId",
+      "replacesId",
+      "createdAt",
+      "createdBy",
+      "notInLoyverse"
+    ],
+    "source": "src/modules/inventory/infrastructure/google-sheets/stock-adjustments/const.ts",
+    "columns": {
+      "id": "text",
+      "accountId": "text",
+      "shopName": "text",
+      "date": "text",
+      "direction": "text",
+      "reason": "text",
+      "employeeId": "text",
+      "employeeName": "text",
+      "quantity": "numeric",
+      "itemDescription": "text",
+      "photoUrl": "text",
+      "note": "text",
+      "reversesId": "text",
+      "replacesId": "text",
+      "createdAt": "text",
+      "createdBy": "text",
+      "notInLoyverse": "boolean"
+    },
+    "references": {
+      "employeeId": "employees",
+      "reversesId": "stock_adjustments",
+      "replacesId": "stock_adjustments"
+    },
+    "key": "id",
+    "required": []
+  },
+  "movements": {
+    "headers": [
+      "id",
+      "userId",
+      "packingDate",
+      "deliverDateTime",
+      "status",
+      "totalQuantity",
+      "createdAt",
+      "updatedAt"
+    ],
+    "source": "src/modules/inventory/infrastructure/google-sheets/movement-schema.ts",
+    "columns": {
+      "id": "text",
+      "userId": "text",
+      "packingDate": "text",
+      "deliverDateTime": "text",
+      "status": "text",
+      "totalQuantity": "numeric",
+      "createdAt": "text",
+      "updatedAt": "text"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  },
+  "movement_details": {
+    "headers": [
+      "id",
+      "movementMasterId",
+      "shopName",
+      "quantity",
+      "remark",
+      "fromLocation",
+      "toLocation",
+      "productImageUrl",
+      "purchaseDetailId",
+      "status",
+      "createdAt",
+      "updatedAt",
+      "stockCounted",
+      "isNewArrival"
+    ],
+    "source": "src/modules/inventory/infrastructure/google-sheets/movement-schema.ts",
+    "columns": {
+      "id": "text",
+      "movementMasterId": "text",
+      "shopName": "text",
+      "quantity": "numeric",
+      "remark": "text",
+      "fromLocation": "text",
+      "toLocation": "text",
+      "productImageUrl": "text",
+      "purchaseDetailId": "text",
+      "status": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "stockCounted": "boolean",
+      "isNewArrival": "boolean"
+    },
+    "references": {
+      "movementMasterId": "movements",
+      "purchaseDetailId": "order_items"
+    },
+    "key": "id",
+    "required": [
+      "movementMasterId"
+    ]
+  },
+  "user_state": {
+    "headers": [
+      "id",
+      "userId",
+      "flowname",
+      "referenceId",
+      "state",
+      "createdAt",
+      "updatedAt",
+      "context"
+    ],
+    "source": "src/modules/line-workflows/infrastructure/google-sheets/user-state/const.ts",
+    "columns": {
+      "id": "text",
+      "userId": "text",
+      "flowname": "text",
+      "referenceId": "text",
+      "state": "text",
+      "createdAt": "text",
+      "updatedAt": "text",
+      "context": "jsonb"
+    },
+    "references": {},
+    "key": "id",
+    "required": []
+  }
+}

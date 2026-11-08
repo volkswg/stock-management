@@ -96,3 +96,12 @@ The seven `src/features/backend/` forwards are removed. No business body moves: 
 The audit covers runtime/erased/dynamic imports, mocks/loaders, scripts, aliases, docs and historical guards. There is no production importer or known external supported consumer of the removed leaves. The package is private with no export map/publish workflow; undisclosed external deep imports must migrate. Services and standalone script forwards remain supported and untouched.
 
 `features-retirement-before.json` preserves all seven sources, 18 symbol destinations, pre-removal runtime identity keys, audited references and exact non-production inverses. Existing fixtures stay immutable. Current loaders use physical owners and reject removed paths; explicit historical readers alone resolve archived sources. No production compatibility directory or replacement barrel is introduced.
+
+## Database migration preparation
+
+The explicit database task adds a private, unwired `stock_migration` schema and
+operator tooling under `tools/migration`; no module owner, application port or
+runtime composition changes. The [migration runbook](../database-migration.md)
+links the complete source worksheet/type/relationship/caller catalog, SQL,
+reconciliation and recovery procedures. Hosted writes, live profiling and runtime
+cutover remain pending separate approval/acceptance.

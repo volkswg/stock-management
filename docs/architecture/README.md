@@ -19,6 +19,10 @@ The external compatibility directory `src/externals/` was retired in [PR #40](ht
 | How do I test safely and what was actually verified? | [Verification procedure and results](../refactoring/verification.md) |
 | How should I prepare a change? | [Engineering rules](../../AGENTS.md) |
 
+## Database migration preparation
+
+The [database migration runbook](../database-migration.md) describes the private PostgreSQL schema, source audit, offline tools, synthetic verification and remaining acceptance gates. Runtime persistence remains Google Sheets.
+
 ## Documentation ownership
 
 Keep **current state** in this guide, the ownership map and the roadmap; keep **historical results** in progress and verification. Link rather than copy the same PR history into multiple files. Preserve original test fixtures, historical evidence and stable operational-guide paths. Audit local links and source references before deleting or renaming documents. Do not create one Markdown note per PR.

@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Sensitive migration exports, SQL plans and database dumps
+/migration-artifacts/
+__pycache__/
+/supabase/.temp/
