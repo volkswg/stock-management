@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -5,7 +6,7 @@ import { deleteMovementItem, updateMovementItem } from "@/modules/inventory/serv
 
 export const runtime = "nodejs";
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string; itemId: string }> },
 ): Promise<NextResponse> {
@@ -76,7 +77,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
+async function DELETEOperation(
   _request: Request,
   { params }: { params: Promise<{ id: string; itemId: string }> },
 ): Promise<NextResponse> {
@@ -122,3 +123,6 @@ function optionalBoolean(value: unknown): boolean | undefined {
 function badRequest(error: string): NextResponse {
   return NextResponse.json({ error }, { status: 400 });
 }
+
+export const PATCH = withPersistence(PATCHOperation);
+export const DELETE = withPersistence(DELETEOperation);

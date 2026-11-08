@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -13,7 +14,7 @@ import {
 
 export const runtime = "nodejs";
 
-export async function PATCH(
+async function PATCHOperation(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -50,7 +51,7 @@ export async function PATCH(
 }
 
 // Detail updates are separate from the legacy PATCH clock-out operation.
-export async function PUT(
+async function PUTOperation(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -112,3 +113,6 @@ function isValidDate(value: string): boolean {
   const date = new Date(Date.UTC(year, month - 1, day));
   return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
+
+export const PATCH = withPersistence(PATCHOperation);
+export const PUT = withPersistence(PUTOperation);

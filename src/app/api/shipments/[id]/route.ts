@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
@@ -26,7 +27,7 @@ const ALLOWED_SHIPPING_BILL_TYPES = new Set([
 ]);
 const MAX_SHIPPING_BILL_SIZE_BYTES = 10 * 1024 * 1024;
 
-export async function GET(
+async function GETOperation(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -68,7 +69,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -206,3 +207,6 @@ function isValidShippingBill(value: unknown): value is File {
     ALLOWED_SHIPPING_BILL_TYPES.has(value.type)
   );
 }
+
+export const GET = withPersistence(GETOperation);
+export const PATCH = withPersistence(PATCHOperation);

@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -9,7 +10,7 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const month = searchParams.get("month")?.trim() || "";
   const shopId = searchParams.get("shopId")?.trim() || "";
@@ -66,3 +67,5 @@ function isValidMonth(value: string): boolean {
   const month = Number(value.slice(5));
   return month >= 1 && month <= 12;
 }
+
+export const GET = withPersistence(GETOperation);

@@ -1,3 +1,4 @@
+import {sheetsPersistenceStub} from "./sheets-persistence-stub.mjs";
 import {retirement,canonicalExports,registryProjection,worksheetProjection,archivedRelative,readEvidence} from "./retirement-history.mjs";
 import {cleanupHistory} from "./cleanup-history.mjs";
 import { remainingBefore, expenseRecords } from "./remaining-worksheet-history.mjs";
@@ -50,7 +51,7 @@ export function googleGraph({historical=false,globals={},crypto={}}={}) {
   const physical=historical?canonical:file;
   const source=historical&&cleanupHistory.files[canonical]?cleanupHistory.files[canonical].source:historical&&entry?entry.source:historical&&retirement.files[canonical]?retirement.files[canonical].source:readFileSync(physical,"utf8"),exports={};cache.set(key,exports);
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-  const context=vm.createContext({exports,Buffer,URL,URLSearchParams,Error,Date,console,fetch:()=>assert.fail("Live provider IO forbidden"),...globals,require(specifier){
+  const context=vm.createContext({exports,Buffer,URL,URLSearchParams,Error,Date,console,fetch:()=>assert.fail("Live provider IO forbidden"),...globals,require(specifier){ const storageStub=sheetsPersistenceStub(specifier);if(storageStub)return storageStub;
    if(specifier==="node:crypto")return { default: crypto };
    let target=specifier.startsWith("@/")?`src/${specifier.slice(2)}`:posix.normalize(`${dirname(physical)}/${specifier}`);
    if(historical)target=archivedRelative(physical,specifier);else if(!target.endsWith(".ts"))target+=existsSync(`${target}.ts`)?".ts":"/index.ts";

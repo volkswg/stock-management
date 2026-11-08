@@ -1,3 +1,4 @@
+import {postgresNewFiles} from "./helpers/postgres-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import {canonicalPath} from "./helpers/retirement-history.mjs";
 import { completionExtraFiles, completionNewFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
@@ -31,7 +32,7 @@ test("all ten physical files restore original bytes/declarations and all other p
  const {readdirSync}=await import("node:fs");const {worksheetFiles,worksheetDestinations,worksheetHash,assertWorksheetHistory}=await import("./helpers/worksheet-history.mjs");
  for(const [file,hash]of Object.entries(worksheetBefore.productionHashes)){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else if(hrWorksheetFiles.has(file))assertHrWorksheetHistory(file,hash);else if(directoryFiles.has(file))assertDirectoryHistory(file,hash);else if(salesWorksheetFiles.has(file))assertSalesWorksheetHistory(file,hash);else if(worksheetFiles.has(file))assertWorksheetHistory(file,hash);else assert.equal(worksheetHash(readArchive(file)),hash,file);}
  const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(worksheetBefore.productionHashes,f)).sort(),[...worksheetDestinations,...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(worksheetBefore.productionHashes,f)).sort(),[...postgresNewFiles,...worksheetDestinations,...salesWorksheetDestinations,...directoryNewFiles,...hrWorksheetDestinations,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(worksheetBefore.fixtureHashes))assert.equal(worksheetHash(readArchive(`tests/fixtures/${file}`)),hash,file);
 });
 

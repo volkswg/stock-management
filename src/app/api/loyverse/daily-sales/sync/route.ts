@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { createLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -7,7 +8,7 @@ import { syncLoyverseDailySales } from "@/modules/sales/server";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function POSTOperation(request: Request): Promise<NextResponse> {
   const body = await readJsonBody(request);
   if (!isRecord(body)) {
     return NextResponse.json(
@@ -130,3 +131,5 @@ function toTrimmedString(value: unknown): string {
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+export const POST = withPersistence(POSTOperation);

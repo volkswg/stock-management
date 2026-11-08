@@ -1,3 +1,4 @@
+import {sheetsPersistenceStub} from "./sheets-persistence-stub.mjs";
 import {legacySpecifier} from "./cleanup-history.mjs";
 import { completionNewFiles } from "./hr-application-history.mjs";
 import { restoreHRSource } from "./hr-payroll-history.mjs";
@@ -19,7 +20,7 @@ export function hrPayrollGraph({original=false,events=[],service,employees=[],co
  const employeeFunctions={listEmployees:read('employees',employees),listEmployeeCompensations:read('compensations',compensations)},timesheetFunctions={EmployeeTimesheetStatus:{Work:'work',Leave:'leave'},listEmployeeTimesheetsForMonth:read('attendance',attendance)},salesFunctions={getGoogleSheetsSalesDashboard:read('sales',sales)},shops={listShops:read('shops',[{id:'S',active:true}])};
  function load(file){assert.ok(allowed.has(file),`Unapproved HR dependency ${file}`);if(cache.has(file))return cache.get(file);const source=overrides[file]??(original?(payrollBefore.files[file]?.source??(payrollBefore.types[file]?restoreHRSource(file):undefined)):undefined)??readFileSync(file,'utf8'),exports={};cache.set(file,exports);
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date:Clock,Request,Response,URL,fetch:()=>assert.fail('Live IO forbidden'),console:{error:(...a)=>events.push(['log',...a])},...globals,require(spec){
+  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date:Clock,Request,Response,URL,fetch:()=>assert.fail('Live IO forbidden'),console:{error:(...a)=>events.push(['log',...a])},...globals,require(spec){ const storageStub=sheetsPersistenceStub(spec);if(storageStub)return storageStub;
    if(spec==='server-only')return {};
    if(spec==='node:crypto')return {createHash,randomUUID:()=>assert.fail('No workforce ID generation expected')};
    if(spec==='next/server')return {NextResponse:Response};

@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -5,7 +6,7 @@ import { createOrder, listOrders } from "@/modules/orders/server";
 
 export const runtime = "nodejs";
 
-export async function GET(): Promise<NextResponse> {
+async function GETOperation(): Promise<NextResponse> {
   try {
     const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
     const orders = await listOrders({ googleSheetsService });
@@ -23,7 +24,7 @@ export async function GET(): Promise<NextResponse> {
   }
 }
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function POSTOperation(request: Request): Promise<NextResponse> {
   const body = await readJsonBody(request);
   const input = parseCreateOrderInput(body);
   if (!input) {
@@ -104,3 +105,6 @@ function parseCreateOrderInput(value: unknown): CreateOrderInput | undefined {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+export const GET = withPersistence(GETOperation);
+export const POST = withPersistence(POSTOperation);

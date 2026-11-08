@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -5,7 +6,7 @@ import { listMovements, type MovementDateFilter } from "@/modules/inventory/serv
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   const filter = parseDateFilter(new URL(request.url).searchParams);
   if (!filter) {
     return NextResponse.json(
@@ -45,3 +46,5 @@ function optionalDate(value: string | null): string | undefined | null {
   if (!value?.trim()) return undefined;
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
 }
+
+export const GET = withPersistence(GETOperation);

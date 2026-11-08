@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
@@ -7,7 +8,7 @@ import { updateMovementImage } from "@/modules/inventory/server";
 export const runtime = "nodejs";
 const MAX_IMAGE_SIZE_BYTES = 20 * 1024 * 1024;
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string; itemId: string }> },
 ): Promise<NextResponse> {
@@ -112,3 +113,5 @@ function movementImageName(
   );
   return `movement-${safeId}-${Date.now()}${extension}`;
 }
+
+export const PATCH = withPersistence(PATCHOperation);

@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
@@ -13,7 +14,7 @@ const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGES_PER_TYPE = 10;
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function POSTOperation(request: Request): Promise<NextResponse> {
   const input = await readCreateOrderInput(request);
   if (!input) {
     return NextResponse.json(
@@ -156,3 +157,5 @@ async function toOrderImageUploads(
     })),
   );
 }
+
+export const POST = withPersistence(POSTOperation);

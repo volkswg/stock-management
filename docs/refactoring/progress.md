@@ -248,3 +248,54 @@ full suite then passed. Existing Supabase project inspected read-only; security
 advisor returns no findings. Live source inventory, hosted DDL/import/restore and
 production recovery time remain unverified. Network policy blocked direct
 changelog retrieval; current import/backup documentation was read via Supabase MCP.
+
+## Phase 2 operational PostgreSQL (2026-11-09, Bangkok)
+
+Baseline: merged PR48 / `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
+Branch `migration/postgres-operational`. The owner approved Supabase-only stable
+operation keys, retained across retries/reload, saved-response replay and
+missing-key rejection; original Sheets behavior remains the default.
+
+Implemented 23 private operational business tables plus commands, audit,
+side-effect attempts and target-isolation metadata; immutable staging protection;
+transactional exact promotion into an empty target; feature-owned PostgreSQL
+bindings reusing existing port mappers; request-wide transactions/replay/stale
+checks; bounded server-only pooling, nonprivileged role/TLS/target guard and
+staging authorization. LINE journals individual events, archives cleared sessions,
+and records reply attempts. Drive remains the image provider. The browser key
+script is loaded only for an explicitly built Supabase staging deployment.
+No feature application/domain body, business calculation or prior fixture changes.
+
+Export now preserves formatted text identities (including leading zeros), exact
+unformatted numerical tokens and both original renderings/types/formulas. Two
+three-rendering batch captures plus metadata use seven read requests rather than
+per-tab quota exhaustion. Mocked HTTP verifies this without Google access. The
+offline profiler flags duplicate IDs, invalid dates/numbers, orphans, formulas
+and incompatible numeric display formats without repairing records.
+
+Evidence is Codex-local: full suite 564/564 passes, Python migration/profile/export
+checks 18/18 pass, and isolated PostgreSQL acceptance has 23 passing cases covering all seven modules,
+concurrent retries, actual lost-COMMIT acknowledgement, handled-error rollback and closed-context protection against late asynchronous writes,
+LINE regrouping/failure counters, Loyverse history, payroll snapshots, stale
+revisions and access denial. Exact archive promotion and two-database backup/
+restore compare complete data, grants, policies and constraints. Typecheck and
+credential-free isolated build pass. Lint retains only the inherited unused
+shipmentRow warning. The app-paths manifest is unchanged:
+`32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
+All 113 built client JS chunks exclude private SQL/configuration strings; actual
+build source/public bytes match the implementation.
+
+Prior immutable fixtures remain byte-identical. An additive transition witness
+and exact wrapper/composition proofs retain old source/hash assertions. Closed
+Sheets harnesses explicitly choose their original engine; separate current-source
+and actual-PG tests cover the new branch. Temporary failures exposed missing void
+response journaling, positional single-cell/session handling, stale source
+inventories and test-volume cleanup. They were fixed without changing business
+calculations. Test cleanup now removes anonymous volumes; leftover task-created
+volumes were explicitly identified and removed after an ENOSPC restore failure.
+
+No live export, Google/LINE/Loyverse request, hosted Supabase schema/data write,
+production environment edit, cutover, merge or manual deployment occurred. Live
+profiling, hosted capacity/reconciliation and recovery/security acceptance remain
+owner-approved gates. Full-table projections/global serialization and uncertain
+Drive/reply effects are explicit limitations, not production-readiness claims.

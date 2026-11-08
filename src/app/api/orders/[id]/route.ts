@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -7,7 +8,7 @@ import { GoogleSheetsOrderDetailShipmentProjection } from "@/modules/shipments/i
 
 export const runtime = "nodejs";
 
-export async function GET(
+async function GETOperation(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -44,7 +45,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -141,3 +142,6 @@ function parseOrderUpdate(value: unknown): {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+export const GET = withPersistence(GETOperation);
+export const PATCH = withPersistence(PATCHOperation);

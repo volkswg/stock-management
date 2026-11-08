@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -6,7 +7,7 @@ import { parseEmployeeInput } from "../route";
 
 export const runtime = "nodejs";
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -51,3 +52,5 @@ async function readJsonBody(request: Request): Promise<unknown> {
     return undefined;
   }
 }
+
+export const PATCH = withPersistence(PATCHOperation);

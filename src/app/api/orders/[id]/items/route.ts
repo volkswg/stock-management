@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -7,7 +8,7 @@ import type {OrderProductUpdate}from "@/modules/orders/contracts";
 
 export const runtime = "nodejs";
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -75,3 +76,5 @@ async function readProductUpdates(request: Request): Promise<OrderProductUpdate[
   }
   return items;
 }
+
+export const PATCH = withPersistence(PATCHOperation);

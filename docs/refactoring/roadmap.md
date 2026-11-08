@@ -27,6 +27,24 @@ Sheet mode uses the existing operational workbook only; remove the account-speci
 
 Do not merge security policy changes, launch write-capable smoke tests or touch real Google Sheets, LINE, Loyverse or payroll records as part of documentation maintenance. A separately reviewed implementation and operational verification are required.
 
+## Supabase migration
+
+Phase 1 merged as [PR48](https://github.com/volkswg/stock-management/pull/48),
+commit `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`: private import schema, offline
+tools and synthetic verification. Production persistence remains Google Sheets.
+
+Phase 2 implements the private operational schema, exact archive promotion,
+feature-owned PostgreSQL bindings to existing persistence ports, request-wide
+transactions, durable response replay, safe pooling/access and isolated storage
+selection. The owner approved stable Supabase request keys; Sheets remains the
+production default. See [architecture](../architecture/decisions.md#phase-2-postgresql-operational-persistence)
+and the [migration runbook](../database-migration.md).
+
+Actual frozen-source profiling, hosted staging promotion/reconciliation, realistic
+capacity/latency, independent security/recovery acceptance and production cutover
+remain gated. Synthetic tests do not authorize production enablement. No production
+configuration, hosted data, Drive objects or Sheets records are changed by this PR.
+
 ## Deferred product decisions — not refactoring leftovers
 
 The aggregate Sheets construction/connection behavior and selected `services/`, backend and standalone-script compatibility remain intentionally supported. Workspace/Next shell ownership, PostgreSQL/Supabase migration, authorization/tenancy, subscriptions/billing, Purchase Order Master, provider replacement, and cross-provider transactions/queues/reconciliation need their own product decisions. Existing race, retry and partial-write behavior was preserved, not repaired.

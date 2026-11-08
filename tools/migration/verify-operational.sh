@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+name="stock-operational-verify-$$"
+artifacts=$(mktemp -d)
+cleanup(){ docker --host=unix:///var/run/docker.sock rm -fv "$name" >/dev/null; rm -rf "$artifacts"; }
+trap cleanup EXIT
+docker --host=unix:///var/run/docker.sock run -d --name "$name" -p 127.0.0.1::5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.7 >/dev/null
+for attempt in $(seq 1 60); do
+ if docker --host=unix:///var/run/docker.sock exec "$name" pg_isready -U postgres >/dev/null 2>&1; then break; fi
+ sleep 1
+done
+pg(){ docker --host=unix:///var/run/docker.sock exec -i "$name" "$@"; }
+pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated;'
+for file in supabase/migrations/*.sql; do pg psql -U postgres -v ON_ERROR_STOP=1 < "$file" > "$artifacts/migration.log"; done
+pg psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE stock_test LOGIN PASSWORD 'synthetic-only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS; GRANT stock_runtime TO stock_test;"
+# Phase 1 importer and exact-value operational promotion, using synthetic data only.
+python3 - <<'PY' > "$artifacts/import.sql"
+import sys
+sys.path.insert(0,'tools/migration')
+from core import import_sql
+from test_migration import fixture
+print(import_sql(fixture()))
+PY
+pg psql -U postgres -v ON_ERROR_STOP=1 < "$artifacts/import.sql" > "$artifacts/import.log"
+pg psql -U postgres -v ON_ERROR_STOP=1 < "$artifacts/import.sql" > "$artifacts/reimport.log"
+pg psql -U postgres -v ON_ERROR_STOP=1 < tools/migration/promote.sql > "$artifacts/promote.log"
+if pg psql -U postgres -v ON_ERROR_STOP=1 < tools/migration/promote.sql > "$artifacts/repeat-promotion.log" 2>&1; then
+ echo 'Promotion must reject a nonempty operational target' >&2; exit 1
+fi
+if pg psql -U postgres -v ON_ERROR_STOP=1 -c "UPDATE stock_migration.orders SET id='forbidden'" > "$artifacts/immutable.log" 2>&1; then
+ echo 'Frozen archive unexpectedly accepted an update' >&2; exit 1
+fi
+# Keep promotion fixtures separate from domain-valid application fixtures.
+pg createdb -U postgres application_test
+for file in supabase/migrations/*.sql; do pg psql -U postgres -d application_test -v ON_ERROR_STOP=1 < "$file" > "$artifacts/application-schema.log"; done
+port=$(docker --host=unix:///var/run/docker.sock port "$name" 5432/tcp | sed 's/.*://')
+target_id=$(pg psql -U postgres -d application_test -At -c "SELECT isolation_id FROM stock_operational.environment")
+env -i PATH="$PATH" STOCK_TARGET_ISOLATION_ID="$target_id" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/application_test" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test tools/migration/operational.test.cjs
+pg pg_dump -U postgres -Fc -n stock_operational -n stock_migration > "$artifacts/backup.dump"
+pg pg_dump -U postgres -d application_test -Fc -n stock_operational -n stock_migration > "$artifacts/application.dump"
+pg createdb -U postgres restored
+pg createdb -U postgres restored_application
+pg pg_restore -U postgres -d restored_application --single-transaction --exit-on-error < "$artifacts/application.dump"
+pg pg_restore -U postgres -d restored --single-transaction --exit-on-error < "$artifacts/backup.dump"
+python3 - <<'PY' > "$artifacts/fingerprint.sql"
+import sys
+sys.path.insert(0,'tools/migration')
+from core import CATALOG
+for schema,tables in [('stock_migration',['import_batches']+list(CATALOG)),('stock_operational',['commands','audit','side_effects','environment']+list(CATALOG))]:
+ for table in tables:
+  print(f"SELECT '{schema}.{table}',md5(coalesce(string_agg(v::text,'' ORDER BY v::text),'')) FROM (SELECT to_jsonb(t) v FROM {schema}.{table} t) s;")
+print("SELECT schemaname,tablename,policyname,roles,cmd,qual,with_check FROM pg_policies WHERE schemaname IN ('stock_operational','stock_migration') ORDER BY 1,2,3;")
+print("SELECT table_schema,table_name,grantee,privilege_type FROM information_schema.table_privileges WHERE table_schema IN ('stock_operational','stock_migration') ORDER BY 1,2,3,4;")
+print("SELECT conrelid::regclass::text,conname,pg_get_constraintdef(oid) FROM pg_constraint WHERE connamespace IN ('stock_operational'::regnamespace,'stock_migration'::regnamespace) ORDER BY 1,2;")
+print("SELECT schemaname,tablename,rowsecurity FROM pg_tables WHERE schemaname IN ('stock_operational','stock_migration') ORDER BY 1,2;")
+PY
+pg psql -U postgres -At -v ON_ERROR_STOP=1 < "$artifacts/fingerprint.sql" > "$artifacts/before"
+pg psql -U postgres -At -v ON_ERROR_STOP=1 -d restored < "$artifacts/fingerprint.sql" > "$artifacts/after"
+diff -u "$artifacts/before" "$artifacts/after"
+pg psql -U postgres -At -d application_test -v ON_ERROR_STOP=1 < "$artifacts/fingerprint.sql" > "$artifacts/application-before"
+pg psql -U postgres -At -d restored_application -v ON_ERROR_STOP=1 < "$artifacts/fingerprint.sql" > "$artifacts/application-after"
+diff -u "$artifacts/application-before" "$artifacts/application-after"
+pg psql -U postgres -At -c "SELECT pg_database_size(current_database()),sum(pg_total_relation_size(c.oid)) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('stock_migration','stock_operational');"
+echo 'PASS: archive import, exact operational promotion, application/transaction tests, complete archive+operational backup and restore'

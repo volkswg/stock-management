@@ -11,7 +11,7 @@ export function restoreFeatureSource(file,source){
   source??=readFileSync(file,'utf8');
   source=restoreWorkbookSource(file,source);
   const edit=featuresHistory.edits[file];if(!edit)return source;
-  const current=readFileSync(file,'utf8');assert.equal(hash(current),edit.afterHash,file);
+  const current=restoreWorkbookSource(file);assert.equal(hash(current),edit.afterHash,file);
   let restored=current;
   for(const change of edit.changes.toReversed()){
     assert.equal(restored.slice(change.afterStart,change.afterStart+change.after.length),change.after,file);

@@ -1,3 +1,4 @@
+import {postgresNewFiles} from "./helpers/postgres-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
@@ -16,7 +17,7 @@ import {restoreWorkbookSource} from './helpers/loyverse-workbook-history.mjs';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 test('all seven forwards retire safely with exact canonical function/enum identities, unchanged production bodies and immutable history',()=>{
   assert.equal(existsSync('src/features'),false);assert.equal(Object.keys(featureFiles).length,7);
-  const current=currentSourceFiles('src').filter(f=>!f.endsWith('.tsbuildinfo')).sort().map(file=>[file,hash(restoreWorkbookSource(file))]);
+  const current=currentSourceFiles('src').filter(f=>!f.endsWith('.tsbuildinfo')&&!postgresNewFiles.includes(f)).sort().map(file=>[file,hash(restoreWorkbookSource(file))]);
   assert.equal(current.length,featuresHistory.unchangedProduction.count);
   assert.equal(hash(JSON.stringify(current)),featuresHistory.unchangedProduction.sha256);
   for(const [file,expected]of Object.entries(featuresHistory.fixtureHashes))assert.equal(hash(readFileSync(file)),expected,file);
@@ -40,7 +41,7 @@ test('all seven forwards retire safely with exact canonical function/enum identi
 
 test('physical runtime/type/browser graphs and alias resolution contain no retired feature modules or new cycles/private edges',()=>{
   const graph=userStateGraph(),options=ts.parseJsonConfigFileContent(ts.readConfigFile('tsconfig.json',ts.sys.readFile).config,ts.sys,process.cwd()).options;
-  assert.equal(graph.all.length,389);
+  assert.equal(graph.all.length,389+postgresNewFiles.length);
   const aliases=JSON.parse(readFileSync('tsconfig.json','utf8')).compilerOptions.paths;
   const expected={...featuresHistory.aliasesBefore};delete expected['@/feature/*'];assert.deepEqual(aliases,expected);
   for(const file of graph.all){assert.ok(existsSync(file)&&!file.startsWith('src/features/'),file);

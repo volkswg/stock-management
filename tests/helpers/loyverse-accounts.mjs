@@ -1,3 +1,4 @@
+import {sheetsPersistenceStub} from "./sheets-persistence-stub.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
@@ -36,7 +37,7 @@ export function accountGraph({original=false,config=envConfig(),env={},rows=acco
     const source=original&&accountsBefore.files[file]?accountsBefore.files[file].source:readFileSync(file,'utf8');
     const exports={};cache.set(file,exports);
     const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-    new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date,Request,Response,URL,URLSearchParams,process:{env},console:{error:(...args)=>events.push(['log',...args])},fetch:()=>assert.fail('Live IO forbidden'),...globals,require(spec){
+    new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date,Request,Response,URL,URLSearchParams,process:{env},console:{error:(...args)=>events.push(['log',...args])},fetch:()=>assert.fail('Live IO forbidden'),...globals,require(spec){ const storageStub=sheetsPersistenceStub(spec);if(storageStub)return storageStub;
       if(spec==='server-only')return {};
       if(spec==='@/composition/loyverse-accounts')return load(accountsComposition);
       if(spec==='@/infrastructure/configuration/google-sheets/loyverse-accounts')return load(accountsReader);

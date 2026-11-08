@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -11,7 +12,7 @@ import { listExpenses, listExpenseShops } from "@/modules/expenses/server";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
   const year = searchParams.get("year")?.trim() || getBangkokYear();
   if (!isValidYear(year)) {
@@ -74,3 +75,5 @@ function getBangkokYear(): string {
 function isValidYear(value: string): boolean {
   return /^\d{4}$/.test(value) && Number(value) >= 2000 && Number(value) <= 2100;
 }
+
+export const GET = withPersistence(GETOperation);

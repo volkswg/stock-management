@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -9,7 +10,7 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   try {
     const config = getConfig();
     const accounts = (await listLoyverseAccounts(config)).map(({ id, shopName }) => ({
@@ -94,3 +95,5 @@ function getBangkokDate(): string {
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+export const GET = withPersistence(GETOperation);

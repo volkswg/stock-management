@@ -378,3 +378,40 @@ The final build uses a fresh source-only copy, only tracked .env.example, existi
 Focused tests exercise actual composition/config with fake Google and Loyverse clients: main-workbook selection, ignored/unevaluated obsolete override, missing/invalid IDs, access failure without fallback, metadata confidentiality and independent env rollback. Inherited tests retain six-column validation, ordering/disabled records, Sales sync/reporting, Expenses mappings, HTTP/error parity, financial/stock/payroll behavior, exact source inverses, runtime identities and browser/runtime/type graph guards. No new cycle or private cross-feature edge; application/domain/transport/route code is unchanged. Only composition and config production files change.
 
 Results are Codex-local, not independent CI or live integration verification. Workbook-wide reader access is an owner-reviewed operational risk; former separate-workbook deployments must copy the account tab privately before adopting this version or explicitly use env mode. No real tokens, production data, live provider calls, Vercel settings, deployment or merge were accessed/performed.
+
+## Phase 2 operational storage — isolated verification
+
+Base: merged PR48 `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
+Production defaults remain Google Sheets. All tests below use synthetic data;
+PostgreSQL runners exclude inherited integration credentials with env -i and
+create disposable localhost PostgreSQL 17.7 containers only.
+
+| Gate | Result |
+| --- | --- |
+| Full npm test | 564 pass, zero failures/skips |
+| Python migration/profile/export checks | 18 pass |
+| Real PostgreSQL | 23 pass: all seven module paths, API/LINE boundaries, concurrent replay, actual lost-COMMIT ACK, rollback, stale revisions, receipts/payroll/history |
+| Archive → operational promotion | Exact typed/cell multiset reconciliation; rejects nonempty targets; archive mutation denied |
+| Backup/restore | Both promoted and application-generated databases; full records, journal/effects, constraints, grants and RLS policies match |
+| Typecheck / isolated production build | Pass, /tmp/phase2-final-build; integration credentials excluded |
+| Lint | Exit 0, inherited unused shipmentRow warning only |
+| Source/history | Original application/domain bodies and prior fixtures unchanged; additive exact source witness |
+| Routes / manifest | Existing 23 pages and 35 APIs; unchanged app-paths SHA256 above |
+| Client boundary | All 113 built client JS chunks exclude private DB/config/SQL strings; current browser graphs remain clean |
+
+The 2,000-row synthetic workload confirms a primary-key index scan and measures
+actual Orders list reads plus operational disk usage. It is not a hosted Free-tier
+capacity or throughput forecast. Exact local timings vary with concurrent test
+load; see the reproducible runner's output. Source export tests mock all seven
+batch HTTP requests, verify formatted identities and numeric token precision, and
+prove dry-run performs no network/token access. Browser key tests execute real
+Web Request/Response/crypto APIs in an isolated VM, including lost response,
+reload and body-parse failure; they are not full React/browser visual tests.
+
+Reproduce with npm test, npm run lint, npm run typecheck and
+`bash tools/migration/verify-operational.sh`. Build from a fresh source/dependency
+copy using env -i, not inherited production credentials. The
+[migration runbook](../database-migration.md#phase-2-operational-storage-opt-in-isolated-testing)
+records configuration, external-effect uncertainty, owner-approved frozen export,
+hosted reconciliation, capacity, recovery, authorization and cutover gates. No
+production data or Vercel environment setting is changed by verification.

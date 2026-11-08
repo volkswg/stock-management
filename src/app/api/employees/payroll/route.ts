@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { payrollRevision, calculateEmployeePayroll } from "@/modules/hr/payroll-server";
 import { createPayrollReaders } from "@/composition/hr-payroll";
 import { NextResponse } from "next/server";
@@ -6,7 +7,7 @@ import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   const month = new URL(request.url).searchParams.get("month")?.trim() || "";
   if (!isValidMonth(month)) {
     return NextResponse.json(
@@ -40,3 +41,5 @@ function isValidMonth(value: string): boolean {
   const month = Number(value.slice(5));
   return month >= 1 && month <= 12;
 }
+
+export const GET = withPersistence(GETOperation);

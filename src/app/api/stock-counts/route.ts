@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -10,7 +11,7 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   const month = new URL(request.url).searchParams.get("month")?.trim() || "";
   if (!isValidMonth(month)) {
     return NextResponse.json(
@@ -42,7 +43,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
 }
 
-export async function PUT(request: Request): Promise<NextResponse> {
+async function PUTOperation(request: Request): Promise<NextResponse> {
   const body = await readJsonBody(request);
   if (!isRecord(body)) {
     return invalidInput();
@@ -132,3 +133,6 @@ async function readJsonBody(request: Request): Promise<unknown> {
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+export const GET = withPersistence(GETOperation);
+export const PUT = withPersistence(PUTOperation);

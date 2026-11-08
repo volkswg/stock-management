@@ -2,7 +2,7 @@
 
 ## Current system
 
-Business workflows belong to the Orders, Shipments, Inventory, Sales, Expenses, HR and LINE modules. Feature-owned Google Sheets adapters implement application ports. Shared Google auth/Sheets/Drive and LINE/Loyverse transports live in `src/infrastructure/`; `src/composition/` wires the existing aggregate Sheets service and cross-feature readers. Pure protocols and utilities live in `src/shared/`.
+Business workflows belong to the Orders, Shipments, Inventory, Sales, Expenses, HR and LINE modules. Feature-owned persistence mappers implement application ports, using Google Sheets by default or private PostgreSQL operational bindings in isolated staging. Shared Google auth/Sheets/Drive and LINE/Loyverse transports live in `src/infrastructure/`; `src/composition/` wires the existing aggregate Sheets service and cross-feature readers. Pure protocols and utilities live in `src/shared/`.
 
 The external compatibility directory `src/externals/` was retired in [PR #40](https://github.com/volkswg/stock-management/pull/40); the pure aggregate Sheets service contract is at `src/infrastructure/persistence/google-sheets/service-contracts.ts`. The seven `src/features/` forwards and unused `@/feature/*` alias are also retired; their canonical owners are unchanged. Reviewed `services/` and standalone script compatibility surfaces remain. This is a structural milestone, **not** a database replacement or production-security certification.
 
@@ -21,7 +21,7 @@ The external compatibility directory `src/externals/` was retired in [PR #40](ht
 
 ## Database migration preparation
 
-The [database migration runbook](../database-migration.md) describes the private PostgreSQL schema, source audit, offline tools, synthetic verification and remaining acceptance gates. Runtime persistence remains Google Sheets.
+The [database migration runbook](../database-migration.md) describes the private PostgreSQL schema, source audit, offline tools, synthetic verification and remaining acceptance gates. Runtime persistence remains Google Sheets. Phase 2 adds opt-in isolated PostgreSQL persistence through the [operational persistence decision](decisions.md#phase-2-postgresql-operational-persistence); production remains on Sheets.
 
 ## Documentation ownership
 

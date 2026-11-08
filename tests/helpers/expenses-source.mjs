@@ -1,3 +1,4 @@
+import {sheetsPersistenceStub} from "./sheets-persistence-stub.mjs";
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {posix} from 'node:path';
@@ -8,7 +9,7 @@ const allowed=new Set(['src/services/expenses/manageExpenses.ts','src/services/e
 export function loadExpenseSource(file,{imports={},globals={}}={}){
  const cache=new Map();function load(file){assert.ok(allowed.has(file),`Unapproved Expense source ${file}`);if(cache.has(file))return cache.get(file);
   const exports={},code=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;cache.set(file,exports);
-  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date,fetch:()=>assert.fail('Live IO forbidden'),...globals,require(spec){if(spec==='server-only')return {};if(spec==='node:crypto'){assert.ok(imports[spec]);return imports[spec];}
+  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date,fetch:()=>assert.fail('Live IO forbidden'),...globals,require(spec){ const storageStub=sheetsPersistenceStub(spec);if(storageStub)return storageStub;if(spec==='server-only')return {};if(spec==='node:crypto'){assert.ok(imports[spec]);return imports[spec];}
    if(spec==='./expenses/const'&&imports['./types'])return imports['./types'];
    let target=spec.startsWith('@/')?'src/'+spec.slice(2):posix.normalize(posix.dirname(file)+'/'+spec);target+=existsSync(target+'.ts')?'.ts':'/index.ts';return load(target);
   }});return exports;

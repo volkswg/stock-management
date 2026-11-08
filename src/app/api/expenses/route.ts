@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -11,7 +12,7 @@ function failed(error: unknown) {
   console.error("Expense operation failed", error instanceof Error ? error.message : "Unknown error");
   return NextResponse.json({ ok: false, error: "Expense operation failed. Please retry." }, { status: 500 });
 }
-export async function GET(request: Request) {
+async function GETOperation(request: Request) {
   const month = new URL(request.url).searchParams.get("month") || "";
   if (!validMonth(month)) return NextResponse.json({ ok: false, error: "Select a valid month." }, { status: 400 });
   try {
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, month, expenses: expenses.filter(row => row.month === month), shops, categories });
   } catch (error) { return failed(error); }
 }
-export async function POST(request: Request) {
+async function POSTOperation(request: Request) {
   try {
     const body: unknown = await request.json().catch(() => null);
     if (!isRecord(body) || typeof body.amount !== "number") throw new ExpenseError("Enter valid expense details.");
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, id });
   } catch (error) { return failed(error); }
 }
-export async function DELETE(request: Request) {
+async function DELETEOperation(request: Request) {
   try {
     const body: unknown = await request.json().catch(() => null);
     if (!isRecord(body) || !string(body.id)) throw new ExpenseError("Expense ID is required.");
@@ -37,3 +38,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) { return failed(error); }
 }
+
+export const GET = withPersistence(GETOperation);
+export const POST = withPersistence(POSTOperation);
+export const DELETE = withPersistence(DELETEOperation);

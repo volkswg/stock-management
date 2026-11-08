@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
@@ -15,7 +16,7 @@ const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 
 type OrderImageType = "bill" | "product";
 
-export async function POST(
+async function POSTOperation(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -139,3 +140,5 @@ function getImageExtension(contentType: string): string {
   if (contentType === "image/webp") return ".webp";
   return "";
 }
+
+export const POST = withPersistence(POSTOperation);

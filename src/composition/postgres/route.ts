@@ -1,0 +1,62 @@
+import { executeCommand, hashIntent } from "@/infrastructure/persistence/postgres/commands";
+import "server-only";
+import { createHash, timingSafeEqual } from "node:crypto";
+import { currentTransaction, storageMode, stagingSettings, transaction, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
+
+type StoredResponse = { status: number; body: string; headers: [string,string][] };
+function equal(a: string, b: string) { const left = Buffer.from(a), right = Buffer.from(b); return left.length === right.length && timingSafeEqual(left,right); }
+export function authorizeStaging(request: Request) {
+  const { token } = stagingSettings();
+  const supplied = request.headers.get("authorization") || "";
+  if (!equal(supplied, `Bearer ${token}`)) throw new PersistenceFailure(401,"Staging authorization required.");
+}
+function restore(value: StoredResponse): Response { return new Response(Buffer.from(value.body,"base64"),{status:value.status,headers:value.headers}); }
+class RejectedResponse extends PersistenceFailure {
+  constructor(readonly response: Response) { super(response.status); }
+}
+async function requestIntent(request: Request) {
+  if (request.headers.get("content-type")?.includes("multipart/form-data")) {
+    const form = await request.clone().formData(), entries: unknown[] = [];
+    for (const [key,value] of form.entries()) entries.push(typeof value === "string" ? [key,value] : [key,value.name,value.type,createHash("sha256").update(Buffer.from(await value.arrayBuffer())).digest("hex")]);
+    return hashIntent(entries);
+  }
+  const text = await request.clone().text();
+  try { return hashIntent(JSON.parse(text)); } catch { return hashIntent(text); }
+}
+export function withPersistence<Args extends unknown[], Result extends Response>(handler: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result> {
+  return async (...args) => {
+    try {
+      if (storageMode() === "google-sheets") return handler(...args);
+      const request = args[0] as Request;
+      if (!(request instanceof Request)) throw new PersistenceFailure(503,"A staging request context is required.");
+      const isLine = new URL(request.url).pathname === "/api/line/webhook";
+      if (isLine) { stagingSettings(); return handler(...args); }
+      authorizeStaging(request);
+      const method=request.method.toUpperCase();
+      if (method === "GET" || method === "HEAD") return await transaction(false,async()=>{
+        const response=await handler(...args);
+        response.headers.set("x-stock-revision",await readRevision());
+        return response;
+      });
+      const kind=method+":"+new URL(request.url).pathname;
+      const stored = await executeCommand<StoredResponse>(kind,request.headers.get("Idempotency-Key") || "",hashIntent({query:new URL(request.url).search,body:await requestIntent(request)}),async () => {
+        const expected=request.headers.get("If-Match");
+        if(expected && expected !== await readRevision()) throw new PersistenceFailure(409,"Storage revision changed. Refresh before retrying.");
+        const response = await handler(...args);
+        if (response.status >= 400) throw new RejectedResponse(response);
+        response.headers.set("x-stock-revision",await readRevision());
+        return { status:response.status,body:Buffer.from(await response.clone().arrayBuffer()).toString("base64"),headers:[...response.headers.entries()] };
+      });
+      return restore(stored) as Result;
+    } catch (error) {
+      if (error instanceof RejectedResponse) return error.response as Result;
+      const safe=error instanceof PersistenceFailure ? error : new PersistenceFailure();
+      return Response.json({error:safe.message},{status:safe.status}) as Result;
+    }
+  };
+}
+async function readRevision(): Promise<string> {
+  const result=await currentTransaction().query("SELECT coalesce(max(sequence),0)::text AS revision FROM stock_operational.audit");
+  return `"stock-${result.rows[0].revision}"`;
+}
+export function activeDatabase() { return currentTransaction(); }
