@@ -11,11 +11,12 @@ import {ordersLineGraph} from './helpers/orders-line-source.mjs';
 import {loadSource} from './helpers/load-source.mjs';
 import {currentSourceFiles} from './helpers/retirement-history.mjs';
 import {userStateGraph} from './helpers/user-state-worksheet-graph.mjs';
+import {restoreWorkbookSource} from './helpers/loyverse-workbook-history.mjs';
 
 const hash=value=>createHash('sha256').update(value).digest('hex');
 test('all seven forwards retire safely with exact canonical function/enum identities, unchanged production bodies and immutable history',()=>{
   assert.equal(existsSync('src/features'),false);assert.equal(Object.keys(featureFiles).length,7);
-  const current=currentSourceFiles('src').filter(f=>!f.endsWith('.tsbuildinfo')).sort().map(file=>[file,hash(readFileSync(file))]);
+  const current=currentSourceFiles('src').filter(f=>!f.endsWith('.tsbuildinfo')).sort().map(file=>[file,hash(restoreWorkbookSource(file))]);
   assert.equal(current.length,featuresHistory.unchangedProduction.count);
   assert.equal(hash(JSON.stringify(current)),featuresHistory.unchangedProduction.sha256);
   for(const [file,expected]of Object.entries(featuresHistory.fixtureHashes))assert.equal(hash(readFileSync(file)),expected,file);

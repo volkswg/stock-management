@@ -11,7 +11,7 @@ export const accountHeaders=['id','shopName','storeId','accessToken','active','s
 export const exampleAccounts=[{id:'first',shopName:'First Shop',accessToken:'synthetic-first-secret',storeId:'store-1'},{id:'second',shopName:'Second Shop',accessToken:'synthetic-second-secret'}];
 export const accountRows=()=>[accountHeaders, ['second','Second Shop','','synthetic-second-secret',true,20], ['disabled','Old Shop','','',false,30], ['first','First Shop','store-1','synthetic-first-secret','TRUE','10']];
 export const envConfig=()=>({loyverse:{accounts:structuredClone(exampleAccounts)},googleSheets:{spreadsheetId:'operations'},googleService:{accountEmail:'fake@example.test',accountPrivateKey:'synthetic-key'}});
-export const sheetConfig=()=>({...envConfig(),loyverse:{accountSource:'sheet',accountsSpreadsheetId:'private-accounts',accounts:[]}});
+export const sheetConfig=()=>({...envConfig(),loyverse:{accountSource:'sheet',accounts:[]}});
 
 // A closed loader for actual configuration/reader/composition and captured HTTP.
 // Only provider classes, operational Sheets and feature endpoints are injected.

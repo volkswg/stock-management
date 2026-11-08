@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {restoreWorkbookSource} from './loyverse-workbook-history.mjs';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 export const accountsHistory=JSON.parse(readFileSync('tests/fixtures/loyverse-accounts-before.json','utf8'));
@@ -8,9 +9,10 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 // Exact bounded inverses only for this feature's reviewed edits. Historical tests
 // retain their original hashes; current executable loaders always read real files.
 export function restoreAccountSource(file,source=readFileSync(file,'utf8')) {
+  source=restoreWorkbookSource(file,source);
   const edit=accountsHistory.edits[file];
   if(!edit)return source;
-  const current=readFileSync(file,'utf8');
+  const current=restoreWorkbookSource(file);
   assert.equal(hash(current),edit.afterHash,file);
   let restored=current;
   for(const change of edit.changes.toReversed()){

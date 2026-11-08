@@ -13,9 +13,13 @@ The cleanup landed at `3c870ef122c640c6ed8958dadb83ae714094dfb5`; PR43 then land
 
 Merged [PR43](https://github.com/volkswg/stock-management/pull/43) supports account credentials in a separate privately shared Google workbook behind a server-only reader, with explicit env/sheet selection and env as the default. All metadata/client consumers use that seam without changing business worksheets, IDs or calculations. JSON support remains for rollback; owner-run sharing, data copy, Vercel enablement and live verification are described in [README](../../README.md#loyverse-configuration). This work neither performs production migration/deployment nor implements issue #38.
 
-## Current bounded cleanup: retire src/features
+## Completed: retire src/features (PR44)
 
-Remove the seven obsolete backend forwards and unused singular path alias, migrate test/type consumers to existing owners and preserve every historical witness. Business implementations, production imports, schemas, environment settings and provider behavior remain unchanged. The audit found no known required external consumer. Review the single cleanup PR before any merge; remaining service/script compatibility is outside scope.
+Merged PR44 removed the seven obsolete backend forwards and unused singular path alias, migrated test/type consumers to existing owners and preserved every historical witness. Business implementations, production imports, schemas, environment settings and provider behavior remain unchanged. The audit found no known required external consumer. Remaining service/script compatibility is outside that cleanup scope.
+
+## Current bounded change: one Loyverse workbook
+
+Sheet mode uses the existing operational workbook only; remove the account-specific workbook setting and any workbook-selection fallback. Preserve env rollback, account validation/order, public metadata and credential confidentiality. The owner must restrict/audit workbook readers before storing tokens; hiding a tab does not isolate read access. No production workbook, sharing, Vercel setting or deployment changes are part of implementation.
 
 ## Next: production-readiness gate (open, not implemented)
 
