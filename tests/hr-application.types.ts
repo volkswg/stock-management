@@ -1,4 +1,4 @@
-import type { IGoogleSheetsService } from '../src/externals/google/sheet/types';
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { Employee, EmployeeCompensation, EmployeeInput, EmployeeTimesheet, EmployeeTimesheetStatus, EmployeeWorkdayType } from '../src/modules/hr/contracts';
 import * as employees from '../src/services/employees/manageEmployees';
 import * as attendance from '../src/services/employees/manageEmployeeTimesheets';

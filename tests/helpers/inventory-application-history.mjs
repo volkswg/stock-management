@@ -1,5 +1,5 @@
 import {restoreOrdersLineSource} from "./orders-line-history.mjs";
-import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';
+import assert from 'node:assert/strict';import {readEvidence as readFileSync} from "./retirement-history.mjs";import{createHash}from'node:crypto';
 import{inventoryOwners}from'./inventory-source.mjs';
 export const inventoryApplicationBefore=JSON.parse(readFileSync('tests/fixtures/inventory-application-before.json','utf8'));
 const priorSources=new Map();

@@ -1,11 +1,11 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { plain } from "./helpers/load-source.mjs";
 import { shipmentServices, fakeShipmentSheets, shipmentRow, SHIPMENT_TIME } from "./helpers/shipments.mjs";
 
 const { services } = shipmentServices();
-const fixture = JSON.parse(readFileSync(new URL("./fixtures/shipments-read.json", import.meta.url), "utf8"));
+const fixture = JSON.parse(readArchive(new URL("./fixtures/shipments-read.json", import.meta.url), "utf8"));
 
 test("original shipment list/detail preserve exact JSON, trimming, statuses, deleted/duplicate data and read order", async () => {
   const h = fakeShipmentSheets(fixture.rows);

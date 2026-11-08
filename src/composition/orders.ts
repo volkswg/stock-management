@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { OrderDetail } from "@/modules/orders/contracts";
 import { getOrderDetail as executeGetOrderDetail } from "@/modules/orders/server";
 import { GoogleSheetsOrderDetailShipmentProjection } from "@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection";

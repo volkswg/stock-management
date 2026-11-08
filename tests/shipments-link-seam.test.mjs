@@ -1,6 +1,7 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 import { shipmentServices, fakeShipmentSheets, shipmentRow, shipmentRoutes, shipmentParams, jsonRequest, ShipmentClock, SHIPMENT_TIME } from "./helpers/shipments.mjs";
@@ -96,7 +97,7 @@ test("actual composed linking equals saved original for malformed rows/collectio
 });
 
 test("exact five historical declarations preserved, four moved helpers unchanged, class/types/mapping/composition parity", () => {
-  const baseline = JSON.parse(readFileSync("tests/fixtures/shipments-structure.json", "utf8")); assert.equal(migratedLinkFunctions.size, 5);
+  const baseline = JSON.parse(readArchive("tests/fixtures/shipments-structure.json", "utf8")); assert.equal(migratedLinkFunctions.size, 5);
   for (const key of migratedLinkFunctions) assertShipmentLinkHistory(key, baseline.functions[key]);
   assertLinkClassTypesAndMapping();
 });
@@ -141,15 +142,15 @@ test("actual worksheet/transport path preserves three GET ranges, encoded names 
   for (const mode of ["new", "same", "conflict", "append-failure"]) {
     const requests = [], rows = valid(); rows.shipmentOrders = mode === "same" ? [["l", "s/1", "o/1"]] : mode === "conflict" ? [["l", "other", "o/1"]] : [];
     const constants = load("src/externals/google/sheet/const.ts");
-    const { GoogleSheetsClient } = loadSource("src/externals/google/sheet/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => {
+    const { GoogleSheetsClient } = loadSource("src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => {
       requests.push({ url, init }); if (init.method === "POST") return mode === "append-failure" ? new Response("failure", { status: 500 }) : Response.json({});
       const name = decodeURIComponent(new URL(url).pathname.split("/values/")[1]).split("!")[0].slice(1, -1).replaceAll("''", "'");
       return Response.json({ values: rows[name.slice("Synthetic ' ".length)] });
     } } });
-    const { BaseGoogleSheet } = loadSource("src/externals/google/sheet/sheets/BaseGoogleSheet.ts"), sheets = {};
+    const { BaseGoogleSheet } = loadSource("src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts"), sheets = {};
     for (const [property, folder, name] of [["shipments", "shipments", "ShipmentsSheet"], ["orders", "orders", "OrdersSheet"], ["shipmentOrders", "shipment-orders", "ShipmentOrdersSheet"]]) {
-      const imports = { "../BaseGoogleSheet": { BaseGoogleSheet }, "../../const": constants }; if (folder !== "orders") imports["./const"] = loadSource(`src/externals/google/sheet/sheets/${folder}/const.ts`);
-      const Class = loadSource(`src/externals/google/sheet/sheets/${folder}/${name}.ts`, { imports })[name];
+      const imports = { "../BaseGoogleSheet": { BaseGoogleSheet }, "../../const": constants }; if (folder !== "orders") imports["./const"] = loadSource(canonicalPath(`src/externals/google/sheet/sheets/${folder}/const.ts`));
+      const Class = loadSource(canonicalPath(`src/externals/google/sheet/sheets/${folder}/${name}.ts`), { imports })[name];
       sheets[property] = new Class(new GoogleSheetsClient({ getAccessToken: async () => "fake-token" }, "fake sheet/id"), `Synthetic ' ${property}`);
     }
     const store = new GoogleSheetsShipmentOrderLinkStore(sheets), deps = { store, now: () => SHIPMENT_TIME, createId: () => "synthetic-shipment-id" };

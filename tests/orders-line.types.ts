@@ -1,6 +1,6 @@
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
-import type { LineBotService } from "@/externals/line";
+import type { LineBotService } from "@/infrastructure/external/line/LineBotService";
 import type { LineEvent, LineReplyMessage } from "@/shared/types/line-protocol";
 import type { Order, OrderBill, OrderItem, CreatedOrder } from "@/modules/orders/contracts";
 import type { MovementState, UserState } from "@/modules/line-workflows/contracts";

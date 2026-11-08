@@ -1,3 +1,6 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
 import { sheetTypeFiles, assertOrdersSheetTypeHistory } from "./helpers/orders-sheet-type-history.mjs";
 import { assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
@@ -6,18 +9,17 @@ import { assertOrdersDetailServerHistory } from "./helpers/orders-detail-history
 import { assertShipmentDriveRouteHistory } from "./helpers/shipments-drive-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { loadSource, plain } from "./helpers/load-source.mjs";
 import { shipmentUiPath } from "./helpers/shipment-ui-paths.mjs";
 import { componentHarness, elements, flush } from "./helpers/component-harness.mjs";
 
-const baseline = JSON.parse(readFileSync(new URL("./fixtures/shipments-browser-client.json", import.meta.url), "utf8"));
+const baseline = JSON.parse(readArchive(new URL("./fixtures/shipments-browser-client.json", import.meta.url), "utf8"));
 const hash = value => createHash("sha256").update(value).digest("hex"), printer = ts.createPrinter();
-const parse = file => ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+const parse = file => ts.createSourceFile(file, readArchive(file, "utf8"), ts.ScriptTarget.Latest, true);
 const apiPath = () => shipmentUiPath("api.ts");
-const api = fetch => loadSource(apiPath(), { globals: { Error, FormData, File, fetch } });
+const api = fetch => loadSource(canonicalPath(apiPath()), { globals: { Error, FormData, File, fetch } });
 const one = (tree, name, predicate = () => true) => { const e = elements(tree, name).find(e => predicate(e.props)); assert.ok(e, name); return e; };
 
 test("original client raw bytes, every function/guard and all seven exported types remain identical", () => {
@@ -134,7 +136,7 @@ test("completed client move has exactly three resolved consumers, no retired app
       if (!(ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) || !node.moduleSpecifier) continue;
       const specifier = node.moduleSpecifier.text;
       assert.ok(!/(^|\/)app\/shipments\/api(?:\.ts)?$/.test(specifier), `${file}: retired ${specifier}`);
-      const target = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
+      const target = ts.resolveModuleName(specifier, resolve(file), options, evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;
       if (target && relative(process.cwd(), target) === baseline.to) consumers.push(file);
     }
   }

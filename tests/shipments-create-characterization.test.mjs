@@ -1,11 +1,11 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { shipmentServices, ShipmentClock } from "./helpers/shipments.mjs";
 import { plain } from "./helpers/load-source.mjs";
 import { deferred, flush } from "./helpers/component-harness.mjs";
 
-const before = JSON.parse(readFileSync(new URL("./fixtures/shipments-create-before.json", import.meta.url), "utf8"));
+const before = JSON.parse(readArchive(new URL("./fixtures/shipments-create-before.json", import.meta.url), "utf8"));
 
 for (const [index, fixture] of before.cases.entries()) test(`creation legacy compatibility matches original fields, field order and single A:M row: case ${index + 1}`, async () => {
   const { services, load } = shipmentServices(), appends = [];

@@ -1,5 +1,5 @@
+import {readEvidence,readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { ESLint } from "eslint";
@@ -10,8 +10,8 @@ async function reject(filePath,code){const [result]=await eslint.lintText(code,{
 
 test("new DTO shapes pass exact scopes while pure enum, Orders/server scopes and both Shipment UI scopes retain previous enforcement",async()=>{
   for(const file of [dtoContract,dtoLegacy,status]){const [r]=await eslint.lintFiles(file);assert.equal(r.errorCount,0,JSON.stringify(r.messages));assert.equal(r.warningCount,0);}
-  for(const [file,saved]of Object.entries(dtoBefore.boundaries))if(file!=="eslint/shipments-boundaries.mjs")assert.equal(readFileSync(file,"utf8"),saved.source,file);
-  const file="eslint/shipments-boundaries.mjs",before=dtoBefore.boundaries[file].source,current=readFileSync(file,"utf8");
+  for(const [file,saved]of Object.entries(dtoBefore.boundaries))if(file!=="eslint/shipments-boundaries.mjs")assert.equal(readEvidence(file,"utf8"),saved.source,file);
+  const file="eslint/shipments-boundaries.mjs",before=dtoBefore.boundaries[file].source,current=readArchive(file,"utf8");
   assert.equal(current.slice(0,current.indexOf("const dtoNames")),before.slice(0,before.indexOf("const dtoNames")),"Original browser/client helper rules unchanged");
   const branch=s=>{let found;function visit(n){if(ts.isIfStatement(n)&&n.expression.getText(s)==='file.endsWith("/modules/shipments/status.ts")')found=n.thenStatement;ts.forEachChild(n,visit);}visit(s);assert.ok(found);return dtoPrint(found,s);};
   assert.equal(branch(dtoParse(file)),branch(dtoParse(file,before)),"Physical enum rule unchanged");
@@ -20,7 +20,7 @@ test("new DTO shapes pass exact scopes while pure enum, Orders/server scopes and
 });
 
 test("physical public DTO contract rejects legacy reverse edges, alias/relative/provider/type-value/import-type/dynamic and duplicate-definition bypasses",async()=>{
-  const code=readFileSync(dtoContract,"utf8");
+  const code=readArchive(dtoContract,"utf8");
   for(const bad of [dtoBefore.sources[dtoContract].source,
     code.replace('"./status"','"@/modules/shipments/status"'),code.replace('"./status"','"@/services/shipments/types"'),
     code.replace('"@/modules/orders/contracts"','"../../orders/contracts"'),code.replace('import type { OrderStatus }','import { OrderStatus }'),
@@ -37,7 +37,7 @@ test("physical public DTO contract rejects legacy reverse edges, alias/relative/
 });
 
 test("legacy leaf forwards only the public enum and eight erased named DTOs, rejecting alternate/relative/extra/runtime and dynamic dependencies",async()=>{
-  const code=readFileSync(dtoLegacy,"utf8");
+  const code=readArchive(dtoLegacy,"utf8");
   for(const bad of [dtoBefore.sources[dtoLegacy].source,
     code.replaceAll('"@/modules/shipments/contracts"','"../../modules/shipments/contracts"'),code.replaceAll('"@/modules/shipments/contracts"','"@/services/shipments"'),
     code.replaceAll('"@/modules/shipments/contracts"','"@/modules/shipments/status"'),code.replace('export type {','export {'),

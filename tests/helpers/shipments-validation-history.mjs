@@ -1,6 +1,6 @@
 import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import { createHash } from "node:crypto";
 import ts from "typescript";
 export const shipmentValidationFile="src/features/backend/shipments/utils.ts";

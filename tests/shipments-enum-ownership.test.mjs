@@ -1,3 +1,6 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import { completionExtraFiles, completionNewFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { hrFiles, hrNewFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
 import { expensesFiles, expensesNewFiles, assertExpensesHistory } from "./helpers/expenses-business-history.mjs";
@@ -15,7 +18,7 @@ import { googleFiles, googleDestinations, assertGoogleHistory } from "./helpers/
 import { shipmentHttpFiles, assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import { shipmentValidationFile, assertShipmentValidationImportHistory } from "./helpers/shipments-validation-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import {readdirSync} from "node:fs";
 import { relative, resolve } from "node:path";
 import test from "node:test";
 import ts from "typescript";
@@ -38,10 +41,10 @@ test("exactly one physical ShipmentStatus declaration retains original source/AS
   assert.deepEqual(definitions, [[physical,enumBefore.enum.source]]);
   const source=enumParse(physical); assert.equal(source.statements.length,1);
   const compile = text => ts.transpileModule(text, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  assert.equal(compile(readFileSync(physical,"utf8")), compile(enumBefore.enum.source));
+  assert.equal(compile(readArchive(physical,"utf8")), compile(enumBefore.enum.source));
   assert.equal(enumHash(enumPrint(source.statements[0],source)),enumBefore.enum.sha256);
   const fail=()=>assert.fail("Pure enum evaluated IO, a clock or an import");
-  const loaded=loadSource(physical,{globals:{Date:fail,fetch:fail,Buffer:undefined,process:undefined,Math:{random:fail}}});
+  const loaded=loadSource(canonicalPath(physical),{globals:{Date:fail,fetch:fail,Buffer:undefined,process:undefined,Math:{random:fail}}});
   assert.deepEqual(Object.keys(loaded),["ShipmentStatus"]);
   assert.deepEqual(Object.entries(loaded.ShipmentStatus),enumBefore.enum.keys.map((key,i)=>[key,enumBefore.enum.values[i]]));
 });
@@ -55,11 +58,11 @@ test("physical, public, legacy leaf and unchanged barrel share one cached enum r
   assert.equal(services.ShipmentStatus[token],true); assert.equal(load(contract).ShipmentStatus[token],true); delete definition.ShipmentStatus[token];
   assert.deepEqual(Object.keys(load(contract)),enumBefore.enum.exports);
   const original=originalEnumGraph().load("src/services/shipments/index.ts"); assert.deepEqual(Object.keys(services).sort(),Object.keys(original).sort());
-  assert.equal(enumHash(readFileSync("src/services/shipments/index.ts")),enumBefore.sources["src/services/shipments/index.ts"].sha256);
+  assert.equal(enumHash(readArchive("src/services/shipments/index.ts")),enumBefore.sources["src/services/shipments/index.ts"].sha256);
 });
 
 test("only the two reviewed existing production files change; all other source, routes, clients, DTO owners and provider bytes remain exact", () => {
-  const changes=Object.entries(enumBefore.productionHashes).filter(([file,hash])=>{if(completionExtraFiles.has(file)){assertCompletionHistory(file,hash);return false;}else if(hrFiles.has(file)){assertHRHistory(file,hash);return false;}else if(expensesFiles.has(file)){assertExpensesHistory(file,hash);return false;}else if(remainingFiles.has(file)){assertRemainingHistory(file,hash);return false;}else if(userStateFiles.has(file)){assertUserStateHistory(file,hash);return false;}if(salesQueryFiles.has(file)){assertSalesQueryHistory(file,hash);return false;}if(movementSchemaFiles.has(file)){assertMovementSchemaHistory(file,hash);return false;}if(inventoryWorksheetFiles.has(file)){assertInventoryWorksheetHistory(file,hash);return false;}if(hrWorksheetFiles.has(file)){assertHrWorksheetHistory(file,hash);return false;}if(directoryFiles.has(file)){assertDirectoryHistory(file,hash);return false;}if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return enumHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
+  const changes=Object.entries(enumBefore.productionHashes).filter(([file,hash])=>{if(completionExtraFiles.has(file)){assertCompletionHistory(file,hash);return false;}else if(hrFiles.has(file)){assertHRHistory(file,hash);return false;}else if(expensesFiles.has(file)){assertExpensesHistory(file,hash);return false;}else if(remainingFiles.has(file)){assertRemainingHistory(file,hash);return false;}else if(userStateFiles.has(file)){assertUserStateHistory(file,hash);return false;}if(salesQueryFiles.has(file)){assertSalesQueryHistory(file,hash);return false;}if(movementSchemaFiles.has(file)){assertMovementSchemaHistory(file,hash);return false;}if(inventoryWorksheetFiles.has(file)){assertInventoryWorksheetHistory(file,hash);return false;}if(hrWorksheetFiles.has(file)){assertHrWorksheetHistory(file,hash);return false;}if(directoryFiles.has(file)){assertDirectoryHistory(file,hash);return false;}if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return enumHash(readArchive(file))!==hash;}).map(([file])=>file).sort();
   assert.deepEqual(changes,[contract,legacy].sort());
   assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(enumBefore.productionHashes,f)&&!googleDestinations.includes(f)&&!worksheetDestinations.includes(f)&&!salesWorksheetDestinations.includes(f)&&!directoryNewFiles.includes(f)&&!hrWorksheetDestinations.includes(f)&&!inventoryWorksheetDestinations.includes(f)&&!movementSchemaNewFiles.includes(f)&&!salesQueryNewFiles.includes(f)&&!userStateDestinations.includes(f)&&!remainingDestinations.includes(f)&&!expensesNewFiles.includes(f)&&!hrNewFiles.includes(f)&&!completionNewFiles.includes(f)),[physical]);
   assert.equal(enumBefore.productionTypeScriptCount,277);
@@ -70,7 +73,7 @@ test("only the two reviewed existing production files change; all other source, 
 test("original public contract raw hashes remain authoritative with only the exact status forwarding source reversed", () => {
   const expected="77753cb8809856586d5399999b7be5ca5ca8983a8e67897391b976cac2aacd78";
   for(const file of ["shipments-browser-client.json","shipments-ui-relocation.json"]) {
-    const fixture=JSON.parse(readFileSync(`tests/fixtures/${file}`,"utf8")); assert.equal(fixture.retained[contract],expected);
+    const fixture=JSON.parse(readArchive(`tests/fixtures/${file}`,"utf8")); assert.equal(fixture.retained[contract],expected);
     assertShipmentEnumContractHistory(contract,expected);
   }
   const source=enumParse(contract), original=enumParse(legacy,enumBefore.sources[legacy].source);
@@ -84,7 +87,7 @@ function dependencies(file,types) {
     if(!(ts.isImportDeclaration(n)||ts.isExportDeclaration(n))||!n.moduleSpecifier)return [];
     const c=n.importClause,e=c?.namedBindings&&ts.isNamedImports(c.namedBindings)?c.namedBindings.elements:undefined;
     const erased=n.isTypeOnly||c?.isTypeOnly||(e?.length&&!c.name&&e.every(x=>x.isTypeOnly)); if(!types&&erased)return [];
-    const target=ts.resolveModuleName(n.moduleSpecifier.text,resolve(file),options,ts.sys).resolvedModule?.resolvedFileName;
+    const target=ts.resolveModuleName(n.moduleSpecifier.text,resolve(file),options,evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;
     return target&&relative(process.cwd(),target).startsWith("src/")?[relative(process.cwd(),target).replaceAll("\\","/")]:[];
   });
 }

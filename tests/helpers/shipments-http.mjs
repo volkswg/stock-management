@@ -1,3 +1,4 @@
+import {canonicalPath} from "./retirement-history.mjs";
 import vm from "node:vm";
 import ts from "typescript";
 import {loadSource,plain} from "./load-source.mjs";
@@ -17,7 +18,7 @@ export async function runShipmentHttpCase(example,{original=false}={}){
   "@/services/shipments":services,"@/modules/shipments/server":load("src/modules/shipments/server.ts"),"@/modules/shipments/contracts":load("src/modules/shipments/contracts.ts"),
   "@/features/backend/shared/utils":load("src/features/backend/shared/utils.ts"),"@/features/backend/shipments/utils":load("src/features/backend/shipments/utils.ts")};
  const globals={Date:ShipmentClock,Error,File,console:logger};
- function route(name){const file=routes[name];if(!original)return loadSource(file,{imports,globals});
+ function route(name){const file=routes[name];if(!original)return loadSource(canonicalPath(file),{imports,globals});
   const exports={},output=ts.transpileModule(shipmentHttpBefore.sources[file].source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   new vm.Script(output,{filename:file}).runInNewContext({exports,Buffer,URL,URLSearchParams,...globals,require:specifier=>{if(!Object.hasOwn(imports,specifier))throw new Error(`Unapproved historical route import ${specifier}`);return imports[specifier];}});return exports;
  }

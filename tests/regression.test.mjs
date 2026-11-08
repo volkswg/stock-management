@@ -1,6 +1,6 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { loadSource, plain } from "./helpers/load-source.mjs";
 import { routeContracts } from "./helpers/routes.mjs";
@@ -80,8 +80,8 @@ test("movement notes sum standalone quantities and preserve label text", () => {
 });
 
 test("LINE validates the exact raw body and rejects changed, missing, or invalid signatures", () => {
-  const constants = loadSource("src/externals/line/const.ts");
-  const { LineBotService } = loadSource("src/externals/line/LineBotService.ts", {
+  const constants = loadSource("src/infrastructure/external/line/const.ts");
+  const { LineBotService } = loadSource("src/infrastructure/external/line/LineBotService.ts", {
     imports: { "node:crypto": crypto, "./const": constants },
   });
   const secret = "synthetic-test-secret";
@@ -97,8 +97,8 @@ test("LINE validates the exact raw body and rejects changed, missing, or invalid
 
 function sheetsHarness(responses) {
   const requests = [];
-  const { GoogleSheetsClient } = loadSource("src/externals/google/sheet/client/GoogleSheetsClient.ts", {
-    imports: { "../const": loadSource("src/externals/google/sheet/const.ts") },
+  const { GoogleSheetsClient } = loadSource("src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts", {
+    imports: { "../const": loadSource("src/infrastructure/persistence/google-sheets/const.ts") },
     globals: {
       fetch: async (url, init) => {
         requests.push({ url, init });
@@ -136,6 +136,6 @@ test("Sheets writes preserve RAW financial values and the legacy USER_ENTERED de
 });
 
 test("existing page URLs, dynamic segments and explicitly exported API methods remain stable", () => {
-  const expected = JSON.parse(readFileSync(new URL("./fixtures/route-contracts.json", import.meta.url), "utf8"));
+  const expected = JSON.parse(readArchive(new URL("./fixtures/route-contracts.json", import.meta.url), "utf8"));
   assert.deepEqual(routeContracts(), expected);
 });

@@ -1,5 +1,7 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import {readdirSync} from "node:fs";
 import { resolve, relative } from "node:path";
 import { builtinModules } from "node:module";
 import test from "node:test";
@@ -17,9 +19,9 @@ test("Shipment lint permits the public contract/gallery/client and only the docu
     assert.equal(restricted(result), false, filePath);
     const [actual] = await eslint.lintFiles(filePath); assert.equal(restricted(actual), false, filePath);
   }
-  const [forward] = await eslint.lintText(readFileSync(contract, "utf8"), { filePath: contract });
+  const [forward] = await eslint.lintText(readArchive(contract, "utf8"), { filePath: contract });
   assert.equal(restricted(forward), false);
-  const [pure] = await eslint.lintText(readFileSync(leaf, "utf8"), { filePath: leaf });
+  const [pure] = await eslint.lintText(readArchive(leaf, "utf8"), { filePath: leaf });
   assert.equal(restricted(pure), false);
   const [route] = await eslint.lintText('import { listShipments } from "@/services/shipments"; export const read = listShipments;', { filePath: "src/app/api/shipments/route.ts" });
   assert.equal(restricted(route), false, "HTTP server composition is deliberately outside browser restrictions");
@@ -84,7 +86,7 @@ function graph(runtime) {
     assert.ok(!/\/modules\/[^/]+\/(application|infrastructure)\/|\/server\.[^/]+$/.test(file), file);
     assert.ok(!file.startsWith("src/app/"), file);
     active.push(file);
-    const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+    const source = ts.createSourceFile(file, readArchive(file, "utf8"), ts.ScriptTarget.Latest, true);
     for (const node of source.statements) {
       if (!(ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) || !node.moduleSpecifier) continue;
       const clause = node.importClause, elements = clause?.namedBindings && ts.isNamedImports(clause.namedBindings) ? clause.namedBindings.elements : undefined;
@@ -92,7 +94,7 @@ function graph(runtime) {
       if (runtime && onlyType) continue;
       const specifier = node.moduleSpecifier.text;
       assert.ok(!serverPackages.has(specifier), `${file}: ${specifier}`);
-      const resolved = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
+      const resolved = ts.resolveModuleName(specifier, resolve(file), options, evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;
       if (resolved) { const target = relative(process.cwd(), resolved).replaceAll("\\", "/"); if (target.startsWith("src/")) visit(target); }
       else if (/^(\.|@\/)/.test(specifier) && !specifier.endsWith(".css")) assert.fail(`Unresolved import ${specifier} in ${file}`);
     }
@@ -105,8 +107,8 @@ test("Shipment runtime graph reaches only browser-safe project code and has no c
 test("Shipment graph including type-only edges has no cycles or server implementations", () => graph(false));
 test("Orders removes both browser bridges without adding a reverse Shipments module edge", () => {
   function walk(dir) { return readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]); }
-  for (const file of walk("src/modules/orders").filter(f => /\.tsx?$/.test(f))) assert.ok(!readFileSync(file, "utf8").includes("modules/shipments"), file);
-  const detail = readFileSync("src/modules/orders/ui/[id]/OrderDetailPage.tsx", "utf8");
+  for (const file of walk("src/modules/orders").filter(f => /\.tsx?$/.test(f))) assert.ok(!readArchive(file, "utf8").includes("modules/shipments"), file);
+  const detail = readArchive("src/modules/orders/ui/[id]/OrderDetailPage.tsx", "utf8");
   assert.ok(!detail.includes('"@/services/shipments/types"')); assert.ok(!detail.includes('"@/app/shipments/api"'));
 });
 

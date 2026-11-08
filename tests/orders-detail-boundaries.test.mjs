@@ -1,5 +1,7 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import {readdirSync} from "node:fs";
 import { resolve, relative } from "node:path";
 import test from "node:test";
 import ts from "typescript";
@@ -30,8 +32,8 @@ test("detail adapters reject private cross-feature mappers/providers/config/rout
     'import { IGoogleSheetsService } from "@/externals/google/sheet/types";', 'export * from "../../contracts";', 'const x = require("@/config");', 'type X = import("@/externals/google/sheet/types").GoogleSheetRow;',
   ]) await check(file, code, true);
   for (const file of [server, reader]) await check(file, 'import type { Shipment } from "@/modules/shipments/contracts";', true);
-  for (const file of [reader, projection, server]) assert.ok(readFileSync(file, "utf8").startsWith('import "server-only";'));
-  for (const file of [port, orderPort]) assert.doesNotMatch(readFileSync(file, "utf8"), /GoogleSheet|readRows|worksheet|config|shipment[s]?\/contracts/);
+  for (const file of [reader, projection, server]) assert.ok(readArchive(file, "utf8").startsWith('import "server-only";'));
+  for (const file of [port, orderPort]) assert.doesNotMatch(readArchive(file, "utf8"), /GoogleSheet|readRows|worksheet|config|shipment[s]?\/contracts/);
 });
 
 const options = ts.parseJsonConfigFileContent(ts.readConfigFile("tsconfig.json", ts.sys.readFile).config, ts.sys, process.cwd()).options;
@@ -43,12 +45,12 @@ for (const types of [false, true]) test(`resolved detail and feature ownership g
     const owner = /^src\/modules\/(orders|shipments)\//.exec(file)?.[1] ?? inheritedOwner;
     if (inheritedOwner && owner && inheritedOwner !== owner) edges.add(`${inheritedOwner}->${owner}`);
     const key = `${owner}:${file}`; if (visited.has(key)) return; active.push(file);
-    const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+    const source = ts.createSourceFile(file, readArchive(file, "utf8"), ts.ScriptTarget.Latest, true);
     for (const n of source.statements) {
       if (!(ts.isImportDeclaration(n) || ts.isExportDeclaration(n)) || !n.moduleSpecifier) continue;
       const c = n.importClause, elements = c?.namedBindings && ts.isNamedImports(c.namedBindings) ? c.namedBindings.elements : undefined;
       if (!types && (n.isTypeOnly || c?.isTypeOnly || (elements?.length && !c.name && elements.every(e => e.isTypeOnly)))) continue;
-      const target = ts.resolveModuleName(n.moduleSpecifier.text, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
+      const target = ts.resolveModuleName(n.moduleSpecifier.text, resolve(file), options, evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;
       if (target) { const path = relative(process.cwd(), target).replaceAll("\\", "/"); if (path.startsWith("src/")) visit(path, owner); }
     }
     active.pop(); visited.add(key);

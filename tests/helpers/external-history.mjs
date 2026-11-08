@@ -1,6 +1,6 @@
 import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash} from 'node:crypto';
 export const externalHistory=JSON.parse(readFileSync('tests/fixtures/external-infrastructure-before.json','utf8'));
 export const externalNewFiles=[...Object.values(externalHistory.moves).map(e=>e.to),'src/infrastructure/external/line/index.ts','src/infrastructure/external/loyverse/index.ts'];

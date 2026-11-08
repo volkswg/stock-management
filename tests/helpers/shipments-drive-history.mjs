@@ -1,7 +1,7 @@
 import {restoreCleanupSource} from "./cleanup-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import ts from "typescript";
 export const shipmentDriveBefore = JSON.parse(readFileSync(new URL("../fixtures/shipments-drive-before.json", import.meta.url), "utf8"));
 const printer = ts.createPrinter(), hash = text => createHash("sha256").update(text).digest("hex");

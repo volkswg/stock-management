@@ -4,7 +4,7 @@ import type * as Inventory from '../src/modules/inventory/server';
 import type * as LegacyMovement from '../src/services/movements';
 import type * as LegacyCount from '../src/services/stock-counts';
 import type * as LegacyAdjustment from '../src/services/stock-adjustments/manageStockAdjustments';
-import type { IGoogleSheetsService } from '../src/externals/google/sheet/types';
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { StockCountAccount, StockCountRecord, MonthlyShopStockCount, MovementDateFilter, ProductMovementMasterRecord } from '../src/modules/inventory/contracts';
 type Equal<A,B>=(<T>()=>T extends A?1:2) extends (<T>()=>T extends B?1:2)?true:false;
 type Assert<T extends true>=T;

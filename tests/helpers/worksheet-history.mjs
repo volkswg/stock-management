@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash} from "node:crypto";
 import ts from "typescript";
 export const worksheetBefore=JSON.parse(readFileSync("tests/fixtures/worksheet-ownership-before.json","utf8"));

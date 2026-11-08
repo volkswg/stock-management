@@ -1,6 +1,6 @@
 # Current ownership and retained compatibility
 
-The completion stack starts at merged PR33/main `9ab9f2095342c66f30acf9612d79ed92063b8597`: [PR34](https://github.com/volkswg/stock-management/pull/34) Sales/Inventory, [PR35](https://github.com/volkswg/stock-management/pull/35) Orders/LINE, [PR36](https://github.com/volkswg/stock-management/pull/36) external transport, followed by the stacked final-cleanup branch. Publication does not imply merge or deployment. Earlier ownership stages and immutable evidence remain in [progress](../refactoring/progress.md).
+[PR34](https://github.com/volkswg/stock-management/pull/34) Sales/Inventory, [PR35](https://github.com/volkswg/stock-management/pull/35) Orders/LINE, [PR36](https://github.com/volkswg/stock-management/pull/36) external transport and [PR37](https://github.com/volkswg/stock-management/pull/37) composition are merged. Issue #39 starts at main `5867348d86d57cc98322362fa175140626c7f5d7` and physically removes all 65 external compatibility files. Earlier ownership stages and immutable evidence remain in [progress](../refactoring/progress.md).
 
 | Slice | Actual owner | Retained boundaries |
 | --- | --- | --- |
@@ -19,7 +19,7 @@ The completion stack starts at merged PR33/main `9ab9f2095342c66f30acf9612d79ed9
 
 ## Physical worksheet owners
 
-Paths below are relative to `src/modules/<owner>/infrastructure/google-sheets/`. Each class and existing header leaf have exactly one physical owner; MovementSheet has no local const.ts. The corresponding old `externals/google/sheet/sheets/` paths are explicit named forwards. Headers retain their original mutable array identity, names and order.
+Paths below are relative to `src/modules/<owner>/infrastructure/google-sheets/`. Each class and existing header leaf have exactly one physical owner; MovementSheet has no local const.ts. The corresponding old `externals/google/sheet/sheets/` paths are retired; active imports use these physical owners. Headers retain their original mutable array identity, names and order.
 
 | Owner / subdirectory | Class | Header export | Original default range |
 | --- | --- | --- | --- |
@@ -43,15 +43,15 @@ Paths below are relative to `src/modules/<owner>/infrastructure/google-sheets/`.
 | sales / receipt-syncs | SalesReceiptSyncsSheet | SALES_RECEIPT_SYNC_HEADERS | A:I |
 | sales / profit-cost-overrides | SalesProfitCostOverridesSheet | SALES_PROFIT_COST_OVERRIDE_HEADERS | A:H |
 
-Orders A:Z is deliberately preserved rather than reduced to its current header count. Other original header-derived `lastColumnLetter(headers.length - 1)` expressions remain. Registry-created instances and legacy leaf/index exports (where originally available) share exact class/prototype/header identity; there is no parallel registry or copied implementation.
+Orders A:Z is deliberately preserved rather than reduced to its current header count. Other original header-derived `lastColumnLetter(headers.length - 1)` expressions remain. Registry-created instances and canonical imports share exact class/prototype/header identity; there is no parallel registry or copied implementation. Historical test-only export projections verify the former mixed barrels against these same owners.
 
-The six generic root Sheets declarations are GoogleSheetCellValue, GoogleSheetRow, GoogleSheetRangeUpdate, IGoogleSheet, IGoogleRowsSheet and IGoogleBatchRowsSheet. The old types file retains the aggregate GoogleSheetsConfig, IGoogleSheetsService, MovementWorksheet and MovementRange plus explicit generic forwards. Feature classes use pure root generic types, never erased imports through the mixed aggregate index.
+The six generic root Sheets declarations are GoogleSheetCellValue, GoogleSheetRow, GoogleSheetRangeUpdate, IGoogleSheet, IGoogleRowsSheet and IGoogleBatchRowsSheet. The root `service-contracts.ts` leaf retains the aggregate GoogleSheetsConfig, IGoogleSheetsService, MovementWorksheet and MovementRange plus explicit generic forwards, byte-for-byte from the retired types file. Feature classes use pure root generic types, never erased imports through the mixed aggregate index.
 
 ## Aggregate and public composition
 
 The aggregate GoogleSheetsService still constructs the same worksheets in the same order, validates the same configuration and checks connections/batches exactly as before. All current APIs need that service shape. Its implementation/factory now live in explicit composition, outside root infrastructure; active routes use its narrow named index. It is not safe to remove or lazily split construction/health checks during this behavior-preserving refactor. There is no second registry or persistence path.
 
-Active routes use named module servers, canonical Google/external infrastructure, composition and pure shared helpers. Their runtime graphs reach no `services`, `externals` or backend compatibility implementation. Remaining generic/full-service interface imports from the pure legacy Sheets type leaf are erased, supported callable contracts; applications/domain never import them. Adapters still own every row/range/header/schema decision.
+Active routes use named module servers, canonical Google/external infrastructure, composition and pure shared helpers. Their runtime graphs reach no `services`, `externals` or backend compatibility implementation. Full-service interface imports use the pure root service-contracts leaf; applications/domain never import it. Adapters still own every row/range/header/schema decision.
 
 ## Compatibility retirement gates
 
@@ -60,11 +60,13 @@ Active routes use named module servers, canonical Google/external infrastructure
 | `services/{orders,shipments,employees,expenses,sales,movements,stock-counts,stock-adjustments,user-states,line}` and barrels | Supported callable/type/enum/error/header surfaces remain covered by runtime and compile-time consumers. They contain named forwards or identity bindings; actual wiring is in composition |
 | `services/utils/createSortableId.ts` | Aliases the single stateful root ID module; no reset or duplicated sequence state |
 | `features/backend/{line,shared,shipments}` | Named compatibility leaves to LINE workflows, pure shared helpers and Shipment HTTP validation |
-| `externals/google` and Sheets indexes/types | Constructor/prototype/header/export compatibility. Generic transport and worksheets have canonical owners; the pure aggregate service/config type declarations retain original full-service signatures |
-| `externals/{line,loyverse}` | Named transport/protocol forwards; original indexes retain exact exports and constructor identity |
 | `scripts/line-rich-menu-client.ts` | Relative `.ts` compatibility forward to the original standalone client. Its RichMenuRequest declaration matches the app transport contract exactly and now shares that definition |
 
-The consumer audit includes production static/erased/dynamic imports, barrels, script paths and inherited runtime/type tests. No supported surface is removed merely because production has switched imports; external consumers cannot be disproved from a private checkout. All legacy business function/class bodies have left services/backend compatibility paths. Necessary typed aliases retain callable and enum namespaces, and movement identity bindings retain original CommonJS descriptors. No forwarding cycle or duplicate implementation is introduced.
+The consumer audit includes production static/erased/dynamic imports, barrels, script paths and inherited runtime/type tests. Issue #39 explicitly authorizes retirement of the external source paths. The package is private, has no package export map or publish workflow, and the audited repository/scripts/types/tests have no remaining live import. No known external compatibility blocker was found; undisclosed deep-import consumers would need to migrate. Other legacy paths remain supported. All legacy business function/class bodies have left services/backend compatibility paths. Necessary typed aliases retain callable and enum namespaces, and movement identity bindings retain original CommonJS descriptors. No forwarding cycle or duplicate implementation is introduced.
+
+## Retired external paths
+
+Google auth/client/base/Drive imports now target root infrastructure; worksheet classes/headers target their feature owners; LINE DTOs/enums/messages target pure shared leaves; LINE/Loyverse clients target root external infrastructure; aggregate construction targets composition. No new mixed production barrel replaces the two removed Sheets indexes. `tests/fixtures/externals-retirement-before.json` records all removed sources, symbol destinations, import audit and exact source inverses. Earlier fixtures remain byte-identical; archived source is used only for original/history evidence, while current loaders and graphs use physical canonical files.
 
 ## Final graph and limitations
 

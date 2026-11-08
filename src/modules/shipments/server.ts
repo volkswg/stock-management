@@ -1,5 +1,5 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import { createSortableId } from "@/infrastructure/runtime/create-sortable-id";
 import type { Shipment, ShipmentListItem, ShipmentStatus } from "./contracts";
 import { createShipment as executeCreateShipment } from "./application/create-shipment";

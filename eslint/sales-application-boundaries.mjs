@@ -2,12 +2,12 @@ import { noDynamicServerBypass } from './orders-boundaries.mjs';
 const scopes={
   "src/modules/sales/server.ts": [
     "server-only",
-    "@/externals/google/sheet/types",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "@/modules/expenses/contracts",
     "./contracts",
     "./application/reports",
     "./infrastructure/google-sheets/sales-reader",
-    "@/externals/loyverse",
+    "@/infrastructure/external/loyverse",
     "./application/sync-receipts",
     "./infrastructure/google-sheets/receipt-sync",
     "./application/ports/receipt-sync",
@@ -18,7 +18,7 @@ const scopes={
     "./application/sync-status",
     "./infrastructure/google-sheets/sync-status",
     "./infrastructure/google-sheets/sales-reader",
-    "@/externals/loyverse",
+    "@/infrastructure/external/loyverse",
     "./application/receipts-for-date"
   ],
   "src/modules/sales/application/reports.ts": [

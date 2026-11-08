@@ -1,5 +1,5 @@
 import "server-only";
-import type { GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { GoogleSheetRow, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { OrderProductImage, OrderBillImage } from "../../contracts";
 import type { OrderDetailReader, OrderDetailOrders, OrderDetailProducts, OrderDetailBills } from "../../application/ports/order-detail-reader";
 import { mapOrderRow, mapOrderProductImageRow, toStringValue } from "./order-row-mapping";

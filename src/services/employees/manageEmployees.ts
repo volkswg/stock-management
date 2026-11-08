@@ -1,4 +1,4 @@
-import type { IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { Employee, EmployeeCompensation, EmployeeInput } from "@/modules/hr/contracts";
 import { listEmployees as ownedList, listEmployeeCompensations as ownedCompensations, createEmployee as ownedCreate, updateEmployee as ownedUpdate } from "@/modules/hr/server";
 export type { EmployeeStatus, EmployeeCompensationType, EmployeeCommissionType, Employee, EmployeeCompensation, EmployeeInput } from "@/modules/hr/contracts";

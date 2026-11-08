@@ -1,3 +1,4 @@
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import test from 'node:test';import assert from 'node:assert/strict';
 import {hrPayrollGraph,hrPayrollData,payrollInputs,advanceInput,hrTrace} from './helpers/hr-payroll.mjs';
 import {plain} from './helpers/load-source.mjs';
@@ -53,14 +54,14 @@ test('advance duplicate updates and settlement append preserve nontransactional 
 
 test('actual original/current payroll, settlement and advance HTTP preserve routes, statuses, errors and financial JSON',async()=>{
  for(const [route,method,input]of [['payroll','GET',null],['payroll/settle','POST',{}],['advances','GET',null],['advances','POST',advanceInput],['advances','PATCH',{}]]){
-  const results=[];for(const original of [true,false]){const events=[],d=hrPayrollData({original,events}),g=hrPayrollGraph({original,events,service:d.service,...payrollInputs()}),routeModule=g.load('src/app/api/employees/'+route+'/route.ts');const response=await routeModule[method](new Request('https://example.test/api/employees/'+route+(route==='payroll'?'?month=2026-11':''),{method,...(method==='GET'?{}:{body:JSON.stringify(input)})}));results.push(plain({status:response.status,body:await response.json(),events:hrTrace(events)}));}assert.deepEqual(results[1],results[0]);
+  const results=[];for(const original of [true,false]){const events=[],d=hrPayrollData({original,events}),g=hrPayrollGraph({original,events,service:d.service,...payrollInputs()}),routeModule=g.load(canonicalPath('src/app/api/employees/'+route+'/route.ts'));const response=await routeModule[method](new Request('https://example.test/api/employees/'+route+(route==='payroll'?'?month=2026-11':''),{method,...(method==='GET'?{}:{body:JSON.stringify(input)})}));results.push(plain({status:response.status,body:await response.json(),events:hrTrace(events)}));}assert.deepEqual(results[1],results[0]);
  }
 });
 
 test('actual employee/compensation/attendance worksheet reads and initialization remain outside HR core with identical payroll results',async()=>{
  const {googleGraph}=await import('./helpers/google-infrastructure.mjs');const results=[];
  for(const original of [true,false]){
-  const events=[],d=hrPayrollData({original,events}),provider=googleGraph({historical:original}),registry=provider.load('src/externals/google/sheet/index.ts');
+  const events=[],d=hrPayrollData({original,events}),provider=googleGraph({historical:original}),registry=provider.registry();
   for(const [property,klass,headers,rows]of [['employees','EmployeesSheet','EMPLOYEE_HEADERS',[['E','Employee','','active','2020-01-01','','c','u','actor']]],['employeeCompensations','EmployeeCompensationsSheet','EMPLOYEE_COMPENSATION_HEADERS',[['E',100,0,'c','u','actor','2020-01-01','daily','sales_bucket',100,10,50]]],['employeeTimesheets','EmployeeTimesheetsSheet','EMPLOYEE_TIMESHEET_HEADERS',[['T','E','S','work','2026-11-01T01:00:00Z','2026-11-01T02:00:00Z','full']]]]){
    d.data[property]=[Array.from(registry[headers]),...rows];d.service[property]=new registry[klass](d.client,property);
   }

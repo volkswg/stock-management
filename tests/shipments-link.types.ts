@@ -1,4 +1,4 @@
-import type { IGoogleSheetsService } from "../src/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { ShipmentOrder } from "../src/modules/shipments/contracts";
 import type { linkOrderToShipment as Direct, LinkOrderToShipmentError as DirectError, ShipmentOrder as LegacyOrder, LinkOrderToShipmentResult as DirectResult, LinkOrderToShipmentErrorCode as Code } from "../src/services/shipments/linkOrderToShipment";
 import type { linkOrderToShipment as Barrel, LinkOrderToShipmentError as BarrelError, LinkOrderToShipmentResult as BarrelResult } from "../src/services/shipments";

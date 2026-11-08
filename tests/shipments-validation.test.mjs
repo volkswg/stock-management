@@ -1,7 +1,8 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
 import {restoreCleanupSource} from "./helpers/cleanup-history.mjs";
 import { shipmentHttpFiles, assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
 import ts from "typescript";
@@ -59,11 +60,11 @@ test("updated helper resolves only public contracts/status at runtime, erased Or
   for(const types of [false,true]){
     const active=[],seen=new Set();
     function visit(file){assert.ok(!active.includes(file),[...active,file].join(" -> "));if(seen.has(file))return;active.push(file);
-      const source=ts.createSourceFile(file,readFileSync(file,"utf8"),ts.ScriptTarget.Latest,true);
+      const source=ts.createSourceFile(file,readArchive(file,"utf8"),ts.ScriptTarget.Latest,true);
       for(const node of source.statements){if(!(ts.isImportDeclaration(node)||ts.isExportDeclaration(node))||!node.moduleSpecifier)continue;
         const clause=node.importClause,bindings=clause?.namedBindings,elements=bindings&&ts.isNamedImports(bindings)?bindings.elements:undefined;
         if(!types&&(node.isTypeOnly||clause?.isTypeOnly||(elements?.length&&!clause.name&&elements.every(e=>e.isTypeOnly))))continue;
-        const target=ts.resolveModuleName(node.moduleSpecifier.text,resolve(file),options,ts.sys).resolvedModule?.resolvedFileName;assert.ok(target,node.moduleSpecifier.text);
+        const target=ts.resolveModuleName(node.moduleSpecifier.text,resolve(file),options,evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;assert.ok(target,node.moduleSpecifier.text);
         visit(relative(process.cwd(),target).replaceAll("\\","/"));
       }active.pop();seen.add(file);
     }visit(shipmentValidationFile);

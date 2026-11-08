@@ -1,5 +1,5 @@
 import "server-only";
-import type { GoogleSheetCellValue, GoogleSheetRow } from "@/externals/google/sheet/types";
+import type { GoogleSheetCellValue, GoogleSheetRow } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import { OrderStatus, type OrderListItem, type OrderProductImage } from "../../contracts";
 
 export function mapOrderRow(row: GoogleSheetRow): OrderListItem | undefined {

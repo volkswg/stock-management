@@ -1,6 +1,6 @@
 # Architecture guide
 
-The completion stack starts at merged PR33/main `9ab9f2095342c66f30acf9612d79ed92063b8597`. Sales/Inventory (PR34), Orders/LINE (PR35) and external transport (PR36) are published for review; this stacked branch completes the compatibility/composition audit. These branches have not been merged or deployed by Codex.
+PR34–37 are merged. Issue [#39](https://github.com/volkswg/stock-management/issues/39) retires the external compatibility directory from verified main `5867348d86d57cc98322362fa175140626c7f5d7`; this branch awaits System Architect review. Codex has not merged or deployed it.
 
 | Read for | Canonical document |
 | --- | --- |
@@ -13,7 +13,7 @@ The completion stack starts at merged PR33/main `9ab9f2095342c66f30acf9612d79ed9
 | Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
 | Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
 
-All scoped business use cases and worksheets now have feature owners. Google/Drive/LINE/Loyverse transport and the existing ID runtime have root infrastructure owners; pure protocol/message helpers live in shared. Explicit composition wires the unchanged aggregate Sheets registry and consumer readers outside feature cores. Active HTTP paths use canonical imports. Supported legacy callables/types/constructors/headers retain named aliases and one physical implementation. Workspace/Next shell and unrelated product work remain unchanged.
+All scoped business use cases and worksheets now have feature owners. Google/Drive/LINE/Loyverse transport and the existing ID runtime have root infrastructure owners; pure protocol/message helpers live in shared. Explicit composition wires the unchanged aggregate Sheets registry and consumer readers outside feature cores. Active HTTP paths use canonical imports. Remaining services/backend compatibility callables retain named aliases and one physical implementation. `src/externals/` is removed; its consumers use canonical module, infrastructure or composition owners. Full-service Sheets declarations live in the pure root `service-contracts.ts` leaf. Workspace/Next shell and unrelated product work remain unchanged.
 
 ## Documentation maintenance
 

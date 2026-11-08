@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import { createHash } from "node:crypto";
 import vm from "node:vm";
 import ts from "typescript";

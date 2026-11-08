@@ -1,17 +1,17 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { loadSource, plain } from "./helpers/load-source.mjs";
 import { ordersServer } from "./helpers/orders-server.mjs";
 
-const fixture = JSON.parse(readFileSync(new URL("./fixtures/orders-read-model.json", import.meta.url), "utf8"));
+const fixture = JSON.parse(readArchive(new URL("./fixtures/orders-read-model.json", import.meta.url), "utf8"));
 const contracts = loadSource("src/modules/orders/contracts.ts");
 const noIO = () => { throw new Error("Unexpected real dependency in Orders tests"); };
 
 test("extracted DTO fields, optionality and nullability retain their base declarations", () => {
-  const expected = JSON.parse(readFileSync(new URL("./fixtures/orders-type-shapes.json", import.meta.url), "utf8"));
-  const source = ts.createSourceFile("contracts.ts", readFileSync("src/modules/orders/contracts.ts", "utf8"), ts.ScriptTarget.Latest, true);
+  const expected = JSON.parse(readArchive(new URL("./fixtures/orders-type-shapes.json", import.meta.url), "utf8"));
+  const source = ts.createSourceFile("contracts.ts", readArchive("src/modules/orders/contracts.ts", "utf8"), ts.ScriptTarget.Latest, true);
   const printer = ts.createPrinter({ removeComments: true });
   for (const [name, shape] of Object.entries(expected)) {
     const node = source.statements.find((node) => ts.isTypeAliasDeclaration(node) && node.name.text === name);

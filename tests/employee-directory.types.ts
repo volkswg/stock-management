@@ -4,7 +4,7 @@ import type { StockCountAccount as LegacyAccount } from "../src/services/stock-c
 import type { EmployeeDirectoryEntry } from "../src/modules/hr/contracts";
 import type { EmployeeDirectory } from "../src/modules/inventory/application/ports/employee-directory";
 import type { listAdjustmentEmployees } from "../src/services/stock-adjustments/manageStockAdjustments";
-import type { IGoogleSheetsService } from "../src/externals/google/sheet/types";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 type Equal<A,B> = (<T>()=>T extends A?1:2) extends (<T>()=>T extends B?1:2)?true:false;
 type Assert<T extends true> = T;
 export type DirectoryCompatibility=[Assert<Equal<AdjustmentEmployee,LegacyEmployee>>,Assert<Equal<StockCountAccount,LegacyAccount>>,Assert<Equal<AdjustmentEmployee,EmployeeDirectoryEntry>>,Assert<Equal<ReturnType<typeof listAdjustmentEmployees>,Promise<AdjustmentEmployee[]>>>,Assert<Equal<Parameters<typeof listAdjustmentEmployees>,[IGoogleSheetsService]>>,Assert<Equal<ReturnType<EmployeeDirectory["listEmployees"]>,Promise<AdjustmentEmployee[]>>>];

@@ -2,7 +2,7 @@ import { noDynamicServerBypass } from './orders-boundaries.mjs';
 const scopes={
   "src/modules/inventory/server.ts": [
     "server-only",
-    "@/externals/google/sheet/types",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "./contracts",
     "@/modules/hr/server",
     "./application/list-adjustment-employees",

@@ -1,13 +1,13 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
 import {loadSalesSource} from './helpers/sales-source.mjs';
 import {googleGraph} from './helpers/google-infrastructure.mjs';
 import {plain} from './helpers/load-source.mjs';
-const before=JSON.parse(readFileSync('tests/fixtures/sales-application-before.json','utf8'));
+const before=JSON.parse(readArchive('tests/fixtures/sales-application-before.json','utf8'));
 class Clock extends Date {constructor(...args){super(...(args.length?args:['2026-11-07T01:02:03.004Z']));}}
 const specs=[['salesReceipts','SalesReceiptsSheet','SALES_RECEIPT_HEADERS'],['salesReceiptItems','SalesReceiptItemsSheet','SALES_RECEIPT_ITEM_HEADERS'],['salesReceiptPayments','SalesReceiptPaymentsSheet','SALES_RECEIPT_PAYMENT_HEADERS'],['salesReceiptSyncs','SalesReceiptSyncsSheet','SALES_RECEIPT_SYNC_HEADERS'],['salesProfitCostOverrides','SalesProfitCostOverridesSheet','SALES_PROFIT_COST_OVERRIDE_HEADERS']];
-function setup(original){const events=[],provider=googleGraph(),registry=provider.load('src/externals/google/sheet/index.ts'),data={},service={};let failure,gate;
+function setup(original){const events=[],provider=googleGraph(),registry=provider.registry(),data={},service={};let failure,gate;
  const marker=new Error('synthetic storage failure');
  const client={ensureWorksheet:async(name)=>{events.push(['ensure',name]);},getValues:async(name,range)=>{events.push(['read',name,range]);if(failure?.(name,'read',range))throw marker;return /1:.*1$/.test(range)?data[name].slice(0,1):data[name];},updateValues:async(name,range,values,mode)=>{events.push(['update',name,range,plain(values),mode]);if(failure?.(name,'update',range))throw marker;data[name][Number(/\d+/.exec(range)[0])-1]=values[0];},appendValues:async(name,range,values,mode)=>{events.push(['append',name,range,plain(values),mode]);if(gate)await gate(name);if(failure?.(name,'append',range))throw marker;data[name].push(...values);}};
  for(const [name,C,H]of specs){data[name]=[Array.from(registry[H])];service[name]=new registry[C](client,name);}

@@ -1,7 +1,7 @@
 import {restoreSalesApplicationSource}from "./sales-application-history.mjs";
 import { restoreExpensesSource } from "./expenses-business-history.mjs";
 import assert from "node:assert/strict";
-import {readFileSync}from"node:fs";
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import {createHash}from"node:crypto";
 export const salesQueryBefore=JSON.parse(readFileSync("tests/fixtures/inventory-sales-query-before.json","utf8"));
 export const salesQueryFiles=new Set(Object.keys(salesQueryBefore.files));

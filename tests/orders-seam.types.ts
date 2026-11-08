@@ -1,4 +1,4 @@
-import type { IGoogleSheetsService } from "../src/externals/google/sheet";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { CreatedOrder, OrderListItem } from "../src/modules/orders/contracts";
 import type * as Public from "../src/modules/orders/server";
 import type * as Legacy from "../src/services/orders";

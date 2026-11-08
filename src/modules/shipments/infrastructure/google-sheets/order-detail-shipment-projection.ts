@@ -1,5 +1,5 @@
 import "server-only";
-import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/externals/google/sheet/types";
+import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { OrderShipment } from "@/modules/orders/contracts";
 import type { OrderDetailShipmentProjectionReader, OrderShipmentLinks, OrderShipmentCandidates } from "@/modules/orders/application/ports/order-detail-shipment-projection";
 import { ShipmentStatus } from "../../contracts";

@@ -1,5 +1,5 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
@@ -103,7 +103,7 @@ test("actual status target keeps original untouched raw values/defaults and corr
 });
 
 test("status history retains original three hashes, helper bodies, precheck, findIndex/destructuring, raw cells and existing compositions", () => {
-  const fixture = JSON.parse(readFileSync("tests/fixtures/shipments-structure.json", "utf8")); assert.equal(migratedStatusFunctions.size, 3);
+  const fixture = JSON.parse(readArchive("tests/fixtures/shipments-structure.json", "utf8")); assert.equal(migratedStatusFunctions.size, 3);
   for (const key of migratedStatusFunctions) assertShipmentStatusHistory(key, fixture.functions[key]);
   assertStatusSourceParity();
 });
@@ -117,13 +117,13 @@ test("legacy direct/barrel/server status exports share identity and the original
 test("real status transport retains quoted/encoded M1 PUT -> A2:M GET -> B3:M3 PUT with exact bodies and USER_ENTERED", async () => {
   for (const phase of ["success", "M1", "A2:M", "B3:M3"]) {
     const requests = [], constants = load("src/externals/google/sheet/const.ts"), row = shipmentRow({ carrier: " raw ", remark: 42, createdAt: false, createdBy: true });
-    const { GoogleSheetsClient } = loadSource("src/externals/google/sheet/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => {
+    const { GoogleSheetsClient } = loadSource("src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => {
       requests.push({ url, init }); const range = decodeURIComponent(new URL(url).pathname.split("/values/")[1]).split("!")[1];
       if (range === phase) return new Response("synthetic failure", { status: 500 });
       return Response.json(init.method === "GET" ? { values: [shipmentRow({ id: "other" }), row] } : {});
     } } });
-    const { BaseGoogleSheet } = loadSource("src/externals/google/sheet/sheets/BaseGoogleSheet.ts");
-    const { ShipmentsSheet } = loadSource("src/externals/google/sheet/sheets/shipments/ShipmentsSheet.ts", { imports: { "../BaseGoogleSheet": { BaseGoogleSheet }, "../../const": constants, "./const": load("src/externals/google/sheet/sheets/shipments/const.ts") } });
+    const { BaseGoogleSheet } = loadSource("src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts");
+    const { ShipmentsSheet } = loadSource("src/modules/shipments/infrastructure/google-sheets/shipments/ShipmentsSheet.ts", { imports: { "../BaseGoogleSheet": { BaseGoogleSheet }, "../../const": constants, "./const": load("src/externals/google/sheet/sheets/shipments/const.ts") } });
     const sheets = { shipments: new ShipmentsSheet(new GoogleSheetsClient({ getAccessToken: async () => "fake-token" }, "fake sheet/id"), "Synthetic ' Shipments") };
     const pending = services.updateShipmentStatus({ googleSheetsService: sheets, ...base });
     if (phase === "success") assert.equal((await pending).outcome, "updated");

@@ -1,5 +1,6 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { ordersServer } from "./helpers/orders-server.mjs";
 import { detailService, detailSheets, detailSheetNames, detailHttp } from "./helpers/orders-detail.mjs";
@@ -7,7 +8,7 @@ import { plain, loadSource } from "./helpers/load-source.mjs";
 import { deferred, flush } from "./helpers/component-harness.mjs";
 import { assertOrderDetailHistory, orderDetailBefore as before } from "./helpers/orders-detail-history.mjs";
 const load = ordersServer(), app = load("src/modules/orders/application/get-order-detail.ts"), original = detailService({ original: true }), current = detailService();
-const fixture = JSON.parse(readFileSync("tests/fixtures/orders-read-model.json", "utf8"));
+const fixture = JSON.parse(readArchive("tests/fixtures/orders-read-model.json", "utf8"));
 const order = ["o", "complete", "Seller", 0], shipment = ["s", "draft", "Carrier", "PO", 0];
 const valid = () => ({ orders: [order], orderItems: [], orderBills: [], shipmentOrders: [["l", "s", "o"]], shipments: [shipment] });
 
@@ -78,14 +79,14 @@ test("original/new actual Orders GET handlers preserve 200/400/404/500, factory 
 });
 
 test("real five-worksheet transport retains original names/quoting/ranges/GET order and exact golden result", async () => {
-  const requests = [], constants = loadSource("src/externals/google/sheet/const.ts");
-  const { GoogleSheetsClient } = loadSource("src/externals/google/sheet/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => {
+  const requests = [], constants = loadSource("src/infrastructure/persistence/google-sheets/const.ts");
+  const { GoogleSheetsClient } = loadSource("src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts", { imports: { "../const": constants }, globals: { fetch: async (url, init) => {
     requests.push({ url, init }); const name = decodeURIComponent(new URL(url).pathname.split("/values/")[1]).split("!")[0].slice(1, -1).replaceAll("''", "'").slice("Synthetic ' ".length); return Response.json({ values: fixture.rows[name] });
   } } });
-  const { BaseGoogleSheet } = loadSource("src/externals/google/sheet/sheets/BaseGoogleSheet.ts"), sheets = {};
+  const { BaseGoogleSheet } = loadSource("src/infrastructure/persistence/google-sheets/sheets/BaseGoogleSheet.ts"), sheets = {};
   for (const [property, folder, name] of [["orders", "orders", "OrdersSheet"], ["orderItems", "order-items", "OrderItemsSheet"], ["orderBills", "order-bills", "OrderBillsSheet"], ["shipmentOrders", "shipment-orders", "ShipmentOrdersSheet"], ["shipments", "shipments", "ShipmentsSheet"]]) {
-    const imports = { "../BaseGoogleSheet": { BaseGoogleSheet }, "../../const": constants }; if (folder !== "orders") imports["./const"] = loadSource(`src/externals/google/sheet/sheets/${folder}/const.ts`);
-    const Class = loadSource(`src/externals/google/sheet/sheets/${folder}/${name}.ts`, { imports })[name]; sheets[property] = new Class(new GoogleSheetsClient({ getAccessToken: async () => "fake-token" }, "fake sheet/id"), `Synthetic ' ${property}`);
+    const imports = { "../BaseGoogleSheet": { BaseGoogleSheet }, "../../const": constants }; if (folder !== "orders") imports["./const"] = loadSource(canonicalPath(`src/externals/google/sheet/sheets/${folder}/const.ts`));
+    const Class = loadSource(canonicalPath(`src/externals/google/sheet/sheets/${folder}/${name}.ts`), { imports })[name]; sheets[property] = new Class(new GoogleSheetsClient({ getAccessToken: async () => "fake-token" }, "fake sheet/id"), `Synthetic ' ${property}`);
   }
   assert.deepEqual(plain(await current.getOrderDetail({ googleSheetsService: sheets, orderId: "order/1" })), fixture.expectedDetail);
   assert.deepEqual(requests.map(r => decodeURIComponent(new URL(r.url).pathname.split("/values/")[1])), ["'Synthetic '' orders'!A:I", "'Synthetic '' orderItems'!A:J", "'Synthetic '' orderBills'!A:G", "'Synthetic '' shipmentOrders'!A:G", "'Synthetic '' shipments'!A:M"]);

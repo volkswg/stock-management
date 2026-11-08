@@ -1,3 +1,4 @@
+import {canonicalPath} from "./retirement-history.mjs";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
@@ -34,7 +35,7 @@ export function driveRoute({ rows = [shipmentRow({ status: "ready_to_ship" })], 
     const before = JSON.parse(readFileSync("tests/fixtures/shipments-drive-before.json", "utf8"));
     const output = ts.transpileModule(before.source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, exports = {};
     new vm.Script(output).runInNewContext({ exports, Buffer, URL, URLSearchParams, ...contextGlobals, require: name => { if (!Object.hasOwn(imports, name)) throw new Error(`Unapproved original route dependency ${name}`); return imports[name]; } }); route = exports;
-  } else route = loadSource(driveRouteFile, { imports, globals: contextGlobals });
+  } else route = loadSource(canonicalPath(driveRouteFile), { imports, globals: contextGlobals });
   return { route, trace, errors, sheets, services, provider };
 }
 export function shippingBillRequest({ type = "application/pdf", size = 4, status = "shipping" } = {}) {

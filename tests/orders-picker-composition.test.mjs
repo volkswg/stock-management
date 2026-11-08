@@ -1,5 +1,6 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import { builtinModules } from "node:module";
 import test from "node:test";
@@ -24,8 +25,8 @@ test("client composition supplies one stable adapter and no DOM; server page pas
   const tree = await page.default({ params: Promise.resolve({ id: "o/1" }) });
   assert.equal(tree.type, composed.module.OrderDetailClient); assert.deepEqual(plain(tree.props), { orderId: "o/1" });
   assert.deepEqual(plain(page.metadata), { title: "Order details | Stock Management", description: "Review order information, bills, and product images." });
-  assert.ok(readFileSync(clientPath, "utf8").startsWith('"use client";'));
-  assert.ok(!readFileSync("src/app/orders/[id]/page.tsx", "utf8").includes('"use client"'));
+  assert.ok(readArchive(clientPath, "utf8").startsWith('"use client";'));
+  assert.ok(!readArchive("src/app/orders/[id]/page.tsx", "utf8").includes('"use client"'));
 });
 
 test("composition preserves exact exclusions, AbortSignal and delegation identity without mapping/retries", async () => {
@@ -82,13 +83,13 @@ test("a fake Orders-owned port receives only signal, retains lifecycle and refet
 
 test("reviewed picker plumbing retains every original statement, including non-picker functions and JSX", () => {
   assertPickerDetailParity();
-  const source = ts.createSourceFile(detailPath, readFileSync(detailPath, "utf8"), ts.ScriptTarget.Latest, true);
+  const source = ts.createSourceFile(detailPath, readArchive(detailPath, "utf8"), ts.ScriptTarget.Latest, true);
   for (const name of ["OrderDetailPage", "OrderContent", "ShipmentLinkCard"]) {
     const fn = source.statements.find(n => ts.isFunctionDeclaration(n) && n.name.text === name);
     const property = fn.parameters[0].type.members.find(m => m.name.getText() === "shipmentPicker");
     assert.ok(property && !property.questionToken); assert.equal(property.type.getText(), "OrderShipmentPickerPort");
   }
-  assert.ok(readFileSync(detailPath, "utf8").includes("[currentShipment, shipmentPicker, shipmentsRequestId]"));
+  assert.ok(readArchive(detailPath, "utf8").includes("[currentShipment, shipmentPicker, shipmentsRequestId]"));
 });
 
 for (const runtime of [true, false]) test(`app client composition graph is browser-safe and file-acyclic (${runtime ? "runtime" : "including types"})`, () => {
@@ -101,13 +102,13 @@ for (const runtime of [true, false]) test(`app client composition graph is brows
     assert.ok(!/\/(application|infrastructure)\/|\/server\.ts$/.test(file), file);
     assert.ok(!file.startsWith("src/app/") || file === clientPath, file);
     active.push(file);
-    const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+    const source = ts.createSourceFile(file, readArchive(file, "utf8"), ts.ScriptTarget.Latest, true);
     for (const n of source.statements) {
       if (!(ts.isImportDeclaration(n) || ts.isExportDeclaration(n)) || !n.moduleSpecifier) continue;
       const clause = n.importClause, names = clause?.namedBindings && ts.isNamedImports(clause.namedBindings) ? clause.namedBindings.elements : undefined;
       if (runtime && (n.isTypeOnly || clause?.isTypeOnly || (names?.length && !clause.name && names.every(e => e.isTypeOnly)))) continue;
       const specifier = n.moduleSpecifier.text; assert.ok(!forbidden.has(specifier), `${file}: ${specifier}`);
-      const target = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName;
+      const target = ts.resolveModuleName(specifier, resolve(file), options, evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;
       if (target) { const project = relative(process.cwd(), target); if (project.startsWith("src/")) visit(project); }
       else if (/^(\.|@\/)/.test(specifier) && !specifier.endsWith(".css")) assert.fail(`Unresolved ${specifier}`);
     }

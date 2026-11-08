@@ -1,5 +1,6 @@
+import {restoreRetirementSource} from "./retirement-history.mjs";
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import {readEvidence as readFileSync} from "./retirement-history.mjs";
 import { createHash } from 'node:crypto';
 export const cleanupHistory = JSON.parse(readFileSync('tests/fixtures/final-cleanup-before.json', 'utf8'));
 export const cleanupNewFiles = [...Object.values(cleanupHistory.moves).map(e => e.to), ...cleanupHistory.newFiles];
@@ -31,6 +32,7 @@ function reverseEdit(file, source) { const e = cleanupHistory.edits[file]; if (!
     source = source.replaceAll(c.to, c.from);
 } assert.equal(hash(source), e.sha256, file); return source; }
 export function restoreCleanupSource(file, source = readFileSync(file, 'utf8')) {
+    source=restoreRetirementSource(file,source);
     const move = cleanupHistory.moves[file];
     if (move) {
         const saved = cleanupHistory.files[file];

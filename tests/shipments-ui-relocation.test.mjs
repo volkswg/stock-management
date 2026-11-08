@@ -1,7 +1,7 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import { assertShipmentEnumContractHistory } from "./helpers/shipments-enum-history.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { componentHarness, elements, flush } from "./helpers/component-harness.mjs";
@@ -10,22 +10,22 @@ import { shipmentUiPath } from "./helpers/shipment-ui-paths.mjs";
 import { assertPickerDetailParity } from "./helpers/orders-picker-structure.mjs";
 import { pickerFromHttp } from "./helpers/orders-picker.mjs";
 
-const baseline = JSON.parse(readFileSync(new URL("./fixtures/shipments-ui-relocation.json", import.meta.url), "utf8"));
+const baseline = JSON.parse(readArchive(new URL("./fixtures/shipments-ui-relocation.json", import.meta.url), "utf8"));
 const hash = value => createHash("sha256").update(value).digest("hex");
-const source = file => ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+const source = file => ts.createSourceFile(file, readArchive(file, "utf8"), ts.ScriptTarget.Latest, true);
 const bodyHash = file => { const s = source(file), printer = ts.createPrinter(); return hash(s.statements.filter(n => !ts.isImportDeclaration(n) && !ts.isExportDeclaration(n)).map(n => printer.printNode(ts.EmitHint.Unspecified, n, s)).join("\n")); };
 const one = (tree, type, predicate = () => true) => { const item = elements(tree, type).find(e => predicate(e.props)); assert.ok(item, type); return item; };
 
 test("seven original Shipment source bodies/CSS and route wrapper metadata/JSX remain equal before and after moves", () => {
   for (const entry of baseline.files) {
     const file = shipmentUiPath(entry.from.slice("src/app/shipments/".length));
-    assert.equal(file.endsWith(".css") ? hash(readFileSync(file)) : bodyHash(file), entry.hash, file);
+    assert.equal(file.endsWith(".css") ? hash(readArchive(file)) : bodyHash(file), entry.hash, file);
   }
   for (const entry of baseline.wrappers) assert.equal(bodyHash(entry.file), entry.hash, entry.file);
   for (const [file, expected] of Object.entries(baseline.retained)) {
     if (file === "src/modules/shipments/contracts.ts") { assertShipmentEnumContractHistory(file, expected); continue; }
     if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
-    else assert.equal(hash(readFileSync(baseline.files.find(e => e.from === file)?.to ?? file)), expected, file);
+    else assert.equal(hash(readArchive(baseline.files.find(e => e.from === file)?.to ?? file)), expected, file);
   }
 });
 
@@ -81,7 +81,7 @@ test("all seven implementations/styles move once; four wrappers reference their 
   function walk(dir) { return readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]); }
   assert.deepEqual(walk("src/modules/shipments/ui").sort(), moved.map(e => e.to).sort());
   for (const file of walk("src").filter(f => /\.tsx?$/.test(f))) {
-    const text = readFileSync(file, "utf8");
+    const text = readArchive(file, "utf8");
     for (const entry of moved) assert.ok(!text.includes(`@/${entry.from.slice(4).replace(/\.(tsx?|css)$/, "")}`), `${file}: retired ${entry.from}`);
   }
   for (const [file, client] of [["ShipmentListPage.tsx", "./api"], ["[id]/ShipmentDetailPage.tsx", "../api"]]) assert.ok(source(shipmentUiPath(file)).statements.some(n => ts.isImportDeclaration(n) && n.moduleSpecifier.text === client));

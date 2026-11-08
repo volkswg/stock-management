@@ -1,3 +1,4 @@
+import {retirement,evidenceHost,readArchive} from "./retirement-history.mjs";
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
@@ -5,13 +6,13 @@ import ts from 'typescript';
 import { userStateBefore } from './user-state-worksheet-history.mjs';
 const options = ts.parseJsonConfigFileContent(ts.readConfigFile('tsconfig.json', ts.sys.readFile).config, ts.sys, process.cwd()).options;
 export function userStateGraph(overrides = {}) {
-  const host = { ...ts.sys, fileExists: f => Object.hasOwn(overrides, relative(process.cwd(), f)) || ts.sys.fileExists(f), directoryExists: d => Object.keys(overrides).some(f => resolve(f).startsWith(resolve(d) + '/')) || ts.sys.directoryExists(d) };
+  const host = { ...evidenceHost(ts.sys,overrides), fileExists: f => Object.hasOwn(overrides, relative(process.cwd(), f)) || (Object.keys(overrides).length>0&&Object.hasOwn(retirement.files,relative(process.cwd(),f))) || ts.sys.fileExists(f), directoryExists: d => Object.keys(overrides).some(f => resolve(f).startsWith(resolve(d) + '/')) || (Object.keys(overrides).length>0&&evidenceHost(ts.sys,overrides).directoryExists(d)) || ts.sys.directoryExists(d) };
   const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);
-  const all = [...new Set([...walk("src"),...Object.keys(userStateBefore.productionHashes), ...Object.keys(overrides), ...Object.values(userStateBefore.moves).map(e=>e.to).filter(existsSync)])].filter(f=>/\.tsx?$/.test(f));
+  const all = [...new Set([...walk("src"),...Object.keys(overrides), ...Object.values(userStateBefore.moves).map(e=>e.to).filter(existsSync)])].filter(f=>/\.tsx?$/.test(f));
   const cache = new Map();
   function deps(file, types) {
     const key = `${types}:${file}`; if (cache.has(key)) return cache.get(key);
-    const source=overrides[file]??readFileSync(file,'utf8'), ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true), result=[];
+    const source=overrides[file]??(existsSync(file)?readFileSync(file,'utf8'):readArchive(file,'utf8')), ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true), result=[];
     function add(spec, erased) { if (!types && erased) return; const r=ts.resolveModuleName(spec,resolve(file),options,host).resolvedModule?.resolvedFileName,p=r&&relative(process.cwd(),r); if(p?.startsWith('src/')&&/\.tsx?$/.test(p)) result.push(p); }
     function visit(n) {
       if ((ts.isImportDeclaration(n)||ts.isExportDeclaration(n))&&n.moduleSpecifier&&ts.isStringLiteral(n.moduleSpecifier)) { const c=n.importClause,e=c?.namedBindings&&ts.isNamedImports(c.namedBindings)?c.namedBindings.elements:ts.isNamedExports(n.exportClause??{})?n.exportClause.elements:[]; add(n.moduleSpecifier.text,n.isTypeOnly||c?.isTypeOnly||(e?.length&&!c?.name&&e.every(x=>x.isTypeOnly))); }

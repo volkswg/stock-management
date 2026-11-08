@@ -1,5 +1,5 @@
+import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import test from "node:test";
 import { ordersServer } from "./helpers/orders-server.mjs";
 import { plain, loadSource } from "./helpers/load-source.mjs";
@@ -12,8 +12,8 @@ function clock(events = []) {
     static now() { return Date.parse(FIXED); }
   };
 }
-const fixture = JSON.parse(readFileSync(new URL("./fixtures/orders-read-model.json", import.meta.url), "utf8"));
-const cases = JSON.parse(readFileSync(new URL("./fixtures/orders-seam-list.json", import.meta.url), "utf8"));
+const fixture = JSON.parse(readArchive(new URL("./fixtures/orders-read-model.json", import.meta.url), "utf8"));
+const cases = JSON.parse(readArchive(new URL("./fixtures/orders-seam-list.json", import.meta.url), "utf8"));
 
 for (const { name, rows, expected } of cases) {
   test(`legacy list parity: ${name}`, async () => {

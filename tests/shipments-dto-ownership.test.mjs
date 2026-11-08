@@ -1,3 +1,6 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
+import {canonicalPath} from "./helpers/retirement-history.mjs";
 import { completionExtraFiles, completionNewFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { hrFiles, hrNewFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
 import { expensesFiles, expensesNewFiles, assertExpensesHistory } from "./helpers/expenses-business-history.mjs";
@@ -15,7 +18,7 @@ import { googleFiles, googleDestinations, assertGoogleHistory } from "./helpers/
 import { shipmentHttpFiles, assertShipmentHttpHistory } from "./helpers/shipments-http-history.mjs";
 import { shipmentValidationFile, assertShipmentValidationImportHistory } from "./helpers/shipments-validation-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import {readdirSync} from "node:fs";
 import { relative, resolve } from "node:path";
 import test from "node:test";
 import ts from "typescript";
@@ -44,18 +47,18 @@ test("DTO erasure leaves only original enum exports; legacy direct/barrel/server
   assert.equal(services.updateShipmentStatus,load("src/services/shipments/updateShipmentStatus.ts").updateShipmentStatus);
   assert.equal(services.LinkOrderToShipmentError,load("src/modules/shipments/application/link-order-to-shipment.ts").LinkOrderToShipmentError);
   const compile=text=>ts.transpileModule(text,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
-  assert.equal(compile(readFileSync(dtoContract,"utf8")),compile('import { ShipmentStatus } from "./status";\nexport { ShipmentStatus };'));
-  const graph=dtoPureGraph();graph.load(dtoLegacy);graph.load(dtoContract);graph.load("src/modules/shipments/status.ts");assert.equal(graph.evaluations.filter(f=>f.endsWith("/status.ts")).length,1);
+  assert.equal(compile(readArchive(dtoContract,"utf8")),compile('import { ShipmentStatus } from "./status";\nexport { ShipmentStatus };'));
+  const graph=dtoPureGraph();graph.load(canonicalPath(dtoLegacy));graph.load(canonicalPath(dtoContract));graph.load("src/modules/shipments/status.ts");assert.equal(graph.evaluations.filter(f=>f.endsWith("/status.ts")).length,1);
 });
 
 test("two exact production edits and chained PR15/PR16 history preserve every earlier fixture, route and enum/provider/browser byte",()=>{
   assertShipmentDtoHistory();
-  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>{if(completionExtraFiles.has(file)){assertCompletionHistory(file,hash);return false;}else if(hrFiles.has(file)){assertHRHistory(file,hash);return false;}else if(expensesFiles.has(file)){assertExpensesHistory(file,hash);return false;}else if(remainingFiles.has(file)){assertRemainingHistory(file,hash);return false;}else if(userStateFiles.has(file)){assertUserStateHistory(file,hash);return false;}if(salesQueryFiles.has(file)){assertSalesQueryHistory(file,hash);return false;}if(movementSchemaFiles.has(file)){assertMovementSchemaHistory(file,hash);return false;}if(inventoryWorksheetFiles.has(file)){assertInventoryWorksheetHistory(file,hash);return false;}if(hrWorksheetFiles.has(file)){assertHrWorksheetHistory(file,hash);return false;}if(directoryFiles.has(file)){assertDirectoryHistory(file,hash);return false;}if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return dtoHash(readFileSync(file))!==hash;}).map(([file])=>file).sort();
+  const changed=Object.entries(dtoBefore.productionHashes).filter(([file,hash])=>{if(completionExtraFiles.has(file)){assertCompletionHistory(file,hash);return false;}else if(hrFiles.has(file)){assertHRHistory(file,hash);return false;}else if(expensesFiles.has(file)){assertExpensesHistory(file,hash);return false;}else if(remainingFiles.has(file)){assertRemainingHistory(file,hash);return false;}else if(userStateFiles.has(file)){assertUserStateHistory(file,hash);return false;}if(salesQueryFiles.has(file)){assertSalesQueryHistory(file,hash);return false;}if(movementSchemaFiles.has(file)){assertMovementSchemaHistory(file,hash);return false;}if(inventoryWorksheetFiles.has(file)){assertInventoryWorksheetHistory(file,hash);return false;}if(hrWorksheetFiles.has(file)){assertHrWorksheetHistory(file,hash);return false;}if(directoryFiles.has(file)){assertDirectoryHistory(file,hash);return false;}if(salesWorksheetFiles.has(file)){assertSalesWorksheetHistory(file,hash);return false;}if(worksheetFiles.has(file)){assertWorksheetHistory(file,hash);return false;}if(sheetTypeFiles.has(file)){assertOrdersSheetTypeHistory(file,hash);return false;}if(googleFiles.has(file)){assertGoogleHistory(file,hash);return false;}if(shipmentHttpFiles.has(file)){assertShipmentHttpHistory(file,hash);return false;}if(file===shipmentValidationFile){assertShipmentValidationImportHistory(file,hash);return false;}return dtoHash(readArchive(file))!==hash;}).map(([file])=>file).sort();
   assert.deepEqual(changed,[dtoContract,dtoLegacy].sort());
   assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(dtoBefore.productionHashes,f)&&!googleDestinations.includes(f)&&!worksheetDestinations.includes(f)&&!salesWorksheetDestinations.includes(f)&&!directoryNewFiles.includes(f)&&!hrWorksheetDestinations.includes(f)&&!inventoryWorksheetDestinations.includes(f)&&!movementSchemaNewFiles.includes(f)&&!salesQueryNewFiles.includes(f)&&!userStateDestinations.includes(f)&&!remainingDestinations.includes(f)&&!expensesNewFiles.includes(f)&&!hrNewFiles.includes(f)&&!completionNewFiles.includes(f)),[]);
-  for(const [file,hash]of Object.entries(dtoBefore.fixtureHashes))assert.equal(dtoHash(readFileSync(file)),hash,file);
+  for(const [file,hash]of Object.entries(dtoBefore.fixtureHashes))assert.equal(dtoHash(readArchive(file)),hash,file);
   assert.deepEqual(routeContracts(),dtoBefore.routeContracts);assert.equal(routeContracts().filter(r=>r.kind==="page").length,23);assert.equal(routeContracts().filter(r=>r.kind==="api").length,35);
-  const old=JSON.parse(readFileSync("tests/fixtures/shipments-enum-before.json","utf8"));
+  const old=JSON.parse(readArchive("tests/fixtures/shipments-enum-before.json","utf8"));
   const restored=dtoBefore.sources[dtoContract].source.replace('export { ShipmentStatus } from "./status";','export { ShipmentStatus } from "@/services/shipments/types";');
   assert.equal(restored,old.sources[dtoContract].source);assert.equal(dtoHash(restored),"77753cb8809856586d5399999b7be5ca5ca8983a8e67897391b976cac2aacd78");
   for(const source of currentDtoDeclarations())assert.equal(dtoPrint(source.node,source.source),old.dtos[source.node.name.text].ast);
@@ -67,7 +70,7 @@ function edges(file,types){return dtoParse(file).statements.flatMap(n=>{
   const c=n.importClause,b=c?.namedBindings,e=b&&ts.isNamedImports(b)?b.elements:undefined;
   const erased=!!(n.isTypeOnly||c?.isTypeOnly||(e?.length&&!c.name&&e.every(v=>v.isTypeOnly)));
   if(!types&&erased)return [];
-  const target=ts.resolveModuleName(n.moduleSpecifier.text,resolve(file),options,ts.sys).resolvedModule?.resolvedFileName;
+  const target=ts.resolveModuleName(n.moduleSpecifier.text,resolve(file),options,evidenceHost(ts.sys)).resolvedModule?.resolvedFileName;
   if(!target)return [];const f=relative(process.cwd(),target).replaceAll("\\","/");return f.startsWith("src/")?[{target:f,erased}]:[];
 });}
 for(const types of [false,true])test(`resolved DTO/feature/browser graphs remove legacy reverse edge and remain acyclic (${types?"runtime plus erased types":"runtime"})`,()=>{

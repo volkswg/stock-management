@@ -168,9 +168,9 @@ const scopes={
   ],
   "src/modules/line-workflows/server.ts": [
     "server-only",
-    "@/externals/google/sheet/types",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "@/infrastructure/files/google-drive/types",
-    "@/externals/line",
+    "@/infrastructure/external/line",
     "@/shared/types/line-protocol",
     "@/config",
     "@/services/utils/createSortableId",
@@ -258,7 +258,7 @@ const scopes={
   "src/shared/types/line-protocol.ts": [],
   "src/modules/orders/server.ts": [
     "server-only",
-    "@/externals/google/sheet/types",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "@/services/utils/createSortableId",
     "./contracts",
     "./application/create-order",
@@ -280,7 +280,7 @@ const scopes={
   ],
   "src/modules/inventory/server.ts": [
     "server-only",
-    "@/externals/google/sheet/types",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "./contracts",
     "@/modules/hr/server",
     "./application/list-adjustment-employees",
@@ -303,7 +303,7 @@ const scopes={
   ]
 };
 export const ordersLineWorkflowBoundaries=Object.entries(scopes).map(([file,paths])=>({files:[file],rules:{
- 'no-restricted-imports':['error',{paths:file==='src/modules/orders/server.ts'?[{name:'@/externals/google/sheet/types',allowTypeImports:true,message:'Import Sheet interfaces only as erased types.'}]:[],patterns:[{regex:paths.length?`^(?!(?:${paths.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$).+`:'.+',message:'Use explicit feature contracts, consumer-owned ports and adapter/server composition.'}]}],
- 'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Keep compatibility and public exports named.'},...((/\/(application|domain)\//.test(file)||file.endsWith('/quantity.ts'))?[{selector:'NewExpression[callee.name="Date"][arguments.length=0]',message:'Inject the current clock.'},{selector:'CallExpression[callee.object.name="Date"][callee.property.name="now"]',message:'Inject the current clock.'}]:[]),...(file==='src/modules/orders/server.ts'?[{selector:"ImportDeclaration[source.value='@/externals/google/sheet']:not([importKind='type'])",message:'No aggregate implementation imports.'}]:[])],
+ 'no-restricted-imports':['error',{paths:file==='src/modules/orders/server.ts'?[{name:'@/infrastructure/persistence/google-sheets/service-contracts',allowTypeImports:true,message:'Import Sheet interfaces only as erased types.'}]:[],patterns:[{regex:paths.length?`^(?!(?:${paths.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$).+`:'.+',message:'Use explicit feature contracts, consumer-owned ports and adapter/server composition.'}]}],
+ 'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Keep compatibility and public exports named.'},...((/\/(application|domain)\//.test(file)||file.endsWith('/quantity.ts'))?[{selector:'NewExpression[callee.name="Date"][arguments.length=0]',message:'Inject the current clock.'},{selector:'CallExpression[callee.object.name="Date"][callee.property.name="now"]',message:'Inject the current clock.'}]:[]),...(file==='src/modules/orders/server.ts'?[{selector:"ImportDeclaration[source.value='@/infrastructure/persistence/google-sheets/service-contracts']:not([importKind='type'])",message:'No aggregate implementation imports.'}]:[])],
  'no-restricted-globals':['error','process','fetch',...(!file.includes('/server.ts')&&!file.includes('/infrastructure/')?['Buffer']:[])],
 }}));

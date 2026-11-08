@@ -1,6 +1,7 @@
+import {evidenceHost} from "./helpers/retirement-history.mjs";
+import {readArchive} from "./helpers/retirement-history.mjs";
 import {restoreCleanupSource} from "./helpers/cleanup-history.mjs";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import test from "node:test";
 import ts from "typescript";
@@ -17,7 +18,7 @@ test("actual creation application/port, adapter and composition pass their narro
   for (const [filePath, code] of [
     [application, 'import { ShipmentStatus } from "../contracts"; import type { CreatedShipmentWriter } from "./ports/created-shipment-writer"; export const status = ShipmentStatus.Draft; export type Writer = CreatedShipmentWriter;'],
     [port, 'import type { Shipment } from "../../contracts"; export interface Writer { append(record: Shipment): Promise<void> }'],
-    [adapter, 'import "server-only"; import type { IGoogleSheetsService } from "@/externals/google/sheet/types"; import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const"; export type Sheets = IGoogleSheetsService; export const range = lastColumnLetter(12);'],
+    [adapter, 'import "server-only"; import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts"; import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const"; export type Sheets = IGoogleSheetsService; export const range = lastColumnLetter(12);'],
     [server, 'import "server-only"; import { createSortableId } from "@/infrastructure/runtime/create-sortable-id"; export const id = createSortableId; export const clock = () => new Date().toISOString();'],
   ]) { const [result] = await eslint.lintText(code, { filePath }); assert.equal(restricted(result), false, JSON.stringify(result.messages)); }
 });
@@ -72,7 +73,7 @@ for (const runtime of [true, false]) test(`creation project graph is file-acycli
       if (runtime && (n.isTypeOnly || clause?.isTypeOnly || (elements?.length && !clause.name && elements.every(e => e.isTypeOnly)))) continue;
       const specifier = n.moduleSpecifier.text;
       if (["server-only", "node:crypto"].includes(specifier)) { assert.ok(specifier === "server-only" ? [adapter, server, "src/modules/shipments/infrastructure/google-drive/shipment-bill-storage.ts", "src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts", "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts", "src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts"].includes(file) : file === "src/services/utils/createSortableId.ts"); continue; }
-      const resolved = ts.resolveModuleName(specifier, resolve(file), options, ts.sys).resolvedModule?.resolvedFileName; assert.ok(resolved, `${file}: ${specifier}`);
+      const resolved = ts.resolveModuleName(specifier, resolve(file), options, evidenceHost(ts.sys)).resolvedModule?.resolvedFileName; assert.ok(resolved, `${file}: ${specifier}`);
       const target = relative(process.cwd(), resolved).replaceAll("\\", "/"); assert.ok(target.startsWith("src/"), target);
       const fromOwner = /^src\/modules\/([^/]+)\//.exec(file)?.[1], toOwner = /^src\/modules\/([^/]+)\//.exec(target)?.[1];
       if (fromOwner && toOwner && fromOwner !== toOwner) edges.add(`${fromOwner}->${toOwner}`);
@@ -86,7 +87,7 @@ for (const runtime of [true, false]) test(`creation project graph is file-acycli
 });
 
 test("type-erased Sheets interfaces are pure, server markers are explicit, and browser files cannot import the seam", async () => {
-  const source = readFileSync("src/externals/google/sheet/types.ts", "utf8");
+  const source = readArchive("src/externals/google/sheet/types.ts", "utf8");
   const ast = ts.createSourceFile("types.ts", source, ts.ScriptTarget.Latest, true); assert.equal(ast.statements.filter(ts.isImportDeclaration).length, 1);
   assert.ok(ast.statements.filter(ts.isImportDeclaration).every(n => n.importClause.isTypeOnly && n.moduleSpecifier.text === "@/infrastructure/persistence/google-sheets/types"));
   for (const file of [adapter, server]) assert.ok(restoreCleanupSource(file).startsWith('import "server-only";'));

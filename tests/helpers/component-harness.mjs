@@ -1,3 +1,4 @@
+import {canonicalPath} from "./retirement-history.mjs";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import ts from "typescript";
@@ -54,13 +55,13 @@ export function componentHarness(path, { api = {}, globals = {} } = {}) {
     if (imports[name]) continue;
     if (name.endsWith(".css")) imports[name] = { __esModule: true, default: new Proxy({}, { get: (_, key) => String(key) }) };
     else if (name.endsWith("/api")) imports[name] = api;
-    else if (name.endsWith("orderListFormat")) imports[name] = loadSource(resolve(dirname(path), `${name}.ts`));
-    else if (name.endsWith("shipmentListFormat")) imports[name] = loadSource(resolve(dirname(path), `${name}.ts`), { imports });
+    else if (name.endsWith("orderListFormat")) imports[name] = loadSource(canonicalPath(resolve(dirname(path), `${name}.ts`)));
+    else if (name.endsWith("shipmentListFormat")) imports[name] = loadSource(canonicalPath(resolve(dirname(path), `${name}.ts`)), { imports });
     else if (node.importClause?.namedBindings && ts.isNamedImports(node.importClause.namedBindings)) {
       imports[name] = Object.fromEntries(node.importClause.namedBindings.elements.map((entry) => [entry.propertyName?.text ?? entry.name.text, entry.propertyName?.text ?? entry.name.text]));
     } else throw new Error(`Unexpected component dependency: ${name}`);
   }
-  const componentModule = loadSource(path, { imports, globals: {
+  const componentModule = loadSource(canonicalPath(path), { imports, globals: {
     Error, AbortController, HTMLElement: class HTMLElement {},
     window: { addEventListener: (name, listener) => listeners.set(name, listener), removeEventListener: (name, listener) => { if (listeners.get(name) === listener) listeners.delete(name); } },
     ...globals,
