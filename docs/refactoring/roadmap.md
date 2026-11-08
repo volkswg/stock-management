@@ -4,7 +4,7 @@ This page describes the **current plan**, not the full migration diary. See the 
 
 ## Completed: modular architecture and legacy external cleanup
 
-- [PRs #1–37](https://github.com/volkswg/stock-management/pull/37) completed the scoped modular migration and final composition. Feature business logic and worksheets have owners; Google/Drive/LINE/Loyverse transport moved to root infrastructure.
+- [PRs #1–37](progress.md#merged-implementation-ledger) completed the scoped modular migration and final composition. Feature business logic and worksheets have owners; Google/Drive/LINE/Loyverse transport moved to root infrastructure.
 - [PR #40](https://github.com/volkswg/stock-management/pull/40) closed [issue #39](https://github.com/volkswg/stock-management/issues/39), physically removed all 65 files under `src/externals/` and migrated internal imports and full-service Google Sheets type declarations. No further external-directory refactor is planned.
 
 Current verified GitHub `main` after the cleanup: `3c870ef122c640c6ed8958dadb83ae714094dfb5`. Codex reported **534 passing offline tests**, lint/typecheck and isolated build at PR #40; those are not independent CI, live-provider or browser acceptance evidence. Keep historical per-PR counts in [progress](progress.md), not here.
