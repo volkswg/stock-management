@@ -70,7 +70,7 @@ test("receipt identifiers retain legacy sanitization and fallback formats", () =
 });
 
 test("movement notes sum standalone quantities and preserve label text", () => {
-  const { parseQuantity, isValidMovementQuantity } = loadSource("src/features/backend/line/services/movements/utils.ts");
+  const { parseQuantity, isValidMovementQuantity } = loadSource("src/modules/inventory/quantity.ts");
   assert.deepEqual(plain(parseQuantity("ดำ 5 ขาว 3")), { quantity: "8", remark: "ดำ 5 ขาว 3" });
   assert.deepEqual(plain(parseQuantity("5")), { quantity: "5", remark: "" });
   assert.deepEqual(plain(parseQuantity("1,000 2.5")), { quantity: "1002.5", remark: "1,000 2.5" });

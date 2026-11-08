@@ -1,3 +1,4 @@
+import {featureFiles} from "./features-retirement-history.mjs";
 import {accountGraph} from "./loyverse-accounts.mjs";
 import {retirement} from "./retirement-history.mjs";
 import {canonicalPath} from "./retirement-history.mjs";
@@ -24,10 +25,10 @@ import { googleBefore } from "./google-infrastructure.mjs";
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
 export function loadSource(path, { imports = {}, globals = {} } = {}) {
-  if(retirement.files[path])throw new Error(`Retired current source path: ${path}`);
+  if(retirement.files[path]||featureFiles[path])throw new Error(`Retired current source path: ${path}`);
   if(externalHistory.moves[path])return loadSource(canonicalPath(externalHistory.moves[path].to),{imports,globals});
-  if(path.startsWith("src/services/orders/")||path.startsWith("src/services/line/")||path.startsWith("src/services/user-states/")||path==="src/services/movements/state.ts"||path==="src/features/backend/line/services/movements/index.ts"||["src/externals/line/enum.ts","src/externals/line/utils/messageBuilder.ts","src/features/backend/shared/utils.ts"].includes(path))return ordersLineGraph({imports,globals}).load(canonicalPath(path));
-  if(["src/services/stock-adjustments/manageStockAdjustments.ts","src/services/stock-counts/manageStockCounts.ts","src/services/movements/manageMovements.ts","src/services/movements/worksheet-schema.ts","src/features/backend/line/services/movements/utils.ts"].includes(path)) return loadInventorySource(path,{imports,globals});
+  if(path.startsWith("src/services/orders/")||path.startsWith("src/services/line/")||path.startsWith("src/services/user-states/")||path==="src/services/movements/state.ts"||["src/externals/line/enum.ts","src/externals/line/utils/messageBuilder.ts"].includes(path))return ordersLineGraph({imports,globals}).load(canonicalPath(path));
+  if(["src/services/stock-adjustments/manageStockAdjustments.ts","src/services/stock-counts/manageStockCounts.ts","src/services/movements/manageMovements.ts","src/services/movements/worksheet-schema.ts","src/modules/inventory/quantity.ts"].includes(path)) return loadInventorySource(path,{imports,globals});
   if(path.startsWith("src/services/sales/")) return loadSalesSource(path,{imports,globals});
   if(["src/services/employees/manageSalaryAdvances.ts","src/services/employees/calculateEmployeePayroll.ts","src/services/employees/settleEmployeePayroll.ts"].includes(path)) return createHRSourceLoader({imports,globals})(path);
   if(path === "src/services/expenses/manageExpenses.ts") return loadExpenseSource(path,{imports,globals});

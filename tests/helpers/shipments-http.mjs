@@ -1,3 +1,4 @@
+import {canonicalFeatureSpecifier} from "./features-retirement-history.mjs";
 import {canonicalPath} from "./retirement-history.mjs";
 import vm from "node:vm";
 import ts from "typescript";
@@ -16,11 +17,11 @@ export async function runShipmentHttpCase(example,{original=false}={}){
   "@/externals/google/sheet":{createGoogleSheetsServiceFromConfig:()=>{trace.push(["sheets"]);return fake.sheets;}},
   "@/externals/google/drive":{createGoogleDriveServiceFromConfig:()=>{trace.push(["drive"]);return example.drive==="unavailable"?undefined:drive;}},
   "@/services/shipments":services,"@/modules/shipments/server":load("src/modules/shipments/server.ts"),"@/modules/shipments/contracts":load("src/modules/shipments/contracts.ts"),
-  "@/features/backend/shared/utils":load("src/features/backend/shared/utils.ts"),"@/features/backend/shipments/utils":load("src/features/backend/shipments/utils.ts")};
+  "@/shared/lib/is-record":load("src/shared/lib/is-record.ts"),"@/modules/shipments/http":load("src/modules/shipments/http.ts")};
  const globals={Date:ShipmentClock,Error,File,console:logger};
  function route(name){const file=routes[name];if(!original)return loadSource(canonicalPath(file),{imports,globals});
   const exports={},output=ts.transpileModule(shipmentHttpBefore.sources[file].source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-  new vm.Script(output,{filename:file}).runInNewContext({exports,Buffer,URL,URLSearchParams,...globals,require:specifier=>{if(!Object.hasOwn(imports,specifier))throw new Error(`Unapproved historical route import ${specifier}`);return imports[specifier];}});return exports;
+  new vm.Script(output,{filename:file}).runInNewContext({exports,Buffer,URL,URLSearchParams,...globals,require:specifier=>{specifier=canonicalFeatureSpecifier(specifier);if(!Object.hasOwn(imports,specifier))throw new Error(`Unapproved historical route import ${specifier}`);return imports[specifier];}});return exports;
  }
  const responses=[];
  for(const spec of example.requests){const url=spec.url??"https://example.test/api/shipments",init={method:spec.method};

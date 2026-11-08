@@ -12,7 +12,7 @@ function helpers(){
   const {load,services}=shipmentServices();const exports={};
   const code=ts.transpileModule(validationBefore.source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   new vm.Script(code).runInNewContext({exports,require:name=>{assert.equal(name,"@/services/shipments");return services;}});
-  return {original:exports,current:load(shipmentValidationFile),load,services};
+  return {original:exports,current:load("src/modules/shipments/http.ts"),load,services};
 }
 
 test("original and current validation declarations/status outputs preserve four helper exports, original enum identity and all malformed status values",()=>{

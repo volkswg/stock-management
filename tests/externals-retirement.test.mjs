@@ -1,3 +1,4 @@
+import {featureFiles} from "./helpers/features-retirement-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync, existsSync} from 'node:fs';
@@ -13,7 +14,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 test('retirement removes all 65 compatibility files, preserves every inherited fixture and changes only the audited production imports', () => {
   assert.equal(existsSync('src/externals'), false);
   assert.equal(Object.keys(retirement.files).length, 65);
-  const expected = [...Object.keys(retirement.productionHashes).filter(f => !retirement.files[f]), retirement.contract, ...accountNewFiles].sort();
+  const expected = [...Object.keys(retirement.productionHashes).filter(f => !retirement.files[f] && !featureFiles[f]), retirement.contract, ...accountNewFiles].sort();
   assert.deepEqual(currentSourceFiles('src').filter(f => !f.endsWith('.tsbuildinfo')).sort(), expected);
   for (const [file, beforeHash] of Object.entries(retirement.productionHashes)) {
     assert.equal(hash(restoreRetirementSource(file)), beforeHash, file);
@@ -28,7 +29,7 @@ test('retirement removes all 65 compatibility files, preserves every inherited f
 
 test('physical current runtime/type graphs resolve canonical modules without archived files, retain public feature directions and keep browsers provider-free', () => {
   const graph = userStateGraph();
-  assert.equal(graph.all.length, 393 + accountNewFiles.length);
+  assert.equal(graph.all.length, 393 + accountNewFiles.length - Object.keys(featureFiles).length);
   assert.ok(graph.all.every(f => existsSync(f) && !f.startsWith(retirement.prefix)));
   const options = ts.parseJsonConfigFileContent(ts.readConfigFile('tsconfig.json', ts.sys.readFile).config, ts.sys, process.cwd()).options;
   for (const file of graph.all) {

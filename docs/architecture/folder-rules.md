@@ -1,6 +1,6 @@
 # Folder ownership
 
-Apply these rules to new and migrated code. `services` and backend feature leaves retain reviewed compatibility surfaces. `src/externals/` is retired and must not be recreated. Do not scaffold empty layers or blindly move mixed files.
+Apply these rules to new and migrated code. `services` and standalone script leaves retain reviewed compatibility surfaces. `src/externals/` and `src/features/` are retired and must not be recreated. Do not scaffold empty layers or blindly move mixed files.
 
 | Location under `src/` | Owns | Excludes |
 | --- | --- | --- |

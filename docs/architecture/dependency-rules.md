@@ -57,3 +57,9 @@ The aggregate service/config interfaces live in the pure root `infrastructure/pe
 ## Loyverse account source boundary
 
 [Scoped account guards](../../eslint/loyverse-accounts-boundaries.mjs) require server-only storage/composition, exact dependencies and a two-field pure metadata DTO. Consumers cannot read raw credential configuration, import the synchronous env-only factory or reach the private reader via alias, relative, erased or dynamic paths. HTTP composition receives metadata; Sales receives its existing ReceiptSource capability. No application/domain imports the new storage/composition implementation. Private Google failures discard provider bodies and client failures redact known tokens before HTTP/log handling. The actual current runtime/type/browser graphs remain independent of historical source inverses.
+
+## Retired feature namespace
+
+[Feature retirement guards](../../eslint/features-retirement-boundaries.mjs) reject live `@/features`, `@/feature` and relative feature-path imports in production and active tests, including erased, re-export, dynamic, CommonJS, import-equals and import-type forms. Recreating `src/features/` is forbidden. These independent rules supplement existing feature/Google/external/account safeguards without widening exceptions. The obsolete forwarding scope and singular alias are removed.
+
+Historical graph hosts may resolve the seven archived paths for original/negative evidence only. Actual graph roots are physical current files; current import resolution, browser reachability, cycles, public module directions and canonical enum/function identities are verified separately. No application/domain or feature infrastructure dependency is added. Remaining service/script compatibility still requires its own consumer audit before retirement.
