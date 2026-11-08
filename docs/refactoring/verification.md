@@ -358,3 +358,23 @@ The final build is a fresh source-only copy without application env files, using
 Three new tests cover physical retirement/complete source fingerprint/enum-function-prototype identities, strict actual runtime/type/browser graphs and alias resolution, and real scoped lint bypass negatives. A type fixture retains the old classifier names through canonical import aliases and verifies classification/event/session/progress signatures. Existing financial, stock, payroll, LINE/Loyverse, HTTP, worksheet/order/error, header/constructor and historical guards remain enabled. The original Inventory comparison resolves its captured quantity implementation only in an explicit original-source context; current loaders still reject removed paths. Full tests pass after that historical-loader repair without another production build.
 
 No file cycles, private cross-feature edge, browser→server/provider reachability, route/schema/formula/provider/environment/package/lockfile or authentication change. No known supported external consumer blocks removal; unknown external deep imports deliberately need migration. Services and standalone script compatibility remain justified and unchanged. Live providers, production data/credentials, browser visuals and independent CI are not verified or accessed; no operational setup, Vercel change, merge or deployment occurs.
+
+## Loyverse single-workbook support
+
+Base: main `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), tree-identical to previously verified head `cc5a41707b0bf8b6302a9ea9c1e6221d66bc1734` with 550 passing tests/lint/typecheck/isolated build. Branch `fix/loyverse-single-workbook`. Account workbook selection now uses only GOOGLE_SHEETS_SPREADSHEET_ID; the account-specific environment setting and AppConfig field are removed. A missing/invalid ID or inaccessible/malformed worksheet fails closed with no alternate workbook or JSON fallback. The reader, six-column validation, ordering, bound clients, redaction and env rollback remain unchanged.
+
+Historical guards reconcile the exact new selection/template edits through an additive witness; old fixture bytes and assertions remain intact. Owner instructions explain workbook-wide token visibility, the lack of per-tab read isolation and the requirement to restrict existing-workbook access. No credentials, production records or Vercel settings are accessed or modified.
+
+| Check | Verified equivalent main baseline | Final |
+| --- | --- | --- |
+| npm test | 550 pass, no failures/skips | **551 = 550 inherited + 1 new**, no failures/skips |
+| npm run lint | Exit 0, inherited unused shipmentRow warning | Exit 0, same warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free build | Existing PR44 verified source/build | Pass, /tmp/loyverse-single-workbook-final; one final build |
+| Source routes / app-paths manifest | 23 pages / 35 APIs | Unchanged, byte-identical manifest |
+
+The final build uses a fresh source-only copy, only tracked .env.example, existing hardlinked dependencies and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. All **414 production files** match the built copy. Manifest SHA-256 remains `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`. All **44 inherited fixtures** remain byte-identical; 119 canonical local links/fragments resolve. The 113 client JavaScript chunks contain no JSON credential setting, removed account-workbook setting or account-reader implementation.
+
+Focused tests exercise actual composition/config with fake Google and Loyverse clients: main-workbook selection, ignored/unevaluated obsolete override, missing/invalid IDs, access failure without fallback, metadata confidentiality and independent env rollback. Inherited tests retain six-column validation, ordering/disabled records, Sales sync/reporting, Expenses mappings, HTTP/error parity, financial/stock/payroll behavior, exact source inverses, runtime identities and browser/runtime/type graph guards. No new cycle or private cross-feature edge; application/domain/transport/route code is unchanged. Only composition and config production files change.
+
+Results are Codex-local, not independent CI or live integration verification. Workbook-wide reader access is an owner-reviewed operational risk; former separate-workbook deployments must copy the account tab privately before adopting this version or explicitly use env mode. No real tokens, production data, live provider calls, Vercel settings, deployment or merge were accessed/performed.

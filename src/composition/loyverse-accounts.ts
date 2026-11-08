@@ -56,12 +56,9 @@ function safeError(error: unknown, secrets: string[]): Error {
 async function readAccounts(config: AppConfig): Promise<LoyverseAccountConfig[]> {
   if (!config.loyverse.accountSource || config.loyverse.accountSource === "env") return config.loyverse.accounts;
   if (config.loyverse.accountSource !== "sheet") throw new Error("LOYVERSE_ACCOUNT_SOURCE must be env or sheet.");
-  const spreadsheetId = config.loyverse.accountsSpreadsheetId?.trim();
+  const spreadsheetId = config.googleSheets.spreadsheetId.trim();
   if (!spreadsheetId || !/^[\w-]+$/.test(spreadsheetId)) {
-    throw new Error("LOYVERSE_ACCOUNTS_SPREADSHEET_ID must identify the private account spreadsheet.");
-  }
-  if (spreadsheetId === config.googleSheets.spreadsheetId.trim()) {
-    throw new Error("Loyverse accounts must use a separate private spreadsheet.");
+    throw new Error("GOOGLE_SHEETS_SPREADSHEET_ID must identify the Loyverse account spreadsheet.");
   }
   let reader;
   try {

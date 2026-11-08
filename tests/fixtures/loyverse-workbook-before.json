@@ -1,0 +1,208 @@
+{
+  "base": "689d02c93326a1831c38c583c464524644c72e66",
+  "files": {
+    "src/composition/loyverse-accounts.ts": {
+      "source": "import \"server-only\";\nimport type { AppConfig, LoyverseAccountConfig } from \"@/config\";\nimport type { LoyverseAccountMetadata } from \"@/shared/types/loyverse-account\";\nimport { GoogleServiceAccountAuth } from \"@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth\";\nimport { GoogleSheetsClient } from \"@/infrastructure/persistence/google-sheets/client/GoogleSheetsClient\";\nimport { GoogleSheetsLoyverseAccounts } from \"@/infrastructure/configuration/google-sheets/loyverse-accounts\";\nimport { LoyverseService, type ILoyverseService } from \"@/infrastructure/external/loyverse\";\n\n// The metadata seam used by Sales, Expenses, Inventory and attendance HTTP composition.\n// No caller of this function receives credentials or provider clients.\nexport async function listLoyverseAccounts(config: AppConfig): Promise<LoyverseAccountMetadata[]> {\n  return (await readAccounts(config)).map(({ id, shopName }) => ({ id, shopName }));\n}\n\n// Only Loyverse read/sync composition needs client capabilities, never raw tokens.\nexport async function createLoyverseAccounts(config: AppConfig): Promise<Array<LoyverseAccountMetadata & {\n  storeId?: string; service: ILoyverseService;\n}>> {\n  const accounts = await readAccounts(config);\n  const secrets = accounts.map(account => account.accessToken);\n  return accounts.map(({ id, shopName, storeId, accessToken }) => {\n    let client: ILoyverseService;\n    try { client = new LoyverseService({ accessToken }); }\n    catch (error) { throw safeError(error, secrets); }\n    async function request<T>(operation: () => Promise<T>): Promise<T> {\n      try { return await operation(); }\n      catch (error) {\n        throw safeError(error, secrets);\n      }\n    }\n    const service: ILoyverseService = {\n      checkConnection: () => request(() => client.checkConnection()),\n      getReceipt: receiptNumber => request(() => client.getReceipt(receiptNumber)),\n      getReceipts: query => request(() => client.getReceipts(query)),\n      getSalesByItem: query => request(() => client.getSalesByItem(query)),\n    };\n    return { id, shopName, storeId, service };\n  });\n}\n\nfunction safeError(error: unknown, secrets: string[]): Error {\n  // Discard the original cause/properties/stack: provider bodies may echo tokens.\n  let message: string;\n  try { message = error instanceof Error ? error.message : String(error); }\n  catch { message = \"Loyverse request failed.\"; }\n  for (const secret of secrets.toSorted((a, b) => b.length - a.length)) {\n    if (secret) {\n      for (const value of [secret, encodeURIComponent(secret), JSON.stringify(secret).slice(1, -1)]) {\n        message = message.replaceAll(value, \"[REDACTED]\");\n      }\n    }\n  }\n  return new Error(message);\n}\n\nasync function readAccounts(config: AppConfig): Promise<LoyverseAccountConfig[]> {\n  if (!config.loyverse.accountSource || config.loyverse.accountSource === \"env\") return config.loyverse.accounts;\n  if (config.loyverse.accountSource !== \"sheet\") throw new Error(\"LOYVERSE_ACCOUNT_SOURCE must be env or sheet.\");\n  const spreadsheetId = config.loyverse.accountsSpreadsheetId?.trim();\n  if (!spreadsheetId || !/^[\\w-]+$/.test(spreadsheetId)) {\n    throw new Error(\"LOYVERSE_ACCOUNTS_SPREADSHEET_ID must identify the private account spreadsheet.\");\n  }\n  if (spreadsheetId === config.googleSheets.spreadsheetId.trim()) {\n    throw new Error(\"Loyverse accounts must use a separate private spreadsheet.\");\n  }\n  let reader;\n  try {\n    const auth = new GoogleServiceAccountAuth({\n      serviceAccountEmail: config.googleService.accountEmail,\n      serviceAccountPrivateKey: config.googleService.accountPrivateKey,\n      scopes: [\"https://www.googleapis.com/auth/spreadsheets.readonly\"],\n    });\n    reader = new GoogleSheetsLoyverseAccounts(new GoogleSheetsClient(auth, spreadsheetId));\n  } catch {\n    throw new Error(\"Private Loyverse account storage authentication is not configured.\");\n  }\n  return reader.readAccounts();\n}\n",
+      "sha256": "483c168881096b94eb6a553d1cb8a04d7a737a239abe7369b9f4a0c3efad5de1"
+    },
+    ".env.example": {
+      "source": "# Worksheet tabs use built-in names. Only add GOOGLE_SHEETS_*_WORKSHEET_NAME\n# overrides when existing workbook tabs have different names (see README).\nGOOGLE_SHEETS_SPREADSHEET_ID=\nGOOGLE_DRIVE_FOLDER_ID=\nGOOGLE_DRIVE_MAKE_FILES_READABLE_BY_LINK=false\nGOOGLE_OAUTH_CLIENT_ID=\nGOOGLE_OAUTH_CLIENT_SECRET=\nGOOGLE_OAUTH_REFRESH_TOKEN=\nGOOGLE_SERVICE_ACCOUNT_EMAIL=\nGOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\"\nLINE_CHANNEL_SECRET=\nLINE_CHANNEL_ACCESS_TOKEN=\n# Separate purchase-app URL used by the Purchase rich menu.\nPUBLIC_BASE_URL=\n# Inventra URL used by the Order and Movement rich menus.\nNEW_PUBLIC_BASE_URL=\n# Account source: env (default/rollback) or sheet. See README before switching.\nLOYVERSE_ACCOUNT_SOURCE=env\nLOYVERSE_ACCOUNTS_JSON=[]\n# Required only in sheet mode: a separate, privately shared workbook.\nLOYVERSE_ACCOUNTS_SPREADSHEET_ID=\n\n# Optional override for movement links. Defaults to PUBLIC_BASE_URL.\nMOVEMENT_PUBLIC_BASE_URL=\n\n# Movement flow: quantity_photo (current/default) or photo_only. Redeploy after changing.\nMOVEMENT_CREATE_MODE=quantity_photo\n\n",
+      "sha256": "cb2c5480f185628dd413d1f77022c7c0c7a9e62916e90bf381cdfd4ce80b41d7"
+    },
+    "src/config/index.ts": {
+      "source": "import { isRecord } from \"@/shared/lib/is-record\";\n\nexport type LoyverseAccountConfig = {\n  id: string;\n  shopName: string;\n  accessToken: string;\n  storeId?: string;\n};\n\nexport type AppConfig = {\n  line: {\n    channelSecret: string;\n    channelAccessToken: string;\n  };\n  publicBaseUrl: string;\n  movementPublicBaseUrl: string;\n  movementCreateMode: \"quantity_photo\" | \"photo_only\";\n  loyverse: {\n    accounts: LoyverseAccountConfig[];\n    accountSource?: \"env\" | \"sheet\";\n    accountsSpreadsheetId?: string;\n  };\n  googleSheets: {\n    spreadsheetId: string;\n    employeeCompensationsWorksheetName: string;\n    employeesWorksheetName: string;\n    employeeTimesheetsWorksheetName: string;\n    employeeAdvancesWorksheetName: string;\n    payrollSettlementsWorksheetName: string;\n    ordersWorksheetName: string;\n    orderBillsWorksheetName: string;\n    orderItemsWorksheetName: string;\n    salesReceiptItemsWorksheetName: string;\n    salesProfitCostOverridesWorksheetName: string;\n    salesReceiptPaymentsWorksheetName: string;\n    expensesWorksheetName: string;\n    expenseCategoriesWorksheetName: string;\n    shopsWorksheetName: string;\n    salesReceiptsWorksheetName: string;\n    salesReceiptSyncsWorksheetName: string;\n    shipmentOrdersWorksheetName: string;\n    shipmentsWorksheetName: string;\n    stockCountsWorksheetName: string;\n    stockAdjustmentsWorksheetName: string;\n    movementMasterWorksheetName: string;\n    movementDetailWorksheetName: string;\n    userStateWorksheetName: string;\n  };\n  googleDrive: {\n    folderId: string;\n    makeFilesReadableByLink: boolean;\n  };\n  googleOAuth: {\n    clientId: string;\n    clientSecret: string;\n    refreshToken: string;\n  };\n  googleService: {\n    accountEmail: string;\n    accountPrivateKey: string;\n  };\n};\n\nexport function getConfig(): AppConfig {\n  const accountSource = parseLoyverseAccountSource(process.env.LOYVERSE_ACCOUNT_SOURCE);\n  return {\n    line: {\n      channelSecret: process.env.LINE_CHANNEL_SECRET || \"\",\n      channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || \"\",\n    },\n    publicBaseUrl: process.env.PUBLIC_BASE_URL || \"\",\n    movementPublicBaseUrl: process.env.MOVEMENT_PUBLIC_BASE_URL?.trim() || \"\",\n    movementCreateMode: parseMovementCreateMode(process.env.MOVEMENT_CREATE_MODE),\n    loyverse: {\n      accountSource,\n      accountsSpreadsheetId: accountSource === \"sheet\"\n        ? process.env.LOYVERSE_ACCOUNTS_SPREADSHEET_ID?.trim() || \"\" : \"\",\n      accounts: accountSource === \"env\"\n        ? parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON) : [],\n    },\n    googleSheets: {\n      spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || \"\",\n      employeeCompensationsWorksheetName:\n        process.env.GOOGLE_SHEETS_EMPLOYEE_COMPENSATIONS_WORKSHEET_NAME?.trim() ||\n        \"employee_compensations\",\n      employeesWorksheetName:\n        process.env.GOOGLE_SHEETS_EMPLOYEES_WORKSHEET_NAME?.trim() ||\n        \"employees\",\n      employeeTimesheetsWorksheetName:\n        process.env.GOOGLE_SHEETS_EMPLOYEE_TIMESHEETS_WORKSHEET_NAME?.trim() ||\n        \"employee_timesheets\",\n      employeeAdvancesWorksheetName: process.env.GOOGLE_SHEETS_EMPLOYEE_ADVANCES_WORKSHEET_NAME?.trim() || \"employee_advances\",\n      payrollSettlementsWorksheetName: process.env.GOOGLE_SHEETS_PAYROLL_SETTLEMENTS_WORKSHEET_NAME?.trim() || \"payroll_settlements\",\n      ordersWorksheetName:\n        process.env.GOOGLE_SHEETS_ORDERS_WORKSHEET_NAME?.trim() || \"orders\",\n      orderBillsWorksheetName:\n        process.env.GOOGLE_SHEETS_ORDER_BILLS_WORKSHEET_NAME?.trim() ||\n        \"order_bills\",\n      orderItemsWorksheetName:\n        process.env.GOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME?.trim() ||\n        \"order_items\",\n      salesReceiptItemsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPT_ITEMS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipt_items\",\n      salesProfitCostOverridesWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_PROFIT_COST_OVERRIDES_WORKSHEET_NAME?.trim() ||\n        \"sales_profit_cost_overrides\",\n      salesReceiptPaymentsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPT_PAYMENTS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipt_payments\",\n      expensesWorksheetName: process.env.GOOGLE_SHEETS_EXPENSES_WORKSHEET_NAME?.trim() || \"expenses\",\n      expenseCategoriesWorksheetName: process.env.GOOGLE_SHEETS_EXPENSE_CATEGORIES_WORKSHEET_NAME?.trim() || \"expense_categories\",\n      shopsWorksheetName: process.env.GOOGLE_SHEETS_SHOPS_WORKSHEET_NAME?.trim() || \"shops\",\n      salesReceiptsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPTS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipts\",\n      salesReceiptSyncsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPT_SYNCS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipt_syncs\",\n      shipmentOrdersWorksheetName:\n        process.env.GOOGLE_SHEETS_SHIPMENT_ORDERS_WORKSHEET_NAME?.trim() ||\n        \"shipment_orders\",\n      shipmentsWorksheetName:\n        process.env.GOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME?.trim() ||\n        \"shipments\",\n      stockAdjustmentsWorksheetName: process.env.GOOGLE_SHEETS_STOCK_ADJUSTMENTS_WORKSHEET_NAME?.trim() || \"stock_adjustments\",\n      stockCountsWorksheetName:\n        process.env.GOOGLE_SHEETS_STOCK_COUNTS_WORKSHEET_NAME?.trim() ||\n        \"stock_counts\",\n      movementMasterWorksheetName:\n        process.env.GOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME?.trim() || \"movements\",\n      movementDetailWorksheetName:\n        process.env.GOOGLE_SHEETS_MOVEMENT_DETAIL_WORKSHEET_NAME?.trim() || \"movement_details\",\n      userStateWorksheetName:\n        process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME?.trim() ||\n        \"user_state\",\n    },\n    googleDrive: {\n      folderId: process.env.GOOGLE_DRIVE_FOLDER_ID || \"\",\n      makeFilesReadableByLink:\n        process.env.GOOGLE_DRIVE_MAKE_FILES_READABLE_BY_LINK === \"true\",\n    },\n    googleOAuth: {\n      clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || \"\",\n      clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || \"\",\n      refreshToken: process.env.GOOGLE_OAUTH_REFRESH_TOKEN || \"\",\n    },\n    googleService: {\n      accountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || \"\",\n      accountPrivateKey: normalizePrivateKey(\n        process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || \"\",\n      ),\n    },\n  };\n}\n\nfunction normalizePrivateKey(value: string): string {\n  return value.replace(/\\\\n/g, \"\\n\");\n}\n\nfunction parseLoyverseAccountSource(value: string | undefined): \"env\" | \"sheet\" {\n  const source = value?.trim() || \"env\";\n  if (source !== \"env\" && source !== \"sheet\") {\n    throw new Error(\"LOYVERSE_ACCOUNT_SOURCE must be env or sheet.\");\n  }\n  return source;\n}\n\nfunction parseLoyverseAccounts(\n  value: string | undefined,\n): LoyverseAccountConfig[] {\n  if (!value?.trim()) return [];\n\n  let parsed: unknown;\n  try {\n    parsed = JSON.parse(value);\n  } catch {\n    throw new Error(\"LOYVERSE_ACCOUNTS_JSON must be valid JSON.\");\n  }\n  if (!Array.isArray(parsed)) {\n    throw new Error(\"LOYVERSE_ACCOUNTS_JSON must be a JSON array.\");\n  }\n\n  const accounts = parsed.map((entry, index) => {\n    const account = isRecord(entry) ? entry : {};\n    const id = toTrimmedString(account.id);\n    const shopName = toTrimmedString(account.shopName);\n    const accessToken = toTrimmedString(account.accessToken);\n    const storeId = toTrimmedString(account.storeId) || undefined;\n    if (!id || !shopName || !accessToken) {\n      throw new Error(\n        `LOYVERSE_ACCOUNTS_JSON entry ${index + 1} requires id, shopName, and accessToken.`,\n      );\n    }\n    return { id, shopName, accessToken, storeId };\n  });\n\n  if (new Set(accounts.map((account) => account.id)).size !== accounts.length) {\n    throw new Error(\"LOYVERSE_ACCOUNTS_JSON account ids must be unique.\");\n  }\n  return accounts;\n}\n\nfunction toTrimmedString(value: unknown): string {\n  return typeof value === \"string\" ? value.trim() : \"\";\n}\n\nfunction parseMovementCreateMode(value: string | undefined): AppConfig[\"movementCreateMode\"] {\n  const mode = value?.trim() || \"quantity_photo\";\n  if (mode !== \"quantity_photo\" && mode !== \"photo_only\") {\n    throw new Error(\"MOVEMENT_CREATE_MODE must be quantity_photo or photo_only.\");\n  }\n  return mode;\n}\n",
+      "sha256": "cf6c69435f983863b5599fb82ca1c2b6ecae0f52416634e9dff50221e342b596"
+    }
+  },
+  "fixtureHashes": {
+    "tests/fixtures/google-infrastructure-before.json": "8a840db4d19ce6caef46a2b6af62adc3272b5bdc0ea1d48c93b665657ba76034",
+    "tests/fixtures/google-infrastructure-consumers.json": "c23894cf3307b34e2ec9877abf08e24a5b646a2fa2190a783a6a215bb2c110ac",
+    "tests/fixtures/hr-worksheets-before.json": "41e3dd0fb6e6b97cd5a72c80cec200bebfe3baa48bd7f949a02d99ff667ee5d6",
+    "tests/fixtures/inventory-employee-directory-before.json": "e9725fc76fba3453bb7f6c5a4eae2a2e4d4a28064a5102e464756f000d178533",
+    "tests/fixtures/inventory-sales-query-before.json": "81f09a340191bc5b326a0eafa55abdcd99214f68fe5b24bf930af619a1b00113",
+    "tests/fixtures/inventory-worksheets-before.json": "99a75f182b2811a5be77d95705c7ec4a405e3719e6a9e8f201f93ac4516472f4",
+    "tests/fixtures/movement-schema-before.json": "2c6cc05eb0709122cd19a82468849310eaa1f32ac20816cd09c049fe0c315425",
+    "tests/fixtures/orders-detail-before.json": "f66cb601fc3279fdd3929212cd740625b05bfcbddc1d3f4ae730d19c8b27ab59",
+    "tests/fixtures/orders-picker-seam.json": "d61e119ff0710acdd0447ec976ad14124be2b519b635e37d5a07f41cb3d9a113",
+    "tests/fixtures/orders-read-model.json": "4f9f74473e11ba5c7c4f14909d9d903149082197e337c9ff3523602381ae23f2",
+    "tests/fixtures/orders-seam-list.json": "6046e60a459cf78a8ef89e3195f30f2c66546f3673983d5f6ab295fa4169c873",
+    "tests/fixtures/orders-seam-preserved.json": "d5a97e772bf9fed81c43f757a80c358ded7ad6405f2b41eb1709292c37d1f7cc",
+    "tests/fixtures/orders-sheet-types-before.json": "bcc38ae34b819d99d762c8ad97eb20eb5b23dc90d02ef4ed2372de9211730d1f",
+    "tests/fixtures/orders-type-shapes.json": "3e3760f14b3f5f9eb7cfb8c7f9c0c8a4760bd88e2913d92ecc76772e3e87c15c",
+    "tests/fixtures/orders-ui-structure.json": "53518ab9863a5843fccdb5fe2cf6b64b1b09cb676056b1bff109ff1cdcf0b006",
+    "tests/fixtures/route-contracts.json": "0c703c2032ebd353298d77f4553f610151270e900df8055365ca0d7d3e4b77eb",
+    "tests/fixtures/sales-worksheets-before.json": "20beded7f2b24708fe623bc4654f5aaabfab4718b74209e89414093d486d0f6f",
+    "tests/fixtures/shipments-browser-client.json": "381df5f6fd75468097ed5c2892c88ca5097df2811c614ff3ff33d4c696648232",
+    "tests/fixtures/shipments-create-before.json": "d149cf0bb8c4ea57c60e8680a2adf39a0e897787a0650e09f20c1cae372a5eba",
+    "tests/fixtures/shipments-drive-before.json": "302d85a679e6292cfb1092e265eee7edd9a9acf8fd7b27333e678be3ffa89e17",
+    "tests/fixtures/shipments-dto-before.json": "c788c4b5655eb122615babec7d0f4d5c0c07c68ce8432c9babc965bebdc08024",
+    "tests/fixtures/shipments-enum-before.json": "8d3d9674f9532650299cade14abec692ee3cfbbd65bfbe968b4c26bcb027e78f",
+    "tests/fixtures/shipments-http-before.json": "6feb068fb15329ab3f880b938fcd03aada199345181cb4186fcea37c5ea1767d",
+    "tests/fixtures/shipments-link-before.json": "a95769b4b699da28a07f2fe129d475dcc5e2b065d622df8466aef845f74d1594",
+    "tests/fixtures/shipments-list-before.json": "2428c587bfb8dbac7a4a2161c14e3cd78df43c321c6c7ba733bcd788d9e61952",
+    "tests/fixtures/shipments-read.json": "d61a83e578239d71d8d765ba5d24d916d4146a9bf8b0c85c80ca18c1878f27b8",
+    "tests/fixtures/shipments-status-before.json": "ac130c6528e49b19efbcdd31efc4956c3c7edd552ea16155b63d5e725418343e",
+    "tests/fixtures/shipments-structure.json": "6cedf4321ef781c180132f27d347eae42e526721d27e00006a0cc3c437b91ce8",
+    "tests/fixtures/shipments-ui-relocation.json": "55eced0ac464be297058b4cc140772cbed9ee75332e4bd7beb2c7069232119fc",
+    "tests/fixtures/shipments-validation-before.json": "d06aa6b618c631c704eaaff30dad829e29da9859d6d9c0a1762fb9e20a2f3ccd",
+    "tests/fixtures/worksheet-ownership-before.json": "9e26b67739dcb1c94534164abdd85878c8a9aa10528e17ef78c987f2dc67be1d",
+    "tests/fixtures/remaining-worksheets-before.json": "1dc93c60b3c2d6e4e90b6295254548fd5c7dc4bc0cfd4fb1bba9c96a5debbab4",
+    "tests/fixtures/hr-application-before.json": "bb6e61287268f70eeb29d5b25ca92d280b57c0f5a1208cb729b6c631a3e62f6e",
+    "tests/fixtures/externals-retirement-before.json": "d9e1642272c69e3d58966df28e5540111e822b44709ea6a1ab4165b841a50bcd",
+    "tests/fixtures/orders-line-before.json": "9d660771fb5d8527a6c72114bf781aef673062d08eebb68ac0e67174a836ec72",
+    "tests/fixtures/expenses-business-before.json": "e190129217a65c65c74548ae0eea93748c9cf01d88a89f70ec1fe7ed68263eed",
+    "tests/fixtures/sales-application-before.json": "7c336bbbee3c6ebdd11bb036cb6280610156956665a0dff40fe759c3524b04a5",
+    "tests/fixtures/hr-payroll-before.json": "0c60c5b420e8345e2cc5806cc78048197592f1b854d8eb6d5439b6665d53d622",
+    "tests/fixtures/loyverse-accounts-before.json": "5d305f0a2d825cf0583367b11fd96ecc5a71e8882c00add5184712574634f102",
+    "tests/fixtures/user-state-worksheet-before.json": "4b971b924f6722d81b799b91fa4a7dd4da701b887b543ba58c6d145194b4b3bc",
+    "tests/fixtures/features-retirement-before.json": "2754203370c11de4b13e36af7ac0337e5081de7463e56409ac96c42184377b20",
+    "tests/fixtures/inventory-application-before.json": "58f303c4ec4f594437f43361247b41dff4b5568334b90559e50f1d23ca984e17",
+    "tests/fixtures/external-infrastructure-before.json": "8902b3cad513a06baf4793de4e1cb4ae3a4584ceca7d49e906b5af7ea3907e51",
+    "tests/fixtures/final-cleanup-before.json": "6bbd370bfc23d025bac5a1d6c86da13de2def8368cf8274fbd2eef3b51220407"
+  },
+  "edits": {
+    "src/composition/loyverse-accounts.ts": {
+      "beforeHash": "483c168881096b94eb6a553d1cb8a04d7a737a239abe7369b9f4a0c3efad5de1",
+      "afterHash": "abdebd0b6266893bd1eb1fe1556b1f1e5c7f3953628e5ae0dceb84737330a1f4",
+      "changes": [
+        {
+          "afterStart": 3059,
+          "before": "",
+          "after": "goog"
+        },
+        {
+          "afterStart": 3064,
+          "before": "oyv",
+          "after": ""
+        },
+        {
+          "afterStart": 3065,
+          "before": "rs",
+          "after": "Sh"
+        },
+        {
+          "afterStart": 3068,
+          "before": ".accoun",
+          "after": "e"
+        },
+        {
+          "afterStart": 3071,
+          "before": "S",
+          "after": ".s"
+        },
+        {
+          "afterStart": 3085,
+          "before": "?",
+          "after": ""
+        },
+        {
+          "afterStart": 3174,
+          "before": "",
+          "after": "GOOG"
+        },
+        {
+          "afterStart": 3179,
+          "before": "OYVERS",
+          "after": ""
+        },
+        {
+          "afterStart": 3181,
+          "before": "ACCOUN",
+          "after": "SHEE"
+        },
+        {
+          "afterStart": 3221,
+          "before": "private account spreadsheet.\");\n  }\n  if (spreadsheetId === config.googleSheets.spreadsheetId.trim()) {\n    throw new Error(\"",
+          "after": ""
+        },
+        {
+          "afterStart": 3237,
+          "before": "s must use a separate private",
+          "after": ""
+        }
+      ]
+    },
+    ".env.example": {
+      "beforeHash": "cb2c5480f185628dd413d1f77022c7c0c7a9e62916e90bf381cdfd4ce80b41d7",
+      "afterHash": "0a96f4bf21d5ac32bed1ca8e140a11f6c8ca5f1418ad3d36825d318dc58e0a5e",
+      "changes": [
+        {
+          "afterStart": 802,
+          "before": "Required only in s",
+          "after": "S"
+        },
+        {
+          "afterStart": 812,
+          "before": ":",
+          "after": ""
+        },
+        {
+          "afterStart": 813,
+          "before": "",
+          "after": "re"
+        },
+        {
+          "afterStart": 816,
+          "before": "",
+          "after": "ds"
+        },
+        {
+          "afterStart": 819,
+          "before": "",
+          "after": "loyver"
+        },
+        {
+          "afterStart": 827,
+          "before": "p",
+          "after": "_"
+        },
+        {
+          "afterStart": 829,
+          "before": "",
+          "after": "ccounts f"
+        },
+        {
+          "afterStart": 839,
+          "before": "ate,",
+          "after": "om"
+        },
+        {
+          "afterStart": 842,
+          "before": "privately shared workbook.\n",
+          "after": "GOOG"
+        },
+        {
+          "afterStart": 847,
+          "before": "OYVERS",
+          "after": ""
+        },
+        {
+          "afterStart": 849,
+          "before": "ACCOUN",
+          "after": "SHEE"
+        },
+        {
+          "afterStart": 870,
+          "before": "=",
+          "after": " above."
+        }
+      ]
+    },
+    "src/config/index.ts": {
+      "beforeHash": "cf6c69435f983863b5599fb82ca1c2b6ecae0f52416634e9dff50221e342b596",
+      "afterHash": "228dfd18766bbe84a56af535af1acf93a1643a49334ad0ca655dfca75a62d1ab",
+      "changes": [
+        {
+          "afterStart": 472,
+          "before": ";\n    accountsSpreadsheetId?: string",
+          "after": ""
+        },
+        {
+          "afterStart": 2271,
+          "before": ",\n      accountsSpreadsheetId: accountSource === \"sheet\"\n        ? process.env.LOYVERSE_ACCOUNTS_SPREADSHEET_ID?.trim() || \"\" : \"\"",
+          "after": ""
+        }
+      ]
+    }
+  }
+}

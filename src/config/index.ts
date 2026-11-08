@@ -18,7 +18,6 @@ export type AppConfig = {
   loyverse: {
     accounts: LoyverseAccountConfig[];
     accountSource?: "env" | "sheet";
-    accountsSpreadsheetId?: string;
   };
   googleSheets: {
     spreadsheetId: string;
@@ -73,8 +72,6 @@ export function getConfig(): AppConfig {
     movementCreateMode: parseMovementCreateMode(process.env.MOVEMENT_CREATE_MODE),
     loyverse: {
       accountSource,
-      accountsSpreadsheetId: accountSource === "sheet"
-        ? process.env.LOYVERSE_ACCOUNTS_SPREADSHEET_ID?.trim() || "" : "",
       accounts: accountSource === "env"
         ? parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON) : [],
     },

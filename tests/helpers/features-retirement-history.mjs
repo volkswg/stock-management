@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {restoreWorkbookSource} from './loyverse-workbook-history.mjs';
 import {readFileSync,existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 export const featuresHistory=JSON.parse(readFileSync('tests/fixtures/features-retirement-before.json','utf8'));
@@ -8,6 +9,7 @@ export function restoreFeatureSource(file,source){
   const removed=featureFiles[file];
   if(removed){assert.equal(existsSync(file),false,`Retired feature file recreated: ${file}`);assert.equal(hash(removed.source),removed.sha256,file);return source??removed.source;}
   source??=readFileSync(file,'utf8');
+  source=restoreWorkbookSource(file,source);
   const edit=featuresHistory.edits[file];if(!edit)return source;
   const current=readFileSync(file,'utf8');assert.equal(hash(current),edit.afterHash,file);
   let restored=current;

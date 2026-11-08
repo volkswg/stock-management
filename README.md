@@ -31,13 +31,13 @@ LOYVERSE_ACCOUNTS_JSON=[{"id":"main-shop","shopName":"Main Shop","accessToken":"
 
 Keep credentials in approved private configuration, never source control, screenshots, chat, logs or `NEXT_PUBLIC_*` variables. There is no credential editing page or management endpoint. Existing account/shop APIs return only their existing public metadata.
 
-### Prepare the private account spreadsheet
+### Prepare the account worksheet in the existing workbook
 
 These are **owner actions after review**, not steps performed by this PR:
 
-1. Create a **separate Google spreadsheet**, outside broadly shared folders/drives. Do not use the operational `GOOGLE_SHEETS_SPREADSHEET_ID` workbook or the existing `shops` tab. The application rejects using the same workbook ID.
-2. Set General access to **Restricted**. Share the new workbook only with the owner and the exact existing `GOOGLE_SERVICE_ACCOUNT_EMAIL`, as **Viewer**. Remove other people, groups, domain/link sharing and inherited broad access. Reuse the existing service-account key; no new Google credentials or provider are needed. The reader requests the Sheets read-only OAuth scope and never creates tabs, repairs headers or writes credentials.
-3. Create one worksheet named exactly `loyverse_accounts`. Put these six case-sensitive headers in A1:F1, in this order:
+1. Use the existing `GOOGLE_SHEETS_SPREADSHEET_ID` workbook. Sheet mode always reads that workbook; there is no account-specific spreadsheet ID or workbook fallback. Use a dedicated `loyverse_accounts` tab, never the existing `shops` tab.
+2. **Every workbook reader can see the access-token cells. Hiding or protecting a worksheet does not provide separate read access.** Restrict and audit sharing before adding tokens. Keep access limited to the owner, required service account and only people explicitly trusted with credentials; remove broad/inherited/link sharing. If access cannot be restricted appropriately, keep env mode until it can. Keep the service account's existing operational permissions needed for business writes; do not downgrade them. The account reader still requests the read-only Sheets scope and never creates tabs, repairs headers or writes credentials.
+3. In that existing workbook, create one worksheet named exactly `loyverse_accounts`. Put these six case-sensitive headers in A1:F1, in this order:
 
    ```text
    id,shopName,storeId,accessToken,active,sortOrder
@@ -59,18 +59,19 @@ The application sorts enabled accounts by sortOrder and uses the first as the ex
 
 ### Enable, verify and roll back on Vercel
 
-1. Keep `LOYVERSE_ACCOUNTS_JSON` unchanged for rollback. In the project's **Settings → Environment Variables**, choose only the intended environment/branch and set:
+1. Keep `LOYVERSE_ACCOUNTS_JSON` unchanged for rollback. In the project's **Settings → Environment Variables**, choose only the intended environment/branch. Set the source to sheet using the already configured operational workbook:
 
    ```dotenv
    LOYVERSE_ACCOUNT_SOURCE=sheet
-   LOYVERSE_ACCOUNTS_SPREADSHEET_ID=<private spreadsheet ID, not its URL>
+   # Existing setting; this is also the account workbook.
+   GOOGLE_SHEETS_SPREADSHEET_ID=<existing workbook ID>
    ```
 
-   This is the only new required spreadsheet identifier in sheet mode. Existing service-account and operational spreadsheet settings remain unchanged. Scope staging/preview to its own private test workbook and credentials, not production data. Never use `NEXT_PUBLIC_` prefixes. No Vercel settings are changed by this PR.
-2. After owner-approved deployment of the reviewed code, verify in an isolated staging environment first. Env changes apply to new deployments; changing the dashboard setting alone does not switch a running deployment. Sheet mode never evaluates the JSON account source and does **not** fall back to it on missing ID, bad rows, missing tab, denied access or provider failure.
+   `GOOGLE_SHEETS_SPREADSHEET_ID` is the only workbook setting. The former `LOYVERSE_ACCOUNTS_SPREADSHEET_ID` setting is no longer read, even if an old deployment setting remains. If upgrading from a separate account workbook, manually copy the six-column tab into the existing workbook and verify IDs/order privately before switching to this code. No copying or Vercel setting changes are performed by this PR. Keep the existing service-account settings. Scope staging/preview to its own restricted test workbook and credentials, not production data. Never use `NEXT_PUBLIC_` prefixes.
+2. After owner-approved deployment of the reviewed code, verify in an isolated staging environment first. Env changes apply to new deployments; changing the dashboard setting alone does not switch a running deployment. Sheet mode never evaluates the JSON account source. A missing/invalid `GOOGLE_SHEETS_SPREADSHEET_ID`, bad rows, a missing tab, denied access or provider failure produces a safe error. There is no alternate workbook or env/JSON fallback.
 3. Check `/api/loyverse/accounts` returns only the expected active `id`/`shopName` pairs in the original order. Verify the default and explicitly selected account, optional store filtering, daily/dashboard/profit totals, sync-status lists, Inventory and attendance shop lists, and Expenses Shop Master account mappings. Inspect response keys and logs for confidentiality without copying tokens into them. Metadata requests must not return tokens, store credentials or raw Google errors.
 4. Using staging fixtures, check a disabled account is absent and cannot be newly selected, an existing disabled-account Shop Master mapping can still be edited, and missing workbook access produces a safe failure. Verify Sales sync on an approved unsynced past date and its repeat/idempotency behavior; do not run test sync writes against production. Private accounts are read once per lookup without a cross-request cache or new retry policy; workbook outages therefore block affected lookups.
-5. Roll back by setting `LOYVERSE_ACCOUNT_SOURCE=env` and deploying a new owner-approved deployment with the retained, valid `LOYVERSE_ACCOUNTS_JSON`. Verify IDs/order and normal operation again. There are no business-data migrations to undo; the private workbook is simply unused in env mode.
+5. Roll back by setting `LOYVERSE_ACCOUNT_SOURCE=env` and deploying a new owner-approved deployment with the retained, valid `LOYVERSE_ACCOUNTS_JSON`. Verify IDs/order and normal operation again. There are no business-data migrations to undo; the account worksheet is simply unused in env mode.
 
 Delete the deployed `LOYVERSE_ACCOUNTS_JSON` value **only after** successful owner verification, completion of the agreed rollback window, confirmation that every environment/deployment that needs it has migrated, and an approved secure recovery plan. Older deployments or an env-mode rollback still need it. Removing the variable is a separate owner operation; this PR retains JSON support and does not delete credentials, migrate production records or deploy anything. Live sharing, access and account correctness remain owner verification steps.
 

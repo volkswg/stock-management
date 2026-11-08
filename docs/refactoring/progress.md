@@ -1,12 +1,10 @@
 # Refactoring progress and evidence
 
-## Current merged state and features retirement
+## Current merged state and single-workbook account configuration
 
-Verified base: main `2d2dc18a5c1112e9f6368599ad0d6d67defa79af`, merged PR43; no conflicting open PR. The tree exactly matches PR43 head `02cba30ec1d28ad1d163537843a2c32cb18cfc83`, whose final 547-test/lint/typecheck/build evidence is already recorded.
+Verified main is `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), with the external/features retirements and PR43 account source complete. The tree matches the previously verified PR44 head with 550 passing tests and successful lint/typecheck/isolated build.
 
-Branch `refactor/retire-features-compatibility` removes all seven backend forwards and the unused `@/feature/*` alias. There are no active production importers or known required external consumers. Pre-removal offline evaluation verified 15 runtime function/enum identities plus three erased forwards. Tests and historical graph/mock resolvers migrate to canonical owners without changing original fixtures or expectations. Every other production file is unchanged. See the [ownership map](../architecture/migration-map.md#retired-feature-compatibility-directory) and [verification](verification.md#feature-compatibility-retirement).
-
-PR43 account-source implementation and owner-only rollout remain documented in [verification](verification.md#private-loyverse-account-source) and [README](../../README.md#loyverse-configuration). Issue #38 is separate production-readiness work.
+Branch `fix/loyverse-single-workbook` makes sheet mode read `loyverse_accounts` only from the existing GOOGLE_SHEETS_SPREADSHEET_ID. The dedicated account-workbook variable/AppConfig field and separate-workbook restriction are removed. No workbook/JSON fallback is added; env-mode rollback, six-column validation, ordering and server-only credential handling remain. Historical source inverses preserve old fixture bytes and assertions. See [verification](verification.md#loyverse-single-workbook-support) and [owner instructions](../../README.md#loyverse-configuration), including workbook-wide token visibility. No production migration, ACL/Vercel change or deployment is performed.
 
 ## Historical HR completion evidence (PR #33)
 

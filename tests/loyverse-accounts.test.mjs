@@ -10,6 +10,7 @@ import {loadSalesSource} from './helpers/sales-source.mjs';
 import {loadExpenseSource} from './helpers/expenses-source.mjs';
 import {googleGraph} from './helpers/google-infrastructure.mjs';
 import {userStateGraph} from './helpers/user-state-worksheet-graph.mjs';
+import {restoreWorkbookSource,workbookHistory} from './helpers/loyverse-workbook-history.mjs';
 
 const plain=value=>JSON.parse(JSON.stringify(value));
 const hash=value=>createHash('sha256').update(value).digest('hex');
@@ -38,10 +39,11 @@ test('default/env configuration retains original account parsing, order, validat
 });
 
 test('sheet configuration never evaluates the JSON source and rejects unknown source settings without reflecting values',()=>{
-  const env={LOYVERSE_ACCOUNT_SOURCE:' sheet ',LOYVERSE_ACCOUNTS_SPREADSHEET_ID:' private-accounts '};
+  const env={LOYVERSE_ACCOUNT_SOURCE:' sheet ',GOOGLE_SHEETS_SPREADSHEET_ID:'operations'};
+  Object.defineProperty(env,'LOYVERSE_ACCOUNTS_SPREADSHEET_ID',{get(){assert.fail('Removed account-workbook setting was read');}});
   Object.defineProperty(env,'LOYVERSE_ACCOUNTS_JSON',{get(){assert.fail('Sheet mode read the legacy credential source');}});
   const config=accountGraph({env}).load('src/config/index.ts').getConfig();
-  assert.equal(config.loyverse.accountSource,'sheet');assert.equal(config.loyverse.accountsSpreadsheetId,'private-accounts');assert.deepEqual(plain(config.loyverse.accounts),[]);
+  assert.equal(config.loyverse.accountSource,'sheet');assert.equal(Object.hasOwn(config.loyverse,'accountsSpreadsheetId'),false);assert.deepEqual(plain(config.loyverse.accounts),[]);
   assert.throws(()=>accountGraph({env:{LOYVERSE_ACCOUNT_SOURCE:tokens[0]}}).load('src/config/index.ts').getConfig(),error=>!error.message.includes(tokens[0])&&/must be env or sheet/.test(error.message));
   assert.throws(()=>accountGraph().load('src/infrastructure/external/loyverse/createLoyverseServiceFromConfig.ts').createLoyverseAccountsFromConfig(sheetConfig()),/require the server account reader/);
 });
@@ -72,19 +74,44 @@ test('missing/invalid account storage fails closed on headers, required fields, 
   assert.deepEqual(plain(await new Reader({getValues:async()=>[accountHeaders,['off','Off','','',false,0]]}).readAccounts()),[]);
 });
 
-test('sheet mode uses only the separate workbook and existing service auth with read-only scope; missing access cannot fall back',async()=>{
+test('sheet mode uses the configured workbook and existing service auth with read-only scope; missing access cannot fall back',async()=>{
   const config=sheetConfig();Object.defineProperty(config.loyverse,'accounts',{get(){assert.fail('Sheet mode used env accounts');}});
   const g=accountGraph();assert.deepEqual(plain(await g.access().listLoyverseAccounts(config)),metadata);
-  assert.deepEqual(plain(g.events),[['account-auth',['https://www.googleapis.com/auth/spreadsheets.readonly']],['account-client','private-accounts'],['account-read','loyverse_accounts','A:F']]);
-  for(const spreadsheetId of ['', 'https://example.test/book','operations']){
-    const invalid=sheetConfig();invalid.loyverse.accountsSpreadsheetId=spreadsheetId;const f=accountGraph();
+  assert.deepEqual(plain(g.events),[['account-auth',['https://www.googleapis.com/auth/spreadsheets.readonly']],['account-client','operations'],['account-read','loyverse_accounts','A:F']]);
+  for(const spreadsheetId of ['https://example.test/book','../operations']){
+    const invalid=sheetConfig();invalid.googleSheets.spreadsheetId=spreadsheetId;const f=accountGraph();
     await assert.rejects(f.access().listLoyverseAccounts(invalid));assert.deepEqual(f.events,[]);
   }
+  const missing=sheetConfig();missing.googleSheets.spreadsheetId='';
+  const absent=accountGraph();await assert.rejects(absent.access().listLoyverseAccounts(missing),/must identify the Loyverse account spreadsheet/);assert.deepEqual(absent.events,[]);
   for(const status of [400,403,404,429,500]){
     const failed=accountGraph({read:async()=>{throw new Error(`Google ${status}: ${tokens.join(' ')}`);}});
     await assert.rejects(failed.access().listLoyverseAccounts(config),error=>{clean([error.message,error.stack,error.cause]);return /Check spreadsheet access/.test(error.message);});
     assert.equal(failed.events.filter(e=>e[0]==='account-read').length,1);
   }
+});
+
+test('sheet mode uses only the existing workbook, ignores the removed override, and keeps metadata/token handling and env rollback unchanged',async()=>{
+  for(const oldValue of [undefined,'','private-accounts']){
+    const config=sheetConfig();config.googleSheets.spreadsheetId=' operations ';
+    if(oldValue!==undefined)config.loyverse.accountsSpreadsheetId=oldValue;
+    Object.defineProperty(config.loyverse,'accounts',{get(){assert.fail('Sheet lookup used env credentials');}});
+    const g=accountGraph({config}),accounts=await g.access().createLoyverseAccounts(config);
+    assert.deepEqual(plain(accounts.map(({id,shopName})=>({id,shopName}))),metadata);clean(accounts);
+    assert.equal(g.events.find(event=>event[0]==='account-client')[1],'operations');
+    assert.deepEqual(plain(g.events.find(event=>event[0]==='account-read')),['account-read','loyverse_accounts','A:F']);
+    const response=await g.load('src/app/api/loyverse/accounts/route.ts').GET();assert.equal(response.status,200);
+    const json=await response.json();assert.deepEqual(json,{ok:true,accounts:metadata});clean([json,g.events.filter(event=>event[0]==='log')]);
+  }
+  const ignored=sheetConfig();Object.defineProperty(ignored.loyverse,'accountsSpreadsheetId',{get(){assert.fail('Removed override was read');}});
+  assert.deepEqual(plain(await accountGraph().access().listLoyverseAccounts(ignored)),metadata);
+  const failed=accountGraph({read:async()=>{throw new Error(tokens[0]);}});
+  await assert.rejects(failed.access().listLoyverseAccounts(sheetConfig()),error=>{clean(error.message);return /Check spreadsheet access/.test(error.message);});
+  assert.deepEqual(failed.events.filter(event=>event[0]==='account-client'),[['account-client','operations']]);
+  const config=envConfig();Object.defineProperty(config.loyverse,'accountsSpreadsheetId',{get(){assert.fail('Env mode read the override');}});Object.defineProperty(config.googleSheets,'spreadsheetId',{get(){assert.fail('Env mode read the operational ID');}});
+  assert.deepEqual(plain(await accountGraph().access().listLoyverseAccounts(config)),metadata);
+  for(const [file,entry]of Object.entries(workbookHistory.files))assert.equal(hash(restoreWorkbookSource(file)),entry.sha256,file);
+  for(const [file,expected]of Object.entries(workbookHistory.fixtureHashes))assert.equal(hash(readFileSync(file)),expected,file);
 });
 
 test('metadata and configured capabilities never serialize credentials; errors from every client operation and construction are redacted',async()=>{
@@ -201,7 +228,7 @@ test('all affected HTTP methods preserve original env-mode validation, JSON, sta
 test('new source has exact pre-feature inverses and every inherited fixture stays byte-identical',()=>{
   for(const [file,saved]of Object.entries(accountsBefore.files))assert.equal(hash(restoreAccountSource(file)),saved.sha256,file);
   for(const [file,expected]of Object.entries(accountsHistory.fixtureHashes))assert.equal(hash(readFileSync(file)),expected,file);
-  for(const file of accountNewFiles)assert.equal(hash(readFileSync(file)),accountsHistory.newHashes[file],file);
+  for(const file of accountNewFiles)assert.equal(hash(restoreWorkbookSource(file)),accountsHistory.newHashes[file],file);
   assert.equal(ts.transpileModule(readFileSync('src/shared/types/loyverse-account.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText.trim(),'export {};');
 });
 
