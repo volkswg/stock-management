@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -8,13 +9,13 @@ export const runtime = "nodejs";
 type Context = { params: Promise<{ kind: string }> };
 function fail(error: unknown) { return NextResponse.json({ ok: false, error: error instanceof ExpenseError ? error.message : "Master data operation failed. Please retry." }, { status: error instanceof ExpenseError ? error.status : 500 }); }
 function validKind(kind: string): asserts kind is "shops" | "categories" { if (!["shops", "categories"].includes(kind)) throw new ExpenseError("Master not found.", 404); }
-export async function GET(_request: Request, context: Context) {
+async function GETOperation(_request: Request, context: Context) {
   try { const { kind } = await context.params; validKind(kind); const config = getConfig(), service = createGoogleSheetsServiceFromConfig(config);
     const records = kind === "shops" ? await listExpenseShops(service) : await listExpenseCategories(service);
     return NextResponse.json({ ok: true, records, accounts: kind === "shops" ? (await listLoyverseAccounts(config)).map(({ id, shopName }) => ({ id, shopName })) : [] });
   } catch (error) { return fail(error); }
 }
-export async function POST(request: Request, context: Context) {
+async function POSTOperation(request: Request, context: Context) {
   try { const { kind } = await context.params; validKind(kind); const body: unknown = await request.json().catch(() => null);
     if (!isRecord(body) || typeof body.name !== "string" || typeof body.active !== "boolean") throw new ExpenseError("Enter a name and active status.");
     const config = getConfig(); const mapping = typeof body.loyverseAccountId === "string" ? body.loyverseAccountId.trim() : "";
@@ -29,3 +30,6 @@ export async function POST(request: Request, context: Context) {
     return NextResponse.json({ ok: true, id });
   } catch (error) { return fail(error); }
 }
+
+export const GET = withPersistence(GETOperation);
+export const POST = withPersistence(POSTOperation);

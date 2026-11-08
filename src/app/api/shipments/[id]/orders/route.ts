@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -8,7 +9,7 @@ import {
 
 export const runtime = "nodejs";
 
-export async function POST(
+async function POSTOperation(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
@@ -78,3 +79,5 @@ function getLinkErrorStatus(error: LinkOrderToShipmentError): number {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+export const POST = withPersistence(POSTOperation);

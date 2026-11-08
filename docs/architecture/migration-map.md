@@ -105,3 +105,23 @@ runtime composition changes. The [migration runbook](../database-migration.md)
 links the complete source worksheet/type/relationship/caller catalog, SQL,
 reconciliation and recovery procedures. Hosted writes, live profiling and runtime
 cutover remain pending separate approval/acceptance.
+
+
+## Phase 2 operational PostgreSQL
+
+All seven modules now have feature-owned PostgreSQL table bindings. Their existing
+persistence-port mappers and application/domain code remain unchanged. Shared
+server-only PostgreSQL transport owns pooling, explicit transactions, range
+compatibility, command replay and effect attempts. Explicit composition owns the
+aggregate and request authorization/transaction selection; LINE owns per-event
+journaled execution. The operational migration creates 23 business tables plus
+commands/audit/side_effects/environment, separate from the immutable 23-table
+business archive plus import_batches. `tools/migration` owns exact promotion,
+offline profiling and disposable PostgreSQL acceptance. See the
+[operational runbook](../database-migration.md#phase-2-operational-storage-opt-in-isolated-testing).
+Production storage is still Google Sheets; hosted promotion/cutover are not done.
+Phase 3 owns the proposed approved-export/hosted-validation/freeze/cutover sequence
+in the same canonical runbook. Offline delta review, readonly operational extraction
+and structural capacity capture live in tools/migration; they do not implement CDC,
+reverse sync or a production activation path. The secret-free GitHub acceptance
+workflow and disposable browser/API fixture own synthetic review evidence.

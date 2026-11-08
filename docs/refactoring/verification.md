@@ -378,3 +378,69 @@ The final build uses a fresh source-only copy, only tracked .env.example, existi
 Focused tests exercise actual composition/config with fake Google and Loyverse clients: main-workbook selection, ignored/unevaluated obsolete override, missing/invalid IDs, access failure without fallback, metadata confidentiality and independent env rollback. Inherited tests retain six-column validation, ordering/disabled records, Sales sync/reporting, Expenses mappings, HTTP/error parity, financial/stock/payroll behavior, exact source inverses, runtime identities and browser/runtime/type graph guards. No new cycle or private cross-feature edge; application/domain/transport/route code is unchanged. Only composition and config production files change.
 
 Results are Codex-local, not independent CI or live integration verification. Workbook-wide reader access is an owner-reviewed operational risk; former separate-workbook deployments must copy the account tab privately before adopting this version or explicitly use env mode. No real tokens, production data, live provider calls, Vercel settings, deployment or merge were accessed/performed.
+
+## Phase 2 operational storage — isolated verification
+
+Base: merged PR48 `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
+Production defaults remain Google Sheets. All tests below use synthetic data;
+PostgreSQL runners exclude inherited integration credentials with env -i and
+create disposable localhost PostgreSQL 17.7 containers only.
+
+| Gate | Result |
+| --- | --- |
+| Full npm test | 564 pass, zero failures/skips |
+| Python migration/profile/export checks | 18 pass |
+| Real PostgreSQL | 23 pass: all seven module paths, API/LINE boundaries, concurrent replay, actual lost-COMMIT ACK, rollback, stale revisions, receipts/payroll/history |
+| Archive → operational promotion | Exact typed/cell multiset reconciliation; rejects nonempty targets; archive mutation denied |
+| Backup/restore | Both promoted and application-generated databases; full records, journal/effects, constraints, grants and RLS policies match |
+| Typecheck / isolated production build | Pass, /tmp/phase2-final-build; integration credentials excluded |
+| Lint | Exit 0, inherited unused shipmentRow warning only |
+| Source/history | Original application/domain bodies and prior fixtures unchanged; additive exact source witness |
+| Routes / manifest | Existing 23 pages and 35 APIs; unchanged app-paths SHA256 above |
+| Client boundary | All 113 built client JS chunks exclude private DB/config/SQL strings; current browser graphs remain clean |
+
+The 2,000-row synthetic workload confirms a primary-key index scan and measures
+actual Orders list reads plus operational disk usage. It is not a hosted Free-tier
+capacity or throughput forecast. Exact local timings vary with concurrent test
+load; see the reproducible runner's output. Source export tests mock all seven
+batch HTTP requests, verify formatted identities and numeric token precision, and
+prove dry-run performs no network/token access. Browser key tests execute real
+Web Request/Response/crypto APIs in an isolated VM, including lost response,
+reload and body-parse failure; they are not full React/browser visual tests.
+
+Reproduce with npm test, npm run lint, npm run typecheck and
+`bash tools/migration/verify-operational.sh`. Build from a fresh source/dependency
+copy using env -i, not inherited production credentials. The
+[migration runbook](../database-migration.md#phase-2-operational-storage-opt-in-isolated-testing)
+records configuration, external-effect uncertainty, owner-approved frozen export,
+hosted reconciliation, capacity, recovery, authorization and cutover gates. No
+production data or Vercel environment setting is changed by verification.
+
+### PR49 review acceptance — updated current-source evidence
+
+| Gate | Fresh local result |
+| --- | --- |
+| Regression / Python | 565/565 and 22/22 pass; no failures/skips |
+| Real PostgreSQL / Chromium | 25/25 and 1/1 pass, actual Orders API and private runner authorization |
+| Corrected boundaries | SQL READ ONLY/nested upgrade denial; explicit LINE exception; query-bound browser keys; foreign revision isolation; 204 replay |
+| Reconciliation | Actual archive and operational CLI extraction match all 23 synthetic tables exactly |
+| Recovery | Two complete restored states; records, grants/RLS, constraints, indexes, triggers/functions and sequences match |
+| Lint / typecheck | Pass, inherited shipmentRow warning only |
+| Isolated production build | verify-build.sh passes with env -i, source-byte match, unchanged route manifest and 113 clean client chunks |
+| Hosted inspection | Metadata-only READ ONLY: migration schemas absent, migration ledger empty; security advisor empty |
+
+`tools/migration/verify-operational.sh` additionally requires Playwright tooling
+(the local environment provides 1.62.1) and Chromium. Independent GitHub acceptance
+installs Playwright 1.62.1 in the runner temp directory, without a project dependency
+or second lockfile, and uses the runner's Chrome. Credentials are synthetic;
+business/provider secrets are neither required nor available to the workflow.
+Both browser and SQL runners refuse hosted data; real hosted acceptance is a
+separately authorized Phase 3 activity. The browser fixture is not the full React
+application. Full-app module/provider acceptance remains unchecked in the runbook.
+
+The GitHub `Migration acceptance` check and synthetic artifact on
+[PR49](https://github.com/volkswg/stock-management/pull/49) provide independent
+source-matched evidence when completed; require a passing run for the final
+reviewed commit. Preserve failures as evidence, correct code and rerun rather than
+classifying a Vercel build as database acceptance. Do not publish private artifacts
+from Phase 3 through this workflow.

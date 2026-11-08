@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -9,7 +10,7 @@ import { ShipmentStatus } from "@/modules/shipments/contracts";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   const searchParams = new URL(request.url).searchParams;
   const excludeStatuses = parseExcludedStatuses(searchParams);
   if (!excludeStatuses) {
@@ -60,7 +61,7 @@ function isShipmentStatus(value: string): value is ShipmentStatus {
   return Object.values(ShipmentStatus).includes(value as ShipmentStatus);
 }
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function POSTOperation(request: Request): Promise<NextResponse> {
   let body: unknown;
   try {
     body = await request.json();
@@ -129,3 +130,6 @@ function parseCreateShipmentInput(
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+export const GET = withPersistence(GETOperation);
+export const POST = withPersistence(POSTOperation);

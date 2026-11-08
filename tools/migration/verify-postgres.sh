@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 name="stock-migration-verify-$$"
 artifacts=$(mktemp -d)
-cleanup() { docker --host=unix:///var/run/docker.sock rm -f "$name" >/dev/null; rm -rf "$artifacts"; }
+cleanup() { docker --host=unix:///var/run/docker.sock rm -fv "$name" >/dev/null; rm -rf "$artifacts"; }
 trap cleanup EXIT
 python3 tools/migration/integration.py > "$artifacts/import.sql"
 docker --host=unix:///var/run/docker.sock run -d --name "$name" -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.7 >/dev/null

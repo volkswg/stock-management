@@ -51,6 +51,10 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     fetch: () => { throw new Error("Live network is forbidden in regression tests"); },
     ...globals,
     require: (specifier) => {
+      // Existing characterization harnesses select the unchanged Sheets branch.
+      // PostgreSQL tests execute actual wrappers through postgres-runtime.cjs.
+      if(specifier === "@/composition/postgres/route") return {withPersistence: handler => handler};
+
       if(specifier === "@/composition/loyverse-accounts") return accountGraph().access();
       if(path===expenseRecords && specifier==='@/infrastructure/persistence/google-sheets/sheets/RecordsSheet'){
         const translated=new Proxy({}, {getOwnPropertyDescriptor:()=>({configurable:true,enumerable:true}),get:(_,key)=>key==='./BaseGoogleSheet'?imports['../BaseGoogleSheet']:imports[key]});

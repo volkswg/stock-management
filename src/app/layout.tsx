@@ -1,3 +1,4 @@
+import Script from "next/script";
 import type { Metadata } from "next";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { AppBreadcrumb } from "./AppBreadcrumb";
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        {process.env.STOCK_STORAGE === "supabase" && <Script src="/stock-staging-operations.js" strategy="beforeInteractive" />}
         <AntdRegistry>
           <AppBreadcrumb />
           {children}

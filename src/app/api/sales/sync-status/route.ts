@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -6,7 +7,7 @@ import { listSalesSyncStatus } from "@/modules/sales/server";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   try {
     const config = getConfig();
     const { searchParams } = new URL(request.url);
@@ -76,3 +77,5 @@ function isValidMonth(month: string): boolean {
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+export const GET = withPersistence(GETOperation);

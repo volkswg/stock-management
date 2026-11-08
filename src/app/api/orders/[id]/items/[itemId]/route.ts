@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import {OrderItemQuantityType}from "@/modules/orders/contracts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -9,7 +10,7 @@ import {
 
 export const runtime = "nodejs";
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string; itemId: string }> },
 ): Promise<NextResponse> {
@@ -143,3 +144,5 @@ function isOrderItemQuantityType(value: unknown): value is OrderItemQuantityType
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+export const PATCH = withPersistence(PATCHOperation);

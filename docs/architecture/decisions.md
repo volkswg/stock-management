@@ -229,3 +229,86 @@ The account source defaults to env for compatibility; sheet mode reads only the 
 Account storage uses the existing service account with a read-only Sheets scope and does not join the operational aggregate registry. Sharing and migration are owner operations. Metadata leaves the seam only as id/shopName; selected credentials remain inside closure-bound provider methods, not enumerable client/config fields. Google error bodies are discarded; provider errors redact known raw/URI/JSON-escaped tokens and drop original causes/properties. Existing safe error messages/status mappings and all provider request/calculation behavior remain intact. The legacy synchronous factory continues supporting env callers and rejects sheet configurations explicitly. See [manual rollout/rollback](../../README.md#loyverse-configuration).
 
 Workbook-level permissions apply to every worksheet: hiding/protecting the account tab cannot keep tokens from other workbook readers. The owner must restrict/audit existing-workbook access before using sheet mode; the application exposes only metadata/capabilities regardless of workbook choice. No automatic ACL changes, tab creation or credential writes are added.
+
+
+## Phase 2 PostgreSQL operational persistence
+
+Baseline: merged PR48, `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
+The owner explicitly approved stable client operation keys for Supabase-mode
+creates, propagation across retries, saved-response replay and missing-key
+rejection, while retaining keyless Google Sheets behavior. The legacy-create
+characterizations demonstrate why business-field uniqueness cannot substitute
+for command identity: intentional identical orders must remain separate.
+
+`stock_migration` remains a private immutable archive. A separate private
+`stock_operational` schema holds the same 23 typed business entities, ordered
+compatibility cells, revisions and retained archived records. Additional command,
+audit, side-effect and target-isolation tables provide durable execution/recovery evidence. The
+promotion plan requires an empty operational target and compares typed business
+fields plus original cells in both directions before commit. It neither edits the
+archive nor merges imports into live mutable state. Dates/months/timestamps retain
+original text/Bangkok semantics pending owner-approved real-data profiling.
+
+Feature-owned PostgreSQL table bindings supply operational records to the existing
+feature-owned port mappers. The compatibility range projection is confined to
+infrastructure; application/domain interfaces and all calculations remain unchanged.
+No parallel business service, generic business repository or duplicated domain
+algorithm is added. It deliberately retains sparse row ordinals because historical
+bill/item/session IDs and some session references depend on row positions. Clearing
+sessions and deleting movements archives their records, retaining audit history.
+New inserts derive ordinals inside the command lock, avoiding sequence gaps that
+would break those references after rollback. Direct SQL users must not bypass this
+writer protocol. Full-dataset projections remain a capacity/performance limitation;
+this is a bounded staging implementation, not an unmeasured scalability claim.
+
+Every Supabase HTTP operation has an explicit unit of work. Mutations use a
+database transaction and common advisory lock; reads use PostgreSQL READ ONLY
+transactions and a shared lock, and nested mutation upgrades are rejected. This
+serializes existing read/check/write applications across server instances and
+preserves deferred reference handles. Multi-table writes, command identity and
+serialized response commit together. A matching retry replays the original
+response; changed intent conflicts. An ambiguous COMMIT is never blindly retried.
+A subsequent invocation waits for the database lock before inspecting the journal.
+Handled HTTP errors roll back earlier writes. Completed commands cannot be edited
+or deleted by the runtime role. Optional If-Match/x-stock-revision headers add
+stale-view checks; existing financial revisions remain authoritative.
+
+LINE keeps its signature verification and uses each webhookEventId independently
+of HTTP delivery batches. Redelivery flags/reply tokens are excluded from intent;
+business payload and actor/source remain bound to the event. Business failures
+roll back to an event savepoint while retaining the original response structure.
+Replies are captured during application execution and attempted after commit,
+with durable at-most-once attempt records. A sending/uncertain reply is never
+automatically reposted. This avoids duplicates but can lose a reply after a crash;
+operators must reconcile uncertain outcomes. Drive remains the image provider.
+Its uploads are outside PostgreSQL transactions and can be orphaned on rollback;
+there is no claim of atomic/exactly-once cross-provider effects.
+
+STOCK_STORAGE defaults to google-sheets. Supabase requires explicit isolated
+staging enablement, server-only credentials/token, verified TLS and a nonprivileged
+login capable of SET LOCAL ROLE stock_runtime. VERCEL_ENV=production is rejected.
+Regular staging APIs require an operator bearer token; only the explicitly
+registered LINE entrypoint uses its own signature boundary. A caller-controlled
+URL cannot exempt an ordinary handler. The runtime role has no archive access, DDL or DELETE, and
+cannot update immutable financial histories. RLS and explicit grants deny anonymous
+and authenticated Data API access. Original production Sheets authorization is
+unchanged; this is not issue38's application authorization implementation.
+
+A staging-only browser script retains a command key across connection/body errors
+and same-tab reload, retiring it after a successfully parsed successful response.
+It contains no credentials. Isolated browser runners must supply staging
+authorization from a private runner scoped to the exact approved origin/API path;
+no global cross-origin bearer headers or page/storage injection. Retry identity
+includes the query string and foreign responses cannot supply local revisions.
+There is no new login UI, production environment change
+or automatic backend fallback. [Runbook and cutover gates](../database-migration.md)
+are mandatory before approving live staging or a later production cutover.
+
+The [Phase 3 execution checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
+requires separate source/target permissions, exact record and business-total parity,
+hosted recovery/capacity/security sign-off and a global write freeze. The append-only
+archive is not CDC: final changes/deletions/reordering require a fresh full import
+into an approved empty target. Production authorization/monitoring and reverse
+migration after SQL writes remain explicit release blockers, not implemented
+fallbacks. Offline delta review and readonly operational extraction aid review
+without granting execution authority.

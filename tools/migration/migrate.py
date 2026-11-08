@@ -8,6 +8,10 @@ import sys
 from pathlib import Path
 from core import CATALOG, import_sql, normalize, reconcile, digest, convert
 
+class ExactNumber(str):
+    """Keep a JSON decimal token exact while retaining its source number type."""
+
+
 def write_private(path, value):
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(fd, 'w') as stream:
@@ -62,20 +66,35 @@ def main():
         base='https://sheets.googleapis.com/v4/spreadsheets/'+urllib.parse.quote(args.workbook,safe='')
         def get(path):
             req=urllib.request.Request(base+path,headers={'Authorization':'Bearer '+token})
-            with urllib.request.urlopen(req,timeout=60) as response: return json.load(response, parse_float=str)
+            with urllib.request.urlopen(req,timeout=60) as response: return json.load(response, parse_float=ExactNumber)
         metadata=get('?fields=sheets.properties.title')
         known={s['properties']['title'] for s in metadata['sheets']}
         if not set(mapping.values())<=known: raise ValueError('mapped worksheet missing')
         if 'loyverse_accounts' in mapping.values(): raise ValueError('credential sheet excluded')
         def capture():
+            names=list(mapping)
+            ranges=["'"+mapping[table].replace("'","''")+"'" for table in names]
+            def rendered(mode):
+                query=urllib.parse.urlencode([('ranges',r) for r in ranges]+[('valueRenderOption',mode),('dateTimeRenderOption','FORMATTED_STRING')])
+                values=get('/values:batchGet?'+query).get('valueRanges',[])
+                if len(values)!=len(names): raise ValueError('incomplete batch export')
+                return {table:item.get('values',[]) for table,item in zip(names,values)}
+            raw=rendered('UNFORMATTED_VALUE');formatted=rendered('FORMATTED_VALUE');formulas=rendered('FORMULA')
             sheets={}
-            for table,name in mapping.items():
-                a1="'"+name.replace("'","''")+"'"
-                query=urllib.parse.urlencode({'valueRenderOption':'UNFORMATTED_VALUE','dateTimeRenderOption':'FORMATTED_STRING'})
-                rows=get('/values/'+urllib.parse.quote(a1,safe='')+'?'+query).get('values',[])
-                formula_query=urllib.parse.urlencode({'valueRenderOption':'FORMULA'})
-                formulas=get('/values/'+urllib.parse.quote(a1,safe='')+'?'+formula_query).get('values',[])
-                sheets[table]={'headers':rows[0] if rows else [],'rows':rows[1:],'formulaRows':formulas[1:]}
+            for table in names:
+                rows=raw[table];display=formatted[table]
+                if len(rows)!=len(display): raise ValueError('rendered row count drift')
+                selected=[]
+                for number,row in enumerate(rows[1:],1):
+                    width=max(len(row),len(display[number]))
+                    values=[]
+                    for index in range(width):
+                        if index>=len(CATALOG[table]['headers']): raise ValueError('unexpected source column')
+                        source=display[number] if CATALOG[table]['columns'][CATALOG[table]['headers'][index]]=='text' else row
+                        values.append(source[index] if index<len(source) else None)
+                    selected.append(values)
+                types=[['boolean' if isinstance(v,bool) else 'number' if isinstance(v,(int,ExactNumber)) else 'null' if v is None else 'string' for v in row] for row in rows[1:]]
+                sheets[table]={'headers':display[0] if display else [],'rows':selected,'rawRows':rows[1:],'rawCellTypes':types,'formattedRows':display[1:],'formulaRows':formulas[table][1:]}
             return {'version':1,'spreadsheetId':args.workbook,'sheets':sheets}
         first=capture(); second=capture()
         if digest(first)!=digest(second): raise ValueError('source changed during export; freeze writers and retry')

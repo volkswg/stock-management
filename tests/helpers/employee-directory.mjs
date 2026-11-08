@@ -1,3 +1,4 @@
+import {sheetsPersistenceStub} from "./sheets-persistence-stub.mjs";
 import {accountGraph} from "./loyverse-accounts.mjs";
 import {legacySpecifier} from "./cleanup-history.mjs";
 import { inventoryOwners } from "./inventory-source.mjs";
@@ -18,7 +19,7 @@ export function directoryGraph({original=false,service,events=[],globals={}}={})
  function load(file){if(cache.has(file))return cache.get(file);if(!allowed.has(file))throw Error(`Unapproved directory dependency ${file}`);
   const source=original?(directoryBefore.files[file]?.source??(file==="src/app/api/stock-adjustments/route.ts"?directoryBefore.routeSource:readFileSync(file,"utf8"))):readFileSync(file,"utf8");
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,exports={};cache.set(file,exports);
-  const context=vm.createContext({exports,URL,Error,Date:DirectoryClock,Request,Response,console:{error(){}},fetch:()=>{throw Error("Live IO forbidden");},...globals,require(specifier){if(specifier==="@/composition/loyverse-accounts")return accountGraph().access();
+  const context=vm.createContext({exports,URL,Error,Date:DirectoryClock,Request,Response,console:{error(){}},fetch:()=>{throw Error("Live IO forbidden");},...globals,require(specifier){ const storageStub=sheetsPersistenceStub(specifier);if(storageStub)return storageStub;if(specifier==="@/composition/loyverse-accounts")return accountGraph().access();
    if(specifier==="node:crypto")return {randomUUID:()=>{throw Error("No directory ID generation expected");}};
    if(specifier==="server-only")return {};
    if(legacySpecifier(specifier)==="@/modules/sales/server")return {createSalesDashboardReader:()=>({readSales:()=>{throw Error("No Sales read expected");}})};

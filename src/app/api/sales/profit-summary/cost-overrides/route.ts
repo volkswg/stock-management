@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -10,7 +11,7 @@ import {
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function POSTOperation(request: Request): Promise<NextResponse> {
   const body = await readJsonBody(request);
   const month = isRecord(body) ? readString(body.month) : "";
   const accountId = isRecord(body) ? readString(body.accountId) : "";
@@ -61,7 +62,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 }
 
-export async function DELETE(request: Request): Promise<NextResponse> {
+async function DELETEOperation(request: Request): Promise<NextResponse> {
   const body = await readJsonBody(request);
   const month = isRecord(body) ? readString(body.month) : "";
   const accountId = isRecord(body) ? readString(body.accountId) : "";
@@ -122,3 +123,6 @@ function isValidMonth(value: string): boolean {
   const month = Number(value.slice(5));
   return month >= 1 && month <= 12;
 }
+
+export const POST = withPersistence(POSTOperation);
+export const DELETE = withPersistence(DELETEOperation);

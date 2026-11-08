@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -6,7 +7,7 @@ import { createEmployee, listEmployees } from "@/modules/hr/server";
 
 export const runtime = "nodejs";
 
-export async function GET(): Promise<NextResponse> {
+async function GETOperation(): Promise<NextResponse> {
   try {
     const employees = await listEmployees({
       googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
@@ -21,7 +22,7 @@ export async function GET(): Promise<NextResponse> {
   }
 }
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function POSTOperation(request: Request): Promise<NextResponse> {
   const input = parseEmployeeInput(await readJsonBody(request), false);
   if (!input || !input.name || !input.hiredDate || !input.status) {
     return NextResponse.json(
@@ -239,3 +240,6 @@ function readOptionalDate(
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
+export const GET = withPersistence(GETOperation);
+export const POST = withPersistence(POSTOperation);

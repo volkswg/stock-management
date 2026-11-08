@@ -1,3 +1,4 @@
+import {postgresNewFiles} from "./helpers/postgres-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import {canonicalPath} from "./helpers/retirement-history.mjs";
 import {restoreSalesApplicationSource}from "./helpers/sales-application-history.mjs";
@@ -41,7 +42,7 @@ test('original/current real UserStateSheet and GoogleSheetsClient preserve quote
 test('two exact moves reconstruct complete original sources/ASTs and retain every other production and historical fixture byte',async()=>{
  const {readdirSync}=await import('node:fs'),{default:ts}=await import('typescript'),{userStateHash,assertUserStateHistory,userStateFiles,userStateDestinations}=await import('./helpers/user-state-worksheet-history.mjs');
  for(const [file,hash]of Object.entries(userStateBefore.productionHashes)){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else assert.equal(userStateHash(readArchive(file)),hash,file);}
- const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk('src').filter(f=>!f.endsWith('.tsbuildinfo')&&!Object.hasOwn(userStateBefore.productionHashes,f)).sort(),[...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
+ const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk('src').filter(f=>!f.endsWith('.tsbuildinfo')&&!Object.hasOwn(userStateBefore.productionHashes,f)).sort(),[...postgresNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(userStateBefore.fixtureHashes))assert.equal(userStateHash(readArchive(file)),hash,file);
  const all=walk('src').filter(f=>f.endsWith('.ts')).map(f=>readArchive(f,'utf8')).join('\n'),printer=ts.createPrinter();for(const e of Object.values(userStateBefore.moves)){const ast=ts.createSourceFile(e.to,readArchive(e.to,'utf8'),ts.ScriptTarget.Latest,true);assert.deepEqual(ast.statements.filter(n=>!ts.isImportDeclaration(n)).map(n=>printer.printNode(ts.EmitHint.Unspecified,n,ast)),e.declarations);assert.equal((all.match(new RegExp(`export ${e.export==='UserStateSheet'?'class':'const'} ${e.export}\\b`,'g'))??[]).length,1);}
 });

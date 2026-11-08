@@ -1,0 +1,57 @@
+name: Migration acceptance
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+concurrency:
+  group: migration-acceptance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  synthetic-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Install locked project dependencies and isolated browser tooling
+        run: |
+          set -euo pipefail
+          npx --yes yarn@1.22.22 install --frozen-lockfile --non-interactive
+          npm install --prefix "$RUNNER_TEMP/stock-browser-tools" --no-package-lock --ignore-scripts playwright@1.62.1
+          test -x /usr/bin/google-chrome
+          mkdir evidence
+          git rev-parse HEAD > evidence/source-sha.txt
+      - name: Regression, boundaries and type safety
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee evidence/regression.log
+          npm run lint 2>&1 | tee evidence/lint.log
+          npm run typecheck 2>&1 | tee evidence/typecheck.log
+          python3 -m unittest discover -s tools/migration -p 'test_*.py' -v 2>&1 | tee evidence/python.log
+      - name: Real PostgreSQL, scoped browser authorization, reconciliation and recovery
+        env:
+          NODE_PATH: ${{ runner.temp }}/stock-browser-tools/node_modules
+          STOCK_CHROMIUM_EXECUTABLE: /usr/bin/google-chrome
+        run: |
+          set -euo pipefail
+          bash tools/migration/verify-postgres.sh 2>&1 | tee evidence/archive-postgres.log
+          bash tools/migration/verify-operational.sh 2>&1 | tee evidence/operational-postgres.log
+      - name: Credential-free production build and bundle boundaries
+        run: |
+          set -euo pipefail
+          bash tools/migration/verify-build.sh 2>&1 | tee evidence/build.log
+      - name: Preserve synthetic evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: migration-synthetic-${{ github.event.pull_request.head.sha }}
+          path: evidence/
+          retention-days: 14
+          if-no-files-found: error

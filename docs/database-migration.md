@@ -1,11 +1,13 @@
 # Google Sheets → PostgreSQL migration
 
-This is preparation and synthetic validation, not runtime cutover. Application ports,
-module adapters, composition, business calculations and provider integrations remain
-unchanged. `stock_migration` is an unexposed staging schema. Only its database owner
+Phase 1 provides the immutable import foundation; Phase 2 adds opt-in isolated
+operational persistence. Production still uses Google Sheets. Application ports,
+business calculations and provider ownership remain unchanged. `stock_migration`
+is an unexposed staging schema. Only its database owner
 can import; there are no browser, anon, authenticated or service-role grants or RLS
 policies. Never expose this schema through the Data API. Application authorization
-and port implementations belong to the next phase.
+for production remains a separate release gate. Phase 3 execution below is a plan,
+not authorization to access records, apply hosted migrations or cut over.
 
 ## Source audit and schema
 
@@ -96,10 +98,14 @@ names and Google authentication implementations are unchanged.
    python3 tools/migration/migrate.py export --workbook WORKBOOK_ID --mapping migration-artifacts/mapping.json --output migration-artifacts/source.json --dry-run
    ```
 
-4. With separate authorization for live reads, remove `--dry-run`. Export reads
-   unformatted evaluated values (dates formatted as strings) and formula cells,
-   twice, and rejects changing captures. This is drift detection, not a substitute
-   for a write freeze. Decimal JSON tokens are decoded without binary arithmetic.
+4. With separate authorization for live reads, remove `--dry-run`. Export batch-reads
+   evaluated unformatted values, formatted values and formula cells twice, and
+   rejects changing captures. Text identities use the displayed values seen by the
+   existing application; money/quantities use exact unformatted numeric tokens.
+   Both complete renderings and original number/string cell types remain archived. This is drift detection, not a substitute
+   for a write freeze. Decimal JSON tokens are decoded without binary arithmetic. Seven read requests
+   cover the metadata and two three-rendering captures for all 23 worksheets,
+   avoiding per-tab quota exhaustion.
    Unknown tabs are reported; missing business tabs and mismatched headers fail.
    Output paths are exclusive-create; existing backups are never overwritten.
 5. Validate offline, then generate a reviewable SQL plan:
@@ -223,3 +229,523 @@ checks and full 24-table backup/restore fingerprints pass. Typecheck and isolate
 credential-free Next build pass. Lint has one inherited unused-variable warning.
 Hosted security advisor returns no findings; hosted schema/data are unchanged.
 These results do not satisfy the live-data acceptance gates above.
+
+
+## Phase 2 operational storage (opt-in isolated testing)
+
+Start point: merged PR48 `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
+The operational migration is
+[`20261108191839_stock_operational.sql`](../supabase/migrations/20261108191839_stock_operational.sql).
+It keeps the 23-table staging archive immutable and creates 23 separate operational
+business tables plus command, audit, reply-attempt history and target-isolation metadata. All are private,
+with RLS. The existing seven feature applications and port mappers remain the one
+business implementation; feature-owned `infrastructure/postgres/tables.ts` binds
+them to typed operational records. Existing compatibility names do not imply
+Google transport is used when Supabase is selected. Drive still stores images.
+
+Coverage: Orders/items/bills, Shipments/order links, Movements/details,
+counts/adjustments/reversals, receipt/items/payments/sync history/cost overrides,
+expenses/categories/shops, employees/compensation/attendance/advances/settlements,
+and LINE session workflows. Configuration credentials in loyverse_accounts remain
+excluded, using the existing private env/Sheets configuration seam. No business
+module is switched automatically.
+
+### Isolated server configuration
+
+Use a separate staging deployment, configure these variables before its build,
+and never edit production Vercel settings:
+
+- `STOCK_STORAGE=supabase` (otherwise default `google-sheets`).
+- `STOCK_STAGING_ENABLED=true`; `VERCEL_ENV=production` always rejects Supabase.
+- `STOCK_DATABASE_URL`: dedicated nonprivileged login, approved direct/session or
+  transaction-pooler URI. Do not include TLS query overrides. Pool maximum is two
+  connections per instance, idle timeout five seconds. All statements are unnamed;
+  transaction-local role/settings/locks work with transaction pooling.
+- `STOCK_TARGET_ISOLATION_ID`: owner-verified UUID from
+  `SELECT isolation_id FROM stock_operational.environment` on the approved target.
+  Every transaction verifies this database-side guard before reading/writing business
+  state. Rotate the guard and review configuration before enabling a restored clone.
+- `STOCK_DATABASE_CA`: optional trusted PEM for hosted PostgreSQL; hostname/CA
+  verification is mandatory. Never disable TLS checks for a hosted target.
+- `STOCK_STAGING_AUTH_TOKEN`: privately generated, at least 32 characters. HTTP
+  integration runners send `Authorization: Bearer <token>`. Browser runners inject
+  this header outside the application; no login UI or browser credential config
+  is introduced. Database credentials never enter browser bundles.
+- `STOCK_ALLOW_LOCAL_TEST_DATABASE=true` is only for a disposable localhost DB.
+
+An owner applies migrations and separately provisions a LOGIN with no superuser,
+BYPASSRLS, CREATEDB, CREATEROLE or inherited owner powers, grants it membership in
+stock_runtime and revokes unnecessary public-schema rights. Set its password via
+private tooling, not chat, SQL committed to Git or command arguments. The app
+executes SET LOCAL ROLE stock_runtime in each transaction. That role has no
+archive access, DDL or DELETE and cannot update receipts, compensation,
+adjustments or settlements. Immutable archive triggers also prevent accidental
+owner UPDATE/DELETE/TRUNCATE. Do not expose either schema via the Data API.
+Original Sheets-mode authentication remains unchanged; production staff/owner
+policy still needs the separate production-readiness review.
+
+### Command identity and concurrent writes
+
+The owner approved a Supabase-only request-contract addition: mutations require a
+stable `Idempotency-Key`. Missing keys return 428, reused keys with different
+intent return 409, and successful retries replay the stored status/body/headers.
+Generate a key once per intentional action, before the first POST, retain it
+through network errors and reloads, and use a new key for another intentional
+identical create. A staging-only script handles current browser fetch callers;
+it uses sessionStorage and hashes actual multipart bytes rather than unstable
+multipart boundaries. A successful parsed response retires the key. Storage
+failure stops a blind submission. Cross-tab/device recovery requires the original
+key from the caller; losing it cannot be solved by guessing from business fields.
+
+Writes serialize using a PostgreSQL advisory lock around the complete existing
+application execution. Deferred FKs, business uniqueness, revision checks and the
+command journal commit together; GETs use a shared lock for coherent multi-table
+reads. No runtime fallback exists. Handled error responses roll back all preceding
+writes. Optional If-Match uses the x-stock-revision value from a prior response;
+replay of an already committed key remains safe even when that view is stale.
+Existing payroll revisions and cancellation/reversal rules are unchanged.
+
+LINE verifies its original signature, requires webhookEventId, and journals each
+event separately so regrouped redeliveries cannot repeat business commands. It
+normalizes only delivery metadata and reply tokens for fingerprinting. Replies
+are attempted after commit through durable attempt records. A crash after marking
+sending, or an ambiguous send, is quarantined rather than automatically repeated.
+There is no exactly-once third-party-delivery guarantee. Inspect sending/uncertain
+side_effects and associated command results privately before choosing recovery.
+Failed event processing rolls back business changes to a savepoint and retains a
+terminal result; repeated failed deliveries replay that result. Owner recovery
+requires reviewing the cause and external effects; do not delete command history
+or fabricate a new event ID to force a replay.
+
+Drive uploads stay outside database atomicity and may leave orphan files after
+rollback or an ambiguous database acknowledgement. Preserve returned file IDs,
+review command/audit records and Drive ownership before cleanup. There is no
+automatic destructive cross-provider rollback. A process crash before the upload
+ID is returned may require a private Drive inventory. This remains a cutover risk.
+
+### Offline profiling and promotion
+
+With a separately approved frozen export, create a private offline profile:
+
+```sh
+python3 tools/migration/profile.py migration-artifacts/source.json --output migration-artifacts/profile.json
+```
+
+The report covers business/source cell types, duplicate identities, date validity/shapes, formula-like cells and formatted-numeric compatibility requiring review, orphan
+relationships, decimal totals and serialized size. Any problem requires review;
+no source cell is repaired. Real date/locale interpretation still needs an owner.
+Next run the existing dry-run/import planner, load only the approved staging
+archive, back it up, and inspect
+[`tools/migration/promote.sql`](../tools/migration/promote.sql). Execute with
+`psql -X -v ON_ERROR_STOP=1` against an approved **empty** operational target.
+Promotion takes the writer lock, preserves every ID/raw cell/typed value, compares
+both directions with EXCEPT ALL, validates constraints and commits atomically.
+A nonempty target fails; repeated promotion never overwrites runtime records.
+Stop on reconciliation failure. Do not disable constraints to force acceptance.
+
+Operational compatibility projections retain sparse row ordinals and archived
+records because historical session references depend on them. Native updates keep
+identities immutable, advance revisions and append an audit snapshot. Hard-delete
+business operations become retained archives with equivalent active-reader
+results. PostgreSQL stores new inputs literally; it does not execute Google Sheets formulas.
+Profile formula-like source cells and obtain business-rule review before promotion.
+Imported evaluated values and original formula cells remain archived unchanged.
+Date strings and existing JavaScript financial/stock calculations are
+preserved; typed numeric columns do not introduce new rounding.
+
+### Verification and capacity
+
+```sh
+npm test
+npm run lint
+npm run typecheck
+bash tools/migration/verify-operational.sh
+```
+
+The PostgreSQL runner creates local disposable PostgreSQL only: all migrations,
+synthetic archive import, exact promotion, existing feature applications, concurrent
+request replay, actual lost-COMMIT-ack simulation, stale revisions, permissions,
+LINE and Loyverse fakes, payroll snapshots, indexed synthetic workload and logical
+backup/restore. It accepts no hosted URL. The production build must run separately
+in an isolated source/dependency copy with integration credentials excluded.
+
+Full-table compatibility projections and the global write lock deliberately favor
+correctness over throughput. They are suitable only for measured small staging
+workloads. Projection rejects ordinals above one million; the synthetic 2,000-row
+measurement is not a production benchmark. Profile sparse IDs/row positions and
+measure CPU/memory/latency/lock contention with an approved export before cutover.
+The Free-tier database must hold immutable snapshots, operational data, audit,
+indexes and recovery overhead; export bytes alone substantially understate disk
+requirements. No unmeasured production capacity guarantee is made.
+
+Back up both stock_migration and stock_operational, including commands, audit and
+side_effects. Restore into a fresh isolated database with the same roles; compare
+complete records/fingerprints, constraints, grants/RLS and journal/effect states.
+Backups contain personal business data and short-lived reply tokens; encrypt and
+restrict them. The automated rehearsal compares both promoted import state and
+application-generated state, not just an empty schema.
+
+### Production cutover and rollback prerequisites
+
+1. Approve a frozen native workbook backup/export and target; inventory every tab,
+   profile types/IDs/dates/relationships and resolve all unexplained records.
+2. Reconcile IDs, counts, relationships and exact financial/stock totals after
+   promotion; stop on any mismatch. Keep original Sheets data untouched.
+3. Review caller operation-key retention, supported legacy-client policy, actual
+   production authorization, least-privilege credentials/TLS, hosted isolation,
+   and the build-time staging browser-script selection.
+4. Validate real workloads, concurrency, ambiguous commits, external-effect
+   quarantine, off-site backups, restores and recovery time. Approve an operator
+   procedure for failed LINE commands and uncertain replies/uploads.
+5. Quiesce old/manual writers and pending provider requests. Prepare a separately
+   approved cutover; this PR does not enable production writes or change Vercel.
+
+Rollback before cutover is simply leaving STOCK_STORAGE at its default Sheets
+value. After a future cutover, stop all writers, retain journals/audit/tombstones
+and reconcile post-cutover data before any storage switch. Restoring an older
+backup can lose committed operations; restoring journal/effect state can also
+reintroduce delivery uncertainty. Prove terminal outcomes before resuming writes.
+Never automatically fall back to stale Sheets or delete history to make retry
+work. No automatic merge, deployment or production-cutover tool is provided.
+
+## Phase 3: real data validation and controlled cutover
+
+This is the single execution runbook. All boxes begin **unchecked**. An owner
+must authorize each external action separately, naming the workbook/copy,
+Supabase project/database, approved operators, artifact recipients, time window
+and allowed reads/writes. PR49 review/merge approval does not authorize Phase 3.
+Never paste credentials or real records into chat, PRs, logs or CI artifacts.
+
+### Gate 0 — authority, isolation and release prerequisites
+
+- [ ] Record the approved PR49 commit, independent CI run/artifact checksums and
+  architect review. Resolve all security/reconciliation/recovery failures first.
+- [ ] Owner identifies the authoritative workbook, every business tab and any
+  unknown tab. Compare the 23-table catalog, mapping and source audit with that
+  inventory. Classify private `loyverse_accounts` separately; never export tokens.
+- [ ] Obtain read-only export approval and a native, frozen workbook backup/copy.
+  Record workbook ID, revision/copy time, UTC and Asia/Bangkok freeze timestamps,
+  locale/timezone, writer inventory and signed owner acknowledgement. Prefer an
+  owner-provided frozen copy. Read-only OAuth scope alone does not isolate tabs;
+  workbook-wide credential visibility requires a restricted principal/copy.
+- [ ] Separately approve hosted DDL/import and restore targets. Verify project ref,
+  database, region, TLS hostname/CA, login identity and target isolation UUID out
+  of band. Never use the existing empty project merely because it is connected.
+  The current scripts use fixed schema names, so an unrelated populated schema
+  in that project blocks execution. Prefer a dedicated empty approved database;
+  a new billable project/infrastructure requires owner approval.
+- [ ] Define acceptable RTO/RPO, freeze duration, workload, latency targets and
+  capacity budget before testing. Record accountable owner, migration operator,
+  independent reconciler, security reviewer and rollback incident lead.
+- [ ] **Production blocker:** the code rejects `VERCEL_ENV=production`, uses a
+  shared staging actor/token and has no production authentication policy. A
+  separate reviewed release must provide server-verified identity, per-operation
+  authorization (including HR/payroll), audit attribution, CSRF/session protection,
+  abuse controls and a fail-closed production target gate. Do not bypass these
+  guards by falsifying Vercel environment metadata. Issue #38 remains open scope.
+
+### Gate 1 — secure artifact handling and read-only export
+
+Create a restricted encrypted working directory (0700) outside shared sync roots.
+Use the ignored `migration-artifacts/` location only on encrypted storage. Files
+are exclusive-create 0600; this prevents replacement, not disclosure to a host
+administrator. Store encrypted off-site copies with separate key custodians,
+least-privilege access, access logs, retention/expiry and tested key recovery.
+Include source/full renderings/formulas, mapping, SQL plans, database dumps,
+profiles, reconciliation and business acceptance evidence. Git and public CI
+must contain synthetic evidence only. Suppress shell tracing, request traces,
+HAR/video/screenshots and provider response bodies. Rotate short-lived tokens.
+
+- [ ] Privately provision `GOOGLE_SHEETS_READONLY_TOKEN` with only
+  `spreadsheets.readonly`; do not reuse the application's write-capable account.
+- [ ] Freeze all writers to the copy during capture. For a live final freeze,
+  use Gate 7; do not assume two matching reads guarantee workbook atomicity.
+- [ ] Run the export dry-run from the earlier section. Independently review all
+  mapped tabs. Only after export approval, execute the same command without
+  `--dry-run`. It makes GET requests only, never application `ensureExists` calls.
+- [ ] Record SHA256 of the exact artifact bytes, the canonical snapshot checksum,
+  tool/commit version, operator, seven-request completion and capture times.
+  Unknown tabs or changed captures stop acceptance; do not discard them silently.
+
+### Gate 2 — offline profiling and source compatibility
+
+```sh
+python3 tools/migration/profile.py migration-artifacts/source.json --output migration-artifacts/profile.json
+python3 tools/migration/migrate.py plan migration-artifacts/source.json --dry-run
+python3 tools/migration/migrate.py plan migration-artifacts/source.json --output migration-artifacts/import.sql
+```
+
+- [ ] Review all 23 tables: exact headers, count/IDs (including leading zeros),
+  duplicate/missing IDs, compensation positional identities, blank/sparse rows,
+  every FK, polymorphic/external references and historical/deleted records.
+- [ ] Compare raw, formatted and formula values; validate numeric precision,
+  currencies, refunds, locale separators and totals. Raw field totals alone do
+  not prove net sales, inventory availability or payroll equivalence.
+- [ ] Validate date/month shapes, timestamp offsets, Bangkok day/month boundaries,
+  leap days and naïve timestamps. No automatic timezone assignment is allowed.
+- [ ] Run the existing application parsers/calculations over the approved source
+  and promoted target projections. Compare parsed money/quantity values per cell
+  as well as report totals: existing Sheets readers consume displayed values,
+  whereas PostgreSQL preserves unformatted numeric cells. Display rounding,
+  formatted currency/commas and formulas are **blocking compatibility findings**
+  until reviewed and fixed in version-controlled code with new tests. Never
+  edit the export or dismiss a profiler finding just to achieve a pass.
+- [ ] Resolve all profiler problems, orphan/duplicate IDs, unknown source types,
+  formulas, unsupported sparse ordinals and table constraints. Preserve the
+  original artifact and document every approved source correction/re-export.
+  Any unresolved problem stops deployment/import, not just production cutover.
+
+### Gate 3 — isolated hosted deployment, import and reconciliation
+
+After explicit target-specific DDL approval, inspect the SQL migrations at the
+approved commit and apply them through Supabase migration tracking using a
+private owner connection. Rehearse the same process on the restore target. Do
+not run project reset, destructive down SQL or privileged browser clients.
+Provision a dedicated non-owner LOGIN with NOSUPERUSER/NOBYPASSRLS/NOCREATEDB/
+NOCREATEROLE/NOINHERIT, grant membership only in `stock_runtime`, and verify no
+inherited roles/object ownership broaden access. Keep migration-owner credentials
+separate. Runtime uses SET LOCAL ROLE per transaction, max two pooled connections,
+verified TLS and no named prepared statements; use the approved Supavisor
+transaction-pooler endpoint for Vercel. Use a direct/session connection for
+migration and pg_dump. Verify custom-role/pooler support on the actual target;
+unsupported hosted roles/pooling stop the gate rather than substituting an owner.
+
+- [ ] Record migration ledger, 24 archive tables/27 operational tables, RLS,
+  grants, constraints, indexes, immutable triggers and environment UUID/purpose.
+  Keep both schemas absent from exposed Data API schemas; anon/authenticated and
+  runtime-login direct access must fail. RLS is not a replacement for app auth.
+- [ ] Take a private pre-import backup and verify its encrypted off-site copy.
+- [ ] With import approval, execute reviewed `import.sql` with ON_ERROR_STOP.
+  Capture only sanitized status/checksums. Reimport identically; counts and
+  fingerprints must remain identical. A changed identity must abort atomically.
+- [ ] Extract `database-snapshot` and reconcile against the exact source.
+- [ ] Review `promote.sql`, verify empty operational target and execute it only
+  after approval. Promotion locks both schemas, validates all values/constraints
+  and preserves IDs/ordinals/history in one transaction; failed promotion rolls
+  back. Runtime remains disabled throughout.
+- [ ] Privately configure `PGSERVICE`, `PGPASSFILE` and
+  `STOCK_TARGET_ISOLATION_ID` for the approved target, then run:
+
+```sh
+python3 tools/migration/phase3.py operational-snapshot --source migration-artifacts/source.json --output migration-artifacts/operational.json
+python3 tools/migration/migrate.py reconcile migration-artifacts/source.json migration-artifacts/operational.json
+```
+
+The operational extractor uses a repeatable-read READ ONLY transaction and shared
+writer lock, checks target UUID/purpose, compares typed columns with business
+cells and rejects archived/invalid positional records. It is intended for a
+pristine promoted target. Reconciliation covers all counts, complete ID sets,
+relationships, exact numeric totals and row fingerprints, including historical
+rows. Reports contain private identities. Save them in restricted artifacts,
+never ordinary CI. Require `match: true` and zero rejects/unexplained records.
+
+- [ ] Independently compare stock by account/shop/month (delivered journeys,
+  counts, adjustments/reversals) and finances by date/account/currency, including
+  receipts/refunds/tax/discount/payments, Orders/shipping, Expenses and payroll
+  advance/settlement snapshots. Compare existing API JSON/status/order results
+  using the same frozen clocks, external-provider fakes and original algorithms.
+- [ ] **Stop on any mismatch.** Keep both source and failing target intact;
+  identify cause, correct code in review and repeat from an empty approved target.
+  Do not disable constraints, mutate archives, drop records or tolerate rounding.
+
+### Gate 4 — capacity, region and query performance
+
+- [ ] Confirm the actual project plan/region. For Bangkok users, compare available
+  Singapore (`ap-southeast-1`) and nearby supported regions against the actual
+  Vercel function region, round-trip latency, residency and recovery needs.
+  Do not relocate the existing project; region changes require a new approved
+  target/migration. A region proposal is not a deployment instruction.
+- [ ] Run `psql -X -v ON_ERROR_STOP=1 -f tools/migration/capacity.sql` against the
+  approved target and store output privately. Measure database, heap/index,
+  archive/full-snapshot/audit/command growth and connection counts. Stats row
+  estimates supplement exact reconciliation counts; they do not replace them.
+- [ ] Recheck [current plan limits](https://supabase.com/pricing),
+  [database size](https://supabase.com/docs/guides/platform/manage-your-usage/database-size),
+  [backups](https://supabase.com/docs/guides/platform/backups) and
+  [pooling](https://supabase.com/docs/guides/database/connecting-to-postgres).
+  Free projects commonly have 500 MB database storage, limited compute/connections,
+  inactivity pausing and no paid PITR guarantee. Do not assume automatic daily
+  recoverable backups on Free. Confirm current quotas in the target dashboard.
+  Drive images remain on Drive; exports/dumps and DB traffic still consume space
+  and egress. Budget full archive duplication, indexes, audit/replay growth,
+  maintenance and restore headroom, not just source JSON bytes.
+- [ ] Measure warm/cold p50/p95/p99 API/query/lock waits, memory and throughput
+  at approved peak concurrency on an expendable clone, with provider calls faked.
+  Include full Orders reads, receipt/profit reports, inventory/monthly stock and
+  payroll. Save EXPLAIN (ANALYZE, BUFFERS) for representative reads. Never run
+  write EXPLAIN or load tests on production. Global write serialization and
+  full-table projections are known limits; reject cutover if agreed limits fail.
+- [ ] Owner approves measured capacity/headroom, latency and growth horizon.
+  Any required new infrastructure/paid plan is a separate approval, not an
+  automatic upgrade or an excuse to alter business semantics.
+
+### Gate 5 — authorization, browser/API and business acceptance
+
+The staging bearer token is an operator capability, not a customer login. Supply
+it from a private Node test-runner environment/secret store. An API runner must
+allow only the exact approved HTTPS origin/path and set `redirect: 'error'`.
+A browser runner intercepts requests in Node and injects Authorization only for
+that exact origin's `/api/` paths. Abort foreign origins/redirects rather than
+using global `extraHTTPHeaders`. Keep the token out of page evaluate/init scripts,
+URLs, local/session storage, build env, HAR, traces and screenshots. The browser
+can necessarily see a request bearer in its network tools: use only trusted,
+owner-authorized testers and a short-lived token; rotate after acceptance.
+Deployment protection/SSO credentials are separate and do not authorize the API.
+Do not make private staging publicly accessible to get tests passing.
+
+`browser-acceptance.test.cjs` demonstrates this boundary with a disposable local
+fixture and actual Orders route/PostgreSQL: denied API/browser requests, scoped
+bearer injection, post-commit response loss, reload/replay and a new intentional
+create, and foreign-origin denial. It accepts only loopback SQL. It does not
+claim full React UI/hosted/provider acceptance. Its fixture serves the real retry
+script and bridges requests to actual HTTP handlers. The independent CI workflow
+installs isolated pinned Playwright tooling and Chromium; it receives no business
+secrets. Do not repoint this synthetic runner at real data.
+
+Approve a private hosted acceptance runner/configuration separately. Do not
+replay imported user sessions against real LINE users. Use test LINE channel,
+Loyverse sandbox/fake receipts and a restricted Drive test folder, or explicitly
+approve each external provider action. Preserve original account identities via
+safe fixture configuration; never export credential tabs into test artifacts.
+
+| Module | Required acceptance on an expendable approved clone |
+| --- | --- |
+| Orders/items/bills | List/detail/create/update/cancel/soft delete, quantities/prices and image references; multipart upload errors; retry/reload retains key; intentional duplicate payload gets new ID |
+| Shipments | Create/link/unlink/status/bill; duplicate links and stale mutations; cancellation and historical links retained |
+| Inventory | Journey/item/delivery transitions, stock counts, adjustments/reversals/replacements; exact per-account balances; simultaneous edits and retry races |
+| Sales/Loyverse | Original receipts/items/payments, refunds/store/date filters, repeated paginated sync and failures; sync history atomic; unchanged dashboard/profit overrides |
+| HR/payroll | Employee/status/compensation history; Bangkok clock-in/out/half days; advances/cancellation, revision conflicts, exact payroll/settlement snapshot and replay |
+| Expenses/shops | Ledger/master CRUD and soft delete; existing names/account mappings; amounts, month filters and report totals |
+| LINE/session | Valid/invalid signatures; text/photo/multi-event journeys; regrouped redelivery; clearing/history; failed event recovery; uncertain reply quarantine without double business mutation |
+| Security/recovery | Missing/wrong bearer, production guard, wrong UUID/TLS/login, readonly SQL, forged LINE path, stale revisions, missing/reused keys, direct Data API/browser SQL denial; no secrets in bundles |
+
+- [ ] Compare original Sheets-compatible fixture and SQL results for every
+  existing operation, response/status and state transition; log remaining
+  untested/unsupported paths explicitly. Any unexplained difference blocks.
+- [ ] Inject concurrent writes, partial multi-table failure, stale views, lost
+  COMMIT acknowledgements and retry storms. Require zero duplicate business
+  commands, no partial rows and identical financial/stock outcomes.
+- [ ] Review terminal failed LINE results, sending/uncertain replies and orphan
+  Drive uploads privately. There is no atomic database+provider transaction or
+  guaranteed reply delivery. Do not erase journal rows or invent new event IDs.
+
+### Gate 6 — backup/restore and recovery sign-off
+
+- [ ] Dump **both** schemas, commands/audit/side_effects/environment, sequences,
+  triggers/functions, constraints, privileges and policies using PostgreSQL tools
+  compatible with the target version. Preserve role definitions separately;
+  recreate custom-role passwords from the secret store, never dump them to Git.
+  Example after approval: `pg_dump -Fc -n stock_migration -n stock_operational
+  -f migration-artifacts/accepted.dump`. Verify exit status, SHA256 and encryption.
+- [ ] Restore the dump into a new approved empty target with the required roles
+  using pg_restore --single-transaction --exit-on-error. Never restore over the
+  source or production. Compare all records/fingerprints, typed/raw values,
+  identities/totals, sequence positions, journal/effect states, triggers,
+  constraints, indexes, RLS/grants and migration ledger. Re-run runtime auth and
+  denied-write checks with a newly provisioned least-privilege login.
+- [ ] Isolate restored environment UUID/credentials before exposing an app;
+  restoring environment metadata duplicates its UUID, so UUID alone does not
+  distinguish clones. Record endpoint+UUID+credential approval together; a new
+  UUID needs an explicit owner-only operation and must be retested.
+- [ ] Rehearse application-generated state as well as pristine promotion,
+  including committed command replay and uncertain effects. No real messages,
+  uploads or syncs may fire during restore testing. Compare off-site artifact
+  decryption and measured RTO/RPO with approved targets. Recovery failure stops.
+  Database backups do not include Drive images or provider delivery outcomes.
+
+### Gate 7 — final freeze and delta review (separate cutover approval)
+
+- [ ] Resolve production auth/config/monitoring prerequisites and approve a
+  maintenance window with named abort/decision times. Retain an untouched native
+  Sheets backup; do not delete legacy data or revoke source read access prematurely.
+- [ ] Block all business writers at ingress and manual worksheet permissions:
+  browser/API clients, scripts, scheduled Loyverse sync, LINE webhook consumption
+  and in-flight workers. Drain active requests; record provider cursors/event IDs,
+  unfinished sessions, pending keys and external outcomes. Use an owner-approved
+  durable provider hold/retry procedure; never acknowledge/drop events without
+  storing them safely. Verify zero new source changes across the final capture.
+- [ ] Export a **final full snapshot** under the same read-only procedure and
+  repeat profiling. Compare the rehearsed and final artifacts offline:
+
+```sh
+python3 tools/migration/phase3.py delta-review migration-artifacts/source.json migration-artifacts/final.json --output migration-artifacts/delta-review.json
+```
+
+The report classifies added, removed, changed and moved IDs and flags positional
+compensation identities. It writes no SQL and never applies a delta. **Changed,
+deleted or reordered source rows cannot be merged by the append-only importer.**
+The supported final-load strategy is to deploy a fresh approved empty target,
+import the final full snapshot and promote/reconcile it atomically. Keep the
+rehearsal target for evidence. Do not clear schemas or reuse mutable acceptance
+data. If the window cannot accommodate a complete final load, cutover is blocked
+until a separately reviewed CDC/delta design exists. A matching final export is
+not permission to run undocumented in-place updates.
+
+- [ ] Repeat Gates 2–6 on the final target; acceptance mutations belong on a clone,
+  not the final database. Seal source checksum, target/UUID, commit, backup,
+  reconciliation, auth/performance/recovery evidence and owner signature.
+- [ ] Abort if freeze cannot be proved, any record/total differs, capacity is
+  insufficient, provider events cannot be held/replayed safely, or recovery fails.
+  Leave Sheets as the authoritative store and re-open only its writers after
+  recording/disposing of queued events without duplicate delivery.
+
+### Gate 8 — controlled activation, monitoring and rollback
+
+This gate is not executable with PR49's production guard. Implement and review
+production authorization/target selection first, then obtain separate owner
+approval for production env changes/deployment. No Vercel setting changes occur
+as part of this runbook preparation. Selection is deployment-level, not an atomic
+cross-provider switch: a global write freeze is required to make it safe.
+
+- [ ] Keep ingress frozen, verify no old deployment/scheduled/manual writer can
+  write Sheets, and bind the approved release to exactly one final SQL target.
+  Never dual-write. Confirm server-only pooled credentials, role restrictions,
+  API identity/authorization, CSRF controls and client key persistence.
+- [ ] Run authenticated **read-only** smoke/reconciliation checks while frozen.
+  Promote traffic only after the incident lead's recorded go/no-go. Enable SQL
+  writers once, then release held LINE/sync events with original durable keys.
+  Every multi-table business command remains one PostgreSQL transaction; never
+  retry an ambiguous write with a new key or switch storage on failure.
+- [ ] Before activation, install/verify redacted monitoring: API error rate and
+  latency, DB connections/lock waits/statement timeouts, disk/headroom/growth,
+  backup freshness/restore failures, auth denials, stale/replayed/conflicting
+  keys, terminal failed commands and sending/uncertain effects. Define thresholds,
+  alert destinations/on-call, emergency writer-disable and secret rotation.
+  Alerts must exclude record bodies, SQL bind values and bearer/DB credentials.
+- [ ] Monitor exact day/shop/account financial and stock control totals during
+  the agreed observation window. Critical auth, reconciliation, recovery or
+  unexplained-total failures immediately freeze writers and trigger incident review.
+
+Rollback decision table:
+
+| Point | Safe action |
+| --- | --- |
+| Before SQL business writes | Keep ingress frozen, prove SQL has no post-freeze business commands, restore approved Sheets routing/config and resume its writers only after checking held events |
+| After SQL writes, DB available | Freeze all writers; preserve a new backup, audit/tombstones, journals/effects and provider outcomes. Prefer a reviewed forward fix against the same SQL state. Reconcile every post-cutover mutation before any return to Sheets |
+| DB unavailable/corrupt | Freeze ingress/providers; recover the latest verified backup to an isolated target, reconcile commit/outcome uncertainty and data since backup, then obtain incident approval before traffic resumes |
+| Return to Sheets after SQL writes | **Blocked:** no reverse-sync implementation exists. A separately reviewed reverse migration must preserve original IDs/history/soft deletes and financial/stock totals and prove replay outcomes before switching |
+
+Never automatically fall back to stale Sheets, replay already-attempted provider
+messages or restore over a live database. Backup restoration can lose newer
+commits and rewind effect state; a caller's missing response does not imply its
+transaction failed. Keep legacy records/backups for the owner-approved retention
+period; deletion is separately authorized.
+
+### Automation and acceptance evidence handoff
+
+| Artifact/tool | Current automation | Remaining owner-approved work |
+| --- | --- | --- |
+| `migrate.py` | Read-only export dry-run/capture, strict append-only SQL planning, archive extraction and exact reconciliation | Frozen copy approval, source mapping/inventory, hosted execution |
+| `profile.py` | Offline type/ID/FK/date/formula/numeric compatibility profile | Per-cell original-reader/business report parity and source defect resolution |
+| `phase3.py` | Offline delta review; readonly operational extraction with target guard | No CDC/reverse-sync or production switch automation |
+| `capacity.sql` | Read-only database/table/index size and connection/statistics capture | Real workload/region/pooler latency, growth, quota dashboard sign-off |
+| `verify-postgres.sh`, `verify-operational.sh` | Disposable synthetic DBs, import/promotion, concurrency/replay/module checks, actual browser/API credential boundary and full logical recovery | Hosted role/TLS/isolation, real-data reconciliation and restore timings |
+| `verify-build.sh`, GitHub Migration acceptance | Credential-free isolated build, client bundle boundary, synthetic regression and uploaded CI evidence | Private hosted full-application acceptance; production security/monitoring |
+
+Hand the architect one signed packet: approvals/target identities, approved
+commit+CI link, encrypted artifact manifest/checksums, source/profile resolutions,
+all 23-table reconciliations, per-account business totals, complete acceptance
+matrix, capacity/latency, restored-state comparisons/RTO/RPO, unresolved risks,
+freeze/activation times, recovery owner and go/no-go. Any unchecked critical gate
+means **no cutover**. PR49 can be reviewed as an isolated persistence milestone;
+real-data/hosted/production acceptance remains pending separate authorization.

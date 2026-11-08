@@ -1,9 +1,13 @@
+import { storageMode } from "@/infrastructure/persistence/postgres/database";
+import { createPostgresService } from "../postgres/service";
+import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { AppConfig } from "@/config";
 import { GoogleSheetsService } from "./GoogleSheetsService";
 
 export function createGoogleSheetsServiceFromConfig(
   config: AppConfig,
-): GoogleSheetsService {
+): IGoogleSheetsService {
+  if (storageMode() === "supabase") return createPostgresService();
   return new GoogleSheetsService({
     spreadsheetId: config.googleSheets.spreadsheetId,
     employeeAdvancesWorksheetName: config.googleSheets.employeeAdvancesWorksheetName,

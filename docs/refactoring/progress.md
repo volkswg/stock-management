@@ -248,3 +248,101 @@ full suite then passed. Existing Supabase project inspected read-only; security
 advisor returns no findings. Live source inventory, hosted DDL/import/restore and
 production recovery time remain unverified. Network policy blocked direct
 changelog retrieval; current import/backup documentation was read via Supabase MCP.
+
+## Phase 2 operational PostgreSQL (2026-11-09, Bangkok)
+
+Baseline: merged PR48 / `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
+Branch `migration/postgres-operational`. The owner approved Supabase-only stable
+operation keys, retained across retries/reload, saved-response replay and
+missing-key rejection; original Sheets behavior remains the default.
+
+Implemented 23 private operational business tables plus commands, audit,
+side-effect attempts and target-isolation metadata; immutable staging protection;
+transactional exact promotion into an empty target; feature-owned PostgreSQL
+bindings reusing existing port mappers; request-wide transactions/replay/stale
+checks; bounded server-only pooling, nonprivileged role/TLS/target guard and
+staging authorization. LINE journals individual events, archives cleared sessions,
+and records reply attempts. Drive remains the image provider. The browser key
+script is loaded only for an explicitly built Supabase staging deployment.
+No feature application/domain body, business calculation or prior fixture changes.
+
+Export now preserves formatted text identities (including leading zeros), exact
+unformatted numerical tokens and both original renderings/types/formulas. Two
+three-rendering batch captures plus metadata use seven read requests rather than
+per-tab quota exhaustion. Mocked HTTP verifies this without Google access. The
+offline profiler flags duplicate IDs, invalid dates/numbers, orphans, formulas
+and incompatible numeric display formats without repairing records.
+
+Evidence is Codex-local: full suite 564/564 passes, Python migration/profile/export
+checks 18/18 pass, and isolated PostgreSQL acceptance has 23 passing cases covering all seven modules,
+concurrent retries, actual lost-COMMIT acknowledgement, handled-error rollback and closed-context protection against late asynchronous writes,
+LINE regrouping/failure counters, Loyverse history, payroll snapshots, stale
+revisions and access denial. Exact archive promotion and two-database backup/
+restore compare complete data, grants, policies and constraints. Typecheck and
+credential-free isolated build pass. Lint retains only the inherited unused
+shipmentRow warning. The app-paths manifest is unchanged:
+`32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
+All 113 built client JS chunks exclude private SQL/configuration strings; actual
+build source/public bytes match the implementation.
+
+Prior immutable fixtures remain byte-identical. An additive transition witness
+and exact wrapper/composition proofs retain old source/hash assertions. Closed
+Sheets harnesses explicitly choose their original engine; separate current-source
+and actual-PG tests cover the new branch. Temporary failures exposed missing void
+response journaling, positional single-cell/session handling, stale source
+inventories and test-volume cleanup. They were fixed without changing business
+calculations. Test cleanup now removes anonymous volumes; leftover task-created
+volumes were explicitly identified and removed after an ENOSPC restore failure.
+
+No live export, Google/LINE/Loyverse request, hosted Supabase schema/data write,
+production environment edit, cutover, merge or manual deployment occurred. Live
+profiling, hosted capacity/reconciliation and recovery/security acceptance remain
+owner-approved gates. Full-table projections/global serialization and uncertain
+Drive/reply effects are explicit limitations, not production-readiness claims.
+
+### PR49 acceptance review and Phase 3 preparation
+
+All corrections remain in [PR49](https://github.com/volkswg/stock-management/pull/49)
+on `migration/postgres-operational`, based on verified main/PR48. Review identified
+and corrected three boundaries: SQL read requests now use READ ONLY and reject
+nested mutation upgrades; the signature-only exception requires explicit LINE
+entrypoint registration; browser command identity includes query parameters and
+foreign responses cannot change local revision state. No-content responses also
+replay correctly. No original application/domain algorithm or prior immutable
+fixture changed; the Phase 2 witness updates only exact current-source hashes.
+
+Fresh local acceptance: **565 regression tests, 22 Python checks, 25 real-PG
+cases plus one real Chromium/API acceptance case**, zero failures/skips;
+lint exits 0 with the same inherited shipmentRow warning, typecheck and isolated
+credential-free production build pass. Routes/manifest remain identical and all
+113 client JS chunks pass private-database-string checks. The browser fixture
+executes the actual Orders route and real SQL: denied requests, Node-scoped bearer,
+post-commit response loss, same-key reload replay, new intentional create and
+foreign-origin denial. It does not establish full hosted/UI/provider acceptance.
+
+Archive and operational CLI snapshots reconcile exactly with synthetic input;
+import/promotion/idempotency and backup/restore pass. Restore comparisons now also
+include indexes, triggers, functions and sequence definitions/values. Local
+Chromium transparently retried an initial dropped socket, so deterministic
+post-commit delivery failure is injected at the browser network boundary. The
+final test passes without weakening the duplicate-record assertion.
+
+A secret-free GitHub `Migration acceptance` workflow runs current-source regression,
+Python, PostgreSQL/Chromium, recovery and isolated build checks with pinned actions
+and isolated browser tooling. Independent evidence is the source-matched run and
+artifact linked from PR49, not the Vercel preview or this local report.
+
+The canonical [Phase 3 checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
+now covers source/target approvals, secure artifacts, profiling, hosted access,
+full record/business reconciliation, quotas/region/performance, recovery,
+module/security acceptance, final write freeze/full-load and rollback/monitoring.
+New offline delta review and readonly operational extraction support those gates;
+no automatic changed-row CDC, production switch or reverse sync is claimed.
+
+Hosted metadata-only READ ONLY inspection found no stock_migration/stock_operational
+schemas, zero public tables, an empty migration ledger and no security advisories.
+No hosted schema/data write, live Google export/read/mutation, provider action,
+production environment change, merge or manual deployment was performed. These
+checks establish our actions and current schema state, not a global audit of
+unrelated operators. Real-data/hosted acceptance and production authentication,
+monitoring, capacity and recovery sign-off remain separate owner-approved gates.

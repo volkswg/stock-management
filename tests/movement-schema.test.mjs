@@ -1,3 +1,4 @@
+import {postgresNewFiles} from "./helpers/postgres-history.mjs";
 import {evidenceHost} from "./helpers/retirement-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import {canonicalPath} from "./helpers/retirement-history.mjs";
@@ -26,7 +27,7 @@ test("original movement header helper preserves mutable schemas, ensure/read/wri
 test("exact schema source/declaration restoration preserves every unrelated production byte and historical fixture",async()=>{
  const {readdirSync}=await import("node:fs"),{default:ts}=await import("typescript"),{movementSchemaFiles,movementSchemaHash,assertMovementSchemaHistory}=await import("./helpers/movement-schema-history.mjs");
  for(const [file,hash]of Object.entries(movementSchemaBefore.productionHashes)){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else assert.equal(movementSchemaHash(readArchive(file)),hash,file);}
- const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(movementSchemaBefore.productionHashes,f)).sort(),[movementSchemaBefore.newFile,...salesQueryNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
+ const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(movementSchemaBefore.productionHashes,f)).sort(),[...postgresNewFiles,movementSchemaBefore.newFile,...salesQueryNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(movementSchemaBefore.fixtureHashes))assert.equal(movementSchemaHash(readArchive(file)),hash,file);
  assert.equal(restoreSalesApplicationSource(movementSchemaBefore.newFile,readArchive(movementSchemaBefore.newFile,"utf8")),movementSchemaBefore.newSource);
  const printer=ts.createPrinter(),parse=file=>ts.createSourceFile(file,restoreSalesApplicationSource(file,readArchive(file,"utf8")),ts.ScriptTarget.Latest,true),name=n=>n.name?.text??(ts.isVariableStatement(n)?n.declarationList.declarations[0].name.text:undefined),leaf=parse(movementSchemaBefore.newFile);

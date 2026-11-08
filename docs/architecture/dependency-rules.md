@@ -63,3 +63,19 @@ The aggregate service/config interfaces live in the pure root `infrastructure/pe
 [Feature retirement guards](../../eslint/features-retirement-boundaries.mjs) reject live `@/features`, `@/feature` and relative feature-path imports in production and active tests, including erased, re-export, dynamic, CommonJS, import-equals and import-type forms. Recreating `src/features/` is forbidden. These independent rules supplement existing feature/Google/external/account safeguards without widening exceptions. The obsolete forwarding scope and singular alias are removed.
 
 Historical graph hosts may resolve the seven archived paths for original/negative evidence only. Actual graph roots are physical current files; current import resolution, browser reachability, cycles, public module directions and canonical enum/function identities are verified separately. No application/domain or feature infrastructure dependency is added. Remaining service/script compatibility still requires its own consumer audit before retirement.
+
+
+## Isolated PostgreSQL persistence
+
+Application/domain ports and algorithms are unchanged. Feature-owned PostgreSQL
+bindings import their own canonical headers and shared server-only record
+transport; root infrastructure imports no feature registry. Composition chooses
+the complete storage engine and provides one request-wide transaction. The LINE
+server selects its own PostgreSQL event wrapper while retaining existing pure
+applications. No browser graph may reach pg, pooled credentials or private
+operational SQL. A staging-only public script retains operation keys and contains
+no credentials. Exact route-body/factory/LINE/layout witnesses reconcile prior
+history, while separate current-source, real-PostgreSQL and client-bundle checks
+verify the actual new branch. Historical Sheets harnesses explicitly select their
+original backend; they are not evidence of SQL behavior. Existing negative
+ownership rules and all prior fixtures remain enabled and unchanged.

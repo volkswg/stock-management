@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
@@ -9,7 +10,7 @@ export const runtime = "nodejs";
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 
-export async function PATCH(
+async function PATCHOperation(
   request: Request,
   { params }: { params: Promise<{ id: string; itemId: string }> },
 ): Promise<NextResponse> {
@@ -63,3 +64,5 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to replace the product image. Please retry." }, { status: 500 });
   }
 }
+
+export const PATCH = withPersistence(PATCHOperation);

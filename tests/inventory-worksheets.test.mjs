@@ -1,3 +1,4 @@
+import {postgresNewFiles} from "./helpers/postgres-history.mjs";
 import {evidenceHost} from "./helpers/retirement-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import {canonicalPath} from "./helpers/retirement-history.mjs";
@@ -59,7 +60,7 @@ test("three Inventory moves restore exact original sources/ASTs, single owners a
  const {readdirSync,existsSync}=await import("node:fs"),{inventoryWorksheetFiles,inventoryWorksheetDestinations,inventoryWorksheetHash,assertInventoryWorksheetHistory}=await import("./helpers/inventory-worksheet-history.mjs");
  const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);
  for(const [file,hash]of Object.entries(inventoryWorksheetsBefore.productionHashes)){if(completionExtraFiles.has(file))assertCompletionHistory(file,hash);else if(hrFiles.has(file))assertHRHistory(file,hash);else if(expensesFiles.has(file))assertExpensesHistory(file,hash);else if(remainingFiles.has(file))assertRemainingHistory(file,hash);else if(userStateFiles.has(file))assertUserStateHistory(file,hash);else if(salesQueryFiles.has(file))assertSalesQueryHistory(file,hash);else if(movementSchemaFiles.has(file))assertMovementSchemaHistory(file,hash);else if(inventoryWorksheetFiles.has(file))assertInventoryWorksheetHistory(file,hash);else assert.equal(inventoryWorksheetHash(readArchive(file)),hash,file);}
- assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(inventoryWorksheetsBefore.productionHashes,f)).sort(),[...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
+ assert.deepEqual(walk("src").filter(f=>!f.endsWith(".tsbuildinfo")&&!Object.hasOwn(inventoryWorksheetsBefore.productionHashes,f)).sort(),[...postgresNewFiles,...inventoryWorksheetDestinations,...movementSchemaNewFiles,...salesQueryNewFiles,...completionNewFiles,...hrNewFiles,...expensesNewFiles,...remainingDestinations,...userStateDestinations].sort());
  for(const [file,hash]of Object.entries(inventoryWorksheetsBefore.fixtureHashes))assert.equal(inventoryWorksheetHash(readArchive(file)),hash,file);
  const sources=walk("src").filter(f=>f.endsWith(".ts")).map(f=>readArchive(f,"utf8")).join("\n");for(const e of Object.values(inventoryWorksheetsBefore.moves))assert.equal((sources.match(new RegExp(`export ${e.to.endsWith("const.ts")?"const":"class"} ${e.export}\\b`,"g"))??[]).length,1,e.export);
  assert.equal(existsSync("src/modules/inventory/infrastructure/google-sheets/movements/const.ts"),false);

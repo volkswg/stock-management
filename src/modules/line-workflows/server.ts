@@ -1,3 +1,5 @@
+import { storageMode } from "@/infrastructure/persistence/postgres/database";
+import { processPostgresWebhook } from "./infrastructure/postgres/webhook";
 import "server-only";
 import type { IGoogleSheetsService, GoogleSheetRow, MovementWorksheet } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
@@ -203,4 +205,4 @@ export async function processLineWebhook({ events, lineBotService, getGoogleShee
     getGoogleDriveService: () => IGoogleDriveService | undefined;
     getCreateMode: () => AppConfig['movementCreateMode'];
     getPublicBaseUrl: () => string;
-}) { return processWebhookEvents({ events, lineBotService, getContext: () => createContext(getGoogleSheetsService()).context, getImages: getGoogleDriveService, getCreateMode, getPublicBaseUrl, runtime }); }
+}) { return (storageMode() === "supabase" ? processPostgresWebhook : processWebhookEvents)({ events, lineBotService, getContext: () => createContext(getGoogleSheetsService()).context, getImages: getGoogleDriveService, getCreateMode, getPublicBaseUrl, runtime }); }

@@ -1,10 +1,11 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 
 export const runtime = "nodejs";
 
-export async function GET(): Promise<NextResponse> {
+async function GETOperation(): Promise<NextResponse> {
   try {
     const accounts = (await listLoyverseAccounts(getConfig())).map(({ id, shopName }) => ({
       id,
@@ -23,3 +24,5 @@ export async function GET(): Promise<NextResponse> {
     );
   }
 }
+
+export const GET = withPersistence(GETOperation);

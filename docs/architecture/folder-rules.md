@@ -13,6 +13,7 @@ Apply these rules to new and migrated code. `services` and standalone script lea
 | `modules/<feature>/infrastructure` | Port implementations, feature worksheets/headers and row/response mapping | Duplicated generic transports or other features' private adapters |
 | `modules/<feature>/server.ts` | Guarded, explicit named server composition | Browser exports or broad all-layer barrels |
 | `modules/<feature>/ui` | Components/hooks, co-located CSS, formatters/PDFs and same-origin HTTP clients | Config, credentials, SDK/provider IO, server/application implementation imports |
+| `infrastructure/persistence/postgres` | Server-only pooled transactions, durable command/effect transport and compatibility record projections supplied by feature bindings | Feature registries, business calculations, browser access or runtime fallback |
 | `infrastructure/persistence/google-sheets` | Shared Sheets client/base/row delegates/constants/types and Google auth/JWT plumbing | Feature rules, worksheet schema or aggregate feature registry |
 | `infrastructure/files/google-drive` | Drive provider/factory/protocol types, using shared Google auth | Order/movement policy |
 | `infrastructure/external/{line,loyverse}` | Existing provider HTTP/signature/protocol/factory clients, including standalone operational LINE client | Feature journeys, worksheet reports and new providers |
@@ -42,3 +43,18 @@ Root configuration/dependency files, `public` assets and existing operational gu
 [Migration map](migration-map.md) records actual completed ownership and intentionally retained compatibility. Workspace/Next shell remains app-owned. Legacy business paths contain named forwards or identity bindings; concrete bridge functions now live in composition. Inventory owns movement schemas/quantity decisions, LINE owns sessions/journeys and external transport has root owners. All canonical adapters keep row/range mapping out of application ports.
 
 The aggregate Sheets service remains a single composition object with its original constructor/health-check behavior. Its pure full-service declarations live in root `infrastructure/persistence/google-sheets/service-contracts.ts`; generic row types remain in `types.ts`. The former external indexes have no production replacements mixing transport and worksheets. Import concrete owners or named composition entrypoints. Do not move feature registry construction into root infrastructure.
+
+
+## PostgreSQL migration ownership
+
+`modules/<feature>/infrastructure/postgres/tables.ts` binds only that feature's
+operational tables and existing headers to shared PostgreSQL transport. Existing
+feature-owned port mappers remain the single mapping/calculation implementation.
+The range-compatible projection stays in infrastructure; it is not a new domain
+port or a parallel business service. `composition/postgres` owns the aggregate and
+request transaction/auth/idempotency wrapper. The LINE module owns per-event
+workflow execution/reply capture; shared transport only records/sends an effect
+attempt. Operational schemas and offline promotion/profile tools live under
+`supabase/migrations` and `tools/migration`. Immutable staging and mutable business
+state have separate schemas and privileges. Runtime selection is opt-in staging;
+Google Sheets production defaults and Drive image ownership remain.

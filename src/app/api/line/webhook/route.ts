@@ -1,3 +1,4 @@
+import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import {
@@ -16,7 +17,7 @@ import {parseLineWebhookPayload,processLineWebhook}from "@/modules/line-workflow
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request): Promise<NextResponse> {
+async function POSTOperation(request: Request): Promise<NextResponse> {
   const config = getConfig();
   const lineBotService = new LineBotService(
     config.line.channelAccessToken,
@@ -75,3 +76,5 @@ function createGoogleSheetsServiceGetter(
     return googleSheetsService;
   };
 }
+
+export const POST = withPersistence(POSTOperation, { lineWebhook: true });

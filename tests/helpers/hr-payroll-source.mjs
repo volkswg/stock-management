@@ -1,3 +1,4 @@
+import {sheetsPersistenceStub} from "./sheets-persistence-stub.mjs";
 import {legacySpecifier} from "./cleanup-history.mjs";
 import { completionNewFiles } from "./hr-application-history.mjs";
 import assert from 'node:assert/strict';
@@ -10,7 +11,7 @@ export const hrSourceFiles=new Set(["src/composition/hr-payroll.ts","src/composi
 export function createHRSourceLoader({imports={},globals={}}={}){
  const cache=new Map(),forbidden=()=>assert.fail('Unstubbed HR reader');
  function load(file){assert.ok(hrSourceFiles.has(file),`Unapproved HR source ${file}`);if(cache.has(file))return cache.get(file);const exports={},code=ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;cache.set(file,exports);
-  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date,fetch:()=>assert.fail('Live IO forbidden'),...globals,require(spec){
+  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date,fetch:()=>assert.fail('Live IO forbidden'),...globals,require(spec){ const storageStub=sheetsPersistenceStub(spec);if(storageStub)return storageStub;
    if(Object.hasOwn(imports,spec))return imports[spec];if(Object.hasOwn(imports,legacySpecifier(spec)))return imports[legacySpecifier(spec)];
    if(spec==='server-only')return {};
    if(spec==='node:crypto')return {createHash};

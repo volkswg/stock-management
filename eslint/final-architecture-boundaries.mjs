@@ -48,6 +48,9 @@ const scopes = {
         "@/infrastructure/persistence/google-sheets/service-contracts"
     ],
     "src/composition/google-sheets/createGoogleSheetsServiceFromConfig.ts": [
+        "@/infrastructure/persistence/postgres/database",
+        "../postgres/service",
+        "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/config",
         "./GoogleSheetsService"
     ],
@@ -95,6 +98,8 @@ const scopes = {
         "@/infrastructure/persistence/google-sheets/service-contracts"
     ],
     "src/modules/line-workflows/server.ts": [
+        "@/infrastructure/persistence/postgres/database",
+        "./infrastructure/postgres/webhook",
         "server-only",
         "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/files/google-drive/types",
