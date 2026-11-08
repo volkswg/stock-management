@@ -1,3 +1,4 @@
+import {accountGraph} from "./loyverse-accounts.mjs";
 import {retirement} from "./retirement-history.mjs";
 import {canonicalPath} from "./retirement-history.mjs";
 import {cleanupHistory} from "./cleanup-history.mjs";
@@ -49,6 +50,7 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     fetch: () => { throw new Error("Live network is forbidden in regression tests"); },
     ...globals,
     require: (specifier) => {
+      if(specifier === "@/composition/loyverse-accounts") return accountGraph().access();
       if(path===expenseRecords && specifier==='@/infrastructure/persistence/google-sheets/sheets/RecordsSheet'){
         const translated=new Proxy({}, {getOwnPropertyDescriptor:()=>({configurable:true,enumerable:true}),get:(_,key)=>key==='./BaseGoogleSheet'?imports['../BaseGoogleSheet']:imports[key]});
         return loadSource('src/infrastructure/persistence/google-sheets/sheets/RecordsSheet.ts',{imports:translated,globals});

@@ -26,12 +26,12 @@ export const getGoogleSheetsProfitSummary: (input: {
     googleSheetsService: IGoogleSheetsService;
     year: string;
 }) => Promise<GoogleSheetsProfitSummary> = reports.getGoogleSheetsProfitSummary;
-import type { ConfiguredLoyverseAccount } from "@/infrastructure/external/loyverse";
+import type { ReceiptSource } from "./application/ports/receipt-source";
 import { syncReceipts } from "./application/sync-receipts";
 import { createReceiptSync } from "./infrastructure/google-sheets/receipt-sync";
 import type { SyncLoyverseDailySalesResult } from "./application/ports/receipt-sync";
 export async function syncLoyverseDailySales({ account, googleSheetsService, salesDate, }: {
-    account: ConfiguredLoyverseAccount;
+    account: { id: string; shopName: string; storeId?: string; service: ReceiptSource };
     googleSheetsService: IGoogleSheetsService;
     salesDate: string;
 }): Promise<SyncLoyverseDailySalesResult> {

@@ -1,7 +1,7 @@
+import { createLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
-import { createLoyverseAccountsFromConfig } from "@/infrastructure/external/loyverse";
 import { isRecord } from "@/shared/lib/is-record";
 import { syncLoyverseDailySales } from "@/modules/sales/server";
 
@@ -40,7 +40,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    const account = createLoyverseAccountsFromConfig(config).find(
+    const account = (await createLoyverseAccounts(config)).find(
       (candidate) => candidate.id === accountId,
     );
     if (!account) {

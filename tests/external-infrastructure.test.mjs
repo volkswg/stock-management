@@ -1,4 +1,5 @@
 import {readArchive} from "./helpers/retirement-history.mjs";
+import {restoreAccountSource} from "./helpers/loyverse-accounts-history.mjs";
 import {canonicalPath} from "./helpers/retirement-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -29,7 +30,7 @@ test('external original-source witness retains exact hashes',()=>{for(const [fil
 
 test('one physical client retains strict direct/index/legacy constructor/prototype and factory identities with literal source preservation',()=>{
  const g=externalGraph();for(const [feature,name]of [['line','LineBotService'],['loyverse','LoyverseService']]){const owned=g.load(canonicalPath(`src/infrastructure/external/${feature}/index.ts`)),legacy=g.load(canonicalPath(`src/externals/${feature}/index.ts`));assert.deepEqual(Object.keys(legacy),Object.keys(owned));assert.equal(legacy[name],owned[name]);assert.equal(g.load(canonicalPath(`src/externals/${feature}/${name}.ts`))[name],owned[name]);assert.equal(owned[name].prototype.constructor,owned[name]);}
- for(const [file,e]of Object.entries(externalBefore.moves)){assert.equal(readArchive(file,'utf8'),e.forward);assert.equal(readArchive(e.to,'utf8'),externalBefore.files[file].source,e.to);}
+ for(const [file,e]of Object.entries(externalBefore.moves)){assert.equal(readArchive(file,'utf8'),e.forward);assert.equal(restoreAccountSource(e.to),externalBefore.files[file].source,e.to);}
 });
 test('canonical provider runtime/type graphs remain feature-neutral, browser-free and guarded against legacy/private/config bypasses',async()=>{
  const {userStateGraph}=await import('./helpers/user-state-worksheet-graph.mjs'),{ESLint}=await import('eslint'),g=userStateGraph(),eslint=new ESLint();

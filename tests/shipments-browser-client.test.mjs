@@ -1,3 +1,4 @@
+import {restoreEnvironmentTemplate} from "./helpers/loyverse-accounts-history.mjs";
 import {evidenceHost} from "./helpers/retirement-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import {canonicalPath} from "./helpers/retirement-history.mjs";
@@ -35,6 +36,7 @@ test("original client raw bytes, every function/guard and all seven exported typ
     assert.equal(hash(body), expected, consumer);
   }
   for (const [file, expected] of Object.entries(baseline.retained)) {
+    if (file === ".env.example") { assert.equal(hash(restoreEnvironmentTemplate()), expected, file); continue; }
     if (sheetTypeFiles.has(file) && file !== "src/modules/orders/server.ts") { assertOrdersSheetTypeHistory(file, expected); continue; }
     if (["src/app/api/shipments/route.ts", "src/app/api/shipments/[id]/orders/route.ts"].includes(file)) { assertShipmentHttpHistory(file, expected); continue; }
     if (file === "src/modules/shipments/contracts.ts") { assertShipmentEnumContractHistory(file, expected); continue; }

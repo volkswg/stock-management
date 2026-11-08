@@ -1,3 +1,4 @@
+import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -19,7 +20,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
   try {
     const config = getConfig();
-    const accounts = config.loyverse.accounts.map(({ id, shopName }) => ({
+    const accounts = (await listLoyverseAccounts(config)).map(({ id, shopName }) => ({
       id,
       shopName,
     }));
@@ -66,7 +67,8 @@ export async function PUT(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    const account = config.loyverse.accounts
+    const configuredAccounts = await listLoyverseAccounts(config);
+    const account = configuredAccounts
       .map(({ id, shopName }) => ({ id, shopName }))
       .find((candidate) => candidate.id === accountId);
     if (!account) {
@@ -85,7 +87,7 @@ export async function PUT(request: Request): Promise<NextResponse> {
       updatedBy: "web",
     });
     const stockCounts = await getMonthlyStockCounts({
-      accounts: config.loyverse.accounts.map(({ id, shopName }) => ({
+      accounts: configuredAccounts.map(({ id, shopName }) => ({
         id,
         shopName,
       })),

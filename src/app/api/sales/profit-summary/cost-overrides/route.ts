@@ -1,3 +1,4 @@
+import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -32,7 +33,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    if (!config.loyverse.accounts.some((account) => account.id === accountId)) {
+    if (!(await listLoyverseAccounts(config)).some((account) => account.id === accountId)) {
       return NextResponse.json(
         { ok: false, error: "Shop not found." },
         { status: 404 },
@@ -73,7 +74,7 @@ export async function DELETE(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    if (!config.loyverse.accounts.some((account) => account.id === accountId)) {
+    if (!(await listLoyverseAccounts(config)).some((account) => account.id === accountId)) {
       return NextResponse.json(
         { ok: false, error: "Shop not found." },
         { status: 404 },

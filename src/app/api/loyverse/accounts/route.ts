@@ -1,3 +1,4 @@
+import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 
@@ -5,7 +6,7 @@ export const runtime = "nodejs";
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const accounts = getConfig().loyverse.accounts.map(({ id, shopName }) => ({
+    const accounts = (await listLoyverseAccounts(getConfig())).map(({ id, shopName }) => ({
       id,
       shopName,
     }));

@@ -1,3 +1,4 @@
+import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -26,7 +27,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    const shops = config.loyverse.accounts.map(({ id, shopName }) => ({
+    const shops = (await listLoyverseAccounts(config)).map(({ id, shopName }) => ({
       id,
       name: shopName,
     }));
@@ -95,7 +96,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    if (!config.loyverse.accounts.some((shop) => shop.id === shopId)) {
+    if (!(await listLoyverseAccounts(config)).some((shop) => shop.id === shopId)) {
       return NextResponse.json(
         { ok: false, error: "Shop not found." },
         { status: 400 },

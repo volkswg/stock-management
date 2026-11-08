@@ -1,3 +1,4 @@
+import {accountGraph} from "./loyverse-accounts.mjs";
 import {legacySpecifier} from "./cleanup-history.mjs";
 import { createHRSourceLoader, hrSourceFiles } from "./hr-payroll-source.mjs";
 import assert from 'node:assert/strict';
@@ -24,7 +25,7 @@ export function expenseGraph({original=false,service,events=[],overrides={},exte
   assert.ok(allowed.has(file)||['src/modules/hr/infrastructure/google-sheets/employee-advances/const.ts','src/services/employees/manageSalaryAdvances.ts','src/services/employees/salary-advance-shops.ts','src/app/api/employees/advances/route.ts','src/app/api/sales/profit-summary/route.ts',legacyExpense,'src/services/expenses/types.ts','src/services/expenses/index.ts','src/app/api/expenses/route.ts','src/app/api/expenses/masters/[kind]/route.ts'].includes(file),`Unapproved expense dependency: ${file}`);
   const source=overrides[file]??(original?expensesBefore.files[file]?.source:undefined)??readFileSync(file,'utf8'),exports={};cache.set(file,exports);
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date:Clock,Request,Response,URL,console:{error:(...a)=>events.push(['log',...a])},require(spec){
+  new vm.Script(code,{filename:file}).runInNewContext({exports,Error,Date:Clock,Request,Response,URL,console:{error:(...a)=>events.push(['log',...a])},require(spec){if(spec==="@/composition/loyverse-accounts")return accountGraph().access();
    if(Object.hasOwn(externals,spec))return externals[spec];
    if(file==='src/app/api/sales/profit-summary/route.ts'&&legacySpecifier(spec)==='@/modules/sales/server'&&externals['@/services/sales'])return externals['@/services/sales'];
    if(spec==='server-only')return {};

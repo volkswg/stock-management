@@ -16,6 +16,7 @@ Apply these rules to new and migrated code. `services` and backend feature leave
 | `infrastructure/persistence/google-sheets` | Shared Sheets client/base/row delegates/constants/types and Google auth/JWT plumbing | Feature rules, worksheet schema or aggregate feature registry |
 | `infrastructure/files/google-drive` | Drive provider/factory/protocol types, using shared Google auth | Order/movement policy |
 | `infrastructure/external/{line,loyverse}` | Existing provider HTTP/signature/protocol/factory clients, including standalone operational LINE client | Feature journeys, worksheet reports and new providers |
+| `infrastructure/configuration/google-sheets` | Read-only private integration-account row validation | Operational registry, public credential APIs, business rules or credential writes |
 | `infrastructure/runtime` | Existing stateful sortable identifier implementation | Feature rules or duplicated sequence state |
 | `composition` | Concrete aggregate construction and compatibility consumer wiring outside feature cores | Business algorithms, browser contracts, generic DI frameworks |
 | `shared/{ui,lib,types}` | Proven generic reuse, small explicit utilities/value contracts | Feature dumping ground, config/infrastructure/module/legacy dependencies |
