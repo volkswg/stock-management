@@ -14,6 +14,12 @@ Next.js application for Orders, Shipments, inventory/movements, Sales, expenses 
 
 Use Node 24 (verified 24.22.1) and the repository's existing dependencies and yarn.lock. Run `npm run dev`, then open [localhost:3000](http://localhost:3000). Source is under `src/`; Next routes are in `src/app`. Use approved development configuration. Architecture verification uses isolated copies without application credentials; do not start live integrations or run operational setup as a check.
 
+## Google Sheets worksheet names
+
+`GOOGLE_SHEETS_SPREADSHEET_ID` is required for the workbook. The 23 `GOOGLE_SHEETS_*_WORKSHEET_NAME` settings are **optional**: `src/config/index.ts` supplies the existing worksheet-tab defaults, including `orders`, `shipments`, `movements` and `movement_details`. The `.env.example` template omits these redundant overrides.
+
+Keep or add a worksheet-name environment variable **only if** its actual workbook tab differs from the default. For example, to use a tab named `shop_orders` instead of `orders`, set `GOOGLE_SHEETS_ORDERS_WORKSHEET_NAME=shop_orders`. Before deleting overrides from an existing environment (local or deployment settings), verify every actual tab matches the corresponding default. Changing the template does not change deployed environment variables or rename any Google Sheets tabs.
+
 ## Loyverse Configuration
 
 Configure one or more Loyverse accounts in `.env`:
