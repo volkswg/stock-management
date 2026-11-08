@@ -75,6 +75,45 @@ The application sorts enabled accounts by sortOrder and uses the first as the ex
 
 Delete the deployed `LOYVERSE_ACCOUNTS_JSON` value **only after** successful owner verification, completion of the agreed rollback window, confirmation that every environment/deployment that needs it has migrated, and an approved secure recovery plan. Older deployments or an env-mode rollback still need it. Removing the variable is a separate owner operation; this PR retains JSON support and does not delete credentials, migrate production records or deploy anything. Live sharing, access and account correctness remain owner verification steps.
 
+## Product Master and Order Item identification
+
+Product Master is optional for Order creation, uploads and LINE journeys. Open an Order Detail page and choose **Identify product** on an item (including items without photos). Search by code/name/variant, select an active record and **Save association**. Different items can reference the same permanent product; codes need not be unique. Clear/remove or change an incorrect association without changing quantities, photos or financial values.
+
+**Create new product** prefills the item's code and image URL. Enter a name and optional variant, review duplicate suggestions (including archived products), then explicitly confirm. Uploading an image never creates a product. Creation and linking are separate: after a link failure, retry the existing association; do not create a replacement. The browser retains pending request IDs and nonsecret form values in this tab's session storage across reloads. Keep the tab/storage until recovery finishes. An unresolved creation can be checked, retried with the same request, or permanently cancelled; if creation already won, its product is retained. An already created product can explicitly be kept unlinked. Editing/archiving is available in the same dialog; archival preserves all historical Orders and links.
+
+### Owner setup and access
+
+These are manual owner actions **after review**, first against an isolated test workbook:
+
+1. In the existing `GOOGLE_SHEETS_SPREADSHEET_ID` workbook, create `products` with these exact case-sensitive A1:I1 headers:
+
+   ```text
+   id,productCode,productName,variant,referenceImageUrl,active,createdAt,updatedAt,createdBy
+   ```
+
+   Format text columns as plain text; F contains TRUE/FALSE. The application appends permanent `PROD-<request UUID>` IDs and UTC ISO timestamps, and records the authenticated staff ID as createdBy. Never edit IDs or creation attribution. No automatic historical registration/migration occurs. Reference images are HTTPS URLs to existing files, not copied/owned by Product Master; their sharing/lifetime remains the owner's responsibility.
+2. In the existing Order Items tab (default `order_items`, existing name override respected), add **only `productId` in K1**. Preserve A:J and all historical rows exactly; blank K means unlinked. Do not backfill IDs automatically. Products and link operations validate headers and fail closed if setup is missing. Old order readers/writers retain A:J layouts and do not clear K; the new link adapter writes only K.
+3. Retain the existing Google service account and its workbook edit access. No new workbook/provider/service account is introduced. Do not manually sort, insert/delete rows, modify product/link cells or developer metadata while application writes are possible. Use filter views instead of sorting physical rows. Existing legacy row-index writers have the same external-edit limitation.
+4. Configure **server-only** `PRODUCT_MASTER_STAFF_KEYS_JSON` and `PRODUCT_MASTER_SESSION_SECRET` for the intended isolated environment. Both unset disables all new writes; reads and old Order/LINE operations continue. Generate one independent 32-byte base64url key per staff member and a separate signing secret using a trusted local secret tool. Example local generator (output contains secrets: run privately, never paste in source/PR/logs):
+
+   ```sh
+   node -e 'const c=require("node:crypto"),key=c.randomBytes(32).toString("base64url");console.log({staffKey:key,keyHash:c.createHash("sha256").update(key).digest("hex"),sessionSecret:c.randomBytes(32).toString("base64url")})'
+   ```
+
+   Store only `[{"id":"staff-id","keyHash":"<64 lowercase hex characters>"}]` in PRODUCT_MASTER_STAFF_KEYS_JSON; distribute the corresponding 43-character raw key privately to that staff member. Store the independent base64url secret in PRODUCT_MASTER_SESSION_SECRET. Neither setting uses a NEXT_PUBLIC prefix. IDs are unique ASCII letters/digits/underscore/hyphen, maximum64 characters; maximum100 staff entries. Duplicate IDs or key hashes and partial/invalid configuration fail closed.
+5. Staff sign in inside the association dialog. New create/edit/archive/cancel/link writes require an eight-hour, host-bound signed HTTP-only cookie, same-origin requests and HTTPS (localhost HTTP allowed only for development). All configured staff can change the full catalog and item associations; there is no per-shop role model. Read-only catalog metadata follows the existing application read policy. Existing Order, LINE and other API authentication policy is unchanged; broader access-control work remains issue #38. Review deployment protection and sign-in abuse/rate limits before exposure; there is no distributed rate limiter in this feature.
+6. Remove/rotate a staff key hash to revoke its existing sessions on the next request; rotate the signing secret to revoke all sessions. Redeploy configuration according to normal owner procedures. Sign out clears the browser cookie, but a previously stolen cookie remains valid until expiry or key/secret revocation. Raw keys are cleared from the form and never stored in browser storage or returned by APIs. Product metadata, image URLs and pending form data are not credentials.
+
+### Reliability, rollout and rollback
+
+New mutations atomically create a **fixed, unique Google developer-metadata ID in the same spreadsheets.batchUpdate** as the append/update. This is a server-enforced idempotency/CAS condition, not a Sheets read-check-write lock. Lost responses reconcile that same marker; retries use the same request and never probe a different marker slot. Product edits use updatedAt revisions; association changes use their own revision chain so old quantity/image edits cannot invalidate or erase links. Creating a product and linking it are deliberately separate durable operations. Distinct users confirming distinct creation requests may create similar products: suggestions do not enforce code/content uniqueness. Active-product/active-Order checks are read-time checks: a concurrent archive or legacy Order change can race a pending link. The permanent reference remains valid; no cross-record transaction or new legacy concurrency policy is claimed.
+
+Guard metadata and cancellation tombstones are permanent and must **never be deleted/reused**, including during rollback. Google limits a workbook to **30,000 developer-metadata entries**, shared with all other users of metadata. Each successful creation, edit, association revision or cancelled creation consumes an entry. Monitor capacity operationally before enabling at scale; exhaustion fails closed. Fixed positive31-bit ID hashing can collide; collisions fail closed for operator review, never overwrite/probe. There is no automated compaction/migration or historical row repair. Report retained request IDs and safe error codes to the operator, without credentials; never repeatedly create new requests to work around ambiguous outcomes.
+
+Deployment checklist: review scoped staff access and workbook sharing, prepare headers without touching history, configure only approved test settings, run synthetic create/search/edit/archive/link/unlink and reload/retry scenarios, check old Web/LINE uploads and quantity/code/status operations preserve K, check expired/revoked/anonymous sessions cannot mutate, and verify existing reports/route behavior. Only the owner may approve production setup/deployment; this PR performs none of those actions. Real Google metadata uniqueness/permissions/quotas and Drive URL accessibility need staging verification; local tests use fake services.
+
+Rollback: first disable new writes/revoke sessions and drain in-flight requests, then roll back application code through the owner's usual process. **Retain products, K values, IDs, all guard metadata and tombstones.** Older A:J operations leave K intact. Do not delete new worksheets/columns or replay ambiguous writes with new IDs. Re-enable only after reviewing pending request outcomes and confirming compatible code/headers. No financial/schema backfill or historical-data deletion is needed.
+
 ## Movement creation mode
 
 Set `MOVEMENT_CREATE_MODE` in the deployment environment, then redeploy:

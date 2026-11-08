@@ -25,7 +25,7 @@ import ts from "typescript";
 import { enumBefore, enumHash, enumParse, enumPrint, originalEnumGraph, assertShipmentEnumContractHistory } from "./helpers/shipments-enum-history.mjs";
 import { shipmentServices, fakeShipmentSheets, shipmentRow } from "./helpers/shipments.mjs";
 import { loadSource, plain } from "./helpers/load-source.mjs";
-import { routeContracts } from "./helpers/routes.mjs";
+import {legacyRouteContracts as routeContracts} from "./helpers/product-master-history.mjs";
 import { browserOwnership, ownershipEdges } from "./helpers/browser-ownership.mjs";
 
 const physical = "src/modules/shipments/status.ts", contract = "src/modules/shipments/contracts.ts", legacy = "src/services/shipments/types.ts";

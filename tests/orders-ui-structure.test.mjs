@@ -1,3 +1,4 @@
+import {productNewFiles} from "./helpers/product-master-history.mjs";
 import {evidenceHost} from "./helpers/retirement-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import {restoreOrdersLineSource} from "./helpers/orders-line-history.mjs";
@@ -25,7 +26,7 @@ function walk(dir) {
 
 test("all 15 UI moves preserve component/type/JSX bodies, directives, formatting and CSS bytes", () => {
   assert.equal(baseline.moves.length, 15);
-  assert.deepEqual(walk("src/modules/orders/ui").sort(), [...baseline.moves.map(({ to }) => to), "src/modules/orders/ui/[id]/shipment-picker-port.ts"].sort());
+  assert.deepEqual(walk("src/modules/orders/ui").filter(file=>!productNewFiles.includes(file)).sort(), [...baseline.moves.map(({ to }) => to), "src/modules/orders/ui/[id]/shipment-picker-port.ts"].sort());
   for (const { from, to, hash: expected } of baseline.moves) {
     assert.equal(existsSync(from), false, `Obsolete implementation remains at ${from}`);
     assert.equal(to.endsWith(".css") ? hash(readArchive(to)) : bodyHash(to), expected, to);

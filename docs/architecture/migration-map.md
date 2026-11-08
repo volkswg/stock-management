@@ -1,10 +1,11 @@
 # Current ownership and retained compatibility
 
-This map describes the **current source after merged [PR #40](https://github.com/volkswg/stock-management/pull/40)**. The prior Sales/Inventory, Orders/LINE, external transport and composition work is complete; all 65 files from `src/externals/` are retired. For the dated merge ledger and original evidence, see [progress](../refactoring/progress.md); for outstanding work, see the [roadmap](../refactoring/roadmap.md).
+This map includes merged PR45 (`277c0b31c76ed4605a91ffad303d218a7957bf84`) and the Product Master integration branch. The prior Sales/Inventory, Orders/LINE, external transport and composition work is complete; all 65 files from `src/externals/` are retired. For the dated merge ledger and original evidence, see [progress](../refactoring/progress.md); for outstanding work, see the [roadmap](../refactoring/roadmap.md).
 
 | Slice | Actual owner | Retained boundaries |
 | --- | --- | --- |
-| Orders | Public contracts/rules/UI; list/create/detail, mutations, attachments/images and filename rules in own application/domain; Sheets/Drive adapters; named server | Detail receives its own Shipment projection port. LINE owns draft/session coordination. No Orders→Shipments/LINE module import |
+| Products | Pure contracts/validation, search/suggestions/create/edit/archive/cancel applications and semantic ProductStore; own A:I Sheets adapter and named server; selector UI | Explicit app composition injects the selector into an Orders-owned picker port. No Products↔Orders module dependency; no automatic catalog creation |
+| Orders | Public contracts/rules/UI; list/create/detail, mutations, attachments/images and filename rules in own application/domain; Sheets/Drive adapters; named server | Detail receives its own Shipment projection port and browser product-picker port. A separate K-only association application/adapter/server owns product links and revision history; legacy DTOs and A:J adapters remain unchanged. LINE owns draft/session coordination. No Orders→Shipments/LINE module import |
 | Shipments | Public status/contracts/UI, creation/read/link/status/bill applications/ports and own Sheets/Drive adapters; server and HTTP validation helpers | Shipment→Orders uses public contracts and specifically registered gallery/projection port |
 | Inventory | Contracts/quantity rules; counts/balances/reconciliation, adjustments/reversals/replacements and movements/journey primitives; own semantic adapters/server | Public HR directory and Sales dashboard readers are composed only at its server; LINE never imports Inventory persistence |
 | Sales | Public report contracts, daily/dashboard/profit, sync/status/cost applications/ports, receipt IDs and Sheets projections/adapters/server | HR payroll and Inventory use the public dashboard reader; provider-native Loyverse projections stay with transport |
@@ -15,7 +16,9 @@ This map describes the **current source after merged [PR #40](https://github.com
 | Shared external | Root LINE/Loyverse client/protocol/factory files; original standalone LineRichMenuClient under root LINE transport | Old constructor names/signatures/error/retry behavior remain; scripts are opt-in and never run during verification |
 | Composition | `composition/google-sheets/` owns aggregate construction/factory; `hr-payroll`, `salary-advance-shops`, `employee-directory`, `orders` own compatibility wiring | May wire concrete feature adapters; feature cores never depend on composition. No DI container or alternative registry |
 | Shared/runtime | Pure LINE DTO/enum/message builders and isRecord in shared; original stateful sortable ID generator in root infrastructure/runtime | No feature dependency; old helper names alias one implementation |
-| Workspace/Next shell | Existing app-owned home/navigation/layout and routes | No Workspace redesign, auth/product work or unrelated UI migration |
+| Workspace/Next shell | Existing app-owned home/navigation/layout and routes | No Workspace redesign; scoped Product Master sign-in and client wiring are app composition |
+
+The new root guarded-write helper composes fixed developer-metadata IDs with atomic Sheets mutations; root security handles only the new staff session. `composition/product-master.ts` supplies existing Google transport, Products public server and Orders product-link server. The aggregate GoogleSheetsService and existing configuration/provider behavior are untouched. Products do not participate in Inventory, movements or stock calculations.
 
 ## Physical worksheet owners
 
@@ -42,6 +45,8 @@ Paths below are relative to `src/modules/<owner>/infrastructure/google-sheets/`.
 | sales / receipt-payments | SalesReceiptPaymentsSheet | SALES_RECEIPT_PAYMENT_HEADERS | A:J |
 | sales / receipt-syncs | SalesReceiptSyncsSheet | SALES_RECEIPT_SYNC_HEADERS | A:I |
 | sales / profit-cost-overrides | SalesProfitCostOverridesSheet | SALES_PROFIT_COST_OVERRIDE_HEADERS | A:H |
+
+Product Master adds a fixed `products` A:I adapter, outside the legacy aggregate registry. The new Order link adapter reads A:K, validates K1=productId and writes K only. Original mutable ORDER_ITEMS_SHEET_HEADERS remains ten columns and the legacy class retains A:J; old appends/quantity/code/image writes leave optional K intact. No historical rows are migrated.
 
 Orders A:Z is deliberately preserved rather than reduced to its current header count. Other original header-derived `lastColumnLetter(headers.length - 1)` expressions remain. Registry-created instances and canonical imports share exact class/prototype/header identity; there is no parallel registry or copied implementation. Historical test-only export projections verify the former mixed barrels against these same owners.
 

@@ -19,7 +19,9 @@ test("client composition supplies one stable adapter and no DOM; server page pas
   const component = function OrderDetailPage() {}, composed = pickerComposition(real(() => assert.fail("No HTTP during composition")), component);
   const first = composed.render("o/1"), second = composed.render("o/2");
   assert.equal(first.type, component); assert.equal(first.props.shipmentPicker, second.props.shipmentPicker);
-  assert.deepEqual(Object.keys(first.props), ["orderId", "shipmentPicker"]);
+  assert.deepEqual(Object.keys(first.props), ["orderId", "shipmentPicker", "productPicker"]);
+  assert.equal(first.props.productPicker, second.props.productPicker);
+  assert.equal(typeof first.props.productPicker.render, "function");
   assert.equal(second.props.orderId, "o/2");
   const page = loadSource("src/app/orders/[id]/page.tsx", { imports: { "react/jsx-runtime": { jsx: (type, props) => ({ type, props }) }, "./OrderDetailClient": composed.module } });
   const tree = await page.default({ params: Promise.resolve({ id: "o/1" }) });

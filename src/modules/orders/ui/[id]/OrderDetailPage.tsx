@@ -44,6 +44,10 @@ import {
   type OrderDetail,
   type OrderShipment,
 } from "@/modules/orders/contracts";
+import { OrderAdditionalProductLinks } from "../OrderAdditionalProductLinks";
+import { OrderProductLinkProvider } from "../OrderProductLinkProvider";
+import { OrderItemProductLink } from "../OrderItemProductLink";
+import type { OrderProductPickerPort } from "./product-picker-port";
 import type { OrderShipmentPickerPort } from "./shipment-picker-port";
 import {
   getOrder,
@@ -67,9 +71,10 @@ const THB_FORMATTER = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 2,
 });
 
-export function OrderDetailPage({ orderId, shipmentPicker }: {
+export function OrderDetailPage({ orderId, shipmentPicker, productPicker }: {
   orderId: string;
   shipmentPicker: OrderShipmentPickerPort;
+  productPicker?: OrderProductPickerPort;
 }) {
   const [order, setOrder] = useState<OrderDetail>();
   const [loading, setLoading] = useState(true);
@@ -134,7 +139,7 @@ export function OrderDetailPage({ orderId, shipmentPicker }: {
             />
           ) : null}
           {!loading && !error && order ? (
-            <OrderContent order={order} onOrderChange={setOrder} shipmentPicker={shipmentPicker} />
+            productPicker ? <OrderProductLinkProvider orderId={order.id} itemIds={order.productImages.map(image => image.id).join("|")}><OrderContent order={order} onOrderChange={setOrder} shipmentPicker={shipmentPicker} productPicker={productPicker} /><OrderAdditionalProductLinks orderId={order.id} visibleItemIds={order.productImages.map(image => image.id)} picker={productPicker} /></OrderProductLinkProvider> : <OrderContent order={order} onOrderChange={setOrder} shipmentPicker={shipmentPicker} />
           ) : null}
         </main>
       </div>
@@ -152,10 +157,12 @@ function OrderContent({
   order,
   onOrderChange,
   shipmentPicker,
+  productPicker,
 }: {
   order: OrderDetail;
   onOrderChange: Dispatch<SetStateAction<OrderDetail | undefined>>;
   shipmentPicker: OrderShipmentPickerPort;
+  productPicker?: OrderProductPickerPort;
 }) {
   const [quantityType, setQuantityType] = useState<OrderItemQuantityType>(
     OrderItemQuantityType.Quote,
@@ -533,6 +540,7 @@ function OrderContent({
                           ),
                           details: (
                             <div className={styles.itemEditors}>
+                              {productPicker ? <OrderItemProductLink orderId={order.id} itemId={image.id} productCode={image.productCode} imageUrl={image.imageUrl} picker={productPicker} /> : null}
                               <OrderItemProductCode
                                 productCode={productDrafts[image.id]?.productCode ?? image.productCode}
                                 dirty={dirtyProductFields.get(image.id)?.productCode !== undefined}

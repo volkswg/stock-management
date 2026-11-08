@@ -1,3 +1,4 @@
+import {productNewFiles,productHistory,restoreProductSource} from "./product-master-history.mjs";
 import {featureFiles,featuresHistory,restoreFeatureSource} from "./features-retirement-history.mjs";
 import assert from 'node:assert/strict';
 import {accountNewFiles,accountChanged,restoreAccountSource} from './loyverse-accounts-history.mjs';
@@ -6,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {resolve,relative,posix} from 'node:path';
 export const retirement=JSON.parse(readFileSync('tests/fixtures/externals-retirement-before.json','utf8'));
 export const archivedFiles={...retirement.files,...featureFiles};
-export const retirementNewFiles=[retirement.contract,...accountNewFiles];
+export const retirementNewFiles=[retirement.contract,...accountNewFiles,...productNewFiles];
 export const retirementChanged=new Set([...Object.keys(retirement.edits),...accountChanged]);
 const hash=s=>createHash('sha256').update(s).digest('hex');
 export const registryProjection='canonical-export-contract:google-registry';
@@ -29,11 +30,11 @@ export function restoreRetirementSource(file,source){
 }
 // Used only by historical source/hash assertions and archived graph overlays.
 // Current executable loaders use node:fs directly and canonical owners.
-export function readEvidence(file,options){const path=typeof file==='string'?file:undefined;if(!path?.startsWith('src/')&&!retirement.lintEdits?.[path]&&!featuresHistory.edits[path])return readFileSync(file,options);const source=restoreRetirementSource(path);return typeof options==='string'||options?.encoding?source:Buffer.from(source);}
+export function readEvidence(file,options){const path=typeof file==='string'?file:undefined;if(!path?.startsWith('src/')&&!retirement.lintEdits?.[path]&&!featuresHistory.edits[path]&&!productHistory.edits[path])return readFileSync(file,options);const source=restoreRetirementSource(path);return typeof options==='string'||options?.encoding?source:Buffer.from(source);}
 export function evidenceHost(sys,overrides={}){const paths=[...Object.keys(archivedFiles),...Object.keys(overrides)];return {...sys,fileExists:f=>paths.includes(relative(process.cwd(),f))||sys.fileExists(f),directoryExists:d=>paths.some(f=>resolve(f).startsWith(resolve(d)+'/'))||sys.directoryExists(d),readFile:f=>{const p=relative(process.cwd(),f);return overrides[p]??archivedFiles[p]?.source??sys.readFile(f);}};}
 export function canonicalExports(archiveFile,load){const saved=retirement.files[archiveFile];assert.ok(saved?.runtimeKeys,'Only the two archived Sheets export contracts may be projected');const values={};for(const name of saved.runtimeKeys){const e=saved.exports.find(e=>e.name===name&&!e.typeOnly);assert.ok(e,name);values[name]=load(e.module)[e.imported];assert.notEqual(values[name],undefined,`${name}: missing canonical export`);}return values;}
 export function archivedRelative(file,spec){return resolveEvidence(spec.startsWith('@/')?'src/'+spec.slice(2):posix.normalize(posix.dirname(file)+'/'+spec));}
 // Helpers for historical graph inventories; deleted files are not current roots.
 export const currentSourceFiles=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?currentSourceFiles(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
 // Archived deleted leaves may be read as evidence, never as current modules.
-export function readArchive(file,options){if(typeof file==='string'&&archivedFiles[file]){const source=restoreRetirementSource(file);return typeof options==='string'||options?.encoding?source:Buffer.from(source);}return readFileSync(file,options);}
+export function readArchive(file,options){if(typeof file==='string'&&archivedFiles[file]){const source=restoreRetirementSource(file);return typeof options==='string'||options?.encoding?source:Buffer.from(source);}if(typeof file==='string'&&productHistory.edits[file]){const source=restoreProductSource(file);return typeof options==='string'||options?.encoding?source:Buffer.from(source);}return readFileSync(file,options);}

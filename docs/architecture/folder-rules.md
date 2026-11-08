@@ -17,6 +17,7 @@ Apply these rules to new and migrated code. `services` and standalone script lea
 | `infrastructure/files/google-drive` | Drive provider/factory/protocol types, using shared Google auth | Order/movement policy |
 | `infrastructure/external/{line,loyverse}` | Existing provider HTTP/signature/protocol/factory clients, including standalone operational LINE client | Feature journeys, worksheet reports and new providers |
 | `infrastructure/configuration/google-sheets` | Read-only private integration-account row validation | Operational registry, public credential APIs, business rules or credential writes |
+| `infrastructure/security`, `infrastructure/http` | Scoped Product Master signed-session verification and bounded HTTP JSON decoding | Feature business rules, identity-provider or global authentication redesign |
 | `infrastructure/runtime` | Existing stateful sortable identifier implementation | Feature rules or duplicated sequence state |
 | `composition` | Concrete aggregate construction and compatibility consumer wiring outside feature cores | Business algorithms, browser contracts, generic DI frameworks |
 | `shared/{ui,lib,types}` | Proven generic reuse, small explicit utilities/value contracts | Feature dumping ground, config/infrastructure/module/legacy dependencies |
@@ -30,7 +31,8 @@ Root configuration/dependency files, `public` assets and existing operational gu
 
 | Module | Responsibility as migrations proceed |
 | --- | --- |
-| Orders | Draft/create/update/list/detail, bills, quantities, product codes/images; LINE journey state belongs to LINE workflows |
+| Products | Product Master search/suggestions, explicit creation, editing/archival and permanent identity; no stock/movement responsibility |
+| Orders | Draft/create/update/list/detail, bills, quantities, product codes/images and optional product associations; LINE journey state belongs to LINE workflows |
 | Shipments | Shipment reads/creation/status, order links and bill coordination; consumes Orders contracts, does not own Order persistence |
 | Inventory | Movements/delivery, monthly counts, reversals and adjustments; pure quantity parsing belongs here rather than LINE |
 | Sales | Loyverse sync, receipts/refunds/reports and profit overrides; protocol client is root infrastructure |

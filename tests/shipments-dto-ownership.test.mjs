@@ -24,7 +24,7 @@ import test from "node:test";
 import ts from "typescript";
 import { dtoBefore,dtoHash,dtoParse,dtoPrint,dtoContract,dtoLegacy,currentDtoDeclarations,assertShipmentDtoHistory,dtoPureGraph } from "./helpers/shipments-dto-history.mjs";
 import { shipmentServices } from "./helpers/shipments.mjs";
-import { routeContracts } from "./helpers/routes.mjs";
+import {legacyRouteContracts as routeContracts} from "./helpers/product-master-history.mjs";
 import { browserOwnership,ownershipEdges } from "./helpers/browser-ownership.mjs";
 const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
 

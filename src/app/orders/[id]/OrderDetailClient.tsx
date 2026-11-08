@@ -1,5 +1,7 @@
 "use client";
 
+import { ProductSelector } from "@/modules/products/ui/ProductSelector";
+import type { OrderProductPickerPort } from "@/modules/orders/ui/[id]/product-picker-port";
 import { OrderDetailPage } from "@/modules/orders/ui/[id]/OrderDetailPage";
 import type { OrderShipmentPickerPort } from "@/modules/orders/ui/[id]/shipment-picker-port";
 import {
@@ -27,6 +29,8 @@ const shipmentPicker: OrderShipmentPickerPort = {
   },
 };
 
+const productPicker: OrderProductPickerPort = { render: input => <ProductSelector {...input} /> };
+
 export function OrderDetailClient({ orderId }: { orderId: string }) {
-  return <OrderDetailPage orderId={orderId} shipmentPicker={shipmentPicker} />;
+  return <OrderDetailPage orderId={orderId} shipmentPicker={shipmentPicker} productPicker={productPicker} />;
 }
