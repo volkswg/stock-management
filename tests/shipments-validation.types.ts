@@ -1,4 +1,4 @@
-import type { isUpdatableStatus, isValidDeliveryFee, isValidPoNumber, readJsonBody } from "../src/features/backend/shipments/utils";
+import type { isUpdatableStatus, isValidDeliveryFee, isValidPoNumber, readJsonBody } from "../src/modules/shipments/http";
 import type { ShipmentStatus } from "../src/modules/shipments/contracts";
 import type { ShipmentStatus as Physical } from "../src/modules/shipments/status";
 import type { ShipmentStatus as Legacy } from "../src/services/shipments";

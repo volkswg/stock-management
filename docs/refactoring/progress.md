@@ -1,10 +1,12 @@
 # Refactoring progress and evidence
 
-## Current merged state and account-source work
+## Current merged state and features retirement
 
-Account-source implementation starts from main `36b5cc10828c7b9c57b2201e606762ad92ec0c05` (merged PR42), with no conflicting open PR. The external retirement and modular ownership remain complete. This branch adds private read-only Loyverse account storage and migrates all fourteen affected HTTP sources, including Inventory and HR metadata consumers. Env mode remains the default; sheet mode fails closed without evaluating JSON. Existing shops, account IDs, financial logic and operational provider behavior remain intact.
+Verified base: main `2d2dc18a5c1112e9f6368599ad0d6d67defa79af`, merged PR43; no conflicting open PR. The tree exactly matches PR43 head `02cba30ec1d28ad1d163537843a2c32cb18cfc83`, whose final 547-test/lint/typecheck/build evidence is already recorded.
 
-The pristine baseline has two inherited `.env.example` hash-guard failures from PR42, with 532 passing tests and lint/typecheck/isolated build successful. Exact source inverses retain the old assertions and reconcile that template change; all existing fixtures remain byte-identical. Focused old/new env HTTP, sheet configuration, confidentiality, actual Sales sync/report and Expenses mapping comparisons supplement the inherited suite. See [verification](verification.md#private-loyverse-account-source) for final results and [owner instructions](../../README.md#loyverse-configuration) for the unperformed production actions. The previously reported PR40 evidence remains in [external retirement verification](verification.md#external-namespace-retirement-issue-39); issue #38 is still separately scoped production-readiness work.
+Branch `refactor/retire-features-compatibility` removes all seven backend forwards and the unused `@/feature/*` alias. There are no active production importers or known required external consumers. Pre-removal offline evaluation verified 15 runtime function/enum identities plus three erased forwards. Tests and historical graph/mock resolvers migrate to canonical owners without changing original fixtures or expectations. Every other production file is unchanged. See the [ownership map](../architecture/migration-map.md#retired-feature-compatibility-directory) and [verification](verification.md#feature-compatibility-retirement).
+
+PR43 account-source implementation and owner-only rollout remain documented in [verification](verification.md#private-loyverse-account-source) and [README](../../README.md#loyverse-configuration). Issue #38 is separate production-readiness work.
 
 ## Historical HR completion evidence (PR #33)
 

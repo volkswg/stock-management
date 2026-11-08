@@ -66,7 +66,7 @@ export function shipmentServices({ globals = {}, createId = () => "synthetic-shi
     if (file === "src/services/orders/createDraftOrder.ts") return load("src/modules/orders/contracts.ts");
     if ((file === "src/services/utils/createSortableId.ts" || file === "src/infrastructure/runtime/create-sortable-id.ts")) return { createSortableId: createId };
     if (cache.has(file)) return cache.get(file);
-    if (!["src/shared/lib/is-record.ts","src/modules/shipments/http.ts"].includes(file) && !seamFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$|src\/features\/backend\/(shared|shipments)\/utils\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
+    if (!["src/shared/lib/is-record.ts","src/modules/shipments/http.ts"].includes(file) && !seamFiles.has(file) && !/^(src\/services\/shipments\/|src\/modules\/(orders|shipments)\/contracts\.ts$)/.test(file)) throw new Error(`Unapproved shipment test dependency: ${file}`);
     const imports = new Proxy({}, {
       getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
       get(_, specifier) {
@@ -93,8 +93,8 @@ export function shipmentRoutes(sheets, { drive, services: replacement } = {}) {
     "@/services/shipments": { ...services, ...replacement },
     "@/modules/shipments/server": { ...load("src/modules/shipments/server.ts"), ...replacement },
     "@/modules/shipments/contracts": load("src/modules/shipments/contracts.ts"),
-    "@/features/backend/shared/utils": load("src/features/backend/shared/utils.ts"),
-    "@/features/backend/shipments/utils": load("src/features/backend/shipments/utils.ts"),
+    "@/shared/lib/is-record": load("src/shared/lib/is-record.ts"),
+    "@/modules/shipments/http": load("src/modules/shipments/http.ts"),
   };
   const globals = { Date: ShipmentClock, Error, File, console: { error: (...args) => errors.push(args) } };
   const route = (file) => loadSource(canonicalPath(file), { imports, globals });

@@ -1,0 +1,467 @@
+{
+  "base": "2d2dc18a5c1112e9f6368599ad0d6d67defa79af",
+  "files": {
+    "src/features/backend/line/enum/index.ts": {
+      "source": "export {MovementStartCommandEnum,EventKindEnum}from \"@/modules/line-workflows/contracts\";\n",
+      "sha256": "a59b2403f5e105ef909e8bf7b8af7c96df469cad3336f84d88cf8aec4fa1d29b",
+      "exports": [
+        {
+          "name": "MovementStartCommandEnum",
+          "imported": "MovementStartCommandEnum",
+          "module": "src/modules/line-workflows/contracts.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "EventKindEnum",
+          "imported": "EventKindEnum",
+          "module": "src/modules/line-workflows/contracts.ts",
+          "typeOnly": false
+        }
+      ],
+      "runtimeKeys": [
+        "MovementStartCommandEnum",
+        "EventKindEnum"
+      ]
+    },
+    "src/features/backend/line/services/movements/index.ts": {
+      "source": "export type {MovementImageUploadProgress}from \"@/modules/line-workflows/contracts\";\nexport {handleMovementEvent}from \"@/modules/line-workflows/server\";\n",
+      "sha256": "7fecb6b301183ba839207fe46a5a5c4d23a007052e0c8b2c28500bc2e5eb986d",
+      "exports": [
+        {
+          "name": "MovementImageUploadProgress",
+          "imported": "MovementImageUploadProgress",
+          "module": "src/modules/line-workflows/contracts.ts",
+          "typeOnly": true
+        },
+        {
+          "name": "handleMovementEvent",
+          "imported": "handleMovementEvent",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": false
+        }
+      ],
+      "runtimeKeys": [
+        "handleMovementEvent"
+      ]
+    },
+    "src/features/backend/line/services/movements/utils.ts": {
+      "source": "export { parseQuantity, isValidMovementQuantity } from \"@/modules/inventory/quantity\";\n",
+      "sha256": "26ae7543771718f01ff190ff67503e13b07bd832393c32dfe4a485e71e6ef9dd",
+      "exports": [
+        {
+          "name": "parseQuantity",
+          "imported": "parseQuantity",
+          "module": "src/modules/inventory/quantity.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "isValidMovementQuantity",
+          "imported": "isValidMovementQuantity",
+          "module": "src/modules/inventory/quantity.ts",
+          "typeOnly": false
+        }
+      ],
+      "runtimeKeys": [
+        "parseQuantity",
+        "isValidMovementQuantity"
+      ]
+    },
+    "src/features/backend/line/services/reply.ts": {
+      "source": "export {replyText}from \"@/modules/line-workflows/server\";\n",
+      "sha256": "10c64dbf867e84a3ba005fd90a81a1f3e278d31c8e6e2a6e3233032a73d70c5b",
+      "exports": [
+        {
+          "name": "replyText",
+          "imported": "replyText",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": false
+        }
+      ],
+      "runtimeKeys": [
+        "replyText"
+      ]
+    },
+    "src/features/backend/line/utils/index.ts": {
+      "source": "export {isLineEvent,parseLineWebhookPayload,isMovementStartCommand,classifyLineEvent}from \"@/modules/line-workflows/server\";\nexport type {LegacyMovementEventClassification as MovementEventClassification,LegacyLineEventClassification as LineEventClassification}from \"@/modules/line-workflows/server\";\n",
+      "sha256": "60ed52cf021e92c77074fcfd581263de4cbba130da4523c097bbadbca67e569d",
+      "exports": [
+        {
+          "name": "isLineEvent",
+          "imported": "isLineEvent",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "parseLineWebhookPayload",
+          "imported": "parseLineWebhookPayload",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "isMovementStartCommand",
+          "imported": "isMovementStartCommand",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "classifyLineEvent",
+          "imported": "classifyLineEvent",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "MovementEventClassification",
+          "imported": "LegacyMovementEventClassification",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": true
+        },
+        {
+          "name": "LineEventClassification",
+          "imported": "LegacyLineEventClassification",
+          "module": "src/modules/line-workflows/server.ts",
+          "typeOnly": true
+        }
+      ],
+      "runtimeKeys": [
+        "isLineEvent",
+        "parseLineWebhookPayload",
+        "isMovementStartCommand",
+        "classifyLineEvent"
+      ]
+    },
+    "src/features/backend/shared/utils.ts": {
+      "source": "export { isRecord } from \"@/shared/lib/is-record\";\n",
+      "sha256": "8d44faeabb39570e77b442deb8294061d792b421abfdb5c26c9e2ff1c79fcb31",
+      "exports": [
+        {
+          "name": "isRecord",
+          "imported": "isRecord",
+          "module": "src/shared/lib/is-record.ts",
+          "typeOnly": false
+        }
+      ],
+      "runtimeKeys": [
+        "isRecord"
+      ]
+    },
+    "src/features/backend/shipments/utils.ts": {
+      "source": "export { readJsonBody, isUpdatableStatus, isValidDeliveryFee, isValidPoNumber } from \"@/modules/shipments/http\";\n",
+      "sha256": "9b9e2599c0466ffc23b0b0791fd1e69e789da6f3268b7abbdf66427a7440c538",
+      "exports": [
+        {
+          "name": "readJsonBody",
+          "imported": "readJsonBody",
+          "module": "src/modules/shipments/http.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "isUpdatableStatus",
+          "imported": "isUpdatableStatus",
+          "module": "src/modules/shipments/http.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "isValidDeliveryFee",
+          "imported": "isValidDeliveryFee",
+          "module": "src/modules/shipments/http.ts",
+          "typeOnly": false
+        },
+        {
+          "name": "isValidPoNumber",
+          "imported": "isValidPoNumber",
+          "module": "src/modules/shipments/http.ts",
+          "typeOnly": false
+        }
+      ],
+      "runtimeKeys": [
+        "readJsonBody",
+        "isUpdatableStatus",
+        "isValidDeliveryFee",
+        "isValidPoNumber"
+      ]
+    }
+  },
+  "unchangedProduction": {
+    "count": 414,
+    "sha256": "f40ff0561f697da42ac840811372c2cd1fa215b27f2da185aed3b8075513f6bf"
+  },
+  "fixtureHashes": {
+    "tests/fixtures/expenses-business-before.json": "e190129217a65c65c74548ae0eea93748c9cf01d88a89f70ec1fe7ed68263eed",
+    "tests/fixtures/external-infrastructure-before.json": "8902b3cad513a06baf4793de4e1cb4ae3a4584ceca7d49e906b5af7ea3907e51",
+    "tests/fixtures/externals-retirement-before.json": "d9e1642272c69e3d58966df28e5540111e822b44709ea6a1ab4165b841a50bcd",
+    "tests/fixtures/final-cleanup-before.json": "6bbd370bfc23d025bac5a1d6c86da13de2def8368cf8274fbd2eef3b51220407",
+    "tests/fixtures/google-infrastructure-before.json": "8a840db4d19ce6caef46a2b6af62adc3272b5bdc0ea1d48c93b665657ba76034",
+    "tests/fixtures/google-infrastructure-consumers.json": "c23894cf3307b34e2ec9877abf08e24a5b646a2fa2190a783a6a215bb2c110ac",
+    "tests/fixtures/hr-application-before.json": "bb6e61287268f70eeb29d5b25ca92d280b57c0f5a1208cb729b6c631a3e62f6e",
+    "tests/fixtures/hr-payroll-before.json": "0c60c5b420e8345e2cc5806cc78048197592f1b854d8eb6d5439b6665d53d622",
+    "tests/fixtures/hr-worksheets-before.json": "41e3dd0fb6e6b97cd5a72c80cec200bebfe3baa48bd7f949a02d99ff667ee5d6",
+    "tests/fixtures/inventory-application-before.json": "58f303c4ec4f594437f43361247b41dff4b5568334b90559e50f1d23ca984e17",
+    "tests/fixtures/inventory-employee-directory-before.json": "e9725fc76fba3453bb7f6c5a4eae2a2e4d4a28064a5102e464756f000d178533",
+    "tests/fixtures/inventory-sales-query-before.json": "81f09a340191bc5b326a0eafa55abdcd99214f68fe5b24bf930af619a1b00113",
+    "tests/fixtures/inventory-worksheets-before.json": "99a75f182b2811a5be77d95705c7ec4a405e3719e6a9e8f201f93ac4516472f4",
+    "tests/fixtures/loyverse-accounts-before.json": "5d305f0a2d825cf0583367b11fd96ecc5a71e8882c00add5184712574634f102",
+    "tests/fixtures/movement-schema-before.json": "2c6cc05eb0709122cd19a82468849310eaa1f32ac20816cd09c049fe0c315425",
+    "tests/fixtures/orders-detail-before.json": "f66cb601fc3279fdd3929212cd740625b05bfcbddc1d3f4ae730d19c8b27ab59",
+    "tests/fixtures/orders-line-before.json": "9d660771fb5d8527a6c72114bf781aef673062d08eebb68ac0e67174a836ec72",
+    "tests/fixtures/orders-picker-seam.json": "d61e119ff0710acdd0447ec976ad14124be2b519b635e37d5a07f41cb3d9a113",
+    "tests/fixtures/orders-read-model.json": "4f9f74473e11ba5c7c4f14909d9d903149082197e337c9ff3523602381ae23f2",
+    "tests/fixtures/orders-seam-list.json": "6046e60a459cf78a8ef89e3195f30f2c66546f3673983d5f6ab295fa4169c873",
+    "tests/fixtures/orders-seam-preserved.json": "d5a97e772bf9fed81c43f757a80c358ded7ad6405f2b41eb1709292c37d1f7cc",
+    "tests/fixtures/orders-sheet-types-before.json": "bcc38ae34b819d99d762c8ad97eb20eb5b23dc90d02ef4ed2372de9211730d1f",
+    "tests/fixtures/orders-type-shapes.json": "3e3760f14b3f5f9eb7cfb8c7f9c0c8a4760bd88e2913d92ecc76772e3e87c15c",
+    "tests/fixtures/orders-ui-structure.json": "53518ab9863a5843fccdb5fe2cf6b64b1b09cb676056b1bff109ff1cdcf0b006",
+    "tests/fixtures/remaining-worksheets-before.json": "1dc93c60b3c2d6e4e90b6295254548fd5c7dc4bc0cfd4fb1bba9c96a5debbab4",
+    "tests/fixtures/route-contracts.json": "0c703c2032ebd353298d77f4553f610151270e900df8055365ca0d7d3e4b77eb",
+    "tests/fixtures/sales-application-before.json": "7c336bbbee3c6ebdd11bb036cb6280610156956665a0dff40fe759c3524b04a5",
+    "tests/fixtures/sales-worksheets-before.json": "20beded7f2b24708fe623bc4654f5aaabfab4718b74209e89414093d486d0f6f",
+    "tests/fixtures/shipments-browser-client.json": "381df5f6fd75468097ed5c2892c88ca5097df2811c614ff3ff33d4c696648232",
+    "tests/fixtures/shipments-create-before.json": "d149cf0bb8c4ea57c60e8680a2adf39a0e897787a0650e09f20c1cae372a5eba",
+    "tests/fixtures/shipments-drive-before.json": "302d85a679e6292cfb1092e265eee7edd9a9acf8fd7b27333e678be3ffa89e17",
+    "tests/fixtures/shipments-dto-before.json": "c788c4b5655eb122615babec7d0f4d5c0c07c68ce8432c9babc965bebdc08024",
+    "tests/fixtures/shipments-enum-before.json": "8d3d9674f9532650299cade14abec692ee3cfbbd65bfbe968b4c26bcb027e78f",
+    "tests/fixtures/shipments-http-before.json": "6feb068fb15329ab3f880b938fcd03aada199345181cb4186fcea37c5ea1767d",
+    "tests/fixtures/shipments-link-before.json": "a95769b4b699da28a07f2fe129d475dcc5e2b065d622df8466aef845f74d1594",
+    "tests/fixtures/shipments-list-before.json": "2428c587bfb8dbac7a4a2161c14e3cd78df43c321c6c7ba733bcd788d9e61952",
+    "tests/fixtures/shipments-read.json": "d61a83e578239d71d8d765ba5d24d916d4146a9bf8b0c85c80ca18c1878f27b8",
+    "tests/fixtures/shipments-status-before.json": "ac130c6528e49b19efbcdd31efc4956c3c7edd552ea16155b63d5e725418343e",
+    "tests/fixtures/shipments-structure.json": "6cedf4321ef781c180132f27d347eae42e526721d27e00006a0cc3c437b91ce8",
+    "tests/fixtures/shipments-ui-relocation.json": "55eced0ac464be297058b4cc140772cbed9ee75332e4bd7beb2c7069232119fc",
+    "tests/fixtures/shipments-validation-before.json": "d06aa6b618c631c704eaaff30dad829e29da9859d6d9c0a1762fb9e20a2f3ccd",
+    "tests/fixtures/user-state-worksheet-before.json": "4b971b924f6722d81b799b91fa4a7dd4da701b887b543ba58c6d145194b4b3bc",
+    "tests/fixtures/worksheet-ownership-before.json": "9e26b67739dcb1c94534164abdd85878c8a9aa10528e17ef78c987f2dc67be1d"
+  },
+  "audit": [
+    {
+      "file": "eslint/final-architecture-boundaries.mjs",
+      "kind": "PropertyAssignment",
+      "value": "src/features/backend/shipments/utils.ts"
+    },
+    {
+      "file": "eslint/final-architecture-boundaries.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "src/features/backend/**/*.ts"
+    },
+    {
+      "file": "tests/final-cleanup.test.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/"
+    },
+    {
+      "file": "tests/final-cleanup.test.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "export {isRecord} from \"@/features/backend/shared/utils\";"
+    },
+    {
+      "file": "tests/helpers/expenses-business.mjs",
+      "kind": "BinaryExpression",
+      "value": "@/features/backend/shared/utils"
+    },
+    {
+      "file": "tests/helpers/hr-application.mjs",
+      "kind": "BinaryExpression",
+      "value": "@/features/backend/shared/utils"
+    },
+    {
+      "file": "tests/helpers/inventory-source.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "src/features/backend/line/services/movements/utils.ts"
+    },
+    {
+      "file": "tests/helpers/inventory-worksheet-workflows.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/line/services/movements/utils"
+    },
+    {
+      "file": "tests/helpers/inventory-worksheet-workflows.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/line/services/movements/utils.ts"
+    },
+    {
+      "file": "tests/helpers/inventory-worksheet-workflows.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shared/utils"
+    },
+    {
+      "file": "tests/helpers/inventory-worksheet-workflows.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shared/utils.ts"
+    },
+    {
+      "file": "tests/helpers/load-source.mjs",
+      "kind": "BinaryExpression",
+      "value": "src/features/backend/line/services/movements/index.ts"
+    },
+    {
+      "file": "tests/helpers/load-source.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "src/features/backend/shared/utils.ts"
+    },
+    {
+      "file": "tests/helpers/load-source.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "src/features/backend/line/services/movements/utils.ts"
+    },
+    {
+      "file": "tests/helpers/shipments-drive.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shared/utils"
+    },
+    {
+      "file": "tests/helpers/shipments-drive.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shared/utils.ts"
+    },
+    {
+      "file": "tests/helpers/shipments-drive.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shipments/utils"
+    },
+    {
+      "file": "tests/helpers/shipments-drive.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shipments/utils.ts"
+    },
+    {
+      "file": "tests/helpers/shipments-http.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shared/utils"
+    },
+    {
+      "file": "tests/helpers/shipments-http.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shared/utils.ts"
+    },
+    {
+      "file": "tests/helpers/shipments-http.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shipments/utils"
+    },
+    {
+      "file": "tests/helpers/shipments-http.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shipments/utils.ts"
+    },
+    {
+      "file": "tests/helpers/shipments-validation-history.mjs",
+      "kind": "VariableDeclaration",
+      "value": "src/features/backend/shipments/utils.ts"
+    },
+    {
+      "file": "tests/helpers/shipments.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shared/utils"
+    },
+    {
+      "file": "tests/helpers/shipments.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shared/utils.ts"
+    },
+    {
+      "file": "tests/helpers/shipments.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shipments/utils"
+    },
+    {
+      "file": "tests/helpers/shipments.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shipments/utils.ts"
+    },
+    {
+      "file": "tests/inventory-sales-query.test.mjs",
+      "kind": "PropertyAssignment",
+      "value": "@/features/backend/shared/utils"
+    },
+    {
+      "file": "tests/inventory-sales-query.test.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/shared/utils.ts"
+    },
+    {
+      "file": "tests/inventory-worksheets.test.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "import { parseQuantity } from \"@/features/backend/line/services/movements/utils\"; export {parseQuantity};"
+    },
+    {
+      "file": "tests/inventory-worksheets.test.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/line/"
+    },
+    {
+      "file": "tests/inventory-worksheets.test.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "@/features/backend/line/services/movements/utils"
+    },
+    {
+      "file": "tests/orders-boundaries.test.mjs",
+      "kind": "ArrayLiteralExpression",
+      "value": "import { Gallery } from \"@/features/frontend/orders/components/OrderImageGallery\";"
+    },
+    {
+      "file": "tests/orders-line-workflows.test.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/line/utils/index.ts"
+    },
+    {
+      "file": "tests/orders-line-workflows.test.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/line/services/movements/index.ts"
+    },
+    {
+      "file": "tests/orders-ui-structure.test.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/frontend/orders"
+    },
+    {
+      "file": "tests/regression.test.mjs",
+      "kind": "CallExpression",
+      "value": "src/features/backend/line/services/movements/utils.ts"
+    },
+    {
+      "file": "tests/sales-inventory-boundaries.test.mjs",
+      "kind": "ElementAccessExpression",
+      "value": "src/features/backend/line/services/movements/utils.ts"
+    },
+    {
+      "file": "tests/shipments-validation.types.ts",
+      "kind": "ImportDeclaration",
+      "value": "../src/features/backend/shipments/utils"
+    }
+  ],
+  "aliasesBefore": {
+    "@/*": [
+      "./src/*"
+    ],
+    "@/feature/*": [
+      "./src/features/*"
+    ]
+  },
+  "edits": {
+    "tsconfig.json": {
+      "beforeHash": "b19ceade5eeeac2997985f9f6ec09f9578754a2d10c152102265dd161baa4e74",
+      "afterHash": "653b53c17b7031cb01d30de2fd7cdf66b3706d7dacfb644c5af32160f5e5d67e",
+      "changes": [
+        {
+          "afterStart": 481,
+          "before": ",\n      \"@/feature/*\": [\"./src/features/*\"]",
+          "after": ""
+        }
+      ]
+    },
+    "eslint/final-architecture-boundaries.mjs": {
+      "beforeHash": "38128771bc6246f783f33d305605613a6c7e80566984b758535acbfc9b7e0e86",
+      "afterHash": "28c0d156ff28c6f9a4a8a9c06b987300801492a1d3fb43bd2921ee1a8b8e6a35",
+      "changes": [
+        {
+          "afterStart": 672,
+          "before": "\"\n    ],\n    \"src/features/backend/shipments/utils.ts\": [\n        \"@/modules/shipments/http",
+          "after": ""
+        },
+        {
+          "afterStart": 12429,
+          "before": ", 'src/features/backend/**/*.ts'",
+          "after": ""
+        }
+      ]
+    }
+  }
+}

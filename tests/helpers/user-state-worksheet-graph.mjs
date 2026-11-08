@@ -1,4 +1,4 @@
-import {retirement,evidenceHost,readArchive} from "./retirement-history.mjs";
+import {archivedFiles,evidenceHost,readArchive} from "./retirement-history.mjs";
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
@@ -6,7 +6,7 @@ import ts from 'typescript';
 import { userStateBefore } from './user-state-worksheet-history.mjs';
 const options = ts.parseJsonConfigFileContent(ts.readConfigFile('tsconfig.json', ts.sys.readFile).config, ts.sys, process.cwd()).options;
 export function userStateGraph(overrides = {}) {
-  const host = { ...evidenceHost(ts.sys,overrides), fileExists: f => Object.hasOwn(overrides, relative(process.cwd(), f)) || (Object.keys(overrides).length>0&&Object.hasOwn(retirement.files,relative(process.cwd(),f))) || ts.sys.fileExists(f), directoryExists: d => Object.keys(overrides).some(f => resolve(f).startsWith(resolve(d) + '/')) || (Object.keys(overrides).length>0&&evidenceHost(ts.sys,overrides).directoryExists(d)) || ts.sys.directoryExists(d) };
+  const host = { ...evidenceHost(ts.sys,overrides), fileExists: f => Object.hasOwn(overrides, relative(process.cwd(), f)) || (Object.keys(overrides).length>0&&Object.hasOwn(archivedFiles,relative(process.cwd(),f))) || ts.sys.fileExists(f), directoryExists: d => Object.keys(overrides).some(f => resolve(f).startsWith(resolve(d) + '/')) || (Object.keys(overrides).length>0&&evidenceHost(ts.sys,overrides).directoryExists(d)) || ts.sys.directoryExists(d) };
   const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${d}/${e.name}`):[`${d}/${e.name}`]);
   const all = [...new Set([...walk("src"),...Object.keys(overrides), ...Object.values(userStateBefore.moves).map(e=>e.to).filter(existsSync)])].filter(f=>/\.tsx?$/.test(f));
   const cache = new Map();

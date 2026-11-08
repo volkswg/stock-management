@@ -1,3 +1,4 @@
+import {canonicalFeatureSpecifier} from "./features-retirement-history.mjs";
 import {canonicalPath} from "./retirement-history.mjs";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
@@ -27,14 +28,14 @@ export function driveRoute({ rows = [shipmentRow({ status: "ready_to_ship" })], 
     "@/services/shipments": { ...services, ...(updateStatus ? { updateShipmentStatus: updateStatus } : {}) },
     "@/modules/shipments/server": { ...load("src/modules/shipments/server.ts"), ...(updateStatus ? { updateShipmentStatus: updateStatus } : {}) },
     "@/modules/shipments/contracts": load("src/modules/shipments/contracts.ts"),
-    "@/features/backend/shared/utils": load("src/features/backend/shared/utils.ts"),
-    "@/features/backend/shipments/utils": load("src/features/backend/shipments/utils.ts"),
+    "@/shared/lib/is-record": load("src/shared/lib/is-record.ts"),
+    "@/modules/shipments/http": load("src/modules/shipments/http.ts"),
   };
   let route;
   if (original) {
     const before = JSON.parse(readFileSync("tests/fixtures/shipments-drive-before.json", "utf8"));
     const output = ts.transpileModule(before.source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, exports = {};
-    new vm.Script(output).runInNewContext({ exports, Buffer, URL, URLSearchParams, ...contextGlobals, require: name => { if (!Object.hasOwn(imports, name)) throw new Error(`Unapproved original route dependency ${name}`); return imports[name]; } }); route = exports;
+    new vm.Script(output).runInNewContext({ exports, Buffer, URL, URLSearchParams, ...contextGlobals, require: name => { name=canonicalFeatureSpecifier(name); if (!Object.hasOwn(imports, name)) throw new Error(`Unapproved original route dependency ${name}`); return imports[name]; } }); route = exports;
   } else route = loadSource(canonicalPath(driveRouteFile), { imports, globals: contextGlobals });
   return { route, trace, errors, sheets, services, provider };
 }

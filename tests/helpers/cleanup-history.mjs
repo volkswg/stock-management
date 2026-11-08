@@ -1,3 +1,4 @@
+import {canonicalFeatureSpecifier} from "./features-retirement-history.mjs";
 import {restoreRetirementSource} from "./retirement-history.mjs";
 import assert from 'node:assert/strict';
 import {readEvidence as readFileSync} from "./retirement-history.mjs";
@@ -5,7 +6,7 @@ import { createHash } from 'node:crypto';
 export const cleanupHistory = JSON.parse(readFileSync('tests/fixtures/final-cleanup-before.json', 'utf8'));
 export const cleanupNewFiles = [...Object.values(cleanupHistory.moves).map(e => e.to), ...cleanupHistory.newFiles];
 export const cleanupChanged = new Set([...Object.keys(cleanupHistory.moves), ...Object.keys(cleanupHistory.edits)]);
-export const legacySpecifier = spec => Object.entries(cleanupHistory.specifiers).find(([, next]) => spec === next)?.[0] ?? spec;
+export const legacySpecifier = spec => canonicalFeatureSpecifier(Object.entries(cleanupHistory.specifiers).find(([, next]) => spec === next)?.[0] ?? spec);
 const hash = s => createHash('sha256').update(s).digest('hex');
 const prior = new Map(), priorHashes = new Map();
 for (const name of ['external-infrastructure-before', 'orders-line-before', 'expenses-business-before', 'inventory-sales-query-before', 'movement-schema-before', 'inventory-employee-directory-before', 'remaining-worksheets-before', 'sales-application-before', 'inventory-application-before', 'hr-application-before', 'hr-payroll-before']) {

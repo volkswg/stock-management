@@ -33,7 +33,7 @@ export function expenseGraph({original=false,service,events=[],overrides={},exte
    if(spec==='next/server')return {NextResponse:Response};
    if(legacySpecifier(spec)==='@/config')return {getConfig:()=>{events.push(['config']);return {loyverse:{accounts:[{id:'account',shopName:'Shop'}]}};}};
    if(legacySpecifier(spec)==='@/externals/google/sheet')return {createGoogleSheetsServiceFromConfig:()=>{events.push(['factory']);return service;}};
-   if(legacySpecifier(spec)==='@/features/backend/shared/utils')return {isRecord:value=>!!value&&typeof value==='object'&&!Array.isArray(value)};
+   if(legacySpecifier(spec)==='@/shared/lib/is-record')return {isRecord:value=>!!value&&typeof value==='object'&&!Array.isArray(value)};
    if(legacySpecifier(spec)==='@/modules/expenses/infrastructure/google-sheets/expenses/const')return headers;
    let target=spec.startsWith('@/')?'src/'+spec.slice(2):posix.normalize(posix.dirname(file)+'/'+spec);target+=existsSync(target+'.ts')?'.ts':'/index.ts';return load(target);
   }});return exports;

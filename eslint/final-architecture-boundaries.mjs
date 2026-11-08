@@ -19,9 +19,6 @@ const scopes = {
     "src/services/utils/createSortableId.ts": [
         "@/infrastructure/runtime/create-sortable-id"
     ],
-    "src/features/backend/shipments/utils.ts": [
-        "@/modules/shipments/http"
-    ],
     "src/scripts/line-rich-menu-client.ts": [
         "../infrastructure/external/line/LineRichMenuClient.ts"
     ],
@@ -214,5 +211,5 @@ export const finalArchitectureBoundaries = [...Object.entries(scopes).map(([file
     { files: ['src/modules/shipments/http.ts'], rules: { 'no-restricted-syntax': [...noDynamicServerBypass, { selector: 'ExportAllDeclaration', message: 'Expose named HTTP helpers.' }], 'no-restricted-globals': ['error', 'process', 'Buffer', 'fetch'] } },
     { files: ['src/services/employees/payroll-composition.ts', 'src/services/stock-adjustments/employee-directory.ts'], rules: { 'no-restricted-syntax': [...noDynamicServerBypass, { selector: 'ExportAllDeclaration', message: 'Keep compatibility exports named.' }] } },
     { files: ['src/composition/hr-payroll.ts', 'src/composition/employee-directory.ts'], rules: { 'no-restricted-syntax': [...noDynamicServerBypass, { selector: 'ExportNamedDeclaration[source]', message: 'Physical composition owns its implementations.' }, { selector: 'ExportAllDeclaration', message: 'Keep exports named.' }] } },
-    { files: ['src/services/**/*.ts', 'src/features/backend/**/*.ts'], rules: { 'final-architecture/facades': 'error' } }
+    { files: ['src/services/**/*.ts'], rules: { 'final-architecture/facades': 'error' } }
 ];
