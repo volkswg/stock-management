@@ -17,9 +17,13 @@ Merged [PR43](https://github.com/volkswg/stock-management/pull/43) supports acco
 
 Merged PR44 removed the seven obsolete backend forwards and unused singular path alias, migrated test/type consumers to existing owners and preserved every historical witness. Business implementations, production imports, schemas, environment settings and provider behavior remain unchanged. The audit found no known required external consumer. Remaining service/script compatibility is outside that cleanup scope.
 
-## Current bounded change: one Loyverse workbook
+## Completed: one Loyverse workbook (PR45)
 
-Sheet mode uses the existing operational workbook only; remove the account-specific workbook setting and any workbook-selection fallback. Preserve env rollback, account validation/order, public metadata and credential confidentiality. The owner must restrict/audit workbook readers before storing tokens; hiding a tab does not isolate read access. No production workbook, sharing, Vercel setting or deployment changes are part of implementation.
+Sheet mode uses the existing operational workbook only; the account-specific workbook setting is removed. Env rollback, account validation/order, public metadata and server-only credential handling are retained. The owner must restrict/audit workbook readers before storing tokens; hiding a tab does not isolate read access. No production workbook, sharing, Vercel setting or deployment changes are part of implementation.
+
+## Current bounded change: Sales sync reliability
+
+Implement bounded atomic publication, preflight validation, retry reconciliation and outcome verification while retaining all original financial/date/projection rules. Writes fail closed because a real durable workbook/account/date coordinator is absent. A separately reviewed durable adapter, crash/quarantine operator protocol and server wiring are required before enabling sync. Oversized dates need the documented staged-publication extension; sequential canonical appends are not an acceptable workaround. Review the inherited write-API access policy separately. See [operator prerequisites](../../README.md#daily-sales-synchronization-rollout-gate).
 
 ## Next: production-readiness gate (open, not implemented)
 

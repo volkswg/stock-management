@@ -34,7 +34,14 @@ export type MovementWorksheet = "userState" | "movementDetails" | "movementMaste
 
 export type MovementRange = { sheet: MovementWorksheet; range: string };
 
+export type SalesSyncWrite = {
+  sheet: "salesReceipts" | "salesReceiptItems" | "salesReceiptPayments" | "salesReceiptSyncs";
+  range: string;
+  values: GoogleSheetRow[];
+};
+
 export interface IGoogleSheetsService {
+  writeSalesSync?(updates: SalesSyncWrite[], beforeWrite: () => Promise<void>): Promise<void>;
   readMovementRanges?(ranges: MovementRange[]): Promise<GoogleSheetRow[][]>;
   readonly employeeCompensations: IGoogleRowsSheet;
   readonly employees: IGoogleRowsSheet;

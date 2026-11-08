@@ -1,10 +1,12 @@
 # Refactoring progress and evidence
 
-## Current merged state and single-workbook account configuration
+## Current merged state and Sales sync reliability
 
-Verified main is `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), with the external/features retirements and PR43 account source complete. The tree matches the previously verified PR44 head with 550 passing tests and successful lint/typecheck/isolated build.
+Verified main is `277c0b31c76ed4605a91ffad303d218a7957bf84` (merged PR45); no conflicting open PR was found. PR45 completed single-workbook account configuration. A pristine baseline copy passes all 551 inherited tests, lint (one inherited warning), typecheck and isolated build.
 
-Branch `fix/loyverse-single-workbook` makes sheet mode read `loyverse_accounts` only from the existing GOOGLE_SHEETS_SPREADSHEET_ID. The dedicated account-workbook variable/AppConfig field and separate-workbook restriction are removed. No workbook/JSON fallback is added; env-mode rollback, six-column validation, ordering and server-only credential handling remain. Historical source inverses preserve old fixture bytes and assertions. See [verification](verification.md#loyverse-single-workbook-support) and [owner instructions](../../README.md#loyverse-configuration), including workbook-wide token visibility. No production migration, ACL/Vercel change or deployment is performed.
+Branch `fix/loyverse-sync-reliability` implements validated bounded atomic workbook publication, matching partial-row recovery, durable-intent/fingerprint verification and fail-closed ambiguity handling. The original projection/report/date logic remains unchanged. All inherited fixtures stay immutable; historical independent-append behavior remains executable as explicitly labelled pre-reliability evidence, with current failure/concurrency coverage added separately.
+
+The critical rollout prerequisite is explicit: **no production durable coordinator exists**. Server composition rejects sync writes until a reviewed implementation is injected. Oversized dates are blocked with a staged design recorded for review; the inherited unauthenticated write route is audited without changing policy. See [decision](../architecture/decisions.md#sales-sync-atomic-publication-and-durable-coordination), [owner rollout/rollback](../../README.md#daily-sales-synchronization-rollout-gate) and [verification](verification.md#sales-sync-reliability).
 
 ## Historical HR completion evidence (PR #33)
 

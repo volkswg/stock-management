@@ -96,3 +96,8 @@ The seven `src/features/backend/` forwards are removed. No business body moves: 
 The audit covers runtime/erased/dynamic imports, mocks/loaders, scripts, aliases, docs and historical guards. There is no production importer or known external supported consumer of the removed leaves. The package is private with no export map/publish workflow; undisclosed external deep imports must migrate. Services and standalone script forwards remain supported and untouched.
 
 `features-retirement-before.json` preserves all seven sources, 18 symbol destinations, pre-removal runtime identity keys, audited references and exact non-production inverses. Existing fixtures stay immutable. Current loaders use physical owners and reject removed paths; explicit historical readers alone resolve archived sources. No production compatibility directory or replacement barrel is introduced.
+
+
+## Sales synchronization reliability gate
+
+The existing Sales adapter now reconciles legacy rows and prepares one bounded atomic workbook update, including the completion marker. Shared client validation/transport stays in root infrastructure; the aggregate composition maps semantic Sales worksheet keys to configured names. Existing columns, financial rules, public reports, account IDs and legacy callable forwards remain. Sales' application port defines durable coordination/intent obligations; no real coordinator is implemented. Current server/HTTP composition blocks sync writes until a reviewed adapter is supplied. Oversized publication remains explicitly blocked pending the [staged design](decisions.md#sales-sync-atomic-publication-and-durable-coordination). This is not a production-concurrency certification.

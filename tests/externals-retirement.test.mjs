@@ -1,3 +1,4 @@
+import {restoreSyncSource} from './helpers/sales-sync-reliability-history.mjs';
 import {featureFiles} from "./helpers/features-retirement-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -22,7 +23,8 @@ test('retirement removes all 65 compatibility files, preserves every inherited f
   for (const [file, beforeHash] of Object.entries(retirement.fixtureHashes)) {
     assert.equal(hash(readFileSync(file)), beforeHash, file);
   }
-  const contract = readFileSync(retirement.contract, 'utf8');
+  const contract = restoreSyncSource(retirement.contract);
+  assert.equal(ts.transpileModule(readFileSync(retirement.contract,'utf8'), {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText.trim(), 'export {};');
   assert.equal(contract, retirement.files['src/externals/google/sheet/types.ts'].source);
   assert.equal(ts.transpileModule(contract, {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText.trim(), 'export {};');
 });

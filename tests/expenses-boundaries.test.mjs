@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import {readArchive} from "./helpers/retirement-history.mjs";
 import { completionExtraFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
 import { hrFiles, assertHRHistory } from "./helpers/hr-payroll-history.mjs";
@@ -41,7 +42,7 @@ test('Expenses runtime/type graphs enforce pure application, public HR shop cont
 
 test('Expenses exact lint scopes reject private/legacy, erased, relative, dynamic and global IO bypasses',async()=>{
  const eslint=new ESLint();
- for(const file of expensesNewFiles.filter(f=>f.startsWith('src/modules/'))){const [ok]=await eslint.lintText(readArchive(file,'utf8'),{filePath:file});assert.equal(ok.errorCount,0,JSON.stringify(ok.messages));
+ for(const file of expensesNewFiles.filter(f=>f.startsWith('src/modules/'))){const [ok]=await eslint.lintText(readFileSync(file,'utf8'),{filePath:file});assert.equal(ok.errorCount,0,JSON.stringify(ok.messages));
   for(const source of ['import type { Expense } from "@/services/expenses"; export type X=Expense;','export { StockCountsSheet } from "@/modules/inventory/infrastructure/google-sheets/stock-counts/StockCountsSheet";','export type X=import("@/config").AppConfig;','const x=require("node:fs"); export {x};','const x=import("@/config"); export {x};']){const [bad]=await eslint.lintText(source,{filePath:file});assert.ok(bad.errorCount>0,`${file}: ${source}`);}
  }
  const [bad]=await eslint.lintText('export const x=Date.now();',{filePath:'src/modules/expenses/application/manage-expenses.ts'});assert.ok(bad.errorCount>0);

@@ -20,7 +20,7 @@ import { ShipmentsSheet } from "@/modules/shipments/infrastructure/google-sheets
 import { StockCountsSheet } from "@/modules/inventory/infrastructure/google-sheets/stock-counts/StockCountsSheet";
 import { UserStateSheet } from "@/modules/line-workflows/infrastructure/google-sheets/user-state/UserStateSheet";
 import { MovementSheet } from "@/modules/inventory/infrastructure/google-sheets/movements/MovementSheet";
-import type { GoogleSheetsConfig, GoogleSheetRow, MovementRange, MovementWorksheet, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { GoogleSheetsConfig, SalesSyncWrite, GoogleSheetRow, MovementRange, MovementWorksheet, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 
 export class GoogleSheetsService implements IGoogleSheetsService {
   readonly employeeCompensations: EmployeeCompensationsSheet;
@@ -48,6 +48,7 @@ export class GoogleSheetsService implements IGoogleSheetsService {
   readonly userState: UserStateSheet;
 
   private readonly client: GoogleSheetsClient;
+  private readonly salesWorksheetNames = {} as Record<SalesSyncWrite["sheet"], string>;
   private readonly movementWorksheetNames: Record<MovementWorksheet, string>;
 
   constructor(config: GoogleSheetsConfig) {
@@ -95,11 +96,11 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     );
     this.salesReceipts = new SalesReceiptsSheet(
       this.client,
-      config.salesReceiptsWorksheetName,
+      this.salesWorksheetNames.salesReceipts = config.salesReceiptsWorksheetName,
     );
     this.salesReceiptItems = new SalesReceiptItemsSheet(
       this.client,
-      config.salesReceiptItemsWorksheetName,
+      this.salesWorksheetNames.salesReceiptItems = config.salesReceiptItemsWorksheetName,
     );
     this.salesProfitCostOverrides = new SalesProfitCostOverridesSheet(
       this.client,
@@ -107,11 +108,11 @@ export class GoogleSheetsService implements IGoogleSheetsService {
     );
     this.salesReceiptPayments = new SalesReceiptPaymentsSheet(
       this.client,
-      config.salesReceiptPaymentsWorksheetName,
+      this.salesWorksheetNames.salesReceiptPayments = config.salesReceiptPaymentsWorksheetName,
     );
     this.salesReceiptSyncs = new SalesReceiptSyncsSheet(
       this.client,
-      config.salesReceiptSyncsWorksheetName,
+      this.salesWorksheetNames.salesReceiptSyncs = config.salesReceiptSyncsWorksheetName,
     );
     this.shipmentOrders = new ShipmentOrdersSheet(
       this.client,
@@ -131,6 +132,12 @@ export class GoogleSheetsService implements IGoogleSheetsService {
       this.client,
       config.userStateWorksheetName,
     );
+  }
+
+  async writeSalesSync(updates: SalesSyncWrite[], beforeWrite: () => Promise<void>): Promise<void> {
+    return this.client.batchUpdateWorkbookValues(updates.map(({ sheet, range, values }) => ({
+      worksheetName: this.salesWorksheetNames[sheet], range, values,
+    })), beforeWrite);
   }
 
   async readMovementRanges(ranges: MovementRange[]): Promise<GoogleSheetRow[][]> {

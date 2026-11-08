@@ -29,14 +29,20 @@ export const getGoogleSheetsProfitSummary: (input: {
 import type { ReceiptSource } from "./application/ports/receipt-source";
 import { syncReceipts } from "./application/sync-receipts";
 import { createReceiptSync } from "./infrastructure/google-sheets/receipt-sync";
-import type { SyncLoyverseDailySalesResult } from "./application/ports/receipt-sync";
-export async function syncLoyverseDailySales({ account, googleSheetsService, salesDate, }: {
+import type { ReceiptSyncCoordinator, SyncLoyverseDailySalesResult } from "./application/ports/receipt-sync";
+export async function syncLoyverseDailySales({ account, googleSheetsService, salesDate, coordinator, }: {
     account: { id: string; shopName: string; storeId?: string; service: ReceiptSource };
     googleSheetsService: IGoogleSheetsService;
     salesDate: string;
+    coordinator?: ReceiptSyncCoordinator;
 }): Promise<SyncLoyverseDailySalesResult> {
-    const { store, source } = createReceiptSync(googleSheetsService, account);
-    return syncReceipts(account.id, salesDate, store, source, { now: () => new Date().toISOString() });
+    // No implicit unsafe fallback. Existing deployment composition intentionally
+    // fails closed until a reviewed durable coordinator is supplied.
+    if (!coordinator) throw new Error("Sales sync blocked: durable workbook/account/date coordinator is not configured. Reports remain available; contact the operator.");
+    return coordinator.run({ accountId: account.id, salesDate }, async attempt => {
+        const { store, source } = createReceiptSync(googleSheetsService, account, attempt);
+        return syncReceipts(account.id, salesDate, store, source, { now: () => new Date().toISOString() });
+    });
 }
 import { randomUUID } from "node:crypto";
 import * as costs from "./application/cost-overrides";

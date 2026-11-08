@@ -1,3 +1,5 @@
+import {syncHistory} from './helpers/sales-sync-reliability-history.mjs';
+import {loadSalesSource} from './helpers/sales-source.mjs';
 import {readArchive} from "./helpers/retirement-history.mjs";
 import {canonicalPath} from "./helpers/retirement-history.mjs";
 import { completionExtraFiles, completionNewFiles, assertCompletionHistory } from "./helpers/hr-application-history.mjs";
@@ -55,7 +57,7 @@ test("saved-original/current real Sales worksheet/client requests preserve URLs,
  assert.deepEqual(traces[1],traces[0]);
 });
 
-test("unchanged legacy Sales sync/report/refund/override workflows retain original rows, Bangkok query, results and partial-failure event order",async()=>{
+test("historical pre-reliability Sales sync/report/refund/override workflows retain original rows, Bangkok query, results and partial-failure event order",async()=>{
  const {googleGraph}=await import("./helpers/google-infrastructure.mjs");
  async function scenario(historical,failItems=false){
   class Clock extends Date{constructor(...args){super(args.length?args[0]:"2026-11-06T12:00:00.000Z");}}
@@ -63,7 +65,7 @@ test("unchanged legacy Sales sync/report/refund/override workflows retain origin
   const client={ensureWorksheet:async(name)=>{events.push(["ensure",name]);},getValues:async(name,range)=>{events.push(["read",name,range]);return (range.startsWith("A1:")?data[name].slice(0,1):data[name]).map(row=>row.slice());},appendValues:async(name,range,values)=>{events.push(["append",name,range,plain(values)]);if(failItems&&name==="receipt-items")throw error;data[name].push(...values.map(row=>Array.from(row)));},updateValues:async(name,range,values)=>{events.push(["update",name,range,plain(values)]);const index=Number(/\d+/.exec(range)?.[0]??1)-1;values.forEach((row,i)=>{data[name][index+i]=Array.from(row);});}};
   for(const spec of salesWorksheetsBefore.worksheets){data[spec.folder]=[Array.from(registry[spec.header])];service[{receipts:"salesReceipts","receipt-items":"salesReceiptItems","receipt-payments":"salesReceiptPayments","receipt-syncs":"salesReceiptSyncs","profit-cost-overrides":"salesProfitCostOverrides"}[spec.folder]]=new registry[spec.name](client,spec.folder);}
   const globals={Date:Clock,Error},imports={"@/externals/google/sheet":registry,...Object.fromEntries(["receipts","receipt-items","receipt-payments","receipt-syncs"].map(folder=>[`@/modules/sales/infrastructure/google-sheets/${folder}/const`,registry]))};const ids=loadSource("src/services/sales/idBuilders.ts"),mappers=loadSource("src/services/sales/rowMappers.ts"),receipts=loadSource("src/services/sales/getLoyverseReceiptsForSalesDate.ts",{globals});
-  const sync=loadSource("src/services/sales/syncLoyverseDailySales.ts",{imports:{...imports,"./idBuilders":ids,"./rowMappers":mappers,"./getLoyverseReceiptsForSalesDate":receipts},globals});
+  const sync=loadSalesSource("src/services/sales/syncLoyverseDailySales.ts",{originals:syncHistory.files,imports:{...imports,"./idBuilders":ids,"./rowMappers":mappers,"./getLoyverseReceiptsForSalesDate":receipts},globals});
   const records=[{receipt_number:"r/1",receipt_type:"SALE",receipt_date:"2026-11-06T00:00:00.000Z",created_at:"created",updated_at:"updated",total_money:10,total_tax:0,line_items:[{id:"i",item_id:"item",item_name:"Item",quantity:2,price:5,total_money:10,cost:2}],payments:[{money_amount:10,payment_type_id:"cash",name:"Cash",type:"CASH"}]},{receipt_number:"r/2",receipt_type:"REFUND",refund_for:"r/1",receipt_date:"2026-11-06T01:00:00.000Z",created_at:"c",updated_at:"u",total_money:2,line_items:[],payments:[]}];
   const account={id:"shop/id",shopName:"Synthetic",storeId:"store/1",service:{getReceipts:async(query)=>{events.push(["loyverse",plain(query)]);return records;}}};
   let outcome;try{outcome=await sync.syncLoyverseDailySales({account,googleSheetsService:service,salesDate:"2026-11-06"});}catch(e){assert.equal(e,error);return {failed:true,events,data};}

@@ -61,6 +61,8 @@ const scopes={
     "@/modules/sales/infrastructure/google-sheets/receipt-syncs/const"
   ],
   "src/modules/sales/infrastructure/google-sheets/receipt-sync.ts": [
+    "node:crypto",
+    "@/infrastructure/persistence/google-sheets/service-contracts",
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "../../application/ports/receipt-sync",
@@ -92,6 +94,6 @@ const scopes={
 };
 export const salesApplicationBoundaries=Object.entries(scopes).map(([file,paths])=>({files:[file],rules:{
  'no-restricted-imports':['error',{patterns:[{regex:paths.length?`^(?!(?:${paths.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$).+`:'.+',message:'Sales reports use public contracts and semantic reader ports; persistence mapping stays in the adapter.'}]}],
- 'no-restricted-syntax':[...noDynamicServerBypass,...((/\/(application|domain)\//.test(file)||file.endsWith('/quantity.ts'))?[{selector:'NewExpression[callee.name="Date"][arguments.length=0]',message:'Inject the current clock.'},{selector:'CallExpression[callee.object.name="Date"][callee.property.name="now"]',message:'Inject the current clock.'}]:[]),{selector:'ExportAllDeclaration',message:'Keep exports named.'}],
+ 'no-restricted-syntax':[...noDynamicServerBypass,...(file.endsWith('/google-sheets/receipt-sync.ts')?[{selector:'CallExpression[callee.type="MemberExpression"][callee.property.name=/^(appendRows|updateRows|appendValues|updateValues|clear|deleteRow)$/]',message:'Receipt sync must publish through one validated atomic workbook request, never independent mutations.'}]:[]),...((/\/(application|domain)\//.test(file)||file.endsWith('/quantity.ts'))?[{selector:'NewExpression[callee.name="Date"][arguments.length=0]',message:'Inject the current clock.'},{selector:'CallExpression[callee.object.name="Date"][callee.property.name="now"]',message:'Inject the current clock.'}]:[]),{selector:'ExportAllDeclaration',message:'Keep exports named.'}],
  'no-restricted-globals':['error','process','Buffer','fetch','crypto',...(file.includes('/application/')?['performance']:[])],
 }}));

@@ -1,3 +1,4 @@
+import {restoreSyncSource} from './sales-sync-reliability-history.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -6,6 +7,7 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 // Reconcile only the approved workbook-selection/template change before older
 // immutable source guards. Current executable loaders read the actual source.
 export function restoreWorkbookSource(file,source=readFileSync(file,'utf8')){
+  source=restoreSyncSource(file,source);
   const edit=workbookHistory.edits[file];if(!edit)return source;
   const current=readFileSync(file,'utf8');assert.equal(hash(current),edit.afterHash,file);
   let restored=current;

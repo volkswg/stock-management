@@ -1,3 +1,4 @@
+import {syncHarness} from './helpers/sales-sync-reliability.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -8,7 +9,6 @@ import {accountGraph,accountRows,accountHeaders,envConfig,sheetConfig,accountsCo
 import {accountsHistory,restoreAccountSource,accountNewFiles} from './helpers/loyverse-accounts-history.mjs';
 import {loadSalesSource} from './helpers/sales-source.mjs';
 import {loadExpenseSource} from './helpers/expenses-source.mjs';
-import {googleGraph} from './helpers/google-infrastructure.mjs';
 import {userStateGraph} from './helpers/user-state-worksheet-graph.mjs';
 import {restoreWorkbookSource,workbookHistory} from './helpers/loyverse-workbook-history.mjs';
 
@@ -143,15 +143,8 @@ test('a pending private read delays clients and returns no partial directory; fa
   release(accountRows());assert.equal((await pending).length,2);assert.equal(g.events.filter(e=>e[0]==='account-read').length,1);
 });
 
-function salesFixture(){
-  const registry=googleGraph().registry(),data={},events=[],service={};
-  const client={ensureWorksheet:async name=>events.push(['ensure',name]),getValues:async(name,range)=>{events.push(['read',name,range]);return /1:.*1$/.test(range)?data[name].slice(0,1):data[name];},updateValues:async(name,range,values,mode)=>{events.push(['update',name,range,plain(values),mode]);data[name][Number(/\d+/.exec(range)[0])-1]=values[0];},appendValues:async(name,range,values,mode)=>{events.push(['append',name,range,plain(values),mode]);data[name].push(...values);}};
-  for(const [name,C,H]of [['salesReceipts','SalesReceiptsSheet','SALES_RECEIPT_HEADERS'],['salesReceiptItems','SalesReceiptItemsSheet','SALES_RECEIPT_ITEM_HEADERS'],['salesReceiptPayments','SalesReceiptPaymentsSheet','SALES_RECEIPT_PAYMENT_HEADERS'],['salesReceiptSyncs','SalesReceiptSyncsSheet','SALES_RECEIPT_SYNC_HEADERS'],['salesProfitCostOverrides','SalesProfitCostOverridesSheet','SALES_PROFIT_COST_OVERRIDE_HEADERS']]){
-    data[name]=[Array.from(registry[H])];service[name]=new registry[C](client,name);
-  }
-  class Clock extends Date {constructor(...args){super(...(args.length?args:['2026-11-08T01:00:00Z']));}}
-  return {data,events,service,api:loadSalesSource('src/modules/sales/server.ts',{globals:{Date:Clock}})};
-}
+function salesFixture(){return syncHarness();}
+
 const receipt={receipt_number:'R/1',receipt_type:'SALE',receipt_date:'2026-11-01T01:00:00Z',created_at:'c',updated_at:'u',total_money:99.987654,line_items:[{id:'i',item_id:'item',item_name:'Item',quantity:3,gross_total_money:120,total_money:99.987654,total_discount:20.012346,cost_total:11.1,line_taxes:[],line_discounts:[],line_modifiers:[]}],payments:[{payment_type_id:'cash',money_amount:99.987654,payment_details:{}}]};
 
 test('env/sheet accounts drive the same real Sales sync, refunds, daily/dashboard/profit totals, store filters and idempotent writes',async()=>{
@@ -159,9 +152,9 @@ test('env/sheet accounts drive the same real Sales sync, refunds, daily/dashboar
   for(const mode of ['env','sheet']){
     const queries=[];class Client {async getReceipts(query){queries.push(plain(query));return [receipt,{...receipt,receipt_number:'refund',receipt_type:'REFUND',refund_for:'R/1',total_money:10,line_items:[],payments:[]}];}}
     const g=accountGraph({Client}),account=(await g.access().createLoyverseAccounts(mode==='env'?envConfig():sheetConfig()))[0],w=salesFixture();
-    const sync=await w.api.syncLoyverseDailySales({account,googleSheetsService:w.service,salesDate:'2026-11-01'});
-    const retry=await w.api.syncLoyverseDailySales({account,googleSheetsService:w.service,salesDate:'2026-11-01'});
-    const daily=await w.api.getGoogleSheetsDailySales({accountId:'first',googleSheetsService:w.service,salesDate:'2026-11-01'});
+    const sync=await w.api.syncLoyverseDailySales({account,googleSheetsService:w.service,coordinator:w.coordinator,salesDate:'2026-11-01'});
+    const retry=await w.api.syncLoyverseDailySales({account,googleSheetsService:w.service,coordinator:w.coordinator,salesDate:'2026-11-01'});
+    const daily=await w.api.getGoogleSheetsDailySales({accountId:'first',googleSheetsService:w.service,coordinator:w.coordinator,salesDate:'2026-11-01'});
     const dashboard=await w.api.getGoogleSheetsSalesDashboard({googleSheetsService:w.service,fromDate:'2026-11-01',toDate:'2026-11-30'});
     const profit=await w.api.getGoogleSheetsProfitSummary({accounts:metadata,costOverrides:[],expenses:[],googleSheetsService:w.service,year:'2026'});
     runs.push(plain({sync,retry,daily,dashboard,profit,queries,data:w.data,events:w.events}));

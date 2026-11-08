@@ -378,3 +378,30 @@ The final build uses a fresh source-only copy, only tracked .env.example, existi
 Focused tests exercise actual composition/config with fake Google and Loyverse clients: main-workbook selection, ignored/unevaluated obsolete override, missing/invalid IDs, access failure without fallback, metadata confidentiality and independent env rollback. Inherited tests retain six-column validation, ordering/disabled records, Sales sync/reporting, Expenses mappings, HTTP/error parity, financial/stock/payroll behavior, exact source inverses, runtime identities and browser/runtime/type graph guards. No new cycle or private cross-feature edge; application/domain/transport/route code is unchanged. Only composition and config production files change.
 
 Results are Codex-local, not independent CI or live integration verification. Workbook-wide reader access is an owner-reviewed operational risk; former separate-workbook deployments must copy the account tab privately before adopting this version or explicitly use env mode. No real tokens, production data, live provider calls, Vercel settings, deployment or merge were accessed/performed.
+
+
+## Sales sync reliability
+
+Base: main `277c0b31c76ed4605a91ffad303d218a7957bf84` (merged PR45); branch `fix/loyverse-sync-reliability`. Audit covers the sync application/server/HTTP source, four worksheet adapters/headers, root transport, reports and inherited executable history. The additive witness captures exact original/approved source hashes and every inherited fixture hash. No old fixture is regenerated. Current guards read actual code; historical guards invert only these exact approved changes.
+
+Baseline verification runs in a pristine source-only copy at /tmp/sales-sync-baseline: 551 tests pass with zero failures/skips, lint exits zero with only inherited unused shipmentRow warning, typecheck and one credential-free production build pass. An earlier working-copy test run overlapped edits and is invalid baseline evidence; the pristine run is authoritative.
+
+New synthetic coverage executes actual Sales application, adapter, aggregate composition, worksheets and Google client with fake HTTP/provider responses. It compares original/current row projections and daily/dashboard/profit outputs, and exercises every legacy partial combination, duplicate/colliding IDs, counts/headers/conflicts, zero receipts/empty sheets, provider errors, rejected/ambiguous Sheets requests, failed readback, late commits, independent coordinator clients sharing a durable-backend model, workbook-wide serialization, payload/grid limits, missing real coordinator and HTTP/auth-policy evidence. The model is not production infrastructure or proof of a deployed lock.
+
+Rollout is blocked pending a reviewed durable coordinator; current valid write requests return the existing 502 error envelope. Oversized dates are deliberately blocked pending the staged-publication design. No live provider, production records/credentials, Vercel configuration, user authentication policy, merge or deployment is accessed/changed. See [rollout and rollback](../../README.md#daily-sales-synchronization-rollout-gate) for operator actions, ambiguous-outcome quarantine and report consistency limits.
+
+
+| Check | Pristine main baseline | Frozen final branch |
+| --- | --- | --- |
+| npm test | 551 pass, zero failures/skips | **572 = 551 inherited + 21 new**, zero failures/skips |
+| npm run lint | Exit 0, inherited unused shipmentRow warning | Exit 0, same warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free npm run build | Pass, /tmp/sales-sync-baseline | Pass, /tmp/sales-sync-release-candidate |
+| Source routes / app-paths manifest | 23 pages / 35 APIs | Unchanged; manifest byte-identical |
+| Historical fixtures | 45 inherited witnesses | All 45 byte-identical; one additive reliability witness |
+
+The authoritative final build is a fresh source-only copy using only tracked .env.example and existing hardlinked dependencies, run with `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. All 414 production files match the built copy. SHA-256 of the unchanged route manifest is `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`. All 110 client JavaScript chunks exclude credential JSON configuration, the account reader and durable-intent implementation strings. Runtime/type module/file cycle checks, browser boundaries, real negative lint scopes and constructor/header/function identities pass; 126 canonical local links/fragments resolve.
+
+Preliminary validation exposed missing historical inverse entrypoints, an archived append implementation incorrectly used as a current lint-positive fixture, and four extra constructor config reads. Exact-source reconciliation/current-source lint loading and original-order name capture resolve these without weakening assertions or old fixtures. The final full suite ran against frozen production/test/lint bytes. Older development runs/builds invalidated by edits are not final evidence. Source routes, projections/financial calculations, worksheet headers, identifiers, configuration/env/provider credentials, authentication policy and package/lockfile remain unchanged; sync mutation/error behavior deliberately changes as documented.
+
+These are Codex-local results. Independent CI, live Google/Loyverse semantics/access, a real durable coordinator and operational cutover/rollback are unverified. The PR is suitable for architecture review, **not production enablement**: current HTTP composition has no coordinator and rejects valid sync writes with 502; oversized dates require the staged extension. No production data, credentials, deployment settings, merge or deployment were accessed/performed.
