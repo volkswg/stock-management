@@ -1,3 +1,4 @@
+import {productHistory} from "./helpers/product-master-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
@@ -137,5 +138,7 @@ test("Sheets writes preserve RAW financial values and the legacy USER_ENTERED de
 
 test("existing page URLs, dynamic segments and explicitly exported API methods remain stable", () => {
   const expected = JSON.parse(readArchive(new URL("./fixtures/route-contracts.json", import.meta.url), "utf8"));
-  assert.deepEqual(routeContracts(), expected);
+  const actual=routeContracts(),added=new Set(productHistory.newRoutes.map(route=>route.file));
+  assert.deepEqual(actual.filter(route=>!added.has(route.file)),expected);
+  assert.deepEqual(actual.filter(route=>added.has(route.file)),productHistory.newRoutes);
 });

@@ -1,0 +1,299 @@
+{
+  "base": "277c0b31c76ed4605a91ffad303d218a7957bf84",
+  "edits": {
+    ".env.example": {
+      "beforeHash": "0a96f4bf21d5ac32bed1ca8e140a11f6c8ca5f1418ad3d36825d318dc58e0a5e",
+      "afterHash": "8339a5c839938bf2b804efde4e501b2fcf0e712d2d310adc2209e18febc7b84a",
+      "changes": [
+        {
+          "afterStart": 1102,
+          "before": "",
+          "after": "# Optional Product Master write access. Both unset => new writes disabled.\n# Server-only: owner-issued staff key SHA-256 hashes, never raw staff keys.\n# See README Product Master setup; never use NEXT_PUBLIC_ prefixes.\nPRODUCT_MASTER_STAFF_KEYS_JSON=[]\nPRODUCT_MASTER_SESSION_SECRET=\n"
+        }
+      ]
+    },
+    "eslint.config.mjs": {
+      "beforeHash": "72d5846fd61054fe37c4282d4763a7920cdc77aab6b5d52bada0e54f50ca48b2",
+      "afterHash": "7b1dcd8ab706234cba08758e6c0decd52cc3c5c2d216ffe4883cf7f6395c83f5",
+      "changes": [
+        {
+          "afterStart": 0,
+          "before": "",
+          "after": "import {productMasterBoundaries} from \"./eslint/product-master-boundaries.mjs\";\n"
+        },
+        {
+          "afterStart": 2532,
+          "before": "",
+          "after": "...productMasterBoundaries,\n  "
+        }
+      ]
+    },
+    "eslint/orders-boundaries.mjs": {
+      "beforeHash": "d03649772295914db53a13f1a010cc0d810fbc2227459fcb5cbdaaf8f82a97ac",
+      "afterHash": "1e9f70c0f5a822aca04eaf8da19484601c18938644073e5cbbaa1d30c98b0799",
+      "changes": [
+        {
+          "afterStart": 3547,
+          "before": "",
+          "after": "|product-picker-port"
+        },
+        {
+          "afterStart": 3568,
+          "before": "",
+          "after": "$|@/modules/products/ui/ProductSelector"
+        }
+      ]
+    },
+    "src/app/orders/[id]/OrderDetailClient.tsx": {
+      "beforeHash": "f702aeddc0dc7ce8eddf5089a8be3d739819a3fdd76ddc8d57eeb6e200e5f7b7",
+      "afterHash": "5bb2e648fb989836c615573ccaf0614f98b845cc5a980e10cc2ce68b4256b5b2",
+      "changes": [
+        {
+          "afterStart": 14,
+          "before": "",
+          "after": "\nimport { ProductSelector } from \"@/modules/products/ui/ProductSelector\";\nimport type { OrderProductPickerPort } from \"@/modules/orders/ui/[id]/product-picker-port\";"
+        },
+        {
+          "afterStart": 963,
+          "before": "",
+          "after": "const productPicker: OrderProductPickerPort = { render: input => <ProductSelector {...input} /> };\n\n"
+        },
+        {
+          "afterStart": 1209,
+          "before": "",
+          "after": "productPicker={productPicker} "
+        }
+      ]
+    },
+    "src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts": {
+      "beforeHash": "2a3bc2860c7f4e5962ff27e9ca122ca2d338a55cd21d8dc08ce7fe2f7eb2272d",
+      "afterHash": "2b088c9b9f3ef90fdcab2662ddf280267150d189bc1d08a354d2da2e9964ddd3",
+      "changes": [
+        {
+          "afterStart": 3015,
+          "before": "",
+          "after": "findMetadata(lookup: { metadataId?: number; metadataKey?: string }): Promise<Array<{ metadataId?: number; metadataKey?: string; metadataValue?: string }>> {\n    const result = await this.request<{ matchedDeveloperMetadata?: Array<{ developerMetadata: { metadataId?: number; metadataKey?: string; metadataValue?: string } }> }>(\n      \"/developerMetadata:search\", { method: \"POST\", body: JSON.stringify({ dataFilters: [{ developerMetadataLookup: { ...lookup, visibility: \"DOCUMENT\" } }] }) },\n    );\n    return (result.matchedDeveloperMetadata ?? []).map(match => match.developerMetadata);\n  }\n\n  async worksheetId(title: string): Promise<number> {\n    const result = await this.request<GoogleSpreadsheetResponse>(\"?fields=sheets.properties(sheetId,title)\", { method: \"GET\" });\n    const matches = result.sheets?.filter(sheet => sheet.properties?.title === title) ?? [];\n    if (matches.length !== 1 || !Number.isInteger(matches[0].properties?.sheetId)) throw new Error(\"Required worksheet is missing or invalid.\");\n    return matches[0].properties!.sheetId!;\n  }\n\n  async updateSpreadsheet(requests: unknown[]): Promise<void> {\n    await this.request(\":batchUpdate\", { method: \"POST\", body: JSON.stringify({ requests }) });\n  }\n\n  async "
+        }
+      ]
+    },
+    "src/modules/orders/ui/[id]/OrderDetailPage.tsx": {
+      "beforeHash": "810c2fd0ca1e50d781b87557cacd5072eda221bdc9cd7c25731e0c4f37465bf4",
+      "afterHash": "44ff19a7d03c04e5bd273ba6b823bc1af75592c906c15f67e6a7003235df2991",
+      "changes": [
+        {
+          "afterStart": 718,
+          "before": "",
+          "after": "\";\nimport { OrderAdditionalProductLinks } from \"../OrderAdditionalProductLinks\";\nimport { OrderProductLinkProvider } from \"../OrderProductLinkProvider\";\nimport { OrderItemProductLink } from \"../OrderItemProductLink\";\nimport type { OrderProductPickerPort } from \"./product-picker-port"
+        },
+        {
+          "afterStart": 1815,
+          "before": "",
+          "after": ", productPicker"
+        },
+        {
+          "afterStart": 1885,
+          "before": "",
+          "after": "tPickerPort;\n  productPicker?: OrderProduc"
+        },
+        {
+          "afterStart": 3729,
+          "before": "",
+          "after": "productPicker ? <OrderProductLinkProvider orderId={order.id} itemIds={order.productImages.map(image => image.id).join(\"|\")}><OrderContent order={order} onOrderChange={setOrder} shipmentPicker={shipmentPicker} productPicker={productPicker} /><OrderAdditionalProductLinks orderId={order.id} visibleItemIds={order.productImages.map(image => image.id)} picker={productPicker} /></OrderProductLinkProvider> : "
+        },
+        {
+          "afterStart": 4493,
+          "before": "",
+          "after": "  productPicker,\n"
+        },
+        {
+          "afterStart": 4635,
+          "before": "",
+          "after": "tPickerPort;\n  productPicker?: OrderProduc"
+        },
+        {
+          "afterStart": 19196,
+          "before": "",
+          "after": "\n                              {productPicker ? <OrderItemProductLink orderId={order.id} itemId={image.id} productCode={image.productCode} imageUrl={image.imageUrl} picker={productPicker} /> : null}"
+        }
+      ]
+    }
+  },
+  "newFiles": [
+    "src/app/api/orders/[id]/items/[itemId]/product/route.ts",
+    "src/app/api/orders/[id]/product-links/route.ts",
+    "src/app/api/product-access/route.ts",
+    "src/app/api/products/[id]/route.ts",
+    "src/app/api/products/creations/[requestId]/cancel/route.ts",
+    "src/app/api/products/route.ts",
+    "src/app/api/products/suggestions/route.ts",
+    "src/composition/product-master-http.ts",
+    "src/composition/product-master.ts",
+    "src/config/product-master-access.ts",
+    "src/infrastructure/http/read-json.ts",
+    "src/infrastructure/persistence/google-sheets/guarded-write.ts",
+    "src/infrastructure/security/product-staff-session.ts",
+    "src/modules/orders/application/ports/product-links.ts",
+    "src/modules/orders/application/product-links.ts",
+    "src/modules/orders/infrastructure/google-sheets/product-links.ts",
+    "src/modules/orders/product-link-contracts.ts",
+    "src/modules/orders/product-link-server.ts",
+    "src/modules/orders/ui/OrderAdditionalProductLinks.tsx",
+    "src/modules/orders/ui/OrderItemProductLink.tsx",
+    "src/modules/orders/ui/OrderProductLinkProvider.tsx",
+    "src/modules/orders/ui/[id]/product-picker-port.ts",
+    "src/modules/products/application/ports/product-store.ts",
+    "src/modules/products/application/products.ts",
+    "src/modules/products/contracts.ts",
+    "src/modules/products/domain/validation.ts",
+    "src/modules/products/infrastructure/google-sheets/product-store.ts",
+    "src/modules/products/server.ts",
+    "src/modules/products/ui/ProductSelector.tsx",
+    "src/modules/products/ui/ProductStaffAccess.tsx",
+    "src/modules/products/ui/api.ts",
+    "src/shared/lib/request-id.ts"
+  ],
+  "newHashes": {
+    "src/app/api/orders/[id]/items/[itemId]/product/route.ts": "e30fea79d643b9f4b40199fedd3ecd63240acf60e64f2f5c6525650d89238ccc",
+    "src/app/api/orders/[id]/product-links/route.ts": "1e633c064143c9b2825a3ba4c20ad7cc3810efd74985e27359935e38b79a5593",
+    "src/app/api/product-access/route.ts": "186d9ac583362a717befdc14225ed64e584a32d7a8813d62b9ba9289c5c650ad",
+    "src/app/api/products/[id]/route.ts": "623eed5aba4b39252ea944649f45fcd8201d8d7f871e8a501881145861d9b33b",
+    "src/app/api/products/creations/[requestId]/cancel/route.ts": "b7b4b975bacdedb739fb30058746476b4b74f7e429a8c609c9aecca6d87b23c4",
+    "src/app/api/products/route.ts": "3605ab6f749b21a8ac3d174b0c094651059ba4c38dad2ef849de673d16ec1cb9",
+    "src/app/api/products/suggestions/route.ts": "e3acb70572598ff3f447045652de5dfb1e61f983f5e6ff4559d8239d16e85db0",
+    "src/composition/product-master-http.ts": "ff7a8cab5611bc12f66fccc04065d4242517a2ba6c9d74b245acf6c49fa61ada",
+    "src/composition/product-master.ts": "4a16537340874d4c425833ff0e3b83fd9d60278c45fd7100e2bf9b558d2902c0",
+    "src/config/product-master-access.ts": "1ca0e36920d11a79cc251662a3e69d91a5ca5203e7dd0c98f4cb391df1520eff",
+    "src/infrastructure/http/read-json.ts": "d709ebac28b0ade0176f08a0210cc4362aa5dd0409fb0b567e5f0d3d69d50518",
+    "src/infrastructure/persistence/google-sheets/guarded-write.ts": "67c4ec26c5769ae8ac72c9015d802f20fd9d2a51b8135ab008821915a05e5764",
+    "src/infrastructure/security/product-staff-session.ts": "786e991a690dc8e78c9b42dbbc975a9de1bb59be1f4e856a61dad2bf29bb514c",
+    "src/modules/orders/application/ports/product-links.ts": "e74f1a3e83f42c51247f70edcb8d1b5496eb247a7152329bf8e0d6be031bac92",
+    "src/modules/orders/application/product-links.ts": "04255e1aa40b28fda459ca4ac4eb8df28d5f89fadf5b4225b38ab2657a7ecf80",
+    "src/modules/orders/infrastructure/google-sheets/product-links.ts": "eb46157a80c2af4be03eb056c924352e1470d7ff83996317d4b57947f69bcd8d",
+    "src/modules/orders/product-link-contracts.ts": "3efd6e4a12d13af550e0f15049459815886317fdc0565b3dac72b097479e17bb",
+    "src/modules/orders/product-link-server.ts": "2e5fc3b84df8299c92ce342dfe629eb57813d4c81ada1a2bba0d359f0f023a7f",
+    "src/modules/orders/ui/OrderAdditionalProductLinks.tsx": "ce6e3088c43db5f5c35bd98010a118016379e0ec614ebc2282f7ab76840f8830",
+    "src/modules/orders/ui/OrderItemProductLink.tsx": "c3a713d47c0e0740a94f9a75f467334a6c48b90edd9cf3cb082e184e7f602937",
+    "src/modules/orders/ui/OrderProductLinkProvider.tsx": "60c3fd76680000129fd448ab5b2e0f435990afe941478da16bcf86169d5014d1",
+    "src/modules/orders/ui/[id]/product-picker-port.ts": "8f00561f1816b078c2c1c6c4c6d91a8a22c09456b777ba300d65dca4952a8977",
+    "src/modules/products/application/ports/product-store.ts": "f9cb15c81f4663d0fddb0703744e1dba4d4deb5f5fbb05d1364462ee5393b671",
+    "src/modules/products/application/products.ts": "964b33c39776791b2169036b6c1f8a9013b8d795792e89374c232d2ba531614e",
+    "src/modules/products/contracts.ts": "a1613bf853c57c86e782f730d8b905e14ffa1ac61454695ee1558b291d8c7265",
+    "src/modules/products/domain/validation.ts": "a6067b1f6837b76eea525eb3616ee182b6a9034e10acf96802ebea90c5c6004a",
+    "src/modules/products/infrastructure/google-sheets/product-store.ts": "cee2f381dacedd1e878809cd97463eec26b0727b5bb527f80fbf7dcc888785cc",
+    "src/modules/products/server.ts": "73679c5b2b4f5960e337b6c2033ffd88c0570a6ec11d711cffcbcea7d9538508",
+    "src/modules/products/ui/ProductSelector.tsx": "a8bc42340a320dc9a1be78edbf84dc0e7dd082eebf621a54227a42be20e0b4e0",
+    "src/modules/products/ui/ProductStaffAccess.tsx": "301b20a98486e45ec13012662d5e88308bc6a3323d81eacf7a19a36d18468dda",
+    "src/modules/products/ui/api.ts": "8e7ccf62b5c2639b66a7a3029b5fff531b7a714e4a2a7ab8891521b26d37271c",
+    "src/shared/lib/request-id.ts": "19302563b541fa30f7e7f0cb0178e4c4a0ca5124f3c87be59ae7df6c83461069"
+  },
+  "fixtureHashes": {
+    "tests/fixtures/expenses-business-before.json": "e190129217a65c65c74548ae0eea93748c9cf01d88a89f70ec1fe7ed68263eed",
+    "tests/fixtures/external-infrastructure-before.json": "8902b3cad513a06baf4793de4e1cb4ae3a4584ceca7d49e906b5af7ea3907e51",
+    "tests/fixtures/externals-retirement-before.json": "d9e1642272c69e3d58966df28e5540111e822b44709ea6a1ab4165b841a50bcd",
+    "tests/fixtures/features-retirement-before.json": "2754203370c11de4b13e36af7ac0337e5081de7463e56409ac96c42184377b20",
+    "tests/fixtures/final-cleanup-before.json": "6bbd370bfc23d025bac5a1d6c86da13de2def8368cf8274fbd2eef3b51220407",
+    "tests/fixtures/google-infrastructure-before.json": "8a840db4d19ce6caef46a2b6af62adc3272b5bdc0ea1d48c93b665657ba76034",
+    "tests/fixtures/google-infrastructure-consumers.json": "c23894cf3307b34e2ec9877abf08e24a5b646a2fa2190a783a6a215bb2c110ac",
+    "tests/fixtures/hr-application-before.json": "bb6e61287268f70eeb29d5b25ca92d280b57c0f5a1208cb729b6c631a3e62f6e",
+    "tests/fixtures/hr-payroll-before.json": "0c60c5b420e8345e2cc5806cc78048197592f1b854d8eb6d5439b6665d53d622",
+    "tests/fixtures/hr-worksheets-before.json": "41e3dd0fb6e6b97cd5a72c80cec200bebfe3baa48bd7f949a02d99ff667ee5d6",
+    "tests/fixtures/inventory-application-before.json": "58f303c4ec4f594437f43361247b41dff4b5568334b90559e50f1d23ca984e17",
+    "tests/fixtures/inventory-employee-directory-before.json": "e9725fc76fba3453bb7f6c5a4eae2a2e4d4a28064a5102e464756f000d178533",
+    "tests/fixtures/inventory-sales-query-before.json": "81f09a340191bc5b326a0eafa55abdcd99214f68fe5b24bf930af619a1b00113",
+    "tests/fixtures/inventory-worksheets-before.json": "99a75f182b2811a5be77d95705c7ec4a405e3719e6a9e8f201f93ac4516472f4",
+    "tests/fixtures/loyverse-accounts-before.json": "5d305f0a2d825cf0583367b11fd96ecc5a71e8882c00add5184712574634f102",
+    "tests/fixtures/loyverse-workbook-before.json": "0063ac8a27d6ce31b7579f111ed05f58064431adb49ed7892adcee658b14ac81",
+    "tests/fixtures/movement-schema-before.json": "2c6cc05eb0709122cd19a82468849310eaa1f32ac20816cd09c049fe0c315425",
+    "tests/fixtures/orders-detail-before.json": "f66cb601fc3279fdd3929212cd740625b05bfcbddc1d3f4ae730d19c8b27ab59",
+    "tests/fixtures/orders-line-before.json": "9d660771fb5d8527a6c72114bf781aef673062d08eebb68ac0e67174a836ec72",
+    "tests/fixtures/orders-picker-seam.json": "d61e119ff0710acdd0447ec976ad14124be2b519b635e37d5a07f41cb3d9a113",
+    "tests/fixtures/orders-read-model.json": "4f9f74473e11ba5c7c4f14909d9d903149082197e337c9ff3523602381ae23f2",
+    "tests/fixtures/orders-seam-list.json": "6046e60a459cf78a8ef89e3195f30f2c66546f3673983d5f6ab295fa4169c873",
+    "tests/fixtures/orders-seam-preserved.json": "d5a97e772bf9fed81c43f757a80c358ded7ad6405f2b41eb1709292c37d1f7cc",
+    "tests/fixtures/orders-sheet-types-before.json": "bcc38ae34b819d99d762c8ad97eb20eb5b23dc90d02ef4ed2372de9211730d1f",
+    "tests/fixtures/orders-type-shapes.json": "3e3760f14b3f5f9eb7cfb8c7f9c0c8a4760bd88e2913d92ecc76772e3e87c15c",
+    "tests/fixtures/orders-ui-structure.json": "53518ab9863a5843fccdb5fe2cf6b64b1b09cb676056b1bff109ff1cdcf0b006",
+    "tests/fixtures/remaining-worksheets-before.json": "1dc93c60b3c2d6e4e90b6295254548fd5c7dc4bc0cfd4fb1bba9c96a5debbab4",
+    "tests/fixtures/route-contracts.json": "0c703c2032ebd353298d77f4553f610151270e900df8055365ca0d7d3e4b77eb",
+    "tests/fixtures/sales-application-before.json": "7c336bbbee3c6ebdd11bb036cb6280610156956665a0dff40fe759c3524b04a5",
+    "tests/fixtures/sales-worksheets-before.json": "20beded7f2b24708fe623bc4654f5aaabfab4718b74209e89414093d486d0f6f",
+    "tests/fixtures/shipments-browser-client.json": "381df5f6fd75468097ed5c2892c88ca5097df2811c614ff3ff33d4c696648232",
+    "tests/fixtures/shipments-create-before.json": "d149cf0bb8c4ea57c60e8680a2adf39a0e897787a0650e09f20c1cae372a5eba",
+    "tests/fixtures/shipments-drive-before.json": "302d85a679e6292cfb1092e265eee7edd9a9acf8fd7b27333e678be3ffa89e17",
+    "tests/fixtures/shipments-dto-before.json": "c788c4b5655eb122615babec7d0f4d5c0c07c68ce8432c9babc965bebdc08024",
+    "tests/fixtures/shipments-enum-before.json": "8d3d9674f9532650299cade14abec692ee3cfbbd65bfbe968b4c26bcb027e78f",
+    "tests/fixtures/shipments-http-before.json": "6feb068fb15329ab3f880b938fcd03aada199345181cb4186fcea37c5ea1767d",
+    "tests/fixtures/shipments-link-before.json": "a95769b4b699da28a07f2fe129d475dcc5e2b065d622df8466aef845f74d1594",
+    "tests/fixtures/shipments-list-before.json": "2428c587bfb8dbac7a4a2161c14e3cd78df43c321c6c7ba733bcd788d9e61952",
+    "tests/fixtures/shipments-read.json": "d61a83e578239d71d8d765ba5d24d916d4146a9bf8b0c85c80ca18c1878f27b8",
+    "tests/fixtures/shipments-status-before.json": "ac130c6528e49b19efbcdd31efc4956c3c7edd552ea16155b63d5e725418343e",
+    "tests/fixtures/shipments-structure.json": "6cedf4321ef781c180132f27d347eae42e526721d27e00006a0cc3c437b91ce8",
+    "tests/fixtures/shipments-ui-relocation.json": "55eced0ac464be297058b4cc140772cbed9ee75332e4bd7beb2c7069232119fc",
+    "tests/fixtures/shipments-validation-before.json": "d06aa6b618c631c704eaaff30dad829e29da9859d6d9c0a1762fb9e20a2f3ccd",
+    "tests/fixtures/user-state-worksheet-before.json": "4b971b924f6722d81b799b91fa4a7dd4da701b887b543ba58c6d145194b4b3bc",
+    "tests/fixtures/worksheet-ownership-before.json": "9e26b67739dcb1c94534164abdd85878c8a9aa10528e17ef78c987f2dc67be1d"
+  },
+  "newRoutes": [
+    {
+      "file": "api/orders/[id]/items/[itemId]/product/route.ts",
+      "path": "/api/orders/[id]/items/[itemId]/product",
+      "kind": "api",
+      "methods": [
+        "GET",
+        "PATCH"
+      ]
+    },
+    {
+      "file": "api/orders/[id]/product-links/route.ts",
+      "path": "/api/orders/[id]/product-links",
+      "kind": "api",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "file": "api/product-access/route.ts",
+      "path": "/api/product-access",
+      "kind": "api",
+      "methods": [
+        "DELETE",
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "file": "api/products/[id]/route.ts",
+      "path": "/api/products/[id]",
+      "kind": "api",
+      "methods": [
+        "GET",
+        "PATCH"
+      ]
+    },
+    {
+      "file": "api/products/creations/[requestId]/cancel/route.ts",
+      "path": "/api/products/creations/[requestId]/cancel",
+      "kind": "api",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "file": "api/products/route.ts",
+      "path": "/api/products",
+      "kind": "api",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "file": "api/products/suggestions/route.ts",
+      "path": "/api/products/suggestions",
+      "kind": "api",
+      "methods": [
+        "POST"
+      ]
+    }
+  ]
+}

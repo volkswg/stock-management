@@ -73,7 +73,7 @@ ordersBoundaries.push(
     files: ["src/app/orders/[[]id[]]/OrderDetailClient.tsx"],
     rules: {
       "no-restricted-imports": ["error", { patterns: [{
-        regex: "^(?!@/modules/orders/ui/\\[id\\]/(?:OrderDetailPage|shipment-picker-port)$|@/modules/shipments/ui/api$|@/modules/shipments/contracts$).*",
+        regex: "^(?!@/modules/orders/ui/\\[id\\]/(?:OrderDetailPage|shipment-picker-port|product-picker-port)$|@/modules/products/ui/ProductSelector$|@/modules/shipments/ui/api$|@/modules/shipments/contracts$).*",
         message: "Orders client composition may wire only its UI/port, the existing Shipment browser client and public enum.",
       }] }],
       "no-restricted-syntax": noDynamicServerBypass,

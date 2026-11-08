@@ -42,7 +42,7 @@ The build currently prerenders UI without fetching production records. Clearing 
 - Check default vs explicitly passed ranges, exact payload ordering/types, RAW/USER_ENTERED/INSERT_ROWS, partial writes, clock/ID ordering, enum/error/constructor/header identity and old direct/barrel signatures. Preserve money/quantity/nullability/floating-point quirks and Bangkok dates.
 - Run actual flat-config positive/negative import fixtures, TypeScript-resolved runtime **and** type-inclusive file/module graphs, re-export/alias resolution and browser reachability. Preserve known named legacy erased debt, not broad exemptions. Scoped graphs do not audit every package internals or unextracted legacy aggregation.
 - Compare `tests/fixtures/route-contracts.json` without regenerating it: 23 page entries / 35 API files, dynamic segments and explicit HTTP exports/re-exports. It does not model future rewrites/intercepting routes/middleware/implicit HEAD/OPTIONS or full response semantics. Compare build manifests too; Next-generated _not-found/icon entries are not extra page sources.
-- Compare original/final `.next/server/app-paths-manifest.json` byte-for-byte. Current expected SHA-256: `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
+- For structural-only changes compare original/final `.next/server/app-paths-manifest.json` byte-for-byte. Authorized feature additions must preserve every old entry and assert the exact added entries separately. Historical expected SHA-256: `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
 - Review diff for unapproved route/UI/CSS/provider/schema/env/package/lockfile changes. Report unverified paths and discovered defects separately. Structural changes must not silently repair business behavior.
 
 ## Documentation consolidation results
@@ -378,3 +378,49 @@ The final build uses a fresh source-only copy, only tracked .env.example, existi
 Focused tests exercise actual composition/config with fake Google and Loyverse clients: main-workbook selection, ignored/unevaluated obsolete override, missing/invalid IDs, access failure without fallback, metadata confidentiality and independent env rollback. Inherited tests retain six-column validation, ordering/disabled records, Sales sync/reporting, Expenses mappings, HTTP/error parity, financial/stock/payroll behavior, exact source inverses, runtime identities and browser/runtime/type graph guards. No new cycle or private cross-feature edge; application/domain/transport/route code is unchanged. Only composition and config production files change.
 
 Results are Codex-local, not independent CI or live integration verification. Workbook-wide reader access is an owner-reviewed operational risk; former separate-workbook deployments must copy the account tab privately before adopting this version or explicitly use env mode. No real tokens, production data, live provider calls, Vercel settings, deployment or merge were accessed/performed.
+
+## Product Master and Order integration
+
+**Historical initial-head evidence, superseded for approval by the [guard capacity review](#product-guard-capacity-review).** The 575-pass result below did not model Google's character quota and does not certify a sustainable coordinator.
+
+Base latest main `277c0b31c76ed4605a91ffad303d218a7957bf84` (merged PR45); branch feat/product-master-order-integration. Draft PR46 sync work is excluded. Baseline is the pristine matching tree in /tmp/sales-sync-baseline:551 tests, no failures/skips; lint exit0 with inherited shipmentRow warning only; typecheck and isolated credential-free build successful. Evidence reused for this exact base rather than rebuilding it.
+
+Focused checks execute actual new application/adapter/client/HTTP code with fake Sheets, staff settings, clocks and atomic metadata constraints. Deferred concurrent writes, lost responses, provider failure, stale/reused requests, cancellation racing delayed creation, post-write reads, duplicate/invalid rows and K preservation are covered. Real legacy Order mutation/image/Web-create adapters run against fake transport; inherited LINE/Web/financial suites remain. The standalone offline Chromium check (`node tests/browser/product-master.mjs`, with an isolated credential-free dev source at PRODUCT_UI_BASE_URL) intercepts every API/image/external request, executing real new HTTP/app/adapters with fake Sheets: upload without auto-create, staff login, explicit duplicate review, create/link partial failure/reload/retry, relink/archive/unlink, no-image items and mobile layout. No browser automation dependency is added.
+
+Final Codex-local results (independent CI is unverified): Historical route fixture and all45 inherited fixtures are preserved byte-for-byte. Old23 pages/35 APIs must remain exact; seven new API routes yield23 pages/42 APIs. Historical source inverses are exact bounded patches; current graph/lint/executable/browser tests read physical source. Production/CI/live provider behavior is unverified; setup/sharing/metadata capacity and uniqueness behavior must be checked in owner-approved staging. No real credentials, provider calls, production data, operational scripts, deployment/settings changes or merge are used.
+
+| Gate | Baseline | Final |
+| --- | --- | --- |
+| npm test | 551 pass | **575 = 551 inherited +24 new**, zero failures/skips |
+| npm run lint | Exit0, inherited shipmentRow warning | Exit0, same warning only |
+| npm run typecheck | Pass | Pass |
+| Isolated credential-free production build | Pass, pristine matching main | Pass, /tmp/product-master-final |
+| Route source / build manifest | 23 pages /35 APIs | 23/42; every old mapping unchanged plus exactly seven new APIs |
+| History / current graphs | 45 immutable fixtures; no cycles/browser violations | All45 byte-identical; independent runtime/type/browser graphs and negative guards pass |
+| Built source / client artifacts | — | All 446 production source/assets match; all 112 client JS chunks exclude staff config/signing, guards and Google credentials |
+| Offline Chromium / documentation | — | Complete synthetic workflow and 390px layout pass;110 local links/fragments resolve |
+
+Final build uses the existing dependencies, only tracked .env.example and `env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build`. App-paths SHA-256 is `31139b4e65abd0574be96d1777fb3ba91002518b5f402c851528c6aa1bb5a157`; the historical manifest/route fixture is unchanged and checked as an exact subset plus the seven authorized additions. Preliminary runs found historical inventory/route assertions requiring bounded reconciliation and a test-script lint naming issue; these were corrected without fixture regeneration, test removal, business changes or repeated production builds. Final full suite runs against the frozen physical implementation. Existing API sources, financial rules, worksheet classes/headers, LINE/Loyverse, package/lockfile and aggregate configuration remain unchanged. PR46 is closed/unmerged and not an ancestor; its Sales changes are excluded.
+
+## Product guard capacity review
+
+Review base is PR47 head `89b936e2e051f3d1743f126315a5252b95971aea`, against main `277c0b31c76ed4605a91ffad303d218a7957bf84`. PR46 remains excluded. The matching prior head's baseline is 575 tests, lint/typecheck/build/browser checks passing, with the inherited shipmentRow warning only. No additional infrastructure or production-source change is introduced: the review is blocked on the [durable executor/journal decision](../architecture/decisions.md#product-write-coordination-review-blocker). PR47 is draft/not ready for approval.
+
+The Google fake now enforces 30,000 key/value characters separately for spreadsheet and sheet scopes, with atomic rejection of overflow. Six additive tests execute the actual current guard/adapters: exhaustion before 200 creates; failure/retry/cancellation behavior at capacity with unchanged rows/markers; separate scope budgets; a deliberately unsafe guard-GC/late-POST duplicate counterexample; permanent cancellation against a timed-out but still pending POST; and recovery after committed-write verification failures. All 46 inherited fixtures and existing source witnesses remain unchanged. Existing high-contention/idempotency/stale-write/financial/LINE/Web/browser tests remain in place.
+
+The fixed-slot prototype and its model tests are excluded from the PR. Passing that assumed CAS model did not establish the required concurrent provider isolation guarantee. No test certifies an unimplemented durable executor, its availability or high-volume scalability. Final results below are Codex-local; fake-provider counterexamples demonstrate blockers, not safe production behavior. No real Google/LINE/Loyverse calls, credentials, data/settings, deployments, new PR or merges are involved.
+
+| Review gate | Result |
+| --- | --- |
+| Capacity witness | 139 creates use 29,885 spreadsheet metadata characters; create 140 and cancellation fail atomically without changing rows/markers |
+| npm test | **581 = 575 inherited + 6 review tests**, zero failures/skips |
+| npm run lint | Exit0; inherited unused shipmentRow warning only |
+| npm run typecheck | Pass |
+| Isolated credential-free build | Pass; /tmp/product-guard-review-final, existing dependencies, no application env files, env -i |
+| Offline Chromium | Existing full synthetic Product/Order workflow and 390px layout pass with quota-aware fake |
+| Source / history / routes | All 446 production files byte-identical to initial PR47 and built copy; all 46 old fixtures unchanged; 23 pages/42 APIs unchanged |
+| Manifest / client artifacts | Initial PR47 manifest byte-identical, SHA256 31139b4e65abd0574be96d1777fb3ba91002518b5f402c851528c6aa1bb5a157; all 112 client JS chunks exclude credentials/guard implementation |
+| Dependency / docs | Runtime/type/browser and negative architecture guards pass; 117 local links/fragments resolve |
+| Approval | **BLOCKED**: sustainable executor/journal is designed, not implemented or provisioned |
+
+No source/fixture rewrite, test removal, new provider/database/dependency/configuration, production data access, merge, deployment or new PR. Failure-injection tests validate the retained guard's limits/recovery and show why guard GC is unsafe; they do not demonstrate a completed replacement. Independent CI and actual provider concurrency remain unverified. The earlier 575-test report remains historical evidence; its capacity interpretation is explicitly corrected.

@@ -1,3 +1,4 @@
+import {restoreProductSource} from "./product-master-history.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -6,7 +7,7 @@ import ts from "typescript";
 const baseline = JSON.parse(readFileSync(new URL("../fixtures/orders-picker-seam.json", import.meta.url), "utf8"));
 const hash = text => createHash("sha256").update(text).digest("hex");
 const printer = ts.createPrinter();
-const parse = file => ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+const parse = file => ts.createSourceFile(file, restoreProductSource(file), ts.ScriptTarget.Latest, true);
 const statements = source => source.statements.filter(n => !ts.isImportDeclaration(n) && !ts.isExportDeclaration(n));
 const name = n => n.name?.text ?? (ts.isVariableStatement(n) ? n.declarationList.declarations.map(d => d.name.getText()).join(",") : n.kind.toString());
 

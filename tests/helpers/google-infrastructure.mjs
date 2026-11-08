@@ -1,3 +1,4 @@
+import {restoreProductSource} from "./product-master-history.mjs";
 import {retirement,canonicalExports,registryProjection,worksheetProjection,archivedRelative,readEvidence} from "./retirement-history.mjs";
 import {cleanupHistory} from "./cleanup-history.mjs";
 import { remainingBefore, expenseRecords } from "./remaining-worksheet-history.mjs";
@@ -22,7 +23,7 @@ export function assertGoogleHistory(file,expected) {
  const entry=googleBefore.moves[file];
  if(entry){
   assert.equal(entry.sha256,hash(entry.source));assert.equal(expected,entry.sha256);
-  let restored=readFileSync(entry.to,"utf8");for(const [from,to] of Object.entries(entry.imports))restored=restored.replaceAll(`"${to}"`,`"${from}"`);
+  let restored=restoreProductSource(entry.to);for(const [from,to] of Object.entries(entry.imports))restored=restored.replaceAll(`"${to}"`,`"${from}"`);
   assert.equal(restored,entry.source,`${file}: only reviewed imports may change`);
   const ast=parse(file,readEvidence(file,"utf8"));assert.ok(ast.statements.length>0);
   for(const statement of ast.statements){assert.ok(ts.isExportDeclaration(statement)&&statement.exportClause&&ts.isNamedExports(statement.exportClause),file);assert.ok(statement.moduleSpecifier.text.startsWith("@/infrastructure/"),file);}

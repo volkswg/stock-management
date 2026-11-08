@@ -100,6 +100,24 @@ export class GoogleSheetsClient {
     });
   }
 
+  async findMetadata(lookup: { metadataId?: number; metadataKey?: string }): Promise<Array<{ metadataId?: number; metadataKey?: string; metadataValue?: string }>> {
+    const result = await this.request<{ matchedDeveloperMetadata?: Array<{ developerMetadata: { metadataId?: number; metadataKey?: string; metadataValue?: string } }> }>(
+      "/developerMetadata:search", { method: "POST", body: JSON.stringify({ dataFilters: [{ developerMetadataLookup: { ...lookup, visibility: "DOCUMENT" } }] }) },
+    );
+    return (result.matchedDeveloperMetadata ?? []).map(match => match.developerMetadata);
+  }
+
+  async worksheetId(title: string): Promise<number> {
+    const result = await this.request<GoogleSpreadsheetResponse>("?fields=sheets.properties(sheetId,title)", { method: "GET" });
+    const matches = result.sheets?.filter(sheet => sheet.properties?.title === title) ?? [];
+    if (matches.length !== 1 || !Number.isInteger(matches[0].properties?.sheetId)) throw new Error("Required worksheet is missing or invalid.");
+    return matches[0].properties!.sheetId!;
+  }
+
+  async updateSpreadsheet(requests: unknown[]): Promise<void> {
+    await this.request(":batchUpdate", { method: "POST", body: JSON.stringify({ requests }) });
+  }
+
   async clearValues(worksheetName: string, range: string): Promise<void> {
     await this.request(
       `/values/${this.encodeRange(worksheetName, range)}:clear`,

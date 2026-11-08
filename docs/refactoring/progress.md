@@ -1,10 +1,16 @@
 # Refactoring progress and evidence
 
-## Current merged state and single-workbook account configuration
+## Product Master review: blocked on durable write coordination
 
-Verified main is `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), with the external/features retirements and PR43 account source complete. The tree matches the previously verified PR44 head with 550 passing tests and successful lint/typecheck/isolated build.
+**PR47 is draft and not ready for SA approval/deployment.** Review verified a 30,000-character spreadsheet metadata limit, correcting the prior entry-count claim. The actual guard exhausts this allocation after roughly a hundred synthetic creations; no data is rewritten on overflow. A deferred HTTP counterexample demonstrates why deleting guards is unsafe. Production code is deliberately unchanged while a durable executor/journal infrastructure decision is pending. See [decision/trade-offs](../architecture/decisions.md#product-write-coordination-review-blocker) and [review evidence](verification.md#product-guard-capacity-review).
 
-Branch `fix/loyverse-single-workbook` makes sheet mode read `loyverse_accounts` only from the existing GOOGLE_SHEETS_SPREADSHEET_ID. The dedicated account-workbook variable/AppConfig field and separate-workbook restriction are removed. No workbook/JSON fallback is added; env-mode rollback, six-column validation, ordering and server-only credential handling remain. Historical source inverses preserve old fixture bytes and assertions. See [verification](verification.md#loyverse-single-workbook-support) and [owner instructions](../../README.md#loyverse-configuration), including workbook-wide token visibility. No production migration, ACL/Vercel change or deployment is performed.
+Base `277c0b31c76ed4605a91ffad303d218a7957bf84` is latest main / merged PR45. Branch `feat/product-master-order-integration` excludes draft PR46. Products owns its contracts/rules/application/port/Google adapter/server/UI; Orders owns a separate link port, K-only adapter, revision contract/server and picker interface. App/root composition connects them without new cross-feature private edges. Existing Order JSON, A:J header/class identity, Web/LINE flows, providers and financial calculations are preserved.
+
+The feature adds explicit duplicate-reviewed creation, immutable IDs/attribution, soft archival, guarded revisions/retries, ambiguous-outcome cancellation/recovery and optional item links. New writes require scoped staff sessions; existing authentication policy is unchanged. A separate additive witness retains all45 earlier fixtures and reconciles only exact reviewed changes before historical guards. Native metadata capacity, hash collisions, external row edits and live staging limits are explicit in [setup/rollback](../../README.md#product-master-and-order-item-identification). [Verification](verification.md#product-master-and-order-integration) records actual local checks. No production data/settings, merge or deployment are touched.
+
+## Merged single-workbook account configuration (PR45)
+
+PR45 makes sheet mode read loyverse_accounts only from the existing GOOGLE_SHEETS_SPREADSHEET_ID. Env rollback, account validation/order and server-only credential handling remain; the dedicated workbook setting/fallback are removed. Its verified main result is551 tests, lint/typecheck and isolated build successful. See [account evidence](verification.md#loyverse-single-workbook-support) and [owner instructions](../../README.md#loyverse-configuration).
 
 ## Historical HR completion evidence (PR #33)
 

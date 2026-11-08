@@ -17,9 +17,11 @@ Merged [PR43](https://github.com/volkswg/stock-management/pull/43) supports acco
 
 Merged PR44 removed the seven obsolete backend forwards and unused singular path alias, migrated test/type consumers to existing owners and preserved every historical witness. Business implementations, production imports, schemas, environment settings and provider behavior remain unchanged. The audit found no known required external consumer. Remaining service/script compatibility is outside that cleanup scope.
 
-## Current bounded change: one Loyverse workbook
+## Blocked feature: Product Master and Order identification
 
-Sheet mode uses the existing operational workbook only; remove the account-specific workbook setting and any workbook-selection fallback. Preserve env rollback, account validation/order, public metadata and credential confidentiality. The owner must restrict/audit workbook readers before storing tokens; hiding a tab does not isolate read access. No production workbook, sharing, Vercel setting or deployment changes are part of implementation.
+Product Master adds search, explicit duplicate-reviewed creation, editing/soft archival and optional K-only Order Item references in the existing workbook. Applications, adapters, HTTP routes, scoped write sessions and Order Detail UI ship together; Order creation remains independent. See [setup/rollback](../../README.md#product-master-and-order-item-identification) and [verification](verification.md#product-master-and-order-integration). The latest base is merged PR45; unmerged PR46 Sales synchronization changes are excluded.
+
+Owner work after SA review: prepare headers, configure scoped staff access privately, review workbook sharing/sign-in abuse protection, verify real metadata behavior/quotas and image visibility in staging, then decide deployment. No production setup is executed. The permanent per-write metadata guard is a critical blocker: Google permits 30,000 characters of spreadsheet metadata, not30,000 entries. A durable exclusive executor/operation journal requires an owner/SA infrastructure decision before implementation; [review design and rejected shortcuts](../architecture/decisions.md#product-write-coordination-review-blocker). PR47 remains draft/not approvable. No cleanup/TTL or unverified bounded metadata CAS is substituted. Movement/stock integration, AI, automated backfills and broader authentication are outside this feature.
 
 ## Next: production-readiness gate (open, not implemented)
 
