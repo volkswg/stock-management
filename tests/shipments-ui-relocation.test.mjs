@@ -1,3 +1,4 @@
+import {restoreEnvironmentTemplate} from "./helpers/loyverse-accounts-history.mjs";
 import {readArchive} from "./helpers/retirement-history.mjs";
 import { assertShipmentEnumContractHistory } from "./helpers/shipments-enum-history.mjs";
 import assert from "node:assert/strict";
@@ -23,6 +24,7 @@ test("seven original Shipment source bodies/CSS and route wrapper metadata/JSX r
   }
   for (const entry of baseline.wrappers) assert.equal(bodyHash(entry.file), entry.hash, entry.file);
   for (const [file, expected] of Object.entries(baseline.retained)) {
+    if (file === ".env.example") { assert.equal(hash(restoreEnvironmentTemplate()), expected, file); continue; }
     if (file === "src/modules/shipments/contracts.ts") { assertShipmentEnumContractHistory(file, expected); continue; }
     if (file === "src/modules/orders/ui/[id]/OrderDetailPage.tsx") assertPickerDetailParity();
     else assert.equal(hash(readArchive(baseline.files.find(e => e.from === file)?.to ?? file)), expected, file);

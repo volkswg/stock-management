@@ -1,0 +1,1047 @@
+{
+  "base": "36b5cc10828c7b9c57b2201e606762ad92ec0c05",
+  "files": {
+    "src/config/index.ts": {
+      "source": "import { isRecord } from \"@/shared/lib/is-record\";\n\nexport type LoyverseAccountConfig = {\n  id: string;\n  shopName: string;\n  accessToken: string;\n  storeId?: string;\n};\n\nexport type AppConfig = {\n  line: {\n    channelSecret: string;\n    channelAccessToken: string;\n  };\n  publicBaseUrl: string;\n  movementPublicBaseUrl: string;\n  movementCreateMode: \"quantity_photo\" | \"photo_only\";\n  loyverse: {\n    accounts: LoyverseAccountConfig[];\n  };\n  googleSheets: {\n    spreadsheetId: string;\n    employeeCompensationsWorksheetName: string;\n    employeesWorksheetName: string;\n    employeeTimesheetsWorksheetName: string;\n    employeeAdvancesWorksheetName: string;\n    payrollSettlementsWorksheetName: string;\n    ordersWorksheetName: string;\n    orderBillsWorksheetName: string;\n    orderItemsWorksheetName: string;\n    salesReceiptItemsWorksheetName: string;\n    salesProfitCostOverridesWorksheetName: string;\n    salesReceiptPaymentsWorksheetName: string;\n    expensesWorksheetName: string;\n    expenseCategoriesWorksheetName: string;\n    shopsWorksheetName: string;\n    salesReceiptsWorksheetName: string;\n    salesReceiptSyncsWorksheetName: string;\n    shipmentOrdersWorksheetName: string;\n    shipmentsWorksheetName: string;\n    stockCountsWorksheetName: string;\n    stockAdjustmentsWorksheetName: string;\n    movementMasterWorksheetName: string;\n    movementDetailWorksheetName: string;\n    userStateWorksheetName: string;\n  };\n  googleDrive: {\n    folderId: string;\n    makeFilesReadableByLink: boolean;\n  };\n  googleOAuth: {\n    clientId: string;\n    clientSecret: string;\n    refreshToken: string;\n  };\n  googleService: {\n    accountEmail: string;\n    accountPrivateKey: string;\n  };\n};\n\nexport function getConfig(): AppConfig {\n  return {\n    line: {\n      channelSecret: process.env.LINE_CHANNEL_SECRET || \"\",\n      channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || \"\",\n    },\n    publicBaseUrl: process.env.PUBLIC_BASE_URL || \"\",\n    movementPublicBaseUrl: process.env.MOVEMENT_PUBLIC_BASE_URL?.trim() || \"\",\n    movementCreateMode: parseMovementCreateMode(process.env.MOVEMENT_CREATE_MODE),\n    loyverse: {\n      accounts: parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON),\n    },\n    googleSheets: {\n      spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || \"\",\n      employeeCompensationsWorksheetName:\n        process.env.GOOGLE_SHEETS_EMPLOYEE_COMPENSATIONS_WORKSHEET_NAME?.trim() ||\n        \"employee_compensations\",\n      employeesWorksheetName:\n        process.env.GOOGLE_SHEETS_EMPLOYEES_WORKSHEET_NAME?.trim() ||\n        \"employees\",\n      employeeTimesheetsWorksheetName:\n        process.env.GOOGLE_SHEETS_EMPLOYEE_TIMESHEETS_WORKSHEET_NAME?.trim() ||\n        \"employee_timesheets\",\n      employeeAdvancesWorksheetName: process.env.GOOGLE_SHEETS_EMPLOYEE_ADVANCES_WORKSHEET_NAME?.trim() || \"employee_advances\",\n      payrollSettlementsWorksheetName: process.env.GOOGLE_SHEETS_PAYROLL_SETTLEMENTS_WORKSHEET_NAME?.trim() || \"payroll_settlements\",\n      ordersWorksheetName:\n        process.env.GOOGLE_SHEETS_ORDERS_WORKSHEET_NAME?.trim() || \"orders\",\n      orderBillsWorksheetName:\n        process.env.GOOGLE_SHEETS_ORDER_BILLS_WORKSHEET_NAME?.trim() ||\n        \"order_bills\",\n      orderItemsWorksheetName:\n        process.env.GOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME?.trim() ||\n        \"order_items\",\n      salesReceiptItemsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPT_ITEMS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipt_items\",\n      salesProfitCostOverridesWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_PROFIT_COST_OVERRIDES_WORKSHEET_NAME?.trim() ||\n        \"sales_profit_cost_overrides\",\n      salesReceiptPaymentsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPT_PAYMENTS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipt_payments\",\n      expensesWorksheetName: process.env.GOOGLE_SHEETS_EXPENSES_WORKSHEET_NAME?.trim() || \"expenses\",\n      expenseCategoriesWorksheetName: process.env.GOOGLE_SHEETS_EXPENSE_CATEGORIES_WORKSHEET_NAME?.trim() || \"expense_categories\",\n      shopsWorksheetName: process.env.GOOGLE_SHEETS_SHOPS_WORKSHEET_NAME?.trim() || \"shops\",\n      salesReceiptsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPTS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipts\",\n      salesReceiptSyncsWorksheetName:\n        process.env.GOOGLE_SHEETS_SALES_RECEIPT_SYNCS_WORKSHEET_NAME?.trim() ||\n        \"sales_receipt_syncs\",\n      shipmentOrdersWorksheetName:\n        process.env.GOOGLE_SHEETS_SHIPMENT_ORDERS_WORKSHEET_NAME?.trim() ||\n        \"shipment_orders\",\n      shipmentsWorksheetName:\n        process.env.GOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME?.trim() ||\n        \"shipments\",\n      stockAdjustmentsWorksheetName: process.env.GOOGLE_SHEETS_STOCK_ADJUSTMENTS_WORKSHEET_NAME?.trim() || \"stock_adjustments\",\n      stockCountsWorksheetName:\n        process.env.GOOGLE_SHEETS_STOCK_COUNTS_WORKSHEET_NAME?.trim() ||\n        \"stock_counts\",\n      movementMasterWorksheetName:\n        process.env.GOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME?.trim() || \"movements\",\n      movementDetailWorksheetName:\n        process.env.GOOGLE_SHEETS_MOVEMENT_DETAIL_WORKSHEET_NAME?.trim() || \"movement_details\",\n      userStateWorksheetName:\n        process.env.GOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME?.trim() ||\n        \"user_state\",\n    },\n    googleDrive: {\n      folderId: process.env.GOOGLE_DRIVE_FOLDER_ID || \"\",\n      makeFilesReadableByLink:\n        process.env.GOOGLE_DRIVE_MAKE_FILES_READABLE_BY_LINK === \"true\",\n    },\n    googleOAuth: {\n      clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || \"\",\n      clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || \"\",\n      refreshToken: process.env.GOOGLE_OAUTH_REFRESH_TOKEN || \"\",\n    },\n    googleService: {\n      accountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || \"\",\n      accountPrivateKey: normalizePrivateKey(\n        process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || \"\",\n      ),\n    },\n  };\n}\n\nfunction normalizePrivateKey(value: string): string {\n  return value.replace(/\\\\n/g, \"\\n\");\n}\n\nfunction parseLoyverseAccounts(\n  value: string | undefined,\n): LoyverseAccountConfig[] {\n  if (!value?.trim()) return [];\n\n  let parsed: unknown;\n  try {\n    parsed = JSON.parse(value);\n  } catch {\n    throw new Error(\"LOYVERSE_ACCOUNTS_JSON must be valid JSON.\");\n  }\n  if (!Array.isArray(parsed)) {\n    throw new Error(\"LOYVERSE_ACCOUNTS_JSON must be a JSON array.\");\n  }\n\n  const accounts = parsed.map((entry, index) => {\n    const account = isRecord(entry) ? entry : {};\n    const id = toTrimmedString(account.id);\n    const shopName = toTrimmedString(account.shopName);\n    const accessToken = toTrimmedString(account.accessToken);\n    const storeId = toTrimmedString(account.storeId) || undefined;\n    if (!id || !shopName || !accessToken) {\n      throw new Error(\n        `LOYVERSE_ACCOUNTS_JSON entry ${index + 1} requires id, shopName, and accessToken.`,\n      );\n    }\n    return { id, shopName, accessToken, storeId };\n  });\n\n  if (new Set(accounts.map((account) => account.id)).size !== accounts.length) {\n    throw new Error(\"LOYVERSE_ACCOUNTS_JSON account ids must be unique.\");\n  }\n  return accounts;\n}\n\nfunction toTrimmedString(value: unknown): string {\n  return typeof value === \"string\" ? value.trim() : \"\";\n}\n\nfunction parseMovementCreateMode(value: string | undefined): AppConfig[\"movementCreateMode\"] {\n  const mode = value?.trim() || \"quantity_photo\";\n  if (mode !== \"quantity_photo\" && mode !== \"photo_only\") {\n    throw new Error(\"MOVEMENT_CREATE_MODE must be quantity_photo or photo_only.\");\n  }\n  return mode;\n}\n",
+      "sha256": "98a942aaf5651417b8f53d49ff978cd573b2e5e3b1803203246fa656d6277315"
+    },
+    "src/modules/sales/server.ts": {
+      "source": "import \"server-only\";\nimport type { IGoogleSheetsService } from \"@/infrastructure/persistence/google-sheets/service-contracts\";\nimport type { Expense } from \"@/modules/expenses/contracts\";\nimport type { GoogleSheetsDailySalesReport, GoogleSheetsSalesDashboardReport, GoogleSheetsProfitSummary, SalesProfitCostOverride } from \"./contracts\";\nimport { createSalesReports } from \"./application/reports\";\nimport { createSalesReader } from \"./infrastructure/google-sheets/sales-reader\";\nconst reports = createSalesReports(createSalesReader);\nexport const getGoogleSheetsDailySales: (input: {\n    accountId: string;\n    googleSheetsService: IGoogleSheetsService;\n    salesDate: string;\n}) => Promise<GoogleSheetsDailySalesReport> = reports.getGoogleSheetsDailySales;\nexport const getGoogleSheetsSalesDashboard: (input: {\n    accountIds?: string[];\n    fromDate: string;\n    googleSheetsService: IGoogleSheetsService;\n    toDate: string;\n}) => Promise<GoogleSheetsSalesDashboardReport> = reports.getGoogleSheetsSalesDashboard;\nexport const getGoogleSheetsProfitSummary: (input: {\n    accounts: Array<{\n        id: string;\n        shopName: string;\n    }>;\n    costOverrides: SalesProfitCostOverride[];\n    expenses: Expense[];\n    googleSheetsService: IGoogleSheetsService;\n    year: string;\n}) => Promise<GoogleSheetsProfitSummary> = reports.getGoogleSheetsProfitSummary;\nimport type { ConfiguredLoyverseAccount } from \"@/infrastructure/external/loyverse\";\nimport { syncReceipts } from \"./application/sync-receipts\";\nimport { createReceiptSync } from \"./infrastructure/google-sheets/receipt-sync\";\nimport type { SyncLoyverseDailySalesResult } from \"./application/ports/receipt-sync\";\nexport async function syncLoyverseDailySales({ account, googleSheetsService, salesDate, }: {\n    account: ConfiguredLoyverseAccount;\n    googleSheetsService: IGoogleSheetsService;\n    salesDate: string;\n}): Promise<SyncLoyverseDailySalesResult> {\n    const { store, source } = createReceiptSync(googleSheetsService, account);\n    return syncReceipts(account.id, salesDate, store, source, { now: () => new Date().toISOString() });\n}\nimport { randomUUID } from \"node:crypto\";\nimport * as costs from \"./application/cost-overrides\";\nimport { createCostOverrideStore } from \"./infrastructure/google-sheets/cost-overrides\";\nexport async function listSalesProfitCostOverrides({ googleSheetsService, year, }: {\n    googleSheetsService: IGoogleSheetsService;\n    year: string;\n}): Promise<SalesProfitCostOverride[]> {\n    return costs.listSalesProfitCostOverrides({ store: createCostOverrideStore(googleSheetsService), year });\n}\nexport async function setSalesProfitCostOverride({ accountId, averageItemCost, createdBy, googleSheetsService, month, note, }: {\n    accountId: string;\n    averageItemCost: number;\n    createdBy: string;\n    googleSheetsService: IGoogleSheetsService;\n    month: string;\n    note: string;\n}): Promise<SalesProfitCostOverride> {\n    return costs.setSalesProfitCostOverride({ accountId, averageItemCost, createdBy, store: createCostOverrideStore(googleSheetsService), month, note, runtime: { now: () => new Date().toISOString(), uuid: randomUUID } });\n}\nexport async function removeSalesProfitCostOverride({ accountId, googleSheetsService, month, }: {\n    accountId: string;\n    googleSheetsService: IGoogleSheetsService;\n    month: string;\n}): Promise<boolean> {\n    return costs.removeSalesProfitCostOverride({ accountId, store: createCostOverrideStore(googleSheetsService), month });\n}\nimport type { SalesSyncStatusRow, SalesSyncStatusSummary } from \"./contracts\";\nimport { listSalesSyncStatus as executeSyncStatus } from \"./application/sync-status\";\nimport { createSyncStatusReader } from \"./infrastructure/google-sheets/sync-status\";\nexport async function listSalesSyncStatus({ accountId, googleSheetsService, month, }: {\n    accountId?: string;\n    googleSheetsService: IGoogleSheetsService;\n    month: string;\n}): Promise<{\n    rows: SalesSyncStatusRow[];\n    summary: SalesSyncStatusSummary;\n}> {\n    return executeSyncStatus({ accountId, reader: createSyncStatusReader(googleSheetsService), month });\n}\nimport type { SalesSheets } from \"./infrastructure/google-sheets/sales-reader\";\nimport type { ILoyverseService, LoyverseReceipt } from \"@/infrastructure/external/loyverse\";\nimport { getLoyverseReceiptsForSalesDate as readReceiptsForDate } from \"./application/receipts-for-date\";\nexport { isValidBangkokSalesDate } from \"./application/receipts-for-date\";\nexport async function getLoyverseReceiptsForSalesDate({ loyverseService, salesDate, storeId }: {\n    loyverseService: ILoyverseService;\n    salesDate: string;\n    storeId?: string;\n}): Promise<LoyverseReceipt[]> {\n    return readReceiptsForDate({ loyverseService, salesDate, storeId });\n}\n// Public consumer seam: HR/Inventory supply their own consumer-owned interface.\nexport function createSalesDashboardReader(service: SalesSheets) {\n    return { readSales: (input: {\n            accountIds: string[];\n            fromDate: string;\n            toDate: string;\n        }) => reports.getGoogleSheetsSalesDashboard({ ...input, googleSheetsService: service }) };\n}\n",
+      "sha256": "04e9cfd134743faa09efc2bcac19d9eb364c511f9e9fec7a5aa1f93f94d916d7"
+    },
+    "src/infrastructure/external/loyverse/createLoyverseServiceFromConfig.ts": {
+      "source": "import type { AppConfig } from \"@/config\";\nimport { LoyverseService } from \"./LoyverseService\";\n\nexport type ConfiguredLoyverseAccount = {\n  id: string;\n  shopName: string;\n  storeId?: string;\n  service: LoyverseService;\n};\n\nexport function createLoyverseAccountsFromConfig(\n  config: AppConfig,\n): ConfiguredLoyverseAccount[] {\n  return config.loyverse.accounts.map((account) => ({\n    id: account.id,\n    shopName: account.shopName,\n    storeId: account.storeId,\n    service: new LoyverseService({ accessToken: account.accessToken }),\n  }));\n}\n",
+      "sha256": "dacd4db5c3f6fc29b8c49dc117b68e52226e9728fed9ac06edfdad5e622aa476"
+    },
+    ".env.example": {
+      "source": "# Worksheet tabs use built-in names. Only add GOOGLE_SHEETS_*_WORKSHEET_NAME\n# overrides when existing workbook tabs have different names (see README).\nGOOGLE_SHEETS_SPREADSHEET_ID=\nGOOGLE_DRIVE_FOLDER_ID=\nGOOGLE_DRIVE_MAKE_FILES_READABLE_BY_LINK=false\nGOOGLE_OAUTH_CLIENT_ID=\nGOOGLE_OAUTH_CLIENT_SECRET=\nGOOGLE_OAUTH_REFRESH_TOKEN=\nGOOGLE_SERVICE_ACCOUNT_EMAIL=\nGOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\"\nLINE_CHANNEL_SECRET=\nLINE_CHANNEL_ACCESS_TOKEN=\n# Separate purchase-app URL used by the Purchase rich menu.\nPUBLIC_BASE_URL=\n# Inventra URL used by the Order and Movement rich menus.\nNEW_PUBLIC_BASE_URL=\nLOYVERSE_ACCOUNTS_JSON=[]\n\n# Optional override for movement links. Defaults to PUBLIC_BASE_URL.\nMOVEMENT_PUBLIC_BASE_URL=\n\n# Movement flow: quantity_photo (current/default) or photo_only. Redeploy after changing.\nMOVEMENT_CREATE_MODE=quantity_photo\n\n",
+      "sha256": "d986b704752436673ba466c23bb06db6a48e3599dad2cc7c726caadd321003cb"
+    },
+    "src/app/api/stock-adjustments/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { createStockAdjustment, listAdjustmentEmployees, listStockAdjustments, reverseStockAdjustment, StockAdjustmentError, validStockMonth } from \"@/modules/inventory/server\";\nexport const runtime = \"nodejs\";\nfunction fail(error: unknown) {\n  return NextResponse.json({ ok: false, error: error instanceof StockAdjustmentError ? error.message : \"Stock adjustment operation failed. Please retry.\" }, { status: error instanceof StockAdjustmentError ? error.status : 500 });\n}\nexport async function GET(request: Request) {\n  try {\n    const month = new URL(request.url).searchParams.get(\"month\") || \"\";\n    if (!validStockMonth(month)) throw new StockAdjustmentError(\"Choose a valid adjustment month.\");\n    const config = getConfig(), service = createGoogleSheetsServiceFromConfig(config);\n    const [records, employees] = await Promise.all([listStockAdjustments(service), listAdjustmentEmployees(service)]);\n    return NextResponse.json({ ok: true, records: records.filter(a => a.date.slice(0, 7) === month), employees, accounts: config.loyverse.accounts.map(({ id, shopName }) => ({ id, shopName })) });\n  } catch (error) { return fail(error); }\n}\nexport async function POST(request: Request) {\n  try {\n    const config = getConfig();\n    const record = await createStockAdjustment(createGoogleSheetsServiceFromConfig(config), config.loyverse.accounts.map(({ id, shopName }) => ({ id, shopName })), await request.json().catch(() => null));\n    return NextResponse.json({ ok: true, record }, { status: 201 });\n  } catch (error) { return fail(error); }\n}\nexport async function PATCH(request: Request) {\n  try {\n    const body = await request.json().catch(() => null);\n    if (!body || body.action !== \"reverse\") throw new StockAdjustmentError(\"Choose the reverse action.\");\n    const record = await reverseStockAdjustment(createGoogleSheetsServiceFromConfig(getConfig()), body);\n    return NextResponse.json({ ok: true, record });\n  } catch (error) { return fail(error); }\n}\n",
+      "sha256": "18fe73eb58f1080c97de40e9b579dcc12e0e54d0b89c075b8c232cbe50ad0b97"
+    },
+    "src/app/api/stock-counts/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { isRecord } from \"@/shared/lib/is-record\";\nimport {\n  getMonthlyStockCounts,\n  saveMonthlyStockCount,\n} from \"@/modules/inventory/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  const month = new URL(request.url).searchParams.get(\"month\")?.trim() || \"\";\n  if (!isValidMonth(month)) {\n    return NextResponse.json(\n      { ok: false, error: \"Enter a valid stock-count month.\" },\n      { status: 400 },\n    );\n  }\n  try {\n    const config = getConfig();\n    const accounts = config.loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      shopName,\n    }));\n    const stockCounts = await getMonthlyStockCounts({\n      accounts,\n      googleSheetsService: createGoogleSheetsServiceFromConfig(config),\n      month,\n    });\n    return NextResponse.json({ ok: true, month, stockCounts });\n  } catch (error) {\n    console.error(\"Failed to load monthly stock counts\", {\n      error: getErrorMessage(error),\n      month,\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load monthly stock counts.\" },\n      { status: 500 },\n    );\n  }\n}\n\nexport async function PUT(request: Request): Promise<NextResponse> {\n  const body = await readJsonBody(request);\n  if (!isRecord(body)) {\n    return invalidInput();\n  }\n  const month = typeof body.month === \"string\" ? body.month.trim() : \"\";\n  const accountId =\n    typeof body.accountId === \"string\" ? body.accountId.trim() : \"\";\n  const physicalCount = body.physicalCount;\n  const note = typeof body.note === \"string\" ? body.note.trim() : \"\";\n  if (\n    !isValidMonth(month) ||\n    !accountId ||\n    typeof physicalCount !== \"number\" ||\n    !Number.isFinite(physicalCount) ||\n    !Number.isInteger(physicalCount) ||\n    physicalCount < 0 ||\n    physicalCount > 1_000_000_000 ||\n    note.length > 500\n  ) {\n    return invalidInput();\n  }\n\n  try {\n    const config = getConfig();\n    const account = config.loyverse.accounts\n      .map(({ id, shopName }) => ({ id, shopName }))\n      .find((candidate) => candidate.id === accountId);\n    if (!account) {\n      return NextResponse.json(\n        { ok: false, error: \"Shop not found.\" },\n        { status: 404 },\n      );\n    }\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    await saveMonthlyStockCount({\n      account,\n      googleSheetsService,\n      month,\n      note,\n      physicalCount,\n      updatedBy: \"web\",\n    });\n    const stockCounts = await getMonthlyStockCounts({\n      accounts: config.loyverse.accounts.map(({ id, shopName }) => ({\n        id,\n        shopName,\n      })),\n      googleSheetsService,\n      month,\n    });\n    return NextResponse.json({ ok: true, month, stockCounts });\n  } catch (error) {\n    console.error(\"Failed to save monthly stock count\", {\n      accountId,\n      error: getErrorMessage(error),\n      month,\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to save the physical stock count.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction invalidInput(): NextResponse {\n  return NextResponse.json(\n    { ok: false, error: \"Enter a valid shop, month, and physical count.\" },\n    { status: 400 },\n  );\n}\n\nfunction isValidMonth(value: string): boolean {\n  if (!/^\\d{4}-\\d{2}$/.test(value)) return false;\n  const month = Number(value.slice(5));\n  return month >= 1 && month <= 12;\n}\n\nasync function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nfunction getErrorMessage(error: unknown): string {\n  return error instanceof Error ? error.message : String(error);\n}\n",
+      "sha256": "299e61a167493eee7357843b06a3f3807d9dcd8a78bb29e853cc1b9a6603bb54"
+    },
+    "src/app/api/employees/timesheets/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { isRecord } from \"@/shared/lib/is-record\";\nimport {\n  addEmployeeLeave,\n  clockInEmployee,\n  listEmployeeTimesheets,\n  listEmployees,\n  EmployeeTimesheetDateConflictError,\n  EmployeeTimesheetStatus,\n} from \"@/modules/hr/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  const { searchParams } = new URL(request.url);\n  const date = searchParams.get(\"date\")?.trim() || \"\";\n  const shopId = searchParams.get(\"shopId\")?.trim() || \"\";\n  if (!isValidDate(date)) {\n    return NextResponse.json(\n      { ok: false, error: \"Enter a valid timesheet date.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const config = getConfig();\n    const shops = config.loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      name: shopName,\n    }));\n    if (shopId && !shops.some((shop) => shop.id === shopId)) {\n      return NextResponse.json(\n        { ok: false, error: \"Shop not found.\" },\n        { status: 400 },\n      );\n    }\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    const [employees, timesheets] = await Promise.all([\n      listEmployees({ googleSheetsService }),\n      listEmployeeTimesheets({ date, googleSheetsService, shopId }),\n    ]);\n    return NextResponse.json({\n      ok: true,\n      date,\n      shopId: shopId || null,\n      shops,\n      employees,\n      timesheets,\n    });\n  } catch (error) {\n    console.error(\"Failed to list employee timesheets\", {\n      error: getErrorMessage(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load employee timesheets.\" },\n      { status: 500 },\n    );\n  }\n}\n\nexport async function POST(request: Request): Promise<NextResponse> {\n  const body = await readJsonBody(request);\n  const employeeId = isRecord(body) ? readString(body.employeeId) : \"\";\n  const shopId = isRecord(body) ? readString(body.shopId) : \"\";\n  const date = isRecord(body) ? readString(body.date) : \"\";\n  const status = isRecord(body) ? readString(body.status) : \"\";\n  const workdayType = isRecord(body) ? readString(body.workdayType) : \"\";\n  if (\n    !employeeId ||\n    !shopId ||\n    !isValidDate(date) ||\n    (status !== EmployeeTimesheetStatus.Work &&\n      status !== EmployeeTimesheetStatus.Leave) ||\n    (status === EmployeeTimesheetStatus.Work &&\n      workdayType !== \"full\" &&\n      workdayType !== \"half\")\n  ) {\n    return NextResponse.json(\n      {\n        ok: false,\n        error: \"Select a valid status, date, employee, and shop.\",\n      },\n      { status: 400 },\n    );\n  }\n  if (date > getBangkokDate()) {\n    return NextResponse.json(\n      { ok: false, error: \"Timesheet date cannot be in the future.\" },\n      { status: 400 },\n    );\n  }\n  const normalizedWorkdayType = workdayType === \"half\" ? \"half\" : \"full\";\n\n  try {\n    const config = getConfig();\n    if (!config.loyverse.accounts.some((shop) => shop.id === shopId)) {\n      return NextResponse.json(\n        { ok: false, error: \"Shop not found.\" },\n        { status: 400 },\n      );\n    }\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    const employees = await listEmployees({ googleSheetsService });\n    const employee = employees.find((candidate) => candidate.id === employeeId);\n    if (!employee) {\n      return NextResponse.json(\n        { ok: false, error: \"Employee not found.\" },\n        { status: 404 },\n      );\n    }\n    if (employee.status !== \"active\") {\n      return NextResponse.json(\n        { ok: false, error: \"Inactive employees cannot be added.\" },\n        { status: 400 },\n      );\n    }\n    const timesheet =\n      status === EmployeeTimesheetStatus.Leave\n        ? await addEmployeeLeave({\n            date,\n            employeeId,\n            googleSheetsService,\n            shopId,\n          })\n        : await clockInEmployee({\n            date,\n            employeeId,\n            googleSheetsService,\n            shopId,\n            workdayType: normalizedWorkdayType,\n          });\n    return NextResponse.json({ ok: true, timesheet }, { status: 201 });\n  } catch (error) {\n    if (error instanceof EmployeeTimesheetDateConflictError) {\n      return NextResponse.json(\n        { ok: false, error: error.message },\n        { status: 409 },\n      );\n    }\n    console.error(\"Failed to add employee timesheet\", {\n      employeeId,\n      shopId,\n      error: getErrorMessage(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to add employee timesheet.\" },\n      { status: 500 },\n    );\n  }\n}\n\nasync function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nfunction readString(value: unknown): string {\n  return typeof value === \"string\" ? value.trim() : \"\";\n}\n\nfunction isValidDate(value: string): boolean {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;\n  const [year, month, day] = value.split(\"-\").map(Number);\n  const date = new Date(Date.UTC(year, month - 1, day));\n  return (\n    date.getUTCFullYear() === year &&\n    date.getUTCMonth() === month - 1 &&\n    date.getUTCDate() === day\n  );\n}\n\nfunction getBangkokDate(): string {\n  return new Intl.DateTimeFormat(\"en-CA\", {\n    day: \"2-digit\",\n    month: \"2-digit\",\n    timeZone: \"Asia/Bangkok\",\n    year: \"numeric\",\n  }).format(new Date());\n}\n\nfunction getErrorMessage(error: unknown): string {\n  return error instanceof Error ? error.message : String(error);\n}\n",
+      "sha256": "46c5372f82fa92a170cf41340ff235d5040b8d46b8f9770bc1251992c81e64c8"
+    },
+    "src/app/api/employees/timesheets/[id]/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { isRecord } from \"@/shared/lib/is-record\";\nimport {\n  clockOutEmployee,\n  updateEmployeeTimesheet,\n  EmployeeTimesheetStatus,\n  EmployeeTimesheetDateConflictError,\n  EmployeeTimesheetValidationError,\n} from \"@/modules/hr/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function PATCH(\n  _request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const timesheetId = (await params).id.trim();\n  if (!timesheetId) {\n    return NextResponse.json(\n      { ok: false, error: \"Timesheet ID is required.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const timesheet = await clockOutEmployee({\n      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),\n      timesheetId,\n    });\n    if (!timesheet) {\n      return NextResponse.json(\n        { ok: false, error: \"Timesheet not found.\" },\n        { status: 404 },\n      );\n    }\n    return NextResponse.json({ ok: true, timesheet });\n  } catch (error) {\n    console.error(\"Failed to clock out employee\", {\n      timesheetId,\n      error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to clock out employee.\" },\n      { status: 500 },\n    );\n  }\n}\n\n// Detail updates are separate from the legacy PATCH clock-out operation.\nexport async function PUT(\n  request: Request,\n  { params }: { params: Promise<{ id: string }> },\n): Promise<NextResponse> {\n  const timesheetId = (await params).id.trim();\n  const body: unknown = await request.json().catch(() => undefined);\n  if (!timesheetId || !isRecord(body)) {\n    return NextResponse.json({ ok: false, error: \"Invalid timesheet details.\" }, { status: 400 });\n  }\n  const { date, employeeId, shopId, status, workdayType } = body;\n  if (\n    typeof date !== \"string\" || !isValidDate(date) ||\n    typeof employeeId !== \"string\" || !employeeId.trim() ||\n    typeof shopId !== \"string\" || !shopId.trim() ||\n    (status !== EmployeeTimesheetStatus.Work && status !== EmployeeTimesheetStatus.Leave) ||\n    (status === EmployeeTimesheetStatus.Work && workdayType !== \"full\" && workdayType !== \"half\")\n  ) {\n    return NextResponse.json({ ok: false, error: \"Select a valid status, date, employee, and shop.\" }, { status: 400 });\n  }\n  const today = new Intl.DateTimeFormat(\"en-CA\", {\n    day: \"2-digit\", month: \"2-digit\", year: \"numeric\", timeZone: \"Asia/Bangkok\",\n  }).format(new Date());\n  if (date > today) {\n    return NextResponse.json({ ok: false, error: \"Timesheet date cannot be in the future.\" }, { status: 400 });\n  }\n  try {\n    const config = getConfig();\n    if (!config.loyverse.accounts.some((shop) => shop.id === shopId.trim())) {\n      return NextResponse.json({ ok: false, error: \"Shop not found.\" }, { status: 400 });\n    }\n    const timesheet = await updateEmployeeTimesheet({\n      timesheetId,\n      date,\n      employeeId: employeeId.trim(),\n      shopId: shopId.trim(),\n      status,\n      workdayType: status === EmployeeTimesheetStatus.Work && workdayType === \"half\" ? \"half\" : status === EmployeeTimesheetStatus.Work ? \"full\" : null,\n      googleSheetsService: createGoogleSheetsServiceFromConfig(config),\n    });\n    if (!timesheet) {\n      return NextResponse.json({ ok: false, error: \"Timesheet not found.\" }, { status: 404 });\n    }\n    return NextResponse.json({ ok: true, timesheet });\n  } catch (error) {\n    if (error instanceof EmployeeTimesheetDateConflictError || error instanceof EmployeeTimesheetValidationError) {\n      return NextResponse.json({ ok: false, error: error.message }, {\n        status: error instanceof EmployeeTimesheetDateConflictError ? 409 : 400,\n      });\n    }\n    console.error(\"Failed to update employee timesheet\", {\n      timesheetId, error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json({ ok: false, error: \"Failed to update employee timesheet.\" }, { status: 500 });\n  }\n}\n\nfunction isValidDate(value: string): boolean {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;\n  const [year, month, day] = value.split(\"-\").map(Number);\n  const date = new Date(Date.UTC(year, month - 1, day));\n  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;\n}\n",
+      "sha256": "a2bca36d0d6495415a597750bd46c408d0d0e1ee24b5a9f6916344134fe450ac"
+    },
+    "src/app/api/employees/timesheets/summary/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport {\n  listEmployees,\n  listEmployeeTimesheetsForMonth,\n} from \"@/modules/hr/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  const { searchParams } = new URL(request.url);\n  const month = searchParams.get(\"month\")?.trim() || \"\";\n  const shopId = searchParams.get(\"shopId\")?.trim() || \"\";\n  if (!isValidMonth(month)) {\n    return NextResponse.json(\n      { ok: false, error: \"Enter a valid summary month.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const config = getConfig();\n    const shops = config.loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      name: shopName,\n    }));\n    if (shopId && !shops.some((shop) => shop.id === shopId)) {\n      return NextResponse.json(\n        { ok: false, error: \"Shop not found.\" },\n        { status: 400 },\n      );\n    }\n\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    const [employees, timesheets] = await Promise.all([\n      listEmployees({ googleSheetsService }),\n      listEmployeeTimesheetsForMonth({\n        googleSheetsService,\n        month,\n        shopId,\n      }),\n    ]);\n    return NextResponse.json({\n      ok: true,\n      month,\n      shopId: shopId || null,\n      shops,\n      employees,\n      timesheets,\n    });\n  } catch (error) {\n    console.error(\"Failed to load employee timesheet summary\", {\n      error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load timesheet summary.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction isValidMonth(value: string): boolean {\n  if (!/^\\d{4}-\\d{2}$/.test(value)) return false;\n  const month = Number(value.slice(5));\n  return month >= 1 && month <= 12;\n}\n",
+      "sha256": "c0e281bbda179e6bb7f4174caa264374dfc8b390d3d02830fa2139377a606017"
+    },
+    "src/app/api/expenses/masters/[kind]/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { isRecord } from \"@/shared/lib/is-record\";\nimport { ExpenseError, listExpenseCategories, listExpenseShops, saveExpenseMaster } from \"@/modules/expenses/server\";\nexport const runtime = \"nodejs\";\ntype Context = { params: Promise<{ kind: string }> };\nfunction fail(error: unknown) { return NextResponse.json({ ok: false, error: error instanceof ExpenseError ? error.message : \"Master data operation failed. Please retry.\" }, { status: error instanceof ExpenseError ? error.status : 500 }); }\nfunction validKind(kind: string): asserts kind is \"shops\" | \"categories\" { if (![\"shops\", \"categories\"].includes(kind)) throw new ExpenseError(\"Master not found.\", 404); }\nexport async function GET(_request: Request, context: Context) {\n  try { const { kind } = await context.params; validKind(kind); const config = getConfig(), service = createGoogleSheetsServiceFromConfig(config);\n    const records = kind === \"shops\" ? await listExpenseShops(service) : await listExpenseCategories(service);\n    return NextResponse.json({ ok: true, records, accounts: kind === \"shops\" ? config.loyverse.accounts.map(({ id, shopName }) => ({ id, shopName })) : [] });\n  } catch (error) { return fail(error); }\n}\nexport async function POST(request: Request, context: Context) {\n  try { const { kind } = await context.params; validKind(kind); const body: unknown = await request.json().catch(() => null);\n    if (!isRecord(body) || typeof body.name !== \"string\" || typeof body.active !== \"boolean\") throw new ExpenseError(\"Enter a name and active status.\");\n    const config = getConfig(); const mapping = typeof body.loyverseAccountId === \"string\" ? body.loyverseAccountId.trim() : \"\";\n    // Existing mappings remain editable even if their account has since left configuration.\n    const service = createGoogleSheetsServiceFromConfig(config);\n    if (kind === \"shops\" && mapping && !config.loyverse.accounts.some(account => account.id === mapping)) {\n      const existing = (await listExpenseShops(service)).find(shop => shop.id === body.id);\n      if (existing?.loyverseAccountId !== mapping) throw new ExpenseError(\"Select a configured Loyverse account or leave the mapping empty.\");\n    }\n    const id = await saveExpenseMaster(service, kind, { id: typeof body.id === \"string\" ? body.id : undefined, name: body.name, active: body.active, loyverseAccountId: mapping });\n    return NextResponse.json({ ok: true, id });\n  } catch (error) { return fail(error); }\n}\n",
+      "sha256": "bc9b5bbf12d8e6ab92e8ec659f46c65fd42f9f29aa5ad1f815ae5be65bd7e616"
+    },
+    "src/app/api/loyverse/accounts/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(): Promise<NextResponse> {\n  try {\n    const accounts = getConfig().loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      shopName,\n    }));\n\n    return NextResponse.json({ ok: true, accounts });\n  } catch (error) {\n    console.error(\"Failed to load Loyverse accounts\", {\n      error: error instanceof Error ? error.message : String(error),\n    });\n\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load Loyverse accounts.\" },\n      { status: 500 },\n    );\n  }\n}\n",
+      "sha256": "9b1c9c3edefa58c223c77d266325390f9ed4c95bfe28598214b03c144ac6abdd"
+    },
+    "src/app/api/loyverse/daily-sales/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport {\n  aggregateSalesByItem,\n  createLoyverseAccountsFromConfig,\n  type LoyverseReceipt,\n} from \"@/infrastructure/external/loyverse\";\nimport {\n  getLoyverseReceiptsForSalesDate,\n  isValidBangkokSalesDate,\n} from \"@/modules/sales/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  try {\n    const loyverseAccounts = createLoyverseAccountsFromConfig(getConfig());\n    if (loyverseAccounts.length === 0) {\n      return NextResponse.json(\n        {\n          ok: false,\n          error: \"Loyverse is not configured. Set LOYVERSE_ACCOUNTS_JSON.\",\n        },\n        { status: 503 },\n      );\n    }\n\n    const { searchParams } = new URL(request.url);\n    const accountId = searchParams.get(\"account\")?.trim() || \"\";\n    const account = accountId\n      ? loyverseAccounts.find((candidate) => candidate.id === accountId)\n      : loyverseAccounts[0];\n    if (!account) {\n      return NextResponse.json(\n        { ok: false, error: \"Loyverse account not found.\" },\n        { status: 404 },\n      );\n    }\n\n    const date = searchParams.get(\"date\")?.trim() || getBangkokDate();\n    if (!isValidBangkokSalesDate(date)) {\n      return NextResponse.json(\n        { ok: false, error: \"A valid date in YYYY-MM-DD format is required.\" },\n        { status: 400 },\n      );\n    }\n\n    const receipts = await getLoyverseReceiptsForSalesDate({\n      loyverseService: account.service,\n      salesDate: date,\n      storeId: account.storeId,\n    });\n    const report = aggregateSalesByItem(receipts);\n\n    return NextResponse.json({\n      ok: true,\n      source: \"loyverse\",\n      date,\n      account: { id: account.id, shopName: account.shopName },\n      hourlyGrossSales: createHourlyGrossSales(receipts),\n      report,\n    });\n  } catch (error) {\n    console.error(\"Failed to load Loyverse daily sales\", {\n      error: getErrorMessage(error),\n    });\n\n    return NextResponse.json(\n      { ok: false, error: getErrorMessage(error) },\n      { status: 502 },\n    );\n  }\n}\n\nfunction getBangkokDate(): string {\n  return getBangkokDateForDate(new Date());\n}\n\nfunction getBangkokDateForDate(date: Date): string {\n  const parts = new Intl.DateTimeFormat(\"en-US\", {\n    day: \"2-digit\",\n    month: \"2-digit\",\n    timeZone: \"Asia/Bangkok\",\n    year: \"numeric\",\n  }).formatToParts(date);\n  const year = parts.find((part) => part.type === \"year\")?.value || \"\";\n  const month = parts.find((part) => part.type === \"month\")?.value || \"\";\n  const day = parts.find((part) => part.type === \"day\")?.value || \"\";\n  return `${year}-${month}-${day}`;\n}\n\nfunction createHourlyGrossSales(receipts: LoyverseReceipt[]): {\n  hour: string;\n  grossSales: number;\n}[] {\n  const values = Array.from({ length: 24 }, (_, hour) => ({\n    hour: `${String(hour).padStart(2, \"0\")}:00`,\n    grossSales: 0,\n  }));\n  const hourFormatter = new Intl.DateTimeFormat(\"en-GB\", {\n    hour: \"2-digit\",\n    hourCycle: \"h23\",\n    timeZone: \"Asia/Bangkok\",\n  });\n\n  for (const receipt of receipts) {\n    if (receipt.cancelled_at || receipt.receipt_type !== \"SALE\") continue;\n    const hour = Number(hourFormatter.format(new Date(receipt.receipt_date)));\n    if (!Number.isInteger(hour) || !values[hour]) continue;\n    values[hour].grossSales += (receipt.line_items || []).reduce(\n      (sum, item) => sum + toNumber(item.gross_total_money),\n      0,\n    );\n  }\n\n  return values.map((value) => ({\n    ...value,\n    grossSales: normalizeNumber(value.grossSales),\n  }));\n}\n\nfunction toNumber(value: number | null | undefined): number {\n  return typeof value === \"number\" && Number.isFinite(value) ? value : 0;\n}\n\nfunction normalizeNumber(value: number): number {\n  return Number(value.toFixed(6));\n}\n\nfunction getErrorMessage(error: unknown): string {\n  return error instanceof Error ? error.message : String(error);\n}\n",
+      "sha256": "cd73dfc4f13cb9b319695d19cf1bb39f0c92383a8fb905d7a4448c92849ffad0"
+    },
+    "src/app/api/loyverse/daily-sales/sync/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { createLoyverseAccountsFromConfig } from \"@/infrastructure/external/loyverse\";\nimport { isRecord } from \"@/shared/lib/is-record\";\nimport { syncLoyverseDailySales } from \"@/modules/sales/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function POST(request: Request): Promise<NextResponse> {\n  const body = await readJsonBody(request);\n  if (!isRecord(body)) {\n    return NextResponse.json(\n      { ok: false, error: \"Account and date are required.\" },\n      { status: 400 },\n    );\n  }\n\n  const accountId = toTrimmedString(body.account);\n  const date = toTrimmedString(body.date);\n  if (!accountId || !isValidDate(date)) {\n    return NextResponse.json(\n      {\n        ok: false,\n        error: \"A valid account and date in YYYY-MM-DD format are required.\",\n      },\n      { status: 400 },\n    );\n  }\n\n  if (date === getBangkokDate(new Date()) && isBeforeBangkokSyncCutoff()) {\n    return NextResponse.json(\n      {\n        ok: false,\n        error: \"Today's sales can be synced after 20:30 Bangkok time.\",\n      },\n      { status: 409 },\n    );\n  }\n\n  try {\n    const config = getConfig();\n    const account = createLoyverseAccountsFromConfig(config).find(\n      (candidate) => candidate.id === accountId,\n    );\n    if (!account) {\n      return NextResponse.json(\n        { ok: false, error: \"Loyverse account not found.\" },\n        { status: 404 },\n      );\n    }\n\n    const result = await syncLoyverseDailySales({\n      account,\n      googleSheetsService: createGoogleSheetsServiceFromConfig(config),\n      salesDate: date,\n    });\n    if (result.outcome === \"already_synced\") {\n      return NextResponse.json(\n        { ok: false, error: \"Selected sales date is already synced.\" },\n        { status: 409 },\n      );\n    }\n\n    return NextResponse.json({\n      ok: true,\n      date,\n      account: { id: account.id, shopName: account.shopName },\n      ...result,\n    });\n  } catch (error) {\n    console.error(\"Failed to sync Loyverse daily sales\", {\n      accountId,\n      date,\n      error: getErrorMessage(error),\n    });\n\n    return NextResponse.json(\n      { ok: false, error: getErrorMessage(error) },\n      { status: 502 },\n    );\n  }\n}\n\nasync function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nfunction isValidDate(value: string): boolean {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;\n  const date = new Date(`${value}T00:00:00+07:00`);\n  return !Number.isNaN(date.getTime()) && getBangkokDate(date) === value;\n}\n\nfunction isBeforeBangkokSyncCutoff(): boolean {\n  const parts = new Intl.DateTimeFormat(\"en-US\", {\n    hour: \"2-digit\",\n    hour12: false,\n    minute: \"2-digit\",\n    timeZone: \"Asia/Bangkok\",\n  }).formatToParts(new Date());\n  const hour = Number(parts.find((part) => part.type === \"hour\")?.value || 0);\n  const minute = Number(\n    parts.find((part) => part.type === \"minute\")?.value || 0,\n  );\n  return hour * 60 + minute < 20 * 60 + 30;\n}\n\nfunction getBangkokDate(date: Date): string {\n  const parts = new Intl.DateTimeFormat(\"en-US\", {\n    day: \"2-digit\",\n    month: \"2-digit\",\n    timeZone: \"Asia/Bangkok\",\n    year: \"numeric\",\n  }).formatToParts(date);\n  const year = parts.find((part) => part.type === \"year\")?.value || \"\";\n  const month = parts.find((part) => part.type === \"month\")?.value || \"\";\n  const day = parts.find((part) => part.type === \"day\")?.value || \"\";\n  return `${year}-${month}-${day}`;\n}\n\nfunction toTrimmedString(value: unknown): string {\n  return typeof value === \"string\" ? value.trim() : \"\";\n}\n\nfunction getErrorMessage(error: unknown): string {\n  return error instanceof Error ? error.message : String(error);\n}\n",
+      "sha256": "ae8c7a868704c1e99d35f08a100fa4183a5e56a6eada8059255f85cec990c2d3"
+    },
+    "src/app/api/sales/daily-sales/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport {\n  getGoogleSheetsDailySales,\n  isValidBangkokSalesDate,\n  listSalesSyncStatus,\n} from \"@/modules/sales/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  try {\n    const config = getConfig();\n    const accounts = config.loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      shopName,\n    }));\n    const { searchParams } = new URL(request.url);\n    const accountId = searchParams.get(\"account\")?.trim() || accounts[0]?.id || \"\";\n    const account = accounts.find((candidate) => candidate.id === accountId);\n    if (!account) {\n      return NextResponse.json(\n        { ok: false, error: \"Sales account not found.\" },\n        { status: 404 },\n      );\n    }\n\n    const date = searchParams.get(\"date\")?.trim() || getBangkokDate();\n    if (!isValidBangkokSalesDate(date)) {\n      return NextResponse.json(\n        { ok: false, error: \"A valid date in YYYY-MM-DD format is required.\" },\n        { status: 400 },\n      );\n    }\n\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    const [report, syncStatus] = await Promise.all([\n      getGoogleSheetsDailySales({\n        accountId,\n        googleSheetsService,\n        salesDate: date,\n      }),\n      listSalesSyncStatus({\n        accountId,\n        googleSheetsService,\n        month: date.slice(0, 7),\n      }),\n    ]);\n    const isSynced = syncStatus.rows.some(\n      (row) => row.salesDate === date && row.status === \"complete\",\n    );\n\n    return NextResponse.json({\n      ok: true,\n      source: \"google_sheets\",\n      date,\n      account,\n      accounts,\n      isSynced,\n      hourlyGrossSales: report.hourlyGrossSales,\n      report: {\n        receiptCount: report.receiptCount,\n        rows: report.rows,\n        paymentsByType: report.paymentsByType,\n        totals: report.totals,\n      },\n    });\n  } catch (error) {\n    console.error(\"Failed to load daily sales from Google Sheets\", {\n      error: getErrorMessage(error),\n    });\n\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load daily sales from Google Sheets.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction getBangkokDate(): string {\n  const parts = new Intl.DateTimeFormat(\"en-US\", {\n    day: \"2-digit\",\n    month: \"2-digit\",\n    timeZone: \"Asia/Bangkok\",\n    year: \"numeric\",\n  }).formatToParts(new Date());\n  const year = parts.find((part) => part.type === \"year\")?.value || \"\";\n  const month = parts.find((part) => part.type === \"month\")?.value || \"\";\n  const day = parts.find((part) => part.type === \"day\")?.value || \"\";\n  return `${year}-${month}-${day}`;\n}\n\nfunction getErrorMessage(error: unknown): string {\n  return error instanceof Error ? error.message : String(error);\n}\n",
+      "sha256": "836c7d9734b63a101e45112f8b9a6d32955613db781ee1804672c8c5c1932795"
+    },
+    "src/app/api/sales/dashboard/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport {\n  getGoogleSheetsSalesDashboard,\n  isValidBangkokSalesDate,\n} from \"@/modules/sales/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  try {\n    const config = getConfig();\n    const accounts = config.loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      shopName,\n    }));\n    const { searchParams } = new URL(request.url);\n    const accountIds = [\n      ...new Set(\n        (searchParams.get(\"accounts\") || \"\")\n          .split(\",\")\n          .map((value) => value.trim())\n          .filter(Boolean),\n      ),\n    ];\n    if (\n      accountIds.some(\n        (accountId) => !accounts.some((account) => account.id === accountId),\n      )\n    ) {\n      return NextResponse.json(\n        { ok: false, error: \"Sales account not found.\" },\n        { status: 404 },\n      );\n    }\n\n    const today = getBangkokDate();\n    const fromDate =\n      searchParams.get(\"from\")?.trim() || `${today.slice(0, 7)}-01`;\n    const toDate = searchParams.get(\"to\")?.trim() || today;\n    if (\n      !isValidBangkokSalesDate(fromDate) ||\n      !isValidBangkokSalesDate(toDate) ||\n      fromDate > toDate\n    ) {\n      return NextResponse.json(\n        { ok: false, error: \"A valid date range is required.\" },\n        { status: 400 },\n      );\n    }\n\n    const dashboard = await getGoogleSheetsSalesDashboard({\n      accountIds: accountIds.length ? accountIds : undefined,\n      fromDate,\n      googleSheetsService: createGoogleSheetsServiceFromConfig(config),\n      toDate,\n    });\n\n    return NextResponse.json({\n      ok: true,\n      source: \"google_sheets\",\n      fromDate,\n      toDate,\n      accountIds,\n      accounts,\n      ...dashboard,\n    });\n  } catch (error) {\n    console.error(\"Failed to load sales dashboard from Google Sheets\", {\n      error: getErrorMessage(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load sales dashboard from Google Sheets.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction getBangkokDate(): string {\n  const parts = new Intl.DateTimeFormat(\"en-US\", {\n    day: \"2-digit\",\n    month: \"2-digit\",\n    timeZone: \"Asia/Bangkok\",\n    year: \"numeric\",\n  }).formatToParts(new Date());\n  const year = parts.find((part) => part.type === \"year\")?.value || \"\";\n  const month = parts.find((part) => part.type === \"month\")?.value || \"\";\n  const day = parts.find((part) => part.type === \"day\")?.value || \"\";\n  return `${year}-${month}-${day}`;\n}\n\nfunction getErrorMessage(error: unknown): string {\n  return error instanceof Error ? error.message : String(error);\n}\n",
+      "sha256": "7d2ad6212d59052feaae2a68a8988250d54c8705c9a7fd02ac328cf3a5273993"
+    },
+    "src/app/api/sales/profit-summary/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport {\n  getGoogleSheetsProfitSummary,\n  listSalesProfitCostOverrides,\n} from \"@/modules/sales/server\";\n\nimport { listExpenses, listExpenseShops } from \"@/modules/expenses/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  const { searchParams } = new URL(request.url);\n  const year = searchParams.get(\"year\")?.trim() || getBangkokYear();\n  if (!isValidYear(year)) {\n    return NextResponse.json(\n      { ok: false, error: \"Enter a valid profit summary year.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const config = getConfig();\n    const configuredAccounts = config.loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      shopName,\n    }));\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    const [expenses, costOverrides, shops] = await Promise.all([\n      listExpenses({ googleSheetsService, year }),\n      listSalesProfitCostOverrides({ googleSheetsService, year }),\n      listExpenseShops(googleSheetsService),\n    ]);\n    const accountMap = new Map(configuredAccounts.map(account => [account.id, account]));\n    for (const shop of shops) {\n      const id = shop.loyverseAccountId || shop.id;\n      accountMap.set(id, { id, shopName: shop.name });\n    }\n    const accounts = [...accountMap.values()];\n    const summary = await getGoogleSheetsProfitSummary({\n      accounts,\n      costOverrides,\n      expenses,\n      googleSheetsService,\n      year,\n    });\n    return NextResponse.json({\n      ok: true,\n      source: \"google_sheets\",\n      accounts,\n      ...summary,\n    });\n  } catch (error) {\n    console.error(\"Failed to load sales profit summary\", {\n      year,\n      error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load sales profit summary.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction getBangkokYear(): string {\n  return new Intl.DateTimeFormat(\"en-US\", {\n    timeZone: \"Asia/Bangkok\",\n    year: \"numeric\",\n  }).format(new Date());\n}\n\nfunction isValidYear(value: string): boolean {\n  return /^\\d{4}$/.test(value) && Number(value) >= 2000 && Number(value) <= 2100;\n}\n",
+      "sha256": "ebc1cf07edce61c369c0397b25ebc20c9f289350344dc82e762aef2dd4d58770"
+    },
+    "src/app/api/sales/sync-status/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { listSalesSyncStatus } from \"@/modules/sales/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(request: Request): Promise<NextResponse> {\n  try {\n    const config = getConfig();\n    const { searchParams } = new URL(request.url);\n    const month = searchParams.get(\"month\")?.trim() || getBangkokMonth();\n    if (!isValidMonth(month)) {\n      return NextResponse.json(\n        { ok: false, error: \"A valid month in YYYY-MM format is required.\" },\n        { status: 400 },\n      );\n    }\n\n    const accountId = searchParams.get(\"account\")?.trim() || \"\";\n    const accounts = config.loyverse.accounts.map(({ id, shopName }) => ({\n      id,\n      shopName,\n    }));\n    if (accountId && !accounts.some((account) => account.id === accountId)) {\n      return NextResponse.json(\n        { ok: false, error: \"Loyverse account not found.\" },\n        { status: 404 },\n      );\n    }\n\n    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);\n    const { rows, summary } = await listSalesSyncStatus({\n      accountId: accountId || undefined,\n      googleSheetsService,\n      month,\n    });\n\n    return NextResponse.json({\n      ok: true,\n      source: \"google_sheets\",\n      month,\n      accountId: accountId || null,\n      accounts,\n      rows,\n      summary,\n    });\n  } catch (error) {\n    console.error(\"Failed to load sales sync status\", {\n      error: getErrorMessage(error),\n    });\n\n    return NextResponse.json(\n      { ok: false, error: \"Failed to load sales sync status.\" },\n      { status: 500 },\n    );\n  }\n}\n\nfunction getBangkokMonth(): string {\n  const parts = new Intl.DateTimeFormat(\"en-US\", {\n    month: \"2-digit\",\n    timeZone: \"Asia/Bangkok\",\n    year: \"numeric\",\n  }).formatToParts(new Date());\n  const year = parts.find((part) => part.type === \"year\")?.value || \"\";\n  const month = parts.find((part) => part.type === \"month\")?.value || \"\";\n  return `${year}-${month}`;\n}\n\nfunction isValidMonth(month: string): boolean {\n  return /^\\d{4}-(0[1-9]|1[0-2])$/.test(month);\n}\n\nfunction getErrorMessage(error: unknown): string {\n  return error instanceof Error ? error.message : String(error);\n}\n",
+      "sha256": "ba0334ddcaeb5bdb6e3fb79b44618ff36ba73599acac1a84a83fbbb80e085b00"
+    },
+    "src/app/api/sales/profit-summary/cost-overrides/route.ts": {
+      "source": "import { NextResponse } from \"next/server\";\nimport { getConfig } from \"@/config\";\nimport { createGoogleSheetsServiceFromConfig } from \"@/composition/google-sheets\";\nimport { isRecord } from \"@/shared/lib/is-record\";\nimport {\n  removeSalesProfitCostOverride,\n  setSalesProfitCostOverride,\n} from \"@/modules/sales/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function POST(request: Request): Promise<NextResponse> {\n  const body = await readJsonBody(request);\n  const month = isRecord(body) ? readString(body.month) : \"\";\n  const accountId = isRecord(body) ? readString(body.accountId) : \"\";\n  const averageItemCost = isRecord(body)\n    ? readNumber(body.averageItemCost)\n    : null;\n  const note = isRecord(body) ? readString(body.note) : \"\";\n  if (\n    !isValidMonth(month) ||\n    !accountId ||\n    averageItemCost === null ||\n    averageItemCost < 0 ||\n    note.length > 200\n  ) {\n    return NextResponse.json(\n      { ok: false, error: \"Enter valid item-cost override details.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const config = getConfig();\n    if (!config.loyverse.accounts.some((account) => account.id === accountId)) {\n      return NextResponse.json(\n        { ok: false, error: \"Shop not found.\" },\n        { status: 404 },\n      );\n    }\n    const costOverride = await setSalesProfitCostOverride({\n      accountId,\n      averageItemCost,\n      createdBy: \"web\",\n      googleSheetsService: createGoogleSheetsServiceFromConfig(config),\n      month,\n      note,\n    });\n    return NextResponse.json({ ok: true, costOverride });\n  } catch (error) {\n    console.error(\"Failed to save sales profit cost override\", {\n      accountId,\n      month,\n      error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to save item-cost override.\" },\n      { status: 500 },\n    );\n  }\n}\n\nexport async function DELETE(request: Request): Promise<NextResponse> {\n  const body = await readJsonBody(request);\n  const month = isRecord(body) ? readString(body.month) : \"\";\n  const accountId = isRecord(body) ? readString(body.accountId) : \"\";\n  if (!isValidMonth(month) || !accountId) {\n    return NextResponse.json(\n      { ok: false, error: \"Enter a valid month and shop.\" },\n      { status: 400 },\n    );\n  }\n\n  try {\n    const config = getConfig();\n    if (!config.loyverse.accounts.some((account) => account.id === accountId)) {\n      return NextResponse.json(\n        { ok: false, error: \"Shop not found.\" },\n        { status: 404 },\n      );\n    }\n    const removed = await removeSalesProfitCostOverride({\n      accountId,\n      googleSheetsService: createGoogleSheetsServiceFromConfig(config),\n      month,\n    });\n    return NextResponse.json({ ok: true, removed });\n  } catch (error) {\n    console.error(\"Failed to remove sales profit cost override\", {\n      accountId,\n      month,\n      error: error instanceof Error ? error.message : String(error),\n    });\n    return NextResponse.json(\n      { ok: false, error: \"Failed to remove item-cost override.\" },\n      { status: 500 },\n    );\n  }\n}\n\nasync function readJsonBody(request: Request): Promise<unknown> {\n  try {\n    return await request.json();\n  } catch {\n    return undefined;\n  }\n}\n\nfunction readString(value: unknown): string {\n  return typeof value === \"string\" ? value.trim() : \"\";\n}\n\nfunction readNumber(value: unknown): number | null {\n  if (typeof value !== \"number\" && typeof value !== \"string\") return null;\n  const result = Number(value);\n  return Number.isFinite(result) ? result : null;\n}\n\nfunction isValidMonth(value: string): boolean {\n  if (!/^\\d{4}-\\d{2}$/.test(value)) return false;\n  const month = Number(value.slice(5));\n  return month >= 1 && month <= 12;\n}\n",
+      "sha256": "0a0c190b9270ad7cf92ed8697c8ec18ee2cf2093fc0ac0aafa8ca96cc89120c9"
+    },
+    "eslint/external-infrastructure-boundaries.mjs": {
+      "source": "import {noDynamicServerBypass} from './orders-boundaries.mjs';\nconst scopes={\n  \"src/modules/sales/server.ts\": [\n    \"server-only\",\n    \"@/infrastructure/persistence/google-sheets/service-contracts\",\n    \"@/modules/expenses/contracts\",\n    \"./contracts\",\n    \"./application/reports\",\n    \"./infrastructure/google-sheets/sales-reader\",\n    \"@/infrastructure/external/loyverse\",\n    \"./application/sync-receipts\",\n    \"./infrastructure/google-sheets/receipt-sync\",\n    \"./application/ports/receipt-sync\",\n    \"node:crypto\",\n    \"./application/cost-overrides\",\n    \"./infrastructure/google-sheets/cost-overrides\",\n    \"./application/sync-status\",\n    \"./infrastructure/google-sheets/sync-status\",\n    \"./application/receipts-for-date\"\n  ],\n  \"src/modules/line-workflows/server.ts\": [\n    \"server-only\",\n    \"@/infrastructure/persistence/google-sheets/service-contracts\",\n    \"@/infrastructure/files/google-drive/types\",\n    \"@/infrastructure/external/line\",\n    \"@/shared/types/line-protocol\",\n    \"@/config\",\n    \"@/services/utils/createSortableId\",\n    \"@/modules/orders/contracts\",\n    \"@/modules/orders/server\",\n    \"@/modules/inventory/server\",\n    \"./contracts\",\n    \"./application/ports/workflows\",\n    \"./infrastructure/google-sheets/sessions\",\n    \"./infrastructure/runtime\",\n    \"./application/sessions\",\n    \"./application/order-events\",\n    \"./application/movement-events\",\n    \"./application/classify-event\",\n    \"./application/resolve-user-state\",\n    \"./application/reply\",\n    \"./application/order-events/complete-bill\",\n    \"./application/order-events/complete-products\",\n    \"./application/order-events/create-order\",\n    \"./application/order-events/bill-image\",\n    \"./application/order-events/product-image\",\n    \"./application/order-events/total-price\",\n    \"./infrastructure/payload\",\n    \"./domain/payload\",\n    \"./commands\",\n    \"./application/webhook\"\n  ]\n};\nexport const externalInfrastructureBoundaries=[...Object.entries(scopes).map(([file,paths])=>({files:[file],rules:{'no-restricted-imports':['error',{patterns:[{regex:`^(?!(?:${paths.map(p=>p.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')).join('|')})$).+`,message:'Keep composition dependencies explicit; use canonical external transport.'}]}]}})),{files:['src/infrastructure/external/**/*.ts'],rules:{\n'no-restricted-imports':['error',{patterns:[{regex:'^(?!\\\\./(?:const|types|LineBotService|LoyverseService|createLoyverseServiceFromConfig)$|@/shared/(?:types/line-protocol|lib/line-messages)$|node:crypto$|@/config$).+',message:'Provider infrastructure depends only on its protocol, pure helpers and supplied configuration.'}]}],\n'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Keep client exports named.'},{selector:\"ImportDeclaration[source.value='@/config']:not([importKind='type'])\",message:'Configuration is injected; import only its type.'}],\n'no-restricted-globals':['error','process']}}];\n",
+      "sha256": "8ff0579815862224b599a9e3d061478a3f339de5ef6f0b126d2720a3f4f0caf6"
+    }
+  },
+  "fixtureHashes": {
+    "tests/fixtures/google-infrastructure-before.json": "8a840db4d19ce6caef46a2b6af62adc3272b5bdc0ea1d48c93b665657ba76034",
+    "tests/fixtures/google-infrastructure-consumers.json": "c23894cf3307b34e2ec9877abf08e24a5b646a2fa2190a783a6a215bb2c110ac",
+    "tests/fixtures/hr-worksheets-before.json": "41e3dd0fb6e6b97cd5a72c80cec200bebfe3baa48bd7f949a02d99ff667ee5d6",
+    "tests/fixtures/inventory-employee-directory-before.json": "e9725fc76fba3453bb7f6c5a4eae2a2e4d4a28064a5102e464756f000d178533",
+    "tests/fixtures/inventory-sales-query-before.json": "81f09a340191bc5b326a0eafa55abdcd99214f68fe5b24bf930af619a1b00113",
+    "tests/fixtures/inventory-worksheets-before.json": "99a75f182b2811a5be77d95705c7ec4a405e3719e6a9e8f201f93ac4516472f4",
+    "tests/fixtures/movement-schema-before.json": "2c6cc05eb0709122cd19a82468849310eaa1f32ac20816cd09c049fe0c315425",
+    "tests/fixtures/orders-detail-before.json": "f66cb601fc3279fdd3929212cd740625b05bfcbddc1d3f4ae730d19c8b27ab59",
+    "tests/fixtures/orders-picker-seam.json": "d61e119ff0710acdd0447ec976ad14124be2b519b635e37d5a07f41cb3d9a113",
+    "tests/fixtures/orders-read-model.json": "4f9f74473e11ba5c7c4f14909d9d903149082197e337c9ff3523602381ae23f2",
+    "tests/fixtures/orders-seam-list.json": "6046e60a459cf78a8ef89e3195f30f2c66546f3673983d5f6ab295fa4169c873",
+    "tests/fixtures/orders-seam-preserved.json": "d5a97e772bf9fed81c43f757a80c358ded7ad6405f2b41eb1709292c37d1f7cc",
+    "tests/fixtures/orders-sheet-types-before.json": "bcc38ae34b819d99d762c8ad97eb20eb5b23dc90d02ef4ed2372de9211730d1f",
+    "tests/fixtures/orders-type-shapes.json": "3e3760f14b3f5f9eb7cfb8c7f9c0c8a4760bd88e2913d92ecc76772e3e87c15c",
+    "tests/fixtures/orders-ui-structure.json": "53518ab9863a5843fccdb5fe2cf6b64b1b09cb676056b1bff109ff1cdcf0b006",
+    "tests/fixtures/route-contracts.json": "0c703c2032ebd353298d77f4553f610151270e900df8055365ca0d7d3e4b77eb",
+    "tests/fixtures/sales-worksheets-before.json": "20beded7f2b24708fe623bc4654f5aaabfab4718b74209e89414093d486d0f6f",
+    "tests/fixtures/shipments-browser-client.json": "381df5f6fd75468097ed5c2892c88ca5097df2811c614ff3ff33d4c696648232",
+    "tests/fixtures/shipments-create-before.json": "d149cf0bb8c4ea57c60e8680a2adf39a0e897787a0650e09f20c1cae372a5eba",
+    "tests/fixtures/shipments-drive-before.json": "302d85a679e6292cfb1092e265eee7edd9a9acf8fd7b27333e678be3ffa89e17",
+    "tests/fixtures/shipments-dto-before.json": "c788c4b5655eb122615babec7d0f4d5c0c07c68ce8432c9babc965bebdc08024",
+    "tests/fixtures/shipments-enum-before.json": "8d3d9674f9532650299cade14abec692ee3cfbbd65bfbe968b4c26bcb027e78f",
+    "tests/fixtures/shipments-http-before.json": "6feb068fb15329ab3f880b938fcd03aada199345181cb4186fcea37c5ea1767d",
+    "tests/fixtures/shipments-link-before.json": "a95769b4b699da28a07f2fe129d475dcc5e2b065d622df8466aef845f74d1594",
+    "tests/fixtures/shipments-list-before.json": "2428c587bfb8dbac7a4a2161c14e3cd78df43c321c6c7ba733bcd788d9e61952",
+    "tests/fixtures/shipments-read.json": "d61a83e578239d71d8d765ba5d24d916d4146a9bf8b0c85c80ca18c1878f27b8",
+    "tests/fixtures/shipments-status-before.json": "ac130c6528e49b19efbcdd31efc4956c3c7edd552ea16155b63d5e725418343e",
+    "tests/fixtures/shipments-structure.json": "6cedf4321ef781c180132f27d347eae42e526721d27e00006a0cc3c437b91ce8",
+    "tests/fixtures/shipments-ui-relocation.json": "55eced0ac464be297058b4cc140772cbed9ee75332e4bd7beb2c7069232119fc",
+    "tests/fixtures/shipments-validation-before.json": "d06aa6b618c631c704eaaff30dad829e29da9859d6d9c0a1762fb9e20a2f3ccd",
+    "tests/fixtures/worksheet-ownership-before.json": "9e26b67739dcb1c94534164abdd85878c8a9aa10528e17ef78c987f2dc67be1d",
+    "tests/fixtures/remaining-worksheets-before.json": "1dc93c60b3c2d6e4e90b6295254548fd5c7dc4bc0cfd4fb1bba9c96a5debbab4",
+    "tests/fixtures/hr-application-before.json": "bb6e61287268f70eeb29d5b25ca92d280b57c0f5a1208cb729b6c631a3e62f6e",
+    "tests/fixtures/externals-retirement-before.json": "d9e1642272c69e3d58966df28e5540111e822b44709ea6a1ab4165b841a50bcd",
+    "tests/fixtures/orders-line-before.json": "9d660771fb5d8527a6c72114bf781aef673062d08eebb68ac0e67174a836ec72",
+    "tests/fixtures/expenses-business-before.json": "e190129217a65c65c74548ae0eea93748c9cf01d88a89f70ec1fe7ed68263eed",
+    "tests/fixtures/sales-application-before.json": "7c336bbbee3c6ebdd11bb036cb6280610156956665a0dff40fe759c3524b04a5",
+    "tests/fixtures/hr-payroll-before.json": "0c60c5b420e8345e2cc5806cc78048197592f1b854d8eb6d5439b6665d53d622",
+    "tests/fixtures/user-state-worksheet-before.json": "4b971b924f6722d81b799b91fa4a7dd4da701b887b543ba58c6d145194b4b3bc",
+    "tests/fixtures/inventory-application-before.json": "58f303c4ec4f594437f43361247b41dff4b5568334b90559e50f1d23ca984e17",
+    "tests/fixtures/external-infrastructure-before.json": "8902b3cad513a06baf4793de4e1cb4ae3a4584ceca7d49e906b5af7ea3907e51",
+    "tests/fixtures/final-cleanup-before.json": "6bbd370bfc23d025bac5a1d6c86da13de2def8368cf8274fbd2eef3b51220407"
+  },
+  "beforePr42Env": {
+    "source": "GOOGLE_SHEETS_SPREADSHEET_ID=\nGOOGLE_SHEETS_EMPLOYEE_COMPENSATIONS_WORKSHEET_NAME=employee_compensations\nGOOGLE_SHEETS_EMPLOYEES_WORKSHEET_NAME=employees\nGOOGLE_SHEETS_EMPLOYEE_TIMESHEETS_WORKSHEET_NAME=employee_timesheets\nGOOGLE_SHEETS_EMPLOYEE_ADVANCES_WORKSHEET_NAME=employee_advances\nGOOGLE_SHEETS_PAYROLL_SETTLEMENTS_WORKSHEET_NAME=payroll_settlements\nGOOGLE_SHEETS_ORDERS_WORKSHEET_NAME=orders\nGOOGLE_SHEETS_ORDER_BILLS_WORKSHEET_NAME=order_bills\nGOOGLE_SHEETS_ORDER_ITEMS_WORKSHEET_NAME=order_items\nGOOGLE_SHEETS_SALES_RECEIPTS_WORKSHEET_NAME=sales_receipts\nGOOGLE_SHEETS_SALES_RECEIPT_ITEMS_WORKSHEET_NAME=sales_receipt_items\nGOOGLE_SHEETS_SALES_PROFIT_COST_OVERRIDES_WORKSHEET_NAME=sales_profit_cost_overrides\nGOOGLE_SHEETS_SALES_RECEIPT_PAYMENTS_WORKSHEET_NAME=sales_receipt_payments\nGOOGLE_SHEETS_EXPENSES_WORKSHEET_NAME=expenses\nGOOGLE_SHEETS_EXPENSE_CATEGORIES_WORKSHEET_NAME=expense_categories\nGOOGLE_SHEETS_SHOPS_WORKSHEET_NAME=shops\nGOOGLE_SHEETS_SALES_RECEIPT_SYNCS_WORKSHEET_NAME=sales_receipt_syncs\nGOOGLE_SHEETS_SHIPMENT_ORDERS_WORKSHEET_NAME=shipment_orders\nGOOGLE_SHEETS_SHIPMENTS_WORKSHEET_NAME=shipments\nGOOGLE_SHEETS_STOCK_COUNTS_WORKSHEET_NAME=stock_counts\nGOOGLE_SHEETS_USER_STATE_WORKSHEET_NAME=user_state\nGOOGLE_DRIVE_FOLDER_ID=\nGOOGLE_DRIVE_MAKE_FILES_READABLE_BY_LINK=false\nGOOGLE_OAUTH_CLIENT_ID=\nGOOGLE_OAUTH_CLIENT_SECRET=\nGOOGLE_OAUTH_REFRESH_TOKEN=\nGOOGLE_SERVICE_ACCOUNT_EMAIL=\nGOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=\"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\"\nLINE_CHANNEL_SECRET=\nLINE_CHANNEL_ACCESS_TOKEN=\n# Separate purchase-app URL used by the Purchase rich menu.\nPUBLIC_BASE_URL=\n# Inventra URL used by the Order and Movement rich menus.\nNEW_PUBLIC_BASE_URL=\nLOYVERSE_ACCOUNTS_JSON=[]\n\n# Movement creation and management use these workbook tabs.\nGOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME=movements\nGOOGLE_SHEETS_MOVEMENT_DETAIL_WORKSHEET_NAME=movement_details\n# Optional override for movement links. Defaults to PUBLIC_BASE_URL.\nMOVEMENT_PUBLIC_BASE_URL=\n\n# Movement flow: quantity_photo (current/default) or photo_only. Redeploy after changing.\nMOVEMENT_CREATE_MODE=quantity_photo\n\n# Shop-level non-sale unit adjustments (created on first write).\nGOOGLE_SHEETS_STOCK_ADJUSTMENTS_WORKSHEET_NAME=stock_adjustments\n",
+    "sha256": "3eaf577660b9d03e7c13654e922031bcb9fff172b69ecf2d0fa068cdfcf62ed2"
+  },
+  "edits": {
+    "src/config/index.ts": {
+      "beforeHash": "98a942aaf5651417b8f53d49ff978cd573b2e5e3b1803203246fa656d6277315",
+      "afterHash": "cf6c69435f983863b5599fb82ca1c2b6ecae0f52416634e9dff50221e342b596",
+      "changes": [
+        {
+          "beforeStart": 435,
+          "afterStart": 435,
+          "before": "",
+          "after": ";\n    accountSource?: \"env\" | \"sheet\";\n    accountsSpreadsheetId?: string"
+        },
+        {
+          "beforeStart": 1735,
+          "afterStart": 1808,
+          "before": "",
+          "after": "const accountSource = parseLoyverseAccountSource(process.env.LOYVERSE_ACCOUNT_SOURCE);\n  "
+        },
+        {
+          "beforeStart": 2139,
+          "afterStart": 2301,
+          "before": "",
+          "after": "Source,\n      accountsSpreadsheetId: accountSource === \"sheet\"\n        ? process.env.LOYVERSE_ACCOUNTS_SPREADSHEET_ID?.trim() || \"\" : \"\",\n      account"
+        },
+        {
+          "beforeStart": 2141,
+          "afterStart": 2454,
+          "before": "",
+          "after": " accountSource === \"env\"\n        ?"
+        },
+        {
+          "beforeStart": 2199,
+          "afterStart": 2546,
+          "before": "",
+          "after": " : []"
+        },
+        {
+          "beforeStart": 6084,
+          "afterStart": 6436,
+          "before": "",
+          "after": "Source(value: string | undefined): \"env\" | \"sheet\" {\n  const source = value?.trim() || \"env\";\n  if (source !== \"env\" && source !== \"sheet\") {\n    throw new Error(\"LOYVERSE_ACCOUNT_SOURCE must be env or sheet.\");\n  }\n  return source;\n}\n\nfunction parseLoyverseAccount"
+        }
+      ]
+    },
+    "src/modules/sales/server.ts": {
+      "beforeHash": "04e9cfd134743faa09efc2bcac19d9eb364c511f9e9fec7a5aa1f93f94d916d7",
+      "afterHash": "26d1e879a5ff2670f5bbfbdd883b2857aca7a47339d079809a7c375710c236a2",
+      "changes": [
+        {
+          "beforeStart": 1379,
+          "afterStart": 1379,
+          "before": "C",
+          "after": "ReceiptS"
+        },
+        {
+          "beforeStart": 1381,
+          "afterStart": 1388,
+          "before": "nfig",
+          "after": ""
+        },
+        {
+          "beforeStart": 1387,
+          "afterStart": 1390,
+          "before": "",
+          "after": "c"
+        },
+        {
+          "beforeStart": 1388,
+          "afterStart": 1392,
+          "before": "dLoyverseAccount",
+          "after": ""
+        },
+        {
+          "beforeStart": 1413,
+          "afterStart": 1401,
+          "before": "@",
+          "after": "."
+        },
+        {
+          "beforeStart": 1415,
+          "afterStart": 1403,
+          "before": "",
+          "after": "appl"
+        },
+        {
+          "beforeStart": 1416,
+          "afterStart": 1408,
+          "before": "",
+          "after": "catio"
+        },
+        {
+          "beforeStart": 1417,
+          "afterStart": 1414,
+          "before": "f",
+          "after": "/po"
+        },
+        {
+          "beforeStart": 1419,
+          "afterStart": 1418,
+          "before": "a",
+          "after": "t"
+        },
+        {
+          "beforeStart": 1421,
+          "afterStart": 1420,
+          "before": "",
+          "after": "/receip"
+        },
+        {
+          "beforeStart": 1422,
+          "afterStart": 1428,
+          "before": "ruct",
+          "after": "-so"
+        },
+        {
+          "beforeStart": 1428,
+          "afterStart": 1433,
+          "before": "e/external/loyvers",
+          "after": "c"
+        },
+        {
+          "beforeStart": 1783,
+          "afterStart": 1771,
+          "before": "C",
+          "after": "{ id: string; sh"
+        },
+        {
+          "beforeStart": 1785,
+          "afterStart": 1788,
+          "before": "",
+          "after": "pName: stri"
+        },
+        {
+          "beforeStart": 1786,
+          "afterStart": 1800,
+          "before": "f",
+          "after": "g; storeId?: str"
+        },
+        {
+          "beforeStart": 1788,
+          "afterStart": 1817,
+          "before": "",
+          "after": "n"
+        },
+        {
+          "beforeStart": 1789,
+          "afterStart": 1819,
+          "before": "",
+          "after": "; service: ReceiptSo"
+        },
+        {
+          "beforeStart": 1791,
+          "afterStart": 1841,
+          "before": "",
+          "after": "c"
+        },
+        {
+          "beforeStart": 1792,
+          "afterStart": 1843,
+          "before": "dLoyverseAccount",
+          "after": " }"
+        }
+      ]
+    },
+    "src/infrastructure/external/loyverse/createLoyverseServiceFromConfig.ts": {
+      "beforeHash": "dacd4db5c3f6fc29b8c49dc117b68e52226e9728fed9ac06edfdad5e622aa476",
+      "afterHash": "c714ea3c28caf8a596faa0018153b2c107f9f9a052092ec4c7ca0cc3318c6881",
+      "changes": [
+        {
+          "beforeStart": 331,
+          "afterStart": 331,
+          "before": "",
+          "after": "if (config.loyverse.accountSource === \"sheet\") {\n    throw new Error(\"Sheet-based Loyverse accounts require the server account reader.\");\n  }\n  "
+        }
+      ]
+    },
+    ".env.example": {
+      "beforeHash": "d986b704752436673ba466c23bb06db6a48e3599dad2cc7c726caadd321003cb",
+      "afterHash": "cb2c5480f185628dd413d1f77022c7c0c7a9e62916e90bf381cdfd4ce80b41d7",
+      "changes": [
+        {
+          "beforeStart": 666,
+          "afterStart": 666,
+          "before": "",
+          "after": "# Account source: env (default/rollback) or sheet. See README before switching.\nLOYVERSE_ACCOUNT_SOURCE=env\n"
+        },
+        {
+          "beforeStart": 691,
+          "afterStart": 799,
+          "before": "",
+          "after": "\n# Required only in sheet mode: a separate, privately shared workbook.\nLOYVERSE_ACCOUNTS_SPREADSHEET_ID="
+        }
+      ]
+    },
+    "src/app/api/stock-adjustments/route.ts": {
+      "beforeHash": "18fe73eb58f1080c97de40e9b579dcc12e0e54d0b89c075b8c232cbe50ad0b97",
+      "afterHash": "c673d601537ad9231b034bc55e1095f5999dc7d2edde5e0e7ba96fabc6583a35",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 1195,
+          "afterStart": 1267,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 1200,
+          "afterStart": 1272,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 1203,
+          "afterStart": 1275,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 1210,
+          "afterStart": 1286,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 1219,
+          "afterStart": 1294,
+          "before": "",
+          "after": "(config))"
+        },
+        {
+          "beforeStart": 1493,
+          "afterStart": 1577,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 1498,
+          "afterStart": 1582,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 1501,
+          "afterStart": 1585,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 1508,
+          "afterStart": 1596,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 1517,
+          "afterStart": 1604,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/stock-counts/route.ts": {
+      "beforeHash": "299e61a167493eee7357843b06a3f3807d9dcd8a78bb29e853cc1b9a6603bb54",
+      "afterHash": "3df2bd13ec4b23f001b004897c022bd7139db8c92829732cfb15cfe62b97c127",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 713,
+          "afterStart": 785,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 718,
+          "afterStart": 790,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 721,
+          "afterStart": 793,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 728,
+          "afterStart": 804,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 737,
+          "afterStart": 812,
+          "before": "",
+          "after": "(config))"
+        },
+        {
+          "beforeStart": 2091,
+          "afterStart": 2175,
+          "before": "",
+          "after": "configuredAccounts = await listLoyverseAccounts(config);\n    const "
+        },
+        {
+          "beforeStart": 2107,
+          "afterStart": 2258,
+          "before": ".loyv",
+          "after": "ur"
+        },
+        {
+          "beforeStart": 2113,
+          "afterStart": 2261,
+          "before": "rse.a",
+          "after": "dA"
+        },
+        {
+          "beforeStart": 2683,
+          "afterStart": 2828,
+          "before": ".loyv",
+          "after": "ur"
+        },
+        {
+          "beforeStart": 2689,
+          "afterStart": 2831,
+          "before": "rse.a",
+          "after": "dA"
+        }
+      ]
+    },
+    "src/app/api/employees/timesheets/route.ts": {
+      "beforeHash": "46c5372f82fa92a170cf41340ff235d5040b8d46b8f9770bc1251992c81e64c8",
+      "afterHash": "4893db9fd09a4d727742f403f273d85b70eb43c2bd38c533bed2a9f0cf2ae911",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 881,
+          "afterStart": 953,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 886,
+          "afterStart": 958,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 889,
+          "afterStart": 961,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 896,
+          "afterStart": 972,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 905,
+          "afterStart": 980,
+          "before": "",
+          "after": "(config))"
+        },
+        {
+          "beforeStart": 3007,
+          "afterStart": 3091,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 3012,
+          "afterStart": 3096,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 3015,
+          "afterStart": 3099,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 3022,
+          "afterStart": 3110,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 3031,
+          "afterStart": 3118,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/employees/timesheets/[id]/route.ts": {
+      "beforeHash": "a2bca36d0d6495415a597750bd46c408d0d0e1ee24b5a9f6916344134fe450ac",
+      "afterHash": "9968e8f15d3a01fe712d8de30a758dc4d8cb70d19ba77fe467d0cfd60bcca5b4",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 2781,
+          "afterStart": 2853,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 2786,
+          "afterStart": 2858,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 2789,
+          "afterStart": 2861,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 2796,
+          "afterStart": 2872,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 2805,
+          "afterStart": 2880,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/employees/timesheets/summary/route.ts": {
+      "beforeHash": "c0e281bbda179e6bb7f4174caa264374dfc8b390d3d02830fa2139377a606017",
+      "afterHash": "9b851a3e2dc6a641acf70fd3b589ca5c74160cba576f6edb8dd5be7f5461ee7d",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 737,
+          "afterStart": 809,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 742,
+          "afterStart": 814,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 745,
+          "afterStart": 817,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 752,
+          "afterStart": 828,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 761,
+          "afterStart": 836,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/expenses/masters/[kind]/route.ts": {
+      "beforeHash": "bc9b5bbf12d8e6ab92e8ec659f46c65fd42f9f29aa5ad1f815ae5be65bd7e616",
+      "afterHash": "7db709a547762e84da4fe2429e5ff8e893c9c19ff383b50c9a3546f79d5c30cd",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 1236,
+          "afterStart": 1308,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 1241,
+          "afterStart": 1313,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 1244,
+          "afterStart": 1316,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 1251,
+          "afterStart": 1327,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 1260,
+          "afterStart": 1335,
+          "before": "",
+          "after": "(config))"
+        },
+        {
+          "beforeStart": 1837,
+          "afterStart": 1921,
+          "before": "",
+          "after": "const accounts = kind === \"shops\" ? await listLoyverseAccounts(config) : [];\n    "
+        },
+        {
+          "beforeStart": 2031,
+          "afterStart": 2196,
+          "before": "config.loyverse.",
+          "after": ""
+        }
+      ]
+    },
+    "src/app/api/loyverse/accounts/route.ts": {
+      "beforeHash": "9b1c9c3edefa58c223c77d266325390f9ed4c95bfe28598214b03c144ac6abdd",
+      "afterHash": "9c48ae69f12666e3c892d881f1d4e951d5a8c2d0b67c0aa8db269e2e695473d6",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 199,
+          "afterStart": 271,
+          "before": "",
+          "after": "(await listLoyverseAccounts("
+        },
+        {
+          "beforeStart": 210,
+          "afterStart": 310,
+          "before": ".loyverse.accounts",
+          "after": "))"
+        }
+      ]
+    },
+    "src/app/api/loyverse/daily-sales/route.ts": {
+      "beforeHash": "cd73dfc4f13cb9b319695d19cf1bb39f0c92383a8fb905d7a4448c92849ffad0",
+      "afterHash": "b21bb77e9d5cc85e2ababac155335a6f5a353193668c9717e5e0b16f82de1cb3",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { createLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 113,
+          "afterStart": 187,
+          "before": ",\n  createLoyverseAccountsFromConfig",
+          "after": ""
+        },
+        {
+          "beforeStart": 446,
+          "afterStart": 484,
+          "before": "",
+          "after": "config = getConfig();\n    const "
+        },
+        {
+          "beforeStart": 464,
+          "afterStart": 534,
+          "before": "",
+          "after": " await"
+        },
+        {
+          "beforeStart": 487,
+          "afterStart": 563,
+          "before": "FromC",
+          "after": "(c"
+        },
+        {
+          "beforeStart": 497,
+          "afterStart": 570,
+          "before": "(getConfig()",
+          "after": ""
+        },
+        {
+          "beforeStart": 631,
+          "afterStart": 692,
+          "before": "",
+          "after": ": config.loyverse.accountSource === \"sheet\"\n            ? \"No active Loyverse accounts are configured.\"\n            "
+        }
+      ]
+    },
+    "src/app/api/loyverse/daily-sales/sync/route.ts": {
+      "beforeHash": "ae8c7a868704c1e99d35f08a100fa4183a5e56a6eada8059255f85cec990c2d3",
+      "afterHash": "82dd0112dba0bda7b4d2bc135fca911247d54b181e3c146ce3b26360a36c3d59",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { createLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 162,
+          "afterStart": 236,
+          "before": "\";\nimport { createLoyverseAccountsFromConfig } from \"@/infrastructure/external/loyverse",
+          "after": ""
+        },
+        {
+          "beforeStart": 1293,
+          "afterStart": 1280,
+          "before": "",
+          "after": "(await "
+        },
+        {
+          "beforeStart": 1315,
+          "afterStart": 1309,
+          "before": "FromConfig",
+          "after": ""
+        },
+        {
+          "beforeStart": 1332,
+          "afterStart": 1316,
+          "before": "",
+          "after": ")"
+        }
+      ]
+    },
+    "src/app/api/sales/daily-sales/route.ts": {
+      "beforeHash": "836c7d9734b63a101e45112f8b9a6d32955613db781ee1804672c8c5c1932795",
+      "afterHash": "ee3d182659637bd2598d93db5173f655d8fce122e64c9b7d83ec7164494cb92f",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 451,
+          "afterStart": 523,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 456,
+          "afterStart": 528,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 459,
+          "afterStart": 531,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 466,
+          "afterStart": 542,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 475,
+          "afterStart": 550,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/sales/dashboard/route.ts": {
+      "beforeHash": "7d2ad6212d59052feaae2a68a8988250d54c8705c9a7fd02ac328cf3a5273993",
+      "afterHash": "8f0bd2afa7e54bb0341286e258fde44ac44d7aa6c1a07509f0d7f85b36c1da6c",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 432,
+          "afterStart": 504,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 437,
+          "afterStart": 509,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 440,
+          "afterStart": 512,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 447,
+          "afterStart": 523,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 456,
+          "afterStart": 531,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/sales/profit-summary/route.ts": {
+      "beforeHash": "ebc1cf07edce61c369c0397b25ebc20c9f289350344dc82e762aef2dd4d58770",
+      "afterHash": "d0fc9c8150f6a907cc4e72bc348f5217cc56133c30c8cbfb1652638df38a65cc",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 800,
+          "afterStart": 872,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 805,
+          "afterStart": 877,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 808,
+          "afterStart": 880,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 815,
+          "afterStart": 891,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 824,
+          "afterStart": 899,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/sales/sync-status/route.ts": {
+      "beforeHash": "ba0334ddcaeb5bdb6e3fb79b44618ff36ba73599acac1a84a83fbbb80e085b00",
+      "afterHash": "814fa98bdc60e76c69e39fdd343b444e22872660c44894f94ff110050f8d351e",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 765,
+          "afterStart": 837,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 770,
+          "afterStart": 842,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 773,
+          "afterStart": 845,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 780,
+          "afterStart": 856,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 789,
+          "afterStart": 864,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "src/app/api/sales/profit-summary/cost-overrides/route.ts": {
+      "beforeHash": "0a0c190b9270ad7cf92ed8697c8ec18ee2cf2093fc0ac0aafa8ca96cc89120c9",
+      "afterHash": "979d81af60ee759507db7d6947b2178611fa88e75ab974affdfacc13a4c285ca",
+      "changes": [
+        {
+          "beforeStart": 0,
+          "afterStart": 0,
+          "before": "",
+          "after": "import { listLoyverseAccounts } from \"@/composition/loyverse-accounts\";\n"
+        },
+        {
+          "beforeStart": 1079,
+          "afterStart": 1151,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 1084,
+          "afterStart": 1156,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 1087,
+          "afterStart": 1159,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 1094,
+          "afterStart": 1170,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 1103,
+          "afterStart": 1178,
+          "before": "",
+          "after": "(config))"
+        },
+        {
+          "beforeStart": 2351,
+          "afterStart": 2435,
+          "before": "conf",
+          "after": "(awa"
+        },
+        {
+          "beforeStart": 2356,
+          "afterStart": 2440,
+          "before": "g.",
+          "after": "t "
+        },
+        {
+          "beforeStart": 2359,
+          "afterStart": 2443,
+          "before": "",
+          "after": "istL"
+        },
+        {
+          "beforeStart": 2366,
+          "afterStart": 2454,
+          "before": ".a",
+          "after": "A"
+        },
+        {
+          "beforeStart": 2375,
+          "afterStart": 2462,
+          "before": "",
+          "after": "(config))"
+        }
+      ]
+    },
+    "eslint/external-infrastructure-boundaries.mjs": {
+      "beforeHash": "8ff0579815862224b599a9e3d061478a3f339de5ef6f0b126d2720a3f4f0caf6",
+      "afterHash": "e943fc1af7902be893c3fb8003d7e41d0aefdd038463a05e5872d7dd5c401c35",
+      "changes": [
+        {
+          "beforeStart": 281,
+          "afterStart": 281,
+          "before": "",
+          "after": "\",\n    \"./application/ports/receipt-source"
+        }
+      ]
+    }
+  },
+  "newFiles": [
+    "src/shared/types/loyverse-account.ts",
+    "src/infrastructure/configuration/google-sheets/loyverse-accounts.ts",
+    "src/composition/loyverse-accounts.ts"
+  ],
+  "newHashes": {
+    "src/shared/types/loyverse-account.ts": "e8968092b789ab16a1b25d29166e61db6857cedba2f722abb6b0ff74a044df70",
+    "src/infrastructure/configuration/google-sheets/loyverse-accounts.ts": "8236d6f817320a725a301b016b80aaa8c0a792301e044805fc9510aec9eea626",
+    "src/composition/loyverse-accounts.ts": "483c168881096b94eb6a553d1cb8a04d7a737a239abe7369b9f4a0c3efad5de1"
+  }
+}

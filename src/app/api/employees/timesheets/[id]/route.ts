@@ -1,3 +1,4 @@
+import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -76,7 +77,7 @@ export async function PUT(
   }
   try {
     const config = getConfig();
-    if (!config.loyverse.accounts.some((shop) => shop.id === shopId.trim())) {
+    if (!(await listLoyverseAccounts(config)).some((shop) => shop.id === shopId.trim())) {
       return NextResponse.json({ ok: false, error: "Shop not found." }, { status: 400 });
     }
     const timesheet = await updateEmployeeTimesheet({

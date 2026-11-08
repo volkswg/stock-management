@@ -1,8 +1,8 @@
+import { createLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import {
   aggregateSalesByItem,
-  createLoyverseAccountsFromConfig,
   type LoyverseReceipt,
 } from "@/infrastructure/external/loyverse";
 import {
@@ -14,12 +14,15 @@ export const runtime = "nodejs";
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
-    const loyverseAccounts = createLoyverseAccountsFromConfig(getConfig());
+    const config = getConfig();
+    const loyverseAccounts = await createLoyverseAccounts(config);
     if (loyverseAccounts.length === 0) {
       return NextResponse.json(
         {
           ok: false,
-          error: "Loyverse is not configured. Set LOYVERSE_ACCOUNTS_JSON.",
+          error: config.loyverse.accountSource === "sheet"
+            ? "No active Loyverse accounts are configured."
+            : "Loyverse is not configured. Set LOYVERSE_ACCOUNTS_JSON.",
         },
         { status: 503 },
       );

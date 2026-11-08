@@ -17,6 +17,8 @@ export type AppConfig = {
   movementCreateMode: "quantity_photo" | "photo_only";
   loyverse: {
     accounts: LoyverseAccountConfig[];
+    accountSource?: "env" | "sheet";
+    accountsSpreadsheetId?: string;
   };
   googleSheets: {
     spreadsheetId: string;
@@ -60,6 +62,7 @@ export type AppConfig = {
 };
 
 export function getConfig(): AppConfig {
+  const accountSource = parseLoyverseAccountSource(process.env.LOYVERSE_ACCOUNT_SOURCE);
   return {
     line: {
       channelSecret: process.env.LINE_CHANNEL_SECRET || "",
@@ -69,7 +72,11 @@ export function getConfig(): AppConfig {
     movementPublicBaseUrl: process.env.MOVEMENT_PUBLIC_BASE_URL?.trim() || "",
     movementCreateMode: parseMovementCreateMode(process.env.MOVEMENT_CREATE_MODE),
     loyverse: {
-      accounts: parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON),
+      accountSource,
+      accountsSpreadsheetId: accountSource === "sheet"
+        ? process.env.LOYVERSE_ACCOUNTS_SPREADSHEET_ID?.trim() || "" : "",
+      accounts: accountSource === "env"
+        ? parseLoyverseAccounts(process.env.LOYVERSE_ACCOUNTS_JSON) : [],
     },
     googleSheets: {
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || "",
@@ -149,6 +156,14 @@ export function getConfig(): AppConfig {
 
 function normalizePrivateKey(value: string): string {
   return value.replace(/\\n/g, "\n");
+}
+
+function parseLoyverseAccountSource(value: string | undefined): "env" | "sheet" {
+  const source = value?.trim() || "env";
+  if (source !== "env" && source !== "sheet") {
+    throw new Error("LOYVERSE_ACCOUNT_SOURCE must be env or sheet.");
+  }
+  return source;
 }
 
 function parseLoyverseAccounts(

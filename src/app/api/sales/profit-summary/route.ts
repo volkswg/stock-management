@@ -1,3 +1,4 @@
+import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
@@ -22,7 +23,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   try {
     const config = getConfig();
-    const configuredAccounts = config.loyverse.accounts.map(({ id, shopName }) => ({
+    const configuredAccounts = (await listLoyverseAccounts(config)).map(({ id, shopName }) => ({
       id,
       shopName,
     }));

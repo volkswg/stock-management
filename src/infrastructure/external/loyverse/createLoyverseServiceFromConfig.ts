@@ -11,6 +11,9 @@ export type ConfiguredLoyverseAccount = {
 export function createLoyverseAccountsFromConfig(
   config: AppConfig,
 ): ConfiguredLoyverseAccount[] {
+  if (config.loyverse.accountSource === "sheet") {
+    throw new Error("Sheet-based Loyverse accounts require the server account reader.");
+  }
   return config.loyverse.accounts.map((account) => ({
     id: account.id,
     shopName: account.shopName,

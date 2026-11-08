@@ -1,4 +1,5 @@
 import {externalsRetirementBoundaries} from "./eslint/externals-retirement-boundaries.mjs";
+import {loyverseAccountsBoundaries} from "./eslint/loyverse-accounts-boundaries.mjs";
 import {finalArchitectureBoundaries} from "./eslint/final-architecture-boundaries.mjs";
 import {externalInfrastructureBoundaries} from "./eslint/external-infrastructure-boundaries.mjs";
 import {ordersLineWorkflowBoundaries} from "./eslint/orders-line-workflows-boundaries.mjs";
@@ -43,6 +44,7 @@ const eslintConfig = defineConfig([
   ...externalInfrastructureBoundaries,
   ...finalArchitectureBoundaries,
   ...externalsRetirementBoundaries,
+  ...loyverseAccountsBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
