@@ -1,13 +1,14 @@
 # Stock Management
 
-Next.js application for Orders, Shipments, inventory/movements, Sales, expenses and HR, with existing Google Sheets/Drive, LINE and Loyverse integrations. Modular ownership is being migrated incrementally; compatibility paths remain.
+Next.js application for Orders, Shipments, inventory/movements, Sales, expenses and HR, using Google Sheets/Drive, LINE and Loyverse. The scoped modular refactor is complete through [PR #40](https://github.com/volkswg/stock-management/pull/40): active code uses canonical feature, infrastructure and composition owners; `src/externals/` is removed. Some other compatibility paths remain intentionally supported.
+
+**Production safety:** completion of the refactor does not certify authentication, authorization, live provider behavior or concurrent writes. [Issue #38](https://github.com/volkswg/stock-management/issues/38) tracks access-control verification, CI and isolated smoke tests. Check access restrictions before exposing employee/payroll or write-capable APIs; do not run mutating smoke tests against production.
 
 ## Start here
 
-- [Architecture guide](docs/architecture/README.md): current owners, dependency safeguards and decisions.
-- [Refactoring roadmap](docs/refactoring/roadmap.md) and [progress/evidence](docs/refactoring/progress.md): pending work versus merged slices.
-- [Engineering rules](AGENTS.md) and [safe verification](docs/refactoring/verification.md).
-- Operational/user guides: [expenses](docs/expenses.md), [movement migration](docs/movement-migration.md), [LINE rich-menu links](docs/rich-menu-links.md), [shop stock adjustments](docs/shop-stock-adjustments.md).
+- [Architecture guide](docs/architecture/README.md) for current ownership and documentation navigation; [engineering rules](AGENTS.md) for safe development.
+- [Roadmap](docs/refactoring/roadmap.md) for **current and next work**; [progress ledger](docs/refactoring/progress.md) for completed PRs and archived evidence; [verification](docs/refactoring/verification.md) for safe commands and limits.
+- Operational guides: [expenses](docs/expenses.md), [movement migration](docs/movement-migration.md), [LINE rich-menu links](docs/rich-menu-links.md) and [stock adjustments](docs/shop-stock-adjustments.md).
 
 ## Local development
 
