@@ -1,6 +1,8 @@
 # Refactoring progress and evidence
 
-## Current Product Master integration
+## Product Master review: blocked on durable write coordination
+
+**PR47 is draft and not ready for SA approval/deployment.** Review verified a 30,000-character spreadsheet metadata limit, correcting the prior entry-count claim. The actual guard exhausts this allocation after roughly a hundred synthetic creations; no data is rewritten on overflow. A deferred HTTP counterexample demonstrates why deleting guards is unsafe. Production code is deliberately unchanged while a durable executor/journal infrastructure decision is pending. See [decision/trade-offs](../architecture/decisions.md#product-write-coordination-review-blocker) and [review evidence](verification.md#product-guard-capacity-review).
 
 Base `277c0b31c76ed4605a91ffad303d218a7957bf84` is latest main / merged PR45. Branch `feat/product-master-order-integration` excludes draft PR46. Products owns its contracts/rules/application/port/Google adapter/server/UI; Orders owns a separate link port, K-only adapter, revision contract/server and picker interface. App/root composition connects them without new cross-feature private edges. Existing Order JSON, A:J header/class identity, Web/LINE flows, providers and financial calculations are preserved.
 

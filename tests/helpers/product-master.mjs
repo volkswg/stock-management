@@ -33,10 +33,11 @@ export function harness(){
   }
   if(path.endsWith('/values:batchUpdate')){for(const entry of JSON.parse(init.body).data)update(entry.range,entry.values);return Response.json({});}
   const body=JSON.parse(init.body);
-  if(path.endsWith('/developerMetadata:search')){const query=body.dataFilters[0].developerMetadataLookup;return Response.json({matchedDeveloperMetadata:[...state.metadata.values()].filter(record=>(query.metadataId===undefined||query.metadataId===record.metadataId)&&(query.metadataKey===undefined||query.metadataKey===record.metadataKey)).map(developerMetadata=>({developerMetadata}))});}
+  if(path.endsWith('/developerMetadata:search')){if(state.failMetadataReads>0){state.failMetadataReads--;throw new Error('synthetic metadata read timeout');}const query=body.dataFilters[0].developerMetadataLookup;return Response.json({matchedDeveloperMetadata:[...state.metadata.values()].filter(record=>(query.metadataId===undefined||query.metadataId===record.metadataId)&&(query.metadataKey===undefined||query.metadataKey===record.metadataKey)).map(developerMetadata=>({developerMetadata}))});}
   assert.ok(path.endsWith('/book:batchUpdate'),path);
   if(state.gate)await state.gate();
   if(state.mode==='timeout-before')throw new Error('synthetic timeout');
+  if(state.mode==='timeout-late'){state.lateCommit=()=>fetch(url,init);throw new Error('synthetic timeout with delayed provider request');}
   if(state.mode==='provider-error')return new Response('synthetic private provider body',{status:503});
   const sheets=structuredClone(state.sheets),metadata=new Map(state.metadata);
   for(const request of body.requests){
@@ -45,8 +46,9 @@ export function harness(){
    else if(request.updateCells){const {range,rows}=request.updateCells;rows.forEach((row,offset)=>row.values.forEach((cell,column)=>{sheets[names[range.sheetId]][range.startRowIndex+offset][range.startColumnIndex+column]=Object.values(cell.userEnteredValue)[0];}));}
    else assert.fail('Unexpected request');
   }
+  const allocations=new Map();for(const record of metadata.values()){const scope=record.location?.spreadsheet?'spreadsheet':record.location?.sheetId??record.location?.dimensionRange?.sheetId;const total=(allocations.get(scope)??0)+[...(record.metadataKey??'')].length+[...(record.metadataValue??'')].length;allocations.set(scope,total);if(total>30000)return new Response('synthetic metadata character limit',{status:400});}
   state.sheets=sheets;state.metadata=metadata;events.push(['commit',plain(body)]);
-  if(state.mode==='commit-timeout')throw new Error('synthetic lost response');return Response.json({});
+  if(state.mode==='commit-timeout')throw new Error('synthetic lost response');if(state.failVerification){state.failVerification=false;state.failMetadataReads=2;}return Response.json({});
  };
  function load(file){
   assert.ok(file.startsWith('src/modules/products/')||['src/modules/orders/application/product-links.ts','src/modules/orders/infrastructure/google-sheets/product-links.ts','src/modules/orders/infrastructure/google-sheets/order-items/const.ts','src/modules/orders/infrastructure/google-sheets/orders/const.ts','src/infrastructure/persistence/google-sheets/client/index.ts','src/infrastructure/persistence/google-sheets/client/GoogleSheetsClient.ts','src/infrastructure/persistence/google-sheets/guarded-write.ts','src/infrastructure/persistence/google-sheets/const.ts','src/shared/lib/request-id.ts','src/config/product-master-access.ts','src/infrastructure/security/product-staff-session.ts','src/infrastructure/http/read-json.ts','src/composition/product-master-http.ts','src/composition/product-master.ts','src/modules/orders/product-link-server.ts','src/shared/lib/is-record.ts','src/app/api/product-access/route.ts','src/app/api/products/route.ts','src/app/api/products/suggestions/route.ts','src/app/api/products/[id]/route.ts','src/app/api/products/creations/[requestId]/cancel/route.ts','src/app/api/orders/[id]/product-links/route.ts','src/app/api/orders/[id]/items/[itemId]/product/route.ts'].includes(file),`Unapproved source ${file}`);

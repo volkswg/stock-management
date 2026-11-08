@@ -18,6 +18,8 @@ This map includes merged PR45 (`277c0b31c76ed4605a91ffad303d218a7957bf84`) and t
 | Shared/runtime | Pure LINE DTO/enum/message builders and isRecord in shared; original stateful sortable ID generator in root infrastructure/runtime | No feature dependency; old helper names alias one implementation |
 | Workspace/Next shell | Existing app-owned home/navigation/layout and routes | No Workspace redesign; scoped Product Master sign-in and client wiring are app composition |
 
+**PR47 review blocker:** permanent metadata guards exhaust Google's 30,000-character spreadsheet allocation; the previous 30,000-entry claim was incorrect. No sustainable replacement has shipped. [Durable executor/journal prerequisite](decisions.md#product-write-coordination-review-blocker) is awaiting an infrastructure decision; the PR is draft and must not be approved/deployed.
+
 The new root guarded-write helper composes fixed developer-metadata IDs with atomic Sheets mutations; root security handles only the new staff session. `composition/product-master.ts` supplies existing Google transport, Products public server and Orders product-link server. The aggregate GoogleSheetsService and existing configuration/provider behavior are untouched. Products do not participate in Inventory, movements or stock calculations.
 
 ## Physical worksheet owners
