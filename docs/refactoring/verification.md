@@ -415,3 +415,32 @@ copy using env -i, not inherited production credentials. The
 records configuration, external-effect uncertainty, owner-approved frozen export,
 hosted reconciliation, capacity, recovery, authorization and cutover gates. No
 production data or Vercel environment setting is changed by verification.
+
+### PR49 review acceptance — updated current-source evidence
+
+| Gate | Fresh local result |
+| --- | --- |
+| Regression / Python | 565/565 and 22/22 pass; no failures/skips |
+| Real PostgreSQL / Chromium | 25/25 and 1/1 pass, actual Orders API and private runner authorization |
+| Corrected boundaries | SQL READ ONLY/nested upgrade denial; explicit LINE exception; query-bound browser keys; foreign revision isolation; 204 replay |
+| Reconciliation | Actual archive and operational CLI extraction match all 23 synthetic tables exactly |
+| Recovery | Two complete restored states; records, grants/RLS, constraints, indexes, triggers/functions and sequences match |
+| Lint / typecheck | Pass, inherited shipmentRow warning only |
+| Isolated production build | verify-build.sh passes with env -i, source-byte match, unchanged route manifest and 113 clean client chunks |
+| Hosted inspection | Metadata-only READ ONLY: migration schemas absent, migration ledger empty; security advisor empty |
+
+`tools/migration/verify-operational.sh` additionally requires Playwright tooling
+(the local environment provides 1.62.1) and Chromium. Independent GitHub acceptance
+installs Playwright 1.62.1 in the runner temp directory, without a project dependency
+or second lockfile, and uses the runner's Chrome. Credentials are synthetic;
+business/provider secrets are neither required nor available to the workflow.
+Both browser and SQL runners refuse hosted data; real hosted acceptance is a
+separately authorized Phase 3 activity. The browser fixture is not the full React
+application. Full-app module/provider acceptance remains unchecked in the runbook.
+
+The GitHub `Migration acceptance` check and synthetic artifact on
+[PR49](https://github.com/volkswg/stock-management/pull/49) provide independent
+source-matched evidence when completed; require a passing run for the final
+reviewed commit. Preserve failures as evidence, correct code and rerun rather than
+classifying a Vercel build as database acceptance. Do not publish private artifacts
+from Phase 3 through this workflow.

@@ -10,7 +10,7 @@ export function authorizeStaging(request: Request) {
   const supplied = request.headers.get("authorization") || "";
   if (!equal(supplied, `Bearer ${token}`)) throw new PersistenceFailure(401,"Staging authorization required.");
 }
-function restore(value: StoredResponse): Response { return new Response(Buffer.from(value.body,"base64"),{status:value.status,headers:value.headers}); }
+function restore(value: StoredResponse): Response { return new Response([204,205,304].includes(value.status) ? null : Buffer.from(value.body,"base64"),{status:value.status,headers:value.headers}); }
 class RejectedResponse extends PersistenceFailure {
   constructor(readonly response: Response) { super(response.status); }
 }
@@ -23,13 +23,15 @@ async function requestIntent(request: Request) {
   const text = await request.clone().text();
   try { return hashIntent(JSON.parse(text)); } catch { return hashIntent(text); }
 }
-export function withPersistence<Args extends unknown[], Result extends Response>(handler: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result> {
+export function withPersistence<Args extends unknown[], Result extends Response>(handler: (...args: Args) => Promise<Result>, options: { lineWebhook?: true } = {}): (...args: Args) => Promise<Result> {
   return async (...args) => {
     try {
       if (storageMode() === "google-sheets") return handler(...args);
       const request = args[0] as Request;
       if (!(request instanceof Request)) throw new PersistenceFailure(503,"A staging request context is required.");
-      const isLine = new URL(request.url).pathname === "/api/line/webhook";
+      // Only the signature-verifying LINE entrypoint may opt into this boundary.
+      // A caller-controlled URL must never exempt an ordinary handler from auth.
+      const isLine = options.lineWebhook && new URL(request.url).pathname === "/api/line/webhook";
       if (isLine) { stagingSettings(); return handler(...args); }
       authorizeStaging(request);
       const method=request.method.toUpperCase();

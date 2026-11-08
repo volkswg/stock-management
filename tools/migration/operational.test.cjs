@@ -269,6 +269,24 @@ test('wrong isolated-target metadata, destructive runtime SQL and immutable-hist
  await assert.rejects(transaction(true,()=>requireMutation().query('UPDATE stock_operational.payroll_settlements SET reference=$1',['forbidden'])),PersistenceFailure);
  await assert.rejects(transaction(true,()=>requireMutation().query('CREATE TABLE stock_operational.forbidden(id text)')),PersistenceFailure);
 });
+test('read-only requests enforce PostgreSQL READ ONLY and reject nested mutation upgrades',async()=>{
+ await assert.rejects(transaction(false,()=>currentTransaction().query("INSERT INTO stock_operational.side_effects(key,state) VALUES('readonly-bypass','sending')")),PersistenceFailure);
+ let ran=false;
+ await assert.rejects(transaction(false,()=>transaction(true,async()=>{ran=true;})),PersistenceFailure);
+ assert.equal(ran,false);
+ await transaction(false,async()=>{
+  assert.equal((await currentTransaction().query('SHOW transaction_read_only')).rows[0].transaction_read_only,'on');
+  assert.equal((await currentTransaction().query("SELECT count(*) FROM stock_operational.side_effects WHERE key='readonly-bypass'")).rows[0].count,'0');
+ });
+});
+test('spoofing the LINE URL cannot bypass ordinary handler authorization; no-content responses replay',async()=>{
+ let ran=false;
+ const handler=withPersistence(async()=>{ran=true;return Response.json({});});
+ assert.equal((await handler(new Request('https://example.test/api/line/webhook',{method:'POST'}))).status,401);assert.equal(ran,false);
+ const noContent=withPersistence(async()=>new Response(null,{status:204}));
+ assert.equal((await noContent(request('no-content-command'))).status,204);
+ assert.equal((await noContent(request('no-content-command'))).status,204);
+});
 
 test('failed LINE batches retain received/unprocessed image counters and stop before later events',async()=>{
  const event=index=>({type:'message',webhookEventId:`routing-failure-event-${index}`,replyToken:'synthetic',source:{type:'user',userId:'synthetic'},message:{id:`image-${index}`,type:'image'}});

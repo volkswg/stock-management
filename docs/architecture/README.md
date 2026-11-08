@@ -21,7 +21,7 @@ The external compatibility directory `src/externals/` was retired in [PR #40](ht
 
 ## Database migration preparation
 
-The [database migration runbook](../database-migration.md) describes the private PostgreSQL schema, source audit, offline tools, synthetic verification and remaining acceptance gates. Runtime persistence remains Google Sheets. Phase 2 adds opt-in isolated PostgreSQL persistence through the [operational persistence decision](decisions.md#phase-2-postgresql-operational-persistence); production remains on Sheets.
+The [database migration runbook](../database-migration.md) describes the private PostgreSQL schemas, source audit, offline tools, synthetic verification and the comprehensive [Phase 3 execution checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover). Phase 2 adds opt-in isolated PostgreSQL persistence through the [operational persistence decision](decisions.md#phase-2-postgresql-operational-persistence); production remains on Sheets. Source export, hosted DDL/import, production configuration and cutover each require separate approval.
 
 ## Documentation ownership
 

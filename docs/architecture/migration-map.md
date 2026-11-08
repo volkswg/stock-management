@@ -120,3 +120,8 @@ business archive plus import_batches. `tools/migration` owns exact promotion,
 offline profiling and disposable PostgreSQL acceptance. See the
 [operational runbook](../database-migration.md#phase-2-operational-storage-opt-in-isolated-testing).
 Production storage is still Google Sheets; hosted promotion/cutover are not done.
+Phase 3 owns the proposed approved-export/hosted-validation/freeze/cutover sequence
+in the same canonical runbook. Offline delta review, readonly operational extraction
+and structural capacity capture live in tools/migration; they do not implement CDC,
+reverse sync or a production activation path. The secret-free GitHub acceptance
+workflow and disposable browser/API fixture own synthetic review evidence.

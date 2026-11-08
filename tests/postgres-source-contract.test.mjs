@@ -11,7 +11,7 @@ test('Phase 2 history keeps every original route handler body byte-identical beh
    const methods=[...entry.before.matchAll(/export async function (GET|POST|PUT|PATCH|DELETE)\(/g)].map(m=>m[1]);
    let expected=entry.before;
    for(const method of methods)expected=expected.replace(`export async function ${method}(`,`async function ${method}Operation(`);
-   expected='import { withPersistence } from "@/composition/postgres/route";\n'+expected+'\n'+methods.map(m=>`export const ${m} = withPersistence(${m}Operation);\n`).join('');
+   expected='import { withPersistence } from "@/composition/postgres/route";\n'+expected+'\n'+methods.map(m=>`export const ${m} = withPersistence(${m}Operation${file==='src/app/api/line/webhook/route.ts'?', { lineWebhook: true }':''});\n`).join('');
    assert.equal(current,expected,file);
   }
  }

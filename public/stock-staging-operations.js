@@ -11,7 +11,7 @@
     const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
     if (url.origin !== location.origin || !url.pathname.startsWith("/api/") || ["GET", "HEAD", "OPTIONS"].includes(method)) {
       const response=await originalFetch(input,init);
-      revision=response.headers.get("x-stock-revision") || revision;
+      if (url.origin === location.origin && url.pathname.startsWith("/api/")) revision=response.headers.get("x-stock-revision") || revision;
       return response;
     }
     const request = new Request(input instanceof Request ? input.clone() : url, init);
@@ -24,7 +24,7 @@
       const text = await request.clone().text();
       try { identity = canonical(JSON.parse(text)); } catch { identity = text; }
     }
-    const fingerprint = await digest(new TextEncoder().encode(JSON.stringify([request.method, url.pathname, identity])));
+    const fingerprint = await digest(new TextEncoder().encode(JSON.stringify([request.method, url.pathname, url.search, identity])));
     const storageKey = "stock-pending-operation:" + fingerprint;
     // Storage failure is intentionally fatal before POST; do not silently invent
     // a different operation identity after an ambiguous submission.

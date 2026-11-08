@@ -77,4 +77,4 @@ function createGoogleSheetsServiceGetter(
   };
 }
 
-export const POST = withPersistence(POSTOperation);
+export const POST = withPersistence(POSTOperation, { lineWebhook: true });

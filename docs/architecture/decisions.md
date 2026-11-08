@@ -262,7 +262,8 @@ writer protocol. Full-dataset projections remain a capacity/performance limitati
 this is a bounded staging implementation, not an unmeasured scalability claim.
 
 Every Supabase HTTP operation has an explicit unit of work. Mutations use a
-database transaction and common advisory lock; reads use a shared lock. This
+database transaction and common advisory lock; reads use PostgreSQL READ ONLY
+transactions and a shared lock, and nested mutation upgrades are rejected. This
 serializes existing read/check/write applications across server instances and
 preserves deferred reference handles. Multi-table writes, command identity and
 serialized response commit together. A matching retry replays the original
@@ -286,8 +287,9 @@ there is no claim of atomic/exactly-once cross-provider effects.
 STOCK_STORAGE defaults to google-sheets. Supabase requires explicit isolated
 staging enablement, server-only credentials/token, verified TLS and a nonprivileged
 login capable of SET LOCAL ROLE stock_runtime. VERCEL_ENV=production is rejected.
-Regular staging APIs require an operator bearer token; LINE retains its own
-signature boundary. The runtime role has no archive access, DDL or DELETE, and
+Regular staging APIs require an operator bearer token; only the explicitly
+registered LINE entrypoint uses its own signature boundary. A caller-controlled
+URL cannot exempt an ordinary handler. The runtime role has no archive access, DDL or DELETE, and
 cannot update immutable financial histories. RLS and explicit grants deny anonymous
 and authenticated Data API access. Original production Sheets authorization is
 unchanged; this is not issue38's application authorization implementation.
@@ -295,6 +297,18 @@ unchanged; this is not issue38's application authorization implementation.
 A staging-only browser script retains a command key across connection/body errors
 and same-tab reload, retiring it after a successfully parsed successful response.
 It contains no credentials. Isolated browser runners must supply staging
-authorization separately. There is no new login UI, production environment change
+authorization from a private runner scoped to the exact approved origin/API path;
+no global cross-origin bearer headers or page/storage injection. Retry identity
+includes the query string and foreign responses cannot supply local revisions.
+There is no new login UI, production environment change
 or automatic backend fallback. [Runbook and cutover gates](../database-migration.md)
 are mandatory before approving live staging or a later production cutover.
+
+The [Phase 3 execution checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
+requires separate source/target permissions, exact record and business-total parity,
+hosted recovery/capacity/security sign-off and a global write freeze. The append-only
+archive is not CDC: final changes/deletions/reordering require a fresh full import
+into an approved empty target. Production authorization/monitoring and reverse
+migration after SQL writes remain explicit release blockers, not implemented
+fallbacks. Offline delta review and readonly operational extraction aid review
+without granting execution authority.

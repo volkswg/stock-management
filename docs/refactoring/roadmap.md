@@ -40,8 +40,15 @@ selection. The owner approved stable Supabase request keys; Sheets remains the
 production default. See [architecture](../architecture/decisions.md#phase-2-postgresql-operational-persistence)
 and the [migration runbook](../database-migration.md).
 
+Phase 3 now has one [execution checklist and automation plan](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover),
+including read-only source approval, secure artifacts, isolated deployment/import,
+business acceptance, capacity, recovery, freeze/final full-load and cutover/rollback.
+The immutable importer cannot merge changed/deleted rows; final delta review plans
+a fresh approved target. Production authentication/monitoring, production target
+enablement and reverse migration remain unimplemented release prerequisites.
+
 Actual frozen-source profiling, hosted staging promotion/reconciliation, realistic
-capacity/latency, independent security/recovery acceptance and production cutover
+capacity/latency, hosted security/recovery acceptance and production cutover
 remain gated. Synthetic tests do not authorize production enablement. No production
 configuration, hosted data, Drive objects or Sheets records are changed by this PR.
 

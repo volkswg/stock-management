@@ -40,3 +40,14 @@ test('staging browser leaves readonly and cross-origin requests untouched and co
  assert.equal(run.store.size,0);
  assert.doesNotMatch(readFileSync('public/stock-staging-operations.js','utf8'),/STOCK_DATABASE|service_role|postgres:\/\//);
 });
+test('query parameters distinguish operation intents and foreign responses cannot supply a local revision',async()=>{
+ const keys=[],revisions=[];
+ const run=client(async request=>{
+  if(typeof request==='string')return Response.json({},{headers:{'x-stock-revision':'"foreign"'}});
+  keys.push(request.headers.get('Idempotency-Key'));revisions.push(request.headers.get('If-Match'));
+  return new Response('{broken',{status:201});
+ });
+ await run.fetch('https://other.test/api/orders');
+ await run.fetch('/api/orders?shop=one',input);await run.fetch('/api/orders?shop=two',input);await run.fetch('/api/orders?shop=one',input);
+ assert.notEqual(keys[0],keys[1]);assert.equal(keys[0],keys[2]);assert.deepEqual(revisions,[null,null,null]);
+});

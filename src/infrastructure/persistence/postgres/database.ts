@@ -49,7 +49,10 @@ export function requireMutation(): PoolClient {
 }
 export async function transaction<T>(mutation: boolean, operation: () => Promise<T>): Promise<T> {
   const previous=active.getStore();
-  if (previous) { if (!previous.open) throw new PersistenceFailure(); return operation(); }
+  if (previous) {
+    if (!previous.open || (mutation && !previous.mutation)) throw new PersistenceFailure(503, "A read-only unit of work cannot be upgraded to a mutation.");
+    return operation();
+  }
   if (storageMode() !== "supabase") throw new PersistenceFailure();
   stagingSettings();
   let client: PoolClient;
@@ -59,7 +62,7 @@ export async function transaction<T>(mutation: boolean, operation: () => Promise
   const onError = () => { destroy = true; };
   client.on("error",onError);
   try {
-    await client.query("BEGIN");
+    await client.query(mutation ? "BEGIN" : "BEGIN READ ONLY");
     await client.query("SET LOCAL lock_timeout = '10s'");
     await client.query("SET LOCAL statement_timeout = '30s'");
     await client.query("SET LOCAL idle_in_transaction_session_timeout = '60s'");

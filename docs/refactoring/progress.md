@@ -299,3 +299,50 @@ production environment edit, cutover, merge or manual deployment occurred. Live
 profiling, hosted capacity/reconciliation and recovery/security acceptance remain
 owner-approved gates. Full-table projections/global serialization and uncertain
 Drive/reply effects are explicit limitations, not production-readiness claims.
+
+### PR49 acceptance review and Phase 3 preparation
+
+All corrections remain in [PR49](https://github.com/volkswg/stock-management/pull/49)
+on `migration/postgres-operational`, based on verified main/PR48. Review identified
+and corrected three boundaries: SQL read requests now use READ ONLY and reject
+nested mutation upgrades; the signature-only exception requires explicit LINE
+entrypoint registration; browser command identity includes query parameters and
+foreign responses cannot change local revision state. No-content responses also
+replay correctly. No original application/domain algorithm or prior immutable
+fixture changed; the Phase 2 witness updates only exact current-source hashes.
+
+Fresh local acceptance: **565 regression tests, 22 Python checks, 25 real-PG
+cases plus one real Chromium/API acceptance case**, zero failures/skips;
+lint exits 0 with the same inherited shipmentRow warning, typecheck and isolated
+credential-free production build pass. Routes/manifest remain identical and all
+113 client JS chunks pass private-database-string checks. The browser fixture
+executes the actual Orders route and real SQL: denied requests, Node-scoped bearer,
+post-commit response loss, same-key reload replay, new intentional create and
+foreign-origin denial. It does not establish full hosted/UI/provider acceptance.
+
+Archive and operational CLI snapshots reconcile exactly with synthetic input;
+import/promotion/idempotency and backup/restore pass. Restore comparisons now also
+include indexes, triggers, functions and sequence definitions/values. Local
+Chromium transparently retried an initial dropped socket, so deterministic
+post-commit delivery failure is injected at the browser network boundary. The
+final test passes without weakening the duplicate-record assertion.
+
+A secret-free GitHub `Migration acceptance` workflow runs current-source regression,
+Python, PostgreSQL/Chromium, recovery and isolated build checks with pinned actions
+and isolated browser tooling. Independent evidence is the source-matched run and
+artifact linked from PR49, not the Vercel preview or this local report.
+
+The canonical [Phase 3 checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
+now covers source/target approvals, secure artifacts, profiling, hosted access,
+full record/business reconciliation, quotas/region/performance, recovery,
+module/security acceptance, final write freeze/full-load and rollback/monitoring.
+New offline delta review and readonly operational extraction support those gates;
+no automatic changed-row CDC, production switch or reverse sync is claimed.
+
+Hosted metadata-only READ ONLY inspection found no stock_migration/stock_operational
+schemas, zero public tables, an empty migration ledger and no security advisories.
+No hosted schema/data write, live Google export/read/mutation, provider action,
+production environment change, merge or manual deployment was performed. These
+checks establish our actions and current schema state, not a global audit of
+unrelated operators. Real-data/hosted acceptance and production authentication,
+monitoring, capacity and recovery sign-off remain separate owner-approved gates.

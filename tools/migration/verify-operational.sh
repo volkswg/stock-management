@@ -25,6 +25,21 @@ PY
 pg psql -U postgres -v ON_ERROR_STOP=1 < "$artifacts/import.sql" > "$artifacts/import.log"
 pg psql -U postgres -v ON_ERROR_STOP=1 < "$artifacts/import.sql" > "$artifacts/reimport.log"
 pg psql -U postgres -v ON_ERROR_STOP=1 < tools/migration/promote.sql > "$artifacts/promote.log"
+# Extract the actual promoted operational tables through the read-only CLI.
+cat > "$artifacts/psql" <<'WRAPPER'
+#!/usr/bin/env bash
+exec docker --host=unix:///var/run/docker.sock exec -i "$STOCK_VERIFY_CONTAINER" psql -U postgres "$@"
+WRAPPER
+chmod +x "$artifacts/psql"
+python3 - <<'PY' > "$artifacts/source.json"
+import sys,json
+sys.path.insert(0,'tools/migration')
+from test_migration import fixture
+print(json.dumps(fixture()))
+PY
+promotion_id=$(pg psql -U postgres -At -c 'SELECT isolation_id FROM stock_operational.environment')
+STOCK_VERIFY_CONTAINER="$name" STOCK_TARGET_ISOLATION_ID="$promotion_id" PATH="$artifacts:$PATH" python3 tools/migration/phase3.py operational-snapshot --source "$artifacts/source.json" --output "$artifacts/operational.json"
+python3 tools/migration/migrate.py reconcile "$artifacts/source.json" "$artifacts/operational.json"
 if pg psql -U postgres -v ON_ERROR_STOP=1 < tools/migration/promote.sql > "$artifacts/repeat-promotion.log" 2>&1; then
  echo 'Promotion must reject a nonempty operational target' >&2; exit 1
 fi
@@ -37,6 +52,7 @@ for file in supabase/migrations/*.sql; do pg psql -U postgres -d application_tes
 port=$(docker --host=unix:///var/run/docker.sock port "$name" 5432/tcp | sed 's/.*://')
 target_id=$(pg psql -U postgres -d application_test -At -c "SELECT isolation_id FROM stock_operational.environment")
 env -i PATH="$PATH" STOCK_TARGET_ISOLATION_ID="$target_id" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/application_test" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test tools/migration/operational.test.cjs
+env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-}" STOCK_TARGET_ISOLATION_ID="$target_id" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/application_test" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test tools/migration/browser-acceptance.test.cjs
 pg pg_dump -U postgres -Fc -n stock_operational -n stock_migration > "$artifacts/backup.dump"
 pg pg_dump -U postgres -d application_test -Fc -n stock_operational -n stock_migration > "$artifacts/application.dump"
 pg createdb -U postgres restored
@@ -54,6 +70,10 @@ print("SELECT schemaname,tablename,policyname,roles,cmd,qual,with_check FROM pg_
 print("SELECT table_schema,table_name,grantee,privilege_type FROM information_schema.table_privileges WHERE table_schema IN ('stock_operational','stock_migration') ORDER BY 1,2,3,4;")
 print("SELECT conrelid::regclass::text,conname,pg_get_constraintdef(oid) FROM pg_constraint WHERE connamespace IN ('stock_operational'::regnamespace,'stock_migration'::regnamespace) ORDER BY 1,2;")
 print("SELECT schemaname,tablename,rowsecurity FROM pg_tables WHERE schemaname IN ('stock_operational','stock_migration') ORDER BY 1,2;")
+print("SELECT schemaname,tablename,indexname,indexdef FROM pg_indexes WHERE schemaname IN ('stock_operational','stock_migration') ORDER BY 1,2,3;")
+print("SELECT t.tgrelid::regclass::text,t.tgname,pg_get_triggerdef(t.oid) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE NOT t.tgisinternal AND n.nspname IN ('stock_operational','stock_migration') ORDER BY 1,2;")
+print("SELECT n.nspname,p.proname,pg_get_functiondef(p.oid) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('stock_operational','stock_migration') ORDER BY 1,2;")
+print("SELECT schemaname,sequencename,sequenceowner,data_type,start_value,min_value,max_value,increment_by,cycle,cache_size,last_value FROM pg_sequences WHERE schemaname IN ('stock_operational','stock_migration') ORDER BY 1,2;")
 PY
 pg psql -U postgres -At -v ON_ERROR_STOP=1 < "$artifacts/fingerprint.sql" > "$artifacts/before"
 pg psql -U postgres -At -v ON_ERROR_STOP=1 -d restored < "$artifacts/fingerprint.sql" > "$artifacts/after"
