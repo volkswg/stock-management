@@ -1,6 +1,6 @@
 # Current ownership and retained compatibility
 
-[PR34](https://github.com/volkswg/stock-management/pull/34) Sales/Inventory, [PR35](https://github.com/volkswg/stock-management/pull/35) Orders/LINE, [PR36](https://github.com/volkswg/stock-management/pull/36) external transport and [PR37](https://github.com/volkswg/stock-management/pull/37) composition are merged. Issue #39 starts at main `5867348d86d57cc98322362fa175140626c7f5d7` and physically removes all 65 external compatibility files. Earlier ownership stages and immutable evidence remain in [progress](../refactoring/progress.md).
+This map describes the **current source after merged [PR #40](https://github.com/volkswg/stock-management/pull/40)**. The prior Sales/Inventory, Orders/LINE, external transport and composition work is complete; all 65 files from `src/externals/` are retired. For the dated merge ledger and original evidence, see [progress](../refactoring/progress.md); for outstanding work, see the [roadmap](../refactoring/roadmap.md).
 
 | Slice | Actual owner | Retained boundaries |
 | --- | --- | --- |

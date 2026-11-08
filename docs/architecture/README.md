@@ -1,24 +1,24 @@
 # Architecture guide
 
-PR34–37 are merged. Issue [#39](https://github.com/volkswg/stock-management/issues/39) retires the external compatibility directory from verified main `5867348d86d57cc98322362fa175140626c7f5d7`; this branch awaits System Architect review. Codex has not merged or deployed it.
+## Current system
 
-| Read for | Canonical document |
+Business workflows belong to the Orders, Shipments, Inventory, Sales, Expenses, HR and LINE modules. Feature-owned Google Sheets adapters implement application ports. Shared Google auth/Sheets/Drive and LINE/Loyverse transports live in `src/infrastructure/`; `src/composition/` wires the existing aggregate Sheets service and cross-feature readers. Pure protocols and utilities live in `src/shared/`.
+
+The external compatibility directory `src/externals/` was retired in [PR #40](https://github.com/volkswg/stock-management/pull/40); the pure aggregate Sheets service contract is at `src/infrastructure/persistence/google-sheets/service-contracts.ts`. Other reviewed `services/`, `features/backend/` and script compatibility surfaces remain. This is a structural milestone, **not** a database replacement or production-security certification.
+
+## Find the right document
+
+| Question | Authoritative source |
 | --- | --- |
-| Engineering workflow and behavior preservation | [AGENTS](../../AGENTS.md) |
-| Folder responsibilities and feature owners | [Folder rules](folder-rules.md) |
-| Allowed edges, public surfaces and scoped ESLint enforcement | [Dependency rules](dependency-rules.md) |
-| Actual owners, compatibility paths and remaining legacy | [Migration map](migration-map.md) |
-| Port decisions and exact workflow invariants | [Architecture decisions](decisions.md) |
-| Next work and prerequisite/exit gates | [Roadmap](../refactoring/roadmap.md) |
-| Merged PR ledger, original evidence and old-document index | [Progress](../refactoring/progress.md) |
-| Safe commands, current results and limits | [Verification](../refactoring/verification.md) |
+| Who owns each module, worksheet or compatibility path? | [Current migration/ownership map](migration-map.md) |
+| Where may dependencies point? How are boundaries enforced? | [Dependency rules](dependency-rules.md) |
+| Where should new code live? | [Folder rules](folder-rules.md) |
+| Which behavior and API invariants must remain unchanged? | [Architecture decisions](decisions.md) |
+| What is complete and what is next? | [Roadmap](../refactoring/roadmap.md) |
+| Why did previous changes happen? Which PR and fixture proves them? | [Historical progress and evidence](../refactoring/progress.md) |
+| How do I test safely and what was actually verified? | [Verification procedure and results](../refactoring/verification.md) |
+| How should I prepare a change? | [Engineering rules](../../AGENTS.md) |
 
-All scoped business use cases and worksheets now have feature owners. Google/Drive/LINE/Loyverse transport and the existing ID runtime have root infrastructure owners; pure protocol/message helpers live in shared. Explicit composition wires the unchanged aggregate Sheets registry and consumer readers outside feature cores. Active HTTP paths use canonical imports. Remaining services/backend compatibility callables retain named aliases and one physical implementation. `src/externals/` is removed; its consumers use canonical module, infrastructure or composition owners. Full-service Sheets declarations live in the pure root `service-contracts.ts` leaf. Workspace/Next shell and unrelated product work remain unchanged.
+## Documentation ownership
 
-## Documentation maintenance
-
-Update these canonical documents when ownership or behavior evidence changes. Do not create one Markdown file for each small PR. A standalone document requires lasting independent value (for example, an operational procedure), a clear owner and a link from this guide or the project README.
-
-Keep one authoritative roadmap and one progress ledger. Record completed work and verification provenance once in progress; link immutable original PR/commit evidence instead of repeating old status paragraphs throughout architecture pages. Current-state statements describe the current source, not an earlier PR's temporary exception. Never overwrite historical test fixtures or source hashes to match a refactor.
-
-At cleanup milestones, review links, obsolete plans, duplicate evidence and remaining debt. Before removing a document, audit tracked source/tests/fixtures, other docs and published PR references; preserve required evidence and provide an old-to-new index. Do not delete merely to reduce a file count. Keep operational guides at stable paths unless a separate need justifies moving them.
+Keep **current state** in this guide, the ownership map and the roadmap; keep **historical results** in progress and verification. Link rather than copy the same PR history into multiple files. Preserve original test fixtures, historical evidence and stable operational-guide paths. Audit local links and source references before deleting or renaming documents. Do not create one Markdown note per PR.

@@ -1,4 +1,6 @@
-# Verification procedure and current results
+# Verification procedure and historical results
+
+Safe commands and compatibility checks are below. The latest merged architecture milestone is [PR #40](https://github.com/volkswg/stock-management/pull/40); its [external namespace retirement evidence](#external-namespace-retirement-issue-39) reports 534 passing tests and successful lint/typecheck/credential-free build **from Codex-local execution**. Older sections are historical snapshots, not current branch status; Vercel preview success is not independent CI or production acceptance. Production access-control, staging and browser/live-provider checks remain open in [issue #38](https://github.com/volkswg/stock-management/issues/38).
 
 ## Offline checks
 
