@@ -4,7 +4,7 @@ from core import CATALOG, import_sql
 from test_migration import fixture
 
 root=Path(__file__).resolve().parents[2]
-schema=next((root/'supabase/migrations').glob('*stock_business_staging.sql')).read_text()
+schema='\n'.join(path.read_text() for path in sorted((root/'supabase/migrations').glob('*.sql')))
 f=fixture()
 # Use separate transactions so deferred FK checks actually execute on both passes.
 script=schema+'\n'+import_sql(f)+import_sql(f)

@@ -242,13 +242,15 @@
       "workdayType": "text"
     },
     "references": {
-      "employeeId": "employees",
-      "shopId": "shops"
+      "employeeId": "employees"
     },
     "key": "id",
     "required": [
       "employeeId"
-    ]
+    ],
+    "externalReferences": {
+      "shopId": "loyverse_accounts.id"
+    }
   },
   "employee_advances": {
     "headers": [

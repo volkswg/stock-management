@@ -62,7 +62,7 @@ async function compareApplications(source,operational,config){
  const requiredMonths=new Set(),requiredAccounts=new Set();
  const transactionalDates={orders:['createdAt'],shipments:['createdAt','shippedAt','deliveredAt'],movements:['packingDate','deliverDateTime','createdAt'],sales_receipts:['salesDate'],sales_receipt_syncs:['salesDate'],stock_counts:['month'],stock_adjustments:['date'],employee_timesheets:['createdAt'],employee_advances:['requestedDate','payrollMonth','paidDate'],payroll_settlements:['month','paidDate'],expenses:['month','expenseDate'],sales_profit_cost_overrides:['month']};
  for(const [table,sheet] of Object.entries(source.sheets))for(const row of sheet.rows){
-  for(const column of ['accountId','loyverseAccountId']){const index=sheet.headers.indexOf(column);if(index>=0&&row[index])requiredAccounts.add(String(row[index]));}
+  for(const column of new Set(['accountId','loyverseAccountId',...Object.keys(catalog[table].externalReferences||{})])){const index=sheet.headers.indexOf(column);if(index>=0&&row[index])requiredAccounts.add(String(row[index]));}
   for(const column of transactionalDates[table]||[]){
    const value=row[sheet.headers.indexOf(column)];if(!value)continue;
    if(/^\d{4}-\d{2}/.test(value))requiredMonths.add(value.slice(0,7));

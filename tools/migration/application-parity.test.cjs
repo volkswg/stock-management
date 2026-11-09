@@ -32,3 +32,15 @@ test('an omitted historical month or account cannot produce a complete parity pa
  const column=source.sheets.shops.headers.indexOf('loyverseAccountId');source.sheets.shops.rows[0][column]='account-not-selected';source.sheets.shops.formattedRows[0][column]='account-not-selected';
  const checked=await compareApplications(source,source,config);assert.ok(checked.coverage.missingAccounts.includes('account-not-selected'));
 });
+
+test('timesheet account IDs require explicit credential-free account coverage even without a shop master',async()=>{
+ const source=fixture();
+ const row=['attendance-synthetic','employee-synthetic','account-attendance-synthetic','work','2026-11-09T01:00:00Z','2026-11-09T02:00:00Z','full'];
+ source.sheets.employee_timesheets.rows=[row];source.sheets.employee_timesheets.formattedRows=[structuredClone(row)];
+ const before=structuredClone(source);
+ const missing=await compareApplications(source,source,config);
+ assert.equal(missing.match,false);assert.ok(missing.coverage.missingAccounts.includes('account-attendance-synthetic'));
+ const covered=await compareApplications(source,source,{...config,accounts:[{id:'account-attendance-synthetic',shopName:'Synthetic attendance account'}]});
+ assert.deepEqual(covered.coverage.missingAccounts,[]);
+ assert.deepEqual(source,before);
+});

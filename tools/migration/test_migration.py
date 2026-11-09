@@ -13,6 +13,7 @@ def fixture():
         for col,kind in spec['columns'].items():
             if col=='id': value=table+'-1'
             elif col in spec['references']: value=spec['references'][col]+'-1'
+            elif col in spec.get('externalReferences',{}): value='account-synthetic'
             elif kind=='numeric': value='0.10'
             elif kind=='bigint': value='1'
             elif kind=='boolean': value='false'
@@ -33,6 +34,30 @@ def precision_fixture():
 class MigrationTests(unittest.TestCase):
     def test_complete_fixture(self):
         self.assertEqual(len(normalize(fixture())),23)
+    def test_timesheet_preserves_external_loyverse_account_id_without_shop_master(self):
+        source=fixture()
+        source['sheets']['shops']['rows']=[]
+        source['sheets']['expenses']['rows']=[]
+        source['sheets']['employee_advances']['rows']=[]
+        sheet=source['sheets']['employee_timesheets']
+        column=sheet['headers'].index('shopId')
+        sheet['rows'][0][column]='account-attendance-synthetic'
+        original=copy.deepcopy(source)
+        self.assertEqual(normalize(source)['employee_timesheets'][0]['shopId'],'account-attendance-synthetic')
+        self.assertIn("'account-attendance-synthetic'",import_sql(source))
+        self.assertEqual(source,original)
+        self.assertEqual(CATALOG['employee_timesheets'].get('externalReferences'),{'shopId':'loyverse_accounts.id'})
+
+    def test_timesheet_still_rejects_missing_employee(self):
+        source=fixture();source['sheets']['employees']['rows']=[]
+        source['sheets']['employee_compensations']['rows']=[]
+        with self.assertRaisesRegex(ValueError,'employee_timesheets:2: orphan employeeId'): normalize(source)
+
+    def test_expense_shop_relationship_is_still_internal(self):
+        source=fixture();source['sheets']['shops']['rows']=[]
+        source['sheets']['employee_advances']['rows']=[]
+        with self.assertRaisesRegex(ValueError,'expenses:2: orphan shopId'): normalize(source)
+
     def test_exact_decimals(self):
         self.assertEqual(convert('9007199254740993.01','numeric'),'9007199254740993.01')
         for value in ('NaN','Infinity','1,200',True):

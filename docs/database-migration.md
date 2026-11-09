@@ -46,6 +46,26 @@ Existing env/Sheets configuration continues unchanged. Account IDs in historical
 business records remain external text references; do not synthesize credential or
 account rows from a shop name.
 
+Attendance has a specific external reference: `employee_timesheets.shopId` is
+`loyverse_accounts.id`, as validated by the timesheets API. It is **not** `shops.id`;
+that table is the separate expense shop master. Preserve every attendance value,
+row and original source cell unchanged. `externalReferences` in the catalog records
+this distinction; it does not authorize reading the private configuration sheet.
+Offline application parity requires approved credential-free account metadata
+(`id`, `shopName`) covering attendance account IDs, including historical ones.
+An absent account blocks parity acceptance; do not invent a mapping or import tokens.
+
+The additive [timesheet relationship correction](../supabase/migrations/20261109205118_timesheet_loyverse_account_reference.sql)
+removes only the two incorrect `shopId -> shops.id` foreign keys, in the archive
+and operational schemas, after checking their exact identity. It keeps the
+`employeeId` foreign keys, original IDs/cells, all indexes, policies and grants.
+Previously applied migrations must not be edited or rerun. Applying this new
+migration to an existing database requires separate owner approval and a current
+backup; code/test success does not establish that a database has been corrected.
+There is no automatic rollback to the old relationship: it may reject valid
+Loyverse account IDs. Stop on schema drift and retain the reviewed backup instead
+of rewriting attendance records to satisfy the old constraint.
+
 The [SQL migration](../supabase/migrations/20261108184048_stock_business_staging.sql)
 separates entities, line items, payments and junctions, with deferred foreign keys,
 RESTRICT deletes and indexes on relationships and common date/account fields.
