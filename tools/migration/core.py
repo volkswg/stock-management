@@ -8,7 +8,23 @@ from pathlib import Path
 CATALOG = json.loads(Path(__file__).with_name('worksheets.json').read_text())
 
 def canonical(value):
-    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
+    # JSONB financial snapshots must retain number semantics and precision.
+    # Encoding Decimal as a quoted string would also change historical data.
+    if isinstance(value, Decimal):
+        if not value.is_finite(): raise ValueError('nonfinite JSON number')
+        return str(value)
+    if isinstance(value, dict):
+        if any(not isinstance(k,str) for k in value): raise ValueError('JSON object keys must be strings')
+        return '{'+','.join(canonical(k)+':'+canonical(v) for k,v in sorted(value.items()))+'}'
+    if isinstance(value, list): return '['+','.join(canonical(v) for v in value)+']'
+    if isinstance(value,str):
+        if '\x00' in value: raise ValueError('PostgreSQL cannot preserve NUL in JSON')
+        value.encode('utf-8')
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+
+def load_json(value):
+    def invalid_constant(_): raise ValueError('nonfinite JSON constant')
+    return json.loads(value, parse_float=Decimal, parse_constant=invalid_constant)
 
 def digest(value):
     return hashlib.sha256(canonical(value).encode()).hexdigest()
@@ -19,6 +35,9 @@ def convert(value, kind):
     if kind == 'text':
         if not isinstance(value, str):
             raise ValueError('text cells must be strings; numeric IDs/dates require review')
+        if '\x00' in value:
+            raise ValueError('PostgreSQL text cannot preserve NUL bytes')
+        value.encode('utf-8')
         return value
     if kind == 'boolean':
         if isinstance(value, bool):
@@ -27,7 +46,9 @@ def convert(value, kind):
             return value.lower() == 'true'
         raise ValueError('invalid boolean')
     if kind == 'jsonb':
-        return json.loads(value) if isinstance(value, str) else value
+        result = load_json(value) if isinstance(value, str) else value
+        canonical(result)  # Reject non-finite JSON; never silently rewrite it.
+        return result
     try:
         if isinstance(value, bool) or not re.fullmatch(r'[+-]?\d+(\.\d+)?', str(value)):
             raise ValueError('invalid decimal')

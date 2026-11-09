@@ -1,0 +1,202 @@
+{
+  "version": 1,
+  "scope": "Phase 3 preparation; no real-data migration performed",
+  "reportedAtUtc": "2026-11-09T02:21:54Z",
+  "baseline": "e97a1c9ad9ca9402de33a9796933fece38a92eeb",
+  "mergedPrerequisites": [
+    48,
+    49
+  ],
+  "hostedMetadata": {
+    "projectId": "orjnazrothkdgmzlsuto",
+    "name": "stock-management",
+    "region": "ap-northeast-1",
+    "postgresVersion": "17.11",
+    "databaseBytes": 10917555,
+    "maxConnections": 60,
+    "migrationSchemas": [],
+    "publicTables": 0,
+    "migrationVersions": [],
+    "runtimeRoleExists": false,
+    "securityAdvisoryCount": 0,
+    "pluginRoleBypassesRls": true,
+    "pricingPlan": "not-verified",
+    "dataApiExposure": "not-verified",
+    "backupArrangement": "owner-verification-required",
+    "productionIsolation": "candidate-only; owner-attestation-required"
+  },
+  "cloudReadiness": {
+    "postgresConnectionBindingPresent": false,
+    "postgresServicePresent": false,
+    "supabaseCliCredentialPresent": false,
+    "readonlyGoogleExportTokenPresent": false,
+    "googleApplicationConfigurationPresent": true,
+    "pluginIdentityAvailableToCloud": false,
+    "supabaseNetworkPermission": "not-configured; must be approved and verified"
+  },
+  "execution": {
+    "hostedDdlApplied": false,
+    "businessRecordsRead": false,
+    "realExportPerformed": false,
+    "realImportPerformed": false,
+    "hostedRestorePerformed": false,
+    "productionCutoverPerformed": false,
+    "productionSettingsChanged": false,
+    "productionSupabaseGuardChanged": false
+  },
+  "tables": {
+    "orders": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "order_items": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "order_bills": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "shipments": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "shipment_orders": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "employees": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "employee_compensations": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "employee_timesheets": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "employee_advances": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "payroll_settlements": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "expenses": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "expense_categories": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "shops": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "sales_receipts": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "sales_receipt_items": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "sales_receipt_payments": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "sales_receipt_syncs": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "sales_profit_cost_overrides": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "stock_counts": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "stock_adjustments": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "movements": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "movement_details": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    },
+    "user_state": {
+      "sourceRows": null,
+      "archiveRows": null,
+      "operationalRows": null,
+      "reconciliation": "not-run; source-read and hosted-import authorization missing"
+    }
+  },
+  "blockingActions": [
+    "owner authorization for exact frozen workbook/read-only export",
+    "owner attestation of staging isolation and exact-target DDL/import/restore authorization",
+    "private Cloud PostgreSQL/CLI credentials and approved network/TLS",
+    "verified encrypted off-site backup and isolated restore target",
+    "real-data profiling/application parity/reconciliation",
+    "hosted runtime role/pooler/security/capacity/recovery acceptance"
+  ],
+  "cutoverBlockers": [
+    "production authentication/authorization/audit attribution and monitoring",
+    "production target gate release; existing guard must remain enabled",
+    "controlled freeze/provider hold and final full load into fresh approved target",
+    "preservation of post-cutover commits; no reverse-sync implementation"
+  ],
+  "cutoverReady": false
+}

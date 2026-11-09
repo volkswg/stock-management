@@ -125,3 +125,10 @@ in the same canonical runbook. Offline delta review, readonly operational extrac
 and structural capacity capture live in tools/migration; they do not implement CDC,
 reverse sync or a production activation path. The secret-free GitHub acceptance
 workflow and disposable browser/API fixture own synthetic review evidence.
+
+Phase 3 tools now preserve arbitrary-precision JSONB numbers, verify complete
+frozen archive batches before extraction, generate private 23-table acceptance
+and original-reader comparison reports, and capture consistent exported-snapshot
+backups with complete recovery/security fingerprints. Hosted metadata shows an
+empty Tokyo staging candidate; no real export/import/schema deployment occurred.
+The machine-readable status keeps actual record counts unknown until authorized.

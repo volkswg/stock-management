@@ -444,3 +444,42 @@ source-matched evidence when completed; require a passing run for the final
 reviewed commit. Preserve failures as evidence, correct code and rerun rather than
 classifying a Vercel build as database acceptance. Do not publish private artifacts
 from Phase 3 through this workflow.
+
+## Phase 3 tooling and readiness verification
+
+Baseline: main `e97a1c9ad9ca9402de33a9796933fece38a92eeb` (merged PR49).
+All execution below uses synthetic data, credential-free processes or expressly
+metadata-only inspection. Real-data counts/reconciliation are **not performed**.
+
+| Check | Local result |
+| --- | --- |
+| Full application tests | 565 pass, no failures/skips; integration credentials excluded |
+| Python migration/operator tooling | 44 pass: exact decimal JSON/numeric cells, identity/FK/profile gates, private outputs, full batch, target/service guards, staging plan and artifact-tamper rejection |
+| Real PostgreSQL | 26 application/concurrency cases pass, plus import/promotion/high-precision JSON and archive/operational CLI reconciliation |
+| Offline original application parity | 4 pass: seven module read/report surfaces, display-money mismatch detection, missing formatted source and omitted history/account coverage rejection |
+| Chromium/API | 1 pass against actual Orders owner and disposable SQL; scoped runner bearer, denied auth, committed response loss/reload replay, new intentional action and foreign-origin denial |
+| Recovery | Consistent exported-snapshot dumps and exact restored state/security match for promoted and application-generated DBs; deliberately changed records/grants fail |
+| Lint/typecheck | Pass; inherited unused shipmentRow warning only |
+| Production build | Isolated env -i copy passes; source/public bytes match, route manifest unchanged and 113 client chunks exclude private DB strings |
+| Hosted | Candidate metadata only: Tokyo/17.11, private schemas/ledger absent, security advisor empty. No hosted schema/runtime/data acceptance claimed |
+
+Commands: npm test; Python unittest discovery; both verify-postgres.sh and
+verify-operational.sh; env -i PATH="$PATH" node --test --test-isolation=none
+tools/migration/application-parity.test.cjs; npm run lint/typecheck;
+verify-build.sh. Docker runners accept only their disposable local containers;
+read-only operator tools require explicit private PGSERVICE and source/target gates.
+GitHub Migration acceptance runs the same current-source synthetic checks and
+uploads evidence for the exact PR head; no real-data artifacts belong in CI.
+
+The backup comparison includes complete 51-table row fingerprints and schema,
+column/default, index/constraint, trigger/function, sequence state/grants, RLS,
+role flags and memberships. ACL comparison resolves implicit defaults and ordering
+before comparing permissions; it does not ignore grants. Exported snapshots and
+cooperative writer locks keep dumps/fingerprints coherent; independent owner DDL
+and writers outside this protocol must be frozen. Dump receipts do not assert
+encryption or off-site recovery, and matching records do not authorize cutover.
+
+No src/public/runtime/migration SQL or lockfile changed in Phase 3. All old fixtures
+remain unchanged. Hosted source/target approvals, Cloud connection/network/TLS,
+real-record/profile/business acceptance, hosted restore RTO/RPO, plan quotas and
+production authorization/monitoring remain explicit unverified gates.

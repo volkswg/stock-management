@@ -58,3 +58,9 @@ attempt. Operational schemas and offline promotion/profile tools live under
 `supabase/migrations` and `tools/migration`. Immutable staging and mutable business
 state have separate schemas and privileges. Runtime selection is opt-in staging;
 Google Sheets production defaults and Drive image ownership remain.
+
+`tools/migration` also owns explicit operator-only staging plans, private acceptance
+reports, offline invocation of existing business readers, consistent logical backup
+and restore evidence. These tools do not become runtime services or application
+ports. Database tools require private PGSERVICE configuration; plugin identity is
+not borrowed. Only synthetic fixture wrappers select disposable local databases.

@@ -23,6 +23,12 @@ The external compatibility directory `src/externals/` was retired in [PR #40](ht
 
 The [database migration runbook](../database-migration.md) describes the private PostgreSQL schemas, source audit, offline tools, synthetic verification and the comprehensive [Phase 3 execution checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover). Phase 2 adds opt-in isolated PostgreSQL persistence through the [operational persistence decision](decisions.md#phase-2-postgresql-operational-persistence); production remains on Sheets. Source export, hosted DDL/import, production configuration and cutover each require separate approval.
 
+Phase 3 preparation adds exact historical JSON-number handling, guarded/private
+extraction and reconciliation, existing-application snapshot parity, deployment
+planning and consistent backup/recovery tools. The [execution record](../database-migration.md#current-execution-record-and-reproducible-preparation)
+distinguishes inspected metadata and synthetic acceptance from unexecuted real
+export/hosted import. No application storage selection or production guard changes.
+
 ## Documentation ownership
 
 Keep **current state** in this guide, the ownership map and the roadmap; keep **historical results** in progress and verification. Link rather than copy the same PR history into multiple files. Preserve original test fixtures, historical evidence and stable operational-guide paths. Audit local links and source references before deleting or renaming documents. Do not create one Markdown note per PR.

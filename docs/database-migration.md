@@ -103,8 +103,8 @@ names and Google authentication implementations are unchanged.
    rejects changing captures. Text identities use the displayed values seen by the
    existing application; money/quantities use exact unformatted numeric tokens.
    Both complete renderings and original number/string cell types remain archived. This is drift detection, not a substitute
-   for a write freeze. Decimal JSON tokens are decoded without binary arithmetic. Seven read requests
-   cover the metadata and two three-rendering captures for all 23 worksheets,
+   for a write freeze. Decimal JSON tokens are decoded without binary arithmetic. Eight read requests
+   cover metadata, a header-only preflight and two three-rendering captures for all 23 worksheets,
    avoiding per-tab quota exhaustion.
    Unknown tabs are reported; missing business tabs and mismatched headers fail.
    Output paths are exclusive-create; existing backups are never overwritten.
@@ -122,9 +122,10 @@ names and Google authentication implementations are unchanged.
    database and role separately). Never put passwords in command arguments.
 
    ```sh
-   psql -X -v ON_ERROR_STOP=1 -f migration-artifacts/import.sql
-   python3 tools/migration/migrate.py database-snapshot --output migration-artifacts/target.json
-   python3 tools/migration/migrate.py reconcile migration-artifacts/source.json migration-artifacts/target.json
+   # PostgreSQL errors may contain IDs/values; discard raw driver output.
+   psql -X -v ON_ERROR_STOP=1 -f migration-artifacts/import.sql >/dev/null 2>&1 || { echo 'Import failed; stop and inspect privately.'; exit 1; }
+   python3 tools/migration/migrate.py database-snapshot --source migration-artifacts/source.json --output migration-artifacts/target.json
+   python3 tools/migration/migrate.py reconcile migration-artifacts/source.json migration-artifacts/target.json --output migration-artifacts/archive-reconciliation.json
    ```
 
 Import is one transaction with bounded lock/statement timeouts and an advisory
@@ -139,6 +140,13 @@ It compares per-table counts, complete ID sets, every FK edge, exact decimal tot
 for all monetary/quantity/counter columns and complete normalized row fingerprints.
 Database snapshot additionally compares typed columns with original cells, so
 changing target quantities while leaving source metadata intact is detected.
+Archive extraction requires `--source` and verifies the complete stored frozen
+batch/checksum/workbook, including raw/formatted/formula renderings, before
+reading business rows. Empty workbooks retain their identity. Decimal JSONB
+numbers (including payroll snapshots) are parsed/serialized exactly as numbers,
+never rounded through binary float or rewritten as strings. Reconciliation
+stdout contains status/table names; `--output` writes the full private report
+exclusively with mode 0600.
 Reports include IDs and should be handled as private artifacts. Financial totals
 are source-field totals, not invented cross-currency or net-sales calculations.
 Expected acceptance: zero differences and zero rejects; review per-account/currency
@@ -185,7 +193,7 @@ backward reconciliation; that decision is outside this PR.
 
 ## Hosting, limits and remaining acceptance gates
 
-Existing authorized project: `stock-management` / `orjnazrothkdgmzlsuto`, PostgreSQL
+Existing inspected staging candidate: `stock-management` / `orjnazrothkdgmzlsuto`, PostgreSQL
 17.11, **Tokyo (`ap-northeast-1`)**. Do not create a replacement or paid branch.
 Singapore (`ap-southeast-1`) is geographically closer to Bangkok and may reduce
 latency, but measure from the actual application host and consider residency,
@@ -193,7 +201,8 @@ recovery and egress requirements. Region selection is a deployment decision;
 changing an existing project's region requires a separate migration. This PR
 makes no region change.
 
-Free-tier planning baseline: 500 MB database, limited compute/connections,
+Free-tier planning baseline: 500 MB database (exceeding it can force read-only
+mode), 1 GB overall disk, limited compute/connections,
 5 GB uncached egress (plus a separate cached allowance), and inactivity pausing.
 Verify current quotas/organization billing in the dashboard before loading;
 quotas change. Reserve headroom for indexes, source-cell duplication, full batch
@@ -416,6 +425,77 @@ Supabase project/database, approved operators, artifact recipients, time window
 and allowed reads/writes. PR49 review/merge approval does not authorize Phase 3.
 Never paste credentials or real records into chat, PRs, logs or CI artifacts.
 
+### Current execution record and reproducible preparation
+
+Baseline main is `e97a1c9ad9ca9402de33a9796933fece38a92eeb`, after merged PR48
+and PR49. The [machine-readable status](../tools/migration/phase3-status.json)
+records observations and actions **not executed**, with all 23 real-data row
+counts explicitly unknown. No real export/import/reconciliation is claimed.
+
+Metadata-only inspection on 2026-11-09 found stock-management
+`orjnazrothkdgmzlsuto`, Tokyo/ap-northeast-1, PostgreSQL 17.11, 10,917,555 bytes,
+max_connections=60, no public tables or migration schemas, no stock_runtime role,
+an empty migration ledger and no security advisories. This is a staging candidate,
+not proof of production isolation. Data API exposure, billing plan, pooler limits,
+network restrictions and off-site backups need owner verification. The plugin
+role bypasses RLS and must never be the application login. Production remains
+Google Sheets; the runtime production guard is unchanged. No hosted write ran.
+
+Cloud readiness is separate from plugin access. This executor reports Google
+application configuration, but no PostgreSQL URL/service/password binding,
+Supabase CLI token or read-only export token. Supabase destinations are absent
+from its configured network policy. Google write-capable configuration was not
+read or used. The owner must provision scoped credentials through private
+environment settings and approve network endpoints; never paste them into chat
+or presume plugin OAuth credentials exist in Cloud.
+
+Generate a deployment manifest offline, without credentials/network:
+
+```sh
+python3 tools/migration/staging.py plan --target tools/migration/staging-target.example.json --output migration-artifacts/deployment-plan.json
+```
+
+The manifest pins the exact Tokyo candidate and every migration SHA256, lists
+required approvals and always sets executionAuthorized=false. It cannot execute
+DDL or grant permission. Stop on another target, existing private schema,
+unexpected public relation or changed migration checksum. Never reset a project
+or truncate/replace records to make deployment succeed.
+
+For approved catalog inspection from Cloud, provision private PGSERVICE/PGPASSFILE,
+require `sslmode=verify-full` and the correct CA/hostname, then run
+`python3 tools/migration/staging.py inspect --output migration-artifacts/target-inspection.json`.
+This reads catalogs only, not auth, staff, credential or business rows, and does
+not attest endpoint ownership. PostgreSQL tools require explicit PGSERVICE,
+prohibit password prompts and bound
+connection timeouts. Dump/restore/exported snapshots require a direct/session
+connection; runtime transaction-pooler verification is a separate gate.
+Business extraction/backup also rejects TCP connections without PostgreSQL TLS;
+Unix-socket disposable tests use an explicit synthetic service name in wrappers.
+The private service must independently enforce hostname/CA verification.
+
+Supabase CLI **3.0.0** was installed locally only to verify version/help. No
+remote command/link ran. Old `--linked` syntax is invalid for this version.
+After separate exact-target access/DDL approval, the operator may run:
+
+```sh
+npx --yes supabase@3.0.0 migration list --remote=orjnazrothkdgmzlsuto
+npx --yes supabase@3.0.0 db push --remote=orjnazrothkdgmzlsuto --skip-vault --dry-run
+# Only after reviewing pending files and obtaining DDL approval:
+npx --yes supabase@3.0.0 db push --remote=orjnazrothkdgmzlsuto --skip-vault
+```
+
+These are **unexecuted hosted instructions**, not approval. Provision CLI access
+privately through its supported scoped credential flow, without password flags
+or debug traces. CLI 3 can require database_write while obtaining remote
+metadata/credentials; use the authorized plugin/catalog inspection before that
+permission is granted. `--skip-vault` is mandatory: this CLI otherwise updates
+Vault secrets before migrations. Do not add include-seed/include-roles/include-all,
+CLI automatic-confirmation flags, repair or reset. Stop on partial failure; never
+blindly repeat/rewrite merged migrations. Preserve the remote ledger beside the
+manifest; private-schema backups do not manage Supabase platform metadata.
+The direct changelog URL was network-policy denied; current database/backup docs
+and actual CLI help were consulted instead.
+
 ### Gate 0 — authority, isolation and release prerequisites
 
 - [ ] Record the approved PR49 commit, independent CI run/artifact checksums and
@@ -464,8 +544,10 @@ HAR/video/screenshots and provider response bodies. Rotate short-lived tokens.
   mapped tabs. Only after export approval, execute the same command without
   `--dry-run`. It makes GET requests only, never application `ensureExists` calls.
 - [ ] Record SHA256 of the exact artifact bytes, the canonical snapshot checksum,
-  tool/commit version, operator, seven-request completion and capture times.
+  tool/commit version, operator, eight-request completion and capture times.
   Unknown tabs or changed captures stop acceptance; do not discard them silently.
+  Header-only preflight rejects wrong/credential worksheets before business row
+  capture. Redirects are refused so bearer credentials cannot cross origins.
 
 ### Gate 2 — offline profiling and source compatibility
 
@@ -518,17 +600,23 @@ unsupported hosted roles/pooling stop the gate rather than substituting an owner
 - [ ] With import approval, execute reviewed `import.sql` with ON_ERROR_STOP.
   Capture only sanitized status/checksums. Reimport identically; counts and
   fingerprints must remain identical. A changed identity must abort atomically.
-- [ ] Extract `database-snapshot` and reconcile against the exact source.
+- [ ] Extract `database-snapshot --source <approved-source.json>` and reconcile
+  against that source; preserve the full report with `--output`.
 - [ ] Review `promote.sql`, verify empty operational target and execute it only
   after approval. Promotion locks both schemas, validates all values/constraints
   and preserves IDs/ordinals/history in one transaction; failed promotion rolls
   back. Runtime remains disabled throughout.
+  Discard raw psql stdout/stderr for promotion too; PostgreSQL constraint errors
+  may contain private IDs/financial values. Report only a fixed outcome and stop
+  on failure. Do not enable SQL echo/debug or forward provider/driver errors into
+  ordinary logs. Diagnose only through separately authorized private inspection.
 - [ ] Privately configure `PGSERVICE`, `PGPASSFILE` and
   `STOCK_TARGET_ISOLATION_ID` for the approved target, then run:
 
 ```sh
 python3 tools/migration/phase3.py operational-snapshot --source migration-artifacts/source.json --output migration-artifacts/operational.json
-python3 tools/migration/migrate.py reconcile migration-artifacts/source.json migration-artifacts/operational.json
+python3 tools/migration/migrate.py reconcile migration-artifacts/source.json migration-artifacts/operational.json --output migration-artifacts/operational-reconciliation.json
+python3 tools/migration/acceptance.py migration-artifacts/source.json migration-artifacts/target.json migration-artifacts/operational.json --output migration-artifacts/acceptance.json
 ```
 
 The operational extractor uses a repeatable-read READ ONLY transaction and shared
@@ -538,12 +626,37 @@ pristine promoted target. Reconciliation covers all counts, complete ID sets,
 relationships, exact numeric totals and row fingerprints, including historical
 rows. Reports contain private identities. Save them in restricted artifacts,
 never ordinary CI. Require `match: true` and zero rejects/unexplained records.
+The acceptance report includes all tables even on success: counts, complete
+IDs/FK edges, exact totals and source-cell fingerprints for source/archive/
+operational states, plus module summaries and source profiling. A record pass
+requires the verified full batch and clean profile. It still sets cutoverReady=false:
+derived business totals, authorization, hosted recovery and owner authority remain
+separate gates.
 
 - [ ] Independently compare stock by account/shop/month (delivered journeys,
   counts, adjustments/reversals) and finances by date/account/currency, including
   receipts/refunds/tax/discount/payments, Orders/shipping, Expenses and payroll
   advance/settlement snapshots. Compare existing API JSON/status/order results
   using the same frozen clocks, external-provider fakes and original algorithms.
+- [ ] Run the **offline** original-application comparison:
+
+```sh
+env -i PATH="$PATH" node tools/migration/application-parity.cjs --source migration-artifacts/source.json --operational migration-artifacts/operational.json --config migration-artifacts/parity-config.json --output migration-artifacts/application-parity.json
+```
+
+The private config contains `asOf` (offset-aware frozen timestamp), `months`
+(YYYY-MM for all relevant history) and `accounts` (id/shopName only, no tokens).
+The runner invokes existing applications/mappers over original formatted values
+and reconstructed operational cells; it contains no financial/stock/payroll rules.
+It compares Orders/details/items/bills, Shipments, Movements/items/adjustments,
+Expenses/masters, sales/profit/sync, workforce/compensation/attendance/advances/
+settlements/payroll, stock counts and LINE sessions. Missing formatted data,
+reader failures, omitted observed account/month coverage or differences fail.
+Raw and Bangkok timestamp months are included conservatively; the owner must
+still verify zero-activity periods and complete historical coverage. Every
+provider call and write is rejected; ensureWorksheet only checks frozen fixture
+presence. The full output is private 0600 data, stdout only status/counts.
+This is snapshot/application parity, **not hosted runtime/HTTP/provider acceptance**.
 - [ ] **Stop on any mismatch.** Keep both source and failing target intact;
   identify cause, correct code in review and repeat from an empty approved target.
   Do not disable constraints, mutate archives, drop records or tolerate rounding.
@@ -630,6 +743,40 @@ safe fixture configuration; never export credential tabs into test artifacts.
   guaranteed reply delivery. Do not erase journal rows or invent new event IDs.
 
 ### Gate 6 — backup/restore and recovery sign-off
+
+The reusable capture/verification tool was exercised on local synthetic promoted
+and application-generated states. It uses an exported PostgreSQL snapshot shared
+with pg_dump and fingerprints, holding both cooperative writer locks until
+completion. The snapshot starts after earlier writers drain. It compares all
+51 tables and schema/column/constraint/index/trigger/function/sequence metadata,
+effective ACLs, RLS, runtime role flags/memberships and defaults. Equivalent NULL
+and explicit default ACL representations are normalized; actual grant changes
+fail. No private row/SQL/error body is emitted to ordinary logs.
+
+After explicit hosted backup/read approval and a verified private service:
+
+```sh
+python3 tools/migration/recovery.py capture --directory migration-artifacts/accepted-backup --target-id APPROVED_ISOLATION_UUID
+# Only after separate restore-target approval and empty-target verification:
+pg_restore --single-transaction --exit-on-error --dbname=service=APPROVED_EMPTY_RESTORE_SERVICE migration-artifacts/accepted-backup/database.dump >/dev/null 2>&1 || { echo 'Restore failed; stop and inspect privately.'; exit 1; }
+# PGSERVICE now selects that approved restore endpoint, not the source:
+python3 tools/migration/recovery.py verify --directory migration-artifacts/accepted-backup --target-id APPROVED_ISOLATION_UUID --output migration-artifacts/restore-verification.json
+```
+
+The backup directory is exclusive-create 0700 and files 0600, with streaming
+SHA256 receipts and archive readability checks. An incomplete directory is
+quarantined; rerun into a new path after resolving the error. Capture explicitly
+does **not** claim encryption or successful restore. Verification checks artifact
+checksums before connecting, then compares the restored state under guarded
+read-only snapshots. A mismatch exits nonzero. The synthetic rehearsal also
+changes restored grants/records and proves those checks reject the changes.
+Direct owner SQL outside the writer protocol and hosted DDL must remain frozen.
+No tool provisions roles, restores over a database, encrypts artifacts or proves
+off-site key recovery. Recreate the same role names/flags/grants from an approved
+private role plan with separately provisioned passwords; global roles are not
+part of these schema dumps. The restored UUID is intentionally still the source
+UUID during comparison; isolate endpoints/credentials and retarget only after
+verification. Never expose a restored clone merely because its UUID matches.
 
 - [ ] Dump **both** schemas, commands/audit/side_effects/environment, sequences,
   triggers/functions, constraints, privileges and policies using PostgreSQL tools
@@ -738,6 +885,9 @@ period; deletion is separately authorized.
 | `migrate.py` | Read-only export dry-run/capture, strict append-only SQL planning, archive extraction and exact reconciliation | Frozen copy approval, source mapping/inventory, hosted execution |
 | `profile.py` | Offline type/ID/FK/date/formula/numeric compatibility profile | Per-cell original-reader/business report parity and source defect resolution |
 | `phase3.py` | Offline delta review; readonly operational extraction with target guard | No CDC/reverse-sync or production switch automation |
+| `staging.py`, target template/status | Exact Tokyo deployment manifest/hashes, metadata-only inspection, explicit blocked/unknown execution record | Owner isolation/DDL approval, private Cloud connection/TLS/network provisioning |
+| `acceptance.py`, `application-parity.cjs` | Private full 23-table report and original-application read/calculation comparison from frozen files, with coverage checks | Approved real artifacts, full historical period/account review and hosted runtime acceptance |
+| `recovery.py` | Consistent snapshot backup, streaming receipts, 51-table/security/role/schema restoration comparison; mismatch rejection | Hosted backup/restore approval, same-role provisioning, encryption/off-site key recovery and measured RTO/RPO |
 | `capacity.sql` | Read-only database/table/index size and connection/statistics capture | Real workload/region/pooler latency, growth, quota dashboard sign-off |
 | `verify-postgres.sh`, `verify-operational.sh` | Disposable synthetic DBs, import/promotion, concurrency/replay/module checks, actual browser/API credential boundary and full logical recovery | Hosted role/TLS/isolation, real-data reconciliation and restore timings |
 | `verify-build.sh`, GitHub Migration acceptance | Credential-free isolated build, client bundle boundary, synthetic regression and uploaded CI evidence | Private hosted full-application acceptance; production security/monitoring |

@@ -52,6 +52,15 @@ capacity/latency, hosted security/recovery acceptance and production cutover
 remain gated. Synthetic tests do not authorize production enablement. No production
 configuration, hosted data, Drive objects or Sheets records are changed by this PR.
 
+Phase 3 preparation is implemented in operator tooling: precise JSON-number
+preservation, source-batch/TLS/connection guards, private full-table acceptance,
+existing-application formatted-value parity, exact-target deployment planning and
+consistent backup/restore evidence. Current hosted checks are metadata-only;
+all real-data row counts and reconciliation results remain unknown. The next
+authorized execution must identify the frozen source, approve the exact Tokyo
+target/DDL/import/restore scope and privately provision Cloud credentials/network.
+See the runbook's execution record; there is no production cutover in this work.
+
 ## Deferred product decisions — not refactoring leftovers
 
 The aggregate Sheets construction/connection behavior and selected `services/`, backend and standalone-script compatibility remain intentionally supported. Workspace/Next shell ownership, PostgreSQL/Supabase migration, authorization/tenancy, subscriptions/billing, Purchase Order Master, provider replacement, and cross-provider transactions/queues/reconciliation need their own product decisions. Existing race, retry and partial-write behavior was preserved, not repaired.

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "projectId": "orjnazrothkdgmzlsuto",
+  "name": "stock-management",
+  "region": "ap-northeast-1",
+  "purpose": "isolated-staging",
+  "database": "postgres",
+  "directHost": "db.orjnazrothkdgmzlsuto.supabase.co",
+  "productionWritesAllowed": false
+}

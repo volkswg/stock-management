@@ -38,17 +38,18 @@ class Phase3Tests(unittest.TestCase):
 
     def test_operational_snapshot_uses_readonly_transaction_and_preserves_all_records(self):
         source = fixture()
-        with patch.dict(os.environ, {'STOCK_TARGET_ISOLATION_ID': TARGET}), patch('phase3.subprocess.run', return_value=SimpleNamespace(returncode=0, stdout=database_output(source))) as run:
+        with patch.dict(os.environ, {'STOCK_TARGET_ISOLATION_ID': TARGET, 'PGSERVICE':'synthetic'}), patch('phase3.subprocess.run', return_value=SimpleNamespace(returncode=0, stdout=database_output(source))) as run:
             self.assertEqual(normalize(operational_snapshot(source)), normalize(source))
             sql = run.call_args.kwargs['input']
             self.assertIn('READ ONLY', sql)
             self.assertNotIn('INSERT', sql)
             self.assertEqual(sql.count("'table',"), len(CATALOG))
+            self.assertLess(sql.index('bool_and(isolation_id='),sql.index('FROM stock_operational.orders'))
 
     def test_wrong_target_archived_rows_and_typed_drift_are_rejected(self):
         output = database_output(fixture())
         for invalid in [output.replace(TARGET, '00000000-0000-0000-0000-000000000002'), output.replace('"archived_at": null', '"archived_at": "2026-11-09"'), output.replace('"totalPrice": "0.10"', '"totalPrice": "999"')]:
-            with patch.dict(os.environ, {'STOCK_TARGET_ISOLATION_ID': TARGET}), patch('phase3.subprocess.run', return_value=SimpleNamespace(returncode=0, stdout=invalid)):
+            with patch.dict(os.environ, {'STOCK_TARGET_ISOLATION_ID': TARGET, 'PGSERVICE':'synthetic'}), patch('phase3.subprocess.run', return_value=SimpleNamespace(returncode=0, stdout=invalid)):
                 with self.assertRaises(ValueError): operational_snapshot(fixture())
 
     def test_changed_workbook_or_invalid_final_never_produces_delta_plan(self):

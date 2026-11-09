@@ -2,7 +2,8 @@ import copy
 import json
 import unittest
 from pathlib import Path
-from core import CATALOG, normalize, import_sql, reconcile, convert, exact_total
+from core import CATALOG, normalize, import_sql, reconcile, convert, exact_total, load_json, canonical, literal
+from decimal import Decimal
 
 
 def fixture():
@@ -19,6 +20,14 @@ def fixture():
             else: value='historical text'
             row.append(value)
         snapshot['sheets'][table]['rows']=[row]
+    return snapshot
+
+def precision_fixture():
+    snapshot=fixture()
+    for table,spec in CATALOG.items():
+        for column,kind in spec['columns'].items():
+            if kind=='jsonb':
+                snapshot['sheets'][table]['rows'][0][spec['headers'].index(column)]='{"historical":"preserved","totalPay":9007199254740993.01,"tiny":0.10000000000000000000001}'
     return snapshot
 
 class MigrationTests(unittest.TestCase):
@@ -58,5 +67,21 @@ class MigrationTests(unittest.TestCase):
     def test_no_numeric_identity_coercion(self):
         f=fixture(); f['sheets']['orders']['rows'][0][0]=123
         with self.assertRaises(ValueError): normalize(f)
+    def test_nul_text_and_nonfinite_json_are_rejected_instead_of_rewritten(self):
+        with self.assertRaises(ValueError):convert('original\x00identity','text')
+        for value in ['{"amount":NaN}','{"amount":Infinity}',{'amount':float('nan')}]:
+            with self.assertRaises(ValueError):convert(value,'jsonb')
+    def test_historical_payroll_json_numbers_keep_exact_precision_and_number_types(self):
+        text='{"totalPay":9007199254740993.01,"nested":{"tax":0.10000000000000000000001},"note":"original"}'
+        value=convert(text,'jsonb')
+        self.assertEqual(value['totalPay'],Decimal('9007199254740993.01'))
+        encoded=canonical(value)
+        self.assertIn('"totalPay":9007199254740993.01',encoded)
+        self.assertNotIn('"9007199254740993.01"',encoded)
+        self.assertEqual(load_json(encoded),value)
+        self.assertIn('9007199254740993.01',literal(value,'jsonb'))
+    def test_native_json_numeric_cells_do_not_pass_through_binary_float(self):
+        source=load_json('{"amount":9007199254740993.01}')
+        self.assertEqual(convert(source['amount'],'numeric'),'9007199254740993.01')
 
 if __name__=='__main__': unittest.main()
