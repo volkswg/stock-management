@@ -7,11 +7,11 @@ from datetime import date, datetime
 from decimal import Decimal
 from collections import Counter
 from pathlib import Path
-from core import CATALOG, convert, exact_total, digest
+from core import CATALOG, convert, exact_total, digest, canonical, load_json
 from migrate import write_private
 
 def profile(snapshot):
-    report={'checksum':digest(snapshot),'serializedBytes':len(json.dumps(snapshot,ensure_ascii=False).encode()),'tables':{},'problems':[]}
+    report={'checksum':digest(snapshot),'serializedBytes':len(canonical(snapshot).encode()),'tables':{},'problems':[]}
     normalized={}
     if snapshot.get('version') != 1 or not snapshot.get('spreadsheetId'): report['problems'].append({'problem':'invalid snapshot envelope'})
     if set(snapshot.get('sheets',{})) != set(CATALOG): report['problems'].append({'problem':'worksheet inventory mismatch'})
@@ -38,7 +38,7 @@ def profile(snapshot):
                         display=formatted[number-2]
                         try:
                             projected=convert(display[index] if index<len(display) else None,spec['columns'][col])
-                            if projected is not None and record[col] is not None and Decimal(projected)!=Decimal(record[col]):raise ValueError('numeric rendering mismatch')
+                            if (projected is None) != (record[col] is None) or projected is not None and Decimal(projected)!=Decimal(record[col]):raise ValueError('numeric rendering mismatch')
                         except ValueError:report['problems'].append({'table':table,'row':number,'column':col,'problem':'formatted numeric value requires compatibility review'})
                 if col.endswith(('At','Date')) or col in ('date','month','effectiveFrom','packingDate','deliverDateTime'):
                     shape='blank' if value in ('',None) else 'month' if isinstance(value,str) and re.fullmatch(r'\d{4}-\d{2}',value) else 'date' if isinstance(value,str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}',value) else 'timestamp' if isinstance(value,str) and re.match(r'^\d{4}-\d{2}-\d{2}T',value) else 'unclassified'
@@ -66,8 +66,12 @@ def profile(snapshot):
     report['readyForReview']=not report['problems']
     return report
 
-if __name__=='__main__':
+def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('snapshot');p.add_argument('--output',required=True);args=p.parse_args()
-    result=profile(json.loads(Path(args.snapshot).read_text()));write_private(args.output,json.dumps(result,indent=2)+'\n')
+    result=profile(load_json(Path(args.snapshot).read_text()));write_private(args.output,json.dumps(result,indent=2)+'\n')
     print(json.dumps({'readyForReview':result['readyForReview'],'problemCount':len(result['problems']),'serializedBytes':result['serializedBytes']}))
-    raise SystemExit(0 if result['readyForReview'] else 1)
+    return 0 if result['readyForReview'] else 1
+
+if __name__=='__main__':
+    try: raise SystemExit(main())
+    except Exception: raise SystemExit('Profiling failed. Inspect restricted source artifacts; no records were changed.')

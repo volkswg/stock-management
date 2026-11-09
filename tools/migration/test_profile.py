@@ -40,3 +40,7 @@ class ProfileTests(unittest.TestCase):
         report=profile(snapshot)
         self.assertFalse(report['readyForReview'])
         self.assertEqual(snapshot['sheets']['orders']['rows'][0][5],'2026-11-01T01:00:00')
+    def test_blank_numeric_display_cannot_hide_unformatted_money(self):
+        snapshot=valid();sheet=snapshot['sheets']['orders']
+        sheet['formattedRows']=[list(sheet['rows'][0])];sheet['formattedRows'][0][3]=''
+        self.assertFalse(profile(snapshot)['readyForReview'])

@@ -2,6 +2,7 @@
 # Disposable local Docker ONLY. Does not accept a remote database URL.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+export PGSERVICE=stock_disposable_tests
 name="stock-migration-verify-$$"
 artifacts=$(mktemp -d)
 cleanup() { docker --host=unix:///var/run/docker.sock rm -fv "$name" >/dev/null; rm -rf "$artifacts"; }
@@ -27,7 +28,7 @@ sys.path.insert(0,'tools/migration')
 from test_migration import fixture
 print(json.dumps(fixture()))
 PY
-STOCK_VERIFY_CONTAINER="$name" PATH="$artifacts:$PATH" python3 tools/migration/migrate.py database-snapshot --output "$artifacts/target.json"
+STOCK_VERIFY_CONTAINER="$name" PATH="$artifacts:$PATH" python3 tools/migration/migrate.py database-snapshot --source "$artifacts/source.json" --output "$artifacts/target.json"
 python3 tools/migration/migrate.py reconcile "$artifacts/source.json" "$artifacts/target.json"
 python3 - <<'PY' > "$artifacts/conflict.sql"
 import sys

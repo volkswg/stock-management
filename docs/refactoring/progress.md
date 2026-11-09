@@ -346,3 +346,64 @@ production environment change, merge or manual deployment was performed. These
 checks establish our actions and current schema state, not a global audit of
 unrelated operators. Real-data/hosted acceptance and production authentication,
 monitoring, capacity and recovery sign-off remain separate owner-approved gates.
+
+## Phase 3 real-data migration preparation (2026-11-09)
+
+Verified main `e97a1c9ad9ca9402de33a9796933fece38a92eeb`, with PR48 and PR49
+merged. Branch `migration/phase3-validation`. This milestone completes independent
+operator preparation and synthetic validation; **no real-data migration occurred**.
+The [status record](../../tools/migration/phase3-status.json) lists all 23 real
+source/archive/operational counts as unknown, with explicit blocked actions.
+
+Audit fixed a migration blocker: parsing historical JSONB numbers via binary
+float could round payroll snapshots. Decimal-aware canonical JSON now preserves
+number types/precision in plans and extraction, including values beyond 2^53;
+PostgreSQL import/promotion/restore proves exact preservation. No source cells,
+application/domain code, runtime selector, production guard or merged SQL migration
+changed. Prior immutable fixtures and dependency lockfiles remain byte-identical.
+
+Export verifies headers before reading business rows, rejects credential mappings
+and redirects, retains locale/timezone, and detects formula/rendering drift. Archive
+extraction requires/verifies the complete original batch, including formulas and
+empty-workbook identity. Operational target and TCP TLS checks precede business
+reads. Explicit PGSERVICE is required; plugin identity is never assumed in Cloud.
+Reconciliation writes private exclusive 0600 reports with status-only stdout.
+
+New tools provide an exact-Tokyo deployment manifest, metadata-only inspection,
+private full 23-table acceptance, original-application snapshot comparison with
+frozen clocks/account/month coverage, and consistent exported-snapshot backups.
+Recovery compares 51 complete tables plus schema/columns/indexes/constraints,
+functions/triggers/sequences, effective privileges, RLS and runtime roles/grants.
+Actual altered records/grants on expendable restored databases are rejected.
+Equivalent NULL/default ACL representation differences are normalized without
+relaxing effective permission checks. An initial container-path dump inspection
+and ACL-representation mismatch were diagnosed before recovery acceptance passed.
+
+Local evidence: **565 application tests, 44 Python checks, 26 real-PostgreSQL
+application/concurrency cases, 4 offline application-parity cases and 1 Chromium/
+actual-API case pass**. Both archive and operational reconciliation and recovery
+runners pass. Lint/typecheck pass (only the inherited shipmentRow warning); isolated
+credential-free production build retains 23 pages/35 APIs, the original manifest
+and 113 clean client JS chunks. The first build copy hit local disk limits; an
+obsolete task-created build copy was removed and the final build passed. Synthetic
+capacity accounting now counts each table and its indexes once; no real workload
+or hosted capacity claim follows from this small sample. Source-matched independent
+CI and its synthetic artifact are recorded on the Phase 3 PR.
+
+Read-only hosted metadata: exact stock-management project, Tokyo/ap-northeast-1,
+PostgreSQL 17.11, 10,917,555 bytes, max_connections=60, no migration schemas/public
+tables/runtime role, empty migration ledger and no security advisories. The plugin
+role bypasses RLS and is unsuitable for app use. No hosted DDL, business row read,
+export/import/restore, provider mutation, production environment change, cutover
+or merge was performed. Cloud has Google application config but no approved
+PostgreSQL/CLI connection or readonly export token; Supabase network access and
+owner isolation/backup/billing checks remain pending.
+
+The canonical runbook now pins locally help-verified CLI 3.0.0 commands: explicit
+--remote target and --skip-vault, replacing old --linked assumptions and preventing
+unrelated Vault updates. Only help/version ran. Separate approval is still needed
+for exact frozen source reads and hosted DDL/import/restore, private credentials,
+real profiling/application parity/reconciliation, hosted role/pooler performance,
+capacity and recovery. Production auth/authorization/monitoring, final fresh target,
+write freeze/provider hold and preservation/recovery of post-cutover writes remain
+cutover blockers. Existing production Supabase guard stays enabled.

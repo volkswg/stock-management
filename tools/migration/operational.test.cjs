@@ -242,7 +242,7 @@ test('capacity and primary-key query plan measured on an explicitly synthetic 20
   const readStart=performance.now();
   const listed=await orders.listOrders({googleSheetsService:service});assert.ok(listed.length>=2000);
   console.log('Synthetic actual Orders list duration ms:',Math.round(performance.now()-readStart),'records:',listed.length);
-  const capacity=await currentTransaction().query("SELECT sum(pg_total_relation_size(c.oid))::text AS bytes FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='stock_operational'");
+  const capacity=await currentTransaction().query("SELECT sum(pg_total_relation_size(c.oid))::text AS bytes FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='stock_operational' AND c.relkind IN ('r','p')");
   console.log('Synthetic 2000-row write duration ms:',Math.round(performance.now()-start),'operational bytes:',capacity.rows[0].bytes,'plan:',text);
  });
 });
@@ -315,4 +315,22 @@ test('late asynchronous branches cannot write in autocommit after their request 
  assert.equal((await handler(request('late-asynchronous-key'))).status,409);
  const rejected=assert.rejects(late,PersistenceFailure);release();await rejected;
  await transaction(false,async()=>{assert.equal((await currentTransaction().query("SELECT count(*) FROM stock_operational.orders WHERE id IN ('late-order','early-failed-order')")).rows[0].count,'0');});
+});
+test('a coherent shared reader blocks an independent writer until its unit of work completes',async()=>{
+ let release,ready,entered=false;
+ const gate=new Promise(resolve=>{release=resolve;}),started=new Promise(resolve=>{ready=resolve;});
+ const reader=transaction(false,async()=>{ready();await gate;});
+ await started;
+ const began=performance.now(),writer=transaction(true,async()=>{entered=true;});
+ const observer=new Pool({connectionString:process.env.STOCK_DATABASE_URL});
+ try{
+  let waiting=false;
+  for(let attempt=0;attempt<100;attempt++){
+   waiting=(await observer.query('SELECT EXISTS(SELECT 1 FROM pg_locks WHERE locktype=$1 AND objid=$2 AND NOT granted) AS waiting',['advisory',835107242])).rows[0].waiting;
+   if(waiting)break;
+   await new Promise(resolve=>setTimeout(resolve,10));
+  }
+  assert.equal(waiting,true);assert.equal(entered,false);
+ }finally{release();await reader;await writer;await observer.end();}
+ assert.equal(entered,true);console.log('Synthetic shared-reader writer wait ms:',Math.round(performance.now()-began));
 });

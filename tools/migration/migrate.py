@@ -5,11 +5,18 @@ import json
 import os
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
-from core import CATALOG, import_sql, normalize, reconcile, digest, convert
+from core import CATALOG, import_sql, normalize, reconcile, digest, convert, canonical, load_json
+from pg_access import client_environment, secure_connection_sql
 
 class ExactNumber(str):
     """Keep a JSON decimal token exact while retaining its source number type."""
+
+
+class RefuseRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ValueError('export redirects are forbidden; never forward bearer credentials')
 
 
 def write_private(path, value):
@@ -21,28 +28,33 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('plan'); p.add_argument('snapshot'); p.add_argument('--output'); p.add_argument('--dry-run', action='store_true')
-    p = sub.add_parser('reconcile'); p.add_argument('source'); p.add_argument('target')
+    p = sub.add_parser('reconcile'); p.add_argument('source'); p.add_argument('target'); p.add_argument('--output')
     p = sub.add_parser('export'); p.add_argument('--workbook', required=True); p.add_argument('--mapping', required=True); p.add_argument('--output', required=True); p.add_argument('--dry-run', action='store_true')
-    p = sub.add_parser('database-snapshot'); p.add_argument('--output', required=True)
+    p = sub.add_parser('database-snapshot'); p.add_argument('--output', required=True); p.add_argument('--source', required=True)
     args = parser.parse_args()
     if args.command == 'plan':
-        snapshot = json.loads(Path(args.snapshot).read_text()); sql = import_sql(snapshot)
+        snapshot = load_json(Path(args.snapshot).read_text()); sql = import_sql(snapshot)
         print(json.dumps({'valid': True, 'checksum': digest(snapshot), 'rows': {k:len(v) for k,v in normalize(snapshot).items()}, 'dryRun': args.dry_run or not args.output}))
         if args.output and not args.dry_run: write_private(args.output, sql)
     elif args.command == 'reconcile':
-        report = reconcile(json.loads(Path(args.source).read_text()), json.loads(Path(args.target).read_text()))
-        print(json.dumps(report, indent=2)); return 0 if report['match'] else 1
+        report = reconcile(load_json(Path(args.source).read_text()), load_json(Path(args.target).read_text()))
+        if args.output: write_private(args.output,json.dumps(report,indent=2)+'\n')
+        # IDs, relationships and money never belong in ordinary command logs.
+        print(json.dumps({'match':report['match'],'differentTables':list(report['differences']),'tableCount':len(CATALOG)})); return 0 if report['match'] else 1
     elif args.command == 'database-snapshot':
-        # PGSERVICE/PGPASSFILE are operator-managed; never put passwords on argv.
-        queries = []
+        # Bind extraction to the complete frozen batch, including formulas and
+        # raw/formatted values, before reading individual business records.
+        source=load_json(Path(args.source).read_text()); normalize(source)
+        from core import quote
+        queries = [f"SELECT 1 / (EXISTS(SELECT 1 FROM stock_migration.import_batches WHERE checksum={quote(digest(source))} AND workbook={quote(source['spreadsheetId'])} AND snapshot={quote(canonical(source))}::jsonb))::int;"]
         for table in CATALOG:
             queries.append(f"SELECT json_build_object('table','{table}','workbook',source_workbook,'row',source_row,'cells',source_cells,'typed',to_jsonb(t)) FROM stock_migration.{table} t ORDER BY source_row;")
-        run = subprocess.run(['psql','-XAt','-v','ON_ERROR_STOP=1'],input='BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n'+'\n'.join(queries)+'\nCOMMIT;',text=True,capture_output=True)
+        run = subprocess.run(['psql','-XAtw','-v','ON_ERROR_STOP=1'],input="BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL standard_conforming_strings=on;\nSET LOCAL statement_timeout='120s';\n"+secure_connection_sql()+"\nSELECT pg_advisory_xact_lock_shared(835107241);\n"+'\n'.join(queries)+'\nCOMMIT;',text=True,capture_output=True,env=client_environment(),timeout=150)
         if run.returncode: raise ValueError('database snapshot failed; inspect database access privately')
-        snapshot = {'version':1,'spreadsheetId':'','sheets':{t:{'headers':s['headers'],'rows':[]} for t,s in CATALOG.items()}}
+        snapshot = {'version':1,'spreadsheetId':source['spreadsheetId'],'sheets':{t:{'headers':s['headers'],'rows':[]} for t,s in CATALOG.items()}}
         for line in run.stdout.splitlines():
             if not line.startswith('{'): continue
-            entry=json.loads(line, parse_float=str)
+            entry=load_json(line)
             spec=CATALOG[entry['table']]
             for col,kind in spec['columns'].items():
                 pos=spec['headers'].index(col)
@@ -54,23 +66,35 @@ def main():
             snapshot['spreadsheetId']=entry['workbook']; rows=snapshot['sheets'][entry['table']]['rows']
             while len(rows)<entry['row']-2: rows.append([])
             rows.append(entry['cells'])
-        normalize(snapshot); write_private(args.output,json.dumps(snapshot,ensure_ascii=False)+'\n')
+        normalize(snapshot)
+        snapshot['archiveEvidence']={'sourceChecksum':digest(source),'fullSnapshotVerified':True}
+        write_private(args.output,canonical(snapshot)+'\n')
     else:
         mapping=json.loads(Path(args.mapping).read_text())
         if set(mapping)!=set(CATALOG) or len(set(mapping.values()))!=len(mapping): raise ValueError('mapping must name every business sheet once')
+        if any(not isinstance(name,str) or not name.strip() or name.strip().lower()=='loyverse_accounts' for name in mapping.values()): raise ValueError('credential/invalid worksheet mapping excluded')
         if args.dry_run:
             print(json.dumps({'method':'GET','worksheets':list(mapping.values()),'credentialSheetsExcluded':True})); return 0
         # Token provision is deliberately external: use a short-lived readonly Sheets OAuth token.
-        import urllib.request, urllib.parse
+        import urllib.parse
         token=os.environ['GOOGLE_SHEETS_READONLY_TOKEN']
+        opener=urllib.request.build_opener(RefuseRedirect())
         base='https://sheets.googleapis.com/v4/spreadsheets/'+urllib.parse.quote(args.workbook,safe='')
         def get(path):
             req=urllib.request.Request(base+path,headers={'Authorization':'Bearer '+token})
-            with urllib.request.urlopen(req,timeout=60) as response: return json.load(response, parse_float=ExactNumber)
-        metadata=get('?fields=sheets.properties.title')
+            with opener.open(req,timeout=60) as response: return json.load(response, parse_float=ExactNumber)
+        metadata=get('?fields=properties(locale,timeZone),sheets.properties.title')
         known={s['properties']['title'] for s in metadata['sheets']}
         if not set(mapping.values())<=known: raise ValueError('mapped worksheet missing')
-        if 'loyverse_accounts' in mapping.values(): raise ValueError('credential sheet excluded')
+        names=list(mapping)
+        ranges=["'"+mapping[table].replace("'","''")+"'" for table in names]
+        # Inspect only row 1 first. A mistaken mapping must not fetch token or
+        # unrelated business rows before its canonical headers are checked.
+        header_query=urllib.parse.urlencode([('ranges',r+'!1:1') for r in ranges]+[('valueRenderOption','FORMATTED_VALUE')])
+        header_values=get('/values:batchGet?'+header_query).get('valueRanges',[])
+        if len(header_values)!=len(names): raise ValueError('missing worksheet headers')
+        for table,entry in zip(names,header_values):
+            if entry.get('values',[]) != [CATALOG[table]['headers']]: raise ValueError('mapped worksheet headers differ; business capture forbidden')
         def capture():
             names=list(mapping)
             ranges=["'"+mapping[table].replace("'","''")+"'" for table in names]
@@ -83,7 +107,8 @@ def main():
             sheets={}
             for table in names:
                 rows=raw[table];display=formatted[table]
-                if len(rows)!=len(display): raise ValueError('rendered row count drift')
+                if len(rows)!=len(display) or len(rows)!=len(formulas[table]): raise ValueError('rendered row count drift')
+                if not rows or rows[0]!=CATALOG[table]['headers'] or display[0]!=CATALOG[table]['headers'] or formulas[table][0]!=CATALOG[table]['headers']: raise ValueError('header changed during capture')
                 selected=[]
                 for number,row in enumerate(rows[1:],1):
                     width=max(len(row),len(display[number]))
@@ -95,7 +120,7 @@ def main():
                     selected.append(values)
                 types=[['boolean' if isinstance(v,bool) else 'number' if isinstance(v,(int,ExactNumber)) else 'null' if v is None else 'string' for v in row] for row in rows[1:]]
                 sheets[table]={'headers':display[0] if display else [],'rows':selected,'rawRows':rows[1:],'rawCellTypes':types,'formattedRows':display[1:],'formulaRows':formulas[table][1:]}
-            return {'version':1,'spreadsheetId':args.workbook,'sheets':sheets}
+            return {'version':1,'spreadsheetId':args.workbook,'sourceProperties':metadata.get('properties',{}),'sheets':sheets}
         first=capture(); second=capture()
         if digest(first)!=digest(second): raise ValueError('source changed during export; freeze writers and retry')
         normalize(first); write_private(args.output,json.dumps(first,ensure_ascii=False)+'\n')

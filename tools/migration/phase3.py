@@ -6,8 +6,9 @@ import os
 import subprocess
 import uuid
 from pathlib import Path
-from core import CATALOG, normalize, convert, digest
+from core import CATALOG, normalize, convert, digest, canonical, load_json
 from migrate import write_private
+from pg_access import client_environment, secure_connection_sql
 
 
 def delta_review(before, final):
@@ -34,11 +35,13 @@ def operational_snapshot(source):
     """For pristine promoted targets; refuse archived rows or wrong target, never omit them."""
     normalize(source)
     target = str(uuid.UUID(os.environ['STOCK_TARGET_ISOLATION_ID']))
-    queries = ["SELECT json_build_object('environment',to_jsonb(t)) FROM stock_operational.environment t;"]
+    # SQL assertion runs before any business SELECT, in the same transaction.
+    queries = [f"SELECT 1 / ((SELECT count(*)=1 AND bool_and(isolation_id='{target}'::uuid AND purpose='isolated-staging') FROM stock_operational.environment))::int;",
+               "SELECT json_build_object('environment',to_jsonb(t)) FROM stock_operational.environment t;"]
     for table in CATALOG:
         queries.append(f"SELECT json_build_object('table','{table}','row',row_order+1,'cells',business_cells,'typed',to_jsonb(t)) FROM stock_operational.{table} t ORDER BY row_order;")
-    sql = "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL statement_timeout='120s';\nSELECT pg_advisory_xact_lock_shared(835107242);\n" + '\n'.join(queries) + '\nCOMMIT;'
-    run = subprocess.run(['psql', '-XAt', '-v', 'ON_ERROR_STOP=1'], input=sql, text=True, capture_output=True)
+    sql = "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL statement_timeout='120s';\n"+secure_connection_sql()+"\nSELECT pg_advisory_xact_lock_shared(835107242);\n" + '\n'.join(queries) + '\nCOMMIT;'
+    run = subprocess.run(['psql', '-XAtw', '-v', 'ON_ERROR_STOP=1'], input=sql, text=True, capture_output=True, env=client_environment(), timeout=150)
     if run.returncode:
         raise ValueError('operational extraction failed; inspect access privately')
     snapshot = {'version': 1, 'spreadsheetId': source['spreadsheetId'], 'sheets': {t: {'headers': s['headers'], 'rows': []} for t, s in CATALOG.items()}}
@@ -46,7 +49,7 @@ def operational_snapshot(source):
     for line in run.stdout.splitlines():
         if not line.startswith('{'):
             continue
-        entry = json.loads(line, parse_float=str)
+        entry = load_json(line)
         if 'environment' in entry:
             environments.append(entry['environment'])
             continue
@@ -80,10 +83,10 @@ def main():
     p = sub.add_parser('operational-snapshot'); p.add_argument('--source', required=True); p.add_argument('--output', required=True)
     args = parser.parse_args()
     if args.command == 'delta-review':
-        result = delta_review(json.loads(Path(args.before).read_text()), json.loads(Path(args.final).read_text()))
+        result = delta_review(load_json(Path(args.before).read_text()), load_json(Path(args.final).read_text()))
     else:
-        result = operational_snapshot(json.loads(Path(args.source).read_text()))
-    write_private(args.output, json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+        result = operational_snapshot(load_json(Path(args.source).read_text()))
+    write_private(args.output, canonical(result) + '\n')
     print(json.dumps({'written': True, 'checksum': digest(result), 'remoteWrites': False}))
 
 

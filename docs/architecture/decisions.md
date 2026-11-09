@@ -312,3 +312,31 @@ into an approved empty target. Production authorization/monitoring and reverse
 migration after SQL writes remain explicit release blockers, not implemented
 fallbacks. Offline delta review and readonly operational extraction aid review
 without granting execution authority.
+
+## Phase 3 migration execution preparation
+
+Operator tooling remains outside application/runtime persistence. Historical
+JSON payloads, notably payroll snapshots, must preserve numeric types and decimal
+precision through parse/SQL generation/extraction. Decimal-aware canonical JSON
+fixes the prior binary-float conversion; source cells and existing JS business
+calculations remain unchanged. A full frozen archive batch, including formulas
+and raw/formatted renderings, is required before extraction. Target/TLS assertions
+precede business reads, and explicit PGSERVICE configuration is mandatory.
+
+Reconciliation writes complete ID/relationship/totals evidence privately, with
+status-only stdout. The 23-table acceptance report cannot authorize cutover.
+Offline application comparison invokes existing feature readers/calculations
+against original display values and operational cells with a frozen clock;
+missing history/account coverage and reader failures block it. It introduces no
+new business logic and does not claim hosted runtime/provider acceptance.
+
+Backups share an exported repeatable snapshot with pg_dump and fingerprints,
+while both cooperative writer locks prevent interleaving. Effective privileges
+rather than raw ACL representation are compared on restore; actual grant/data
+changes fail. Encryption, off-site keys, same-role provisioning and hosted RTO/RPO
+remain operator-approved gates. Endpoint ownership/isolation cannot be proved
+by a matching database UUID alone. The Tokyo project remains an undeployed staging
+candidate; no plugin credential is assumed available in Cloud. The version-pinned
+CLI procedure uses an explicit remote target and skips Vault changes. Production
+Google Sheets selection, application authorization policy and the production
+Supabase guard are unchanged.
