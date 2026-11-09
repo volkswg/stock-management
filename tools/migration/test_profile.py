@@ -8,6 +8,16 @@ def valid():
     return snapshot
 
 class ProfileTests(unittest.TestCase):
+    def test_timesheet_account_id_is_not_an_expense_shop_foreign_key(self):
+        snapshot=valid()
+        snapshot['sheets']['employees']['rows']=[['employee-synthetic']]
+        row=['timesheet-synthetic','employee-synthetic','account-synthetic','work',
+             '2026-11-01T01:00:00+07:00','2026-11-01T01:00:00+07:00','full']
+        snapshot['sheets']['employee_timesheets']['rows']=[list(row)]
+        report=profile(snapshot)
+        self.assertTrue(report['readyForReview'],report['problems'])
+        self.assertEqual(snapshot['sheets']['employee_timesheets']['rows'],[row])
+
     def test_profile_types_and_exact_totals_without_repair(self):
         report=profile(valid())
         self.assertTrue(report['readyForReview'])

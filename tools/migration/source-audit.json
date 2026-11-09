@@ -565,8 +565,7 @@
       "workdayType": "text"
     },
     "relationships": {
-      "employeeId": "employees",
-      "shopId": "shops"
+      "employeeId": "employees"
     },
     "readersAndWriters": [
       {
@@ -594,7 +593,10 @@
           "updateRows"
         ]
       }
-    ]
+    ],
+    "externalReferences": {
+      "shopId": "loyverse_accounts.id"
+    }
   },
   "employee_advances": {
     "configProperty": "employeeAdvancesWorksheetName",

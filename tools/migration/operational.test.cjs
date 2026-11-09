@@ -122,11 +122,12 @@ test('HR employee/compensation history and Bangkok attendance transitions',async
   const employee=await hr.createEmployee({googleSheetsService:service,createdBy:'synthetic',input:{name:'Synthetic employee',phone:'',status:'active',hiredDate:'2020-01-01',terminatedDate:'',baseSalary:100,commission:0,compensationEffectiveFrom:'2020-01-01',compensationType:'daily',commissionType:'none',commissionBucketSales:0,commissionBucketAmount:0,commissionRoundupThreshold:0}});
   employeeId=employee.id;
   assert.equal(employee.compensation.baseSalary,100);
-  const shift=await hr.clockInEmployee({googleSheetsService:service,date:'2026-11-01',employeeId,shopId,workdayType:'half'});
+  const shift=await hr.clockInEmployee({googleSheetsService:service,date:'2026-11-01',employeeId,shopId:'account-synthetic',workdayType:'half'});
   assert.ok(shift.id);
   await hr.clockOutEmployee({googleSheetsService:service,timesheetId:shift.id});
   const entries=await hr.listEmployeeTimesheets({googleSheetsService:service,date:'2026-11-01'});
   assert.equal(entries[0].employeeId,employeeId);assert.equal(entries[0].workdayType,'half');assert.equal(entries[0].isOpen,false);
+  assert.equal(entries[0].shopId,'account-synthetic');assert.notEqual(entries[0].shopId,shopId);
   await hr.updateEmployee({googleSheetsService:service,employeeId,input:{baseSalary:120,compensationEffectiveFrom:'2026-11-02'}});
   assert.equal((await hr.listEmployeeCompensations({googleSheetsService:service})).length,2);
  });

@@ -20,7 +20,11 @@ class StagingRecoveryTests(unittest.TestCase):
         with patch('subprocess.run', side_effect=AssertionError('no external calls')):
             result = deployment_plan(EXPECTED_TARGET)
         self.assertFalse(result['executionAuthorized']); self.assertFalse(result['productionCutoverAllowed'])
-        self.assertEqual(len(result['migrations']), 2)
+        self.assertEqual([Path(entry['file']).name for entry in result['migrations']], [
+            '20261108184048_stock_business_staging.sql',
+            '20261108191839_stock_operational.sql',
+            '20261109205118_timesheet_loyverse_account_reference.sql',
+        ])
         for entry in result['migrations']: self.assertEqual(checksum(entry['file']), entry['sha256'])
         commands = '\n'.join(result['steps'])
         self.assertIn('--skip-vault --dry-run', commands)
