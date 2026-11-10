@@ -37,7 +37,9 @@ def fingerprint_sql():
     for schema, tables in [('stock_migration', ['import_batches'] + list(CATALOG)),
                           ('stock_operational', ['commands', 'audit', 'side_effects', 'environment'] + list(CATALOG))]:
         for table in tables:
-            queries.append(f"SELECT json_build_object('table','{schema}.{table}','rows',count(*),'sha256',encode(sha256(convert_to(coalesce(string_agg(length(v::text)::text||':'||v::text,'' ORDER BY v::text COLLATE \"C\"),''),'UTF8')),'hex')) FROM (SELECT to_jsonb(t) v FROM {schema}.{table} t) s;")
+            # Serialize large JSONB rows once, rather than rebuilding them for
+            # the length prefix, concatenation and C-collation sort key.
+            queries.append(f"WITH serialized AS MATERIALIZED (SELECT to_jsonb(t)::text AS v FROM {schema}.{table} t) SELECT json_build_object('table','{schema}.{table}','rows',count(*),'sha256',encode(sha256(convert_to(coalesce(string_agg(length(v)::text||':'||v,'' ORDER BY v COLLATE \"C\"),''),'UTF8')),'hex')) FROM serialized;")
     schema_filter = "IN ('stock_migration','stock_operational')"
     principals = "WITH RECURSIVE principals(oid) AS (SELECT oid FROM pg_roles WHERE rolname='stock_runtime' UNION SELECT member FROM pg_auth_members WHERE roleid=(SELECT oid FROM pg_roles WHERE rolname='stock_runtime')), reachable(oid) AS (SELECT oid FROM principals UNION SELECT m.roleid FROM pg_auth_members m JOIN reachable r ON r.oid=m.member) "
     metadata = {
