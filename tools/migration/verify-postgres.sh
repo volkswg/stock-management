@@ -28,6 +28,7 @@ sys.path.insert(0,'tools/migration')
 from test_migration import fixture
 print(json.dumps(fixture()))
 PY
+STOCK_VERIFY_CONTAINER="$name" PATH="$artifacts:$PATH" python3 tools/migration/indexed-import-integration.py
 STOCK_VERIFY_CONTAINER="$name" PATH="$artifacts:$PATH" python3 tools/migration/migrate.py database-snapshot --source "$artifacts/source.json" --output "$artifacts/target.json"
 python3 tools/migration/migrate.py reconcile "$artifacts/source.json" "$artifacts/target.json"
 python3 - <<'PY' > "$artifacts/conflict.sql"

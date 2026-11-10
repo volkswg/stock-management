@@ -121,7 +121,12 @@ def import_sql(snapshot, *, snapshot_encoding="plain-jsonb"):
             vals = ','.join(literal(v, kinds[c]) for c,v in values.items())
             sql.append(f'INSERT INTO stock_migration.{table} ({cols}) VALUES ({vals}) ON CONFLICT DO NOTHING;')
             predicates = ' AND '.join(f'"{c}" IS NOT DISTINCT FROM {literal(v,kinds[c])}' for c,v in values.items())
-            sql.append(f"SELECT 1 / (EXISTS (SELECT 1 FROM stock_migration.{table} WHERE {predicates}))::int;")
+            # normalize() requires a unique, non-null identity. Equality lets
+            # PostgreSQL locate that row through its existing primary key;
+            # retain every null-safe field comparison before accepting it.
+            key = spec['key']
+            lookup = f'"{key}" = {literal(values[key], kinds[key])}'
+            sql.append(f"SELECT 1 / (EXISTS (SELECT 1 FROM stock_migration.{table} WHERE {lookup} AND {predicates}))::int;")
     from snapshot_encoding import encode_snapshot
     stored_snapshot = encode_snapshot(snapshot, snapshot_encoding)
     sql.append(f"INSERT INTO stock_migration.import_batches (checksum,workbook,snapshot) VALUES ({quote(batch)},{quote(snapshot['spreadsheetId'])},{literal(stored_snapshot,'jsonb')}) ON CONFLICT DO NOTHING;")
