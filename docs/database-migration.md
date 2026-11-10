@@ -85,6 +85,30 @@ or automatically repaired. Optional relationships remain nullable. Historical
 soft deletions, cancellations, reversals, replacements, sync records, snapshots,
 commission rules and timestamps are retained.
 
+Typed nullable JSON uses SQL `NULL` for missing/empty cells and a parsed top-level
+JSON `null`, matching `core.convert` and the archive importer. The original cell
+is retained unchanged: text `null`, whitespace-wrapped JSON `null`, an empty cell,
+and an absent cell remain distinguishable in source/business cells. JSON strings
+such as `"null"`, nested nulls, objects/arrays, `false`, zero and numeric precision
+must not be collapsed to SQL `NULL`. Malformed JSON still fails validation.
+
+The additive [nullable JSON projection correction](../supabase/migrations/20261110011351_normalize_nullable_json_projections.sql)
+normalizes only top-level JSON nulls in the six JSON columns mapped by the four
+existing payroll, receipt-item, receipt-payment and user-state trigger functions.
+It checks their original definitions/security attributes before replacing them.
+Owners, ACLs, trigger bindings, identity/revision guards, rows, indexes and policies
+are retained. It does not rewrite archive or operational records, weaken exact
+reconciliation, rerun applied migrations, or automatically resume a stopped import.
+Applying it and retrying promotion require approval for the exact target. A failed
+promotion can advance sequence counters even when all rows roll back; retain that
+evidence and do not reset counters as an automatic repair.
+
+`tools/migration/nullable-json-integration.py` emits synthetic-only upgrade and
+promotion tests for the CI Unix-socket `json_null_test` database. They reproduce
+the old mismatch, verify all null/value cases against unchanged source cells,
+reject malformed JSON, and compare function security/owners/ACLs, trigger bindings
+and every private table's records before and after the corrective migration.
+
 Date/month/timestamp fields deliberately remain **text in this first schema**:
 existing source values and Bangkok semantics are preserved without speculative
 casts or timezone conversions. Profile their formats before adding typed date
