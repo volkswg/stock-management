@@ -79,7 +79,15 @@ fi
 # Upgrade existing synthetic archive rows, then promote nullable JSON cases.
 pg createdb -U postgres json_null_test
 python3 tools/migration/nullable-json-integration.py > "$artifacts/json-null.sql"
-pg psql -U postgres -d json_null_test -v ON_ERROR_STOP=1 < "$artifacts/json-null.sql" > "$artifacts/json-null.log"
+if ! pg psql -U postgres -d json_null_test -v ON_ERROR_STOP=1 < "$artifacts/json-null.sql" > "$artifacts/json-null.log"; then
+ python3 - "$artifacts/json-null.log" <<'PYLOG'
+import sys
+from pathlib import Path
+for line in Path(sys.argv[1]).read_text().splitlines():
+ if line.startswith('nullable-json:'): print(line)
+PYLOG
+ exit 1
+fi
 echo 'PASS: nullable JSON upgrade/promotion, exact cells/types/precision, malformed JSON rejection and unchanged data/function security/trigger bindings'
 # Keep promotion fixtures separate from domain-valid application fixtures.
 pg createdb -U postgres application_test

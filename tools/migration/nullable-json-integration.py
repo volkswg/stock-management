@@ -10,6 +10,7 @@ source = nullable_json_fixture()
 script = ["SELECT 1 / (current_database()='json_null_test' AND inet_client_addr() IS NULL)::int;"]
 script.extend(path.read_text() for path in migrations if path.name < fix.name)
 script.append(import_sql(source))
+script.append("\\echo nullable-json: synthetic archive imported")
 # Establish the old failure without inserting or promoting any operational record.
 script.append("SELECT 1 / (EXISTS(SELECT 1 FROM stock_migration.sales_receipt_payments WHERE \"paymentDetailsJson\" IS DISTINCT FROM NULLIF(source_cells->>8,'')::jsonb))::int;")
 functions = [quote('map_' + table) for table, spec in CATALOG.items()
@@ -26,12 +27,15 @@ for schema, tables in [('stock_migration', ['import_batches'] + list(CATALOG)),
 row_query = ' UNION ALL '.join(row_queries)
 script.append('CREATE TEMP TABLE json_rows_before AS ' + row_query + ';')
 script.append(fix.read_text())
+script.append("\\echo nullable-json: corrective migration applied")
 for before, after in [('SELECT * FROM json_functions_before', function_query),
                       ('SELECT * FROM json_triggers_before', "SELECT oid,tgfoid,pg_get_triggerdef(oid) AS definition FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN (SELECT oid FROM pg_class WHERE relnamespace='stock_operational'::regnamespace)"),
                       ('SELECT * FROM json_rows_before', row_query)]:
-    script.append(f'SELECT 1 / (NOT EXISTS (({before} EXCEPT ALL {after}) UNION ALL ({after} EXCEPT ALL {before})))::int;')
+    script.append(f'SELECT 1 / (NOT EXISTS ((({before}) EXCEPT ALL ({after})) UNION ALL (({after}) EXCEPT ALL ({before}))))::int;')
+    script.append("\\echo nullable-json: upgrade metadata or record comparison passed")
 script.extend(path.read_text() for path in migrations if path.name > fix.name)
 script.append((root / 'tools/migration/promote.sql').read_text())
+script.append("\\echo nullable-json: exact promotion passed")
 # Exact typed values and original cells must agree for all six JSON projections.
 for table, rows in normalize(source).items():
     spec = CATALOG[table]
