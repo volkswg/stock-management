@@ -797,6 +797,20 @@ effective ACLs, RLS, runtime role flags/memberships and defaults. Equivalent NUL
 and explicit default ACL representations are normalized; actual grant changes
 fail. No private row/SQL/error body is emitted to ordinary logs.
 
+Each row is materialized once as its original JSONB text before calculating the
+same character-length-prefixed, C-collated ordered SHA256. This avoids rebuilding
+a large import-batch JSON value for each reference in the aggregate; row counts,
+fingerprint/receipt formats and all target/TLS/snapshot/metadata guards are
+unchanged. The per-table aggregate still needs memory proportional to its text,
+so this does not certify arbitrary data volumes or hosted capacity.
+
+`bash tools/migration/verify-recovery-fingerprints.sh` uses a separate synthetic
+PostgreSQL 17 container with no network/published ports and a 2 GiB memory cap.
+It compares the prior hash algorithm on empty and mixed-value/Unicode/duplicate
+fixtures, counts actual JSON serialization calls, and checks a 96 MiB JSONB row
+against a scalar oracle. It never connects to operator-configured services or
+changes the memory settings of existing containers.
+
 After explicit hosted backup/read approval and a verified private service:
 
 ```sh
