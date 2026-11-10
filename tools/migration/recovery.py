@@ -14,6 +14,7 @@ import uuid
 from core import CATALOG, digest
 from migrate import write_private
 from pg_access import client_environment, secure_connection_sql
+from jsonb_stream import read_session, batch_fingerprint
 
 METADATA_NAMES = {'schemas', 'tables', 'policies', 'grants', 'constraints', 'indexes',
                   'triggers', 'functions', 'sequences', 'defaults', 'runtimeRole',
@@ -93,15 +94,36 @@ def exported_snapshot(target):
 
 
 def fingerprint(target, snapshot=None):
+    deadline=time.monotonic()+150
+    if snapshot is None:
+        with exported_snapshot(target) as held:
+            return _fingerprint_snapshot(target,held,deadline)
+    return _fingerprint_snapshot(target,snapshot,deadline)
+
+
+def _fingerprint_snapshot(target, snapshot, deadline):
     sql = 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n'
     if snapshot:
         if not re.fullmatch(r'[A-Fa-f0-9-]+', snapshot): raise ValueError('invalid snapshot')
         sql += f"SET TRANSACTION SNAPSHOT '{snapshot}';\n"
-    sql += "SET LOCAL statement_timeout='120s';\n" + secure_connection_sql()+'\n'+guard_sql(target) + '\n'
+    sql += "SET LOCAL statement_timeout='120s'; SET LOCAL client_encoding='UTF8';\n" + secure_connection_sql()+'\n'+guard_sql(target) + '\n'
     sql += 'SELECT pg_advisory_xact_lock_shared(835107241);\nSELECT pg_advisory_xact_lock_shared(835107242);\n'
-    run = subprocess.run(['psql', '-XqAtw', '-v', 'ON_ERROR_STOP=1'], input=sql + fingerprint_sql() + '\nCOMMIT;', text=True, capture_output=True, env=client_environment(), timeout=150)
-    if run.returncode: raise ValueError('fingerprint query failed')
-    rows = [json.loads(line) for line in run.stdout.splitlines() if line.startswith('{')]
+    # The complete frozen snapshot is much larger than individual business rows.
+    # Read its exact JSONB representation in partitions; never reconstruct the
+    # entire row or table-wide hash input in PostgreSQL memory.
+    rows = []
+    # Each backend releases its arenas on exit. Reuse the SAME exported
+    # snapshot and held writer locks, rather than retaining large JSONB arenas
+    # across otherwise small table reads. The original 150s overall limit stays.
+    with read_session(sql + "SET LOCAL standard_conforming_strings=on; SET LOCAL client_encoding='UTF8';", deadline-time.monotonic()) as session:
+        rows.append(batch_fingerprint(session))
+    for schema,names in [('stock_migration',list(CATALOG)),('stock_operational',['commands','audit','side_effects','environment']+list(CATALOG))]:
+        for table in names:
+            with read_session(sql,deadline-time.monotonic()) as session:
+                rows.append(session.table_fingerprint(f'{schema}.{table}'))
+    with read_session(sql,deadline-time.monotonic()) as session:
+        for query in fingerprint_sql().splitlines()[2*len(CATALOG)+5:]:
+            rows.extend(json.loads(line) for line in session.rows(query) if line.startswith(b'{'))
     tables = {f'{schema}.{table}' for schema, names in [('stock_migration', ['import_batches']+list(CATALOG)), ('stock_operational', ['commands','audit','side_effects','environment']+list(CATALOG))] for table in names}
     keys = [r.get('table', r.get('metadata')) for r in rows]
     if len(keys) != len(tables | METADATA_NAMES) or set(keys) != tables | METADATA_NAMES: raise ValueError('incomplete recovery inventory')

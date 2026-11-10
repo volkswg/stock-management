@@ -106,7 +106,7 @@ def literal(value, kind):
         return quote(canonical(value)) + '::jsonb'
     return quote(str(value).lower() if isinstance(value, bool) else value) + '::' + kind
 
-def import_sql(snapshot):
+def import_sql(snapshot, *, snapshot_encoding="plain-jsonb"):
     data = normalize(snapshot)
     batch = digest(snapshot)
     sql = ['BEGIN;', 'SET LOCAL standard_conforming_strings = on;', "SET LOCAL lock_timeout = '5s';", "SET LOCAL statement_timeout = '120s';",
@@ -122,7 +122,9 @@ def import_sql(snapshot):
             sql.append(f'INSERT INTO stock_migration.{table} ({cols}) VALUES ({vals}) ON CONFLICT DO NOTHING;')
             predicates = ' AND '.join(f'"{c}" IS NOT DISTINCT FROM {literal(v,kinds[c])}' for c,v in values.items())
             sql.append(f"SELECT 1 / (EXISTS (SELECT 1 FROM stock_migration.{table} WHERE {predicates}))::int;")
-    sql.append(f"INSERT INTO stock_migration.import_batches (checksum,workbook,snapshot) VALUES ({quote(batch)},{quote(snapshot['spreadsheetId'])},{literal(snapshot,'jsonb')}) ON CONFLICT DO NOTHING;")
+    from snapshot_encoding import encode_snapshot
+    stored_snapshot = encode_snapshot(snapshot, snapshot_encoding)
+    sql.append(f"INSERT INTO stock_migration.import_batches (checksum,workbook,snapshot) VALUES ({quote(batch)},{quote(snapshot['spreadsheetId'])},{literal(stored_snapshot,'jsonb')}) ON CONFLICT DO NOTHING;")
     sql.append('COMMIT;')
     return '\n'.join(sql)+'\n'
 

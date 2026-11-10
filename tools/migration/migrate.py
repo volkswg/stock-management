@@ -9,6 +9,7 @@ import urllib.request
 from pathlib import Path
 from core import CATALOG, import_sql, normalize, reconcile, digest, convert, canonical, load_json
 from pg_access import client_environment, secure_connection_sql
+from jsonb_stream import read_session, verify_snapshot
 
 class ExactNumber(str):
     """Keep a JSON decimal token exact while retaining its source number type."""
@@ -27,13 +28,13 @@ def write_private(path, value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
-    p = sub.add_parser('plan'); p.add_argument('snapshot'); p.add_argument('--output'); p.add_argument('--dry-run', action='store_true')
+    p = sub.add_parser('plan'); p.add_argument('snapshot'); p.add_argument('--output'); p.add_argument('--dry-run', action='store_true'); p.add_argument('--snapshot-encoding', choices=['plain-jsonb','gzip-json-v1'], default='plain-jsonb', help='Opt-in archive representation; use only in a separately approved generated SQL plan')
     p = sub.add_parser('reconcile'); p.add_argument('source'); p.add_argument('target'); p.add_argument('--output')
     p = sub.add_parser('export'); p.add_argument('--workbook', required=True); p.add_argument('--mapping', required=True); p.add_argument('--output', required=True); p.add_argument('--dry-run', action='store_true')
     p = sub.add_parser('database-snapshot'); p.add_argument('--output', required=True); p.add_argument('--source', required=True)
     args = parser.parse_args()
     if args.command == 'plan':
-        snapshot = load_json(Path(args.snapshot).read_text()); sql = import_sql(snapshot)
+        snapshot = load_json(Path(args.snapshot).read_text()); sql = import_sql(snapshot, snapshot_encoding=args.snapshot_encoding)
         print(json.dumps({'valid': True, 'checksum': digest(snapshot), 'rows': {k:len(v) for k,v in normalize(snapshot).items()}, 'dryRun': args.dry_run or not args.output}))
         if args.output and not args.dry_run: write_private(args.output, sql)
     elif args.command == 'reconcile':
@@ -46,26 +47,26 @@ def main():
         # raw/formatted values, before reading individual business records.
         source=load_json(Path(args.source).read_text()); normalize(source)
         from core import quote
-        queries = [f"SELECT 1 / (EXISTS(SELECT 1 FROM stock_migration.import_batches WHERE checksum={quote(digest(source))} AND workbook={quote(source['spreadsheetId'])} AND snapshot={quote(canonical(source))}::jsonb))::int;"]
-        for table in CATALOG:
-            queries.append(f"SELECT json_build_object('table','{table}','workbook',source_workbook,'row',source_row,'cells',source_cells,'typed',to_jsonb(t)) FROM stock_migration.{table} t ORDER BY source_row;")
-        run = subprocess.run(['psql','-XAtw','-v','ON_ERROR_STOP=1'],input="BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL standard_conforming_strings=on;\nSET LOCAL statement_timeout='120s';\n"+secure_connection_sql()+"\nSELECT pg_advisory_xact_lock_shared(835107241);\n"+'\n'.join(queries)+'\nCOMMIT;',text=True,capture_output=True,env=client_environment(),timeout=150)
-        if run.returncode: raise ValueError('database snapshot failed; inspect database access privately')
         snapshot = {'version':1,'spreadsheetId':source['spreadsheetId'],'sheets':{t:{'headers':s['headers'],'rows':[]} for t,s in CATALOG.items()}}
-        for line in run.stdout.splitlines():
-            if not line.startswith('{'): continue
-            entry=load_json(line)
-            spec=CATALOG[entry['table']]
-            for col,kind in spec['columns'].items():
-                pos=spec['headers'].index(col)
-                raw=entry['cells'][pos] if pos<len(entry['cells']) else None
-                expected=convert(raw,kind); actual=entry['typed'][col]
-                if kind in ('numeric','bigint') and actual is not None: actual=str(actual)
-                if expected!=actual: raise ValueError('typed data diverged from source archive')
-            if snapshot['spreadsheetId'] and snapshot['spreadsheetId'] != entry['workbook']: raise ValueError('multiple workbooks')
-            snapshot['spreadsheetId']=entry['workbook']; rows=snapshot['sheets'][entry['table']]['rows']
-            while len(rows)<entry['row']-2: rows.append([])
-            rows.append(entry['cells'])
+        begin="BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL standard_conforming_strings=on;\nSET LOCAL client_encoding='UTF8';\nSET LOCAL statement_timeout='120s';\n"+secure_connection_sql()+"\nSELECT pg_advisory_xact_lock_shared(835107241);\n"
+        with read_session(begin) as session:
+            verify_snapshot(session,source)
+            for table in CATALOG:
+                query=f"SELECT json_build_object('table','{table}','workbook',source_workbook,'row',source_row,'cells',source_cells,'typed',to_jsonb(t)) FROM stock_migration.{table} t ORDER BY source_row;"
+                for line in session.rows(query):
+                    if not line.startswith(b'{'):continue
+                    entry=load_json(line)
+                    spec=CATALOG[entry['table']]
+                    for col,kind in spec['columns'].items():
+                        pos=spec['headers'].index(col)
+                        raw=entry['cells'][pos] if pos<len(entry['cells']) else None
+                        expected=convert(raw,kind); actual=entry['typed'][col]
+                        if kind in ('numeric','bigint') and actual is not None:actual=str(actual)
+                        if expected!=actual:raise ValueError('typed data diverged from source archive')
+                    if snapshot['spreadsheetId'] and snapshot['spreadsheetId']!=entry['workbook']:raise ValueError('multiple workbooks')
+                    snapshot['spreadsheetId']=entry['workbook'];rows=snapshot['sheets'][entry['table']]['rows']
+                    while len(rows)<entry['row']-2:rows.append([])
+                    rows.append(entry['cells'])
         normalize(snapshot)
         snapshot['archiveEvidence']={'sourceChecksum':digest(source),'fullSnapshotVerified':True}
         write_private(args.output,canonical(snapshot)+'\n')
