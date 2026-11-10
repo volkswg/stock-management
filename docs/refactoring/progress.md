@@ -6,6 +6,17 @@ Verified main is `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), with 
 
 Branch `fix/loyverse-single-workbook` makes sheet mode read `loyverse_accounts` only from the existing GOOGLE_SHEETS_SPREADSHEET_ID. The dedicated account-workbook variable/AppConfig field and separate-workbook restriction are removed. No workbook/JSON fallback is added; env-mode rollback, six-column validation, ordering and server-only credential handling remain. Historical source inverses preserve old fixture bytes and assertions. See [verification](verification.md#loyverse-single-workbook-support) and [owner instructions](../../README.md#loyverse-configuration), including workbook-wide token visibility. No production migration, ACL/Vercel change or deployment is performed.
 
+## Migration assertion performance correction (prepared)
+
+The focused correction based on merged PR54 changes only import-plan row lookup:
+an equality predicate on the validated non-null primary key precedes all existing
+null-safe field comparisons. It reuses existing indexes; source values, snapshot
+encoding, database schemas, roles, permissions, recovery fingerprints and timeout
+guards stay unchanged. Synthetic PostgreSQL coverage checks index planning,
+identical replay and rejection of changed values; see the
+[migration guide](../database-migration.md#export-dry-run-and-import). This code
+change does not authorize a hosted retry or replace its full constrained rehearsal.
+
 ## Historical HR completion evidence (PR #33)
 
 At the start of PR #33, verified main was merged PR32, `f90e7bdeb3d7c9815148c3011d217e07b1a80b19`. The requested PR31 SHA was stale: GitHub confirmed PR32 merged, its tree matched the reviewed financial implementation exactly and no conflicting implementation PR was open. Work therefore starts from that audited main on `refactor/hr-application-completion`, preserving the merged work.

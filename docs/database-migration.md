@@ -179,6 +179,15 @@ No UPDATE, DELETE, TRUNCATE or runtime dual-write exists. A new append-only snap
 can add records, but source edits need explicit change-handling design next phase.
 This is intentionally not a continuous replication utility.
 
+The planner locates each imported row using equality on its already validated,
+non-null primary key, then retains every original `IS NOT DISTINCT FROM` field
+comparison. This allows the existing primary-key index to narrow the assertion
+without removing null-safe equality, original-cell checks or changed-identity
+rejection. No new index or schema change is required. PostgreSQL integration
+tests verify indexed lookup on a growing synthetic fixture, identical replay,
+nullable fields and conflicting values. New generated SQL needs fresh review;
+previously approved SQL artifacts must not be silently rewritten or retried.
+
 Reconciliation fails with exit 1 on differences (2 on validation/access errors).
 It compares per-table counts, complete ID sets, every FK edge, exact decimal totals
 for all monetary/quantity/counter columns and complete normalized row fingerprints.

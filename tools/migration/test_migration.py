@@ -89,6 +89,21 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(sql,import_sql(f))
         self.assertIn('ON CONFLICT DO NOTHING',sql)
         self.assertNotIn('UPDATE stock_migration',sql)
+    def test_assertions_locate_identity_and_keep_every_original_comparison(self):
+        source=fixture(); data=normalize(source); sql=import_sql(source)
+        for table,rows in data.items():
+            spec=CATALOG[table]; key=spec['key']
+            values=dict(rows[0],source_workbook=source['spreadsheetId'])
+            kinds=dict(spec['columns'],migration_id='text',source_row='bigint',source_cells='jsonb',source_workbook='text')
+            assertion=next(line for line in sql.splitlines() if f'EXISTS (SELECT 1 FROM stock_migration.{table} WHERE ' in line)
+            self.assertIn(f'WHERE "{key}" = {literal(values[key],kinds[key])} AND ',assertion)
+            for column,value in values.items():
+                self.assertIn(f'"{column}" IS NOT DISTINCT FROM {literal(value,kinds[column])}',assertion)
+    def test_empty_identity_is_rejected_before_indexed_assertion_generation(self):
+        for value in (None,''):
+            source=fixture();source['sheets']['orders']['rows'][0][0]=value
+            with self.assertRaisesRegex(ValueError,'missing/duplicate identity'):
+                import_sql(source)
     def test_no_numeric_identity_coercion(self):
         f=fixture(); f['sheets']['orders']['rows'][0][0]=123
         with self.assertRaises(ValueError): normalize(f)
