@@ -797,19 +797,69 @@ effective ACLs, RLS, runtime role flags/memberships and defaults. Equivalent NUL
 and explicit default ACL representations are normalized; actual grant changes
 fail. No private row/SQL/error body is emitted to ordinary logs.
 
-Each row is materialized once as its original JSONB text before calculating the
-same character-length-prefixed, C-collated ordered SHA256. This avoids rebuilding
-a large import-batch JSON value for each reference in the aggregate; row counts,
-fingerprint/receipt formats and all target/TLS/snapshot/metadata guards are
-unchanged. The per-table aggregate still needs memory proportional to its text,
-so this does not certify arbitrary data volumes or hosted capacity.
+Fingerprints retain the original character-length-prefixed UTF8 text, C ordering,
+row counts and receipt format. Ordinary rows are serialized once and streamed
+with binary COPY into the client hash. The complete `import_batches.snapshot`
+is read as object fields, array partitions and string segments, then reconstructed
+with PostgreSQL's JSONB key order, spacing and exact numeric text. Its full row
+is spooled privately to determine the character-length prefix before hashing.
+No raw/formatted/formula/source-extension field is omitted.
+
+All table reads share the same held exported snapshot and both cooperative
+writer locks. Short-lived reader backends release large allocation arenas;
+the original 120-second statement and 150-second overall fingerprint limits,
+UUID/purpose/TLS checks and all 15 metadata sections remain. Every reader forces
+UTF8. Metadata, ownership, RLS, policies, ACLs, memberships and sequences are
+compared as before. The old SQL fingerprint remains an independent compatibility
+oracle for synthetic fixtures, not the production hash path.
+
+Archive extraction likewise verifies the checksum/workbook and compares the
+**entire** stored snapshot on the client inside one locked read-only transaction,
+without submitting that snapshot as a large SQL literal. Numeric equality is
+exact and ignores insignificant scale as JSONB does; booleans remain distinct
+from numbers. Individual typed/raw row assertions still follow full binding.
+Use an encrypted operator disk and private temporary directory: temporary
+spools contain plaintext and are removed when closed; retained artifacts still
+require their own approved retention/cleanup procedure.
 
 `bash tools/migration/verify-recovery-fingerprints.sh` uses a separate synthetic
-PostgreSQL 17 container with no network/published ports and a 2 GiB memory cap.
-It compares the prior hash algorithm on empty and mixed-value/Unicode/duplicate
-fixtures, counts actual JSON serialization calls, and checks a 96 MiB JSONB row
-against a scalar oracle. It never connects to operator-configured services or
-changes the memory settings of existing containers.
+PostgreSQL 17 container with no network/published ports and a 2 GiB cap. The
+legacy SQL checks and `jsonb-stream-integration.py` compare original/candidate
+hashes, C order, duplicate/null/Unicode/exact-number cases, array/string partition
+boundaries and rejection of a formula changed behind unchanged batch metadata.
+The runner never connects to operator services or changes existing containers.
+
+An optional `migrate.py plan --snapshot-encoding gzip-json-v1` stores the full
+canonical source in a lossless gzip/base64 envelope inside the existing JSONB
+snapshot column. It requires separate approval of that generated plan; the
+default remains `plain-jsonb` and never converts existing batches. Table schemas,
+roles, policies, indexes and business rows do not change. The batch checksum
+still identifies the complete original canonical source. Reading accepts both
+formats, bounds decompression using the independently supplied source's exact
+byte length, rejects malformed/truncated/trailing streams, verifies SHA256 and
+compares every decoded value before reading business rows. Compression does not
+encrypt data; retain the existing private access and encrypted backup controls.
+
+A newly encoded batch has a different stored snapshot representation and hence
+a different physical row fingerprint. The fingerprint algorithm itself is
+unchanged and matches the original SQL oracle for both representations. Existing
+raw batches and backup receipts retain their hashes and readability. Never use
+this option silently to bypass an approved same-payload rehearsal plan.
+
+The synthetic runner also tests an input containing millions of JSON values,
+then lowers **only its own disposable container** to 500,000,000 bytes with no
+additional swap, captures and independently restores the compact table, and
+compares its original SQL hash plus every decoded source field. It checks zero
+OOM/restarts and sampled working memory below 425,000,000 bytes. The source-like
+settings include 224 MB shared buffers; fixture evidence is not hosted capacity
+or real-data acceptance.
+
+Partitioning reduces verification memory; it does not certify arbitrary row
+sizes, import SQL, pg_dump/restore, hosted capacity or application load. Require
+a separately approved, source-matched memory-capped full import/promotion,
+reconciliation, capture and independent restore rehearsal before claiming that
+a plan or compute tier is compatible. Stop on OOM, backend restart, mismatch,
+timeout or insufficient headroom; preserve failed resources and artifacts.
 
 After explicit hosted backup/read approval and a verified private service:
 

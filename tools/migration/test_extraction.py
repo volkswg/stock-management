@@ -19,14 +19,14 @@ class ExtractionTests(unittest.TestCase):
         source['sheets']['orders']['formulaRows']=[['=empty_formula_marker']]
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory,'source.json');path.write_text(json.dumps(source));output=Path(directory,'archive.json')
-            with patch.dict(os.environ,{'PGSERVICE':'synthetic'}),patch('sys.argv',['migrate.py','database-snapshot','--source',str(path),'--output',str(output)]),patch('migrate.subprocess.run',return_value=SimpleNamespace(returncode=0,stdout='')) as run:
+            session=SimpleNamespace(rows=lambda query:[])
+            with patch('sys.argv',['migrate.py','database-snapshot','--source',str(path),'--output',str(output)]),patch('migrate.read_session',return_value=contextlib.nullcontext(session)) as read,patch('migrate.verify_snapshot') as verify:
                 self.assertEqual(main(),0)
-                sql=run.call_args.kwargs['input']
+                sql=read.call_args.args[0]
                 self.assertIn('READ ONLY',sql)
-                self.assertIn('snapshot=',sql)
-                self.assertIn('empty_formula_marker',sql)
-                self.assertLess(sql.index('snapshot='),sql.index('FROM stock_migration.orders'))
-                self.assertEqual(sql.count("'table',"),len(CATALOG))
+                self.assertIn('pg_advisory_xact_lock_shared(835107241)',sql)
+                self.assertIn('pg_stat_ssl',sql)
+                verify.assert_called_once_with(session,source)
             actual=json.loads(output.read_text())
             self.assertEqual(actual['spreadsheetId'],'synthetic-only')
             self.assertTrue(actual['archiveEvidence']['fullSnapshotVerified'])
@@ -34,8 +34,9 @@ class ExtractionTests(unittest.TestCase):
     def test_batch_mismatch_leaves_no_output_and_error_is_not_logged(self):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory,'source.json');path.write_text(json.dumps(fixture()));output=Path(directory,'archive.json')
-            with patch.dict(os.environ,{'PGSERVICE':'synthetic'}),patch('sys.argv',['migrate.py','database-snapshot','--source',str(path),'--output',str(output)]),patch('migrate.subprocess.run',return_value=SimpleNamespace(returncode=1,stdout='',stderr='private synthetic diagnostic')):
-                with self.assertRaisesRegex(ValueError,'database snapshot failed'):main()
+            session=SimpleNamespace(rows=lambda query:[])
+            with patch('sys.argv',['migrate.py','database-snapshot','--source',str(path),'--output',str(output)]),patch('migrate.read_session',return_value=contextlib.nullcontext(session)),patch('migrate.verify_snapshot',side_effect=ValueError('full frozen snapshot differs from archive')):
+                with self.assertRaisesRegex(ValueError,'full frozen snapshot'):main()
             self.assertFalse(output.exists())
 
     def test_reconciliation_never_prints_private_ids_or_totals(self):
