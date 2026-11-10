@@ -24,6 +24,7 @@ class StagingRecoveryTests(unittest.TestCase):
             '20261108184048_stock_business_staging.sql',
             '20261108191839_stock_operational.sql',
             '20261109205118_timesheet_loyverse_account_reference.sql',
+            '20261110011351_normalize_nullable_json_projections.sql',
         ])
         for entry in result['migrations']: self.assertEqual(checksum(entry['file']), entry['sha256'])
         commands = '\n'.join(result['steps'])
