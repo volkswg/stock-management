@@ -2,8 +2,15 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 export const uploadOutcomesHistory = JSON.parse(readFileSync('tests/fixtures/staging-upload-outcomes-before.json', 'utf8'));
+const lineBoundaryHistory = JSON.parse(readFileSync('tests/fixtures/staging-line-boundary-before.json', 'utf8'));
 const hash = value => createHash('sha256').update(value).digest('hex');
 export function restoreUploadOutcomesSource(file, source) {
+  const line = lineBoundaryHistory.edits[file];
+  if (line) {
+    assert.equal(hash(line.before), line.beforeHash, file);
+    assert.equal(hash(source), line.afterHash, file);
+    source = line.before;
+  }
   const entry = uploadOutcomesHistory.edits[file];
   if (!entry) return source;
   assert.equal(hash(entry.before), entry.beforeHash, file);

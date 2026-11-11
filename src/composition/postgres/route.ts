@@ -41,7 +41,7 @@ export function withPersistence<Args extends unknown[], Result extends Response>
       // Only the signature-verifying LINE entrypoint may opt into this boundary.
       // A caller-controlled URL must never exempt an ordinary handler from auth.
       const isLine = options.lineWebhook && new URL(request.url).pathname === "/api/line/webhook";
-      if (isLine) { stagingSettings(); return handler(...args); }
+      if (isLine) { stagingSettings(); return await handler(...args); }
       authorizeStaging(request);
       const method=request.method.toUpperCase();
       if (method === "GET" || method === "HEAD") return await transaction(false,async()=>{

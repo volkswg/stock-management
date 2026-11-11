@@ -93,7 +93,8 @@ class UploadCampaign extends CompletionCampaign {
         assert.ok(graph.pass, 'Command-finalization rollback left a newly accepted file without cleanup.');
     }
     async WT_UPLOAD_UNKNOWN_RETRY() {
-        const movement = this.context.movement.masterId, url = '/api/movements/' + movement + '/items/' + movement + '_ITEM/image';
+        const target = this.context.uploadRetryTarget || { masterId: this.context.movement.masterId, itemId: this.context.movement.masterId + '_ITEM' };
+        const url = '/api/movements/' + target.masterId + '/items/' + target.itemId + '/image';
         const before = await this.seal(), revision = await this.revision(), start = this.ledger().length, key = this.key('upload-unknown');
         this.control({ driveUncertain: true });
         try { await this.api(url, { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: [500, 503], _probe: true }); }

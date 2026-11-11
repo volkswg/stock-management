@@ -3,6 +3,22 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+import * as crypto from 'node:crypto';
+test('the staging LINE request boundary translates asynchronous storage failures to a safe 503 response', async () => {
+  const exports = {};
+  class PersistenceFailure extends Error { constructor(status = 503, message = 'WT safe retry') { super(message); this.status = status; } }
+  const source = ts.transpileModule(readFileSync('src/composition/postgres/route.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  new vm.Script(source).runInNewContext({ exports, Buffer, Request, Response, URL, Error, require(spec) {
+    if (spec === 'server-only') return {};
+    if (spec === 'node:crypto') return crypto;
+    if (spec.endsWith('/commands')) return {};
+    if (spec.endsWith('/uploads')) return {};
+    assert.ok(spec.endsWith('/database')); return { PersistenceFailure, storageMode: () => 'supabase', stagingSettings: () => ({}), stagingReadOnly: () => false };
+  } });
+  const handler = exports.withPersistence(async () => { await Promise.resolve(); throw new PersistenceFailure(); }, { lineWebhook: true });
+  const response = await handler(new Request('http://127.0.0.1/api/line/webhook', { method: 'POST', body: '{}' }));
+  assert.equal(response.status, 503); assert.deepEqual(await response.json(), { error: 'WT safe retry' });
+});
 test('failed staging LINE business work does not commit a completed command that suppresses retry', async () => {
   const exports = {}, commands = new Map(), replies = []; let fail = true, executions = 0;
   class PersistenceFailure extends Error { constructor(status) { super('WT retry required'); this.status = status; } }
