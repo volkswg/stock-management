@@ -106,7 +106,7 @@ test('real paginated provider feeds Sheets-compatible sync once per identity and
         assert.equal(synced.receiptCount,2);assert.equal(synced.itemCount,2);assert.equal(synced.paymentCount,2);
         const dashboard=await sales.getGoogleSheetsSalesDashboard({googleSheetsService:service,accountIds:['WT_ACCOUNT_A'],fromDate:'2026-01-01',toDate:'2026-01-31'});
         assert.equal(dashboard.report.totals.netSales,80);assert.equal(rows.sales_receipts.length,3);
-        const before=JSON.stringify(rows);pages=[[sale],[{...sale,total_money:101}]];index=0;
+        const before=JSON.stringify(rows),next=receipt('WT_NORMALIZED_CONFLICT',100,2,'SALE','2026-01-02T01:00:00.000Z');pages=[[next],[{...next,total_money:101}]];index=0;
         await assert.rejects(sales.syncLoyverseDailySales({googleSheetsService:service,account,salesDate:'2026-01-02'}),/conflicting versions/);
         assert.equal(JSON.stringify(rows),before);
     }finally{globalThis.fetch=originalFetch;}
