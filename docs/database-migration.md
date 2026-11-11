@@ -909,12 +909,85 @@ safe fixture configuration; never export credential tabs into test artifacts.
 
 #### Disposable staging write-testing plan
 
-**Status: prepared only; no copy created and no acceptance writes executed.**
-The owner authorized this plan, not execution. The implementation baseline is
-merged [PR #60](https://github.com/volkswg/stock-management/pull/60), commit
-`bdfab89e43a814bfcc6dff910eda4cde8aed2e98`. Its read-only tests passed; write,
-provider and capacity acceptance have not. A passing write rehearsal will not
-authorize production activation. Google Sheets remains production's store.
+**Current status: local execution stopped at an application compatibility failure (WT06).**
+The owner subsequently authorized the disposable **local** copy, write harness
+and tests. Hosted write testing and production activation remain unapproved.
+The execution baseline is merged [PR #61](https://github.com/volkswg/stock-management/pull/61),
+commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
+original requirements; a stopped/partial run is not full acceptance.
+Google Sheets remains production's store.
+
+##### Local execution result (2026-11-11)
+
+A fresh PostgreSQL 17 cluster, volume, TLS certificate, passwords and copy UUID
+were created with a 1 GiB memory limit and 1.5 CPUs. The two existing recovery
+containers were preserved. The independently recovered post-audit backup was
+checksum-verified and restored: all **51 tables and 15 metadata sections** matched
+before setup, including **70,777 business records**. Setup changed only the new
+copy's environment UUID and the enumerated runtime-login/membership metadata.
+Two clean campaign databases were prepared; the app used a fresh restricted
+login able to SET `stock_runtime`, with no owner/BYPASSRLS privileges.
+
+`tools/migration/local-write/` supplies a manifest/UUID/loopback allowlist,
+independent socket/fetch denial, deterministic fake LINE/Loyverse/Drive providers,
+private ledgers/fault controls, an offline Sheets-compatible oracle and an actual
+HTTP/SQL/browser campaign. `build-app.cjs` creates a separate credential-free
+build: one Drive-factory override and additional private preload/proxy files;
+443 other source/assets remain byte-identical and 113 client chunks were checked.
+Neither this code nor its write flag is imported by the production app.
+
+| Check | Observed result |
+| --- | --- |
+| Local runtime privileges, wrong target/UUID, untrusted TLS, production guard | Passed; refusal before mutation and restricted role access verified |
+| HTTP entry gates | 69 checks passed, including all 31 ordinary mutation methods and signed LINE entrypoint; hosted Data API/protection not run |
+| WT06 overlapping fake receipt pages | **FAIL**: two pages contain one repeated sale plus one refund; local SQL returns 502 on `sales_receipts_pkey` rather than completing a unique-receipt sync |
+| Failed sync atomicity | All 51 table hashes and 15 metadata sections still match the clean copy baseline; no partial receipt, sync, command, effect or revision committed |
+| Existing Sheets-compatible rules with identical fake pages | Three rows / two distinct receipt identities; synthetic net sales 180 versus the independent unique-receipt control of 80. The underlying overlap defect predates Supabase |
+| Generated-state recovery | A preserved earlier exploratory checkpoint with synthetic writes/commands/effects was backed up and restored to a fresh local database; all 51 tables/15 metadata sections matched in 3.2 seconds. No provider replay |
+| Protected original staging and production configuration | All 51 hosted table hashes and 15 metadata sections match before/after; production environment metadata is unchanged, has no `STOCK_*` overrides, and still defaults to Sheets |
+
+The required integrity stop is enforced: the app is stopped, resources/evidence
+are retained and the second clean copy remains pristine. **Zero complete passing
+functional campaigns** are claimed. The 20-pair concurrency, ten-trial fault and
+restart/browser repetitions, capacity workload and complete WT02–15 variants
+remain BLOCKED/not run after the stop; hosted acceptance is NOT RUN. Exploratory
+orders/images, shipments, expenses, attendance/payroll, movement/stock and
+nonoverlapping sync checks are narrower evidence, not complete family passes.
+Five fixture-development attempts were preserved separately. Corrections matched
+existing signed-auth, attendance, month-selected payroll rate, delivery-month and
+receipt-field contracts; no application rules were changed to make tests pass.
+
+Local verification: 565 existing regression tests and eight harness safety/oracle
+checks pass; lint/typecheck and isolated credential-free production build pass
+with the inherited unused `shipmentRow` lint warning only. CI runs the secret-free
+harness self-tests; it never receives this copy, backup, credentials or business
+records and does not execute this private acceptance campaign. Original
+routes/fixtures/schema/business source and `yarn.lock` remain unchanged.
+
+Private result receipt SHA-256:
+`8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a`.
+Operational execution used harness commit `1eb8769`; subsequent formatting has a
+retained syntax-equivalence proof. Raw requests, screenshots, SQL/provider logs,
+manifest, connection profiles and backups remain private outside Git.
+No hosted write, original recovery-resource mutation, real provider request,
+production data request or storage switch occurred.
+
+Next: separately scope the receipt identity/deduplication/conflict policy, fix it
+with characterization of both storage paths, then rerun both clean campaigns and
+all blocked variants. Do not weaken the SQL identity constraint or mark the
+rollback-only result a successful sync. Hosted provisioning/acceptance and
+production activation still require separate authorization.
+
+To review the harness without private data, run
+`node --test tools/migration/local-write/guard.test.cjs tools/migration/local-write/oracle.test.cjs`.
+For a future explicitly authorized local rerun, restore/reseal fresh copy baselines
+first, build a **new** private app destination with `build-app.cjs`, pin its
+attestation/runtime/manifest hashes, start it with only the new copy environment
+and its `__local-write-harness/preload.cjs`, then invoke `campaign.cjs` with the
+private manifest directory and exact approved campaign database. The current
+execution layout uses sibling `app-v3`; review that path before reuse. The runner
+never provisions or defaults to a hosted target. Keep failed attempts and inspect
+private per-case results; unsupported/unimplemented variants remain BLOCKED.
 
 ##### Scope and target selection
 

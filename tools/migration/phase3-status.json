@@ -1,8 +1,8 @@
 {
-  "version": 6,
-  "scope": "Disposable staging write-testing plan prepared, not executed; read-only acceptance and recovery verified; production remains on Google Sheets",
+  "version": 7,
+  "scope": "Disposable local copy and guarded write harness prepared; acceptance stopped at overlapping-receipt compatibility failure; production remains Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T05:56:50.034475+00:00",
+  "lastDataVerificationAtUtc": "2026-11-11T08:34:04.387052+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
@@ -16,7 +16,8 @@
     "postChangeRestoreReceiptSha256": "ad7e1053c94f42ddb3d623241f0d5514e0b58331c1a0b94b05579b7f2dd849ec",
     "privateStagingReadVerificationSha256": "1c2f398a713de5c5cb066f8d25f1872d920ed50f64a8ab2a7eec708d86b43fd8",
     "privateStagingApiReceiptSha256": "ae8cf12ad704fd1548826cdb99c541a8ea8aea99d731cdc6d75a79199d5aec56",
-    "privateStagingBrowserReceiptSha256": "c5e1db1c162977d45f470c81a47688e8a55fc3132e0c09f36151ea2142d7aa71"
+    "privateStagingBrowserReceiptSha256": "c5e1db1c162977d45f470c81a47688e8a55fc3132e0c09f36151ea2142d7aa71",
+    "privateLocalWriteResultSha256": "8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a"
   },
   "target": {
     "projectId": "orjnazrothkdgmzlsuto",
@@ -91,8 +92,9 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Review the disposable-copy write-testing plan, then separately approve the execution manifest, isolated destinations, resource/cost limits and harness implementation; production continues on Google Sheets",
+  "nextStep": "Resolve overlapping receipt identities with an explicit compatible deduplication/conflict policy, then rerun both clean local campaigns and all blocked variants; hosted write testing and production cutover remain unapproved",
   "cutoverBlockers": [
+    "WT06 local overlap sync fails: SQL rejects duplicate receipt identity; existing Sheets-compatible rules double-count the sale. Remaining mandatory clean campaigns, retries, fault and capacity cases are blocked.",
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
     "Read-only hosted API/browser acceptance passed; write/provider workflows, production authorization/security and realistic capacity acceptance remain pending",
     "Reconfirm all writers paused and source freshness; review changes since saved export with approved refresh/delta handling",
@@ -133,7 +135,7 @@
     "credentialsResponsesAndScreenshotsPublished": false
   },
   "writeTestingPlan": {
-    "state": "prepared-not-executed",
+    "state": "local-execution-failed-stopped",
     "document": "docs/database-migration.md#disposable-staging-write-testing-plan",
     "planningBaselineCommit": "bdfab89e43a814bfcc6dff910eda4cde8aed2e98",
     "implementationPullRequest": 60,
@@ -156,16 +158,16 @@
       "WT14",
       "WT15"
     ],
-    "caseResult": "NOT RUN",
+    "caseResult": "FAIL-STOPPED",
     "localFirstSeparateCluster": true,
     "hostedPassRequiredForHostedAcceptance": true,
-    "destinationProvisioned": false,
-    "destinationIdentityApproved": false,
+    "destinationProvisioned": true,
+    "destinationIdentityApproved": true,
     "hostedResourceCostApproved": false,
-    "writeHarnessImplemented": false,
-    "independentProviderIsolationImplemented": false,
-    "executionApproved": false,
-    "acceptanceWritesStarted": false,
+    "writeHarnessImplemented": true,
+    "independentProviderIsolationImplemented": true,
+    "executionApproved": true,
+    "acceptanceWritesStarted": true,
     "existingDataChangedByPlan": false,
     "productionCutoverPerformed": false,
     "productionStorage": "google-sheets",
@@ -190,6 +192,120 @@
       "recoveryRtoMinutes": 15,
       "checkpointRpoAcknowledgedOperationsLost": 0
     },
-    "thresholdsRequireExecutionManifestAcceptance": true
+    "thresholdsRequireExecutionManifestAcceptance": true,
+    "planningOnlyHistoricalPr": 61,
+    "executionBaselineCommit": "dff802bfddf5c522c013262ba8e56ba9532a8221",
+    "executedHarnessCommit": "1eb8769",
+    "writeHarnessFullyAccepted": false,
+    "executionApprovalScope": "local-only",
+    "hostedExecutionApproved": false,
+    "hostedDataChangedByThisRun": false,
+    "mandatoryCasesCertified": false,
+    "localFunctionalCampaignsCompleted": 0,
+    "privateResultSha256": "8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a",
+    "actualFailure": {
+      "case": "WT06",
+      "provider": "fake-loyverse",
+      "pages": 2,
+      "expectedDistinctReceipts": 2,
+      "receivedReceiptRows": 3,
+      "sqlFailureConstraint": "sales_receipts_pkey",
+      "actualHttpStatus": 502,
+      "sqlRollbackAll51TablesAnd15MetadataMatchBaseline": true,
+      "baselineOfflineOracleExpectedNetSales": 80,
+      "baselineOfflineOracleActualNetSales": 180,
+      "baselineDefectAlsoPresentInExistingRules": true,
+      "applicationBusinessLogicFixed": false
+    },
+    "results": [
+      {
+        "id": "WT00",
+        "status": "PASS",
+        "scope": "Local identity/runtime role/TLS refusal/production guard only"
+      },
+      {
+        "id": "WT01",
+        "status": "BLOCKED",
+        "localHttpGateChecksPassed": 69,
+        "reason": "Hosted Data API/protection portion not run; no hosted destination authorized"
+      },
+      {
+        "id": "WT02",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT03",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT04",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT05",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT06",
+        "status": "FAIL",
+        "reason": "Overlapping fake pages rejected by SQL unique identity; unchanged Sheets-compatible rules instead duplicate the sale",
+        "actualHttpStatus": 502,
+        "partialWrites": 0
+      },
+      {
+        "id": "WT07",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT08",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT09",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT10",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT11",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT12",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT13",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT14",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      },
+      {
+        "id": "WT15",
+        "status": "BLOCKED",
+        "reason": "Complete clean campaign not executed after the required stop at WT06"
+      }
+    ],
+    "generatedCheckpointRestoreVerified": true,
+    "generatedCheckpointRestoreTables": 51,
+    "generatedCheckpointRestoreMetadataSections": 15,
+    "protectedHostedSectionsUnchanged": 66,
+    "applicationStopped": true
   }
 }

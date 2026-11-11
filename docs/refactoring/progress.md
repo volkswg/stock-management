@@ -1,31 +1,53 @@
 # Refactoring progress and evidence
 
-## Disposable staging write-testing — plan prepared, not executed (2026-11-11)
+## Disposable local write rehearsal — stopped at WT06 (2026-11-11)
 
-The owner requested a plan only, preserving existing data and production Sheets.
-The [canonical write-testing plan](../database-migration.md#disposable-staging-write-testing-plan)
-defines a new isolated local cluster followed by a separately approved hosted
-Supabase project/preview. It forbids using the original project, its credentials,
-existing read-only preview or shared recovery resources as mutation targets.
-No destination has been provisioned or approved, no restore or new role grant
-has run, and no planned acceptance write/provider action has been executed.
+The owner authorized a separate local copy and write harness after merged
+[PR #61](https://github.com/volkswg/stock-management/pull/61), baseline
+`dff802bfddf5c522c013262ba8e56ba9532a8221`. A new bounded PostgreSQL 17 cluster,
+volume, TLS identity, UUID and restricted runtime login were prepared without
+reusing the two existing recovery containers. The independently recovered
+post-audit backup matched all 51 tables/15 metadata sections and 70,777 business
+records. Only the copy identity and enumerated login metadata changed in setup.
+Two clean databases were created. The real Next app uses test-only provider
+composition plus independent outbound denial; production source is unchanged.
 
-Merged PR #60 (`bdfab89e43a814bfcc6dff910eda4cde8aed2e98`) is the planning
-baseline. Its merge/deployment was separately verified earlier in this owner
-session; production retained Google Sheets. The read-only evidence below was
-captured before that merge and does not describe a new check during planning.
-Existing completed backup/read-acceptance results remain historical evidence.
+**Acceptance failed at WT06 and further writes stopped.** Overlapping fake pages
+repeat one receipt: SQL rejects the duplicate identity (`sales_receipts_pkey`,
+HTTP 502) and rolls back all business rows, command/effect state and revision.
+The unchanged in-memory Sheets-compatible path instead stores three receipt rows
+for two identities and reports synthetic net sales 180 instead of 80. This is an
+existing overlap-handling defect and a migration compatibility blocker, not a
+successful write rehearsal. No business-rule fix or weakened constraint is in
+this PR. The [canonical result](../database-migration.md#local-execution-result-2026-11-11)
+records the scope and follow-up.
 
-The plan specifies baseline restore/fingerprints, a fresh copy UUID/login,
-independent provider isolation, a real-app write harness, 16 mandatory case
-families, exact comparison rules, retry/concurrency/failure tests, bounded
-performance/recovery thresholds, protected-state verification, stop/reset
-rules and named sign-off. All test results remain NOT RUN. The current
-`STOCK_STAGING_READ_ONLY` flag also controls provider fetch denial; turning it
-off alone cannot safely enable this campaign. A reviewed independent deny
-control and fake LINE/Loyverse/Drive composition are prerequisites, not completed
-features. Hosted target/cost and the execution manifest must be approved before
-any setup or test write. Production activation remains a separate decision.
+Local role/TLS/production refusal gates and 69 HTTP entry checks pass. Earlier
+exploratory copies exercised orders/images, shipments, expenses, HR/payroll,
+movements/stock and nonoverlapping sync/replay. Five fixture-development attempts
+are preserved and are not counted as clean passing campaigns. The stopped run
+has zero complete passing campaigns; full concurrency, fault/restart/browser
+repetitions, capacity and remaining mandatory variants are BLOCKED. The second
+clean copy is pristine; the task app is stopped and evidence/resources retained.
+
+A preserved generated checkpoint was backed up and independently restored into
+a fresh local database: all 51 tables/15 metadata sections match (3.2 seconds),
+including command/effect state, with no provider replay. Hosted staging's full
+51-table/15-metadata before/after comparison is exact. Production environment
+metadata is unchanged with no `STOCK_*` overrides; Google Sheets remains active.
+No hosted write, existing recovery-resource mutation, real provider request,
+production data request or cutover occurred. Hosted write acceptance is NOT RUN.
+
+565 regression tests and eight harness self-tests pass; lint/typecheck and
+credential-free production build pass, with only the inherited shipmentRow
+warning. Existing routes, fixtures, schema, application rules and lockfile remain
+unchanged. The secret-free CI job now also runs the harness self-tests, not the
+private real-data rehearsal. Operational harness commit `1eb8769` and private
+receipt `8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a`
+pin the evidence; subsequent formatting has a retained syntax-equivalence proof.
+Raw data, credentials, manifest, backup, provider logs and screenshots are not
+published. Receipt-policy remediation, two clean reruns and all outstanding
+acceptance gates precede any separately approved hosted test or production switch.
 
 ## Private Supabase app — read-only acceptance (2026-11-11)
 
