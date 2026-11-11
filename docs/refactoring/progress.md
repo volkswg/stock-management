@@ -1,14 +1,50 @@
 # Refactoring progress and evidence
 
-## Current merged state and single-workbook account configuration
+## Database migration — current operational status (2026-11-11)
 
-Verified main is `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), with the external/features retirements and PR43 account source complete. The tree matches the previously verified PR44 head with 550 passing tests and successful lint/typecheck/isolated build.
+Repository baseline: merged [PR #55](https://github.com/volkswg/stock-management/pull/55),
+`65ed6f65256e59f7f6fce44bcd4fb88a819ae95c`. The latest saved hosted
+reconciliation completed on **2026-11-11 at 08:46 Bangkok / 01:46 UTC**.
+This is a report of retained private execution evidence, not a fresh database or
+Google Sheets inspection performed by this documentation update.
+
+| Workstream | Latest verified state |
+| --- | --- |
+| Hosted schema | Deployed to the isolated staging project; existing schemas and security guards retained. |
+| Latest source and import | Latest approved original-Sheet export generated 23 business-table CSVs; owner manually imported **70,777 records** into `stock_operational`. This path bypassed the hosted archive/import-batch step. |
+| Record reconciliation | All 23 operational business tables reconcile against that saved source after one approved product-name encoding correction; one row updated and one audit row added. Private row IDs and values remain outside Git. |
+| Application calculations | **66 offline application comparisons passed** against saved source/target artifacts. This does not certify live hosted API/browser/provider behavior. |
+| Sequences | No alignment required; no explicit sequence writes performed. |
+| Recovery | Earlier independently verified schema backup and source archive retained. **Post-import backup/restore verification is incomplete and paused at the owner's request.** The full recovery-fingerprint preflight hit its existing 150-second guard; no post-import capture was completed. |
+| Application activation | **Not ready; no cutover performed.** Production still uses Google Sheets. No production storage setting was switched by these operations. |
+| Cleanup | Superseded export/build/import artifacts retired; latest source/CSVs, verification/audit evidence, credentials/TLS and recovery dependencies retained. Only the explicitly approved failed Docker rehearsal and its dedicated volume were deleted; two recovery containers and shared TLS remain. |
+
+Next work is to inspect the application integration and prepare a scoped testing
+and cutover plan. Recovery remains deferred, not waived or passed. Before any
+activation, resolve post-import recovery, hosted runtime/security/performance and
+business acceptance, reconfirm all writer freezes, and review changes since the
+saved export. Later Sheet activity is not covered by this reconciliation; any
+refresh or delta handling requires a reviewed procedure and approval. Do not
+replay schema migrations or regenerate/retry retired import SQL as a next step.
+
+The [machine-readable status](../../tools/migration/phase3-status.json) records
+these aggregate outcomes and the private result receipt's SHA-256. The owner
+retains detailed records, workbook identity, mappings and artifacts privately;
+none are published here. Credentials in a previous Mac or Cloud session are not
+assumed available to a future operator. The
+[execution runbook](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
+remains the source of acceptance and separately approved operational steps.
+
+## Historical architecture snapshot and single-workbook account configuration
+
+At this architecture milestone, verified main was `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), with the external/features retirements and PR43 account source complete. The tree matches the previously verified PR44 head with 550 passing tests and successful lint/typecheck/isolated build.
 
 Branch `fix/loyverse-single-workbook` makes sheet mode read `loyverse_accounts` only from the existing GOOGLE_SHEETS_SPREADSHEET_ID. The dedicated account-workbook variable/AppConfig field and separate-workbook restriction are removed. No workbook/JSON fallback is added; env-mode rollback, six-column validation, ordering and server-only credential handling remain. Historical source inverses preserve old fixture bytes and assertions. See [verification](verification.md#loyverse-single-workbook-support) and [owner instructions](../../README.md#loyverse-configuration), including workbook-wide token visibility. No production migration, ACL/Vercel change or deployment is performed.
 
-## Migration assertion performance correction (prepared)
+## Migration assertion performance correction (merged PR #55)
 
-The focused correction based on merged PR54 changes only import-plan row lookup:
+Merged [PR #55](https://github.com/volkswg/stock-management/pull/55), based on
+merged PR54, changes only import-plan row lookup:
 an equality predicate on the validated non-null primary key precedes all existing
 null-safe field comparisons. It reuses existing indexes; source values, snapshot
 encoding, database schemas, roles, permissions, recovery fingerprints and timeout
@@ -363,8 +399,9 @@ monitoring, capacity and recovery sign-off remain separate owner-approved gates.
 Verified main `e97a1c9ad9ca9402de33a9796933fece38a92eeb`, with PR48 and PR49
 merged. Branch `migration/phase3-validation`. This milestone completes independent
 operator preparation and synthetic validation; **no real-data migration occurred**.
-The [status record](../../tools/migration/phase3-status.json) lists all 23 real
-source/archive/operational counts as unknown, with explicit blocked actions.
+The [historical preparation status](https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json)
+listed all 23 real source/archive/operational counts as unknown, with explicit
+blocked actions. See the current operational status above for subsequent execution.
 
 Audit fixed a migration blocker: parsing historical JSONB numbers via binary
 float could round payroll snapshots. Decimal-aware canonical JSON now preserves

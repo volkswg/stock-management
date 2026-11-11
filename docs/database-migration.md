@@ -6,8 +6,10 @@ business calculations and provider ownership remain unchanged. `stock_migration`
 is an unexposed staging schema. Only its database owner
 can import; there are no browser, anon, authenticated or service-role grants or RLS
 policies. Never expose this schema through the Data API. Application authorization
-for production remains a separate release gate. Phase 3 execution below is a plan,
-not authorization to access records, apply hosted migrations or cut over.
+for production remains a separate release gate. The [progress ledger](refactoring/progress.md#database-migration--current-operational-status-2026-11-11)
+records completed isolated real-data work and outstanding recovery/cutover gates.
+The Phase 3 runbook below is not authorization to access records, apply hosted
+migrations or cut over.
 
 ## Source audit and schema
 
@@ -480,27 +482,36 @@ Never paste credentials or real records into chat, PRs, logs or CI artifacts.
 
 ### Current execution record and reproducible preparation
 
-Baseline main is `e97a1c9ad9ca9402de33a9796933fece38a92eeb`, after merged PR48
-and PR49. The [machine-readable status](../tools/migration/phase3-status.json)
-records observations and actions **not executed**, with all 23 real-data row
-counts explicitly unknown. No real export/import/reconciliation is claimed.
+As of 2026-11-11, hosted schema deployment and the approved manual CSV import
+are complete in isolated staging. All 23 business tables / 70,777 records
+reconcile against the saved latest export after one approved name correction;
+66 offline application comparisons passed and no sequence alignment was needed.
+The manual CSV route bypassed archive/import-batch loading; do not describe it
+as completion of the standard archive-promotion path below. The application
+still uses Google Sheets; runtime activation and production cutover have not
+occurred. Post-import backup/restore verification is incomplete and paused by
+the owner after the full recovery-fingerprint preflight reached its existing
+timeout guard. An older verified backup does not certify this imported state.
 
-Metadata-only inspection on 2026-11-09 found stock-management
-`orjnazrothkdgmzlsuto`, Tokyo/ap-northeast-1, PostgreSQL 17.11, 10,917,555 bytes,
-max_connections=60, no public tables or migration schemas, no stock_runtime role,
-an empty migration ledger and no security advisories. This is a staging candidate,
-not proof of production isolation. Data API exposure, billing plan, pooler limits,
-network restrictions and off-site backups need owner verification. The plugin
-role bypasses RLS and must never be the application login. Production remains
-Google Sheets; the runtime production guard is unchanged. No hosted write ran.
+Use the [current progress ledger](refactoring/progress.md#database-migration--current-operational-status-2026-11-11)
+and [machine-readable status](../tools/migration/phase3-status.json) for aggregate
+execution results, evidence provenance and remaining gates. The checklists below
+remain acceptance requirements; a successful import or offline comparison does
+not check off hosted runtime, recovery, security, capacity or cutover gates.
+Reconfirm writer freeze and source freshness before any later activation.
 
-Cloud readiness is separate from plugin access. This executor reports Google
-application configuration, but no PostgreSQL URL/service/password binding,
-Supabase CLI token or read-only export token. Supabase destinations are absent
-from its configured network policy. Google write-capable configuration was not
-read or used. The owner must provision scoped credentials through private
-environment settings and approve network endpoints; never paste them into chat
-or presume plugin OAuth credentials exist in Cloud.
+The [2026-11-09 preparation snapshot](https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json)
+is historical: it predates schema deployment and real-data execution. Its missing
+Cloud credentials/network and unknown row counts must not be read as current
+Mac status. This documentation update makes no live provider requests and does
+not inventory credentials. A future operator must independently verify scoped
+access and approved network/TLS; never assume Mac, plugin and Cloud credentials
+are shared or available. Keep workbook identifiers and private execution
+artifacts out of the repository, PRs and CI.
+
+The generic commands below are for separately approved preparation. Deployment
+is already complete in the current target: do not rerun its migrations, replay
+retired import plans or resume paused backup work as documentation maintenance.
 
 Generate a deployment manifest offline, without credentials/network:
 

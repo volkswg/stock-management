@@ -47,19 +47,24 @@ The immutable importer cannot merge changed/deleted rows; final delta review pla
 a fresh approved target. Production authentication/monitoring, production target
 enablement and reverse migration remain unimplemented release prerequisites.
 
-Actual frozen-source profiling, hosted staging promotion/reconciliation, realistic
-capacity/latency, hosted security/recovery acceptance and production cutover
-remain gated. Synthetic tests do not authorize production enablement. No production
-configuration, hosted data, Drive objects or Sheets records are changed by this PR.
+The approved real-data execution has advanced beyond preparation: isolated
+schema deployment, latest-source manual CSV import and record reconciliation
+are complete. The manual import bypassed the archive/import-batch step; it is
+not an archive-promotion result. Offline application comparisons passed, while
+hosted runtime/business/security/performance acceptance remains separate.
+See the [current progress ledger](progress.md#database-migration--current-operational-status-2026-11-11)
+and [machine-readable status](../../tools/migration/phase3-status.json) for the
+verified counts, evidence timestamp and limitations.
 
-Phase 3 preparation is implemented in operator tooling: precise JSON-number
-preservation, source-batch/TLS/connection guards, private full-table acceptance,
-existing-application formatted-value parity, exact-target deployment planning and
-consistent backup/restore evidence. Current hosted checks are metadata-only;
-all real-data row counts and reconciliation results remain unknown. The next
-authorized execution must identify the frozen source, approve the exact Tokyo
-target/DDL/import/restore scope and privately provision Cloud credentials/network.
-See the runbook's execution record; there is no production cutover in this work.
+Post-import recovery verification is incomplete and paused by the owner; older
+verified backups and the retained local recovery setup remain available. The
+application still uses Google Sheets. Next is a scoped application-integration
+inspection and testing/cutover plan, with source freshness and all writer freezes
+reconfirmed before activation. Recovery remains an outstanding release gate.
+No schema replay, new data access, hosted writes, production setting change or
+cutover is authorized by this documentation update. Future Mac/Cloud operators
+must verify their own scoped credentials and network/TLS rather than assume
+access from an earlier session.
 
 ## Deferred product decisions — not refactoring leftovers
 
