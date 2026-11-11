@@ -2,11 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync,readdirSync} from 'node:fs';
 import {postgresHistory,postgresNewFiles,postgresHash,stagingSourceHashes} from './helpers/postgres-history.mjs';
+import {restoreUploadCleanupSource,uploadCleanupHistory} from './helpers/upload-cleanup-history.mjs';
 
 test('Phase 2 history keeps every original route handler body byte-identical behind the actual wrapper',()=>{
  for(const [file,entry] of Object.entries(postgresHistory.edits)){
   assert.equal(postgresHash(entry.before),entry.beforeHash,file);
-  const current=readFileSync(file,'utf8');assert.equal(postgresHash(current),entry.afterHash,file);
+  const rawCurrent=readFileSync(file,'utf8');
+  if(uploadCleanupHistory.edits[file])assert.equal(postgresHash(rawCurrent),uploadCleanupHistory.edits[file].afterHash,file);
+  const current=restoreUploadCleanupSource(file,rawCurrent);assert.equal(postgresHash(current),entry.afterHash,file);
   if(file.startsWith('src/app/api/')){
    const methods=[...entry.before.matchAll(/export async function (GET|POST|PUT|PATCH|DELETE)\(/g)].map(m=>m[1]);
    let expected=entry.before;
@@ -19,7 +22,7 @@ test('Phase 2 history keeps every original route handler body byte-identical beh
 
 test('all new PostgreSQL source paths are explicitly inventoried and server-only; all feature applications and rules remain outside the change',()=>{
  const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||Object.hasOwn(stagingSourceHashes,f))&&f.endsWith('.ts')).sort(),postgresNewFiles.toSorted());
+ assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),postgresNewFiles.toSorted());
  for(const file of postgresNewFiles){
   const source=readFileSync(file,'utf8');
   // Preserve the immutable Phase 2 witness while allowing only this reviewed
@@ -55,7 +58,7 @@ test('all new PostgreSQL source paths are explicitly inventoried and server-only
     .replace('  if (result.rowCount !== 1) throw new PersistenceFailure();\n','').replace('stock-v2-${result.rows[0].revision}','stock-${result.rows[0].revision}');
   }
   if(file==='src/infrastructure/persistence/postgres/commands.ts') historical=source.replace('    const found =', `    await client.query("SELECT set_config('stock.command_key',$1,true)",[key]);\n    const found =`);
-  assert.equal(postgresHash(historical),stagingSourceHashes[file]??postgresHistory.newFiles[file],file);
+  assert.equal(postgresHash(historical),uploadCleanupHistory.newFiles[file]??stagingSourceHashes[file]??postgresHistory.newFiles[file],file);
   assert.match(source,/import "server-only";/,file);
   if(file.startsWith('src/infrastructure/'))assert.doesNotMatch(source,/from ["']@\/modules\//,file);
  }

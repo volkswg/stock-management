@@ -1,3 +1,4 @@
+import { withStagingUploadCleanup } from "@/composition/staging-upload-cleanup";
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -53,30 +54,32 @@ async function POSTOperation(
       );
     }
 
-    const driveFile = await googleDriveService.uploadImage({
-      fileName: createImageFileName(orderId, upload.image, upload.imageType),
-      contentType: upload.image.type,
-      bytes: Buffer.from(await upload.image.arrayBuffer()),
-    });
-    const record =
-      upload.imageType === "bill"
-        ? await createOrderBill({
-            googleSheetsService,
-            orderId,
-            imageUrl: driveFile.webViewLink,
-            createdBy: "web",
-          })
-        : await createOrderItem({
-            googleSheetsService,
-            orderId,
-            imageUrl: driveFile.webViewLink,
-            createdBy: "web",
-          });
+    return await withStagingUploadCleanup(googleDriveService, async (googleDriveService) => {
+      const driveFile = await googleDriveService.uploadImage({
+        fileName: createImageFileName(orderId, upload.image, upload.imageType),
+        contentType: upload.image.type,
+        bytes: Buffer.from(await upload.image.arrayBuffer()),
+      });
+      const record =
+        upload.imageType === "bill"
+          ? await createOrderBill({
+              googleSheetsService,
+              orderId,
+              imageUrl: driveFile.webViewLink,
+              createdBy: "web",
+            })
+          : await createOrderItem({
+              googleSheetsService,
+              orderId,
+              imageUrl: driveFile.webViewLink,
+              createdBy: "web",
+            });
 
-    return NextResponse.json(
-      { imageType: upload.imageType, record },
-      { status: 201 },
-    );
+      return NextResponse.json(
+        { imageType: upload.imageType, record },
+        { status: 201 },
+      );
+    });
   } catch (error) {
     console.error("Failed to upload order image", {
       error: error instanceof Error ? error.message : String(error),

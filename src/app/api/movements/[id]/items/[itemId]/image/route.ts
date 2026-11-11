@@ -1,3 +1,4 @@
+import { withStagingUploadCleanup } from "@/composition/staging-upload-cleanup";
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -46,42 +47,44 @@ async function PATCHOperation(
   }
 
   try {
-    const bytes = Buffer.from(await request.arrayBuffer());
-    if (bytes.length === 0) {
-      return NextResponse.json(
-        { error: "Image file is required." },
-        { status: 400 },
-      );
-    }
-    if (bytes.length > MAX_IMAGE_SIZE_BYTES) {
-      return NextResponse.json(
-        { error: "Image must be 20 MB or smaller." },
-        { status: 413 },
-      );
-    }
-    const uploaded = await googleDriveService.uploadImage({
-      bytes,
-      contentType,
-      fileName: movementImageName(movementMasterId, movementId, contentType),
-    });
-    const records = await updateMovementImage({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(config),
-      imageUrl: uploaded.webViewLink,
-      movementId,
-      movementMasterId,
-    });
-    if (!records) {
-      await googleDriveService.deleteFile(uploaded.id);
-      return NextResponse.json(
-        { error: "Movement item was not found." },
-        { status: 404 },
-      );
-    }
-    return NextResponse.json({
-      record: records.find(
-        (record) => record.movementId.toUpperCase() === movementId.toUpperCase(),
-      ),
-      records,
+    return await withStagingUploadCleanup(googleDriveService, async (googleDriveService) => {
+      const bytes = Buffer.from(await request.arrayBuffer());
+      if (bytes.length === 0) {
+        return NextResponse.json(
+          { error: "Image file is required." },
+          { status: 400 },
+        );
+      }
+      if (bytes.length > MAX_IMAGE_SIZE_BYTES) {
+        return NextResponse.json(
+          { error: "Image must be 20 MB or smaller." },
+          { status: 413 },
+        );
+      }
+      const uploaded = await googleDriveService.uploadImage({
+        bytes,
+        contentType,
+        fileName: movementImageName(movementMasterId, movementId, contentType),
+      });
+      const records = await updateMovementImage({
+        googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+        imageUrl: uploaded.webViewLink,
+        movementId,
+        movementMasterId,
+      });
+      if (!records) {
+        await googleDriveService.deleteFile(uploaded.id);
+        return NextResponse.json(
+          { error: "Movement item was not found." },
+          { status: 404 },
+        );
+      }
+      return NextResponse.json({
+        record: records.find(
+          (record) => record.movementId.toUpperCase() === movementId.toUpperCase(),
+        ),
+        records,
+      });
     });
   } catch (error) {
     console.error("Failed to update movement image", {
