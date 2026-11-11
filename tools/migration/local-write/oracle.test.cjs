@@ -89,3 +89,25 @@ test('mutation coverage uses pinned exported paths and gives static endpoints pr
     assert.equal(state.exportedMethods.filter(x => x.route !== '/api/line/webhook').length, 31);
     assert.throws(() => Campaign.prototype.routeKey.call(state, 'POST', '/api/unknown'));
 });
+test('real paginated provider feeds Sheets-compatible sync once per identity and rejects conflicts before any writes', async () => {
+    const {service,rows}=memoryService(),{receipt}=require('./extra-cases.cjs');
+    const {LoyverseService}=require('../../../src/infrastructure/external/loyverse/LoyverseService.ts'),sales=require('../../../src/modules/sales/server.ts');
+    const sale=receipt('WT_NORMALIZED_SALE',100,2),refund=receipt('WT_NORMALIZED_REFUND',20,1,'REFUND');
+    let pages=[[sale],[sale,refund]],index=0;const originalFetch=globalThis.fetch;
+    globalThis.fetch=async(input,init)=>{
+        const url=new URL(input);
+        assert.equal(url.origin,'https://api.loyverse.com');assert.equal(url.pathname,'/v1.0/receipts');assert.equal(init.headers.Authorization,'Bearer WT_ONLY');
+        const receipts=pages[index++];assert.ok(receipts,'Unexpected provider retry');
+        return Response.json({receipts,cursor:index<pages.length?String(index):null});
+    };
+    try {
+        const account={id:'WT_ACCOUNT_A',shopName:'WT Shop A',service:new LoyverseService({accessToken:'WT_ONLY'})};
+        const synced=await sales.syncLoyverseDailySales({googleSheetsService:service,account,salesDate:'2026-01-01'});
+        assert.equal(synced.receiptCount,2);assert.equal(synced.itemCount,2);assert.equal(synced.paymentCount,2);
+        const dashboard=await sales.getGoogleSheetsSalesDashboard({googleSheetsService:service,accountIds:['WT_ACCOUNT_A'],fromDate:'2026-01-01',toDate:'2026-01-31'});
+        assert.equal(dashboard.report.totals.netSales,80);assert.equal(rows.sales_receipts.length,3);
+        const before=JSON.stringify(rows);pages=[[sale],[{...sale,total_money:101}]];index=0;
+        await assert.rejects(sales.syncLoyverseDailySales({googleSheetsService:service,account,salesDate:'2026-01-02'}),/conflicting versions/);
+        assert.equal(JSON.stringify(rows),before);
+    }finally{globalThis.fetch=originalFetch;}
+});
