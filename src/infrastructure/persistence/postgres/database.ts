@@ -42,12 +42,15 @@ export function currentTransaction(): PoolClient {
   if (!context?.open) throw new PersistenceFailure(503, "PostgreSQL persistence requires an explicit unit of work.");
   return context.safe;
 }
+export function stagingReadOnly(): boolean { return process.env.STOCK_STAGING_READ_ONLY === "true"; }
 export function requireMutation(): PoolClient {
+  if (stagingReadOnly()) throw new PersistenceFailure(405,"Staging is read-only.");
   const context = active.getStore();
   if (!context?.open || !context.mutation) throw new PersistenceFailure(503, "A read-only request cannot mutate persistence.");
   return context.safe;
 }
 export async function transaction<T>(mutation: boolean, operation: () => Promise<T>): Promise<T> {
+  if (mutation && stagingReadOnly()) throw new PersistenceFailure(405,"Staging is read-only.");
   const previous=active.getStore();
   if (previous) {
     if (!previous.open || (mutation && !previous.mutation)) throw new PersistenceFailure(503, "A read-only unit of work cannot be upgraded to a mutation.");
@@ -68,7 +71,7 @@ export async function transaction<T>(mutation: boolean, operation: () => Promise
     await client.query("SET LOCAL idle_in_transaction_session_timeout = '60s'");
     const role = await client.query("SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user");
     if (role.rows[0]?.rolsuper || role.rows[0]?.rolbypassrls) throw new PersistenceFailure(503, "Use a nonprivileged runtime login.");
-    await client.query("SET LOCAL ROLE stock_runtime");
+    if (!stagingReadOnly()) await client.query("SET LOCAL ROLE stock_runtime");
     const guard=await client.query("SELECT isolation_id::text,purpose FROM stock_operational.environment WHERE singleton");
     if(guard.rowCount !== 1 || guard.rows[0].isolation_id !== stagingSettings().targetId || guard.rows[0].purpose !== "isolated-staging") throw new PersistenceFailure(503,"The database does not match the approved isolated staging target.");
     await client.query(mutation ? "SELECT pg_advisory_xact_lock(835107242)" : "SELECT pg_advisory_xact_lock_shared(835107242)");

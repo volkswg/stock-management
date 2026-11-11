@@ -1,7 +1,7 @@
 import { executeCommand, hashIntent } from "@/infrastructure/persistence/postgres/commands";
 import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
-import { currentTransaction, storageMode, stagingSettings, transaction, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
+import { currentTransaction, storageMode, stagingSettings, transaction, stagingReadOnly, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
 
 type StoredResponse = { status: number; body: string; headers: [string,string][] };
 function equal(a: string, b: string) { const left = Buffer.from(a), right = Buffer.from(b); return left.length === right.length && timingSafeEqual(left,right); }
@@ -29,6 +29,10 @@ export function withPersistence<Args extends unknown[], Result extends Response>
       if (storageMode() === "google-sheets") return handler(...args);
       const request = args[0] as Request;
       if (!(request instanceof Request)) throw new PersistenceFailure(503,"A staging request context is required.");
+      if (stagingReadOnly() && !["GET","HEAD"].includes(request.method.toUpperCase())) {
+        stagingSettings(); authorizeStaging(request);
+        return Response.json({error:"Staging is read-only."},{status:405,headers:{Allow:"GET, HEAD"}}) as Result;
+      }
       // Only the signature-verifying LINE entrypoint may opt into this boundary.
       // A caller-controlled URL must never exempt an ordinary handler from auth.
       const isLine = options.lineWebhook && new URL(request.url).pathname === "/api/line/webhook";

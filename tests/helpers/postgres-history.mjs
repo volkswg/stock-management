@@ -4,7 +4,8 @@ import {relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 export const postgresHistory=JSON.parse(readFileSync('tests/fixtures/postgres-transition-before.json','utf8'));
-export const postgresNewFiles=Object.freeze(Object.keys(postgresHistory.newFiles));
+export const stagingSourceHashes=Object.freeze({"src/instrumentation.ts": "977e81fd13fb1d977c1b438fc767364ff7b97037c45d4cc9d035e88a31f5bd7a", "src/infrastructure/runtime/staging-read-only.ts": "05a56e33ecb52c6be045cbba48d33b4f2736435599dfecf5dbf238b8a2540e0a"});
+export const postgresNewFiles=Object.freeze([...Object.keys(postgresHistory.newFiles),...Object.keys(stagingSourceHashes)]);
 export const postgresHash=value=>createHash('sha256').update(value).digest('hex');
 export function restorePostgresSource(file,source) {
  const name=typeof file==='string'?file: file instanceof URL?relative(process.cwd(),fileURLToPath(file)):undefined;
