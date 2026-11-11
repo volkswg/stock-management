@@ -77,5 +77,33 @@ class UploadCampaign extends CompletionCampaign {
     }
     async WT_UPLOAD_BOUNDARIES() { await this.uploadBoundaries(); }
     async WT_UPLOAD_SQL_ROLLBACK() { await this.uploadSqlRollback(); }
+    async WT_UPLOAD_FINALIZE_ROLLBACK() {
+        const movement = this.context.movement.masterId, url = '/api/movements/' + movement + '/items/' + movement + '_ITEM/image';
+        const before = await this.seal(), revision = await this.revision(), start = this.ledger().length, key = this.key('upload-finalize-rollback');
+        this.control({ sqlBefore: { commandKey: key, match: "UPDATE stock_operational.commands SET state='complete'", remaining: 1 } });
+        try { await this.api(url, { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: 503, _probe: true }); }
+        finally { this.control({}); }
+        assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
+        assert.equal((await this.sql('SELECT count(*)::int AS n FROM stock_operational.commands WHERE key=$1', [key]))[0].n, 0);
+        const events = this.ledger().slice(start), uploads = new Set(events.filter(e => e.provider === 'drive' && e.operation === 'upload').map(e => e.id));
+        assert.equal(events.filter(e => e.kind === 'injected-fault' && e.commandKey === key).length, 1);
+        const graph = classifyUploads(events, (await this.fileReferences()).filter(id => uploads.has(id)));
+        this.save('upload-finalize-rollback-proof.json', { httpStatus: 503, businessAndRevisionRolledBack: true, commandRolledBack: true, ...graph });
+        await this.verifyOriginal();
+        assert.ok(graph.pass, 'Command-finalization rollback left a newly accepted file without cleanup.');
+    }
+    async WT_UPLOAD_UNKNOWN_RETRY() {
+        const movement = this.context.movement.masterId, url = '/api/movements/' + movement + '/items/' + movement + '_ITEM/image';
+        const before = await this.seal(), revision = await this.revision(), start = this.ledger().length, key = this.key('upload-unknown');
+        this.control({ driveUncertain: true });
+        try { await this.api(url, { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: [500, 503], _probe: true }); }
+        finally { this.control({}); }
+        assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
+        const retried = await this.api(url, { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: [200, 503], _probe: true });
+        const events = this.ledger().slice(start), attempts = events.filter(e => e.kind === 'fake-provider' && e.provider === 'drive' && e.operation === 'upload');
+        this.save('upload-unknown-retry-proof.json', { retryStatus: retried.status, uploadAttempts: attempts.length, unknownOutcomes: events.filter(e => e.kind === 'fake-provider-outcome' && e.phase === 'uncertain').length, originalRowsUnchanged: !!(await this.verifyOriginal()) });
+        assert.equal(retried.status, 503, 'An accepted upload with a lost response must require reconciliation instead of blind retry.');
+        assert.equal(attempts.length, 1); assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
+    }
 }
 module.exports = { UploadCampaign };

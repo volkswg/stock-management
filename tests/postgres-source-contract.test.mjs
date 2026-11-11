@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync,readdirSync} from 'node:fs';
 import {postgresHistory,postgresNewFiles,postgresHash,stagingSourceHashes} from './helpers/postgres-history.mjs';
 import {restoreUploadCleanupSource,uploadCleanupHistory} from './helpers/upload-cleanup-history.mjs';
+import {restoreUploadOutcomesSource,uploadOutcomesHistory} from './helpers/upload-outcomes-history.mjs';
 
 test('Phase 2 history keeps every original route handler body byte-identical behind the actual wrapper',()=>{
  for(const [file,entry] of Object.entries(postgresHistory.edits)){
   assert.equal(postgresHash(entry.before),entry.beforeHash,file);
-  const rawCurrent=readFileSync(file,'utf8');
+  const rawCurrent=restoreUploadOutcomesSource(file,readFileSync(file,'utf8'));
   if(uploadCleanupHistory.edits[file])assert.equal(postgresHash(rawCurrent),uploadCleanupHistory.edits[file].afterHash,file);
   const current=restoreUploadCleanupSource(file,rawCurrent);assert.equal(postgresHash(current),entry.afterHash,file);
   if(file.startsWith('src/app/api/')){
@@ -24,7 +25,7 @@ test('all new PostgreSQL source paths are explicitly inventoried and server-only
  const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
  assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),postgresNewFiles.toSorted());
  for(const file of postgresNewFiles){
-  const source=readFileSync(file,'utf8');
+  const physical=readFileSync(file,'utf8'),source=restoreUploadOutcomesSource(file,physical);
   // Preserve the immutable Phase 2 witness while allowing only this reviewed
   // audit-removal delta. Actual revision behavior is tested against PostgreSQL.
   let historical=source;
@@ -58,7 +59,7 @@ test('all new PostgreSQL source paths are explicitly inventoried and server-only
     .replace('  if (result.rowCount !== 1) throw new PersistenceFailure();\n','').replace('stock-v2-${result.rows[0].revision}','stock-${result.rows[0].revision}');
   }
   if(file==='src/infrastructure/persistence/postgres/commands.ts') historical=source.replace('    const found =', `    await client.query("SELECT set_config('stock.command_key',$1,true)",[key]);\n    const found =`);
-  assert.equal(postgresHash(historical),uploadCleanupHistory.newFiles[file]??stagingSourceHashes[file]??postgresHistory.newFiles[file],file);
+  assert.equal(postgresHash(historical),uploadOutcomesHistory.newFiles[file]??uploadCleanupHistory.newFiles[file]??stagingSourceHashes[file]??postgresHistory.newFiles[file],file);
   assert.match(source,/import "server-only";/,file);
   if(file.startsWith('src/infrastructure/'))assert.doesNotMatch(source,/from ["']@\/modules\//,file);
  }

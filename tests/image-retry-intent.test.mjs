@@ -37,6 +37,7 @@ function fixture(mode = 'supabase') {
       if (spec === 'server-only') return {};
       if (spec === 'node:crypto') return crypto;
       if (spec === './database' || spec === '@/infrastructure/persistence/postgres/database') return db;
+      if (spec === '@/infrastructure/persistence/postgres/uploads') return { executeUploadCommand: (...args) => load('src/infrastructure/persistence/postgres/commands.ts').executeCommand(...args) };
       if (spec === '@/infrastructure/persistence/postgres/commands') return load('src/infrastructure/persistence/postgres/commands.ts');
       assert.fail('Unapproved source import: ' + spec);
     } });

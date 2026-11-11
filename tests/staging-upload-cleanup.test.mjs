@@ -8,6 +8,7 @@ function fixture(mode = 'supabase', deletionFails = false) {
   const source = ts.transpileModule(readFileSync('src/composition/staging-upload-cleanup.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   new vm.Script(source).runInNewContext({ exports, Response, Set, console: { error: message => warnings.push(message) }, require(spec) {
     if (spec === 'server-only') return {};
+    if (spec === '@/infrastructure/persistence/postgres/uploads') return { observeStagingDrive: drive => drive };
     assert.equal(spec, '@/infrastructure/persistence/postgres/database');
     return { storageMode: () => mode, requireMutation: () => calls.push('mutation-guard') };
   } });

@@ -1,4 +1,5 @@
 import { executeCommand, hashIntent } from "@/infrastructure/persistence/postgres/commands";
+import { executeUploadCommand } from "@/infrastructure/persistence/postgres/uploads";
 import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { currentTransaction, storageMode, stagingSettings, transaction, stagingReadOnly, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
@@ -49,7 +50,9 @@ export function withPersistence<Args extends unknown[], Result extends Response>
         return response;
       });
       const kind=method+":"+new URL(request.url).pathname;
-      const stored = await executeCommand<StoredResponse>(kind,request.headers.get("Idempotency-Key") || "",hashIntent({query:new URL(request.url).search,body:await requestIntent(request)}),async () => {
+      const contentType=request.headers.get("content-type") || "";
+      const execute=contentType.startsWith("image/") || contentType.includes("multipart/form-data") ? executeUploadCommand : executeCommand;
+      const stored = await execute<StoredResponse>(kind,request.headers.get("Idempotency-Key") || "",hashIntent({query:new URL(request.url).search,body:await requestIntent(request)}),async () => {
         const expected=request.headers.get("If-Match");
         if(expected && expected !== await readRevision()) throw new PersistenceFailure(409,"Storage revision changed. Refresh before retrying.");
         const response = await handler(...args);

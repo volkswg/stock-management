@@ -21,6 +21,7 @@ import ts from "typescript";
 import { salesWorksheetsBefore } from "./sales-worksheet-history.mjs";
 import { worksheetBefore } from "./worksheet-history.mjs";
 import { googleBefore } from "./google-infrastructure.mjs";
+import { restoreUploadOutcomesSource } from "./upload-outcomes-history.mjs";
 
 // Characterize unchanged TS without adding a runner or loading real adapters.
 // Every runtime dependency is explicit; network and environment access fail closed.
@@ -33,7 +34,7 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
   if(["src/services/employees/manageSalaryAdvances.ts","src/services/employees/calculateEmployeePayroll.ts","src/services/employees/settleEmployeePayroll.ts"].includes(path)) return createHRSourceLoader({imports,globals})(path);
   if(path === "src/services/expenses/manageExpenses.ts") return loadExpenseSource(path,{imports,globals});
   const filename = resolve(path);
-  const { outputText } = ts.transpileModule(readFileSync(filename, "utf8"), {
+  const { outputText } = ts.transpileModule(restoreUploadOutcomesSource(path, readFileSync(filename, "utf8")), {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2022,
