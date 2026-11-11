@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import {restoreReceiptOverlapSource} from './receipt-overlap-history.mjs';
 import {restoreWorkbookSource} from './loyverse-workbook-history.mjs';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -10,7 +9,6 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 // Exact bounded inverses only for this feature's reviewed edits. Historical tests
 // retain their original hashes; current executable loaders always read real files.
 export function restoreAccountSource(file,source=readFileSync(file,'utf8')) {
-  source=restoreReceiptOverlapSource(file,source);
   source=restoreWorkbookSource(file,source);
   const edit=accountsHistory.edits[file];
   if(!edit)return source;

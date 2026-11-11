@@ -159,6 +159,17 @@ function extend(Campaign) {
         }, {
             key: failureKey
         });
+        const conflictDate=this.inventoryMonth+'-04', conflictReceipt=receipt(this.prefix+'_CONFLICT',7,1,'SALE',conflictDate+'T01:00:00.000Z');
+        const conflictKey=this.key('conflicting-receipt'), conflictBefore=await this.seal(), conflictRevision=await this.revision();
+        this.control({salesPages:{A:[[conflictReceipt],[{...conflictReceipt,total_money:8}]]}});
+        const rejected=await this.post('/api/loyverse/daily-sales/sync',{account:'WT_ACCOUNT_A',date:conflictDate},{key:conflictKey,status:502});
+        assert.equal(rejected.body.error,'Loyverse returned conflicting versions of a receipt. No receipts were returned.');
+        assert.deepEqual(await this.seal(),conflictBefore);assert.equal(await this.revision(),conflictRevision);
+        assert.equal((await this.sql('SELECT count(*)::int n FROM stock_operational.commands WHERE key=$1',[conflictKey]))[0].n,0);
+        this.control({salesPages:{A:[[conflictReceipt],[conflictReceipt]]}});
+        const resolved=await this.post('/api/loyverse/daily-sales/sync',{account:'WT_ACCOUNT_A',date:conflictDate},{key:conflictKey});
+        assert.equal(resolved.body.receiptCount,1);
+        this.save('receipt-conflict-retry.json',{rejectedStatus:502,allBusinessRowsRolledBack:true,revisionAndCommandRolledBack:true,sameKeyRetryStatus:200,uniqueReceipts:1});
         this.control({});
     };
     Campaign.prototype.WT10 = async function () {
