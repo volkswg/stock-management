@@ -1,5 +1,32 @@
 # Refactoring progress and evidence
 
+## Disposable staging write-testing — plan prepared, not executed (2026-11-11)
+
+The owner requested a plan only, preserving existing data and production Sheets.
+The [canonical write-testing plan](../database-migration.md#disposable-staging-write-testing-plan)
+defines a new isolated local cluster followed by a separately approved hosted
+Supabase project/preview. It forbids using the original project, its credentials,
+existing read-only preview or shared recovery resources as mutation targets.
+No destination has been provisioned or approved, no restore or new role grant
+has run, and no planned acceptance write/provider action has been executed.
+
+Merged PR #60 (`bdfab89e43a814bfcc6dff910eda4cde8aed2e98`) is the planning
+baseline. Its merge/deployment was separately verified earlier in this owner
+session; production retained Google Sheets. The read-only evidence below was
+captured before that merge and does not describe a new check during planning.
+Existing completed backup/read-acceptance results remain historical evidence.
+
+The plan specifies baseline restore/fingerprints, a fresh copy UUID/login,
+independent provider isolation, a real-app write harness, 16 mandatory case
+families, exact comparison rules, retry/concurrency/failure tests, bounded
+performance/recovery thresholds, protected-state verification, stop/reset
+rules and named sign-off. All test results remain NOT RUN. The current
+`STOCK_STAGING_READ_ONLY` flag also controls provider fetch denial; turning it
+off alone cannot safely enable this campaign. A reviewed independent deny
+control and fake LINE/Loyverse/Drive composition are prerequisites, not completed
+features. Hosted target/cost and the execution manifest must be approved before
+any setup or test write. Production activation remains a separate decision.
+
 ## Private Supabase app — read-only acceptance (2026-11-11)
 
 PR #60 adds an explicit read-only staging flag, mutation-route/transaction blocks
