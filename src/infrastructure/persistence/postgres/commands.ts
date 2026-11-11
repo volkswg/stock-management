@@ -14,7 +14,6 @@ export async function executeCommand<T>(kind: string, key: string, intent: strin
   if (!/^[a-zA-Z0-9_:.-]{8,200}$/.test(key)) throw new PersistenceFailure(428,"A stable Idempotency-Key is required.");
   return transaction(true,async () => {
     const client = requireMutation(), actor = "isolated-staging";
-    await client.query("SELECT set_config('stock.command_key',$1,true)",[key]);
     const found = await client.query("SELECT intent,response,state FROM stock_operational.commands WHERE actor=$1 AND kind=$2 AND key=$3",[actor,kind,key]);
     if (found.rowCount) {
       if (found.rows[0].intent !== intent) throw new PersistenceFailure(409,"Operation key was already used for different input.");
