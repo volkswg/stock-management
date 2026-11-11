@@ -295,7 +295,10 @@ Hosted security advisor returns no findings; hosted schema/data are unchanged.
 These results do not satisfy the live-data acceptance gates above.
 
 
-## Audit-history removal (prepared, not applied to hosted staging)
+## Audit-history removal (applied to hosted staging)
+
+Migration `20261111034402` is recorded in hosted staging. Do not replay it.
+The following procedure and implementation description are retained for review.
 
 The owner requested removal of `stock_operational.audit`. The new migration
 [`20261111034402_remove_operational_audit.sql`](../supabase/migrations/20261111034402_remove_operational_audit.sql)
@@ -332,8 +335,9 @@ new writes, rollback requires restoration of the approved pre-change backup and
 matching code. After new writes, freeze writers and prepare a separately reviewed
 forward fix or recovery reconciliation; do not blindly restore stale business data.
 The separately authorized 2026-11-11 pre-change backup and independent local
-recovery/rehearsal passed; see the current progress ledger. Hosted audit removal,
-data cleanup and application/production activation remain separately gated.
+recovery/rehearsal passed; see the current progress ledger. Hosted audit removal was subsequently owner-authorized, applied and verified with
+a fresh encrypted independent post-change recovery; data cleanup and application/
+production activation remain separately gated.
 
 ## Phase 2 operational storage (opt-in isolated testing)
 
@@ -538,7 +542,8 @@ backup, independent download/key recovery and exact 51-table/15-metadata restore
 passed. A second local restore passed audit removal, 23-table reconciliation,
 66 application comparisons and a new-schema backup/restore. Final hosted
 verification at 11:31 Bangkok matched the pre-change snapshot, roles and ledger;
-the hosted audit migration remains unapplied. This certifies the scoped private
+the audit-removal migration was subsequently applied with ledger/data/security
+verification and a fresh independent post-change backup/restore. This certifies the scoped private
 schema recovery, not full platform recovery or application cutover readiness.
 
 Use the [current progress ledger](refactoring/progress.md#database-migration--current-operational-status-2026-11-11)

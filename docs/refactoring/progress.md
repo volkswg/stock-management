@@ -1,5 +1,33 @@
 # Refactoring progress and evidence
 
+## Hosted audit removal — applied and verified (2026-11-11)
+
+The owner explicitly authorized applying only the audit-removal migration to
+isolated hosted staging. Backup checksums, independent-restore receipts and the
+current 51-table/15-metadata fingerprints were rechecked first and matched.
+The migration dry run listed only `20261111034402_remove_operational_audit.sql`.
+It was applied through the migration system; the ledger now contains exactly the
+four prior versions plus `20261111034402`. A result-log filename collision occurred
+after the command completed; no migration retry occurred. Read-only schema/ledger
+inspection and complete verification established the committed outcome.
+
+Hosted staging now matches the successful local rehearsal in every table hash
+and all 15 metadata sections. The audit table, identity sequence, logging function
+and 23 audit triggers are gone. One revision row starts at 70,778, with 23 statement
+triggers and the reviewed RLS/column grants. All 50 unaffected tables, all 70,777
+business records, unrelated permissions and roles remain unchanged; 66 offline
+application comparisons passed against the hash-identical verified projection.
+Live application/provider acceptance and production cutover are not certified.
+
+The fresh post-change two-schema backup was encrypted, privately uploaded,
+independently downloaded and decrypted using freshly recovered owner-held key
+material, then restored to a fresh isolated local database. All 51 table hashes
+and 15 metadata sections match. Both pre-change and post-change backup generations
+and local evidence are retained. Security/health checks show no new problems;
+known informational archive-RLS/unused-index notices remain without remediation.
+Production was not switched and remains on Google Sheets. No application setting,
+LINE/Loyverse action, business-data write, paid resource or cleanup was performed.
+
 ## Hosted pre-change recovery — bounded verification fix
 
 The original 150-second fingerprint preflight stopped before capture. Read-only
@@ -35,7 +63,7 @@ or Drive images. Reconfirm writer freeze, source/backup freshness and exact
 target approval before any future hosted audit removal.
 
 
-## Audit removal — implementation pending hosted approval
+## Audit removal — merged implementation and local proof (historical)
 
 The owner requested removal of operational audit history. The proposed migration
 replaces the audit table and 23 logging triggers with one transactional revision
@@ -45,7 +73,7 @@ expect the replacement revision table. Historical migrations/fixtures are retain
 PR #57 verification used disposable synthetic PostgreSQL databases only. The
 separately authorized real-data backup/local rehearsal is recorded above; hosted
 audit removal, application activation and production cutover remain unexecuted.
-See the [removal procedure](../database-migration.md#audit-history-removal-prepared-not-applied-to-hosted-staging)
+See the [removal procedure](../database-migration.md#audit-history-removal-applied-to-hosted-staging)
 for coordinated deployment, destructive-history semantics and old-backup tooling.
 
 Validation: 565 application regression tests, 65 migration unit tests, 27 actual
@@ -69,7 +97,7 @@ Production still uses Sheets; no new live Sheet export was performed.
 
 | Workstream | Latest verified state |
 | --- | --- |
-| Hosted schema | Deployed to the isolated staging project; existing schemas and security guards retained. |
+| Hosted schema | Audit-removal migration applied and ledger verified; one private revision counter replaces audit history. Business schema/security invariants retained. |
 | Latest source and import | Latest approved original-Sheet export generated 23 business-table CSVs; owner manually imported **70,777 records** into `stock_operational`. This path bypassed the hosted archive/import-batch step. |
 | Record reconciliation | All 23 operational business tables reconcile against that saved source after one approved product-name encoding correction; one row updated and one audit row added. Private row IDs and values remain outside Git. |
 | Application calculations | **66 offline application comparisons passed** against saved source/target artifacts. This does not certify live hosted API/browser/provider behavior. |
@@ -78,8 +106,8 @@ Production still uses Sheets; no new live Sheet export was performed.
 | Application activation | **Not ready; no cutover performed.** Production still uses Google Sheets. No production storage setting was switched by these operations. |
 | Cleanup | Superseded export/build/import artifacts retired; latest source/CSVs, verification/audit evidence, credentials/TLS and recovery dependencies retained. Only the explicitly approved failed Docker rehearsal and its dedicated volume were deleted; two recovery containers and shared TLS remain. |
 
-Hosted audit removal still needs separate approval, a writer freeze and a fresh
-source/backup comparison. Before application activation, resolve hosted runtime,
+Hosted audit removal and its post-change recovery verification are complete.
+Before application activation, resolve hosted runtime,
 security/performance and business acceptance, and review changes since the
 saved export. Later Sheet activity is not covered by this reconciliation; any
 refresh or delta handling requires a reviewed procedure and approval. Do not
