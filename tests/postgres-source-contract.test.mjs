@@ -25,6 +25,11 @@ test('all new PostgreSQL source paths are explicitly inventoried and server-only
   // Preserve the immutable Phase 2 witness while allowing only this reviewed
   // audit-removal delta. Actual revision behavior is tested against PostgreSQL.
   let historical=source;
+  if(file==='src/modules/sales/infrastructure/postgres/tables.ts') {
+   const scoped='headers: SALES_PROFIT_COST_OVERRIDE_HEADERS, clearAsArchive: true';
+   assert.equal(source.split(scoped).length,2,'Only cost overrides gain archive-on-clear');
+   historical=historical.replace(scoped,'headers: SALES_PROFIT_COST_OVERRIDE_HEADERS');
+  }
   if(file==='src/infrastructure/persistence/postgres/database.ts') historical=historical
    .replace('export function stagingReadOnly(): boolean { return process.env.STOCK_STAGING_READ_ONLY === "true"; }\n','')
    .replace('  if (stagingReadOnly()) throw new PersistenceFailure(405,"Staging is read-only.");\n','')

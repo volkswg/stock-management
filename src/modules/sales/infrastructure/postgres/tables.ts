@@ -12,6 +12,6 @@ export function salesTables() {
     salesReceiptItems: new PostgresRecords({ table: "sales_receipt_items", headers: SALES_RECEIPT_ITEM_HEADERS }),
     salesReceiptPayments: new PostgresRecords({ table: "sales_receipt_payments", headers: SALES_RECEIPT_PAYMENT_HEADERS }),
     salesReceiptSyncs: new PostgresRecords({ table: "sales_receipt_syncs", headers: SALES_RECEIPT_SYNC_HEADERS }),
-    salesProfitCostOverrides: new PostgresRecords({ table: "sales_profit_cost_overrides", headers: SALES_PROFIT_COST_OVERRIDE_HEADERS }),
+    salesProfitCostOverrides: new PostgresRecords({ table: "sales_profit_cost_overrides", headers: SALES_PROFIT_COST_OVERRIDE_HEADERS, clearAsArchive: true }),
   };
 }
