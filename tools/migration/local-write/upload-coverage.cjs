@@ -14,7 +14,12 @@ class UploadCampaign extends CompletionCampaign {
         return rows.map(row => row.id);
     }
     async fileGraph(label) {
-        const result = classifyUploads(this.ledger(), await this.fileReferences());
+        // Existing replacement contracts retain earlier files. A successful
+        // committed HTTP read is independent evidence that a file had an owner;
+        // record that history separately from current SQL references. A file
+        // accepted for a rolled-back request has neither kind of evidence.
+        const history = [...new Set(this.requests.filter(r => r.status >= 200 && r.status < 300).flatMap(r => [...r.text.matchAll(/WT_FILE_[0-9a-f-]{36}/g)].map(m => m[0])))];
+        const result = classifyUploads(this.ledger(), await this.fileReferences(), history);
         this.save(label + '.json', result);
         assert.ok(result.pass, 'Accepted provider files are orphaned, uncertain, or missing; stop before capacity.');
         return result;

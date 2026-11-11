@@ -14,7 +14,7 @@ function build(source, destination) {
             recursive: true
         });
     fs.cpSync(path.join(source, 'node_modules'), path.join(destination, 'node_modules'), {
-        recursive: true, verbatimSymlinks: true
+        recursive: true, verbatimSymlinks: true, mode: fs.constants.COPYFILE_FICLONE
     });
     const entry = 'src/instrumentation.ts', factory = 'src/infrastructure/files/google-drive/createGoogleDriveServiceFromConfig.ts', runtime = '__local-write-harness/runtime.cjs';
     const before = {

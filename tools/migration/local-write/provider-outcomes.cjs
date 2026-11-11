@@ -14,7 +14,7 @@ function providerJournal(append) {
         },
     };
 }
-function classifyUploads(events, referencedIds) {
+function classifyUploads(events, referencedIds, committedHistoryIds = []) {
     const attempts = new Map(), files = new Map(), unresolvedAttempts = [];
     for (const event of events) {
         if (event.kind === 'fake-provider') {
@@ -43,16 +43,18 @@ function classifyUploads(events, referencedIds) {
         }
     }
     for (const attempt of attempts.values()) if (!attempt.phases.some(p => ['completed', 'rejected'].includes(p))) unresolvedAttempts.push(attempt.attemptId);
-    const orphanIds = [], referenced = [], compensated = [], brokenReferences = [];
+    const orphanIds = [], referenced = [], retainedHistorical = [], compensated = [], brokenReferences = [];
     const references = new Set(referencedIds);
+    const history = new Set(committedHistoryIds);
     for (const [id, file] of files) {
-        if (file.exists && !references.has(id)) orphanIds.push(id);
+        if (file.exists && !references.has(id) && history.has(id)) retainedHistorical.push(id);
+        else if (file.exists && !references.has(id)) orphanIds.push(id);
         else if (file.exists) referenced.push(id);
         else if (references.has(id)) brokenReferences.push(id);
         else compensated.push(id);
     }
     for (const id of references) if (!files.has(id)) brokenReferences.push(id);
-    return { acceptedUploads: files.size, orphanIds, unresolvedAttempts, brokenReferences, referenced, compensated, pass: !orphanIds.length && !unresolvedAttempts.length && !brokenReferences.length };
+    return { acceptedUploads: files.size, orphanIds, unresolvedAttempts, brokenReferences, referenced, retainedHistorical, compensated, pass: !orphanIds.length && !unresolvedAttempts.length && !brokenReferences.length };
 }
 function catalogKey(account, url) {
     const query = [...url.searchParams].sort(([a, av], [b, bv]) => a.localeCompare(b) || av.localeCompare(bv));

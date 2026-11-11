@@ -12,6 +12,8 @@ test('referenced uploads and acknowledged compensation pass; delete attempts wit
     const events = [], journal = providerJournal(e => events.push(e));
     const upload = journal.begin('drive', 'upload', { id: 'WT_FILE_test' }); upload.accepted(); upload.completed();
     assert.equal(classifyUploads(events, ['WT_FILE_test']).pass, true);
+    assert.equal(classifyUploads(events, []).pass, false);
+    assert.deepEqual(classifyUploads(events, [], ['WT_FILE_test']).retainedHistorical, ['WT_FILE_test']);
     const failedDelete = journal.begin('drive', 'delete', { id: 'WT_FILE_test' }); failedDelete.rejected();
     assert.equal(classifyUploads(events, []).pass, false);
     const removed = journal.begin('drive', 'delete', { id: 'WT_FILE_test' }); removed.accepted(); removed.completed();
