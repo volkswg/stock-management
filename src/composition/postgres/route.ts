@@ -20,6 +20,10 @@ async function requestIntent(request: Request) {
     for (const [key,value] of form.entries()) entries.push(typeof value === "string" ? [key,value] : [key,value.name,value.type,createHash("sha256").update(Buffer.from(await value.arrayBuffer())).digest("hex")]);
     return hashIntent(entries);
   }
+  const contentType = request.headers.get("content-type")?.split(";")[0] || "";
+  if (contentType.startsWith("image/")) {
+    return hashIntent({ contentType, sha256: createHash("sha256").update(Buffer.from(await request.clone().arrayBuffer())).digest("hex") });
+  }
   const text = await request.clone().text();
   try { return hashIntent(JSON.parse(text)); } catch { return hashIntent(text); }
 }

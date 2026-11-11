@@ -31,6 +31,26 @@ async function command(run){return executeCommand('synthetic',`operation-${++seq
 
 test.after(closePool);
 
+test('raw-image retries compare exact bytes and media type through the actual PostgreSQL command journal',async()=>{
+ const {collisionPngPair}=require('./local-write/binary-fixtures.cjs'),crypto=require('node:crypto');
+ const [firstBytes,changedBytes]=collisionPngPair();let executions=0;
+ const handler=withPersistence(async req=>{
+  executions++;
+  return Response.json({sha256:crypto.createHash('sha256').update(Buffer.from(await req.arrayBuffer())).digest('hex'),executions});
+ });
+ const image=(key,body=firstBytes,type='image/png')=>new Request('https://example.test/api/raw-image-synthetic',{method:'PATCH',headers:{...auth,'Idempotency-Key':key,'content-type':type},body});
+ const key='WT_raw_image_pg_'+crypto.randomUUID(),nextKey='WT_raw_image_pg_'+crypto.randomUUID();
+ const first=await handler(image(key)),firstBody=await first.text();assert.equal(first.status,200);
+ const before=await transaction(false,async()=>(await currentTransaction().query('SELECT intent,response,state FROM stock_operational.commands WHERE actor=$1 AND kind=$2 AND key=$3',['isolated-staging','PATCH:/api/raw-image-synthetic',key])).rows);
+ const replay=await handler(image(key));assert.equal(replay.status,200);assert.equal(await replay.text(),firstBody);assert.equal(replay.headers.get('x-stock-revision'),first.headers.get('x-stock-revision'));
+ assert.equal((await handler(image(key,changedBytes))).status,409);
+ assert.equal((await handler(image(key,firstBytes,'image/webp'))).status,409);assert.equal(executions,1);
+ const after=await transaction(false,async()=>(await currentTransaction().query('SELECT intent,response,state FROM stock_operational.commands WHERE actor=$1 AND kind=$2 AND key=$3',['isolated-staging','PATCH:/api/raw-image-synthetic',key])).rows);
+ assert.deepEqual(after,before);
+ const fresh=await handler(image(nextKey,changedBytes));assert.equal(fresh.status,200);assert.notEqual(await fresh.text(),firstBody);assert.equal(executions,2);
+ assert.equal(await (await handler(image(key))).text(),firstBody);
+});
+
 test('cost-override deletion archives the original identity and payload, is repeatable, and permits a fresh replacement',async()=>{
  const accountId='WT_COST_DELETE_REGRESSION',month='2024-03';
  const override=await command(()=>sales.setSalesProfitCostOverride({googleSheetsService:service,accountId,month,averageItemCost:2.5,note:'WT retained history',createdBy:'synthetic'}));

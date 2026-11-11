@@ -22,12 +22,23 @@ class CompletionCampaign extends Campaign {
             changedResponseEqualsFirst: changed.text === first.text, revisionUnchanged: await this.revision() === revision,
             rowsUnchangedAfterReplay: JSON.stringify(await this.seal()) === JSON.stringify(business),
             providerUploadsAfterFirst: this.ledger().slice(ledgerCount).filter(x => x.provider === 'drive' && x.operation === 'upload').length,
-            originalCopiedRowsUnchanged: !!(await this.verifyOriginal()), productionSourceChanged: false
+            originalCopiedRowsUnchanged: !!(await this.verifyOriginal()), productionSourceChanged: 'Only the scoped raw-image intent branch'
         };
         this.save('raw-binary-intent-proof.json', proof);
         assert.equal(changed.status, 409, 'Different raw image bytes reused an existing operation key without 409; stop before further writes/load.');
         assert.ok(proof.revisionUnchanged && proof.rowsUnchangedAfterReplay && proof.providerUploadsAfterFirst === 0);
+        const changedType = await this.api(route, { method: 'PATCH', key, headers: { 'content-type': 'image/webp' }, body: firstBytes, _probe: true, status: 409 });
+        const fresh = await this.api(route, { method: 'PATCH', key: this.key('new-image-intent'), headers, body: changedBytes, _probe: true });
+        assert.notEqual(fresh.body.record.imageUrl, first.body.record.imageUrl);
+        assert.equal(this.ledger().filter(x => x.provider === 'drive' && x.operation === 'upload').at(-1).contentSha256, hash(changedBytes));
+        const afterFreshRevision = await this.revision(), afterFresh = await this.seal(), afterFreshLedger = this.ledger().length;
+        const oldReplay = await this.api(route, { method: 'PATCH', key, headers, body: firstBytes, _probe: true });
+        assert.equal(oldReplay.text, first.text); assert.equal(oldReplay.revision, first.revision);
+        assert.equal(await this.revision(), afterFreshRevision); assert.deepEqual(await this.seal(), afterFresh);
+        assert.equal(this.ledger().slice(afterFreshLedger).filter(x => x.provider === 'drive').length, 0);
+        this.save('raw-binary-intent-proof.json', { ...proof, changedMediaTypeStatus: changedType.status, freshIntentStatus: fresh.status, changedBytesActuallyUploadedOnFreshKey: true, oldKeyReplayAfterLaterUploadExact: true, productionSourceChanged: 'Only the scoped raw-image intent branch' });
     }
+    async WT_RAW_IMAGE() { await this.rawBinaryIntent(); }
     summary(status) {
         return { ...super.summary(status), sourceCommit: this.manifest.sourceCommit, completionPlan: 63, fullLocalAcceptance: false, capacity: 'NOT RUN; correctness must pass first' };
     }

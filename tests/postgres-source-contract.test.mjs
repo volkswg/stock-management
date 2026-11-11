@@ -41,6 +41,13 @@ test('all new PostgreSQL source paths are explicitly inventoried and server-only
       }
 `,'');
   if(file==='src/composition/postgres/route.ts') {
+   const imageIntent=`  const contentType = request.headers.get("content-type")?.split(";")[0] || "";
+  if (contentType.startsWith("image/")) {
+    return hashIntent({ contentType, sha256: createHash("sha256").update(Buffer.from(await request.clone().arrayBuffer())).digest("hex") });
+  }
+`;
+   assert.equal(source.split(imageIntent).length,2,'Only the scoped raw-image intent branch is added');
+   historical=historical.replace(imageIntent,'');
    assert.ok(source.includes('SELECT value::text AS revision FROM stock_operational.revision WHERE singleton'));
    assert.ok(source.includes('if (result.rowCount !== 1) throw new PersistenceFailure();'));
    assert.ok(source.includes('stock-v2-${result.rows[0].revision}'));
