@@ -30,4 +30,9 @@ function collisionPngPair() {
     if (found.length !== 2 || found[0].equals(found[1]) || found[0].toString('utf8') !== found[1].toString('utf8')) throw Error('PNG control construction failed');
     return found;
 }
-module.exports = { collisionPngPair, crc32 };
+function sizedPng(totalBytes) {
+    const overhead = png(Buffer.alloc(0)).length;
+    if (!Number.isInteger(totalBytes) || totalBytes < overhead || totalBytes > 20 * 1024 * 1024 + 1) throw Error('Fixture size outside the bounded upload matrix');
+    return png(Buffer.alloc(totalBytes - overhead));
+}
+module.exports = { collisionPngPair, crc32, sizedPng };

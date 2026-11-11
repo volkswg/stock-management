@@ -28,6 +28,7 @@ function build(source, destination) {
         recursive: true
     });
     fs.copyFileSync(path.join(__dirname, 'runtime.cjs'), path.join(destination, runtime));
+    fs.copyFileSync(path.join(__dirname, 'provider-outcomes.cjs'), path.join(destination, '__local-write-harness/provider-outcomes.cjs'));
     fs.writeFileSync(path.join(destination, '__local-write-harness/preload.cjs'), "require('./runtime.cjs').install();\n");
     fs.mkdirSync(path.join(destination, 'src/local-write-harness'), {
         recursive: true
@@ -50,7 +51,7 @@ function build(source, destination) {
             cwd: source, encoding: 'utf8'
         }).trim(), unchangedFilesChecked: same - 1, changes: [...allowed].map(p => ({
             path: p, before: before[p], after: sha(path.join(destination, p))
-        })), newFiles: [runtime, '__local-write-harness/preload.cjs', 'src/local-write-harness/fake-drive.cjs'].map(p => ({
+        })), newFiles: [runtime, '__local-write-harness/provider-outcomes.cjs', '__local-write-harness/preload.cjs', 'src/local-write-harness/fake-drive.cjs'].map(p => ({
             path: p, sha256: sha(path.join(destination, p))
         })), providerMode: 'fake-only', productionSourceChanged: false
     };

@@ -34,7 +34,7 @@ jobs:
           npm test 2>&1 | tee evidence/regression.log
           npm run lint 2>&1 | tee evidence/lint.log
           npm run typecheck 2>&1 | tee evidence/typecheck.log
-          env -i PATH="$PATH" node --test tools/migration/local-write/guard.test.cjs tools/migration/local-write/oracle.test.cjs tools/migration/local-write/binary-fixtures.test.cjs tools/migration/local-write/capacity.test.cjs 2>&1 | tee evidence/local-write-harness.log
+          env -i PATH="$PATH" node --test tools/migration/local-write/guard.test.cjs tools/migration/local-write/oracle.test.cjs tools/migration/local-write/binary-fixtures.test.cjs tools/migration/local-write/capacity.test.cjs tools/migration/local-write/provider-outcomes.test.cjs 2>&1 | tee evidence/local-write-harness.log
           python3 -m unittest discover -s tools/migration -p 'test_*.py' -v 2>&1 | tee evidence/python.log
       - name: Real PostgreSQL, scoped browser authorization, reconciliation and recovery
         env:
