@@ -1,8 +1,8 @@
 {
-  "version": 13,
-  "scope": "Two independent complete supported local functional campaigns and read-only checkpoint recovery verified; capacity BLOCKED; hosted/production NO-GO; production remains Google Sheets",
+  "version": 14,
+  "scope": "Supported local functional campaigns, bounded one/five-client capacity and read-only recovery evidence pass; production remains NO-GO with an existing access-control blocker; user authentication planning only",
   "reportedOnBangkok": "2026-11-12",
-  "lastDataVerificationAtUtc": "2026-11-11T16:49:48.024326+00:00",
+  "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
   "repositoryBaseline": "1a539656711ef5b202b34afaf454d28261e90c52",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
@@ -94,12 +94,12 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Run unchanged one/five-client capacity protocol on a resource-qualified machine, then obtain separate disposable hosted acceptance authorization; no production switch",
+  "nextStep": "Review the existing production access-control NO-GO and prepare separate disposable hosted acceptance, backup activation and dedicated production target approvals; no production switch",
   "cutoverBlockers": [
-    "One/five-client bounded capacity is NOT RUN: host disk headroom is below the approved 20 percent; workload performance and resource acceptance remain unverified",
+    "Hosted capacity/pooling/protection/platform payload acceptance remains NOT RUN; local PASS uses a fixed 384 MiB app heap and does not certify the hosted runtime",
     "Disposable hosted write/protection/pooling acceptance and real-provider reconciliation remain separately authorized gates",
     "Private-schema local recovery passed; broader Supabase platform/Auth, external file and off-site generated-checkpoint recovery are not certified",
-    "Production identity/authentication/authorization design and deliberate production storage guard removal are not approved",
+    "Existing production-wide access control/protection and target identity configuration are not verified adequate; deliberate production storage guard remains enabled. New user authentication is planning only in a separate milestone",
     "Final Sheets source freshness/export/freeze and all writer pauses require separate authorization",
     "Production project/compute/add-on budget, backup/monitoring activation, deployment/merge, cutover and any post-write reverse synchronization require explicit approval"
   ],
@@ -792,6 +792,247 @@
     "privateAggregateReceiptSha256": "2433fbe33df2efc97db1bc14a0e530a0f17925dae8b9385436ede032ba91a949",
     "privateBusinessRecordsPublished": false,
     "historicalFailedAndBlockedRunsPreserved": true,
-    "reportPublishedOnBangkok": "2026-11-12"
+    "reportPublishedOnBangkok": "2026-11-12",
+    "historicalDiskBlockedSnapshot": true,
+    "latestLocalCapacityEvidence": "localCapacityContinuation"
+  },
+  "readinessScope": {
+    "approvedOnBangkok": "2026-11-12",
+    "priority1": "Complete Supabase migration",
+    "migrationWork": [
+      "PostgreSQL write acceptance",
+      "Performance and capacity",
+      "Backup automation preparation and verified restore",
+      "Dedicated production database specification",
+      "Final Google Sheets synchronization",
+      "Controlled cutover and rollback plan"
+    ],
+    "preserveExistingControls": [
+      "Existing authentication and API restrictions",
+      "Raw-body LINE signature verification",
+      "Database permissions and private schemas"
+    ],
+    "inadequateExistingAccessControlMeans": "NO-GO for production activation",
+    "priority2": {
+      "milestone": "User authentication",
+      "state": "PLANNING_ONLY",
+      "roadmap": "docs/architecture/user-authentication-roadmap.md",
+      "covers": [
+        "Login",
+        "Secure sessions",
+        "Roles and permissions",
+        "Shop-level authorization",
+        "User administration",
+        "API access control"
+      ],
+      "newAuthenticationImplementationAuthorized": false
+    },
+    "finalProductionCutoverRequiresExplicitApproval": true,
+    "paidInfrastructureRequiresExplicitApproval": true,
+    "populatedHostedStagingWritesAuthorized": false,
+    "newSheetsBusinessReadsOrExportsAuthorized": false,
+    "backupAutomation": "PREPARED_DISABLED; destination, credentials, key custody, alerts and activation remain unassigned",
+    "dedicatedProductionDatabase": "SPECIFICATION_ONLY; not provisioned",
+    "productionDecision": "NO-GO",
+    "assessmentDocument": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
+    "existingProductionAccessControl": {
+      "decision": "NO-GO",
+      "verification": "hosting-metadata-only; no production business endpoint calls",
+      "ssoScope": "all_except_custom_domains",
+      "passwordProtectionEnabled": false,
+      "productionDomainExcludedFromSso": true,
+      "legacySheetsApiReceivesStagingWrapperAuthentication": false,
+      "noSecuritySettingsChanged": true
+    }
+  },
+  "localCapacityContinuation": {
+    "at": "2026-11-11T20:12:01.954364+00:00",
+    "status": "SUPPORTED_LOCAL_FUNCTIONAL_AND_CAPACITY_EVIDENCE_PASS",
+    "productionDecision": "NO-GO",
+    "runReceiptSha256": "3ba91b1a92ed099c90624ed2a94b0093489fa9afbd4cdfaa36ad980ceb0d27b2",
+    "warmupLoadDrainSeconds": 1478.491,
+    "applicationSourceCommit": "0d142f7263e2daea3a968824465a5ec5fed6f14f",
+    "capacityImplementationFiles": {
+      "tools/migration/local-write/capacity-oracle.cjs": "5697ad8222629857ddd4bb8dd51eed0493e6aa6be098e2104e48d5964b212445",
+      "tools/migration/local-write/capacity-workload.cjs": "5754341a939dd90a34de3ff949773e43da3b4fbf0fe16f69e46ee378899a794e",
+      "tools/migration/local-write/capacity-recovery.py": "8354472b65d58e624389199e48be1da31fcfd466b3012ca326a208156e612d8d",
+      "tools/migration/local-write/capacity.cjs": "044c11670ea9e97f833d9df0b4f3a7879cc0e32aa706543ca866e81e48009e8a",
+      "tools/migration/local-write/capacity-start-app.py": "11be908f574d9f5adf6c3ee9e5a86e837beb22fd3a3a7ec2bee841883653da05",
+      "tools/migration/local-write/capacity-execution.cjs": "1ca02554d927ef20c9c2c653889aeab8666164f6d5c550f5c9f9e9d5cccc80a9",
+      "tools/migration/local-write/capacity-observer.py": "701f81433eac11b0765e608db02db42c6a3b9f6f28eb9a71e5927aee954dfe20",
+      "tools/migration/local-write/capacity-context.cjs": "d812a37ef4d91cf51ecfbf0accb69f3f77c1925bd2a06eb7f675c658e79db99b"
+    },
+    "applicationHeapMiB": 384,
+    "unchangedAppAndDatabaseBudgetMiB": 1024,
+    "unchangedMemoryHeadroomPercent": 20,
+    "levels": [
+      {
+        "clients": 1,
+        "timingStatus": "PASS",
+        "offeredSlots": 600,
+        "started": 600,
+        "completed": 600,
+        "unstartedSlots": 0,
+        "warmupStarted": 120,
+        "timedOut": 0,
+        "actualThroughputPerSecond": 1,
+        "classes": {
+          "read": {
+            "successful": 360,
+            "p50": 27.810834000003524,
+            "p95": 367.8971250000177,
+            "p99": 432.68366599996807,
+            "max": 476.75170799996704
+          },
+          "simpleWrite": {
+            "successful": 150,
+            "p50": 28.474374999990687,
+            "p95": 357.13945799996145,
+            "p99": 375.92358299996704,
+            "max": 378.5729159999755
+          },
+          "compoundWrite": {
+            "successful": 90,
+            "p50": 76.74037499999395,
+            "p95": 245.95316700002877,
+            "p99": 277.98099999999977,
+            "max": 277.98099999999977
+          }
+        },
+        "concreteVariantCount": 17,
+        "minimumSuccessfulSamplesPerVariant": 30,
+        "resourceSummary": {
+          "samples": 726,
+          "maxima": {
+            "databaseMemoryBytes": 607940608,
+            "applicationRssBytes": 423804928,
+            "driverRssBytes": 123207680,
+            "totalClientBackends": 2,
+            "runtimeBackends": 1,
+            "cpuQuotaFraction": 0.1813986556751879,
+            "cpuOver80PercentMs": 0,
+            "storageGrowthBytes": 490098688,
+            "observerSeconds": 0.2945,
+            "newDeadlocks": 0
+          },
+          "minima": {
+            "hostMemoryFreeFraction": 0.33,
+            "vmMemoryFreeFraction": 0.8559757028399707,
+            "hostDiskFreeFraction": 0.23828910941837772,
+            "vmDiskFreeFraction": 0.5208565120135604,
+            "hostFreeDiskBytes": 58406375424
+          },
+          "observerError": null,
+          "oneSecondPolling": true,
+          "tenSecondDiskAndSizePolling": true,
+          "hostedAccess": false,
+          "sqlPayloadsLogged": false
+        },
+        "exactBusinessRowsCompared": 71465,
+        "originalBusinessRowsUnchanged": 70777,
+        "acknowledgedCommands": 288,
+        "expectedMutatingStatements": 576,
+        "recoverySeconds": 5.423,
+        "backupCaptureSeconds": 3.429,
+        "all51Tables15MetadataRestoreExact": true,
+        "proofs": {
+          "-capacity-result.json": "2238c6c74fb2828bc3bdeae4128bdbe803dad35a43f740b19f1a3c948cfa015c",
+          "-oracle-proof.json": "fb113dac27b9dddba68769727de6a49ce7145d420d0f92659036e47db34e5125",
+          "-recovery-result.json": "6c221338971cb80deee0f5d8c6490ea37e778d47abbbd7a3fb0f4e6173ad9dc0",
+          "-resource-summary.json": "c8a65d58c4797a131c00cfbfe90d1da3a5bfea0024c4b7f647106064b66bd838"
+        }
+      },
+      {
+        "clients": 5,
+        "timingStatus": "PASS",
+        "offeredSlots": 3000,
+        "started": 3000,
+        "completed": 3000,
+        "unstartedSlots": 0,
+        "warmupStarted": 597,
+        "timedOut": 0,
+        "actualThroughputPerSecond": 5,
+        "classes": {
+          "read": {
+            "successful": 1800,
+            "p50": 88.0912079999689,
+            "p95": 1099.8145419999491,
+            "p99": 1446.4502499999944,
+            "max": 1708.1656660001026
+          },
+          "simpleWrite": {
+            "successful": 750,
+            "p50": 42.481916999968234,
+            "p95": 887.7980410000309,
+            "p99": 937.673582999967,
+            "max": 978.994458000001
+          },
+          "compoundWrite": {
+            "successful": 450,
+            "p50": 218.21187500003725,
+            "p95": 583.530999999959,
+            "p99": 651.1864580000984,
+            "max": 698.5806250000023
+          }
+        },
+        "concreteVariantCount": 85,
+        "minimumSuccessfulSamplesPerVariant": 30,
+        "resourceSummary": {
+          "samples": 727,
+          "maxima": {
+            "databaseMemoryBytes": 715497472,
+            "applicationRssBytes": 514179072,
+            "driverRssBytes": 131645440,
+            "totalClientBackends": 3,
+            "runtimeBackends": 2,
+            "cpuQuotaFraction": 0.6263968325671261,
+            "cpuOver80PercentMs": 0,
+            "storageGrowthBytes": 617201664,
+            "observerSeconds": 0.5073,
+            "newDeadlocks": 0
+          },
+          "minima": {
+            "hostMemoryFreeFraction": 0.32,
+            "vmMemoryFreeFraction": 0.8499664373468798,
+            "hostDiskFreeFraction": 0.237770548649359,
+            "vmDiskFreeFraction": 0.5160125424839309,
+            "hostFreeDiskBytes": 58279272448
+          },
+          "observerError": null,
+          "oneSecondPolling": true,
+          "tenSecondDiskAndSizePolling": true,
+          "hostedAccess": false,
+          "sqlPayloadsLogged": false
+        },
+        "exactBusinessRowsCompared": 73316,
+        "originalBusinessRowsUnchanged": 70777,
+        "acknowledgedCommands": 1437,
+        "expectedMutatingStatements": 2859,
+        "recoverySeconds": 5.491,
+        "backupCaptureSeconds": 3.525,
+        "all51Tables15MetadataRestoreExact": true,
+        "proofs": {
+          "-capacity-result.json": "551006fd5a8aeac95022677f275f957d71f1007238f906335ac4982f0d5db255",
+          "-oracle-proof.json": "6e36d295e07fa0fd4be7208d6154f0564f24c8e04f2fc7b00d4ec2bf377179f9",
+          "-recovery-result.json": "9ac3086d2aa3cd7096d28d47a4b60d8b52b7545fe99767b4677006cc12512e0d",
+          "-resource-summary.json": "3809a3ef5cd2e05b50eedfa7794abaa30c0aa0d4ef66267eb22429d50d6af67a"
+        }
+      }
+    ],
+    "securityVerificationSha256": "0aadbb36e8fb40252808a229546721924ab2ae805cf21f22a8e500a830de3b90",
+    "protectedVerificationSha256": "ccbc927bf84d0256badae960da7e8b3bf84c49c05060013e2af79e516cf9ac53",
+    "productionMetadataSha256": "b5de4e3b9eb6576fcf9317f802854bf0c7e47483db9a18be7414aca69e469f0a",
+    "protectedHosted51Tables15MetadataExact": true,
+    "productionUnchangedSheetsRelease": true,
+    "newAuthenticationImplemented": false,
+    "hostedWrites": false,
+    "newSheetsBusinessReadsOrExports": false,
+    "realProviderMutations": false,
+    "paidInfrastructureCreated": false,
+    "productionConfigurationChanges": false,
+    "cutoverPerformed": false,
+    "historicalFailureEvidenceRetained": true,
+    "document": "docs/database-migration.md#bounded-local-capacity-continuation-2026-11-12",
+    "privateAggregateReceiptSha256": "3ee617c4d155e9239fe86cceb020899e34a5b04b34425ff474c2f3bc59f9dcc5"
   }
 }

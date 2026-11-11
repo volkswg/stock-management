@@ -18,6 +18,7 @@ The external compatibility directory `src/externals/` was retired in [PR #40](ht
 | Why did previous changes happen? Which PR and fixture proves them? | [Historical progress and evidence](../refactoring/progress.md) |
 | How do I test safely and what was actually verified? | [Verification procedure and results](../refactoring/verification.md) |
 | How should I prepare a change? | [Engineering rules](../../AGENTS.md) |
+| What follows the database migration for staff access? | [User authentication roadmap](user-authentication-roadmap.md), planning only |
 
 ## Database migration preparation
 

@@ -917,14 +917,156 @@ commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
 original requirements; a stopped/partial run is not full acceptance.
 Google Sheets remains production's store.
 
+##### Current migration go/no-go assessment (2026-11-12)
+
+**Production decision: NO-GO.** The owner prioritizes completing the Supabase
+migration, with new user authentication as a separate planning-only milestone.
+Production remains on Google Sheets. This assessment does not authorize a final
+switch, production deployment, paid infrastructure or writes to populated staging.
+
+| Migration gate | Current evidence / required exit |
+| --- | --- |
+| PostgreSQL write acceptance | Two independent fresh local campaigns pass the supported scope, including retry, stale-state, rollback, crash and recovery proofs. Preserve raw BLOCKED labels for absent/hosted variants and explicit dispositions. |
+| Performance and capacity | Both fresh bounded one/five-client profiles pass timing, exact-data and recovery under the unchanged limits. The earlier default-heap and retained-cache failures remain preserved; local results never certify hosted capacity. |
+| Existing security | Recheck ordinary API denial, signed LINE entrypoint, production refusal, TLS/role restrictions and unchanged data. Production-wide exposure/protection and access policy still need verified acceptance; missing adequate controls are a NO-GO. |
+| Backup automation | Existing consistent capture/restore tools and independently recovered encrypted source backup are available. The scheduler/retention/monitoring proposal below stays disabled until identities, private off-site storage, key custody, alerts and a scheduled restore drill are approved and tested. No new backup deletion is authorized. |
+| Dedicated production database | Prepare exact project/UUID, region/version, least-privilege identities, pool/connection budgets, measured disk/index/WAL headroom, quotas and itemized costs. No project or paid service has been created. |
+| Hosted application acceptance | Separate disposable hosted copy, private preview, fake providers, full supported writes, pooling/security checks and platform payload/performance tests remain NOT RUN. Never use populated staging as a load target. |
+| Final Google Sheets synchronization | Require an explicitly approved source/read identity and writer-freeze window; capture a consistent final export, reconcile every row/report into a fresh target and verify no intervening writes. No new Sheets business read/export is part of this update. |
+| Controlled cutover | Require all gates, security/business/recovery sign-offs and exact release/target/window approval. Single write authority, measured stop thresholds and rehearsed rollback; after any acknowledged PostgreSQL write, reconcile its delta before a return to Sheets. |
+
+The current staging bearer is an operator restriction, not a complete staff
+login/role/shop policy. Preserve it, raw-body LINE signature verification, private
+schemas, nonprivileged runtime permissions and the production guard. Do not remove
+those controls or introduce new authentication features to make this milestone
+pass. Review the adequacy of the actual deployment and every API; if it cannot
+meet the approved production policy, report the security blocker explicitly.
+The separate [user authentication roadmap](architecture/user-authentication-roadmap.md)
+is planning only.
+
+**Existing production access control: NO-GO.** Read-only hosting metadata checked
+on 2026-11-12 Bangkok shows Vercel Authentication enabled with
+`all_except_custom_domains` and password protection disabled. The production
+domain is attached to this project. Vercel documents that setting as Standard
+Protection, which excludes production domains
+([scope definition](https://vercel.com/docs/deployment-protection),
+[API setting](https://vercel.com/docs/deployment-protection/methods-to-protect-deployments/vercel-authentication)).
+The production Sheets branch retains legacy handlers and receives no API
+authentication from the staging wrapper. These facts do not establish adequate
+production-wide API access control, so activation must remain blocked. No live
+business endpoint was probed, no protected records were read through the app,
+and no settings were changed. A separately approved control review must cover
+every production URL/API and preserve the signed LINE ingress; this finding
+does not authorize implementing the new user-authentication milestone early.
+
+Continue authorized local migration work in [PR #64](https://github.com/volkswg/stock-management/pull/64).
+Keep it unmerged because merging main deploys production. The
+[next-stage packet](#next-hosted-and-production-stage-plan) records the concrete
+backup configuration, target preparation, source freeze, rollback and independent
+approval boundaries. No owner may infer activation permission from a local PASS.
+
+##### Bounded local capacity continuation (2026-11-12)
+
+The owner cleared disk space and authorized continuation. Disk qualified above
+the unchanged 20% floor; the earlier 5.88% disk block remains historical evidence.
+The first full one-client run passed timing, exact-data and recovery checks, but
+the first five-client run stopped on app RSS: 831.5 MiB exceeded the 819.2 MiB
+headroom stop. Its default Node heap was 2240 MiB against a 1 GiB total RSS budget.
+The partial five-client timing sample is not a capacity PASS or a throughput claim.
+Both stopped/completed checkpoints were verified and restored; their recovery
+bounds were 138.363 s (including retained initial verifier diagnostics) / 6.637 s.
+
+The local launcher now fixes the app heap at 384 MiB and driver heap at 256 MiB;
+neither the RSS budgets, database limits nor acceptance thresholds increased.
+The first bounded retry stopped before traffic because the retained 40-database
+cluster was already above the raw cgroup memory headroom limit, mostly cached
+rehearsal files. Its zero-write checkpoint also passed exact-data/recovery checks.
+No cache was dropped, memory subtracted, old database reset or resource resized.
+Fresh clones of the same sealed post-seed checkpoint were therefore restored into
+a new task-owned local container/volume, retaining all earlier resources/evidence.
+All 51 tables/15 metadata matched before traffic; this preparation changed no
+application, hosted or production configuration.
+
+**Both fresh bounded profiles PASS timing, exact-data and recovery gates.** Each
+used 120 seconds warmup plus 600 measured seconds, no catch-up, one request in
+flight/client, at most one new request/second/client, the fixed 12/5/3 mix and
+256 KiB image/PDF fixtures. Every scheduled concrete variant has at least 20
+successful measured samples. No unexpected status, timeout, deadlock, connection
+failure, incorrect total, partial commit or duplicate/unexplained effect occurred.
+Raw p50/p95/p99/max for every client/variant and class remain in private evidence.
+
+| Clients / class | Successful measured | p50 ms | p95 ms | p99 ms | Maximum ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1 / read | 360 | 27.811 | 367.897 | 432.684 | 476.752 |
+| 1 / simpleWrite | 150 | 28.474 | 357.139 | 375.924 | 378.573 |
+| 1 / compoundWrite | 90 | 76.740 | 245.953 | 277.981 | 277.981 |
+| 5 / read | 1800 | 88.091 | 1099.815 | 1446.450 | 1708.166 |
+| 5 / simpleWrite | 750 | 42.482 | 887.798 | 937.674 | 978.994 |
+| 5 / compoundWrite | 450 | 218.212 | 583.531 | 651.186 | 698.581 |
+
+| Clients | Offered / started / completed | Unstarted slots | Completed/s | Variants / minimum samples | Restore readiness s |
+| --- | --- | ---: | ---: | --- | ---: |
+| 1 | 600 / 600 / 600 | 0 | 1.000 | 17 / 30 | 5.423 |
+| 5 | 3000 / 3000 / 3000 | 0 | 5.000 | 85 / 30 | 5.491 |
+
+| Clients | Peak DB / app / driver MiB | Peak total / runtime backends | Minimum host memory / disk free | Minimum VM memory / disk free |
+| --- | --- | --- | --- | --- |
+| 1 | 579.8 / 404.2 / 117.5 | 2 / 1 | 33.0% / 23.83% | 85.6% / 52.09% |
+| 5 | 682.4 / 490.4 / 125.5 | 3 / 2 | 32.0% / 23.78% | 85.0% / 51.60% |
+
+Combined warmup/load/drain was 1478.491 s, below 1800 s.
+The private orchestration wrapper rejected the ISO UTC `Z` suffix while formatting
+its final combined-clock receipt after all six timing/oracle/recovery gates passed.
+Its STOPPED receipt is retained. An additive verifier parsed the original UTC
+timestamps, checked the first-level clock against the actual final observer-stop
+time, and rechecked all six gates and eight source hashes without changing data,
+repeating traffic or resetting a timer. This is a reporting diagnostic, not an
+erased load failure.
+Database limits remained 1 GiB/1.5 CPU/no swap, max_connections=24, runtime limit=6
+and app pool=2. Raw cgroup memory, CPU/pressure/OOM/restarts and app/driver RSS were
+sampled every second; disk/database/index/WAL every 10 seconds. Both observers
+finished without errors; no OOM, unplanned restart, missing telemetry or sustained
+CPU-headroom breach occurred. Hardware was an 8 GiB ARM Mac with 8 logical CPUs,
+Node 24.22.2 and the existing 2-CPU/4-GiB VM. This is a bounded shared-host local
+profile with an explicit heap cap, not hosted or production capacity certification.
+The hosted candidate must specify and test its actual app/runtime/DB budgets.
+
+The independent offline projection verifies every final business cell, row/global
+revision, command intent/response and fake upload/effect graph. All 70,777 original
+rows remain exact. Each checkpoint's fresh backup/restore matches all 51 tables
+and 15 metadata before/after provider-denied read-only app readiness; SQL writes
+are denied and no provider outcomes are replayed. RPO=0 is limited to acknowledged
+work sealed in those checkpoints. Existing API/LINE/role/TLS checks also pass;
+the current production protection gap remains a separate **NO-GO**.
+
+The eight executed capacity source files were sealed before copy setup/traffic
+and unchanged through both profiles. `capacity-execution.cjs`,
+`capacity-observer.py`, `capacity-oracle.cjs` and `capacity-recovery.py` are explicit
+Mac operator adapters requiring the private prepared manifest, services, secrets,
+checkpoint and fake-provider catalog; they are not app imports, generic cloud
+provisioners or automatic production jobs. The public workload/context controls
+also run in secret-free CI. No private rows, credentials or raw logs are published.
+
+Fresh local verification: 600 regressions, 39 harness controls, 71 Python checks,
+lint/typecheck and isolated credential-free production build pass; only the
+inherited `shipmentRow` lint warning remains. Route manifest is unchanged and 113
+client chunks retain private-database boundaries. Current-head independent CI is
+recorded on PR #64. A bounded read-only protected-source recheck again matches all
+51 tables/15 metadata and the independently recovered source-backup manifest.
+Production metadata still has 14 entries, no STOCK override and the READY PR63
+Sheets release. No hosted write, new Sheets business export, real provider action,
+paid resource, production setting change, merge or cutover occurred.
+Private combined receipt SHA-256: `3ee617c4d155e9239fe86cceb020899e34a5b04b34425ff474c2f3bc59f9dcc5`.
+
 ##### Local acceptance milestone results
 
-Reported 2026-11-12 (Bangkok), from the completed 2026-11-11 execution snapshot.
+Historical completed 2026-11-11 execution snapshot, reported 2026-11-12 (Bangkok).
+See the current assessment above and the capacity continuation above for later evidence.
 [PR #64](https://github.com/volkswg/stock-management/pull/64)
 was reviewed against main `1a539656711ef5b202b34afaf454d28261e90c52` and remains
 unmerged: main automatically deploys production. **Supported local functional
 coverage and recovery pass; the complete pre-production milestone remains NO-GO.**
-One/five-client capacity is BLOCKED, and hosted/production gates are separate.
+At that snapshot, one/five-client capacity was BLOCKED; hosted/production gates remain separate.
 
 **Fixes.** Server and browser compare actual raw bytes plus MIME, preserving
 same-key replay and rejecting changed intent. Browser revision tracking no longer
@@ -1000,7 +1142,7 @@ The existing independently downloaded/decrypted source backup remains verified.
 The app uses its explicit loopback test connection; verify-full TLS is checked by
 separate owner/runtime-role probes, not claimed for that local application pool.
 
-**Capacity is BLOCKED / NOT RUN at both one and five clients.** Host disk free is
+**At this historical checkpoint, capacity was BLOCKED / NOT RUN at both levels.** Host disk free was
 5.88%, below the approved 20% threshold. p50/p95/p99/max, error rates, load
 throughput and full resource headroom are N/A; synthetic engine controls and
 functional timings do not certify capacity. No limits were raised or thresholds
@@ -1081,8 +1223,11 @@ production project, a supported pinned PostgreSQL version, measured disk/index/W
 space plus headroom, bounded pools and least-privilege roles. The current code
 *deliberately refuses Supabase under VERCEL_ENV=production* and expects isolated
 staging identity/auth. Production activation therefore needs a separately reviewed
-production identity/authentication/authorization design; flipping STOCK_STORAGE
-alone is not a deployment plan. Preserve this guard during local acceptance.
+production target/identity configuration and evidence that the existing access
+controls meet the approved production policy; flipping STOCK_STORAGE alone is not
+a deployment plan. Preserve this guard during migration acceptance. If adequate
+access control is missing, keep a clear NO-GO and defer new user authentication
+implementation to its separate milestone.
 
 Official pricing checked on 2026-11-11: Free is $0 with a 500 MB database, two active
 projects and inactivity pausing; Pro starts at $25/month, includes $10 organization
@@ -1180,7 +1325,7 @@ source overwrite is part of this preparation.
 campaigns; reviewed N/A for absent business operations; bounded capacity with the
 unchanged limits/headroom; complete read-only recovery readiness; protected original
 hashes; current CI/security/bundle checks; isolated hosted write/pooling/protection
-acceptance; approved production authentication/roles; independently recoverable
+acceptance; verified adequate existing production access controls/roles; independently recoverable
 backups including image policy; a verified final source freeze/reconciliation;
 approved project costs; exact release/cutover and rollback ownership. Any missing,
 flaky, failed or unavailable mandatory gate is NO-GO, not a conditional PASS.
@@ -1188,7 +1333,8 @@ flaky, failed or unavailable mandatory gate is NO-GO, not a conditional PASS.
 **Exact later approvals:** (1) disposable hosted project/UUID, preview, copied-data
 restore and hosted write/fault/load tests, with cost cap; (2) production organization,
 project/region/compute/add-ons and recurring backup/monitoring spend; (3) production
-auth/identity changes and deployment/merge that triggers production; (4) named Sheets
+target identity/control configuration and deployment/merge that triggers production
+(new user authentication is a separate milestone); (4) named Sheets
 read/export/freeze and controlled ingestion; (5) final activation/cutover window;
 (6) any post-write reverse synchronization or destructive rollback. These approvals
 are independent. Completing local work authorizes none of them.
@@ -2149,11 +2295,14 @@ not permission to run undocumented in-place updates.
 
 ### Gate 8 — controlled activation, monitoring and rollback
 
-This gate is not executable with PR49's production guard. Implement and review
-production authorization/target selection first, then obtain separate owner
-approval for production env changes/deployment. No Vercel setting changes occur
-as part of this runbook preparation. Selection is deployment-level, not an atomic
-cross-provider switch: a global write freeze is required to make it safe.
+This gate is not executable with the current production guard. First verify that
+existing production access controls meet the approved policy and separately
+review the production target/identity release path. If controls are inadequate,
+retain NO-GO; new user authentication is planning only in the next milestone.
+Obtain separate owner approval for production environment changes/deployment and
+the exact cutover. No Vercel setting changes occur as part of this preparation.
+Selection is deployment-level, not an atomic cross-provider switch: a global
+write freeze is required to make it safe.
 
 - [ ] Keep ingress frozen, verify no old deployment/scheduled/manual writer can
   write Sheets, and bind the approved release to exactly one final SQL target.

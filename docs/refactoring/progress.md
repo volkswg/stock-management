@@ -1,6 +1,37 @@
 # Refactoring progress and evidence
 
+## Migration-first scope and bounded capacity continuation (2026-11-12)
+
+The owner prioritizes Supabase completion and makes new user authentication a
+separate planning-only milestone. The [current migration assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+is **production NO-GO**: existing hosting protection excludes production domains,
+legacy Sheets handlers receive no staging-wrapper authentication, and adequate
+production-wide API access control is not certified. No protection was weakened
+or new authentication feature implemented. The separate [authentication roadmap](../architecture/user-authentication-roadmap.md)
+covers login/sessions, roles/shop membership, administration and API/DB enforcement.
+
+The [bounded continuation](../database-migration.md#bounded-local-capacity-continuation-2026-11-12)
+records fresh one/five-client timing, exact-data and recovery PASS with the original
+limits. It preserves the earlier five-client default-heap RSS failure and the
+zero-traffic cached-database preflight block. A fixed 384 MiB local app heap and a
+new task-owned local cluster exclude retained rehearsal history without increasing
+budgets, changing the metric or deleting/resetting existing copies. All original
+70,777 rows remain exact; both restores match 51 tables/15 metadata and read-only
+readiness. No hosted/production performance claim follows from this local profile.
+
+Fresh validation: 600 regressions, 39 harness controls, 71 Python checks,
+lint/typecheck and isolated credential-free build pass; inherited warning only,
+unchanged routes and 113 clean client chunks. Existing API/LINE/role/TLS controls
+pass again. Protected hosted state rechecks exact over read-only TLS; production
+metadata retains the Sheets PR63 release. Disabled backup automation, production
+target specification, final Sheets synchronization and controlled cutover/rollback
+remain prepared gates. Hosted writes, paid infrastructure and cutover were not run.
+Continue in the single draft/unmerged [PR #64](https://github.com/volkswg/stock-management/pull/64).
+Combined private receipt SHA-256: `3ee617c4d155e9239fe86cceb020899e34a5b04b34425ff474c2f3bc59f9dcc5`.
+
 ## Local acceptance milestone results (2026-11-12)
+
+Historical disk-blocked snapshot; superseded for current capacity by the continuation above.
 
 [PR #64](https://github.com/volkswg/stock-management/pull/64) fixes raw-image
 byte/MIME identity in server and browser, old-replay revision downgrade, upload
