@@ -43,6 +43,7 @@ jobs:
           set -euo pipefail
           bash tools/migration/verify-postgres.sh 2>&1 | tee evidence/archive-postgres.log
           env -i PATH="$PATH" node --test --test-isolation=none tools/migration/application-parity.test.cjs 2>&1 | tee evidence/application-parity.log
+          env -i PATH="$PATH" node --test tools/migration/readonly-staging.test.cjs 2>&1 | tee evidence/readonly-staging.log
           bash tools/migration/verify-operational.sh 2>&1 | tee evidence/operational-postgres.log
           bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee evidence/recovery-fingerprints.log
       - name: Credential-free production build and bundle boundaries
