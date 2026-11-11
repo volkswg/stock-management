@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
+import {createRequire} from 'node:module';
+const {collisionPngPair}=createRequire(import.meta.url)('../tools/migration/local-write/binary-fixtures.cjs');
 
 function client(fetch,store=new Map()) {
  const window={fetch};
@@ -50,4 +52,20 @@ test('query parameters distinguish operation intents and foreign responses canno
  await run.fetch('https://other.test/api/orders');
  await run.fetch('/api/orders?shop=one',input);await run.fetch('/api/orders?shop=two',input);await run.fetch('/api/orders?shop=one',input);
  assert.notEqual(keys[0],keys[1]);assert.equal(keys[0],keys[2]);assert.deepEqual(revisions,[null,null,null]);
+});
+test('uncertain browser image requests keep byte identity across reload and give different valid image bytes a different key',async()=>{
+ const keys=[],[first,changed]=collisionPngPair();
+ assert.equal(first.toString('utf8'),changed.toString('utf8'));
+ const lost=async request=>{keys.push(request.headers.get('Idempotency-Key'));throw Error('WT response lost');};
+ const run=client(lost),input=bytes=>({method:'PATCH',headers:{'content-type':'image/png'},body:bytes});
+ await assert.rejects(run.fetch('/api/movements/WT/items/WT/image',input(first)));
+ const reloaded=client(lost,run.store);
+ await assert.rejects(reloaded.fetch('/api/movements/WT/items/WT/image',input(changed)));
+ await assert.rejects(reloaded.fetch('/api/movements/WT/items/WT/image',input(first)));
+ assert.notEqual(keys[0],keys[1]);assert.equal(keys[0],keys[2]);assert.equal(run.store.size,2);
+});
+test('browser raw-image identity includes the media type consumed by the route',async()=>{
+ const keys=[],[bytes]=collisionPngPair(),run=client(async request=>{keys.push(request.headers.get('Idempotency-Key'));throw Error('WT response lost');});
+ for(const contentType of ['image/png','image/webp','image/png'])await assert.rejects(run.fetch('/api/movements/WT/items/WT/image',{method:'PATCH',headers:{'content-type':contentType},body:bytes}));
+ assert.notEqual(keys[0],keys[1]);assert.equal(keys[0],keys[2]);
 });

@@ -20,6 +20,8 @@
     if (request.headers.get("content-type")?.includes("multipart/form-data")) {
       identity = [];
       for (const [key, value] of (await request.clone().formData()).entries()) identity.push(typeof value === "string" ? [key, value] : [key, value.name, value.type, await digest(await value.arrayBuffer())]);
+    } else if (request.headers.get("content-type")?.split(";")[0].startsWith("image/")) {
+      identity = { contentType: request.headers.get("content-type").split(";")[0], sha256: await digest(await request.clone().arrayBuffer()) };
     } else {
       const text = await request.clone().text();
       try { identity = canonical(JSON.parse(text)); } catch { identity = text; }
