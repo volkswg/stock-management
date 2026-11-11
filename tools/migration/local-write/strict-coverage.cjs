@@ -23,7 +23,7 @@ class StrictCampaign extends EdgeCampaign {
                     }
                     variants.push({ id: 'multipart-' + kind, body: form });
                 }
-                const fields = new FormData(); for (const [name, value] of input.body) typeof value === 'string' ? fields.append(name, value + '_changed') : fields.append(name, value, value.name);
+                const fields = new FormData(); for (const [name, value] of input.body) { if (typeof value === 'string') fields.append(name, value + '_changed'); else fields.append(name, value, value.name); }
                 if ([...input.body.values()].some(value => typeof value === 'string')) variants.push({ id: 'multipart-field', body: fields });
             } else if (Buffer.isBuffer(input.body)) {
                 variants.push({ id: 'raw-bytes', body: changed }, { id: 'raw-media-type', body: input.body, headers: { 'content-type': 'image/webp' } });
