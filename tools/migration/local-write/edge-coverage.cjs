@@ -3,6 +3,17 @@ const assert = require('node:assert/strict');
 const { BrowserCampaign } = require('./browser-coverage.cjs');
 const { PNG } = require('./runtime.cjs');
 class EdgeCampaign extends BrowserCampaign {
+    async WT_LINE_COUNTER_PROBE() {
+        const masterId = await this.seedMovement(), user = 'WT_COUNTER_PROBE_' + this.prefix;
+        await this.seedHistory([{ table: 'user_state', row: { id: this.key('COUNTER_STATE'), userId: user, flowname: 'MovementCreate', referenceId: masterId, state: 'quantity', createdAt: '2026-01-01T01:00:00.000Z', updatedAt: '2026-01-01T01:00:00.000Z', context: '{}' } }], 'line-counter-probe');
+        const events = [this.event(user, 'counter-first', '', true), this.event(user, 'counter-unprocessed', '', true)], before = await this.seal(), revision = await this.revision(), start = this.ledger().length;
+        const failed = await this.line(events, 503);
+        assert.equal(failed.body.images.received, 2); assert.equal(failed.body.images.unprocessed, 1); assert.equal(failed.body.images.failedBeforeRouting, 1);
+        assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
+        assert.equal((await this.sql('SELECT count(*)::int n FROM stock_operational.commands WHERE key=ANY($1::text[])', [events.map(e => e.webhookEventId)]))[0].n, 0);
+        assert.equal(this.ledger().slice(start).filter(e => e.kind === 'fake-provider').length, 0);
+        this.save('line-counter-probe.json', { httpStatus: 503, received: 2, unprocessed: 1, failedBeforeRouting: 1, noCompletedFailedCommand: true, noProviderAttempt: true, noBusinessOrRevisionDelta: true });
+    }
     receipt(id, when, total, extra = {}) {
         return { receipt_number: id, receipt_type: 'SALE', receipt_date: when, created_at: when, updated_at: when, store_id: 'WT_STORE_A', total_money: total, total_tax: 0, total_discount: 0, line_items: [{ id: id + '_item', item_name: 'WT item', quantity: 1, price: total, gross_total_money: total, total_discount: 0, total_money: total, cost: 1, cost_total: 1 }], payments: [{ money_amount: total, name: 'Cash' }], ...extra };
     }
