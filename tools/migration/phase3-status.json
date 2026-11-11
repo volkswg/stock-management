@@ -1,8 +1,8 @@
 {
-  "version": 11,
-  "scope": "PR63 local completion started; raw-image byte-intent defect stopped first fresh-copy run; remaining implementation and capacity incomplete; production remains Google Sheets",
+  "version": 12,
+  "scope": "Image retry fix verified in two fresh 461-request local implemented campaigns; remaining full coverage/capacity incomplete; production remains Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T10:31:29.979324+00:00",
+  "lastDataVerificationAtUtc": "2026-11-11T11:08:09.635775+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
@@ -94,9 +94,9 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Review a scoped raw-binary intent fix, then finish pending variant/provider/UI/fault/workload instrumentation and rerun fresh correctness copies before capacity; no existing-data changes or production cutover",
+  "nextStep": "Review the scoped image retry fix and fresh rerun evidence, then finish remaining detailed local coverage and capacity/recovery-app instrumentation before full acceptance; no existing-data changes or production cutover",
   "cutoverBlockers": [
-    "Fresh-copy WT12-RAW-BYTES failed: changed valid raw PNG bytes with the same key return 200 instead of 409. First priority run stopped; remaining coverage implementation, second campaign and capacity remain incomplete.",
+    "Image byte-intent defect is fixed and two fresh implemented reruns have no failures. Seven broader family gaps, full repetitions, provider outcomes, real capacity and recovery-app readiness remain incomplete.",
     "Receipt overlap and cost deletion fixed. Two local runs have no implemented-case failures, but seven mandatory families retain coverage gaps; hosted, realistic capacity and production authorization/activation acceptance are not complete.",
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
     "Read-only hosted API/browser acceptance passed; write/provider workflows, production authorization/security and realistic capacity acceptance remain pending",
@@ -591,5 +591,73 @@
     "syntheticHarnessControlsPassed": 18,
     "existingRegressionTestsPassed": 571,
     "newCopiedExistingRowsEdited": 0
+  },
+  "imageRetryFixResult": {
+    "state": "image-retry-fix-verified-two-fresh-implemented-runs",
+    "sourceFixCommit": "125543b26b485f7fa5a04c3ae0ab57a6b493be5f",
+    "harnessCommit": "fd63c8be8042daf8f8ba2713dd0561777a2ac529",
+    "campaigns": [
+      {
+        "requests": 461,
+        "implementedCaseEntries": 17,
+        "implementedPassEntries": 10,
+        "blockedFamilyEntries": 7,
+        "failed": 0,
+        "rawImageBytesAndMediaConflict": 409,
+        "freshImageIntent": 200,
+        "originalRowsUnchanged": 70777,
+        "oldResponseReplaysWithoutOverwritingNewImage": true,
+        "summarySha256": "1a755dd9a45b3288c6f19d86e878ce977bb0e32c8f0e4375edcf32d120a5d2e0",
+        "rawImageProofSha256": "d33908699c4053a0dddc98b08ddbe9219663ea7d1a118b525130edb090cb14e8"
+      },
+      {
+        "requests": 461,
+        "implementedCaseEntries": 17,
+        "implementedPassEntries": 10,
+        "blockedFamilyEntries": 7,
+        "failed": 0,
+        "rawImageBytesAndMediaConflict": 409,
+        "freshImageIntent": 200,
+        "originalRowsUnchanged": 70777,
+        "oldResponseReplaysWithoutOverwritingNewImage": true,
+        "summarySha256": "3c64ba8e269455b976b34b700cc30c1c1f999c40126e95cdf9fb4fd209916db4",
+        "rawImageProofSha256": "50ba779a6dcf271e0c1493264cb686fbdd53be5cd36c0008fb4a2f485876ffac"
+      }
+    ],
+    "httpRequestsTotal": 922,
+    "recoveryRestoreHashSeconds": [
+      3.819,
+      4.626
+    ],
+    "full51Tables15MetadataRestoreMatchEach": true,
+    "archiveTablesUnchangedEach": 24,
+    "securityMetadataUnchangedEach": 15,
+    "protectedHosted51Tables15MetadataExact": true,
+    "originalStoppedCopy70777RowsExact": true,
+    "initial218RequestDriverFailurePreserved": true,
+    "remainingFullCoverageComplete": false,
+    "capacity": "NOT RUN; seven broader family gaps remain",
+    "fullReadOnlyRecoveryAppProbe": "NOT RUN",
+    "productionMetadata": {
+      "at": "2026-11-11T11:09:19.703Z",
+      "metadataEntries": 14,
+      "unchangedFromPr63": true,
+      "stockOverrideKeys": [],
+      "productionStorage": "google-sheets",
+      "productionSettingsChanged": false,
+      "productionDataRead": false
+    },
+    "hostedWrites": 0,
+    "productionCutoverPerformed": false,
+    "regressionTestsPassed": 577,
+    "harnessControlsPassed": 18,
+    "actualPostgresImageRegressionPassed": 1,
+    "at": "2026-11-11T11:08:09.635775+00:00",
+    "protectedProofSha256": "ad01e00fde7df000a893f824d7df0bd828507e0ca3eb6d227a69e12665d0d630",
+    "recoveryProofSha256": "f5c73727ffd1ab49d0a3f5d3d0923512d47845cda1c79218eef32e44004ffc56",
+    "resultReceiptSha256": "bf98821afdad1bf869e818503854442a7f54bd7f346ef3a812386d57ae982aef",
+    "evidenceDocument": "docs/database-migration.md#image-retry-fix-and-two-fresh-implemented-reruns-2026-11-11",
+    "rawImageLegacyKeys": "409 safe conflict; no journal rewrite or automatic retry",
+    "productionStorage": "google-sheets"
   }
 }

@@ -917,6 +917,69 @@ commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
 original requirements; a stopped/partial run is not full acceptance.
 Google Sheets remains production's store.
 
+##### Image retry fix and two fresh implemented reruns (2026-11-11)
+
+The owner authorized the image retry fix and fresh disposable local reruns.
+Commit `125543b26b485f7fa5a04c3ae0ab57a6b493be5f` adds one four-line branch in
+`src/composition/postgres/route.ts`: raw `image/*` request intent now hashes the
+original bytes plus the route-consumed media type. Identical files replay the
+stored response; changed bytes/type conflict with 409 before upload. A new key
+for an intentional later upload saves the different bytes; replaying the old key
+afterward returns its historical response without overwriting the newer image.
+JSON canonicalization, ordinary text, multipart behavior and the Sheets bypass
+are preserved. No route handler, schema, grant, environment or dependency change.
+
+Six closed, offline regressions exercise the actual wrapper and command/hash
+owners: three exposed the old behavior before the fix and all six pass afterward.
+A new actual-PostgreSQL command-journal regression also passes on a separate
+fresh local database. The original Phase 2 fixture is unchanged; the history
+check reverses only the exact four-line addition before checking its original
+hash. Browser inputs, response contracts, keys and revision rules are unchanged.
+**Older raw-image journal keys computed by the lossy algorithm now safely return
+409**, even for the same file. Their bytes cannot be recovered from the old
+intent hash; no compatibility guess, journal rewrite or automatic new-key retry
+is attempted. This is a staging-only compatibility consequence, not a migration.
+
+The first fixed-code run stopped after 218 requests because the new positive
+control used `imageUrl` instead of the existing response's `productImageUrl`.
+The raw-byte/type checks had already returned the correct 409. The harness field
+was corrected in a separate commit, the stopped copy/logs were retained, and all
+its original 70,777 rows were verified unchanged. A private local service-file
+format error was corrected before app execution on the new rerun copies; no
+database reset, existing-data repair or assertion weakening occurred.
+
+Two **new named copies** were then cloned from the verified untouched local
+reference. Each matched all 51 tables/15 metadata before writes. Both used the
+same fixed build and pinned corrected harness, with separate fake-provider
+ledgers. The app was stopped after the campaigns.
+
+| Check | Each of the two fresh reruns |
+| --- | --- |
+| Implemented API/browser work | 461 HTTP requests; 17 case entries including the new raw-image gate; 10 PASS for implemented checks, 7 retain broader coverage BLOCKED; zero FAIL. |
+| Raw-image proof | First/same-byte replay 200/200; changed bytes and media type 409; new intended key 200 with exact different-byte upload; old key still replays exact body/revision after that later write, without another upload or row/revision change. |
+| Other implemented checks | All 31 ordinary mutation methods' existing replay/auth/conflict proofs; receipt overlap/conflict retry, cost-override deletion/history, stock/payroll controls, 20 Orders same-key pairs, 20 stale-edit pairs, ten rollback and ten commit-ack-loss trials, mobile response loss and post-claim restart. |
+| Original copied data | All original 70,777 rows unchanged; 24 archive tables and 15 security metadata sections unchanged. |
+| Generated checkpoint | Captured and restored into a new local recovery database; all 51 tables/15 metadata match; no app/provider replay. Restore+hash: 3.819 s / 4.626 s. Full read-only recovery app readiness is still NOT RUN. |
+
+Protected hosted staging matches all 51-table/15-metadata before/after hashes;
+only bounded read-only TLS access was used (31.15 s preflight, 21.18 s afterward).
+Production's 14 environment metadata entries match the PR #63 verified state,
+with no STOCK_* override. No production credentials or Sheets records were read,
+no hosted write occurred, and production remains Google Sheets.
+
+All **577** regular regressions, **18** synthetic harness controls and the separate
+actual-PostgreSQL image regression pass. Lint has only the inherited unused
+`shipmentRow` warning; typecheck and both the exact-source credential-free
+production build and attested fake-provider private build pass. No dependency,
+original fixture, generated route contract or operational schema changed.
+
+Private result receipt SHA-256:
+`bf98821afdad1bf869e818503854442a7f54bd7f346ef3a812386d57ae982aef`.
+The image defect is fixed and its scoped reruns pass. **Full PR #63 implementation,
+seven broader family gaps, complete browser/crash repetitions, provider outcomes,
+actual capacity workload/observer/oracle and recovery-app readiness remain
+incomplete**; no full local/hosted acceptance or production cutover is inferred.
+
 ##### Local completion started: raw-image intent failure (2026-11-11)
 
 The owner authorized PR #63 implementation and execution on fresh disposable

@@ -1,5 +1,31 @@
 # Refactoring progress and evidence
 
+## Image retry fixed — two fresh implemented reruns pass (2026-11-11)
+
+The owner authorized the scoped image fix. The shared staging wrapper now hashes
+raw image bytes and media type without decoding them. Six focused regressions
+pass (three failed before); a separate real-PostgreSQL journal regression passes.
+JSON/text/multipart and Sheets behavior remain unchanged; older lossy-format
+image keys safely conflict without rewriting their history or auto-retrying.
+
+The [image-fix evidence](../database-migration.md#image-retry-fix-and-two-fresh-implemented-reruns-2026-11-11)
+records two fresh 461-request campaigns (922 total), each with 17 entries,
+10 implemented PASS / 7 broader BLOCKED and no FAIL. Changed image bytes/type
+return 409; a fresh intentional key uploads the different bytes; older successful
+keys replay without overwriting the newer image. All original 70,777 rows,
+24 archive tables and 15 security metadata remain unchanged. Both generated
+checkpoints restore with all 51 tables/15 metadata matching (3.819 / 4.626 s),
+with no provider replay or recovery app start. A prior 218-request harness-field
+failure is preserved; its copied original rows also match unchanged.
+
+Protected hosted staging before/after hashes are exact. Production environment
+metadata is unchanged and storage remains Sheets. All 577 regular tests,
+18 synthetic controls and one separate real-PG image regression pass; lint retains
+only the inherited warning, and typecheck plus isolated production/private builds
+pass. Source fix: `125543b26b485f7fa5a04c3ae0ab57a6b493be5f`.
+Full coverage/capacity/recovery-app acceptance remains incomplete.
+Receipt: `bf98821afdad1bf869e818503854442a7f54bd7f346ef3a812386d57ae982aef`.
+
 ## Local completion started — raw-image correctness failure (2026-11-11)
 
 PR #63 execution was authorized on fresh disposable copies. Added a real-app
