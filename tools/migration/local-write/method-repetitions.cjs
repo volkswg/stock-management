@@ -108,11 +108,24 @@ class MethodCampaign extends HistoricalCampaign {
             default: assert.fail('No fresh state-changing scenario for ' + route);
         }
     }
+    methodRoutes() {
+        const routes = this.exportedMethods.filter(row => row.route !== '/api/line/webhook').map(row => row.method + ':' + row.route).sort();
+        assert.equal(routes.length, 31); return [...routes, 'POST:/api/expenses/masters/shops'];
+    }
+    async WT_METHOD_FACTORY_SMOKE() {
+        const proofs = [];
+        for (const route of this.methodRoutes()) {
+            const input = await this.scenario(route), revision = await this.revision();
+            const response = await this.api(input.url, { ...input, key: this.key('factory-smoke') });
+            assert.ok(Number(await this.revision()) > Number(revision), 'Smoke preparation produced a no-op: ' + route);
+            proofs.push({ route, status: response.status, stateChanged: true }); this.save('method-factory-smoke.json', proofs);
+        }
+        this.control({}); await this.verifyOriginal();
+    }
     async ordinaryMethodRepetitions() {
         // WT01 populated the physical export inventory. LINE uses its signed
         // logical-event protocol and is checked by its own journey/fault matrix.
-        const routes = this.exportedMethods.filter(row => row.route !== '/api/line/webhook').map(row => row.method + ':' + row.route).sort();
-        assert.equal(routes.length, 31); routes.push('POST:/api/expenses/masters/shops'); const proof = [];
+        const routes = this.methodRoutes(), proof = [];
         for (const route of routes) {
             const item = { route, sameKeyPairs: 0, staleStatePairs: 0, postUnrelatedWriteReplays: 0, preCommitRollbacks: 0 };
             for (let trial = 0; trial < 20; trial++) {
