@@ -811,7 +811,7 @@ This is snapshot/application parity, **not hosted runtime/HTTP/provider acceptan
 
 ### Gate 5 — authorization, browser/API and business acceptance
 
-#### Current private read-only preview (2026-11-11)
+#### Private read-only preview evidence before PR #60 merge (2026-11-11)
 
 The owner authorized preparing a private Supabase staging app and running only
 read-only application tests. The separate Vercel project
@@ -907,26 +907,263 @@ Loyverse sandbox/fake receipts and a restricted Drive test folder, or explicitly
 approve each external provider action. Preserve original account identities via
 safe fixture configuration; never export credential tabs into test artifacts.
 
-| Module | Required acceptance on an expendable approved clone |
-| --- | --- |
-| Orders/items/bills | List/detail/create/update/cancel/soft delete, quantities/prices and image references; multipart upload errors; retry/reload retains key; intentional duplicate payload gets new ID |
-| Shipments | Create/link/unlink/status/bill; duplicate links and stale mutations; cancellation and historical links retained |
-| Inventory | Journey/item/delivery transitions, stock counts, adjustments/reversals/replacements; exact per-account balances; simultaneous edits and retry races |
-| Sales/Loyverse | Original receipts/items/payments, refunds/store/date filters, repeated paginated sync and failures; sync history atomic; unchanged dashboard/profit overrides |
-| HR/payroll | Employee/status/compensation history; Bangkok clock-in/out/half days; advances/cancellation, revision conflicts, exact payroll/settlement snapshot and replay |
-| Expenses/shops | Ledger/master CRUD and soft delete; existing names/account mappings; amounts, month filters and report totals |
-| LINE/session | Valid/invalid signatures; text/photo/multi-event journeys; regrouped redelivery; clearing/history; failed event recovery; uncertain reply quarantine without double business mutation |
-| Security/recovery | Missing/wrong bearer, production guard, wrong UUID/TLS/login, readonly SQL, forged LINE path, stale revisions, missing/reused keys, direct Data API/browser SQL denial; no secrets in bundles |
+#### Disposable staging write-testing plan
 
-- [ ] Compare original Sheets-compatible fixture and SQL results for every
-  existing operation, response/status and state transition; log remaining
-  untested/unsupported paths explicitly. Any unexplained difference blocks.
-- [ ] Inject concurrent writes, partial multi-table failure, stale views, lost
-  COMMIT acknowledgements and retry storms. Require zero duplicate business
-  commands, no partial rows and identical financial/stock outcomes.
-- [ ] Review terminal failed LINE results, sending/uncertain replies and orphan
-  Drive uploads privately. There is no atomic database+provider transaction or
-  guaranteed reply delivery. Do not erase journal rows or invent new event IDs.
+**Status: prepared only; no copy created and no acceptance writes executed.**
+The owner authorized this plan, not execution. The implementation baseline is
+merged [PR #60](https://github.com/volkswg/stock-management/pull/60), commit
+`bdfab89e43a814bfcc6dff910eda4cde8aed2e98`. Its read-only tests passed; write,
+provider and capacity acceptance have not. A passing write rehearsal will not
+authorize production activation. Google Sheets remains production's store.
+
+##### Scope and target selection
+
+Use a new disposable database **cluster**, new credentials and a separate test
+app. First rehearse locally with PostgreSQL 17 and the real Next.js app. Then
+repeat the mandatory cases in a separately approved Supabase project and
+protected Vercel **preview** before claiming hosted write acceptance. A local
+database pass alone does not certify hosted roles, TLS, pooling or protection.
+Hosted project identity, region, quota and any cost must be approved before
+provisioning; this plan makes no assumption about available free projects.
+
+Neither a second schema nor another database in the existing hosted project is
+an acceptable substitute: schema names are fixed and roles are cluster-wide.
+Do not reuse existing recovery containers, databases or volumes as writable
+fixtures. A new local cluster must have its own data volume and bounded resources.
+The original Supabase project `orjnazrothkdgmzlsuto`, its direct/pooler identity,
+isolation UUID `160669bd-2f6f-4490-9259-bada5a1d02c4`, the existing read-only
+preview and production domains are explicitly forbidden mutation targets.
+The existing staging login must retain its SELECT-only grants and read-only flag.
+
+Before execution, seal a private manifest containing:
+
+- The execution approval, operator, business reviewer and recovery reviewer;
+  exact source commit, CI link and test-harness commit. Any harness changes need
+  their own reviewed tests; none are implemented by this plan.
+- Verified backup generation, encrypted-file and dump checksums, decryption and
+  independent-restore receipts, source fingerprint format and ledger provenance.
+  Use the verified **post-audit-removal** backup; do not restore the old audit
+  layout. No new live Sheet export is needed for this rehearsal.
+- Exact destination project/cluster, host, database, region, TLS hostname/CA,
+  container/volume IDs for local work, new isolation UUID, separate preview
+  project/deployment/origin, resource/cost limit and credential references.
+  Hosted IDs are intentionally unset until approved; unset or ambiguous means
+  **BLOCKED**, never default to a linked project or a cached service profile.
+- Test-case versions, seed/checkpoint hashes, permitted changed rows/tables per
+  case, fake-provider identities, clock/ID strategy, workloads and the thresholds
+  below. Record timestamps in UTC and Asia/Bangkok. Keep secrets out of the manifest.
+
+##### Entry gates — all required before the first test write
+
+1. **Restore and prove the baseline.** Verify the existing encrypted backup and
+   recovery receipts without replacing them. Decrypt only into restricted
+   encrypted operator storage and restore to the newly identified empty target.
+   Recreate only reviewed private-schema dependencies from password-free role
+   metadata, with fresh passwords; do not import production/provider credentials
+   or blindly replay platform-role administration. Compare all 51 table hashes,
+   all 15 metadata sections and migration provenance against that backup before
+   enabling the app. Stop on unexplained differences; do not weaken RLS, ownership
+   or grants to make restoration pass. Any target-specific role mapping must be
+   enumerated and reviewed, not hidden by excluding security metadata.
+2. **Give only the copy a new identity.** While its app is disabled, change the
+   copy's environment UUID to a fresh value and retain purpose `isolated-staging`.
+   Record that one expected setup-row delta. The 23 business tables and 70,777
+   records must still match the backup before test seeding. Seal a new complete
+   copy baseline, including exact role/policy and environment differences.
+   Recreated login/setup metadata is not a business-data mismatch exemption.
+3. **Separate every connection.** Source verification, if authorized, runs in a
+   separate read-only operator process; source connection files/passwords never
+   enter the write runner, app, build or clone. No application `.env` files or
+   private account worksheet are copied. Allow only the exact destination
+   project/host/database/UUID and preview origin. Validate identities before any
+   restore, role setup, reset, mutation or cleanup; deliberately wrong IDs must
+   fail without connecting to a protected target. Test rejection with fakes or
+   clone-only mismatches, never by sending a write to the original database.
+4. **Use ordinary runtime privileges.** On the copy only, provision a fresh
+   non-owner, non-superuser, non-BYPASSRLS login able to SET the reviewed
+   `stock_runtime` role without inheriting or administering it. Preserve that
+   role's existing restricted grants/policies; no blanket table/schema grants.
+   Use an owner connection only for explicit copy setup/restore/fault injection.
+   The application receives only the copy login, a fresh scoped operator token
+   and its UUID. Validate RLS and archive/private Data API denial independently.
+5. **Enable writes only in the new app.** Set `STOCK_STORAGE=supabase` and
+   `STOCK_STAGING_ENABLED=true`; disable `STOCK_STAGING_READ_ONLY` only there.
+   Keep the existing app/login read-only. For local loopback only, explicitly
+   enable `STOCK_ALLOW_LOCAL_TEST_DATABASE`; hosted uses verified TLS and the
+   dashboard-confirmed pooler. Use an actual Vercel preview environment; do not
+   spoof `VERCEL_ENV` to bypass the production guard. Exclude DB/auth/account
+   values from the build process and scan client bundles for secrets.
+6. **Prove provider isolation separately.** PR #60's fetch guard is conditional
+   on the read-only flag, so switching that flag off is **not** safe by itself.
+   A reviewed test-only composition must supply deterministic fake LINE,
+   Loyverse and Drive adapters and a provider-denial control independent of the
+   write flag. It must cover server fetch, SDK HTTP/HTTPS, redirects, background
+   jobs and browser requests while permitting only the exact copy database and
+   approved test origin. Prove unknown-host and redirect refusal before writes;
+   dummy tokens alone are insufficient. If the hosting setup cannot enforce
+   this boundary, hosted write testing is BLOCKED. Never repoint the existing
+   readonly runner or remove the current preview's guard to obtain coverage.
+7. **Record protected-state evidence.** With separately approved read-only
+   access, fingerprint the original hosted staging tables/metadata immediately
+   before and after the campaign. Require exact equality, including revision,
+   command and side-effect state. Check production storage configuration remains
+   Sheets and has no test credentials. Do not freeze, export or probe production
+   Sheets/provider data for this campaign; normal owner activity may continue.
+
+The shared staging actor/token is sufficient only for trusted operator tests.
+Production identity, HR/payroll authorization, attribution and CSRF remain a
+separate release gate; do not label operator-token testing production security.
+
+##### Test data, runner and comparison rules
+
+Run each case from a documented checkpoint. Seed uniquely named synthetic
+entities/events in the copy; keep an explicit ledger for any copied historical
+row selected for a legacy-update test. Never replay imported LINE sessions,
+real reply tokens or real receipt-sync events. Provider fakes return deterministic
+pages, refunds, files, replies and injected failures, and retain a separate
+attempt/outcome ledger. External services receive **zero** requests in this phase.
+
+Use the existing unchanged application rules with in-memory Sheets-compatible
+fixtures as the write oracle, plus independently calculated stock/financial
+control totals. No live Sheets writer is an oracle. Preserve real SQL adapters,
+transactions, HTTP routes and React UI; do not mock the operation under test.
+The existing synthetic Orders bridge and read-only runner are starting evidence,
+not the full write-acceptance harness. Build the missing harness before execution.
+
+Use fixed clocks/IDs where supported by existing ports. Otherwise capture new
+IDs/timestamps and map only those declared nondeterministic fields, checking
+uniqueness, format, relationship propagation and Bangkok boundaries separately.
+Never normalize away money, quantities, identities of existing rows, ordering,
+null/blank distinctions, statuses, historical dates, headers or error contracts.
+Compare response/status, persisted rows, relationships, reports, command/effect
+records and fake-provider calls after success, failure, retry and restart.
+
+##### Mandatory acceptance matrix
+
+Each row is a required case family, including its success, rejection and retry
+variants. Run each functional family from a clean checkpoint at least twice.
+Any unimplemented, skipped, flaky or unverified mandatory variant is **BLOCKED**,
+not PASS. Exact existing route status/body contracts remain authoritative except
+for the specifically stated persistence errors below.
+
+| ID | Exercise on the disposable copy | PASS only when |
+| --- | --- | --- |
+| WT00 | Target/UUID/role/TLS/protection gates; simulate forbidden target selection | Every mismatch stops before mutation; protected targets are never contacted by the write runner; valid copy access uses the ordinary runtime login and exact approved origin. |
+| WT01 | Missing/wrong API token, forged LINE-path bypass, production guard, denied direct SQL/Data API access | API token errors are 401; production/identity guard failures are 503; invalid LINE signatures are 401. No business or command/effect mutation occurs. Archive access, elevated roles and exposed private schemas remain denied. |
+| WT02 | Orders/items/bills: create, change price/quantity/remark, cancel and soft delete; legacy links | Exact approved statuses, amounts, items and historical relationships match the oracle; cancelled/soft-deleted history is retained; rejected inputs leave no partial rows. A new intentional identical order has a distinct ID/key. |
+| WT03 | Shipments: create, link/unlink orders, valid/invalid transitions, cancellation and bill association | Link/status/history rules and fees match; duplicate links are rejected; no orphan/partial relationship or invalid transition commits; retries do not duplicate a shipment or fake bill upload. |
+| WT04 | Movement journeys/items: quantities, delivery, zero/missing values and legacy journey transitions | Master/detail quantities and account stock effects match exactly; invalid/missing quantities cannot partially mark delivery; repeat delivery/retry has no second stock effect. |
+| WT05 | Monthly stock counts, adjustment/reversal/replacement and cross-account cases | Opening + delivered stock − net sales − other out + returned in reconciles per account/month; saved physical counts and variances match; reversal changes stock once and preserves original history. |
+| WT06 | Fake sales sync with pagination, overlapping/repeated pages, refunds, cancellations, store/date filters and failure mid-sync | Receipt/item/payment/sync identities and counts are exact; retry is not additive; partial sync never reports complete; dashboard, stock-out, profit and cost overrides match the oracle. |
+| WT07 | Employee changes/effective compensation; Bangkok clock-in/out, leave, half days and duplicate dates | Compensation history, attendance uniqueness and day/shop attribution match; invalid changes are atomic; month/date-boundary results are exact. |
+| WT08 | Salary advances: create/pay/cancel; payroll/commission and settlement, including stale revisions | Base pay, commissions, deductions, recovered/outstanding advances and settlement snapshots match exactly; cancellation/replay cannot pay, deduct or recover twice; settled history remains intact. |
+| WT09 | Expenses, categories and shops: create/edit, inactive/soft-delete, account mappings and monthly reports | Amounts, preserved names/history and account mappings match; totals agree by month/shop/category and with profit; invalid mappings and failed writes leave no partial ledger/master changes. |
+| WT10 | Fake Drive/photo/bill flows: valid/invalid MIME/size, multiple files, upload/DB failures and retry | Only the fake ledger is contacted; accepted references resolve to fake IDs, rejected files add no rows, historical real references are not fetched/rewritten, and uncertain/orphan outcomes are recorded without blind re-upload. |
+| WT11 | Fake LINE text/photo/multi-event journeys, regrouped redelivery and cleared/failed sessions | Valid signatures use only synthetic users/events; logical events commit once despite regrouping; failed SQL can retry safely; fake replies are attempted at most once and uncertain outcomes are surfaced. |
+| WT12 | Missing/malformed operation key, same key/body, changed body/query/file and stale `If-Match` | Missing/malformed key gives 428; reused key with different intent and a fresh operation with stale revision give 409 with no business delta. A completed retry reproduces original stored status/body/headers and adds no business rows or effects. |
+| WT13 | Double click, tab reload, response drop after commit, ambiguous commit acknowledgement and process restart | The browser retains the same pending key across uncertainty; retry resolves the existing command/result. Exactly one logical command commits; an intentional later action gets a new key. No blind new-key retry or Sheets fallback occurs. |
+| WT14 | Parallel edits/creates and forced multi-table SQL failure before commit | No lost update/overdraw/duplicate link; stale edit is rejected or serialized per existing contract. Forced rollback restores every affected business row, revision and command journal; unrelated rows and archive are unchanged. |
+| WT15 | Crash before/after fake reply/send, `sending`/`uncertain` outcomes, then full backup/restore of generated state | A committed business command is not repeated. Uncertain/sending effects remain visible and are never auto-resent. Fresh recovery matches all 51 tables/15 metadata sections, including commands/effects, against its sealed checkpoint. |
+
+WT12–14 apply to **every ordinary exported mutation method**, not Orders alone.
+Inventory all 35 API files and their exported methods at the pinned commit.
+LINE's signature-verified entrypoint uses durable logical-event keys rather than
+the ordinary API's bearer/`Idempotency-Key` contract; exercise the equivalent
+redelivery/uncertainty protections through WT11/13. Record every route exception.
+Repeat multipart and query-intent cases with their actual endpoints.
+No success may be inferred just from an HTTP 2xx.
+An HTTP error is not proof that a transaction failed to commit.
+
+Revision advances once per mutating SQL **statement**, not once per logical
+business command. Assert the expected statement-level change and persisted row
+revisions for a new operation; replay/rollback must not advance the current
+counter. A replay returns its original stored response revision even if unrelated
+later commands advanced the counter. Do not weaken these checks to “value grew.”
+Keep stock/financial effects attributable to each command exactly once.
+
+For pre-commit SQL failures, business rows, revision and that command insertion
+roll back together. For post-commit provider failures, preserve the committed
+business outcome and durable `sending`/`uncertain` state. There is no atomic
+database/provider transaction or guaranteed reply delivery. Never delete journal
+rows, replace event IDs or mark uncertain sends successful to make a retry pass.
+
+##### Performance and recovery acceptance limits
+
+These are proposed bounded **rehearsal** criteria to accept in the execution
+manifest, not an assertion about production peak load or an approved paid plan.
+An altered threshold needs an explicit recorded decision before testing; do not
+relax it after a failure and keep the original PASS label.
+
+| Check | Proposed PASS threshold |
+| --- | --- |
+| Correctness | Zero unexplained response/data/control-total differences; zero duplicate commands/business effects; zero partial multi-table commits; zero unauthorized writes or external requests. No rounding tolerance beyond the existing application rules. |
+| Repetition/faults | Two clean functional campaigns; at least 20 same-key concurrent pairs, 20 stale-edit pairs, and 10 trials each of pre-commit rollback, post-commit response loss and restart/uncertain-effect scenarios. All trials satisfy WT12–15. |
+| Bounded load | On the hosted copy, first one then five simultaneous operator clients for 10 minutes at each level using the sealed read/write mix. Warm read p95 ≤ 2 s, simple-save p95 ≤ 3 s, compound/fake-provider-save p95 ≤ 5 s, and no request > 10 s. Measure cold starts separately. |
+| Reliability/headroom | Zero unexpected 5xx/timeouts, deadlocks or connection-limit errors in the non-fault workload; expected injected errors/conflicts counted separately. Keep at least 20% of approved connection/storage/memory budgets free, with no OOM/restart. Stop before exceeding the manifest's cost/resource limit. |
+| Recovery | Stop copy ingress/providers, drain or record uncertain work, capture a consistent generated-state backup, and restore to another new isolated target. All table/metadata hashes and command/effect outcomes match; proposed RTO ≤ 15 minutes from declared recovery start to verified readiness. RPO is zero only for acknowledged work included in the sealed checkpoint; later writes must be explicitly reconciled, never silently discarded. |
+| Protected environments | Original hosted staging's 51 table hashes and 15 metadata sections, including revision/journals/permissions, equal their pre-campaign snapshot. Production configuration remains Sheets. Runner/provider request ledgers show zero access to production services or protected mutation targets. |
+
+Use the actual full-size saved data for the hosted load/recovery runs; synthetic
+empty-database performance is insufficient. Record exact hardware/plan, region,
+pooler, active connections, test mix, warmups, p50/p95/p99/max and failed requests.
+The small PR #60 read sample is a comparison point, not a peak-capacity approval.
+Production workload expectations and recovery objectives still need Gate 4/6
+sign-off, even if these rehearsal limits pass.
+
+##### Evidence, stop rules and completion
+
+Keep per-case expected/actual deltas, response comparisons, DB fingerprints,
+operation keys/revisions, fake-provider attempt counts, fault timing, browser
+desktop/mobile screenshots, performance samples and restore receipts in private
+encrypted operator storage (0600 files/0700 directories). Cover complete flows
+in the real UI, including keyboard/mobile submits, refresh/reload and visible
+failure/retry messages. API and SQL coverage cannot stand in for UI coverage.
+Publish only case IDs, counts, outcomes, sanitized failures, commit/CI links and
+artifact checksums. Do not publish business values, tokens, SQL binds, raw errors,
+HAR/traces or copied session state to Git/ordinary logs.
+
+Stop immediately on any target ambiguity, unexpected source delta, provider
+egress, permission leak, missing baseline, integrity failure, unexplained total,
+duplicate business effect, orphan outcome requiring reconciliation, budget breach
+or failed recovery. Disable only the **new copy's** ingress/runner, preserve its
+evidence and ambiguous journals, and investigate. Do not “repair” the original
+staging database, rotate its login, change production, automatically fall back
+to Sheets or rerun an uncertain operation with a fresh key.
+
+Reset only the disposable target from its approved checkpoint after recording
+the failure and confirming target identity again. Use a paired fresh fake ledger
+per run; do not erase evidence of uncertain effects. Retest the failed case and
+affected cases after a reviewed fix. Never overwrite the reference backup or
+delete shared recovery resources. Cleanup is limited to exact resources listed
+as disposable in the execution approval; retain the final evidence/recovery set.
+
+The operator and business reviewer sign the case/control-total results; the
+recovery reviewer signs isolation and restoration evidence. Report one of:
+
+- **PASS — disposable write rehearsal only:** every mandatory local and hosted
+  case, browser flow, protected-state comparison, performance and recovery check
+  passed; all differences explained and no unresolved failure/skip remains.
+- **FAIL:** a mandatory assertion failed. Preserve its evidence and block further
+  acceptance until reviewed remediation and rerun succeed.
+- **BLOCKED / NOT RUN:** missing approval, destination/cost identity, harness,
+  provider isolation, comparator, evidence or unexecuted mandatory case. This
+  must never be presented as a partial PASS or as readiness to switch production.
+
+Deliver a signed private execution packet and a sanitized case summary. Any
+real-provider integration test requires separately approved test channel/shop/
+folder and recipients after this fake-provider campaign; it is not certified by
+this plan. Production still needs Gates 4/6–8, including production authorization,
+source refresh/freeze, final reconciliation and post-cutover-write recovery.
+No clone, restore, deployment, role grant or acceptance write is authorized or
+performed by preparing this document.
+
+Platform references checked for this plan: Supabase's
+[backup/restore guide](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore)
+describes migration-history handling, fresh custom-role passwords and separate
+platform/storage concerns. The existing verified private-schema recovery process
+remains authoritative here; do not copy broad platform restore commands from a
+guide. Recheck [CLI v3 targeting changes](https://supabase.com/changelog/supabase-cli-v3)
+and installed command help before any separately authorized execution.
 
 ### Gate 6 — backup/restore and recovery sign-off
 

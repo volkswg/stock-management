@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "scope": "Private Supabase read-only application acceptance passed; audit removal and recovery verified; production remains on Google Sheets",
+  "version": 6,
+  "scope": "Disposable staging write-testing plan prepared, not executed; read-only acceptance and recovery verified; production remains on Google Sheets",
   "reportedOnBangkok": "2026-11-11",
   "lastDataVerificationAtUtc": "2026-11-11T05:56:50.034475+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
@@ -91,7 +91,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Prepare separately approved hosted application/security/performance acceptance and production cutover; production continues on Google Sheets",
+  "nextStep": "Review the disposable-copy write-testing plan, then separately approve the execution manifest, isolated destinations, resource/cost limits and harness implementation; production continues on Google Sheets",
   "cutoverBlockers": [
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
     "Read-only hosted API/browser acceptance passed; write/provider workflows, production authorization/security and realistic capacity acceptance remain pending",
@@ -131,5 +131,65 @@
     },
     "productionDomainStillAtMergedPr59": true,
     "credentialsResponsesAndScreenshotsPublished": false
+  },
+  "writeTestingPlan": {
+    "state": "prepared-not-executed",
+    "document": "docs/database-migration.md#disposable-staging-write-testing-plan",
+    "planningBaselineCommit": "bdfab89e43a814bfcc6dff910eda4cde8aed2e98",
+    "implementationPullRequest": 60,
+    "mandatoryCaseFamilies": 16,
+    "mandatoryCaseIds": [
+      "WT00",
+      "WT01",
+      "WT02",
+      "WT03",
+      "WT04",
+      "WT05",
+      "WT06",
+      "WT07",
+      "WT08",
+      "WT09",
+      "WT10",
+      "WT11",
+      "WT12",
+      "WT13",
+      "WT14",
+      "WT15"
+    ],
+    "caseResult": "NOT RUN",
+    "localFirstSeparateCluster": true,
+    "hostedPassRequiredForHostedAcceptance": true,
+    "destinationProvisioned": false,
+    "destinationIdentityApproved": false,
+    "hostedResourceCostApproved": false,
+    "writeHarnessImplemented": false,
+    "independentProviderIsolationImplemented": false,
+    "executionApproved": false,
+    "acceptanceWritesStarted": false,
+    "existingDataChangedByPlan": false,
+    "productionCutoverPerformed": false,
+    "productionStorage": "google-sheets",
+    "localAndHostedCaseResultsMustBothPass": true,
+    "targetOrEvidenceMissingMeans": "BLOCKED",
+    "providerMode": "fake-only-no-external-requests",
+    "proposedThresholds": {
+      "cleanFunctionalCampaigns": 2,
+      "sameKeyConcurrentPairs": 20,
+      "staleEditPairs": 20,
+      "trialsPerFaultClass": 10,
+      "simultaneousClients": [
+        1,
+        5
+      ],
+      "minutesPerLoadLevel": 10,
+      "warmReadP95Ms": 2000,
+      "simpleSaveP95Ms": 3000,
+      "compoundSaveP95Ms": 5000,
+      "normalRequestMaximumMs": 10000,
+      "minimumResourceHeadroomPercent": 20,
+      "recoveryRtoMinutes": 15,
+      "checkpointRpoAcknowledgedOperationsLost": 0
+    },
+    "thresholdsRequireExecutionManifestAcceptance": true
   }
 }
