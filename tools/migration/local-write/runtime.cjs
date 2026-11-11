@@ -115,7 +115,7 @@ function install() {
             if (!account)
                 return denial('original-provider-account');
             const cursor = url.searchParams.get('cursor') || '';
-            const attempt = journal.begin('loyverse', 'receipt-page', { account, cursor });
+            const attempt = journal.begin('loyverse', 'receipt-page', { account, cursor, query: Object.fromEntries(url.searchParams) });
             if (providerCatalog) {
                 let reply;
                 try { reply = catalogReply(providerCatalog, account, url); }
@@ -187,6 +187,11 @@ function install() {
             tags.set(this, 'effect-claim');
         if (text.startsWith('UPDATE stock_operational.commands SET state='))
             tags.set(this, 'business');
+        if (text.startsWith('UPDATE stock_operational.side_effects SET state='))
+            tags.set(this, 'effect-record');
+        if (text === 'COMMIT' && tags.get(this) === 'business' && consume('exitBeforeBusinessCommit', () => true)) {
+            ledger({ kind: 'injected-fault', phase: 'before-business-commit' }); process.exit(89);
+        }
         const result = query.apply(this, args);
         if (!result?.then)
             return result;
@@ -194,6 +199,9 @@ function install() {
             if (text === 'COMMIT') {
                 const tag = tags.get(this);
                 tags.delete(this);
+                if (tag === 'business' && consume('exitAfterBusinessCommit', () => true)) {
+                    ledger({ kind: 'injected-fault', phase: 'after-business-commit-before-effect' }); process.exit(90);
+                }
                 if (tag === 'business' && consume('loseCommitAck', () => true)) {
                     ledger({
                         kind: 'injected-fault', phase: 'committed-ack-loss'
@@ -205,6 +213,9 @@ function install() {
                         kind: 'injected-fault', phase: 'after-effect-claim'
                     });
                     process.exit(88);
+                }
+                if (tag === 'effect-record' && consume('exitAfterEffectRecorded', () => true)) {
+                    ledger({ kind: 'injected-fault', phase: 'after-effect-recorded' }); process.exit(91);
                 }
             }
             return value;

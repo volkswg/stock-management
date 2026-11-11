@@ -24,6 +24,31 @@ function fixture() {
         root, m, e
     };
 }
+test('crash controls distinguish pre-commit, committed business and recorded-effect boundaries', async () => {
+    const f = fixture(), previous = { ...process.env }, { Client } = require('pg'), query = Client.prototype.query, exit = process.exit;
+    let restore;
+    try {
+        Client.prototype.query = () => Promise.resolve({ rowCount: 1, rows: [] });
+        Object.assign(process.env, f.e); delete process.env.VERCEL_ENV;
+        process.exit = code => { const error = new Error('WT controlled exit'); error.exitCode = code; throw error; };
+        restore = install();
+        for (const [control, sql, code, phase] of [
+            ['exitBeforeBusinessCommit', "UPDATE stock_operational.commands SET state='complete'", 89, 'before-business-commit'],
+            ['exitAfterBusinessCommit', "UPDATE stock_operational.commands SET state='complete'", 90, 'after-business-commit-before-effect'],
+            ['exitAfterEffectRecorded', "UPDATE stock_operational.side_effects SET state='done'", 91, 'after-effect-recorded'],
+        ]) {
+            fs.writeFileSync(f.e.STOCK_WRITE_CONTROL, JSON.stringify({ [control]: { remaining: 1 } }));
+            const client = new Client(); await client.query(sql);
+            try { await client.query('COMMIT'); assert.fail('Missing controlled exit'); } catch (error) { assert.equal(error.exitCode, code); }
+            const events = fs.readFileSync(f.e.STOCK_WRITE_LEDGER, 'utf8').trim().split('\n').map(JSON.parse);
+            assert.equal(events.filter(e => e.kind === 'injected-fault' && e.phase === phase).length, 1);
+        }
+    } finally {
+        restore?.(); Client.prototype.query = query; process.exit = exit;
+        for (const key of Object.keys(process.env)) delete process.env[key]; Object.assign(process.env, previous);
+        fs.rmSync(f.root, { recursive: true });
+    }
+});
 test('local harness refuses remote databases, protected identities, environment leakage and unknown targets', () => {
     const f = fixture();
     try {

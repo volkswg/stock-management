@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Append-only synthetic historical fixtures on a validated disposable local target. */
 const assert = require('node:assert/strict'), fs = require('node:fs');
 const catalog = require('../worksheets.json');
-const properties = Object.freeze({ orders: 'orders', shipments: 'shipments', shipment_orders: 'shipmentOrders', employee_advances: 'employeeAdvances' });
+const properties = Object.freeze({ orders: 'orders', shipments: 'shipments', shipment_orders: 'shipmentOrders', employee_advances: 'employeeAdvances', user_state: 'userState' });
 function validateRows(records) {
     assert.ok(Array.isArray(records) && records.length > 0 && records.length <= 12);
     for (const { table, row } of records) {
@@ -9,6 +9,7 @@ function validateRows(records) {
         assert.ok(Object.keys(row).every(key => catalog[table].headers.includes(key)));
         assert.ok(Object.values(row).every(value => value === null || typeof value === 'string' || typeof value === 'number' && Number.isFinite(value) || typeof value === 'boolean'));
         for (const key of ['orderId', 'shipmentId']) if (row[key]) assert.ok(row[key].startsWith('WT_'));
+        if (table === 'user_state') assert.ok(row.userId?.startsWith('WT_') && row.referenceId?.startsWith('WT_') && row.flowname === 'MovementCreate');
     }
     return records;
 }

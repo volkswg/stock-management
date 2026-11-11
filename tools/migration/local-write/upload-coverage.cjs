@@ -19,7 +19,9 @@ class UploadCampaign extends CompletionCampaign {
         // record that history separately from current SQL references. A file
         // accepted for a rolled-back request has neither kind of evidence.
         const history = [...new Set(this.requests.filter(r => r.status >= 200 && r.status < 300).flatMap(r => [...r.text.matchAll(/WT_FILE_[0-9a-f-]{36}/g)].map(m => m[0])))];
-        const result = classifyUploads(this.ledger(), await this.fileReferences(), history);
+        const ledger = this.ledger(), attempts = new Set(ledger.filter(e => e.kind === 'fake-provider' && e.provider === 'drive').map(e => e.attemptId));
+        const driveEvents = ledger.filter(e => e.kind === 'fake-provider' && e.provider === 'drive' || e.kind === 'fake-provider-outcome' && attempts.has(e.attemptId));
+        const result = { ...classifyUploads(driveEvents, await this.fileReferences(), history), scope: 'Drive uploads and deletions; LINE outcome boundaries are independently asserted by the crash matrix' };
         this.save(label + '.json', result);
         assert.ok(result.pass, 'Accepted provider files are orphaned, uncertain, or missing; stop before capacity.');
         return result;
