@@ -1,8 +1,8 @@
 {
-  "version": 8,
-  "scope": "Receipt-overlap fix implemented and locally verified; disposable write rerun stopped at cost-override deletion; production remains Google Sheets",
+  "version": 9,
+  "scope": "Receipt and cost-override deletion fixes verified in two disposable local runs; all implemented checks pass; full write/hosted acceptance remains incomplete; production remains Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T08:58:28.522340+00:00",
+  "lastDataVerificationAtUtc": "2026-11-11T09:25:11.787205+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
@@ -18,7 +18,8 @@
     "privateStagingApiReceiptSha256": "ae8cf12ad704fd1548826cdb99c541a8ea8aea99d731cdc6d75a79199d5aec56",
     "privateStagingBrowserReceiptSha256": "c5e1db1c162977d45f470c81a47688e8a55fc3132e0c09f36151ea2142d7aa71",
     "privateLocalWriteResultSha256": "8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a",
-    "privateReceiptFixRerunSha256": "3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298"
+    "privateReceiptFixRerunSha256": "3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298",
+    "privateCostFixRerunSha256": "b114a943afd42221ef464410128626013b90097fac1aacbbec4fae2b9261f77a"
   },
   "target": {
     "projectId": "orjnazrothkdgmzlsuto",
@@ -93,9 +94,9 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Fix the separately identified PostgreSQL cost-override deletion/archive binding, then rerun both clean local campaigns and blocked variants; do not change hosted data or activate production",
+  "nextStep": "Complete seven outstanding case-family variants and capacity/repetition checks before separately approved hosted write acceptance; production remains Google Sheets",
   "cutoverBlockers": [
-    "Receipt overlap fixed and verified. WT12 DELETE cost override returns 500 because its SQL binding refuses identity clearing; campaign stopped, second copy pristine, remaining write/fault/capacity acceptance blocked.",
+    "Receipt overlap and cost deletion fixed. Two local runs have no implemented-case failures, but seven mandatory families retain coverage gaps; hosted, realistic capacity and production authorization/activation acceptance are not complete.",
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
     "Read-only hosted API/browser acceptance passed; write/provider workflows, production authorization/security and realistic capacity acceptance remain pending",
     "Reconfirm all writers paused and source freshness; review changes since saved export with approved refresh/delta handling",
@@ -136,7 +137,7 @@
     "credentialsResponsesAndScreenshotsPublished": false
   },
   "writeTestingPlan": {
-    "state": "receipt-overlap-fixed-rerun-stopped-at-wt12",
+    "state": "cost-deletion-fixed-two-local-implemented-runs-pass-full-coverage-blocked",
     "document": "docs/database-migration.md#disposable-staging-write-testing-plan",
     "planningBaselineCommit": "bdfab89e43a814bfcc6dff910eda4cde8aed2e98",
     "implementationPullRequest": 60,
@@ -159,7 +160,7 @@
       "WT14",
       "WT15"
     ],
-    "caseResult": "FAIL-STOPPED-WT12",
+    "caseResult": "IMPLEMENTED_CHECKS_PASS_FULL_COVERAGE_BLOCKED",
     "localFirstSeparateCluster": true,
     "hostedPassRequiredForHostedAcceptance": true,
     "destinationProvisioned": true,
@@ -196,7 +197,7 @@
     "thresholdsRequireExecutionManifestAcceptance": true,
     "planningOnlyHistoricalPr": 61,
     "executionBaselineCommit": "dff802bfddf5c522c013262ba8e56ba9532a8221",
-    "executedHarnessCommit": "141bc9c8c6487e4589b9138863cebf436261a748",
+    "executedHarnessCommit": "943f8702e35af6ae9ca932a5eff13cd671afa1c5",
     "writeHarnessFullyAccepted": false,
     "executionApprovalScope": "local-only",
     "hostedExecutionApproved": false,
@@ -204,100 +205,193 @@
     "mandatoryCasesCertified": false,
     "localFunctionalCampaignsCompleted": 0,
     "privateResultSha256": "8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a",
-    "actualFailure": {
-      "method": "DELETE",
-      "path": "/api/sales/profit-summary/cost-overrides",
-      "expectedStatus": 200,
-      "actualStatus": 500,
-      "applicationError": "Business identity cannot change.",
-      "cause": "Existing cost-override deletion clears its worksheet identity; its PostgreSQL binding does not enable clearAsArchive",
-      "unrelatedFixApplied": false,
-      "failedDeleteJournalAndRevisionUnchanged": true
-    },
+    "actualFailure": null,
     "results": [
       {
-        "id": "WT00",
-        "status": "PASS",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+        "database": "wt_campaign_01",
+        "harnessCommit": "943f8702e35af6ae9ca932a5eff13cd671afa1c5",
+        "cases": [
+          {
+            "id": "WT00",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT01",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Hosted Data API/protection not run; local operator gates passed"
+          },
+          {
+            "id": "WT02",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Cancellation/soft-delete/legacy-update variants unavailable or unexecuted at pinned API"
+          },
+          {
+            "id": "WT03",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Unlink and complete cancellation/history variants not covered"
+          },
+          {
+            "id": "WT09",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT07",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT08",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT04",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT05",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT06",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT10",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Oversize/uncertain upload and orphan cleanup variants not fully covered; replacement route was exercised in WT12"
+          },
+          {
+            "id": "WT11",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Complete LINE text/photo/multi-event/session variants not covered"
+          },
+          {
+            "id": "WT12",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT13",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Only one mobile response-loss/reload/reselection trial per campaign; full repetitions/double-click/new-intent variants pending"
+          },
+          {
+            "id": "WT14",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT15",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Generated backups/restores passed; full before/after-reply crash classes and repetitions not covered"
+          }
+        ]
       },
       {
-        "id": "WT01",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT02",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT03",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT09",
-        "status": "PASS",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT07",
-        "status": "PASS",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT08",
-        "status": "PASS",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT04",
-        "status": "PASS",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT05",
-        "status": "PASS",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT06",
-        "status": "PASS",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT10",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT11",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
-      },
-      {
-        "id": "WT12",
-        "status": "FAIL",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
-        "reason": "Cost-override deletion refused by PostgreSQL identity guard"
-      },
-      {
-        "id": "WT13",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
-        "reason": "Not run after required stop at WT12"
-      },
-      {
-        "id": "WT14",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
-        "reason": "Not run after required stop at WT12"
-      },
-      {
-        "id": "WT15",
-        "status": "BLOCKED",
-        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
-        "reason": "Not run after required stop at WT12"
+        "database": "wt_campaign_02",
+        "harnessCommit": "943f8702e35af6ae9ca932a5eff13cd671afa1c5",
+        "cases": [
+          {
+            "id": "WT00",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT01",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Hosted Data API/protection not run; local operator gates passed"
+          },
+          {
+            "id": "WT02",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Cancellation/soft-delete/legacy-update variants unavailable or unexecuted at pinned API"
+          },
+          {
+            "id": "WT03",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Unlink and complete cancellation/history variants not covered"
+          },
+          {
+            "id": "WT09",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT07",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT08",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT04",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT05",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT06",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT10",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Oversize/uncertain upload and orphan cleanup variants not fully covered; replacement route was exercised in WT12"
+          },
+          {
+            "id": "WT11",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Complete LINE text/photo/multi-event/session variants not covered"
+          },
+          {
+            "id": "WT12",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT13",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Only one mobile response-loss/reload/reselection trial per campaign; full repetitions/double-click/new-intent variants pending"
+          },
+          {
+            "id": "WT14",
+            "status": "PASS",
+            "scope": "implemented variants only"
+          },
+          {
+            "id": "WT15",
+            "status": "BLOCKED",
+            "scope": "implemented variants only",
+            "remaining": "Generated backups/restores passed; full before/after-reply crash classes and repetitions not covered"
+          }
+        ]
       }
     ],
     "generatedCheckpointRestoreVerified": true,
@@ -326,7 +420,43 @@
     "attemptedFamiliesInRerun": 13,
     "completedOrdinaryMutationReplayProofs": 25,
     "allOriginalCopiedBusinessRecordsUnchanged": 70777,
-    "secondCampaignCopyPristine": true,
-    "generatedCheckpointRestoreSeconds": 4.384
+    "secondCampaignCopyPristine": false,
+    "generatedCheckpointRestoreSeconds": 4.384,
+    "previousCostDeletionFailure": {
+      "method": "DELETE",
+      "path": "/api/sales/profit-summary/cost-overrides",
+      "expectedStatus": 200,
+      "actualStatus": 500,
+      "applicationError": "Business identity cannot change.",
+      "cause": "Existing cost-override deletion clears its worksheet identity; its PostgreSQL binding does not enable clearAsArchive",
+      "unrelatedFixApplied": false,
+      "failedDeleteJournalAndRevisionUnchanged": true
+    },
+    "costOverrideDeletionFixed": true,
+    "costFixCommit": "4aac657b705720a386336d655aa47da731207aea",
+    "privateCostFixRerunSha256": "b114a943afd42221ef464410128626013b90097fac1aacbbec4fae2b9261f77a",
+    "implementedCampaignsCompleted": 2,
+    "fullMandatoryPassingCampaigns": 0,
+    "localFunctionalCampaignsCompletedMeaning": "Full mandatory-family acceptance, not partial harness completion",
+    "httpRequestsInLatestRuns": [
+      455,
+      455
+    ],
+    "completedOrdinaryMutationReplayProofsEach": 31,
+    "allOriginalCopiedBusinessRecordsUnchangedEach": 70777,
+    "remainingCoverage": {
+      "WT01": "Hosted Data API/protection not run; local operator gates passed",
+      "WT02": "Cancellation/soft-delete/legacy-update variants unavailable or unexecuted at pinned API",
+      "WT03": "Unlink and complete cancellation/history variants not covered",
+      "WT10": "Oversize/uncertain upload and orphan cleanup variants not fully covered; replacement route was exercised in WT12",
+      "WT11": "Complete LINE text/photo/multi-event/session variants not covered",
+      "WT13": "Only one mobile response-loss/reload/reselection trial per campaign; full repetitions/double-click/new-intent variants pending",
+      "WT15": "Generated backups/restores passed; full before/after-reply crash classes and repetitions not covered"
+    },
+    "bothCampaignsRetainedWithOnlySyntheticChanges": true,
+    "generatedCheckpointRestoreSecondsEach": [
+      3.717,
+      3.127
+    ]
   }
 }

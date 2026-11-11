@@ -1,5 +1,46 @@
 # Refactoring progress and evidence
 
+## Cost-override deletion fix — two implemented local runs pass (2026-11-11)
+
+The owner authorized fixing the WT12 binding defect and rerunning local writes.
+Commit `4aac657b705720a386336d655aa47da731207aea` opts only cost overrides into
+the existing archive-on-clear behavior. Deletion preserves the SQL identity and
+business cells while hiding the archived row; common identity protections,
+schema, privileges and normal Sheets behavior remain unchanged. A dedicated
+real-SQL regression fails before and passes after the fix, including nonblank-ID
+refusal, repeated deletion and a distinct replacement identity. The immutable
+source fixture is retained with one exact bounded witness adjustment.
+
+Both clean-copy runs completed all 16 implemented families without a new failure:
+**455 HTTP requests each**, all **31** ordinary mutation proofs, 20 same-key pairs,
+20 stale-edit pairs, ten multi-table rollbacks, ten lost-commit-acknowledgement
+trials, one mobile response-loss/reload/replay and one post-effect-claim crash per
+copy. Actual HTTP cost deletion retains ID/cells, increments the row once and
+makes a fresh-key repeat a no-op. Receipt overlap/conflict checks still pass.
+The [canonical results](../database-migration.md#cost-override-deletion-fix-and-two-local-reruns-2026-11-11)
+distinguish implemented-case success from full mandatory acceptance: nine families
+pass implemented checks, seven have outstanding variants, and capacity/hosted
+write acceptance are NOT RUN. No full acceptance or production readiness claim.
+
+Every original copied business record (70,777 per copy), all 24 archive tables
+and 15 metadata sections remain unchanged. Both generated checkpoints restore
+with all 51 table hashes/15 metadata sections equal (3.717 / 3.127 seconds),
+with zero checkpoint loss and no provider replay. The previous failed copy and
+both completed runs are preserved; the test app is stopped. Protected hosted
+staging's full before/after snapshot and production environment metadata match;
+Google Sheets remains production's store. No hosted write, real provider call,
+production-data request, original recovery-resource change, merge or cutover.
+
+571 regression tests, nine harness checks and the new real-SQL regression pass;
+lint/typecheck and credential-free production build pass with only the inherited
+shipmentRow warning. Routes, schema, grants, dependencies and historical fixtures
+are unchanged. Draft PR #62 contains the scoped fixes/results. Harness `943f870`
+and private receipt
+`b114a943afd42221ef464410128626013b90097fac1aacbbec4fae2b9261f77a`
+pin the operational evidence; raw records, credentials and backups are not published.
+Complete remaining coverage/repetitions/capacity before considering separately
+approved hosted acceptance or production activation.
+
 ## Receipt-overlap fix — local rerun stopped at WT12 (2026-11-11)
 
 The owner authorized fixing the overlap blocker and rerunning disposable local

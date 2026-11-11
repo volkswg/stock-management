@@ -909,13 +909,83 @@ safe fixture configuration; never export credential tabs into test artifacts.
 
 #### Disposable staging write-testing plan
 
-**Current status: receipt overlap fixed; local rerun stopped at a separate cost-override deletion failure (WT12).**
+**Current status: receipt overlap and cost-override deletion fixed; two clean-copy local runs pass all implemented checks. Full mandatory write acceptance remains incomplete.**
 The owner subsequently authorized the disposable **local** copy, write harness
 and tests. Hosted write testing and production activation remain unapproved.
 The execution baseline is merged [PR #61](https://github.com/volkswg/stock-management/pull/61),
 commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
 original requirements; a stopped/partial run is not full acceptance.
 Google Sheets remains production's store.
+
+##### Cost-override deletion fix and two local reruns (2026-11-11)
+
+The owner authorized fixing the WT12 deletion defect and rerunning disposable
+local writes. Commit `4aac657b705720a386336d655aa47da731207aea` enables the
+existing `clearAsArchive` behavior **only** for `salesProfitCostOverrides`.
+The existing worksheet-style clear now archives the SQL row, preserving its ID
+and exact business cells, and excludes it from active reads. The common identity
+guard, other bindings, schema, grants and normal Sheets behavior are unchanged.
+No existing stored record is migrated, deleted or rewritten by this code change.
+
+A new real-PostgreSQL regression failed before the fix and passed after it on
+separate dedicated local databases. It verifies that a different nonblank ID is
+still refused, deletion increments the row revision once while retaining the
+original ID/payload, repeated deletion is a no-op, and setting a replacement
+creates a distinct active identity. The immutable Phase 2 fixture remains
+unchanged; its source witness permits precisely the one scoped binding addition.
+The secret-free operational CI suite includes this regression.
+
+The earlier failed copy was preserved under a distinct name. A fresh campaign
+copy was cloned from the verified task-owned reference, and both campaign
+baselines matched all **51 tables / 15 metadata sections** before writes.
+The newly built private app retains fake providers and independent outbound
+refusal. Both complete **implemented** runs used harness commit `943f870`:
+
+| Check | Each clean-copy run |
+| --- | --- |
+| HTTP requests / attempted case families | 455 / 16; zero application failures |
+| Ordinary mutation-method proofs | All 31: concurrent same-key request, exact replay, query conflict, stale revision and malformed key refusal |
+| Explicit concurrency / stale-edit pairs | 20 / 20 |
+| Forced multi-table rollback / committed acknowledgement-loss trials | 10 / 10 |
+| Mobile UI post-commit response loss, reload and same-key replay | One successful trial |
+| Crash after side-effect claim and regrouped redelivery | One successful trial; committed business operation is not repeated and sending/uncertain state is retained |
+| Cost-override deletion through actual HTTP | 200; ID/business cells preserved, row revision advances once; fresh-key repeat returns removed=false without a revision change |
+
+The receipt-overlap/conflict fixes also continue to pass. All **70,777 original
+copied business records** are unchanged in each campaign. The archive's 24 tables
+and all 15 security/metadata sections remain exact. Both generated checkpoints
+were backed up and restored into fresh task-owned databases: all 51 table hashes
+and 15 metadata sections match, in **3.717 and 3.127 seconds** respectively, with
+zero checkpoint loss and no provider replay. Both campaigns and the prior failed
+state are retained; the private app is stopped.
+
+**This is not full mandatory acceptance.** Nine families passed their implemented
+variants and seven retain coverage gaps: WT01 hosted Data API/protection; WT02
+cancel/delete/legacy-update variants; WT03 unlink/full cancellation history;
+WT10 oversize/uncertain upload and orphan cleanup; WT11 full LINE/photo/multi-event
+journeys; WT13 full browser repetitions/double-click/new-intent cases; WT15 all
+before/after-reply crash classes and repetitions. WT12 did exercise the product
+image replacement route; that earlier WT10 label is not evidence of missing
+route coverage. Generated backup/restore is now verified separately from the
+remaining WT15 crash variants. Capacity workloads are NOT RUN. Full-family passes,
+hosted write acceptance and production activation remain uncertified.
+
+Final local checks: **571 regression tests, nine safety/oracle checks and one
+new real-SQL regression pass**, as do lint/typecheck and an isolated credential-free
+production build. Only the inherited shipmentRow warning remains. Final build
+inputs match source; the route manifest retains its original hash. No route,
+schema, privilege, dependency, environment-template or immutable-fixture change.
+
+Protected hosted staging's **51 tables / 15 metadata sections** match exactly
+before/after, and production environment metadata is unchanged with no `STOCK_*`
+overrides. Production remains Google Sheets. No hosted write, real provider call,
+production-data request, original recovery-resource mutation, merge or cutover.
+Draft [PR #62](https://github.com/volkswg/stock-management/pull/62) records the
+fixes and scoped results. Private result receipt SHA-256:
+`b114a943afd42221ef464410128626013b90097fac1aacbbec4fae2b9261f77a`.
+Raw business records, credentials, backups, screenshots and logs stay outside Git.
+Next, complete the remaining variants/repetitions and capacity checks before any
+separately authorized hosted write rehearsal or production decision.
 
 ##### Receipt-overlap fix and local rerun (2026-11-11)
 
@@ -982,8 +1052,9 @@ the fix/harness/results and is not merged. Actual rerun harness commit is
 `141bc9c`; private result receipt SHA-256 is
 `3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298`.
 Raw records, credentials, backups, requests, screenshots and logs remain private.
-Next, scope the cost-override archive binding fix and rerun both clean campaigns;
-production activation remains a separate owner decision.
+At this initial stop, the next step was the cost-override archive binding fix;
+the subsequently authorized fix and reruns are recorded above. Production
+activation remains a separate owner decision.
 
 ##### Local execution result (2026-11-11)
 
