@@ -329,6 +329,10 @@ test('failed LINE batches retain received/unprocessed image counters and stop be
  const event=index=>({type:'message',webhookEventId:`routing-failure-event-${index}`,replyToken:'synthetic',source:{type:'user',userId:'synthetic'},message:{id:`image-${index}`,type:'image'}});
  const result=await line.processLineWebhook({events:[event(1),event(2)],lineBotService:{sendReply:async()=>{},downloadMessageContent:async()=>{throw new Error('not used');}},getGoogleSheetsService:()=>{throw new Error('synthetic routing failure');},getGoogleDriveService:()=>undefined,getCreateMode:()=> 'quantity_photo',getPublicBaseUrl:()=> 'https://example.test'});
  assert.equal(result.movementFailed,true);assert.equal(result.imageCounts().received,2);assert.equal(result.imageCounts().unprocessed,1);assert.equal(result.imageCounts().failedBeforeRouting,1);
+ await transaction(false,async()=>{
+  assert.equal((await currentTransaction().query("SELECT count(*)::int n FROM stock_operational.commands WHERE kind='LINE' AND key LIKE 'routing-failure-event-%'")).rows[0].n,0);
+  assert.equal((await currentTransaction().query("SELECT count(*)::int n FROM stock_operational.side_effects WHERE key LIKE 'LINE:routing-failure-event-%'")).rows[0].n,0);
+ });
 });
 
 test('master name checks preserve existing JavaScript case semantics rather than imposing a database-locale identity',async()=>{

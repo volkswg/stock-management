@@ -30,11 +30,15 @@ test('failed staging LINE business work does not commit a completed command that
     if (spec.endsWith('/uploads')) return { executeUploadCommand: execute, observeUpload: upload => upload() };
     if (spec.endsWith('/effects')) return { attemptEffectOnce: async (_key, send) => { await send(); } };
     if (spec.endsWith('/database')) return { PersistenceFailure, requireMutation: () => ({ query: async () => ({}) }) };
-    assert.equal(spec, '../../application/webhook'); return { processWebhookEvents: async input => { executions++; if (fail) input.runtime.error('WT SQL failed'); return { movementFailed: false, imageUploads: [], imageCounts: () => ({ received: 0 }) }; } };
+    assert.equal(spec, '../../application/webhook'); return { processWebhookEvents: async input => { executions++; const image=input.events[0].message.type==='image'; if (fail) input.runtime.error('WT SQL failed'); return { movementFailed: false, imageUploads: [], imageCounts: () => ({ scope:'movement',received:image?1:0,routedToMovement:0,otherFlows:0,unprocessed:0,failedBeforeRouting:fail&&image?1:0,uploaded:0,saved:0,alreadySaved:0,completed:0,failed:0,ignored:0,saveUncertain:0 }) }; } };
   } });
   const input = { events: [{ webhookEventId: 'WT_event', message: { type: 'text' } }], runtime: { error() {} }, lineBotService: { sendReply: async value => replies.push(value) } };
-  await assert.rejects(exports.processPostgresWebhook(input), e => e.status === 503);
+  assert.equal((await exports.processPostgresWebhook(input)).movementFailed, true);
   assert.equal(commands.size, 0); assert.equal(replies.length, 0);
   fail = false; await exports.processPostgresWebhook(input); await exports.processPostgresWebhook(input);
   assert.equal(commands.size, 1); assert.equal(executions, 2);
+  fail=true;
+  const failedBatch=await exports.processPostgresWebhook({...input,events:[1,2].map(n=>({webhookEventId:'WT_failed_image_'+n,message:{type:'image'}}))});
+  assert.equal(failedBatch.movementFailed,true);assert.equal(failedBatch.imageCounts().received,2);assert.equal(failedBatch.imageCounts().unprocessed,1);assert.equal(failedBatch.imageCounts().failedBeforeRouting,1);
+  assert.equal(commands.size,1);assert.equal(executions,3);assert.equal(replies.length,0);
 });

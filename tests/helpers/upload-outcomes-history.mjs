@@ -3,8 +3,15 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 export const uploadOutcomesHistory = JSON.parse(readFileSync('tests/fixtures/staging-upload-outcomes-before.json', 'utf8'));
 const lineBoundaryHistory = JSON.parse(readFileSync('tests/fixtures/staging-line-boundary-before.json', 'utf8'));
+const lineCountersHistory = JSON.parse(readFileSync('tests/fixtures/staging-line-counters-before.json', 'utf8'));
 const hash = value => createHash('sha256').update(value).digest('hex');
 export function restoreUploadOutcomesSource(file, source) {
+  const counters = lineCountersHistory.edits[file];
+  if (counters) {
+    assert.equal(hash(counters.before), counters.beforeHash, file);
+    assert.equal(hash(source), counters.afterHash, file);
+    source = counters.before;
+  }
   const line = lineBoundaryHistory.edits[file];
   if (line) {
     assert.equal(hash(line.before), line.beforeHash, file);
