@@ -104,6 +104,18 @@ class ReadSession:
             lines.append(line)
         raise ValueError('private read-only query failed')
 
+    def digest_table_fingerprint(self, table):
+        # Hash every canonical full row on the server, then stream the sorted
+        # fixed-size hashes. Duplicates remain repeated; no field is omitted.
+        lines=self.rows(f"COPY (WITH hashes AS MATERIALIZED (SELECT encode(sha256(convert_to(to_jsonb(t)::text,'UTF8')),'hex') AS h FROM {table} t) SELECT h FROM hashes ORDER BY h COLLATE \"C\") TO STDOUT;")
+        result=hashlib.sha256(b'stock-table-row-sha256-v2\x00');count=0;previous=b''
+        for line in lines:
+            if not re.fullmatch(b'[0-9a-f]{64}\n',line): raise ValueError('invalid row fingerprint stream')
+            value=line[:-1]
+            if value<previous: raise ValueError('unsorted row fingerprint stream')
+            result.update(bytes.fromhex(value.decode('ascii')));previous=value;count+=1
+        return {'table':table,'rows':count,'sha256':result.hexdigest(),'algorithm':'sorted-row-sha256-v2'}
+
     def table_fingerprint(self, table):
         self.send(f'COPY (WITH serialized AS MATERIALIZED (SELECT to_jsonb(t)::text AS v FROM {table} t) SELECT length(v),v FROM serialized ORDER BY v COLLATE "C") TO STDOUT (FORMAT binary);')
         stream=self.process.stdout

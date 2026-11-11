@@ -1,5 +1,40 @@
 # Refactoring progress and evidence
 
+## Hosted pre-change recovery — bounded verification fix
+
+The original 150-second fingerprint preflight stopped before capture. Read-only
+investigation measured connection/guard setup around 1.45 seconds per connection
+and approximately 82 MB of audit-row JSON. Two readers alone still timed out.
+The explicit version 2 full-row SHA256 stream plus two bounded readers completed
+all 51 tables and 15 metadata sections in 90.91 seconds under the unchanged limit.
+All 23 business-table reconciliation proofs and the original schema/security
+metadata matched. No hosted migration or business write was performed.
+
+The fix retains legacy fingerprints and one-reader defaults, adds explicit audit
+versus revision layout selection, and records/rejects fingerprint format mismatches.
+Independent Python/full-row PostgreSQL oracles, 71 migration unit tests, synthetic
+capture/restore and tamper detection pass. The hosted pre-change capture and
+independent restore/rehearsal evidence are retained privately outside Git.
+
+On 2026-11-11, authorized pre-change capture completed at 11:27 Bangkok. The
+encrypted off-site backup was independently downloaded, checksum-checked and
+decrypted with freshly retrieved owner-held key material. Both pre-change local
+restores matched all 51 table hashes and 15 metadata sections. A separate local
+copy passed the exact merged audit-removal migration: 50 unaffected table hashes
+and unrelated security metadata remained identical; revision/runtime-write probes
+rolled back cleanly. Its new-schema backup and fresh restore also matched. All
+23 business tables reconcile and all 66 offline application comparisons passed.
+The final hosted comparison at 11:31 Bangkok matched the backup in all 66
+sections, roles and the four-version ledger; audit remains hosted and revision
+is absent. Three fresh local databases were retained in existing infrastructure,
+with no new container/role/password or OOM event. No hosted DDL/write or cutover.
+
+Backup scope is the two private schemas plus supplemental password-free role
+and migration-ledger evidence, not full Supabase Auth/Storage/platform recovery
+or Drive images. Reconfirm writer freeze, source/backup freshness and exact
+target approval before any future hosted audit removal.
+
+
 ## Audit removal — implementation pending hosted approval
 
 The owner requested removal of operational audit history. The proposed migration
@@ -7,8 +42,9 @@ replaces the audit table and 23 logging triggers with one transactional revision
 counter and statement triggers. HTTP conflict checks, command replay, business
 versions/archives and side-effect journals remain. Recovery and promotion tools
 expect the replacement revision table. Historical migrations/fixtures are retained.
-Local verification uses disposable synthetic PostgreSQL databases only; no hosted
-DDL, data removal, application activation or production cutover is part of this PR.
+PR #57 verification used disposable synthetic PostgreSQL databases only. The
+separately authorized real-data backup/local rehearsal is recorded above; hosted
+audit removal, application activation and production cutover remain unexecuted.
 See the [removal procedure](../database-migration.md#audit-history-removal-prepared-not-applied-to-hosted-staging)
 for coordinated deployment, destructive-history semantics and old-backup tooling.
 
@@ -20,15 +56,16 @@ rollback/conflict behavior. Complete two-schema capture/restore matches; altered
 records, table grants and revision-column grants are detected. Lint and typecheck
 pass (one inherited unused-variable lint warning); the isolated credential-free
 production build preserves routes and browser bundle privacy. Earlier migration
-files and historical fixtures remain unchanged. No real business data was used.
+files and historical fixtures remain unchanged. PR #57 used no real business data.
 
 ## Database migration — current operational status (2026-11-11)
 
-Repository baseline: merged [PR #55](https://github.com/volkswg/stock-management/pull/55),
+Hosted import baseline: merged [PR #55](https://github.com/volkswg/stock-management/pull/55),
 `65ed6f65256e59f7f6fce44bcd4fb88a819ae95c`. The latest saved hosted
 reconciliation completed on **2026-11-11 at 08:46 Bangkok / 01:46 UTC**.
-This is a report of retained private execution evidence, not a fresh database or
-Google Sheets inspection performed by this documentation update.
+The separately authorized pre-change backup/final hosted comparison is current
+to 11:31 Bangkok, with local migration/recovery rehearsal completed at 11:33.
+Production still uses Sheets; no new live Sheet export was performed.
 
 | Workstream | Latest verified state |
 | --- | --- |
@@ -37,14 +74,13 @@ Google Sheets inspection performed by this documentation update.
 | Record reconciliation | All 23 operational business tables reconcile against that saved source after one approved product-name encoding correction; one row updated and one audit row added. Private row IDs and values remain outside Git. |
 | Application calculations | **66 offline application comparisons passed** against saved source/target artifacts. This does not certify live hosted API/browser/provider behavior. |
 | Sequences | No alignment required; no explicit sequence writes performed. |
-| Recovery | Earlier independently verified schema backup and source archive retained. **Post-import backup/restore verification is incomplete and paused at the owner's request.** The full recovery-fingerprint preflight hit its existing 150-second guard; no post-import capture was completed. |
+| Recovery | **Pre-change two-schema backup and independent recovery verified.** Encrypted private off-site download, fresh key recovery, two exact old-schema restores and local new-schema capture/restore passed. Earlier backups remain retained; broader platform recovery is not certified. |
 | Application activation | **Not ready; no cutover performed.** Production still uses Google Sheets. No production storage setting was switched by these operations. |
 | Cleanup | Superseded export/build/import artifacts retired; latest source/CSVs, verification/audit evidence, credentials/TLS and recovery dependencies retained. Only the explicitly approved failed Docker rehearsal and its dedicated volume were deleted; two recovery containers and shared TLS remain. |
 
-Next work is to inspect the application integration and prepare a scoped testing
-and cutover plan. Recovery remains deferred, not waived or passed. Before any
-activation, resolve post-import recovery, hosted runtime/security/performance and
-business acceptance, reconfirm all writer freezes, and review changes since the
+Hosted audit removal still needs separate approval, a writer freeze and a fresh
+source/backup comparison. Before application activation, resolve hosted runtime,
+security/performance and business acceptance, and review changes since the
 saved export. Later Sheet activity is not covered by this reconciliation; any
 refresh or delta handling requires a reviewed procedure and approval. Do not
 replay schema migrations or regenerate/retry retired import SQL as a next step.

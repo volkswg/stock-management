@@ -322,16 +322,18 @@ Deploy matching application/tooling and schema as a coordinated maintenance chan
 then verify business reconciliation, grants/RLS, revision conflicts and recovery.
 Recovery includes column ACLs to detect changes to the counter-value write grant.
 Do not run old application code against the new schema or new code against the old.
-The new recovery tool expects `revision`; use the pinned historical tool version
-for older backups containing `audit`. A new-schema fingerprint is not comparable
+The recovery tool defaults to `revision`; explicit `--history audit` supports
+fresh pre-change captures. Use the pinned historical tool version when older
+backups have a different metadata fingerprint shape. A new-schema fingerprint is not comparable
 to an old-schema fingerprint without this reviewed change inventory.
 
 Audit-history deletion cannot be reversed by recreating an empty table. Before
 new writes, rollback requires restoration of the approved pre-change backup and
 matching code. After new writes, freeze writers and prepare a separately reviewed
 forward fix or recovery reconciliation; do not blindly restore stale business data.
-Post-import hosted recovery remains paused/incomplete; this PR does not execute
-that work, hosted DDL, data cleanup, deployment or production cutover.
+The separately authorized 2026-11-11 pre-change backup and independent local
+recovery/rehearsal passed; see the current progress ledger. Hosted audit removal,
+data cleanup and application/production activation remain separately gated.
 
 ## Phase 2 operational storage (opt-in isolated testing)
 
@@ -529,9 +531,15 @@ reconcile against the saved latest export after one approved name correction;
 The manual CSV route bypassed archive/import-batch loading; do not describe it
 as completion of the standard archive-promotion path below. The application
 still uses Google Sheets; runtime activation and production cutover have not
-occurred. Post-import backup/restore verification is incomplete and paused by
-the owner after the full recovery-fingerprint preflight reached its existing
-timeout guard. An older verified backup does not certify this imported state.
+occurred. The owner subsequently authorized the timeout fix and pre-change
+backup/rehearsal. Versioned full-row hashes with two bounded readers passed
+the unchanged 150-second verification limit. The encrypted private off-site
+backup, independent download/key recovery and exact 51-table/15-metadata restore
+passed. A second local restore passed audit removal, 23-table reconciliation,
+66 application comparisons and a new-schema backup/restore. Final hosted
+verification at 11:31 Bangkok matched the pre-change snapshot, roles and ledger;
+the hosted audit migration remains unapplied. This certifies the scoped private
+schema recovery, not full platform recovery or application cutover readiness.
 
 Use the [current progress ledger](refactoring/progress.md#database-migration--current-operational-status-2026-11-11)
 and [machine-readable status](../tools/migration/phase3-status.json) for aggregate
@@ -543,8 +551,8 @@ Reconfirm writer freeze and source freshness before any later activation.
 The [2026-11-09 preparation snapshot](https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json)
 is historical: it predates schema deployment and real-data execution. Its missing
 Cloud credentials/network and unknown row counts must not be read as current
-Mac status. This documentation update makes no live provider requests and does
-not inventory credentials. A future operator must independently verify scoped
+Mac status. The backup/rehearsal above was separately owner-authorized execution,
+not implicit authorization from documentation maintenance. A future operator must independently verify scoped
 access and approved network/TLS; never assume Mac, plugin and Cloud credentials
 are shared or available. Keep workbook identifiers and private execution
 artifacts out of the repository, PRs and CI.
@@ -864,6 +872,32 @@ is read as object fields, array partitions and string segments, then reconstruct
 with PostgreSQL's JSONB key order, spacing and exact numeric text. Its full row
 is spooled privately to determine the character-length prefix before hashing.
 No raw/formatted/formula/source-extension field is omitted.
+
+For high-latency hosted verification, the reviewed recovery tool also supports
+explicit `--workers 2 --row-digests`. At most two fresh table readers share the
+same exported snapshot, identity/TLS guards, writer locks and original 150-second
+deadline. One reader remains the default. Fresh backends retain the existing
+memory-release behavior; this does not create a persistent connection pool.
+
+`--row-digests` is an explicit version 2 fingerprint format, not a silent change
+to historical hashes. PostgreSQL hashes every canonical full-row UTF8 value with
+SHA256, sorts the fixed-size row hashes, and streams them to a domain-separated
+client SHA256. Duplicate rows remain repeated and row counts are retained. All
+columns, NULLs, exact numeric values, original cells and business metadata are
+included. Ordinary tables carry the algorithm tag; the full import-batch snapshot
+keeps its existing lossless partitioned fingerprint path. Receipt version 2 names
+the format, and verification refuses a mismatched format before connecting.
+Serial and bounded-reader output agree; synthetic PostgreSQL checks compare the
+compact result against an independent Python oracle over full canonical rows.
+This reduces full-record network transfer and sort width without reducing
+verification coverage. The legacy fingerprint format remains available by default.
+
+`--history audit` explicitly selects the pre-removal schema; the default remains
+`--history revision`. The selected table must exist and the other must be absent;
+there is no fallback. This permits a fresh verified backup before audit removal.
+Historical backups still require their pinned tool version when their metadata
+fingerprint shape differs (for example before column-ACL coverage was added).
+Each new encrypted backup retains its exact recovery-tool sources and checksums.
 
 All table reads share the same held exported snapshot and both cooperative
 writer locks. Short-lived reader backends release large allocation arenas;

@@ -1,15 +1,17 @@
 {
-  "version": 2,
-  "scope": "Isolated hosted manual CSV import reconciled; application remains on Google Sheets",
+  "version": 3,
+  "scope": "Hosted manual CSV import and pre-change two-schema recovery verified; audit removal rehearsed locally only; application remains on Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T01:46:54.982962+00:00",
-  "repositoryBaseline": "65ed6f65256e59f7f6fce44bcd4fb88a819ae95c",
+  "lastDataVerificationAtUtc": "2026-11-11T04:31:47.632518+00:00",
+  "repositoryBaseline": "f19a3c548ab4cb7155b0ffd5ea7d17dcfbb9beb5",
   "evidence": {
-    "basis": "Retained private execution receipts; no live provider inspection by this documentation update",
+    "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
     "privateResultReceiptSha256": "f45e799edef85d5d39106ed687d2b32d6701e3f518e98c7596e6450f2a3b98a1",
     "privateResultPublished": false,
     "workbookIdentifiersAndBusinessRecordsPublished": false,
-    "historicalPreparationSnapshot": "https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json"
+    "historicalPreparationSnapshot": "https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json",
+    "prechangeRehearsalReceiptSha256": "67649f08530a587d3691991a02e8ff889a09a136a479fbb970ca2ff5861fde4b",
+    "finalHostedCheckReceiptSha256": "e022ece914b6a2cc821a6b452877cdaa8d52e98d583eae8daa429b821d3b549b"
   },
   "target": {
     "projectId": "orjnazrothkdgmzlsuto",
@@ -44,13 +46,24 @@
     "sourceFreshness": "Verified against saved latest export only; reconfirm freeze and review later source activity before cutover"
   },
   "recovery": {
-    "state": "paused-by-owner",
-    "postImportRecoveryVerified": false,
-    "postImportBackupCaptured": false,
-    "lastAttempt": "Full recovery-fingerprint preflight reached existing 150-second guard; no automatic retry",
+    "state": "pre-change-two-schema-recovery-verified",
+    "postImportRecoveryVerified": true,
+    "postImportBackupCaptured": true,
+    "lastAttempt": "Versioned full-row hashes and two bounded readers passed within unchanged 150s fingerprint limit; encrypted capture and independent restore verified",
     "earlierIndependentlyVerifiedSchemaBackupRetained": true,
     "olderIndependentlyVerifiedSourceArchiveRetained": true,
-    "olderBackupsCertifyCurrentImportedState": false
+    "olderBackupsCertifyCurrentImportedState": false,
+    "scope": "Both private schemas; supplemental password-free roles and migration ledger; excludes full Supabase platform/Auth/Storage and Drive image recovery",
+    "encryptedOffsiteBackupVerified": true,
+    "independentDownloadVerified": true,
+    "freshOwnerKeyRecoveryVerified": true,
+    "prechangeRestoredTables": 51,
+    "prechangeRestoredMetadataSections": 15,
+    "localAuditRemovalRehearsalVerified": true,
+    "postLocalMigrationBackupRestoreVerified": true,
+    "hostedAuditRemovalApplied": false,
+    "newLocalDatabasesRetained": 3,
+    "newContainersRolesPasswords": 0
   },
   "cleanup": {
     "latestRecoverySetRetained": true,
@@ -59,12 +72,13 @@
     "remainingRecoveryContainersAndSharedTlsPreserved": true
   },
   "operatorAccess": {
-    "credentialsAndNetworkInspectedByThisUpdate": false,
-    "macPluginAndCloudAccessMustBeVerifiedIndependently": true
+    "credentialsAndNetworkInspectedByThisUpdate": true,
+    "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
+    "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Inspect application integration and prepare a scoped testing and cutover plan; keep backup work paused until owner resumes it",
+  "nextStep": "Review recovery-tool changes and separately authorize exact-target hosted audit removal after writer freeze and backup/source freshness recheck; no application cutover",
   "cutoverBlockers": [
-    "Post-import backup/restore verification and recovery sign-off remain incomplete; currently paused by owner",
+    "Hosted audit removal remains unapplied; exact-target approval, writer freeze and backup/source freshness recheck are required before execution; broader platform recovery is not certified",
     "Hosted runtime, authorization/security, browser/API/provider, business and realistic performance/capacity acceptance remain unverified by this import",
     "Reconfirm all writers paused and source freshness; review changes since saved export with approved refresh/delta handling",
     "Production activation, monitoring and post-cutover-write rollback plan require explicit owner approval"
