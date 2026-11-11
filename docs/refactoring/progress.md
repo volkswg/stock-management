@@ -1,5 +1,42 @@
 # Refactoring progress and evidence
 
+## Private Supabase app — read-only acceptance (2026-11-11)
+
+PR #60 adds an explicit read-only staging flag, mutation-route/transaction blocks
+and a server-only outbound provider guard. A separate protected Vercel preview
+uses a dedicated SELECT-only database login through the dashboard-confirmed IPv4
+session pooler with TLS verification. The first direct-endpoint preview failed
+its reads and was superseded; protection was retained throughout. The production
+domain still resolves to `dpl_Gzd8hJXHywXx3ntTHA8dW7TpU1Zb` at merged PR #59,
+and production remains on Google Sheets. No production setting was changed.
+
+The final hosted run passed 166 API checks (130 reads, 32 mutation refusals and
+four authorization/validation/not-found responses), 20 browser pages and five
+mobile views. Saved source application outputs match historical order details,
+inventory, attendance/payroll, sales/profit, expenses, adjustments, advances and
+sync history. All successful reads report revision 70,778. Missing/wrong bearer,
+Vercel protection and runtime provider refusal also pass. Browser tests attempted
+no mutations and blocked foreign requests. Private screenshots/bodies and complete
+receipts remain outside Git; no business values or credentials are published.
+
+All 51 table fingerprints remain identical to the pre-test snapshot and the
+verified post-audit backup. The only metadata changes are the dedicated login,
+25 SELECT policies/grants, 26 ACL entries and PostgreSQL's creator-admin grant
+(without SET/INHERIT). The previous 15 metadata sections match after precisely
+removing those additions. The login can mutate zero private tables, assume no
+other role, create no schema and execute no privileged private-schema function.
+
+All 565 regression tests, two targeted safety tests, lint/typecheck and both
+isolated credential-free and read-only staging builds pass; 113 client chunks
+contain no staging secrets. Lint retains the inherited unused `shipmentRow`
+warning. Three initial local/direct report failures under overlapping reads are
+retained as evidence; isolated pooler-backed stock/profit checks match. Final
+hosted read latencies were p50 227 ms, p95 1,648 ms and maximum 1,839 ms, with no
+peak-load claim. The canonical migration runbook records access boundaries and
+the exact acceptance scope. Write/provider tests, realistic capacity, source
+refresh/freeze and production authorization/activation remain pending. No
+business row, command, side effect, revision value or production source changed.
+
 ## Hosted audit removal — applied and verified (2026-11-11)
 
 The owner explicitly authorized applying only the audit-removal migration to

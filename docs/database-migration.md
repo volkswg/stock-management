@@ -811,6 +811,75 @@ This is snapshot/application parity, **not hosted runtime/HTTP/provider acceptan
 
 ### Gate 5 — authorization, browser/API and business acceptance
 
+#### Current private read-only preview (2026-11-11)
+
+The owner authorized preparing a private Supabase staging app and running only
+read-only application tests. The separate Vercel project
+`stock-management-supabase-staging` uses a protected preview in Tokyo, with no
+production-domain assignment or Google Sheets/provider credentials. Its Next.js
+build command removes database, CA, API-capability and account-config values;
+those values are supplied only to the application runtime. The tested
+source is `8628dd30418b22394d62c73d2c6c60fdf1a718c0` (PR #60). The existing
+production domain still resolves to the PR #59 deployment and uses Google Sheets.
+
+The preview sets `STOCK_STORAGE=supabase`, `STOCK_STAGING_ENABLED=true` and
+`STOCK_STAGING_READ_ONLY=true`. The last flag rejects every exported mutation
+route, including LINE webhooks, before handler execution and rejects mutation
+transaction scopes. Node instrumentation also denies outbound provider fetches.
+Account identities are preserved through credential-free account metadata and
+disabled placeholder tokens. No real LINE, Loyverse or Drive operation is enabled.
+These flags do not replace database permissions or deployment protection.
+
+The dedicated login has SELECT on only the 23 business tables plus environment
+and revision, no membership in the writer role, no DML privileges on any of the
+51 private tables, and no ownership, schema creation or executable privileged
+functions in the private schemas. It defaults to read-only transactions and does
+not assume `stock_runtime`. Exactly 25 SELECT policies/grants and the required
+schema/table ACL entries were added; PostgreSQL also recorded its creator-admin
+membership to `postgres` without SET or INHERIT. Existing permissions/policies
+were preserved. No migration, row change, revision increment or command/effect
+record was needed to prepare or test this preview.
+
+The initial direct database endpoint could not serve preview reads. The endpoint
+was replaced only in this preview's configuration with the dashboard-confirmed
+IPv4 session pooler, using the same SELECT-only login and verified TLS. No
+certificate verification was disabled and no privileged database login was used
+by the application. Keep pooler hostnames/project identity exact; do not infer
+them from a region name or send credentials to guessed endpoints.
+
+Private evidence records 166/166 hosted API checks: 130 successful reads, 32
+mutation refusals, two authorization denials and two invalid/missing-resource
+responses. Reads cover all 39 order details, representative movement items, and
+February–November attendance, stock, payroll, sales, expenses, adjustments and
+per-account sync history, plus annual profit and salary advances. Results match
+the verified saved source application outputs. The response contract's historical
+`google_sheets` source labels remain unchanged; they do not describe the preview's
+actual storage connection. Twenty browser pages, five additional mobile views,
+order search/empty results, API authorization and deployment protection passed.
+Foreign browser requests were blocked; an attempted provider read was refused by
+the runtime guard before any external request. All successful API reads retained
+revision 70,778. A post-test snapshot matched every one of the 51 table hashes;
+all 15 existing metadata sections matched after excluding only the enumerated
+read-only access additions. Screenshots, response bodies, credentials and receipts
+remain in restricted operator artifacts outside Git.
+
+The first local/direct browser pass exposed three report failures under overlap;
+isolated pooler-backed stock and profit reads subsequently matched exactly. The
+final hosted read pass had p50 227 ms, p95 1,648 ms and maximum 1,839 ms for 130
+successful requests. These are small sequential acceptance samples, not peak-load
+or capacity certification. Provider-backed images/uploads, real integrations,
+all write workflows, concurrency/retry/recovery under writes, production
+authorization and source freshness remain separate gates. The owner has not
+authorized production cutover or modifying existing data in this phase.
+
+This remains an operator-only preview. Opening its URL requires Vercel access;
+reading its API additionally requires the scoped private runner described below.
+Do not put the API capability in page code, URLs or browser storage to simplify
+manual access. Retire/rotate the temporary access capability when the authorized
+acceptance work ends. The verified pre/post-audit encrypted backups remain valid
+for the unchanged business data; recreating this new preview login/policies after
+a restore is a separate operator setup step.
+
 The staging bearer token is an operator capability, not a customer login. Supply
 it from a private Node test-runner environment/secret store. An API runner must
 allow only the exact approved HTTPS origin/path and set `redirect: 'error'`.

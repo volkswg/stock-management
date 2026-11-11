@@ -1,8 +1,8 @@
 {
-  "version": 4,
-  "scope": "Hosted audit removal applied and verified; both pre/post-change private-schema recovery verified; production remains on Google Sheets",
+  "version": 5,
+  "scope": "Private Supabase read-only application acceptance passed; audit removal and recovery verified; production remains on Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T04:56:55.224326+00:00",
+  "lastDataVerificationAtUtc": "2026-11-11T05:56:50.034475+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
@@ -13,7 +13,10 @@
     "prechangeRehearsalReceiptSha256": "67649f08530a587d3691991a02e8ff889a09a136a479fbb970ca2ff5861fde4b",
     "finalHostedCheckReceiptSha256": "e022ece914b6a2cc821a6b452877cdaa8d52e98d583eae8daa429b821d3b549b",
     "hostedAuditVerificationReceiptSha256": "0fb41ad4f66b8ccda75d4f83284e824e79d4b159400e6b076120eaea3583ac99",
-    "postChangeRestoreReceiptSha256": "ad7e1053c94f42ddb3d623241f0d5514e0b58331c1a0b94b05579b7f2dd849ec"
+    "postChangeRestoreReceiptSha256": "ad7e1053c94f42ddb3d623241f0d5514e0b58331c1a0b94b05579b7f2dd849ec",
+    "privateStagingReadVerificationSha256": "1c2f398a713de5c5cb066f8d25f1872d920ed50f64a8ab2a7eec708d86b43fd8",
+    "privateStagingApiReceiptSha256": "ae8cf12ad704fd1548826cdb99c541a8ea8aea99d731cdc6d75a79199d5aec56",
+    "privateStagingBrowserReceiptSha256": "c5e1db1c162977d45f470c81a47688e8a55fc3132e0c09f36151ea2142d7aa71"
   },
   "target": {
     "projectId": "orjnazrothkdgmzlsuto",
@@ -34,7 +37,10 @@
     "runtimeActivationReady": false,
     "auditRemovalMigrationApplied": true,
     "auditRemovalVersion": "20261111034402",
-    "hostedBusinessDataChangedByAuditRemoval": false
+    "hostedBusinessDataChangedByAuditRemoval": false,
+    "stagingApplicationStorage": "supabase",
+    "stagingApplicationReadOnly": true,
+    "privateStagingAppPrepared": true
   },
   "reconciliation": {
     "businessTables": 23,
@@ -88,9 +94,42 @@
   "nextStep": "Prepare separately approved hosted application/security/performance acceptance and production cutover; production continues on Google Sheets",
   "cutoverBlockers": [
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
-    "Hosted runtime, authorization/security, browser/API/provider, business and realistic performance/capacity acceptance remain unverified by this import",
+    "Read-only hosted API/browser acceptance passed; write/provider workflows, production authorization/security and realistic capacity acceptance remain pending",
     "Reconfirm all writers paused and source freshness; review changes since saved export with approved refresh/delta handling",
     "Production activation, monitoring and post-cutover-write rollback plan require explicit owner approval"
   ],
-  "cutoverReady": false
+  "cutoverReady": false,
+  "readOnlyApplicationAcceptance": {
+    "reportedOnBangkok": "2026-11-11",
+    "sourceCommit": "8628dd30418b22394d62c73d2c6c60fdf1a718c0",
+    "pullRequest": 60,
+    "separateProtectedPreview": true,
+    "databaseLoginSelectOnly": true,
+    "writerRoleMembership": false,
+    "tlsVerifiedSessionPooler": true,
+    "apiChecksPassed": 166,
+    "successfulReads": 130,
+    "mutationsBlocked": 32,
+    "browserPagesPassed": 20,
+    "additionalMobileViews": 5,
+    "historicalMonthsCovered": 10,
+    "all51TableHashesUnchanged": true,
+    "existing15MetadataSectionsPreserved": true,
+    "readOnlyLoginRolesAdded": 1,
+    "selectPoliciesAdded": 25,
+    "selectGrantsAdded": 25,
+    "aclEntriesAdded": 26,
+    "creatorAdminMembershipAddedWithoutSetOrInherit": true,
+    "providerFetchDeniedBeforeNetwork": true,
+    "realProviderAcceptanceCertified": false,
+    "writeWorkflowAcceptanceCertified": false,
+    "capacityAcceptanceCertified": false,
+    "smallSequentialReadSampleMs": {
+      "p50": 227,
+      "p95": 1648,
+      "maximum": 1839
+    },
+    "productionDomainStillAtMergedPr59": true,
+    "credentialsResponsesAndScreenshotsPublished": false
+  }
 }
