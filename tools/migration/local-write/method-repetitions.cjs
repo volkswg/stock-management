@@ -161,5 +161,20 @@ class MethodCampaign extends HistoricalCampaign {
         assert.ok(proof.every(row => row.sameKeyPairs === 20 && row.staleStatePairs === 20 && row.postUnrelatedWriteReplays === 20 && row.preCommitRollbacks === 1));
     }
     async WT_ALL_METHOD_REPETITIONS() { await this.ordinaryMethodRepetitions(); }
+    async WT_COMPOUND_ROLLBACK_REPETITIONS() {
+        const routes = ['POST:/api/orders/with-images', 'PATCH:/api/movements/[id]/items/[itemId]', 'PATCH:/api/movements/[id]', 'POST:/api/employees', 'PATCH:/api/employees/[id]', 'POST:/api/loyverse/daily-sales/sync', 'POST:/api/shipments/[id]/orders', 'POST:/api/employees/payroll/settle'], proofs = [];
+        for (const route of routes) for (let trial = 0; trial < 10; trial++) {
+            const fault = await this.scenario(route), key = this.key('compound-rollback');
+            if (route === 'PATCH:/api/employees/[id]') fault.body = { baseSalary: 130, compensationEffectiveFrom: '2026-01-02' };
+            const before = await this.seal(), revision = await this.revision(), control = JSON.parse(fs.readFileSync(this.env.STOCK_WRITE_CONTROL));
+            this.control({ ...control, sqlBefore: { commandKey: key, match: "UPDATE stock_operational.commands SET state='complete'", remaining: 1 } });
+            try { await this.api(fault.url, { ...fault, key, status: 503 }); } finally { this.control({}); }
+            assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
+            assert.equal((await this.sql('SELECT count(*)::int n FROM stock_operational.commands WHERE key=$1', [key]))[0].n, 0);
+            assert.equal(this.ledger().filter(e => e.kind === 'injected-fault' && e.commandKey === key).length, 1);
+            proofs.push({ route, trial: trial + 1, faultAfterBusinessWorkBeforeCommit: true, allBusinessRowsRevisionAndCommandRolledBack: true }); this.save('compound-rollback-repetitions.json', proofs);
+        }
+        assert.equal(proofs.length, 80); await this.verifyOriginal(); await this.fileGraph('compound-rollback-file-graph');
+    }
 }
 module.exports = { MethodCampaign };
