@@ -69,3 +69,14 @@ test('browser raw-image identity includes the media type consumed by the route',
  for(const contentType of ['image/png','image/webp','image/png'])await assert.rejects(run.fetch('/api/movements/WT/items/WT/image',{method:'PATCH',headers:{'content-type':contentType},body:bytes}));
  assert.notEqual(keys[0],keys[1]);assert.equal(keys[0],keys[2]);
 });
+test('replaying an old completed response cannot move the browser revision behind a later observed write',async()=>{
+ const revisions=[];
+ const run=client(async request=>{
+  if(typeof request==='string')return Response.json({},{headers:{'x-stock-revision':'"stock-v2-90071992547409930"'}});
+  revisions.push(request.headers.get('If-Match'));return Response.json({ok:true},{headers:{'x-stock-revision':'"stock-v2-5"'}});
+ });
+ await run.fetch('/api/orders');
+ await (await run.fetch('/api/orders',input)).json();
+ await (await run.fetch('/api/orders',{...input,body:JSON.stringify({seller:'Another synthetic intent',totalPrice:20})})).json();
+ assert.deepEqual(revisions,['"stock-v2-90071992547409930"','"stock-v2-90071992547409930"']);
+});

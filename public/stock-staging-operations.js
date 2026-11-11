@@ -6,12 +6,19 @@
   const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object"
     ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, v]) => [key, canonical(v)])) : value;
   let revision;
+  const rememberRevision = response => {
+    const observed = response.headers.get("x-stock-revision");
+    if (!observed) return;
+    const next = /^"stock-v2-(\d+)"$/.exec(observed), current = /^"stock-v2-(\d+)"$/.exec(revision || "");
+    // Completed retries return their original revision, even after later writes.
+    if (!next || !current || BigInt(next[1]) >= BigInt(current[1])) revision = observed;
+  };
   window.fetch = async (input, init) => {
     const url = new URL(input instanceof Request ? input.url : input, location.href);
     const method = (init?.method || (input instanceof Request ? input.method : "GET")).toUpperCase();
     if (url.origin !== location.origin || !url.pathname.startsWith("/api/") || ["GET", "HEAD", "OPTIONS"].includes(method)) {
       const response=await originalFetch(input,init);
-      if (url.origin === location.origin && url.pathname.startsWith("/api/")) revision=response.headers.get("x-stock-revision") || revision;
+      if (url.origin === location.origin && url.pathname.startsWith("/api/")) rememberRevision(response);
       return response;
     }
     const request = new Request(input instanceof Request ? input.clone() : url, init);
@@ -35,7 +42,7 @@
     request.headers.set("Idempotency-Key", key);
     if(revision) request.headers.set("If-Match",revision);
     const response = await originalFetch(request);
-    revision=response.headers.get("x-stock-revision") || revision;
+    rememberRevision(response);
     const readJson = response.json.bind(response);
     response.json = async () => {
       const body = await readJson();
