@@ -38,3 +38,9 @@ test('crash matrix propagates guard and HTTP assertion failures instead of claim
         await assert.rejects(CrashCampaign.prototype.WT_CRASH_MATRIX.call(campaign), error => error === failure);
     }
 });
+test('actual Orders form helper supplies both valid PNG fixtures before submission', async () => {
+    const files = [], page = { goto: async () => {}, getByPlaceholder: () => ({ fill: async () => {} }), locator: () => ({ count: async () => 2, nth: () => ({ setInputFiles: async file => files.push(file) }) }) };
+    await BrowserCampaign.prototype.openOrderForm.call({ config: { origin: 'http://127.0.0.1:3150' } }, page, 'WT_form');
+    assert.equal(files.length, 2);
+    for (const file of files) { assert.equal(file.mimeType, 'image/png'); assert.equal(file.buffer.readUInt32BE(0), 0x89504e47); }
+});

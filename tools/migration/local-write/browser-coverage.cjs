@@ -2,6 +2,7 @@
 const assert = require('node:assert/strict'), path = require('node:path');
 const { CrashCampaign } = require('./crash-coverage.cjs');
 const { browserContext } = require('./browser-context.cjs');
+const { PNG } = require('./runtime.cjs');
 const { collisionPngPair } = require('./binary-fixtures.cjs');
 class BrowserCampaign extends CrashCampaign {
     async browserContext(...args) { return browserContext.call(this, ...args); }
