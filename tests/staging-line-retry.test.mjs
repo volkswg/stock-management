@@ -22,7 +22,10 @@ test('the staging LINE request boundary translates asynchronous storage failures
 test('failed staging LINE business work does not commit a completed command that suppresses retry', async () => {
   const exports = {}, commands = new Map(), replies = []; let fail = true, executions = 0;
   class PersistenceFailure extends Error { constructor(status) { super('WT retry required'); this.status = status; } }
-  const execute = async (_kind, key, _intent, run) => { if (commands.has(key)) return commands.get(key); const result = await run(); commands.set(key, result); return result; };
+  // The real PostgreSQL boundary preserves typed storage failures and sanitizes
+  // other exceptions. A rollback signal carrying response counters must survive
+  // that boundary instead of being converted to an unrelated generic failure.
+  const execute = async (_kind, key, _intent, run) => { if (commands.has(key)) return commands.get(key); try { const result = await run(); commands.set(key, result); return result; } catch(error) { if(error instanceof PersistenceFailure)throw error;throw new PersistenceFailure(503); } };
   const source = ts.transpileModule(readFileSync('src/modules/line-workflows/infrastructure/postgres/webhook.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   new vm.Script(source).runInNewContext({ exports, Object, Error, require(spec) {
     if (spec === 'server-only') return {};

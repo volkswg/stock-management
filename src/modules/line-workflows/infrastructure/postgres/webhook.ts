@@ -10,8 +10,8 @@ export async function processPostgresWebhook<Bytes>(input: Parameters<typeof pro
   type Result = Awaited<ReturnType<typeof processWebhookEvents<Bytes>>>;
   type Counts = ReturnType<Result['imageCounts']>;
   type EventResult = { movementFailed: boolean; counts: Counts; images: Result['imageUploads']; replies: Array<{ token: string | undefined; messages: LineReplyMessage[] }> };
-  class RolledBackEvent extends Error {
-    constructor(readonly result: EventResult) { super("LINE business work was rolled back."); }
+  class RolledBackEvent extends PersistenceFailure {
+    constructor(readonly result: EventResult) { super(503,"LINE business work was rolled back."); }
   }
   const counts: Counts = { scope:"movement",received:0,routedToMovement:0,otherFlows:0,unprocessed:0,failedBeforeRouting:0,uploaded:0,saved:0,alreadySaved:0,completed:0,failed:0,ignored:0,saveUncertain:0 };
   const imageUploads: Result['imageUploads'] = [];
