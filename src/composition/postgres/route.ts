@@ -58,7 +58,8 @@ export function withPersistence<Args extends unknown[], Result extends Response>
   };
 }
 async function readRevision(): Promise<string> {
-  const result=await currentTransaction().query("SELECT coalesce(max(sequence),0)::text AS revision FROM stock_operational.audit");
-  return `"stock-${result.rows[0].revision}"`;
+  const result=await currentTransaction().query("SELECT value::text AS revision FROM stock_operational.revision WHERE singleton");
+  if (result.rowCount !== 1) throw new PersistenceFailure();
+  return `"stock-v2-${result.rows[0].revision}"`;
 }
 export function activeDatabase() { return currentTransaction(); }

@@ -335,3 +335,27 @@ test('a coherent shared reader blocks an independent writer until its unit of wo
  }finally{release();await reader;await writer;await observer.end();}
  assert.equal(entered,true);console.log('Synthetic shared-reader writer wait ms:',Math.round(performance.now()-began));
 });
+
+test('audit-free revision is transactional and rejects legacy tokens',async()=>{
+ const reader=withPersistence(async()=>Response.json({ok:true}));
+ const revision=(await reader(request('',{},'GET'))).headers.get('x-stock-revision');
+ assert.match(revision,/^"stock-v2-\d+"$/);
+ const writer=withPersistence(async()=>{
+  await currentTransaction().query('UPDATE stock_operational.orders SET business_cells=business_cells WHERE id=$1',['order-valid']);
+  return Response.json({ok:true});
+ });
+ const stale=request('legacy-revision-key');stale.headers.set('If-Match','"stock-0"');
+ assert.equal((await writer(stale)).status,409);
+ await assert.rejects(command(async()=>{
+  await currentTransaction().query('UPDATE stock_operational.orders SET business_cells=business_cells WHERE id=$1',['order-valid']);
+  throw new Error('rollback revision');
+ }));
+ assert.equal((await reader(request('',{},'GET'))).headers.get('x-stock-revision'),revision);
+ const fresh=request('new-revision-key');fresh.headers.set('If-Match',revision);
+ const saved=await writer(fresh);assert.equal(saved.status,200);
+ assert.notEqual(saved.headers.get('x-stock-revision'),revision);
+ await transaction(false,async()=>{
+  assert.equal((await currentTransaction().query("SELECT to_regclass('stock_operational.audit') AS audit")).rows[0].audit,null);
+  assert.equal((await currentTransaction().query('SELECT count(*) FROM stock_operational.revision')).rows[0].count,'1');
+ });
+});

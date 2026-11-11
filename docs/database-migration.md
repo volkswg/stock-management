@@ -295,13 +295,52 @@ Hosted security advisor returns no findings; hosted schema/data are unchanged.
 These results do not satisfy the live-data acceptance gates above.
 
 
+## Audit-history removal (prepared, not applied to hosted staging)
+
+The owner requested removal of `stock_operational.audit`. The new migration
+[`20261111034402_remove_operational_audit.sql`](../supabase/migrations/20261111034402_remove_operational_audit.sql)
+replaces it with one private `revision` row, seeded from the old audit maximum.
+It removes all 23 audit triggers and their function, then drops the audit table
+and its identity sequence, policies, grants and stored history. It does not
+change business records, immutable source snapshots, command replay or provider
+effect journals. Historical migration files and prior evidence remain unchanged.
+
+Statement triggers on the 23 business tables increment the counter for INSERT,
+UPDATE and DELETE, within the same transaction. A statement that affects no rows
+can also increment it; tokens are opaque change indicators, not row counts.
+Rollback restores both business state and revision. A missing counter fails closed.
+The runtime role may read/update its value but cannot insert/delete the singleton
+or change its identity; anon/authenticated have no access. No record payload,
+actor, timestamp or change history is stored in the replacement. Existing per-row
+business version fields and retained business archives remain intact.
+
+`x-stock-revision` and `If-Match` keep their existing HTTP behavior, using opaque
+`"stock-v2-N"` tokens. Old tokens deliberately produce 409 and require refresh.
+Before applying anywhere: stop all writers, review a fresh exact-target dependency
+inventory and preserve an approved backup; obtain separate hosted DDL approval.
+Deploy matching application/tooling and schema as a coordinated maintenance change,
+then verify business reconciliation, grants/RLS, revision conflicts and recovery.
+Recovery includes column ACLs to detect changes to the counter-value write grant.
+Do not run old application code against the new schema or new code against the old.
+The new recovery tool expects `revision`; use the pinned historical tool version
+for older backups containing `audit`. A new-schema fingerprint is not comparable
+to an old-schema fingerprint without this reviewed change inventory.
+
+Audit-history deletion cannot be reversed by recreating an empty table. Before
+new writes, rollback requires restoration of the approved pre-change backup and
+matching code. After new writes, freeze writers and prepare a separately reviewed
+forward fix or recovery reconciliation; do not blindly restore stale business data.
+Post-import hosted recovery remains paused/incomplete; this PR does not execute
+that work, hosted DDL, data cleanup, deployment or production cutover.
+
 ## Phase 2 operational storage (opt-in isolated testing)
 
 Start point: merged PR48 `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
 The operational migration is
 [`20261108191839_stock_operational.sql`](../supabase/migrations/20261108191839_stock_operational.sql).
 It keeps the 23-table staging archive immutable and creates 23 separate operational
-business tables plus command, audit, reply-attempt history and target-isolation metadata. All are private,
+business tables plus command, singleton revision, reply-attempt history and
+target-isolation metadata after the audit-removal migration. All are private,
 with RLS. The existing seven feature applications and port mappers remain the one
 business implementation; feature-owned `infrastructure/postgres/tables.ts` binds
 them to typed operational records. Existing compatibility names do not imply
@@ -383,7 +422,7 @@ or fabricate a new event ID to force a replay.
 
 Drive uploads stay outside database atomicity and may leave orphan files after
 rollback or an ambiguous database acknowledgement. Preserve returned file IDs,
-review command/audit records and Drive ownership before cleanup. There is no
+review command records and Drive ownership before cleanup. There is no
 automatic destructive cross-provider rollback. A process crash before the upload
 ID is returned may require a private Drive inventory. This remains a cutover risk.
 
@@ -409,7 +448,8 @@ Stop on reconciliation failure. Do not disable constraints to force acceptance.
 
 Operational compatibility projections retain sparse row ordinals and archived
 records because historical session references depend on them. Native updates keep
-identities immutable, advance revisions and append an audit snapshot. Hard-delete
+identities immutable and advance the singleton revision without storing before/after
+snapshots. Hard-delete
 business operations become retained archives with equivalent active-reader
 results. PostgreSQL stores new inputs literally; it does not execute Google Sheets formulas.
 Profile formula-like source cells and obtain business-rule review before promotion.
@@ -438,11 +478,11 @@ correctness over throughput. They are suitable only for measured small staging
 workloads. Projection rejects ordinals above one million; the synthetic 2,000-row
 measurement is not a production benchmark. Profile sparse IDs/row positions and
 measure CPU/memory/latency/lock contention with an approved export before cutover.
-The Free-tier database must hold immutable snapshots, operational data, audit,
+The Free-tier database must hold immutable snapshots, operational data, revision/command/effect state,
 indexes and recovery overhead; export bytes alone substantially understate disk
 requirements. No unmeasured production capacity guarantee is made.
 
-Back up both stock_migration and stock_operational, including commands, audit and
+Back up both stock_migration and stock_operational, including commands, revision and
 side_effects. Restore into a fresh isolated database with the same roles; compare
 complete records/fingerprints, constraints, grants/RLS and journal/effect states.
 Backups contain personal business data and short-lived reply tokens; encrypt and
@@ -465,7 +505,7 @@ application-generated state, not just an empty schema.
    approved cutover; this PR does not enable production writes or change Vercel.
 
 Rollback before cutover is simply leaving STOCK_STORAGE at its default Sheets
-value. After a future cutover, stop all writers, retain journals/audit/tombstones
+value. After a future cutover, stop all writers, retain journals/tombstones
 and reconcile post-cutover data before any storage switch. Restoring an older
 backup can lose committed operations; restoring journal/effect state can also
 reintroduce delivery uncertainty. Prove terminal outcomes before resuming writes.
@@ -734,7 +774,7 @@ This is snapshot/application parity, **not hosted runtime/HTTP/provider acceptan
   target/migration. A region proposal is not a deployment instruction.
 - [ ] Run `psql -X -v ON_ERROR_STOP=1 -f tools/migration/capacity.sql` against the
   approved target and store output privately. Measure database, heap/index,
-  archive/full-snapshot/audit/command growth and connection counts. Stats row
+  archive/full-snapshot/command growth and connection counts. Stats row
   estimates supplement exact reconciliation counts; they do not replace them.
 - [ ] Recheck [current plan limits](https://supabase.com/pricing),
   [database size](https://supabase.com/docs/guides/platform/manage-your-usage/database-size),
@@ -744,7 +784,7 @@ This is snapshot/application parity, **not hosted runtime/HTTP/provider acceptan
   inactivity pausing and no paid PITR guarantee. Do not assume automatic daily
   recoverable backups on Free. Confirm current quotas in the target dashboard.
   Drive images remain on Drive; exports/dumps and DB traffic still consume space
-  and egress. Budget full archive duplication, indexes, audit/replay growth,
+  and egress. Budget full archive duplication, indexes, command/effect replay growth,
   maintenance and restore headroom, not just source JSON bytes.
 - [ ] Measure warm/cold p50/p95/p99 API/query/lock waits, memory and throughput
   at approved peak concurrency on an expendable clone, with provider calls faked.
@@ -906,7 +946,7 @@ part of these schema dumps. The restored UUID is intentionally still the source
 UUID during comparison; isolate endpoints/credentials and retarget only after
 verification. Never expose a restored clone merely because its UUID matches.
 
-- [ ] Dump **both** schemas, commands/audit/side_effects/environment, sequences,
+- [ ] Dump **both** schemas, commands/revision/side_effects/environment, sequences,
   triggers/functions, constraints, privileges and policies using PostgreSQL tools
   compatible with the target version. Preserve role definitions separately;
   recreate custom-role passwords from the secret store, never dump them to Git.
@@ -996,7 +1036,7 @@ Rollback decision table:
 | Point | Safe action |
 | --- | --- |
 | Before SQL business writes | Keep ingress frozen, prove SQL has no post-freeze business commands, restore approved Sheets routing/config and resume its writers only after checking held events |
-| After SQL writes, DB available | Freeze all writers; preserve a new backup, audit/tombstones, journals/effects and provider outcomes. Prefer a reviewed forward fix against the same SQL state. Reconcile every post-cutover mutation before any return to Sheets |
+| After SQL writes, DB available | Freeze all writers; preserve a new backup, tombstones, journals/effects and provider outcomes. Prefer a reviewed forward fix against the same SQL state. Reconcile every post-cutover mutation before any return to Sheets |
 | DB unavailable/corrupt | Freeze ingress/providers; recover the latest verified backup to an isolated target, reconcile commit/outcome uncertainty and data since backup, then obtain incident approval before traffic resumes |
 | Return to Sheets after SQL writes | **Blocked:** no reverse-sync implementation exists. A separately reviewed reverse migration must preserve original IDs/history/soft deletes and financial/stock totals and prove replay outcomes before switching |
 

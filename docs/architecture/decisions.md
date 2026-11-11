@@ -243,7 +243,8 @@ for command identity: intentional identical orders must remain separate.
 `stock_migration` remains a private immutable archive. A separate private
 `stock_operational` schema holds the same 23 typed business entities, ordered
 compatibility cells, revisions and retained archived records. Additional command,
-audit, side-effect and target-isolation tables provide durable execution/recovery evidence. The
+singleton revision, side-effect and target-isolation tables provide change detection
+and execution/recovery state after the prepared audit-removal migration. The
 promotion plan requires an empty operational target and compares typed business
 fields plus original cells in both directions before commit. It neither edits the
 archive nor merges imports into live mutable state. Dates/months/timestamps retain
@@ -255,7 +256,8 @@ infrastructure; application/domain interfaces and all calculations remain unchan
 No parallel business service, generic business repository or duplicated domain
 algorithm is added. It deliberately retains sparse row ordinals because historical
 bill/item/session IDs and some session references depend on row positions. Clearing
-sessions and deleting movements archives their records, retaining audit history.
+sessions and deleting movements archives their business records. Separate
+before/after audit snapshots are removed by the prepared migration.
 New inserts derive ordinals inside the command lock, avoiding sequence gaps that
 would break those references after rollback. Direct SQL users must not bypass this
 writer protocol. Full-dataset projections remain a capacity/performance limitation;

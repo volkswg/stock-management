@@ -36,7 +36,7 @@ def guard_sql(target):
 def fingerprint_sql():
     queries = []
     for schema, tables in [('stock_migration', ['import_batches'] + list(CATALOG)),
-                          ('stock_operational', ['commands', 'audit', 'side_effects', 'environment'] + list(CATALOG))]:
+                          ('stock_operational', ['commands', 'revision', 'side_effects', 'environment'] + list(CATALOG))]:
         for table in tables:
             # Serialize large JSONB rows once, rather than rebuilding them for
             # the length prefix, concatenation and C-collation sort key.
@@ -58,7 +58,7 @@ def fingerprint_sql():
         'defaults': "SELECT n.nspname,d.defaclobjtype,pg_get_userbyid(d.defaclrole) AS owner,d.defaclacl::text FROM pg_default_acl d JOIN pg_namespace n ON n.oid=d.defaclnamespace WHERE n.nspname IN ('stock_migration','stock_operational') ORDER BY 1,2,3",
         'runtimeRole': "SELECT rolname,rolcanlogin,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolbypassrls FROM pg_roles WHERE rolname='stock_runtime'",
         'sequenceGrants': f"SELECT n.nspname,c.relname,pg_get_userbyid(c.relowner) AS owner,ARRAY(SELECT a::text FROM unnest(coalesce(c.relacl,acldefault('S',c.relowner))) a ORDER BY a::text) AS acl FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname {schema_filter} AND c.relkind='S' ORDER BY 1,2",
-        'columns': f"SELECT n.nspname,c.relname,a.attnum,a.attname,format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull,a.attidentity,a.attgenerated,pg_get_expr(d.adbin,d.adrelid) AS default_expression FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum WHERE n.nspname {schema_filter} AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped ORDER BY 1,2,3",
+        'columns': f"SELECT n.nspname,c.relname,a.attnum,a.attname,format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull,a.attidentity,a.attgenerated,ARRAY(SELECT acl::text FROM unnest(coalesce(a.attacl,ARRAY[]::aclitem[])) acl ORDER BY acl::text) AS column_acl,pg_get_expr(d.adbin,d.adrelid) AS default_expression FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum WHERE n.nspname {schema_filter} AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped ORDER BY 1,2,3",
         'memberships': principals+"SELECT pg_get_userbyid(roleid) AS role,pg_get_userbyid(member) AS member,pg_get_userbyid(grantor) AS grantor,admin_option,inherit_option,set_option FROM pg_auth_members WHERE member IN (SELECT oid FROM reachable) ORDER BY 1,2,3",
         'runtimeLogins': principals+"SELECT rolname,rolcanlogin,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolbypassrls FROM pg_roles WHERE oid IN (SELECT oid FROM reachable) ORDER BY rolname",
     }
@@ -117,14 +117,14 @@ def _fingerprint_snapshot(target, snapshot, deadline):
     # across otherwise small table reads. The original 150s overall limit stays.
     with read_session(sql + "SET LOCAL standard_conforming_strings=on; SET LOCAL client_encoding='UTF8';", deadline-time.monotonic()) as session:
         rows.append(batch_fingerprint(session))
-    for schema,names in [('stock_migration',list(CATALOG)),('stock_operational',['commands','audit','side_effects','environment']+list(CATALOG))]:
+    for schema,names in [('stock_migration',list(CATALOG)),('stock_operational',['commands','revision','side_effects','environment']+list(CATALOG))]:
         for table in names:
             with read_session(sql,deadline-time.monotonic()) as session:
                 rows.append(session.table_fingerprint(f'{schema}.{table}'))
     with read_session(sql,deadline-time.monotonic()) as session:
         for query in fingerprint_sql().splitlines()[2*len(CATALOG)+5:]:
             rows.extend(json.loads(line) for line in session.rows(query) if line.startswith(b'{'))
-    tables = {f'{schema}.{table}' for schema, names in [('stock_migration', ['import_batches']+list(CATALOG)), ('stock_operational', ['commands','audit','side_effects','environment']+list(CATALOG))] for table in names}
+    tables = {f'{schema}.{table}' for schema, names in [('stock_migration', ['import_batches']+list(CATALOG)), ('stock_operational', ['commands','revision','side_effects','environment']+list(CATALOG))] for table in names}
     keys = [r.get('table', r.get('metadata')) for r in rows]
     if len(keys) != len(tables | METADATA_NAMES) or set(keys) != tables | METADATA_NAMES: raise ValueError('incomplete recovery inventory')
     return rows

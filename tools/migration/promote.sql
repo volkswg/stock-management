@@ -5,7 +5,7 @@ SELECT pg_advisory_xact_lock(835107241);
 SELECT pg_advisory_xact_lock(835107242);
 SET CONSTRAINTS ALL DEFERRED;
 SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.commands))::int;
-SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.audit))::int;
+SELECT 1 / ((SELECT count(*)=1 AND min(value)=0 FROM stock_operational.revision))::int;
 SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.side_effects))::int;
 SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.orders))::int;
 SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.order_items))::int;

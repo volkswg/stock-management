@@ -25,6 +25,7 @@ class StagingRecoveryTests(unittest.TestCase):
             '20261108191839_stock_operational.sql',
             '20261109205118_timesheet_loyverse_account_reference.sql',
             '20261110011351_normalize_nullable_json_projections.sql',
+            '20261111034402_remove_operational_audit.sql',
         ])
         for entry in result['migrations']: self.assertEqual(checksum(entry['file']), entry['sha256'])
         commands = '\n'.join(result['steps'])
@@ -46,6 +47,9 @@ class StagingRecoveryTests(unittest.TestCase):
         sql = fingerprint_sql()
         self.assertEqual(sql.count("'table',"), 51)
         self.assertIn('sha256(', sql)
+        self.assertIn('stock_operational.revision', sql)
+        self.assertIn('a.attacl', sql)
+        self.assertNotIn('stock_operational.audit', sql)
         for part in ['pg_policies', 'pg_get_constraintdef', 'pg_indexes', 'pg_get_triggerdef', 'pg_get_functiondef', 'pg_sequences', 'pg_default_acl', 'rolbypassrls']:
             self.assertIn(part, sql)
         with self.assertRaises(ValueError): guard_sql("bad';DROP TABLE x;")

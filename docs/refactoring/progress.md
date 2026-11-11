@@ -1,5 +1,27 @@
 # Refactoring progress and evidence
 
+## Audit removal — implementation pending hosted approval
+
+The owner requested removal of operational audit history. The proposed migration
+replaces the audit table and 23 logging triggers with one transactional revision
+counter and statement triggers. HTTP conflict checks, command replay, business
+versions/archives and side-effect journals remain. Recovery and promotion tools
+expect the replacement revision table. Historical migrations/fixtures are retained.
+Local verification uses disposable synthetic PostgreSQL databases only; no hosted
+DDL, data removal, application activation or production cutover is part of this PR.
+See the [removal procedure](../database-migration.md#audit-history-removal-prepared-not-applied-to-hosted-staging)
+for coordinated deployment, destructive-history semantics and old-backup tooling.
+
+Validation: 565 application regression tests, 65 migration unit tests, 27 actual
+PostgreSQL application/transaction tests, one real-browser/API test and five
+offline application-parity tests passed. Populated synthetic upgrade preserves
+all business/archive/journal records, removes audit objects and retains revision
+rollback/conflict behavior. Complete two-schema capture/restore matches; altered
+records, table grants and revision-column grants are detected. Lint and typecheck
+pass (one inherited unused-variable lint warning); the isolated credential-free
+production build preserves routes and browser bundle privacy. Earlier migration
+files and historical fixtures remain unchanged. No real business data was used.
+
 ## Database migration — current operational status (2026-11-11)
 
 Repository baseline: merged [PR #55](https://github.com/volkswg/stock-management/pull/55),

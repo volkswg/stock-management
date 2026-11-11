@@ -15,6 +15,11 @@ pg(){ docker --host=unix:///var/run/docker.sock exec -i "$name" "$@"; }
 pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated;'
 for file in supabase/migrations/*.sql; do pg psql -U postgres -v ON_ERROR_STOP=1 < "$file" > "$artifacts/migration.log"; done
 pg psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE stock_test LOGIN PASSWORD 'synthetic-only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS; GRANT stock_runtime TO stock_test;"
+# Exercise removal against populated pre-upgrade data in a separate database.
+pg createdb -U postgres audit_removal_test
+python3 tools/migration/audit-removal-integration.py > "$artifacts/audit-removal.sql"
+pg psql -U postgres -d audit_removal_test -v ON_ERROR_STOP=1 < "$artifacts/audit-removal.sql" > "$artifacts/audit-removal.log"
+echo "PASS: populated audit removal, business preservation, revision permissions and rollback"
 # Phase 1 importer and exact-value operational promotion, using synthetic data only.
 python3 - <<'PY' > "$artifacts/import.sql"
 import sys
@@ -124,6 +129,16 @@ for database in postgres application_test; do
  STOCK_VERIFY_CONTAINER="$name" STOCK_VERIFY_DATABASE="recovery_$database" PATH="$artifacts:$PATH" python3 tools/migration/recovery.py verify --directory "$artifacts/recovery-$database" --target-id "$identity" --output "$artifacts/restored-$database.json"
 done
 # Detect altered permissions and records on expendable restored databases.
+# The replacement counter grants UPDATE on its value column only. Recovery must
+# detect column-ACL changes as well as table/schema permissions.
+identity=$(pg psql -U postgres -At -c 'SELECT isolation_id FROM stock_operational.environment')
+pg psql -U postgres -d recovery_postgres -v ON_ERROR_STOP=1 -c 'REVOKE UPDATE(value) ON stock_operational.revision FROM stock_runtime;' > "$artifacts/column-grant-probe.log"
+if STOCK_VERIFY_CONTAINER="$name" STOCK_VERIFY_DATABASE=recovery_postgres PATH="$artifacts:$PATH" python3 tools/migration/recovery.py verify --directory "$artifacts/recovery-postgres" --target-id "$identity" --output "$artifacts/altered-column-grant.json"; then
+ echo 'Recovery must detect changed column grants' >&2; exit 1
+fi
+pg psql -U postgres -d recovery_postgres -v ON_ERROR_STOP=1 -c 'GRANT UPDATE(value) ON stock_operational.revision TO stock_runtime;' > "$artifacts/column-grant-restored.log"
+STOCK_VERIFY_CONTAINER="$name" STOCK_VERIFY_DATABASE=recovery_postgres PATH="$artifacts:$PATH" python3 tools/migration/recovery.py verify --directory "$artifacts/recovery-postgres" --target-id "$identity" --output "$artifacts/restored-column-grant.json"
+
 pg psql -U postgres -d recovery_postgres -v ON_ERROR_STOP=1 -c 'GRANT SELECT ON stock_operational.orders TO anon;' > "$artifacts/grant-probe.log"
 identity=$(pg psql -U postgres -At -c 'SELECT isolation_id FROM stock_operational.environment')
 if STOCK_VERIFY_CONTAINER="$name" STOCK_VERIFY_DATABASE=recovery_postgres PATH="$artifacts:$PATH" python3 tools/migration/recovery.py verify --directory "$artifacts/recovery-postgres" --target-id "$identity" --output "$artifacts/altered-grant.json"; then
@@ -138,7 +153,7 @@ python3 - <<'PY' > "$artifacts/fingerprint.sql"
 import sys
 sys.path.insert(0,'tools/migration')
 from core import CATALOG
-for schema,tables in [('stock_migration',['import_batches']+list(CATALOG)),('stock_operational',['commands','audit','side_effects','environment']+list(CATALOG))]:
+for schema,tables in [('stock_migration',['import_batches']+list(CATALOG)),('stock_operational',['commands','revision','side_effects','environment']+list(CATALOG))]:
  for table in tables:
   print(f"SELECT '{schema}.{table}',md5(coalesce(string_agg(v::text,'' ORDER BY v::text),'')) FROM (SELECT to_jsonb(t) v FROM {schema}.{table} t) s;")
 print("SELECT schemaname,tablename,policyname,roles,cmd,qual,with_check FROM pg_policies WHERE schemaname IN ('stock_operational','stock_migration') ORDER BY 1,2,3;")
