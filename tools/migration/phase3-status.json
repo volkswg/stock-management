@@ -1,8 +1,8 @@
 {
-  "version": 7,
-  "scope": "Disposable local copy and guarded write harness prepared; acceptance stopped at overlapping-receipt compatibility failure; production remains Google Sheets",
+  "version": 8,
+  "scope": "Receipt-overlap fix implemented and locally verified; disposable write rerun stopped at cost-override deletion; production remains Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T08:34:04.387052+00:00",
+  "lastDataVerificationAtUtc": "2026-11-11T08:58:28.522340+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
@@ -17,7 +17,8 @@
     "privateStagingReadVerificationSha256": "1c2f398a713de5c5cb066f8d25f1872d920ed50f64a8ab2a7eec708d86b43fd8",
     "privateStagingApiReceiptSha256": "ae8cf12ad704fd1548826cdb99c541a8ea8aea99d731cdc6d75a79199d5aec56",
     "privateStagingBrowserReceiptSha256": "c5e1db1c162977d45f470c81a47688e8a55fc3132e0c09f36151ea2142d7aa71",
-    "privateLocalWriteResultSha256": "8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a"
+    "privateLocalWriteResultSha256": "8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a",
+    "privateReceiptFixRerunSha256": "3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298"
   },
   "target": {
     "projectId": "orjnazrothkdgmzlsuto",
@@ -92,9 +93,9 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Resolve overlapping receipt identities with an explicit compatible deduplication/conflict policy, then rerun both clean local campaigns and all blocked variants; hosted write testing and production cutover remain unapproved",
+  "nextStep": "Fix the separately identified PostgreSQL cost-override deletion/archive binding, then rerun both clean local campaigns and blocked variants; do not change hosted data or activate production",
   "cutoverBlockers": [
-    "WT06 local overlap sync fails: SQL rejects duplicate receipt identity; existing Sheets-compatible rules double-count the sale. Remaining mandatory clean campaigns, retries, fault and capacity cases are blocked.",
+    "Receipt overlap fixed and verified. WT12 DELETE cost override returns 500 because its SQL binding refuses identity clearing; campaign stopped, second copy pristine, remaining write/fault/capacity acceptance blocked.",
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
     "Read-only hosted API/browser acceptance passed; write/provider workflows, production authorization/security and realistic capacity acceptance remain pending",
     "Reconfirm all writers paused and source freshness; review changes since saved export with approved refresh/delta handling",
@@ -135,7 +136,7 @@
     "credentialsResponsesAndScreenshotsPublished": false
   },
   "writeTestingPlan": {
-    "state": "local-execution-failed-stopped",
+    "state": "receipt-overlap-fixed-rerun-stopped-at-wt12",
     "document": "docs/database-migration.md#disposable-staging-write-testing-plan",
     "planningBaselineCommit": "bdfab89e43a814bfcc6dff910eda4cde8aed2e98",
     "implementationPullRequest": 60,
@@ -158,7 +159,7 @@
       "WT14",
       "WT15"
     ],
-    "caseResult": "FAIL-STOPPED",
+    "caseResult": "FAIL-STOPPED-WT12",
     "localFirstSeparateCluster": true,
     "hostedPassRequiredForHostedAcceptance": true,
     "destinationProvisioned": true,
@@ -195,7 +196,7 @@
     "thresholdsRequireExecutionManifestAcceptance": true,
     "planningOnlyHistoricalPr": 61,
     "executionBaselineCommit": "dff802bfddf5c522c013262ba8e56ba9532a8221",
-    "executedHarnessCommit": "1eb8769",
+    "executedHarnessCommit": "141bc9c8c6487e4589b9138863cebf436261a748",
     "writeHarnessFullyAccepted": false,
     "executionApprovalScope": "local-only",
     "hostedExecutionApproved": false,
@@ -204,6 +205,107 @@
     "localFunctionalCampaignsCompleted": 0,
     "privateResultSha256": "8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a",
     "actualFailure": {
+      "method": "DELETE",
+      "path": "/api/sales/profit-summary/cost-overrides",
+      "expectedStatus": 200,
+      "actualStatus": 500,
+      "applicationError": "Business identity cannot change.",
+      "cause": "Existing cost-override deletion clears its worksheet identity; its PostgreSQL binding does not enable clearAsArchive",
+      "unrelatedFixApplied": false,
+      "failedDeleteJournalAndRevisionUnchanged": true
+    },
+    "results": [
+      {
+        "id": "WT00",
+        "status": "PASS",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT01",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT02",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT03",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT09",
+        "status": "PASS",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT07",
+        "status": "PASS",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT08",
+        "status": "PASS",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT04",
+        "status": "PASS",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT05",
+        "status": "PASS",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT06",
+        "status": "PASS",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT10",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT11",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete"
+      },
+      {
+        "id": "WT12",
+        "status": "FAIL",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
+        "reason": "Cost-override deletion refused by PostgreSQL identity guard"
+      },
+      {
+        "id": "WT13",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
+        "reason": "Not run after required stop at WT12"
+      },
+      {
+        "id": "WT14",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
+        "reason": "Not run after required stop at WT12"
+      },
+      {
+        "id": "WT15",
+        "status": "BLOCKED",
+        "scope": "Implemented local variants only; mandatory-family certification remains incomplete",
+        "reason": "Not run after required stop at WT12"
+      }
+    ],
+    "generatedCheckpointRestoreVerified": true,
+    "generatedCheckpointRestoreTables": 51,
+    "generatedCheckpointRestoreMetadataSections": 15,
+    "protectedHostedSectionsUnchanged": 66,
+    "applicationStopped": true,
+    "initialReceiptOverlapFailure": {
       "case": "WT06",
       "provider": "fake-loyverse",
       "pages": 2,
@@ -217,95 +319,14 @@
       "baselineDefectAlsoPresentInExistingRules": true,
       "applicationBusinessLogicFixed": false
     },
-    "results": [
-      {
-        "id": "WT00",
-        "status": "PASS",
-        "scope": "Local identity/runtime role/TLS refusal/production guard only"
-      },
-      {
-        "id": "WT01",
-        "status": "BLOCKED",
-        "localHttpGateChecksPassed": 69,
-        "reason": "Hosted Data API/protection portion not run; no hosted destination authorized"
-      },
-      {
-        "id": "WT02",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT03",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT04",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT05",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT06",
-        "status": "FAIL",
-        "reason": "Overlapping fake pages rejected by SQL unique identity; unchanged Sheets-compatible rules instead duplicate the sale",
-        "actualHttpStatus": 502,
-        "partialWrites": 0
-      },
-      {
-        "id": "WT07",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT08",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT09",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT10",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT11",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT12",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT13",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT14",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      },
-      {
-        "id": "WT15",
-        "status": "BLOCKED",
-        "reason": "Complete clean campaign not executed after the required stop at WT06"
-      }
-    ],
-    "generatedCheckpointRestoreVerified": true,
-    "generatedCheckpointRestoreTables": 51,
-    "generatedCheckpointRestoreMetadataSections": 15,
-    "protectedHostedSectionsUnchanged": 66,
-    "applicationStopped": true
+    "receiptOverlapIssueResolved": true,
+    "fixCommit": "ff7c997ed6452a20b068762103c589ddd4f0b502",
+    "privateReceiptFixRerunSha256": "3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298",
+    "httpRequestsInRerun": 280,
+    "attemptedFamiliesInRerun": 13,
+    "completedOrdinaryMutationReplayProofs": 25,
+    "allOriginalCopiedBusinessRecordsUnchanged": 70777,
+    "secondCampaignCopyPristine": true,
+    "generatedCheckpointRestoreSeconds": 4.384
   }
 }

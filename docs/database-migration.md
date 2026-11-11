@@ -909,13 +909,81 @@ safe fixture configuration; never export credential tabs into test artifacts.
 
 #### Disposable staging write-testing plan
 
-**Current status: local execution stopped at an application compatibility failure (WT06).**
+**Current status: receipt overlap fixed; local rerun stopped at a separate cost-override deletion failure (WT12).**
 The owner subsequently authorized the disposable **local** copy, write harness
 and tests. Hosted write testing and production activation remain unapproved.
 The execution baseline is merged [PR #61](https://github.com/volkswg/stock-management/pull/61),
 commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
 original requirements; a stopped/partial run is not full acceptance.
 Google Sheets remains production's store.
+
+##### Receipt-overlap fix and local rerun (2026-11-11)
+
+The owner authorized the overlap fix and another disposable local write run.
+Commit `ff7c997ed6452a20b068762103c589ddd4f0b502` changes the Loyverse client's
+completed, date-filtered receipt list: identical payloads with the same receipt
+number collapse in first-seen order. Canonical comparison ignores object-key
+order while preserving array order and all original values. Missing identities
+or conflicting versions reject the entire read with a static error before a
+caller receives any receipts. No version is selected by guessing its timestamp,
+price or status. Both normal Sheets and SQL sync use this provider client.
+No stored row is cleaned up or rewritten by the fix; SQL identity constraints,
+API paths/status mappings, roles, schema and storage configuration are unchanged.
+
+Six focused regressions reproduced five baseline failures and now pass, covering
+within/across-page overlap, nested key order, conflicting money/status/item/payment
+values, invalid identity, date filtering/cancellations and late-page failure.
+A separate actual-client + in-memory Sheets-compatible writer test proves exactly
+two receipt/item/payment rows, net sales 80, and zero writes on a conflicting
+batch. Original immutable fixtures remain unchanged; a hash-pinned bounded source
+inverse keeps historical architecture witnesses intact. Current runtime tests
+execute the fixed source directly.
+
+The new private app was built from the fix, with only the attested fake Drive
+composition override. Both task-owned databases matched the complete clean
+51-table/15-metadata baseline before writes. Earlier failed copies/builds and the
+original recovery containers were preserved. The app still used the restricted
+copy login, fresh UUID, loopback allowlist and fake-only providers.
+
+The real SQL/HTTP **WT06 checks passed**: overlapping pages create two unique
+receipts and exact sale/refund/stock totals; replay adds no calls or rows; a
+conflicting batch and a provider failure leave no business/revision/command delta;
+corrected fake pages retry successfully with the same key. This resolves the
+initial overlap blocker in both normal storage paths without weakening constraints.
+
+The broader rerun attempted 13 case families / 281 HTTP requests, including 69
+entry-gate checks and 25 ordinary mutation concurrency/replay/conflict proofs.
+It then **stopped at WT12**: `DELETE /api/sales/profit-summary/cost-overrides`
+returns 500. The existing cost-override adapter clears its row (including ID),
+while its SQL binding lacks `clearAsArchive`, so `PostgresRecords` refuses it with
+“Business identity cannot change.” The failed operation leaves no command or
+revision change. This separate binding defect is recorded, not repaired in the
+receipt fix. Browser/restart/fault/concurrency remainder, the second clean run,
+capacity and complete mandatory variants remain BLOCKED. No full write acceptance
+or hosted readiness is claimed.
+
+After stopping the app, all **70,777 original copied business rows** still match;
+the archive's 24 tables and all 15 security/metadata sections are unchanged.
+The generated checkpoint restores to a fresh task-owned database with all 51
+hashes/15 metadata sections equal in **4.38 seconds**, with zero checkpoint loss
+and no provider replay. The second copy remains pristine. All 51 protected hosted
+table hashes and 15 metadata sections match before/after. Production environment
+metadata is unchanged with no `STOCK_*` overrides; Google Sheets stays active.
+Zero hosted writes, real-provider requests, production-data requests or existing
+recovery-resource mutations were performed.
+
+Final local checks: **571 regression tests (565 prior + six new), nine harness
+checks, lint/typecheck and isolated credential-free production build pass**.
+Only the inherited shipmentRow lint warning remains. Build inputs match final
+source and the app-paths manifest retains
+`32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
+The draft [PR #62](https://github.com/volkswg/stock-management/pull/62) includes
+the fix/harness/results and is not merged. Actual rerun harness commit is
+`141bc9c`; private result receipt SHA-256 is
+`3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298`.
+Raw records, credentials, backups, requests, screenshots and logs remain private.
+Next, scope the cost-override archive binding fix and rerun both clean campaigns;
+production activation remains a separate owner decision.
 
 ##### Local execution result (2026-11-11)
 
@@ -972,9 +1040,9 @@ manifest, connection profiles and backups remain private outside Git.
 No hosted write, original recovery-resource mutation, real provider request,
 production data request or storage switch occurred.
 
-Next: separately scope the receipt identity/deduplication/conflict policy, fix it
-with characterization of both storage paths, then rerun both clean campaigns and
-all blocked variants. Do not weaken the SQL identity constraint or mark the
+The initial follow-up was to scope the receipt identity/deduplication/conflict
+policy and rerun; the subsequently authorized fix and new WT12 stop are recorded
+above. Both clean campaigns and outstanding variants still require completion. Do not weaken the SQL identity constraint or mark the
 rollback-only result a successful sync. Hosted provisioning/acceptance and
 production activation still require separate authorization.
 

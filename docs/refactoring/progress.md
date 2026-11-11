@@ -1,5 +1,45 @@
 # Refactoring progress and evidence
 
+## Receipt-overlap fix — local rerun stopped at WT12 (2026-11-11)
+
+The owner authorized fixing the overlap blocker and rerunning disposable local
+writes. Commit `ff7c997ed6452a20b068762103c589ddd4f0b502` normalizes identical
+receipt-number payloads after pagination/date filtering, preserving first-seen
+order and values. Conflicting payloads or missing identities reject before any
+receipt reaches the writer. The normal Sheets and SQL paths share this client;
+no existing rows, constraints, roles, schema or storage settings are changed.
+Six focused regression cases and an actual-client/Sheets-compatible write oracle
+prove exact unique-receipt totals and conflict atomicity. Historical fixtures are
+unchanged, with a hash-pinned inverse for original-source witnesses only.
+
+Both task-owned copies matched all 51 clean table hashes and 15 metadata sections
+before writes. The new private app passed real SQL/HTTP overlap, sale/refund/stock
+totals, provider-page failure rollback, conflict rejection and same-key corrected
+retry. The receipt issue is resolved. Thirteen families / 281 HTTP requests were
+attempted, including 69 entry checks and 25 mutation replay/concurrency proofs.
+The broader campaign then stopped at **WT12 cost-override deletion**: its SQL
+binding does not support the adapter's blank-row removal, so the business-identity
+guard refuses it (HTTP 500). No command or revision delta commits. This separate
+defect remains unfixed; later cases, second clean run and capacity are BLOCKED.
+See the [canonical rerun evidence](../database-migration.md#receipt-overlap-fix-and-local-rerun-2026-11-11).
+
+All 70,777 original copied business rows, 24 archive tables and 15 metadata sections
+remain unchanged. Generated-state recovery matched all 51 tables/15 metadata
+sections in 4.38 seconds without provider replay. The second copy is pristine and
+the app stopped. Protected hosted staging's 51 tables/15 metadata sections match
+before/after; production environment metadata is unchanged and Google Sheets
+remains active. Existing recovery containers and prior evidence are preserved.
+No hosted write, real provider/production-data request, merge or production switch.
+
+571 regression tests and nine harness checks pass; lint/typecheck and credential-free
+production build pass with only the inherited shipmentRow warning. Routes, schema,
+immutable fixtures, dependencies and lockfile are unchanged. Draft PR #62 now covers
+the receipt fix and stopped rerun, not full write acceptance. Operational harness
+`141bc9c` and private receipt
+`3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298`
+pin the results. Fix the cost-override binding and complete both clean campaigns
+before considering any separately approved hosted test or production cutover.
+
 ## Disposable local write rehearsal — stopped at WT06 (2026-11-11)
 
 The owner authorized a separate local copy and write harness after merged
@@ -18,8 +58,8 @@ HTTP 502) and rolls back all business rows, command/effect state and revision.
 The unchanged in-memory Sheets-compatible path instead stores three receipt rows
 for two identities and reports synthetic net sales 180 instead of 80. This is an
 existing overlap-handling defect and a migration compatibility blocker, not a
-successful write rehearsal. No business-rule fix or weakened constraint is in
-this PR. The [canonical result](../database-migration.md#local-execution-result-2026-11-11)
+successful write rehearsal. No business-rule fix or weakened constraint was included in the initial
+harness commit `c7288b3`; the subsequent authorized fix is above. The [canonical result](../database-migration.md#local-execution-result-2026-11-11)
 records the scope and follow-up.
 
 Local role/TLS/production refusal gates and 69 HTTP entry checks pass. Earlier
