@@ -909,12 +909,224 @@ safe fixture configuration; never export credential tabs into test artifacts.
 
 #### Disposable staging write-testing plan
 
-**Status: prepared only; no copy created and no acceptance writes executed.**
-The owner authorized this plan, not execution. The implementation baseline is
-merged [PR #60](https://github.com/volkswg/stock-management/pull/60), commit
-`bdfab89e43a814bfcc6dff910eda4cde8aed2e98`. Its read-only tests passed; write,
-provider and capacity acceptance have not. A passing write rehearsal will not
-authorize production activation. Google Sheets remains production's store.
+**Current status: receipt overlap and cost-override deletion fixed; two clean-copy local runs pass all implemented checks. Full mandatory write acceptance remains incomplete.**
+The owner subsequently authorized the disposable **local** copy, write harness
+and tests. Hosted write testing and production activation remain unapproved.
+The execution baseline is merged [PR #61](https://github.com/volkswg/stock-management/pull/61),
+commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
+original requirements; a stopped/partial run is not full acceptance.
+Google Sheets remains production's store.
+
+##### Cost-override deletion fix and two local reruns (2026-11-11)
+
+The owner authorized fixing the WT12 deletion defect and rerunning disposable
+local writes. Commit `4aac657b705720a386336d655aa47da731207aea` enables the
+existing `clearAsArchive` behavior **only** for `salesProfitCostOverrides`.
+The existing worksheet-style clear now archives the SQL row, preserving its ID
+and exact business cells, and excludes it from active reads. The common identity
+guard, other bindings, schema, grants and normal Sheets behavior are unchanged.
+No existing stored record is migrated, deleted or rewritten by this code change.
+
+A new real-PostgreSQL regression failed before the fix and passed after it on
+separate dedicated local databases. It verifies that a different nonblank ID is
+still refused, deletion increments the row revision once while retaining the
+original ID/payload, repeated deletion is a no-op, and setting a replacement
+creates a distinct active identity. The immutable Phase 2 fixture remains
+unchanged; its source witness permits precisely the one scoped binding addition.
+The secret-free operational CI suite includes this regression.
+
+The earlier failed copy was preserved under a distinct name. A fresh campaign
+copy was cloned from the verified task-owned reference, and both campaign
+baselines matched all **51 tables / 15 metadata sections** before writes.
+The newly built private app retains fake providers and independent outbound
+refusal. Both complete **implemented** runs used harness commit `943f870`:
+
+| Check | Each clean-copy run |
+| --- | --- |
+| HTTP requests / attempted case families | 455 / 16; zero application failures |
+| Ordinary mutation-method proofs | All 31: concurrent same-key request, exact replay, query conflict, stale revision and malformed key refusal |
+| Explicit concurrency / stale-edit pairs | 20 / 20 |
+| Forced multi-table rollback / committed acknowledgement-loss trials | 10 / 10 |
+| Mobile UI post-commit response loss, reload and same-key replay | One successful trial |
+| Crash after side-effect claim and regrouped redelivery | One successful trial; committed business operation is not repeated and sending/uncertain state is retained |
+| Cost-override deletion through actual HTTP | 200; ID/business cells preserved, row revision advances once; fresh-key repeat returns removed=false without a revision change |
+
+The receipt-overlap/conflict fixes also continue to pass. All **70,777 original
+copied business records** are unchanged in each campaign. The archive's 24 tables
+and all 15 security/metadata sections remain exact. Both generated checkpoints
+were backed up and restored into fresh task-owned databases: all 51 table hashes
+and 15 metadata sections match, in **3.717 and 3.127 seconds** respectively, with
+zero checkpoint loss and no provider replay. Both campaigns and the prior failed
+state are retained; the private app is stopped.
+
+**This is not full mandatory acceptance.** Nine families passed their implemented
+variants and seven retain coverage gaps: WT01 hosted Data API/protection; WT02
+cancel/delete/legacy-update variants; WT03 unlink/full cancellation history;
+WT10 oversize/uncertain upload and orphan cleanup; WT11 full LINE/photo/multi-event
+journeys; WT13 full browser repetitions/double-click/new-intent cases; WT15 all
+before/after-reply crash classes and repetitions. WT12 did exercise the product
+image replacement route; that earlier WT10 label is not evidence of missing
+route coverage. Generated backup/restore is now verified separately from the
+remaining WT15 crash variants. Capacity workloads are NOT RUN. Full-family passes,
+hosted write acceptance and production activation remain uncertified.
+
+Final local checks: **571 regression tests, nine safety/oracle checks and one
+new real-SQL regression pass**, as do lint/typecheck and an isolated credential-free
+production build. Only the inherited shipmentRow warning remains. Final build
+inputs match source; the route manifest retains its original hash. No route,
+schema, privilege, dependency, environment-template or immutable-fixture change.
+
+Protected hosted staging's **51 tables / 15 metadata sections** match exactly
+before/after, and production environment metadata is unchanged with no `STOCK_*`
+overrides. Production remains Google Sheets. No hosted write, real provider call,
+production-data request, original recovery-resource mutation, merge or cutover.
+Draft [PR #62](https://github.com/volkswg/stock-management/pull/62) records the
+fixes and scoped results. Private result receipt SHA-256:
+`b114a943afd42221ef464410128626013b90097fac1aacbbec4fae2b9261f77a`.
+Raw business records, credentials, backups, screenshots and logs stay outside Git.
+Next, complete the remaining variants/repetitions and capacity checks before any
+separately authorized hosted write rehearsal or production decision.
+
+##### Receipt-overlap fix and local rerun (2026-11-11)
+
+The owner authorized the overlap fix and another disposable local write run.
+Commit `ff7c997ed6452a20b068762103c589ddd4f0b502` changes the Loyverse client's
+completed, date-filtered receipt list: identical payloads with the same receipt
+number collapse in first-seen order. Canonical comparison ignores object-key
+order while preserving array order and all original values. Missing identities
+or conflicting versions reject the entire read with a static error before a
+caller receives any receipts. No version is selected by guessing its timestamp,
+price or status. Both normal Sheets and SQL sync use this provider client.
+No stored row is cleaned up or rewritten by the fix; SQL identity constraints,
+API paths/status mappings, roles, schema and storage configuration are unchanged.
+
+Six focused regressions reproduced five baseline failures and now pass, covering
+within/across-page overlap, nested key order, conflicting money/status/item/payment
+values, invalid identity, date filtering/cancellations and late-page failure.
+A separate actual-client + in-memory Sheets-compatible writer test proves exactly
+two receipt/item/payment rows, net sales 80, and zero writes on a conflicting
+batch. Original immutable fixtures remain unchanged; a hash-pinned bounded source
+inverse keeps historical architecture witnesses intact. Current runtime tests
+execute the fixed source directly.
+
+The new private app was built from the fix, with only the attested fake Drive
+composition override. Both task-owned databases matched the complete clean
+51-table/15-metadata baseline before writes. Earlier failed copies/builds and the
+original recovery containers were preserved. The app still used the restricted
+copy login, fresh UUID, loopback allowlist and fake-only providers.
+
+The real SQL/HTTP **WT06 checks passed**: overlapping pages create two unique
+receipts and exact sale/refund/stock totals; replay adds no calls or rows; a
+conflicting batch and a provider failure leave no business/revision/command delta;
+corrected fake pages retry successfully with the same key. This resolves the
+initial overlap blocker in both normal storage paths without weakening constraints.
+
+The broader rerun attempted 13 case families / 281 HTTP requests, including 69
+entry-gate checks and 25 ordinary mutation concurrency/replay/conflict proofs.
+It then **stopped at WT12**: `DELETE /api/sales/profit-summary/cost-overrides`
+returns 500. The existing cost-override adapter clears its row (including ID),
+while its SQL binding lacks `clearAsArchive`, so `PostgresRecords` refuses it with
+“Business identity cannot change.” The failed operation leaves no command or
+revision change. This separate binding defect is recorded, not repaired in the
+receipt fix. Browser/restart/fault/concurrency remainder, the second clean run,
+capacity and complete mandatory variants remain BLOCKED. No full write acceptance
+or hosted readiness is claimed.
+
+After stopping the app, all **70,777 original copied business rows** still match;
+the archive's 24 tables and all 15 security/metadata sections are unchanged.
+The generated checkpoint restores to a fresh task-owned database with all 51
+hashes/15 metadata sections equal in **4.38 seconds**, with zero checkpoint loss
+and no provider replay. The second copy remains pristine. All 51 protected hosted
+table hashes and 15 metadata sections match before/after. Production environment
+metadata is unchanged with no `STOCK_*` overrides; Google Sheets stays active.
+Zero hosted writes, real-provider requests, production-data requests or existing
+recovery-resource mutations were performed.
+
+Final local checks: **571 regression tests (565 prior + six new), nine harness
+checks, lint/typecheck and isolated credential-free production build pass**.
+Only the inherited shipmentRow lint warning remains. Build inputs match final
+source and the app-paths manifest retains
+`32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
+The draft [PR #62](https://github.com/volkswg/stock-management/pull/62) includes
+the fix/harness/results and is not merged. Actual rerun harness commit is
+`141bc9c`; private result receipt SHA-256 is
+`3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298`.
+Raw records, credentials, backups, requests, screenshots and logs remain private.
+At this initial stop, the next step was the cost-override archive binding fix;
+the subsequently authorized fix and reruns are recorded above. Production
+activation remains a separate owner decision.
+
+##### Local execution result (2026-11-11)
+
+A fresh PostgreSQL 17 cluster, volume, TLS certificate, passwords and copy UUID
+were created with a 1 GiB memory limit and 1.5 CPUs. The two existing recovery
+containers were preserved. The independently recovered post-audit backup was
+checksum-verified and restored: all **51 tables and 15 metadata sections** matched
+before setup, including **70,777 business records**. Setup changed only the new
+copy's environment UUID and the enumerated runtime-login/membership metadata.
+Two clean campaign databases were prepared; the app used a fresh restricted
+login able to SET `stock_runtime`, with no owner/BYPASSRLS privileges.
+
+`tools/migration/local-write/` supplies a manifest/UUID/loopback allowlist,
+independent socket/fetch denial, deterministic fake LINE/Loyverse/Drive providers,
+private ledgers/fault controls, an offline Sheets-compatible oracle and an actual
+HTTP/SQL/browser campaign. `build-app.cjs` creates a separate credential-free
+build: one Drive-factory override and additional private preload/proxy files;
+443 other source/assets remain byte-identical and 113 client chunks were checked.
+Neither this code nor its write flag is imported by the production app.
+
+| Check | Observed result |
+| --- | --- |
+| Local runtime privileges, wrong target/UUID, untrusted TLS, production guard | Passed; refusal before mutation and restricted role access verified |
+| HTTP entry gates | 69 checks passed, including all 31 ordinary mutation methods and signed LINE entrypoint; hosted Data API/protection not run |
+| WT06 overlapping fake receipt pages | **FAIL**: two pages contain one repeated sale plus one refund; local SQL returns 502 on `sales_receipts_pkey` rather than completing a unique-receipt sync |
+| Failed sync atomicity | All 51 table hashes and 15 metadata sections still match the clean copy baseline; no partial receipt, sync, command, effect or revision committed |
+| Existing Sheets-compatible rules with identical fake pages | Three rows / two distinct receipt identities; synthetic net sales 180 versus the independent unique-receipt control of 80. The underlying overlap defect predates Supabase |
+| Generated-state recovery | A preserved earlier exploratory checkpoint with synthetic writes/commands/effects was backed up and restored to a fresh local database; all 51 tables/15 metadata sections matched in 3.2 seconds. No provider replay |
+| Protected original staging and production configuration | All 51 hosted table hashes and 15 metadata sections match before/after; production environment metadata is unchanged, has no `STOCK_*` overrides, and still defaults to Sheets |
+
+The required integrity stop is enforced: the app is stopped, resources/evidence
+are retained and the second clean copy remains pristine. **Zero complete passing
+functional campaigns** are claimed. The 20-pair concurrency, ten-trial fault and
+restart/browser repetitions, capacity workload and complete WT02–15 variants
+remain BLOCKED/not run after the stop; hosted acceptance is NOT RUN. Exploratory
+orders/images, shipments, expenses, attendance/payroll, movement/stock and
+nonoverlapping sync checks are narrower evidence, not complete family passes.
+Five fixture-development attempts were preserved separately. Corrections matched
+existing signed-auth, attendance, month-selected payroll rate, delivery-month and
+receipt-field contracts; no application rules were changed to make tests pass.
+
+Local verification: 565 existing regression tests and eight harness safety/oracle
+checks pass; lint/typecheck and isolated credential-free production build pass
+with the inherited unused `shipmentRow` lint warning only. CI runs the secret-free
+harness self-tests; it never receives this copy, backup, credentials or business
+records and does not execute this private acceptance campaign. Original
+routes/fixtures/schema/business source and `yarn.lock` remain unchanged.
+
+Private result receipt SHA-256:
+`8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a`.
+Operational execution used harness commit `1eb8769`; subsequent formatting has a
+retained syntax-equivalence proof. Raw requests, screenshots, SQL/provider logs,
+manifest, connection profiles and backups remain private outside Git.
+No hosted write, original recovery-resource mutation, real provider request,
+production data request or storage switch occurred.
+
+The initial follow-up was to scope the receipt identity/deduplication/conflict
+policy and rerun; the subsequently authorized fix and new WT12 stop are recorded
+above. Both clean campaigns and outstanding variants still require completion. Do not weaken the SQL identity constraint or mark the
+rollback-only result a successful sync. Hosted provisioning/acceptance and
+production activation still require separate authorization.
+
+To review the harness without private data, run
+`node --test tools/migration/local-write/guard.test.cjs tools/migration/local-write/oracle.test.cjs`.
+For a future explicitly authorized local rerun, restore/reseal fresh copy baselines
+first, build a **new** private app destination with `build-app.cjs`, pin its
+attestation/runtime/manifest hashes, start it with only the new copy environment
+and its `__local-write-harness/preload.cjs`, then invoke `campaign.cjs` with the
+private manifest directory and exact approved campaign database. The current
+execution layout uses sibling `app-v3`; review that path before reuse. The runner
+never provisions or defaults to a hosted target. Keep failed attempts and inspect
+private per-case results; unsupported/unimplemented variants remain BLOCKED.
 
 ##### Scope and target selection
 

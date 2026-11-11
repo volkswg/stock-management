@@ -31,6 +31,22 @@ async function command(run){return executeCommand('synthetic',`operation-${++seq
 
 test.after(closePool);
 
+test('cost-override deletion archives the original identity and payload, is repeatable, and permits a fresh replacement',async()=>{
+ const accountId='WT_COST_DELETE_REGRESSION',month='2024-03';
+ const override=await command(()=>sales.setSalesProfitCostOverride({googleSheetsService:service,accountId,month,averageItemCost:2.5,note:'WT retained history',createdBy:'synthetic'}));
+ const before=await transaction(false,async()=>(await currentTransaction().query('SELECT id,business_cells,row_order::text,revision::text FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[override.id])).rows[0]);
+ await assert.rejects(command(()=>service.salesProfitCostOverrides.updateRows(`A${Number(before.row_order)+1}:H${Number(before.row_order)+1}`,[['WT_CHANGED_ID',...before.business_cells.slice(1)]])),PersistenceFailure);
+ assert.equal(await command(()=>sales.removeSalesProfitCostOverride({googleSheetsService:service,accountId,month})),true);
+ const archived=await transaction(false,async()=>(await currentTransaction().query('SELECT id,business_cells,archived_at,revision::text FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[override.id])).rows[0]);
+ assert.equal(archived.id,before.id);assert.deepEqual(archived.business_cells,before.business_cells);assert.ok(archived.archived_at);assert.equal(Number(archived.revision),Number(before.revision)+1);
+ assert.equal((await transaction(false,()=>sales.listSalesProfitCostOverrides({googleSheetsService:service,year:'2024'}))).some(x=>x.id===override.id),false);
+ assert.equal(await command(()=>sales.removeSalesProfitCostOverride({googleSheetsService:service,accountId,month})),false);
+ const replacement=await command(()=>sales.setSalesProfitCostOverride({googleSheetsService:service,accountId,month,averageItemCost:3,note:'WT replacement',createdBy:'synthetic'}));
+ assert.notEqual(replacement.id,override.id);
+ const active=(await transaction(false,()=>sales.listSalesProfitCostOverrides({googleSheetsService:service,year:'2024'}))).filter(x=>x.accountId===accountId);
+ assert.equal(active.length,1);assert.equal(active[0].averageItemCost,3);
+});
+
 test('all seven feature table adapters are available; no IO without an explicit unit of work',async()=>{
  assert.equal(Object.values(service).filter(v=>v&&typeof v.readRows==='function').length,23);
  await assert.rejects(service.orders.readRows(),PersistenceFailure);

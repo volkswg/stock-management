@@ -1,31 +1,134 @@
 # Refactoring progress and evidence
 
-## Disposable staging write-testing — plan prepared, not executed (2026-11-11)
+## Cost-override deletion fix — two implemented local runs pass (2026-11-11)
 
-The owner requested a plan only, preserving existing data and production Sheets.
-The [canonical write-testing plan](../database-migration.md#disposable-staging-write-testing-plan)
-defines a new isolated local cluster followed by a separately approved hosted
-Supabase project/preview. It forbids using the original project, its credentials,
-existing read-only preview or shared recovery resources as mutation targets.
-No destination has been provisioned or approved, no restore or new role grant
-has run, and no planned acceptance write/provider action has been executed.
+The owner authorized fixing the WT12 binding defect and rerunning local writes.
+Commit `4aac657b705720a386336d655aa47da731207aea` opts only cost overrides into
+the existing archive-on-clear behavior. Deletion preserves the SQL identity and
+business cells while hiding the archived row; common identity protections,
+schema, privileges and normal Sheets behavior remain unchanged. A dedicated
+real-SQL regression fails before and passes after the fix, including nonblank-ID
+refusal, repeated deletion and a distinct replacement identity. The immutable
+source fixture is retained with one exact bounded witness adjustment.
 
-Merged PR #60 (`bdfab89e43a814bfcc6dff910eda4cde8aed2e98`) is the planning
-baseline. Its merge/deployment was separately verified earlier in this owner
-session; production retained Google Sheets. The read-only evidence below was
-captured before that merge and does not describe a new check during planning.
-Existing completed backup/read-acceptance results remain historical evidence.
+Both clean-copy runs completed all 16 implemented families without a new failure:
+**455 HTTP requests each**, all **31** ordinary mutation proofs, 20 same-key pairs,
+20 stale-edit pairs, ten multi-table rollbacks, ten lost-commit-acknowledgement
+trials, one mobile response-loss/reload/replay and one post-effect-claim crash per
+copy. Actual HTTP cost deletion retains ID/cells, increments the row once and
+makes a fresh-key repeat a no-op. Receipt overlap/conflict checks still pass.
+The [canonical results](../database-migration.md#cost-override-deletion-fix-and-two-local-reruns-2026-11-11)
+distinguish implemented-case success from full mandatory acceptance: nine families
+pass implemented checks, seven have outstanding variants, and capacity/hosted
+write acceptance are NOT RUN. No full acceptance or production readiness claim.
 
-The plan specifies baseline restore/fingerprints, a fresh copy UUID/login,
-independent provider isolation, a real-app write harness, 16 mandatory case
-families, exact comparison rules, retry/concurrency/failure tests, bounded
-performance/recovery thresholds, protected-state verification, stop/reset
-rules and named sign-off. All test results remain NOT RUN. The current
-`STOCK_STAGING_READ_ONLY` flag also controls provider fetch denial; turning it
-off alone cannot safely enable this campaign. A reviewed independent deny
-control and fake LINE/Loyverse/Drive composition are prerequisites, not completed
-features. Hosted target/cost and the execution manifest must be approved before
-any setup or test write. Production activation remains a separate decision.
+Every original copied business record (70,777 per copy), all 24 archive tables
+and 15 metadata sections remain unchanged. Both generated checkpoints restore
+with all 51 table hashes/15 metadata sections equal (3.717 / 3.127 seconds),
+with zero checkpoint loss and no provider replay. The previous failed copy and
+both completed runs are preserved; the test app is stopped. Protected hosted
+staging's full before/after snapshot and production environment metadata match;
+Google Sheets remains production's store. No hosted write, real provider call,
+production-data request, original recovery-resource change, merge or cutover.
+
+571 regression tests, nine harness checks and the new real-SQL regression pass;
+lint/typecheck and credential-free production build pass with only the inherited
+shipmentRow warning. Routes, schema, grants, dependencies and historical fixtures
+are unchanged. Draft PR #62 contains the scoped fixes/results. Harness `943f870`
+and private receipt
+`b114a943afd42221ef464410128626013b90097fac1aacbbec4fae2b9261f77a`
+pin the operational evidence; raw records, credentials and backups are not published.
+Complete remaining coverage/repetitions/capacity before considering separately
+approved hosted acceptance or production activation.
+
+## Receipt-overlap fix — local rerun stopped at WT12 (2026-11-11)
+
+The owner authorized fixing the overlap blocker and rerunning disposable local
+writes. Commit `ff7c997ed6452a20b068762103c589ddd4f0b502` normalizes identical
+receipt-number payloads after pagination/date filtering, preserving first-seen
+order and values. Conflicting payloads or missing identities reject before any
+receipt reaches the writer. The normal Sheets and SQL paths share this client;
+no existing rows, constraints, roles, schema or storage settings are changed.
+Six focused regression cases and an actual-client/Sheets-compatible write oracle
+prove exact unique-receipt totals and conflict atomicity. Historical fixtures are
+unchanged, with a hash-pinned inverse for original-source witnesses only.
+
+Both task-owned copies matched all 51 clean table hashes and 15 metadata sections
+before writes. The new private app passed real SQL/HTTP overlap, sale/refund/stock
+totals, provider-page failure rollback, conflict rejection and same-key corrected
+retry. The receipt issue is resolved. Thirteen families / 281 HTTP requests were
+attempted, including 69 entry checks and 25 mutation replay/concurrency proofs.
+The broader campaign then stopped at **WT12 cost-override deletion**: its SQL
+binding does not support the adapter's blank-row removal, so the business-identity
+guard refuses it (HTTP 500). No command or revision delta commits. This separate
+defect remains unfixed; later cases, second clean run and capacity are BLOCKED.
+See the [canonical rerun evidence](../database-migration.md#receipt-overlap-fix-and-local-rerun-2026-11-11).
+
+All 70,777 original copied business rows, 24 archive tables and 15 metadata sections
+remain unchanged. Generated-state recovery matched all 51 tables/15 metadata
+sections in 4.38 seconds without provider replay. The second copy is pristine and
+the app stopped. Protected hosted staging's 51 tables/15 metadata sections match
+before/after; production environment metadata is unchanged and Google Sheets
+remains active. Existing recovery containers and prior evidence are preserved.
+No hosted write, real provider/production-data request, merge or production switch.
+
+571 regression tests and nine harness checks pass; lint/typecheck and credential-free
+production build pass with only the inherited shipmentRow warning. Routes, schema,
+immutable fixtures, dependencies and lockfile are unchanged. Draft PR #62 now covers
+the receipt fix and stopped rerun, not full write acceptance. Operational harness
+`141bc9c` and private receipt
+`3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298`
+pin the results. Fix the cost-override binding and complete both clean campaigns
+before considering any separately approved hosted test or production cutover.
+
+## Disposable local write rehearsal — stopped at WT06 (2026-11-11)
+
+The owner authorized a separate local copy and write harness after merged
+[PR #61](https://github.com/volkswg/stock-management/pull/61), baseline
+`dff802bfddf5c522c013262ba8e56ba9532a8221`. A new bounded PostgreSQL 17 cluster,
+volume, TLS identity, UUID and restricted runtime login were prepared without
+reusing the two existing recovery containers. The independently recovered
+post-audit backup matched all 51 tables/15 metadata sections and 70,777 business
+records. Only the copy identity and enumerated login metadata changed in setup.
+Two clean databases were created. The real Next app uses test-only provider
+composition plus independent outbound denial; production source is unchanged.
+
+**Acceptance failed at WT06 and further writes stopped.** Overlapping fake pages
+repeat one receipt: SQL rejects the duplicate identity (`sales_receipts_pkey`,
+HTTP 502) and rolls back all business rows, command/effect state and revision.
+The unchanged in-memory Sheets-compatible path instead stores three receipt rows
+for two identities and reports synthetic net sales 180 instead of 80. This is an
+existing overlap-handling defect and a migration compatibility blocker, not a
+successful write rehearsal. No business-rule fix or weakened constraint was included in the initial
+harness commit `c7288b3`; the subsequent authorized fix is above. The [canonical result](../database-migration.md#local-execution-result-2026-11-11)
+records the scope and follow-up.
+
+Local role/TLS/production refusal gates and 69 HTTP entry checks pass. Earlier
+exploratory copies exercised orders/images, shipments, expenses, HR/payroll,
+movements/stock and nonoverlapping sync/replay. Five fixture-development attempts
+are preserved and are not counted as clean passing campaigns. The stopped run
+has zero complete passing campaigns; full concurrency, fault/restart/browser
+repetitions, capacity and remaining mandatory variants are BLOCKED. The second
+clean copy is pristine; the task app is stopped and evidence/resources retained.
+
+A preserved generated checkpoint was backed up and independently restored into
+a fresh local database: all 51 tables/15 metadata sections match (3.2 seconds),
+including command/effect state, with no provider replay. Hosted staging's full
+51-table/15-metadata before/after comparison is exact. Production environment
+metadata is unchanged with no `STOCK_*` overrides; Google Sheets remains active.
+No hosted write, existing recovery-resource mutation, real provider request,
+production data request or cutover occurred. Hosted write acceptance is NOT RUN.
+
+565 regression tests and eight harness self-tests pass; lint/typecheck and
+credential-free production build pass, with only the inherited shipmentRow
+warning. Existing routes, fixtures, schema, application rules and lockfile remain
+unchanged. The secret-free CI job now also runs the harness self-tests, not the
+private real-data rehearsal. Operational harness commit `1eb8769` and private
+receipt `8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a`
+pin the evidence; subsequent formatting has a retained syntax-equivalence proof.
+Raw data, credentials, manifest, backup, provider logs and screenshots are not
+published. Receipt-policy remediation, two clean reruns and all outstanding
+acceptance gates precede any separately approved hosted test or production switch.
 
 ## Private Supabase app — read-only acceptance (2026-11-11)
 

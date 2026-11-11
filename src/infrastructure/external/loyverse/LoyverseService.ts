@@ -69,7 +69,7 @@ export class LoyverseService implements ILoyverseService {
       cursor = nextCursor;
     } while (cursor);
 
-    return filterReceiptsByReceiptDate(receipts, query);
+    return uniqueReceipts(filterReceiptsByReceiptDate(receipts, query));
   }
 
   async getSalesByItem(
@@ -327,6 +327,41 @@ function filterReceiptsByReceiptDate(
       receiptDate <= maximum
     );
   });
+}
+
+// Pages may overlap while the provider is being updated. Preserve the first
+// complete representation only when every value agrees; never guess which
+// financial/status version should be saved. Validation finishes before callers
+// receive any receipts, so both storage paths can reject the whole sync.
+function uniqueReceipts(receipts: LoyverseReceipt[]): LoyverseReceipt[] {
+  const seen = new Map<string, string>();
+  const result: LoyverseReceipt[] = [];
+  for (const receipt of receipts) {
+    const id = receipt.receipt_number;
+    if (typeof id !== "string" || !id.trim()) {
+      throw new Error("Loyverse returned a receipt without a valid identity. No receipts were returned.");
+    }
+    const signature = JSON.stringify(canonicalReceiptValue(receipt));
+    const previous = seen.get(id);
+    if (previous !== undefined) {
+      if (previous !== signature) {
+        throw new Error("Loyverse returned conflicting versions of a receipt. No receipts were returned.");
+      }
+      continue;
+    }
+    seen.set(id, signature);
+    result.push(receipt);
+  }
+  return result;
+}
+
+function canonicalReceiptValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalReceiptValue);
+  if (value !== null && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return Object.fromEntries(Object.keys(record).sort().map(key => [key, canonicalReceiptValue(record[key])]));
+  }
+  return value;
 }
 
 function addMilliseconds(value: string, milliseconds: number): string {

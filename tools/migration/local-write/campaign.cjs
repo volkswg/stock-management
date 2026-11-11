@@ -1,0 +1,720 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Private local acceptance driver; no production module imports this file. */
+const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), cp = require('node:child_process'), assert = require('node:assert/strict');
+const { Client } = require('pg'), { validate, PNG } = require('./runtime.cjs');
+const { memoryService } = require('./oracle.cjs');
+const orders = require('../../../src/modules/orders/server.ts');
+const CATALOG = require('../worksheets.json');
+const sha = v => crypto.createHash('sha256').update(v).digest('hex');
+const fields = (v, keys) => Object.fromEntries(keys.map(k => [k, v[k]]));
+async function clock(instant, run) {
+    const RealDate = global.Date;
+    global.Date = class extends RealDate {
+        constructor(...args) {
+            super(...(args.length ? args : [instant]));
+        }
+        static now() {
+            return RealDate.parse(instant);
+        }
+    };
+    try {
+        return await run();
+    }
+    finally {
+        global.Date = RealDate;
+    }
+}
+class Campaign {
+    constructor(state, db) {
+        this.state = path.resolve(state);
+        this.manifest = JSON.parse(fs.readFileSync(path.join(this.state, 'manifest.json')));
+        this.env = JSON.parse(fs.readFileSync(path.join(this.state, db + '-app-env.json')));
+        this.config = validate(this.env, this.manifest);
+        assert.equal(sha(fs.readFileSync(this.env.STOCK_WRITE_MANIFEST)), this.env.STOCK_WRITE_MANIFEST_SHA256);
+        this.db = db;
+        this.app = path.resolve(this.state, '../app-v3');
+        this.prefix = 'WT_' + db.toUpperCase();
+        this.out = path.join(this.state, db + '-results');
+        fs.mkdirSync(this.out, {
+            mode: 0o700
+        });
+        this.requests = [];
+        this.results = [];
+        this.seq = 0;
+        this.blocked = [];
+        this.oracle = memoryService();
+        this.accounts = [{
+                id: 'WT_ACCOUNT_A', shopName: 'WT Shop A'
+            }, {
+                id: 'WT_ACCOUNT_B', shopName: 'WT Shop B'
+            }];
+        this.month = '2026-01';
+        this.date = '2026-01-01';
+        this.context = {};
+        this.harnessCommit = cp.execFileSync('git', ['rev-parse', 'HEAD'], {
+            encoding: 'utf8'
+        }).trim();
+        this.probedRoutes = new Set();
+        this.methodProofs = [];
+    }
+    key(label = 'request') {
+        return this.prefix + '_' + label + '_' + (++this.seq);
+    }
+    save(name, v) {
+        fs.writeFileSync(path.join(this.out, name), JSON.stringify(v, null, 2), {
+            mode: 0o600
+        });
+    }
+    control(v) {
+        fs.writeFileSync(this.env.STOCK_WRITE_CONTROL, JSON.stringify(v), {
+            mode: 0o600
+        });
+    }
+    ledger() {
+        return fs.readFileSync(this.env.STOCK_WRITE_LEDGER, 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+    }
+    routeKey(method, pathname) {
+        if (!this.exportedMethods) {
+            const root = path.resolve(__dirname, '../../../src/app/api');
+            const walk = d => fs.readdirSync(d, {
+                withFileTypes: true
+            }).flatMap(e => e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+            this.exportedMethods = walk(root).filter(f => f.endsWith('/route.ts')).flatMap(f => [...fs.readFileSync(f, 'utf8').matchAll(/export const (POST|PUT|PATCH|DELETE) = withPersistence/g)].map(m => ({
+                method: m[1], route: '/api/' + path.relative(root, path.dirname(f)).split(path.sep).join('/')
+            })));
+        }
+        const parts = pathname.split('/');
+        const match = this.exportedMethods.filter(x => x.method === method && x.route.split('/').length === parts.length && x.route.split('/').every((p, i) => p.startsWith('[') || p === parts[i])).sort((a, b) => a.route.split('[').length - b.route.split('[').length)[0];
+        assert.ok(match, 'Mutation absent from pinned route inventory');
+        return method + ':' + match.route;
+    }
+    async api(url, { method = 'GET', body, key, auth = true, status = 200, headers = {}, _probe = false } = {}) {
+        const u = new URL(url, this.config.origin);
+        assert.equal(u.origin, this.config.origin);
+        assert.ok(u.pathname.startsWith('/api/'));
+        const h = {
+            ...headers
+        };
+        if (auth)
+            h.authorization = 'Bearer ' + this.env.STOCK_STAGING_AUTH_TOKEN;
+        if (key)
+            h['Idempotency-Key'] = key;
+        const multipart = body instanceof FormData, raw = body instanceof Blob || Buffer.isBuffer(body);
+        if (body !== undefined && !multipart && !raw)
+            h['content-type'] = 'application/json';
+        const perform = async () => {
+            const t = performance.now();
+            const r = await fetch(u, {
+                method, headers: h, body: body === undefined ? undefined : multipart || raw ? body : JSON.stringify(body), redirect: 'error', signal: AbortSignal.timeout(30000)
+            });
+            const text = await r.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            }
+            catch {
+                data = null;
+            }
+            const record = {
+                index: this.requests.length + 1, url: u.pathname, query: u.search, method, key: key || null, status: r.status, expectedStatus: status, body: data, text, revision: r.headers.get('x-stock-revision'), ms: performance.now() - t
+            };
+            this.requests.push(record);
+            this.save('requests.json', this.requests);
+            assert.ok((Array.isArray(status) ? status : [status]).includes(r.status), 'HTTP status mismatch; inspect private request ' + record.index);
+            return record;
+        };
+        const proofKey = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) ? this.routeKey(method, u.pathname) : null;
+        const probe = !_probe && auth && key && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && [200, 201].includes(status) && !this.probedRoutes.has(proofKey);
+        if (!probe)
+            return perform();
+        this.probedRoutes.add(proofKey);
+        const [first, parallel] = await Promise.all([perform(), perform()]);
+        assert.equal(parallel.text, first.text);
+        assert.equal(parallel.revision, first.revision);
+        const revision = await this.revision(), options = {
+            method, body, key, headers, _probe: true, status: first.status
+        };
+        const replay = await this.api(url, options);
+        assert.equal(replay.text, first.text);
+        assert.equal(replay.revision, first.revision);
+        const changed = new URL(u);
+        changed.searchParams.set('WT_conflicting_intent', '1');
+        await this.api(changed, {
+            ...options, status: 409
+        });
+        await this.api(url, {
+            ...options, key: this.key('stale'), headers: {
+                ...headers, 'If-Match': '"stock-v2-0"'
+            }, status: 409
+        });
+        await this.api(url, {
+            ...options, key: '!invalid!', status: 428
+        });
+        assert.equal(await this.revision(), revision);
+        this.methodProofs.push({
+            route: proofKey, firstKey: key, parallelSameKey: true, replayExactBodyAndRevision: true, queryConflict: 409, staleRevision: 409, malformedKey: 428
+        });
+        this.save('successful-method-proofs.json', this.methodProofs);
+        return first;
+    }
+    async get(url) {
+        return (await this.api(url)).body;
+    }
+    async post(url, body, opts = {}) {
+        return this.api(url, {
+            method: 'POST', body, key: this.key(), ...opts
+        });
+    }
+    async patch(url, body, opts = {}) {
+        return this.api(url, {
+            method: 'PATCH', body, key: this.key(), ...opts
+        });
+    }
+    async owner() {
+        if (this.admin)
+            return this.admin;
+        const u = new URL(this.env.STOCK_DATABASE_URL);
+        assert.equal(u.hostname, '127.0.0.1');
+        assert.equal(Number(u.port), this.manifest.databasePort);
+        assert.equal(u.pathname, '/' + this.db);
+        const secrets = JSON.parse(fs.readFileSync(path.join(this.state, 'runtime-secrets.json')));
+        u.username = 'supabase_admin';
+        u.password = secrets.ownerPassword;
+        this.admin = new Client({
+            connectionString: u.toString(), ssl: {
+                rejectUnauthorized: true, ca: fs.readFileSync(path.resolve(this.state, '../tls/server.crt'))
+            }, connectionTimeoutMillis: 5000
+        });
+        await this.admin.connect();
+        const r = await this.admin.query('SELECT current_database() AS name,(SELECT isolation_id::text FROM stock_operational.environment WHERE singleton) AS target');
+        assert.equal(r.rows[0].name, this.db);
+        assert.equal(r.rows[0].target, this.manifest.targetIsolationId);
+        return this.admin;
+    }
+    async sql(text, values = []) {
+        const p = await this.owner();
+        assert.match(text, /^(SELECT|WITH|EXPLAIN|BEGIN|ROLLBACK|SET|RESET)/);
+        return (await p.query(text, values)).rows;
+    }
+    async seal() {
+        const result = {};
+        for (const table of Object.keys(CATALOG)) {
+            const rows = await this.sql('SELECT row_order::text AS n,encode(sha256(convert_to(to_jsonb(t)::text,\'UTF8\')),\'hex\') AS h FROM stock_operational.' + table + ' t ORDER BY row_order');
+            result[table] = Object.fromEntries(rows.map(r => [r.n, r.h]));
+        }
+        return result;
+    }
+    async baseline() {
+        this.original = await this.seal();
+        this.save('original-row-hashes.json', this.original);
+        this.initialRevision = await this.revision();
+    }
+    async revision() {
+        return (await this.sql('SELECT value::text AS value FROM stock_operational.revision WHERE singleton'))[0].value;
+    }
+    async verifyOriginal() {
+        const now = await this.seal();
+        for (const [table, rows] of Object.entries(this.original))
+            for (const [n, h] of Object.entries(rows))
+                assert.equal(now[table][n], h, 'Original copied row changed in ' + table);
+        return now;
+    }
+    async family(id, run) {
+        const before = await this.seal(), t = performance.now();
+        let result = {
+            id, status: 'RUNNING', startedAt: new Date().toISOString()
+        };
+        this.save(id + '.json', result);
+        try {
+            await run();
+            const after = await this.verifyOriginal();
+            const changed = Object.keys(before).filter(k => JSON.stringify(before[k]) !== JSON.stringify(after[k]));
+            result = {
+                ...result, status: this.blocked.some(x => x.id === id) ? 'BLOCKED' : 'PASS', ms: performance.now() - t, changedBusinessTables: changed, revision: await this.revision(), blockedVariants: this.blocked.filter(x => x.id === id)
+            };
+            this.save(id + '.json', result);
+            this.results.push(result);
+            console.log(JSON.stringify({
+                case: id, status: result.status, copy: this.db
+            }));
+        }
+        catch (e) {
+            result = {
+                ...result, status: 'FAIL', ms: performance.now() - t, failureClass: e.name, error: e.message, stack: e.stack
+            };
+            this.save(id + '.json', result);
+            this.results.push(result);
+            this.save('campaign-summary.json', this.summary('FAIL'));
+            console.log(JSON.stringify({
+                case: id, status: 'FAIL', copy: this.db, failureClass: e.name
+            }));
+            throw e;
+        }
+    }
+    summary(status) {
+        return {
+            scope: 'local-disposable-copy-only', database: this.db, at: new Date().toISOString(), status, sourceCommit: 'dff802bfddf5c522c013262ba8e56ba9532a8221', harnessCommit: this.harnessCommit, cases: this.results, requests: this.requests.length, hostedAcceptance: 'NOT RUN', productionCutoverPerformed: false
+        };
+    }
+    async checkGuards() {
+        await this.api('/api/orders', {
+            auth: false, status: 401
+        });
+        await this.api('/api/orders', {
+            method: 'POST', body: {
+                seller: this.prefix
+            }, auth: false, status: 401
+        });
+        await this.api('/api/orders', {
+            method: 'POST', body: {
+                seller: this.prefix
+            }, status: 428
+        });
+        await this.api('/api/line/webhook', {
+            method: 'POST', body: {
+                events: []
+            }, auth: false, headers: {
+                'x-line-signature': 'invalid'
+            }, status: 401
+        });
+        assert.ok(this.ledger().some(r => r.kind === 'harness-installed'));
+    }
+    async WT00() {
+        const result = cp.spawnSync(process.execPath, ['-e', "require('./tests/helpers/postgres-runtime.cjs');try{require('./src/infrastructure/persistence/postgres/database.ts').stagingSettings();process.exit(1)}catch(e){process.exit(e.status===503?0:2)}"], {
+            cwd: process.cwd(), env: {
+                PATH: process.env.PATH, ...this.env, VERCEL_ENV: 'production'
+            }, encoding: 'utf8'
+        });
+        assert.equal(result.status, 0, 'Production storage guard must refuse before connection');
+        const untrusted = new Client({
+            connectionString: this.env.STOCK_DATABASE_URL, ssl: {
+                rejectUnauthorized: true
+            }, connectionTimeoutMillis: 3000
+        });
+        try {
+            await assert.rejects(untrusted.connect(), /self-signed|certificate/i);
+        }
+        finally {
+            await untrusted.end().catch(() => {
+            });
+        }
+        const p = await this.owner();
+        const role = (await p.query('SELECT rolsuper,rolbypassrls,rolinherit,rolcreatedb,rolcreaterole,rolconnlimit FROM pg_roles WHERE rolname=$1', [this.manifest.runtimeUser])).rows[0];
+        assert.ok(!role.rolsuper && !role.rolbypassrls && !role.rolinherit && !role.rolcreatedb && !role.rolcreaterole && role.rolconnlimit === 6);
+        for (const value of ['postgres://user:secret@source.invalid:5432/postgres', 'postgres://user:secret@127.0.0.1:5432/postgres'])
+            assert.throws(() => validate({
+                ...this.env, STOCK_DATABASE_URL: value
+            }, this.manifest));
+        assert.throws(() => validate({
+            ...this.env, STOCK_TARGET_ISOLATION_ID: '160669bd-2f6f-4490-9259-bada5a1d02c4'
+        }, this.manifest));
+        const client = new Client({
+            connectionString: this.env.STOCK_DATABASE_URL, ssl: {
+                rejectUnauthorized: true, ca: fs.readFileSync(path.resolve(this.state, '../tls/server.crt'))
+            }
+        });
+        await client.connect();
+        try {
+            await assert.rejects(client.query('SELECT * FROM stock_migration.orders LIMIT 1'), /permission denied/);
+            await assert.rejects(client.query('SELECT * FROM stock_operational.orders LIMIT 1'), /permission denied/);
+            await assert.rejects(client.query('SET ROLE postgres'), /permission denied/);
+            await client.query('SET ROLE stock_runtime');
+            assert.equal((await client.query('SELECT count(*) FROM stock_operational.orders')).rowCount, 1);
+        }
+        finally {
+            await client.end();
+        }
+    }
+    async WT01() {
+        const before = await this.revision();
+        await this.checkGuards();
+        const root = path.resolve(__dirname, '../../../src/app/api');
+        const walk = d => fs.readdirSync(d, {
+            withFileTypes: true
+        }).flatMap(e => e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+        let methods = 0;
+        for (const f of walk(root).filter(f => f.endsWith('/route.ts'))) {
+            const source = fs.readFileSync(f, 'utf8');
+            if (!source.includes('withPersistence'))
+                continue;
+            const url = '/api/' + path.relative(root, path.dirname(f)).split(path.sep).join('/').replace(/\[[^\]]+\]/g, 'WT_missing');
+            for (const m of source.matchAll(/export const (POST|PUT|PATCH|DELETE) = withPersistence/g)) {
+                await this.api(url, {
+                    method: m[1], body: {}, status: url === '/api/line/webhook' ? 401 : 428
+                });
+                await this.api(url, {
+                    method: m[1], body: {}, auth: false, status: 401
+                });
+                methods++;
+            }
+        }
+        assert.ok(methods >= 30);
+        this.save('mutation-method-coverage.json', {
+            methods, allRejectedBeforeBusinessOperation: true
+        });
+        await this.api('/api/orders', {
+            headers: {
+                authorization: 'Bearer invalid-token'
+            }, auth: false, status: 401
+        });
+        assert.equal(await this.revision(), before);
+        this.blocked.push({
+            id: 'WT01', variant: 'Managed Supabase Data API and Vercel protection', reason: 'Hosted environment intentionally not provisioned; local SQL/application checks run.'
+        });
+    }
+    async WT02() {
+        const input = {
+            seller: this.prefix, totalPrice: 123.45, remark: 'WT initial'
+        }, r = await this.post('/api/orders', input, {
+            status: 201
+        }), o = r.body.order;
+        this.context.order = o;
+        const oracle = await clock(o.createdAt, () => orders.createOrder({
+            googleSheetsService: this.oracle.service, id: o.id, ...input, createdBy: 'web'
+        }));
+        assert.deepEqual(o, oracle);
+        let updated = (await this.patch('/api/orders/' + o.id, {
+            totalPrice: 234.56, remark: 'WT changed'
+        })).body.order;
+        await clock(updated.updatedAt, () => orders.updateOrderDetails({
+            googleSheetsService: this.oracle.service, orderId: o.id, totalPrice: 234.56, remark: 'WT changed'
+        }));
+        const read = (await this.get('/api/orders/' + o.id)).order;
+        assert.deepEqual(fields(read, ['id', 'seller', 'status', 'totalPrice', 'remark']), fields((await orders.listOrders({
+            googleSheetsService: this.oracle.service
+        }))[0], ['id', 'seller', 'status', 'totalPrice', 'remark']));
+        const revision = await this.revision();
+        await this.patch('/api/orders/' + o.id, {
+            totalPrice: -1
+        }, {
+            status: 400
+        });
+        assert.equal(await this.revision(), revision);
+        const form = new FormData();
+        form.set('seller', this.prefix + '_IMAGES');
+        form.set('totalPrice', '42.13');
+        form.append('billImages', new Blob([PNG], {
+            type: 'image/png'
+        }), 'WT-bill.png');
+        form.append('productImages', new Blob([PNG], {
+            type: 'image/png'
+        }), 'WT-product.png');
+        const key = this.key('multipart'), first = await this.post('/api/orders/with-images', form, {
+            key, status: 201
+        }), again = await this.post('/api/orders/with-images', form, {
+            key, status: 201
+        });
+        assert.equal(again.text, first.text);
+        const detail = (await this.get('/api/orders/' + first.body.order.id)).order;
+        this.context.imageOrder = detail;
+        assert.equal(detail.billImages.length, 1);
+        assert.equal(detail.productImages.length, 1);
+        const product = detail.productImages[0];
+        this.context.productId = product.id || product.itemId;
+        assert.ok(this.context.productId);
+        await this.patch('/api/orders/' + detail.id + '/items/' + this.context.productId, {
+            productCode: 'WT_PRODUCT'
+        });
+        await this.patch('/api/orders/' + detail.id + '/items/' + this.context.productId, {
+            quantityType: 'quote', quantity: 3
+        });
+        await this.patch('/api/orders/' + detail.id + '/items', {
+            items: [{
+                    id: this.context.productId, productCode: 'WT_PRODUCT_2', quoteQuantity: 3, deliveredQuantity: 2
+                }]
+        });
+        await this.patch('/api/orders/' + detail.id + '/items/' + this.context.productId, {
+            quantityType: 'quote', quantity: 0
+        }, {
+            status: 400
+        });
+        this.blocked.push({
+            id: 'WT02', variant: 'Create cancellation/soft-delete through an Orders API', reason: 'Pinned Orders routes expose create/detail-edit/item-image methods, no cancel/delete mutation; historical retention is verified separately.'
+        });
+    }
+    async WT03() {
+        const r = await this.post('/api/shipments', {
+            poNumber: 'WT_PO', carrier: 'WT Carrier'
+        }, {
+            status: 201
+        }), s = r.body.shipment;
+        this.context.shipment = s;
+        const input = {
+            shipmentId: s.id, orderId: this.context.imageOrder.id
+        };
+        const linked = await this.post('/api/shipments/' + s.id + '/orders', {
+            orderId: input.orderId
+        }, {
+            status: 201
+        });
+        assert.ok(linked.body.created);
+        const retry = await this.post('/api/shipments/' + s.id + '/orders', {
+            orderId: input.orderId
+        });
+        assert.equal(retry.body.created, false);
+        const count = await this.sql('SELECT count(*)::int AS n FROM stock_operational.shipment_orders WHERE "shipmentId"=$1 AND "orderId"=$2', [s.id, input.orderId]);
+        assert.equal(count[0].n, 1);
+        await this.patch('/api/shipments/' + s.id, {
+            status: 'ready_to_ship'
+        });
+        const form = new FormData();
+        form.set('status', 'shipping');
+        form.set('poNumber', 'WT_PO');
+        form.set('shippingBill', new Blob([Buffer.from('%PDF-WT')], {
+            type: 'application/pdf'
+        }), 'WT-shipping.pdf');
+        await this.patch('/api/shipments/' + s.id, form);
+        await this.patch('/api/shipments/' + s.id, {
+            status: 'delivered', deliveryFee: 12.34
+        });
+        const final = (await this.get('/api/shipments/' + s.id)).shipment;
+        assert.equal(final.status, 'delivered');
+        assert.equal(final.shippingFee, 12.34);
+        await this.patch('/api/shipments/' + s.id, {
+            status: 'draft'
+        }, {
+            status: 400
+        });
+        this.blocked.push({
+            id: 'WT03', variant: 'Explicit unlink', reason: 'No unlink mutation is exported at the pinned shipment API; repeat-link is deliberately 200/no duplicate.'
+        });
+    }
+    async WT09() {
+        const shop = (await this.post('/api/expenses/masters/shops', {
+            name: this.prefix + ' shop', active: true, loyverseAccountId: 'WT_ACCOUNT_A'
+        })).body.id;
+        const category = (await this.post('/api/expenses/masters/categories', {
+            name: this.prefix + ' category', active: true
+        })).body.id;
+        this.context.shop = shop;
+        this.context.category = category;
+        const input = {
+            requestId: crypto.randomUUID(), month: this.month, expenseDate: this.date, scope: 'SHOP', shopId: shop, categoryId: category, name: this.prefix + ' expense', amount: 12.34, note: 'WT note'
+        };
+        const e = await this.post('/api/expenses', input);
+        this.context.expense = e.body.id;
+        const actual = (await this.get('/api/expenses?month=' + this.month)).expenses.find(x => x.id === e.body.id);
+        assert.equal(actual.amount, 12.34);
+        await this.post('/api/expenses', {
+            ...input, id: e.body.id, amount: 15.25
+        });
+        assert.equal((await this.get('/api/expenses?month=' + this.month)).expenses.find(x => x.id === e.body.id).amount, 15.25);
+        await this.api('/api/expenses', {
+            method: 'DELETE', key: this.key(), body: {
+                id: e.body.id
+            }
+        });
+        assert.ok(!(await this.get('/api/expenses?month=' + this.month)).expenses.some(x => x.id === e.body.id));
+        assert.ok((await this.sql('SELECT "deletedAt" FROM stock_operational.expenses WHERE id=$1', [e.body.id]))[0].deletedAt);
+        await this.post('/api/expenses/masters/categories', {
+            id: category, name: this.prefix + ' category', active: false
+        });
+        await this.post('/api/expenses', {
+            ...input, requestId: crypto.randomUUID(), amount: 5
+        }, {
+            status: 400
+        });
+        await this.post('/api/expenses/masters/categories', {
+            id: category, name: this.prefix + ' category', active: true
+        });
+    }
+    async WT07() {
+        const input = {
+            name: this.prefix + ' Employee', phone: '', status: 'active', hiredDate: '2020-01-01', terminatedDate: '', baseSalary: 100, commission: 0, compensationEffectiveFrom: '2020-01-01', compensationType: 'daily', commissionType: 'none'
+        };
+        const e = (await this.post('/api/employees', input, {
+            status: 201
+        })).body.employee;
+        this.context.employee = e;
+        const shifts = [];
+        for (const [date, status, workdayType] of [[this.date, 'work', 'half'], ['2026-01-02', 'work', 'full'], ['2026-01-03', 'leave', 'full']]) {
+            const r = await this.post('/api/employees/timesheets', {
+                date, employeeId: e.id, shopId: 'WT_ACCOUNT_A', status, workdayType
+            }, {
+                status: 201
+            });
+            shifts.push(r.body.timesheet);
+            if (status === 'work')
+                await this.patch('/api/employees/timesheets/' + r.body.timesheet.id, {});
+        }
+        await this.post('/api/employees/timesheets', {
+            date: this.date, employeeId: e.id, shopId: 'WT_ACCOUNT_A', status: 'leave', workdayType: 'full'
+        }, {
+            status: 409
+        });
+        await this.patch('/api/employees/' + e.id, {
+            baseSalary: 120, compensationEffectiveFrom: '2026-01-02'
+        });
+        assert.equal((await this.sql('SELECT count(*)::int n FROM stock_operational.employee_compensations WHERE "employeeId"=$1', [e.id]))[0].n, 2);
+        const entries = (await this.get('/api/employees/timesheets/summary?month=' + this.month)).timesheets.filter(x => x.employeeId === e.id);
+        assert.equal(entries.length, 3);
+        assert.ok(entries.some(x => x.workdayType === 'half'));
+        this.context.shifts = shifts;
+    }
+    async WT08() {
+        const employeeId = this.context.employee.id;
+        const input = {
+            requestId: crypto.randomUUID(), employeeId, shopId: this.context.shop, paidDate: this.date, payrollMonth: this.month, paidAmount: 10, reference: 'WT advance', note: ''
+        };
+        const first = (await this.post('/api/employees/advances', input, {
+            status: 201
+        })).body.advance;
+        const again = (await this.post('/api/employees/advances', input, {
+            status: 201
+        })).body.advance;
+        assert.equal(first.id, again.id);
+        await this.patch('/api/employees/advances', {
+            id: first.id, action: 'cancel', updatedAt: 'stale'
+        }, {
+            status: 409
+        });
+        await this.patch('/api/employees/advances', {
+            id: first.id, action: 'cancel', updatedAt: first.updatedAt
+        }, {
+            status: 409
+        });
+        const row = (await this.get('/api/employees/payroll?month=' + this.month)).payroll.find(x => x.employeeId === employeeId);
+        assert.ok(row);
+        assert.equal(row.basePay, 180);
+        assert.equal(row.advanceDeduction, 10);
+        assert.equal(row.totalPay, 170);
+        const settle = {
+            employeeId, month: this.month, paidDate: '2026-01-31', reference: 'WT settlement', revision: row.revision
+        };
+        await this.post('/api/employees/payroll/settle', {
+            ...settle, revision: 'stale'
+        }, {
+            status: 409
+        });
+        const paid = (await this.post('/api/employees/payroll/settle', settle)).body.settlement;
+        assert.equal(paid.snapshot.totalPay, 170);
+        const replay = (await this.post('/api/employees/payroll/settle', settle)).body.settlement;
+        assert.equal(replay.id, paid.id);
+        const advance = (await this.get('/api/employees/advances')).advances.find(x => x.id === first.id);
+        assert.equal(advance.recoveredAmount, 10);
+        assert.equal(advance.outstandingAmount, 0);
+    }
+    async WT12() {
+        await this.remainingMethods();
+        const before = await this.revision(), key = this.key('replay'), body = {
+            seller: this.prefix + '_replay', totalPrice: 88.01
+        };
+        const first = await this.post('/api/orders', body, {
+            key, status: 201
+        });
+        const revision = await this.revision();
+        for (let i = 0; i < 3; i++)
+            assert.equal((await this.post('/api/orders', body, {
+                key, status: 201
+            })).text, first.text);
+        assert.equal(await this.revision(), revision);
+        await this.post('/api/orders', {
+            ...body, totalPrice: 88.02
+        }, {
+            key, status: 409
+        });
+        await this.patch('/api/orders/' + first.body.order.id, {
+            totalPrice: 99
+        }, {
+            headers: {
+                'If-Match': '"stock-v2-' + before + '"'
+            }, status: 409
+        });
+        const next = await this.post('/api/orders', body, {
+            status: 201
+        });
+        assert.notEqual(next.body.order.id, first.body.order.id);
+        const expected = this.exportedMethods.filter(x => x.route !== '/api/line/webhook').map(x => x.method + ':' + x.route).sort();
+        assert.deepEqual(this.methodProofs.map(x => x.route).sort(), expected);
+        this.save('method-proof-summary.json', {
+            covered: this.methodProofs.length, expected: expected.length, proofs: this.methodProofs
+        });
+    }
+    async WT14() {
+        for (let i = 0; i < 20; i++) {
+            const key = this.key('race'), body = {
+                seller: this.prefix + '_race_' + i, totalPrice: 9.99
+            }, r = await Promise.all([this.post('/api/orders', body, {
+                    key, status: 201
+                }), this.post('/api/orders', body, {
+                    key, status: 201
+                })]);
+            assert.equal(r[0].text, r[1].text);
+            const rev = (await this.api('/api/orders/' + r[0].body.order.id)).revision;
+            const url = '/api/orders/' + r[0].body.order.id, attempts = await Promise.all([1, 2].map(async (n) => (await this.patch(url, {
+                remark: 'WT stale ' + n
+            }, {
+                headers: {
+                    'If-Match': rev
+                }, status: [200, 409]
+            })).status));
+            assert.deepEqual(attempts.sort(), [200, 409]);
+        }
+        for (let i = 0; i < 10; i++) {
+            const rev = await this.revision(), key = this.key('rollback'), before = await this.seal();
+            this.control({
+                sqlBefore: {
+                    match: 'INSERT INTO stock_operational.order_items', remaining: 1
+                }
+            });
+            const form = new FormData();
+            form.set('seller', this.prefix + '_ROLLBACK');
+            form.set('totalPrice', '1');
+            form.append('billImages', new Blob([PNG], {
+                type: 'image/png'
+            }), 'WT-bill.png');
+            form.append('productImages', new Blob([PNG], {
+                type: 'image/png'
+            }), 'WT-product.png');
+            await this.post('/api/orders/with-images', form, {
+                key, status: 500
+            });
+            assert.equal(await this.revision(), rev);
+            assert.deepEqual(await this.seal(), before);
+            assert.equal((await this.sql('SELECT count(*)::int n FROM stock_operational.commands WHERE key=$1', [key]))[0].n, 0);
+        }
+        this.control({});
+    }
+    async run(ids) {
+        await this.baseline();
+        for (const id of ids) {
+            if (typeof this[id] !== 'function') {
+                this.results.push({
+                    id, status: 'BLOCKED', reason: 'Local variant harness not yet implemented'
+                });
+                continue;
+            }
+            await this.family(id, () => this[id]());
+        }
+        await this.verifyOriginal();
+        const status = this.results.some(r => r.status === 'FAIL') ? 'FAIL' : this.results.some(r => r.status === 'BLOCKED') ? 'BLOCKED' : 'PASS';
+        this.save('campaign-summary.json', this.summary(status));
+        return this.summary(status);
+    }
+    async close() {
+        await this.admin?.end();
+    }
+}
+require('./extra-cases.cjs').extend(Campaign);
+module.exports = {
+    Campaign, clock, fields
+};
+if (require.main === module)
+    (async () => {
+        let c;
+        try {
+            const state = process.argv[2], db = process.argv[3], ids = (process.argv[4] || 'WT00,WT01,WT02,WT03,WT09,WT07,WT08,WT04,WT05,WT06,WT10,WT11,WT12,WT13,WT14,WT15').split(',');
+            c = new Campaign(state, db);
+            const s = await c.run(ids);
+            console.log(JSON.stringify({
+                status: s.status, localFamilies: s.cases.length, requests: s.requests, hostedAcceptance: 'NOT RUN'
+            }));
+            process.exitCode = s.status === 'FAIL' ? 1 : 0;
+        }
+        catch (e) {
+            console.error('Local campaign stopped; restricted evidence contains the first failed boundary.', e.name);
+            process.exitCode = 1;
+        }
+        finally {
+            await c?.close();
+        }
+    })();
