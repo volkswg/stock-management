@@ -1,202 +1,73 @@
 {
-  "version": 1,
-  "scope": "Phase 3 preparation; no real-data migration performed",
-  "reportedAtUtc": "2026-11-09T02:21:54Z",
-  "baseline": "e97a1c9ad9ca9402de33a9796933fece38a92eeb",
-  "mergedPrerequisites": [
-    48,
-    49
-  ],
-  "hostedMetadata": {
+  "version": 2,
+  "scope": "Isolated hosted manual CSV import reconciled; application remains on Google Sheets",
+  "reportedOnBangkok": "2026-11-11",
+  "lastDataVerificationAtUtc": "2026-11-11T01:46:54.982962+00:00",
+  "repositoryBaseline": "65ed6f65256e59f7f6fce44bcd4fb88a819ae95c",
+  "evidence": {
+    "basis": "Retained private execution receipts; no live provider inspection by this documentation update",
+    "privateResultReceiptSha256": "f45e799edef85d5d39106ed687d2b32d6701e3f518e98c7596e6450f2a3b98a1",
+    "privateResultPublished": false,
+    "workbookIdentifiersAndBusinessRecordsPublished": false,
+    "historicalPreparationSnapshot": "https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json"
+  },
+  "target": {
     "projectId": "orjnazrothkdgmzlsuto",
     "name": "stock-management",
+    "purpose": "isolated-staging",
     "region": "ap-northeast-1",
-    "postgresVersion": "17.11",
-    "databaseBytes": 10917555,
-    "maxConnections": 60,
-    "migrationSchemas": [],
-    "publicTables": 0,
-    "migrationVersions": [],
-    "runtimeRoleExists": false,
-    "securityAdvisoryCount": 0,
-    "pluginRoleBypassesRls": true,
-    "pricingPlan": "not-verified",
-    "dataApiExposure": "not-verified",
-    "backupArrangement": "owner-verification-required",
-    "productionIsolation": "candidate-only; owner-attestation-required"
-  },
-  "cloudReadiness": {
-    "postgresConnectionBindingPresent": false,
-    "postgresServicePresent": false,
-    "supabaseCliCredentialPresent": false,
-    "readonlyGoogleExportTokenPresent": false,
-    "googleApplicationConfigurationPresent": true,
-    "pluginIdentityAvailableToCloud": false,
-    "supabaseNetworkPermission": "not-configured; must be approved and verified"
+    "businessSchema": "stock_operational"
   },
   "execution": {
-    "hostedDdlApplied": false,
-    "businessRecordsRead": false,
-    "realExportPerformed": false,
-    "realImportPerformed": false,
-    "hostedRestorePerformed": false,
+    "hostedDdlApplied": true,
+    "realExportPerformed": true,
+    "realImportPerformed": true,
+    "importMethod": "owner-manual-csv-to-existing-operational-tables",
+    "archiveImportBatchUsed": false,
+    "recordReconciliationPassed": true,
     "productionCutoverPerformed": false,
-    "productionSettingsChanged": false,
-    "productionSupabaseGuardChanged": false
+    "applicationStorage": "google-sheets",
+    "runtimeActivationReady": false
   },
-  "tables": {
-    "orders": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "order_items": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "order_bills": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "shipments": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "shipment_orders": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "employees": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "employee_compensations": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "employee_timesheets": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "employee_advances": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "payroll_settlements": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "expenses": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "expense_categories": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "shops": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "sales_receipts": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "sales_receipt_items": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "sales_receipt_payments": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "sales_receipt_syncs": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "sales_profit_cost_overrides": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "stock_counts": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "stock_adjustments": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "movements": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "movement_details": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    },
-    "user_state": {
-      "sourceRows": null,
-      "archiveRows": null,
-      "operationalRows": null,
-      "reconciliation": "not-run; source-read and hosted-import authorization missing"
-    }
+  "reconciliation": {
+    "businessTables": 23,
+    "businessRecords": 70777,
+    "allBusinessTablesPassed": true,
+    "offlineApplicationComparisonsPassed": 66,
+    "liveHostedApiBrowserProviderAcceptanceCertified": false,
+    "businessRowsCorrected": 1,
+    "auditRowsAddedByCorrection": 1,
+    "correctionVerified": true,
+    "privateRowIdsAndValuesPublished": false,
+    "sequenceAlignmentRequired": false,
+    "explicitSequenceWrites": 0,
+    "sourceFreshness": "Verified against saved latest export only; reconfirm freeze and review later source activity before cutover"
   },
-  "blockingActions": [
-    "owner authorization for exact frozen workbook/read-only export",
-    "owner attestation of staging isolation and exact-target DDL/import/restore authorization",
-    "private Cloud PostgreSQL/CLI credentials and approved network/TLS",
-    "verified encrypted off-site backup and isolated restore target",
-    "real-data profiling/application parity/reconciliation",
-    "hosted runtime role/pooler/security/capacity/recovery acceptance"
-  ],
+  "recovery": {
+    "state": "paused-by-owner",
+    "postImportRecoveryVerified": false,
+    "postImportBackupCaptured": false,
+    "lastAttempt": "Full recovery-fingerprint preflight reached existing 150-second guard; no automatic retry",
+    "earlierIndependentlyVerifiedSchemaBackupRetained": true,
+    "olderIndependentlyVerifiedSourceArchiveRetained": true,
+    "olderBackupsCertifyCurrentImportedState": false
+  },
+  "cleanup": {
+    "latestRecoverySetRetained": true,
+    "obsoleteArtifactsRemovedFromActiveUse": true,
+    "failedDockerRehearsalAndDedicatedVolumeRemovedWithExplicitApproval": true,
+    "remainingRecoveryContainersAndSharedTlsPreserved": true
+  },
+  "operatorAccess": {
+    "credentialsAndNetworkInspectedByThisUpdate": false,
+    "macPluginAndCloudAccessMustBeVerifiedIndependently": true
+  },
+  "nextStep": "Inspect application integration and prepare a scoped testing and cutover plan; keep backup work paused until owner resumes it",
   "cutoverBlockers": [
-    "production authentication/authorization/audit attribution and monitoring",
-    "production target gate release; existing guard must remain enabled",
-    "controlled freeze/provider hold and final full load into fresh approved target",
-    "preservation of post-cutover commits; no reverse-sync implementation"
+    "Post-import backup/restore verification and recovery sign-off remain incomplete; currently paused by owner",
+    "Hosted runtime, authorization/security, browser/API/provider, business and realistic performance/capacity acceptance remain unverified by this import",
+    "Reconfirm all writers paused and source freshness; review changes since saved export with approved refresh/delta handling",
+    "Production activation, monitoring and post-cutover-write rollback plan require explicit owner approval"
   ],
   "cutoverReady": false
 }
