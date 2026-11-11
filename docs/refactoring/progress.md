@@ -1,5 +1,40 @@
 # Refactoring progress and evidence
 
+## Local acceptance milestone results (2026-11-12)
+
+[PR #64](https://github.com/volkswg/stock-management/pull/64) fixes raw-image
+byte/MIME identity in server and browser, old-replay revision downgrade, upload
+rollback cleanup/uncertain resend and failed LINE command/counter retry handling.
+No original business calculation or route was changed; there is no new SQL
+migration, hosted grant write, production setting, audit table or dependency.
+Application source `0d142f7263e2daea3a968824465a5ec5fed6f14f` and harness
+`9f72ed3dbbe8ebbddf05d8f5ca13681881df263b` are pinned in private packets; original fixtures remain immutable.
+
+The [canonical combined WT00–WT15 matrix](../database-migration.md#local-acceptance-milestone-results)
+records two independent 45-entry campaigns, 7037 / 7037 journaled driver requests,
+38 PASS / 7 retained narrow BLOCKED labels / zero FAIL each. Supplemental local
+proofs resolve the local gaps; absent business writes are verified N/A and hosted
+protection remains deferred. Each campaign includes 32-scenario concurrency/intent
+proofs, 100 form and 20 raw-image browser trials, 60 crashes, 80 compound rollbacks,
+40 signed image and 10 shipping-file rollbacks, and 20 restarted uncertainty trials.
+All original 70,777 rows, 24 archive tables and 15 security sections remain exact.
+
+Both checkpoints restore with all 51 tables/15 metadata matching before and after
+read-only app readiness, with no provider replay. Timing: 401.657 s / 12.655 s; campaign one's
+conservative bound includes preserved initial auth-header probe failures. All
+injected fake unknowns/orphans are explicitly accounted for; no unexpected ones.
+600 regressions, 33 controls, 71 Python and 29 PG checks, lint/typecheck and an exact
+credential-free local build pass. CI run 43049889302 independently passes; the
+route manifest and 113 client chunks retain their boundaries.
+
+**Overall pre-production acceptance is NO-GO:** one/five-client capacity remains
+BLOCKED by 5.88% host disk free versus 20% required. No load percentiles or
+headroom pass is claimed. Limits/requirements are unchanged. Source hosted 51/15
+fingerprints and production's 14 metadata entries/Sheets main release are unchanged.
+The next-stage plan is prepared only; no hosted write, production change, provider
+mutation, new Sheets export, merge, provisioning or cutover occurred.
+Receipt SHA-256: `2433fbe33df2efc97db1bc14a0e530a0f17925dae8b9385436ede032ba91a949`.
+
 ## Image retry fixed — two fresh implemented reruns pass (2026-11-11)
 
 The owner authorized the scoped image fix. The shared staging wrapper now hashes

@@ -917,6 +917,282 @@ commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
 original requirements; a stopped/partial run is not full acceptance.
 Google Sheets remains production's store.
 
+##### Local acceptance milestone results
+
+Reported 2026-11-12 (Bangkok), from the completed 2026-11-11 execution snapshot.
+[PR #64](https://github.com/volkswg/stock-management/pull/64)
+was reviewed against main `1a539656711ef5b202b34afaf454d28261e90c52` and remains
+unmerged: main automatically deploys production. **Supported local functional
+coverage and recovery pass; the complete pre-production milestone remains NO-GO.**
+One/five-client capacity is BLOCKED, and hosted/production gates are separate.
+
+**Fixes.** Server and browser compare actual raw bytes plus MIME, preserving
+same-key replay and rejecting changed intent. Browser revision tracking no longer
+moves backward on an old replay. Newly known uploads are compensated after handler
+or transaction failure. Durable claims in the existing effect ledger prevent blind
+resend after unknown acceptance or failed cleanup. Failed LINE business work rolls
+back its command, preserves failure counters and retries the same logical event;
+the HTTP boundary awaits and translates asynchronous failures. No financial rule,
+route, package/lockfile, SQL migration, hosted grant or audit table was introduced.
+Application fixes are pinned by `0d142f7263e2daea3a968824465a5ec5fed6f14f`;
+executed harness `9f72ed3dbbe8ebbddf05d8f5ca13681881df263b`.
+
+**Two independent fresh checkpoints.** Both matched all original 51 tables and
+15 metadata sections before writes, used separate provider journals and the same
+frozen 45-entry inventory. Each completed **38 PASS entries / 7 retained narrow
+BLOCKED labels / zero FAIL**. Those seven base labels are preserved, not relabeled:
+the combined matrix below supplies the added local proofs, verifies unsupported
+operations as N/A, and retains the hosted deferral. Driver journals contain
+7037 / 7037 requests (browser network requests are separately proved, not included
+in that count). Each original 70,777-row set, 24 archive tables and 15 security
+metadata remain unchanged. Only newly synthetic fixtures were editable.
+
+| Family | Result | Evidence per independent campaign |
+| --- | --- | --- |
+| WT00 | PASS | Local target/UUID, role, TLS probes and production refusal |
+| WT01 | PASS local; hosted BLOCKED | All exported method auth/key gates; managed Data API/protection deferred |
+| WT02 | PASS supported; N/A absent writes | Order edits/images/history; cancel/delete success is not exported |
+| WT03 | PASS supported; N/A absent writes | Links, bills, 25 state combinations; unlink/cancel success is not exported |
+| WT04 | PASS | Movement edits/delivery, invalid quantities and both LINE modes |
+| WT05 | PASS | Counts, adjustments, reversal, replacement and account/reference rules |
+| WT06 | PASS | Overlap/conflict/cursor failures, canceled/store/date filters and override history |
+| WT07 | PASS | Effective compensation, Bangkok day/month edges and daily payable cap |
+| WT08 | PASS | Legacy advances, pay/cancel, stale settlement and settled snapshots |
+| WT09 | PASS | Expense mapping rejection, soft-delete history and exact totals |
+| WT10 | PASS local | All upload endpoints/limits, compensation, guarded unknowns and file reconciliation |
+| WT11 | PASS fake providers | Complete signed journeys, sessions, counters and 40 image SQL rollback/retries |
+| WT12 | PASS | JSON/query/multipart/raw intent, canonical replay and changed-input rejection |
+| WT13 | PASS local Chromium | 100 actual desktop/mobile-viewport form trials plus 20 raw-image transport trials |
+| WT14 | PASS | 32 scenarios × 20 same-key and stale-state pairs; 80 compound rollbacks |
+| WT15 | PASS local | 60 LINE process-crash trials; full checkpoint restores and read-only readiness |
+
+The 32 ordinary scenarios cover 31 exported ordinary methods plus both expense
+master kinds; each gets 20 fresh same-key pairs, 20 competing-revision pairs,
+20 exact old-key replays after unrelated writes, changed-query rejection and a
+pre-commit rollback. Compound rollback adds 80 trials, signed LINE image rollback
+40, and shipping-file rollback 10. Browser evidence is Chromium desktop/mobile
+viewports, not physical iOS/Safari certification. Unsupported success operations
+are absent from the current contract; their 400/405 refusal and synthetic legacy
+history are verified instead of inventing business features.
+
+**Explicit uncertain outcomes.** The normal-phase file graph is clean. Each
+campaign then deliberately leaves 22 fake orphan files (11 accepted-response-loss
+and 11 rejected-cleanup fixtures), 11 unknown Drive attempts, 10 unknown LINE
+attempts, 23 guarded upload operations and 31 unreplayed reply claims. All match
+the exact expected fixtures; unexplained outcomes, unexpected orphans and broken
+references are zero. These are fake-only failure witnesses, not real Drive files.
+The application blocks automatic resend; real-provider reconciliation and file
+object recovery are not certified by these tests.
+
+**Recovery.** Each completed checkpoint is captured privately and restored into a
+new named local database. All 51 tables/15 metadata match before and after the
+provider-denied read-only app probe. Restored order amount/image references and
+five other reports read successfully; unauthenticated reads return 401, authenticated
+ordinary and signed LINE writes return 405, SQL writes/role escalation are denied,
+and provider attempts are zero. Readiness timing is 401.657 s / 12.655 s, below the unchanged
+900-second limit. Campaign one's value is a conservative upper bound from checkpoint
+capture start, including initial missing-bearer probe failures and correction;
+its timer was not reset to hide retries. Campaign two uses the normal monotonic
+new-target timer. RPO=0 applies only to acknowledged work inside each sealed
+checkpoint. These are private local dumps and same-cluster role checks; no new
+off-site encryption, Supabase platform/Auth or external file recovery is claimed.
+The existing independently downloaded/decrypted source backup remains verified.
+The app uses its explicit loopback test connection; verify-full TLS is checked by
+separate owner/runtime-role probes, not claimed for that local application pool.
+
+**Capacity is BLOCKED / NOT RUN at both one and five clients.** Host disk free is
+5.88%, below the approved 20% threshold. p50/p95/p99/max, error rates, load
+throughput and full resource headroom are N/A; synthetic engine controls and
+functional timings do not certify capacity. No limits were raised or thresholds
+weakened. Database limits remain 1 GiB, 1.5 CPU, no additional swap, max_connections
+24, runtime-login limit 6 and application pool 2. Functional storage charges all
+this task's allocated files, the complete PostgreSQL volume, container writable
+layer and a 256 MiB temporary/log reserve, with the same 4 GiB stop and 5 GiB
+absolute host-free minimum. Earlier host-delta/observer blocks remain recorded;
+measurement corrections do not satisfy the separate 20% capacity gate. Only
+regenerable inactive build files/dependencies and three proved untouched unused
+test duplicates were reclaimed; tested/failed states, backups, credentials and
+shared reference/recovery resources are retained.
+
+**Verification and protected state.** 600 application regressions, 33 harness
+controls, 71 Python checks and 29 real-PostgreSQL cases pass. Lint has zero errors
+and the one inherited `shipmentRow` warning; typecheck and an exact credential-free
+local production build pass, with unchanged route manifest and 113 clean client
+chunks. [Source-matched CI](https://github.com/volkswg/stock-management/actions/runs/43049889302)
+passes independently. Final bounded read-only hosted checks match all 51 protected
+tables/15 metadata; production has the same 14 configuration metadata entries,
+no STOCK override and the READY main/PR63 release. No hosted write, new Sheets
+business export, real provider mutation, production setting change, merge or
+cutover occurred. Private aggregate receipt SHA-256: `2433fbe33df2efc97db1bc14a0e530a0f17925dae8b9385436ede032ba91a949`.
+
+A browser shutdown diagnostic exposed a disposable local test bearer; the active
+local token was replaced, private evidence/redacted logs retained, and shared
+interception now suppresses raw request-header logs. No hosted or production
+credential was involved.
+
+Initial raw-byte, cleanup/finalization and LINE failures, typed-counter CI failures,
+and later harness fixture/control/observer/auth-header failures are preserved with
+their fixes; they are not erased by the two final independent results. The next
+step is the unchanged bounded capacity protocol on a machine with sufficient
+headroom, followed by separately approved disposable hosted acceptance. See the
+[prepared next-stage packet](#next-hosted-and-production-stage-plan) for project/cost,
+backup/monitoring, final Sheets freeze, deployment/rollback and exact approval gates.
+
+##### Next hosted and production stage plan
+
+The autonomous local milestone authorizes code, isolated copies and documentation,
+not hosted mutations, billing, production provisioning, provider mutations or
+cutover. No configuration below is installed, scheduled or activated. PR #64 must
+not be auto-merged: this repository's main-branch integration triggers production
+deployment, even while the storage default remains Sheets.
+
+**Hosted acceptance packet, separate from the populated staging source.** After
+local correctness and capacity have genuinely passed, identify a distinct disposable
+Supabase project/UUID, available free quota or an explicitly approved budget, and
+a private preview deployment. Restore the independently verified post-audit source backup there, not a local
+checkpoint containing synthetic test records. Do not write in the populated
+staging project. Enumerate only target identity/login setup
+deltas, verify all data and security hashes, and seal source/build/harness versions,
+read/write case inventory, workload, provider mode, exact limits and rollback
+conditions. Use separate owner, read-only, runtime and backup identities with
+verify-full TLS, nonprivileged application access and a private server token.
+Keep the Data API closed to anon/authenticated on private schemas and independently
+verify RLS/grants, pooling, login/protection, browser bundles and denied egress.
+Run the same supported case inventory and one/five-client profile with fake LINE,
+Loyverse and Drive; real-provider acceptance requires another explicit scope.
+Compare protected source staging before/after over a separate read-only channel.
+On failure, stop only disposable ingress, retain evidence, and fix/retest fresh
+copies. No automatic reset, source repair or production promotion.
+
+Hosted upload acceptance must also exercise the platform boundary. Vercel Functions
+currently cap request bodies at 4.5 MB, including multipart overhead; these
+routes' 10 MiB/20 MiB application limits and multi-file forms exceed that cap.
+Local acceptance of those files does not certify a hosted upload. Record the
+platform's pre-handler 413 separately from application validation, and measure
+large read-response bodies against the hosting limit too. Supporting larger files
+needs a separately reviewed upload transport/provider/auth design; this work does
+not change storage providers, lower the existing application limits, or activate
+a hosted workaround. See the official [payload limit](https://vercel.com/docs/errors/function_payload_too_large)
+and [upload guidance](https://vercel.com/kb/guide/how-to-bypass-vercel-body-size-limit-serverless-functions).
+
+**Production requirements and price proposal — no purchase.** Choose the region
+with measured latency to the intended Vercel region, a separately identified
+production project, a supported pinned PostgreSQL version, measured disk/index/WAL
+space plus headroom, bounded pools and least-privilege roles. The current code
+*deliberately refuses Supabase under VERCEL_ENV=production* and expects isolated
+staging identity/auth. Production activation therefore needs a separately reviewed
+production identity/authentication/authorization design; flipping STOCK_STORAGE
+alone is not a deployment plan. Preserve this guard during local acceptance.
+
+Official pricing checked on 2026-11-11: Free is $0 with a 500 MB database, two active
+projects and inactivity pausing; Pro starts at $25/month, includes $10 organization
+compute credit and seven daily backups. A Micro instance is about $10/month.
+Pro with one/two/three always-running Micro projects is therefore approximately
+$25/$35/$45 monthly before usage, tax and optional services; these are estimates,
+not an account quote. Confirm the billing organization and every billable project
+before upgrading; compute credits are shared, not repeated per project.
+[Supabase pricing](https://supabase.com/pricing),
+[compute billing and credits](https://supabase.com/docs/guides/platform/manage-your-usage/compute).
+External encrypted-backup storage/egress, Vercel plan changes, optional PITR,
+additional compute and real Drive storage need their own measured cost/approval.
+No paid resource is implied by this proposal.
+
+**Backup/monitoring configuration proposal — disabled.** Operator-owned scheduler
+configuration (UTC schedules; do not add it to a live service now):
+
+```yaml
+execution_enabled: false
+source_project: UNASSIGNED_REQUIRES_OWNER_APPROVAL
+source_isolation_id: UNASSIGNED_REQUIRES_OWNER_APPROVAL
+backup:
+  schedule_utc: "0 19 * * *" # 02:00 Bangkok daily
+  extra_checkpoint: before_every_migration_and_release
+  consistency: shared_snapshot_dump_plus_full_hashes
+  required_table_and_metadata_inventory: reviewed_target_manifest
+  encryption: owner_controlled_key_separate_from_backup_storage
+  offsite_destination: UNASSIGNED_REQUIRES_APPROVED_PRIVATE_STORAGE
+  retention_proposal: {daily: 14, weekly: 8, monthly: 12}
+  deletion_enabled: false
+restore_drill:
+  schedule_utc: "0 20 * * 0"
+  target: new_disposable_isolated_database
+  checks: [tables, security_metadata, original_rows, read_only_app, no_provider_replay]
+  rto_minutes: 15
+monitor:
+  sample_seconds: 60
+  warn_budget_used_percent: 70
+  stop_budget_used_percent: 80
+  stale_backup_hours: 26
+  alert_on: [backup_failure, hash_mismatch, auth_or_tls_failure,
+    unexpected_5xx, timeout, deadlock, pool_exhaustion, oom_or_restart,
+    orphan_upload, uncertain_effect, duplicate_command, cost_budget_breach]
+  notification_destination: UNASSIGNED_NO_MESSAGES_SENT
+```
+
+Before activation, assign accountable operators, grant the backup role only the
+required private-schema read/export access, test that RLS cannot silently omit
+records, cap reader memory/concurrency and retain existing bounded backup timeouts.
+Use secret storage for credentials/keys, never logs or browser configuration.
+Keep an independent downloaded/decrypted copy and verify a fresh restore plus
+provider-denied read-only app readiness; capture-time checks alone are insufficient.
+Report RPO only for acknowledged operations in a sealed checkpoint. Unknown provider
+outcomes need reconciliation, never automatic replay. Proposed retention does not
+authorize deleting any existing backup or recovery resource.
+Supabase managed database backups omit stored file objects; separate Drive/file
+inventory and recovery need an independently authorized design and verification.
+[Database backup scope and retention](https://supabase.com/docs/guides/platform/backups).
+
+**Final Sheets refresh/freeze proposal — no new export.** Obtain approval for an
+exact source workbook, approved export identity, maintenance window and user/LINE/
+Loyverse pause procedure. Inventory every writer, including background jobs and
+manual edits; record acknowledgements and capture the last accepted command/event
+before a freeze. Create an encrypted pre-freeze recovery point, then a consistent
+final Sheets export with formulas/raw cells/column order and exact financial JSON
+numbers preserved. Hash/reconcile every original row, key relationship and business
+report into a new target; no floating-point or timezone normalization to make a
+mismatch pass. Compare the final source under the same documented freeze. If
+writers cannot be reliably paused, reject the freeze/cutover gate; do not call a
+moving export a final snapshot. Reopening writes invalidates the sealed refresh
+and requires a newly approved reconciliation window.
+
+**Deployment and rollback proposal — not executed.** Pin the last known working
+Sheets production release/configuration and a separately reviewed Supabase release.
+Provision/restore/reconcile the production target only after explicit approval;
+set production credentials server-side and resolve production auth/identity guards
+without weakening them for tests. Stage a protected candidate, run read-only smoke
+checks and the approved user/account permission matrix, and rehearse rollback on
+disposable infrastructure. A separate cutover authorization names the exact release,
+project/UUID, final snapshot, maintenance window, operator and stop thresholds.
+Enable only one write authority, release a small approved cohort, then monitor
+money/stock/payroll invariants, duplicates, error/latency and resource budgets.
+Never silently fall back to Sheets during database failure.
+
+Before new-database writes begin, rollback can restore the pinned Sheets release
+and thaw the verified source. After any acknowledged new-database write, **stop
+new writes and reconcile the post-freeze delta first**; simply returning traffic to
+stale Sheets loses work and may duplicate provider effects. Preserve both stores,
+command/effect ledgers and backups; obtain explicit authorization for any reverse
+import. Uncertain external outcomes need manual reconciliation before replay.
+No automatic database restore over production, dual writing, provider resend or
+source overwrite is part of this preparation.
+
+**Required go/no-go evidence.** All supported local cases in two independent fresh
+campaigns; reviewed N/A for absent business operations; bounded capacity with the
+unchanged limits/headroom; complete read-only recovery readiness; protected original
+hashes; current CI/security/bundle checks; isolated hosted write/pooling/protection
+acceptance; approved production authentication/roles; independently recoverable
+backups including image policy; a verified final source freeze/reconciliation;
+approved project costs; exact release/cutover and rollback ownership. Any missing,
+flaky, failed or unavailable mandatory gate is NO-GO, not a conditional PASS.
+
+**Exact later approvals:** (1) disposable hosted project/UUID, preview, copied-data
+restore and hosted write/fault/load tests, with cost cap; (2) production organization,
+project/region/compute/add-ons and recurring backup/monitoring spend; (3) production
+auth/identity changes and deployment/merge that triggers production; (4) named Sheets
+read/export/freeze and controlled ingestion; (5) final activation/cutover window;
+(6) any post-write reverse synchronization or destructive rollback. These approvals
+are independent. Completing local work authorizes none of them.
+
 ##### Image retry fix and two fresh implemented reruns (2026-11-11)
 
 The owner authorized the image retry fix and fresh disposable local reruns.
