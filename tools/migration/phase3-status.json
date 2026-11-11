@@ -1,9 +1,9 @@
 {
-  "version": 3,
-  "scope": "Hosted manual CSV import and pre-change two-schema recovery verified; audit removal rehearsed locally only; application remains on Google Sheets",
+  "version": 4,
+  "scope": "Hosted audit removal applied and verified; both pre/post-change private-schema recovery verified; production remains on Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T04:31:47.632518+00:00",
-  "repositoryBaseline": "f19a3c548ab4cb7155b0ffd5ea7d17dcfbb9beb5",
+  "lastDataVerificationAtUtc": "2026-11-11T04:56:55.224326+00:00",
+  "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
     "privateResultReceiptSha256": "f45e799edef85d5d39106ed687d2b32d6701e3f518e98c7596e6450f2a3b98a1",
@@ -11,7 +11,9 @@
     "workbookIdentifiersAndBusinessRecordsPublished": false,
     "historicalPreparationSnapshot": "https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json",
     "prechangeRehearsalReceiptSha256": "67649f08530a587d3691991a02e8ff889a09a136a479fbb970ca2ff5861fde4b",
-    "finalHostedCheckReceiptSha256": "e022ece914b6a2cc821a6b452877cdaa8d52e98d583eae8daa429b821d3b549b"
+    "finalHostedCheckReceiptSha256": "e022ece914b6a2cc821a6b452877cdaa8d52e98d583eae8daa429b821d3b549b",
+    "hostedAuditVerificationReceiptSha256": "0fb41ad4f66b8ccda75d4f83284e824e79d4b159400e6b076120eaea3583ac99",
+    "postChangeRestoreReceiptSha256": "ad7e1053c94f42ddb3d623241f0d5514e0b58331c1a0b94b05579b7f2dd849ec"
   },
   "target": {
     "projectId": "orjnazrothkdgmzlsuto",
@@ -29,7 +31,10 @@
     "recordReconciliationPassed": true,
     "productionCutoverPerformed": false,
     "applicationStorage": "google-sheets",
-    "runtimeActivationReady": false
+    "runtimeActivationReady": false,
+    "auditRemovalMigrationApplied": true,
+    "auditRemovalVersion": "20261111034402",
+    "hostedBusinessDataChangedByAuditRemoval": false
   },
   "reconciliation": {
     "businessTables": 23,
@@ -46,7 +51,7 @@
     "sourceFreshness": "Verified against saved latest export only; reconfirm freeze and review later source activity before cutover"
   },
   "recovery": {
-    "state": "pre-change-two-schema-recovery-verified",
+    "state": "pre-and-post-audit-removal-recovery-verified",
     "postImportRecoveryVerified": true,
     "postImportBackupCaptured": true,
     "lastAttempt": "Versioned full-row hashes and two bounded readers passed within unchanged 150s fingerprint limit; encrypted capture and independent restore verified",
@@ -61,9 +66,13 @@
     "prechangeRestoredMetadataSections": 15,
     "localAuditRemovalRehearsalVerified": true,
     "postLocalMigrationBackupRestoreVerified": true,
-    "hostedAuditRemovalApplied": false,
+    "hostedAuditRemovalApplied": true,
     "newLocalDatabasesRetained": 3,
-    "newContainersRolesPasswords": 0
+    "newContainersRolesPasswords": 0,
+    "postAuditRemovalBackupCaptured": true,
+    "postAuditRemovalEncryptedOffsiteRecoveryVerified": true,
+    "postAuditRemovalRestoredTables": 51,
+    "postAuditRemovalRestoredMetadataSections": 15
   },
   "cleanup": {
     "latestRecoverySetRetained": true,
@@ -76,9 +85,9 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Review recovery-tool changes and separately authorize exact-target hosted audit removal after writer freeze and backup/source freshness recheck; no application cutover",
+  "nextStep": "Prepare separately approved hosted application/security/performance acceptance and production cutover; production continues on Google Sheets",
   "cutoverBlockers": [
-    "Hosted audit removal remains unapplied; exact-target approval, writer freeze and backup/source freshness recheck are required before execution; broader platform recovery is not certified",
+    "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
     "Hosted runtime, authorization/security, browser/API/provider, business and realistic performance/capacity acceptance remain unverified by this import",
     "Reconfirm all writers paused and source freshness; review changes since saved export with approved refresh/delta handling",
     "Production activation, monitoring and post-cutover-write rollback plan require explicit owner approval"
