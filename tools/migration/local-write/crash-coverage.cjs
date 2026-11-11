@@ -46,7 +46,7 @@ class CrashCampaign extends MethodCampaign {
                 assert.equal(await countOrders(), 1); assert.equal(await countCommands(), 1); assert.equal(attempts().length, boundary.afterAttempts);
                 const afterEffect = await this.sql('SELECT state FROM stock_operational.side_effects WHERE key=$1', [effectKey]);
                 assert.deepEqual(afterEffect.map(e => e.state), [boundary.afterAttempts === 0 || boundary.control === 'exitAfterFakeReply' ? 'sending' : 'done']);
-                results.push({ boundary: boundary.control, trial: trial + 1, committedBeforeRestart: boundary.committed, attemptsBeforeRestart: boundary.beforeAttempts, attemptsAfterRedelivery: attempts().length, businessCommandsAfterRecovery: 1, effectState: afterEffect[0].state, unknownOutcomeAutoResent: false });
+                results.push({ eventKey: event.webhookEventId, providerAttemptId: attempts()[0]?.attemptId || null, boundary: boundary.control, trial: trial + 1, committedBeforeRestart: boundary.committed, attemptsBeforeRestart: boundary.beforeAttempts, attemptsAfterRedelivery: attempts().length, businessCommandsAfterRecovery: 1, effectState: afterEffect[0].state, unknownOutcomeAutoResent: false });
                 this.save('crash-matrix.json', results);
             }
             await this.verifyOriginal();

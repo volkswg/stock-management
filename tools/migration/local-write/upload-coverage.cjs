@@ -104,7 +104,7 @@ class UploadCampaign extends CompletionCampaign {
         assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
         const retried = await this.api(url, { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: [200, 503], _probe: true });
         const events = this.ledger().slice(start), attempts = events.filter(e => e.kind === 'fake-provider' && e.provider === 'drive' && e.operation === 'upload');
-        this.save('upload-unknown-retry-proof.json', { retryStatus: retried.status, uploadAttempts: attempts.length, unknownOutcomes: events.filter(e => e.kind === 'fake-provider-outcome' && e.phase === 'uncertain').length, originalRowsUnchanged: !!(await this.verifyOriginal()) });
+        this.save('upload-unknown-retry-proof.json', { key, url, fileId: attempts[0]?.id, uploadAttemptId: attempts[0]?.attemptId, retryStatus: retried.status, uploadAttempts: attempts.length, unknownOutcomes: events.filter(e => e.kind === 'fake-provider-outcome' && e.phase === 'uncertain').length, originalRowsUnchanged: !!(await this.verifyOriginal()) });
         assert.equal(retried.status, 503, 'An accepted upload with a lost response must require reconciliation instead of blind retry.');
         assert.equal(attempts.length, 1); assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
     }

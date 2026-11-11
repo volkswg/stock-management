@@ -216,11 +216,12 @@ function extend(Campaign) {
         this.control({
             driveFailure: true
         });
-        await this.post(target, make(PNG), {
+        const failed = await this.post(target, make(PNG), {
             status: 500
         });
         this.control({});
         assert.equal(await this.revision(), at);
+        this.save('pre-acceptance-upload-failure.json', { key: failed.key, url: target, noAcceptedProviderFile: true, retryRequiresReconciliation: true });
         this.blocked.push({
             id: 'WT10', variant: 'Oversize/orphan cleanup and product-image replacement', reason: 'Not yet executed by this local driver; successful upload and provider-failure rollback are narrower evidence.'
         });

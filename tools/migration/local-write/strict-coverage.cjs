@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Explicit intent, transition, reference and provider-uncertainty matrices. */
-const assert = require('node:assert/strict'), crypto = require('node:crypto');
+const assert = require('node:assert/strict'), crypto = require('node:crypto'), fs = require('node:fs'), path = require('node:path');
+const { classifyUploads } = require('./provider-outcomes.cjs');
 const { EdgeCampaign } = require('./edge-coverage.cjs');
 const { PNG } = require('./runtime.cjs');
 const { collisionPngPair } = require('./binary-fixtures.cjs');
@@ -86,6 +87,34 @@ class StrictCampaign extends EdgeCampaign {
         const final = counts(await read()); assert.equal(final.WT_ACCOUNT_A, initial.WT_ACCOUNT_A); assert.equal(final.WT_ACCOUNT_B, initial.WT_ACCOUNT_B + 1);
         this.save('stock-reference-matrix.json', { missingAccountAndAdjustmentRejected: true, replacementBeforeReversalRejected: true, existingCrossAccountCorrectionRulePreserved: true, netAccountAChange: 0, netAccountBChange: 1, originalHistoryRetained: true }); await this.verifyOriginal();
     }
+    async WT_FINAL_OUTCOMES() {
+        const read = name => JSON.parse(fs.readFileSync(path.join(this.out, name)));
+        const repeated = read('upload-uncertainty-repetitions.json'), unknown = read('upload-unknown-retry-proof.json'), cleanup = read('cleanup-reconciliation-proof.json'), rejected = read('pre-acceptance-upload-failure.json'), crashes = read('crash-matrix.json');
+        assert.equal(repeated.length, 20); assert.equal(crashes.length, 60);
+        const expectedFiles = [...repeated.map(row => row.fileId), unknown.fileId, cleanup.acceptedNewFile];
+        assert.equal(new Set(expectedFiles).size, 22);
+        const expectedDriveUnknown = [...repeated.filter(row => row.failure === 'accepted-response-lost').map(row => row.uploadAttemptId), unknown.uploadAttemptId];
+        const ledger = this.ledger(), driveIds = new Set(ledger.filter(row => row.kind === 'fake-provider' && row.provider === 'drive').map(row => row.attemptId));
+        const events = ledger.filter(row => row.kind === 'fake-provider' && row.provider === 'drive' || row.kind === 'fake-provider-outcome' && driveIds.has(row.attemptId));
+        const history = this.requests.filter(row => row.status >= 200 && row.status < 300).flatMap(row => [...row.text.matchAll(/WT_FILE_[0-9a-f-]{36}/g)].map(match => match[0]));
+        const graph = classifyUploads(events, await this.fileReferences(), history);
+        assert.deepEqual(graph.orphanIds.sort(), expectedFiles.sort()); assert.deepEqual(graph.brokenReferences, []);
+        assert.deepEqual(graph.unresolvedAttempts.sort(), expectedDriveUnknown.sort());
+        const claims = await this.sql("SELECT key,state FROM stock_operational.side_effects WHERE state<>'done' ORDER BY key"), uploads = claims.filter(row => row.state === 'uncertain');
+        const inputs = [...repeated, unknown, cleanup, rejected]; assert.equal(inputs.length, 23);
+        const expectedPrefixes = inputs.map(row => 'UPLOAD:' + hashIntent({ kind: 'PATCH:' + row.url, key: row.key }) + ':');
+        expectedPrefixes[22] = 'UPLOAD:' + hashIntent({ kind: 'POST:' + rejected.url, key: rejected.key }) + ':';
+        assert.equal(uploads.length, 23); assert.ok(uploads.every(row => expectedPrefixes.some(prefix => row.key.startsWith(prefix))));
+        assert.ok(expectedPrefixes.every(prefix => uploads.filter(row => row.key.startsWith(prefix)).length === 1));
+        const expectedReplies = [...crashes.filter(row => row.effectState === 'sending').map(row => 'LINE:' + row.eventKey + ':reply:0'), 'LINE:' + this.prefix + '_CRASH:reply:0'];
+        const sending = claims.filter(row => row.state === 'sending'); assert.equal(expectedReplies.length, 31);
+        assert.deepEqual(sending.map(row => row.key).sort(), expectedReplies.sort());
+        const expectedLineUnknown = crashes.filter(row => row.boundary === 'exitAfterFakeReply').map(row => row.providerAttemptId), expectedUnknown = [...expectedDriveUnknown, ...expectedLineUnknown];
+        const attempts = ledger.filter(row => row.kind === 'fake-provider'), unresolved = attempts.filter(row => !ledger.some(event => event.kind === 'fake-provider-outcome' && event.attemptId === row.attemptId && ['completed', 'rejected'].includes(event.phase))).map(row => row.attemptId);
+        assert.deepEqual(unresolved.sort(), expectedUnknown.sort()); assert.equal(expectedLineUnknown.length, 10);
+        this.save('final-provider-outcome-reconciliation.json', { allExpectedFailureFixturesAccountedFor: true, expectedOrphanFileIds: expectedFiles, expectedDriveUnknownAttemptIds: expectedDriveUnknown, expectedLineUnknownAttemptIds: expectedLineUnknown, unanticipatedOrphans: 0, brokenReferences: 0, unexplainedProviderOutcomes: 0, uploadGuardsRequiringReconciliation: uploads.length, unreplayedReplyClaims: sending.length, normalPhaseFileGraphPassedBeforeUncertaintyFixtures: true, injectedUnknownsWereNotAutoResent: true, graph });
+        await this.verifyOriginal();
+    }
     async WT_UPLOAD_UNCERTAINTY_REPETITIONS() {
         const proofs = [], target = this.context.uploadRetryTarget, active = '/api/movements/' + target.masterId + '/items/' + target.itemId + '/image';
         for (const failure of ['accepted-response-lost', 'cleanup-rejected']) for (let trial = 0; trial < 10; trial++) {
@@ -101,7 +130,7 @@ class StrictCampaign extends EdgeCampaign {
             assert.equal(uploads.length, 1); assert.equal(deletes.length, failure === 'cleanup-rejected' ? 1 : 0);
             assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
             assert.equal((await this.sql('SELECT count(*)::int n FROM stock_operational.commands WHERE key=$1', [key]))[0].n, 0);
-            proofs.push({ failure, trial: trial + 1, key, fileId: uploads[0].id, uploadAttemptId: uploads[0].attemptId, acceptedUploadAttempts: 1, cleanupAttempts: deletes.length, durableGuardState: 'uncertain', retryAfterProcessRestart: 503, automaticResend: false, businessAndRevisionUnchanged: true, requiresExplicitReconciliation: true }); this.save('upload-uncertainty-repetitions.json', proofs);
+            proofs.push({ url, failure, trial: trial + 1, key, fileId: uploads[0].id, uploadAttemptId: uploads[0].attemptId, acceptedUploadAttempts: 1, cleanupAttempts: deletes.length, durableGuardState: 'uncertain', retryAfterProcessRestart: 503, automaticResend: false, businessAndRevisionUnchanged: true, requiresExplicitReconciliation: true }); this.save('upload-uncertainty-repetitions.json', proofs);
         }
         assert.equal(proofs.length, 20); await this.verifyOriginal();
     }

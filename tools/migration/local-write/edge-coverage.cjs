@@ -85,7 +85,7 @@ class EdgeCampaign extends BrowserCampaign {
         await this.api('/api/movements/WT_missing/items/WT_missing/image', { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: 503, _probe: true });
         const events = this.ledger().slice(start), uploads = events.filter(e => e.kind === 'fake-provider' && e.provider === 'drive' && e.operation === 'upload'), deletes = events.filter(e => e.kind === 'fake-provider' && e.provider === 'drive' && e.operation === 'delete');
         assert.equal(uploads.length, 1); assert.equal(deletes.length, 1);
-        this.save('cleanup-reconciliation-proof.json', { acceptedNewFile: uploads[0].id, cleanupAttempts: 1, cleanupRejected: true, newUploadAttemptsAfterRetry: 0, retryStatus: 503, requiresReconciliation: true, noBusinessOrRevisionChange: true });
+        this.save('cleanup-reconciliation-proof.json', { key, url: '/api/movements/WT_missing/items/WT_missing/image', uploadAttemptId: uploads[0].attemptId, acceptedNewFile: uploads[0].id, cleanupAttempts: 1, cleanupRejected: true, newUploadAttemptsAfterRetry: 0, retryStatus: 503, requiresReconciliation: true, noBusinessOrRevisionChange: true });
         this.save('upload-multiple-proof.json', { invalidMixedFilesRejectedBeforeProvider: true, elevenFilesPerGroupRejected: true, tenBillsAndTenProductsAccepted: true });
     }
     async WT_EXPENSE_REFERENCE_EDGES() {
