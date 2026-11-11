@@ -48,10 +48,12 @@ class EdgeCampaign extends BrowserCampaign {
         assert.ok(shifts.every(row => day(row.body.timesheet.createdAt) === '2026-01-31'));
         const january = (await this.get('/api/employees/payroll?month=2026-01')).payroll.find(row => row.employeeId === employee.id);
         const february = (await this.get('/api/employees/payroll?month=2026-02')).payroll.find(row => row.employeeId === employee.id);
-        assert.equal(january.basePay, 180); assert.equal(february.basePay, 0);
+        // Multiple valid shifts on one calendar day are capped at one payable
+        // day by the existing payroll rule: min(1, half + full) * 120 = 120.
+        assert.equal(january.basePay, 120); assert.equal(february.basePay, 0);
         assert.equal((await this.sql('SELECT count(*)::int n FROM stock_operational.employee_compensations WHERE "employeeId"=$1', [employee.id]))[0].n, 3);
         const before = await this.seal(), revision = await this.revision(); await create('2099-01-01', 'WT_ACCOUNT_A', 'work', 'full', 400); assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
-        this.save('hr-date-edge-proof.json', { bangkokJan31Attribution: true, validSameDayMultipleWorkShifts: 2, workLeaveConflicts: 2, compensationHistoryRows: 3, existingMonthSelectedPayRulePreserved: true, januaryBasePay: 180, februaryLeaveBasePay: 0, futureDateRejectedAtomically: true });
+        this.save('hr-date-edge-proof.json', { bangkokJan31Attribution: true, validSameDayMultipleWorkShifts: 2, payableDaysCappedPerDate: 1, workLeaveConflicts: 2, compensationHistoryRows: 3, existingMonthSelectedPayRulePreserved: true, januaryBasePay: 120, februaryLeaveBasePay: 0, futureDateRejectedAtomically: true });
     }
     async WT_UPLOAD_MULTIPLE_AND_CLEANUP_FAILURE() {
         const make = (bills, products, invalid = false) => { const form = new FormData(); form.set('seller', this.key('MULTI')); for (let i = 0; i < bills; i++) form.append('billImages', new Blob([PNG], { type: invalid && i === bills - 1 ? 'text/plain' : 'image/png' }), 'WT-bill-' + i + '.png'); for (let i = 0; i < products; i++) form.append('productImages', new Blob([PNG], { type: 'image/png' }), 'WT-product-' + i + '.png'); return form; };
