@@ -29,7 +29,9 @@ class CompletionCampaign extends Campaign {
         assert.ok(proof.revisionUnchanged && proof.rowsUnchangedAfterReplay && proof.providerUploadsAfterFirst === 0);
         const changedType = await this.api(route, { method: 'PATCH', key, headers: { 'content-type': 'image/webp' }, body: firstBytes, _probe: true, status: 409 });
         const fresh = await this.api(route, { method: 'PATCH', key: this.key('new-image-intent'), headers, body: changedBytes, _probe: true });
-        assert.notEqual(fresh.body.record.imageUrl, first.body.record.imageUrl);
+        assert.equal(typeof first.body.record.productImageUrl, 'string');
+        assert.equal(typeof fresh.body.record.productImageUrl, 'string');
+        assert.notEqual(fresh.body.record.productImageUrl, first.body.record.productImageUrl);
         assert.equal(this.ledger().filter(x => x.provider === 'drive' && x.operation === 'upload').at(-1).contentSha256, hash(changedBytes));
         const afterFreshRevision = await this.revision(), afterFresh = await this.seal(), afterFreshLedger = this.ledger().length;
         const oldReplay = await this.api(route, { method: 'PATCH', key, headers, body: firstBytes, _probe: true });
