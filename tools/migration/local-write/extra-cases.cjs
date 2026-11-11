@@ -233,14 +233,21 @@ function extend(Campaign) {
             }
         });
         const overrides = '/api/sales/profit-summary/cost-overrides';
-        await this.post(overrides, {
+        const saved=(await this.post(overrides, {
             month: this.inventoryMonth, accountId: 'WT_ACCOUNT_A', averageItemCost: 2.5, note: 'WT cost control'
-        });
+        })).body.costOverride;
+        const retainedBefore=(await this.sql('SELECT id,business_cells,revision::text FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[saved.id]))[0];
         await this.api(overrides, {
             method: 'DELETE', key: this.key(), body: {
                 month: this.inventoryMonth, accountId: 'WT_ACCOUNT_A'
             }
         });
+        const retainedAfter=(await this.sql('SELECT id,business_cells,revision::text,archived_at FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[saved.id]))[0];
+        assert.equal(retainedAfter.id,retainedBefore.id);assert.deepEqual(retainedAfter.business_cells,retainedBefore.business_cells);assert.ok(retainedAfter.archived_at);assert.equal(Number(retainedAfter.revision),Number(retainedBefore.revision)+1);
+        const revisionAfterDelete=await this.revision();
+        const repeated=await this.api(overrides,{method:'DELETE',key:this.key(),body:{month:this.inventoryMonth,accountId:'WT_ACCOUNT_A'}});
+        assert.equal(repeated.body.removed,false);assert.equal(await this.revision(),revisionAfterDelete);
+        this.save('cost-override-delete-proof.json',{httpStatus:200,archived:true,idAndBusinessCellsPreserved:true,recordRevisionIncrement:1,repeatRemoved:false,repeatRevisionUnchanged:true});
         const movement = this.context.movement, item = movement.masterId + '_ITEM', url = '/api/movements/' + movement.masterId + '/items/' + item;
         await this.patch(url, {
             remark: 'WT edited'
@@ -371,7 +378,8 @@ function extend(Campaign) {
             });
             await fill();
             await page.locator('button[type=submit]').click();
-            await page.waitForTimeout(500);
+            const deadline=Date.now()+30000;
+            while(!lost&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,100));
             assert.ok(lost && key && committed?.order?.id);
             const values = await page.evaluate(() => ({
                 local: {
