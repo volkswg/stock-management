@@ -1,5 +1,46 @@
 # Refactoring progress and evidence
 
+## Remaining local coverage/capacity — plan prepared only (2026-11-11)
+
+Baseline is merged PR #62, `40cc91cd2711559a249d43163ec38008385854d0`.
+Source-matched CI run 42996521762 passed; the automatic production deployment
+was subsequently verified READY on that commit with unchanged Sheets storage.
+Those are prior merge receipts, not fresh live-data inspection during planning.
+
+The [completion plan](../database-migration.md#remaining-local-coverage-and-capacity-completion-plan-prepared-only)
+adds a per-variant audit across all 16 families, not just the seven BLOCKED labels.
+It proposes excluding hosted-only API/protection from the local denominator and
+marking nonexistent Orders cancel/delete and Shipment unlink/cancel writes N/A
+only after explicit scope review. Current unsupported-action rejection and
+synthetic legacy history still require tests; no new feature is implied by a
+status enum. Original copied rows remain immutable; all editable legacy fixtures
+must be newly synthetic.
+
+Proposed work covers upload size/uncertainty/cleanup, full signed LINE/photo
+journeys, per-method intent/rollback/concurrency, ten trials per browser/crash
+boundary, two clean campaigns, immutable concurrent provider fixtures and paired
+attempt/outcome ledgers. Local capacity uses one then five clients, 2-minute
+warmups and ten measured minutes each, a sealed 60/25/15 read/simple/compound mix,
+2/3/5-second warm p95 limits, 10-second maximum, explicit pacing/sample counts and
+20% resource headroom. No limit/pool tuning is hidden in a passing result.
+Generated checkpoints need full 51-table/15-metadata restore plus a read-only
+provider-denied app probe and protected-state comparison. LOCAL PASS is separate
+from deferred hosted/full-platform/production acceptance.
+
+This update changes documentation/status only. No harness implementation,
+fixture/write/fault/load/restore run, resource or database change, production
+setting, live provider request or fresh live-data inspection occurred. All new
+execution results remain NOT RUN. A later owner instruction and a sealed local
+execution packet are needed before implementation/execution; merging the plan
+alone starts no private campaign. Production remains Google Sheets.
+
+Verification of this documentation-only update: all 571 existing regression
+tests, typecheck and an isolated credential-free production build pass. Lint
+has no errors and retains the existing unused `shipmentRow` warning. The diff
+changes only this ledger, the canonical migration plan and phase-3 status;
+application/build inputs, fixtures, schema, grants, environment and dependencies
+are unchanged. These checks do not execute the planned private write/load tests.
+
 ## Cost-override deletion fix — two implemented local runs pass (2026-11-11)
 
 The owner authorized fixing the WT12 binding defect and rerunning local writes.

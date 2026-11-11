@@ -917,6 +917,191 @@ commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
 original requirements; a stopped/partial run is not full acceptance.
 Google Sheets remains production's store.
 
+##### Remaining local coverage and capacity completion plan (prepared only)
+
+**Planning only: no new harness implementation, fixture write, fault, load run,
+restore, resource/configuration change or live-data inspection is authorized or
+performed by this update.** Baseline: merged [PR #62](https://github.com/volkswg/stock-management/pull/62),
+`40cc91cd2711559a249d43163ec38008385854d0`; source-matched
+[CI run 42996521762](https://github.com/volkswg/stock-management/actions/runs/42996521762)
+passed before merge. Production deployment was verified READY at that merge
+with unchanged environment metadata and Google Sheets storage. Those are prior
+receipts, not new production/data checks made during planning.
+
+Two earlier copies each completed 455 HTTP requests and all implemented checks;
+that does not prove every variant in any of the 16 families. This plan completes
+**current-contract local** coverage and a bounded local capacity rehearsal.
+Hosted Supabase Data API/pooler/protection, real provider integration and production
+activation remain separate gates. A later owner instruction must authorize the
+harness work and local execution packet; merging this plan alone runs neither.
+
+**1. Freeze the case inventory and resolve scope before implementation.**
+Inventory the pinned 35 API files, 31 ordinary mutation methods plus signed LINE
+entrypoint, actual UI actions, validators and transition tables. Give every
+success/rejection/retry/fault variant a case ID, current expected status/body,
+allowed synthetic row/table deltas, command/revision/effect expectations, oracle,
+fixture hash, repetitions and evidence file. Audit all 16 families, including the
+nine previously labelled PASS for implemented checks. Record proposed dispositions:
+
+| Requirement | Proposed local disposition; no historical result is relabelled |
+| --- | --- |
+| WT01 hosted Data API and Vercel protection | DEFERRED-HOSTED, excluded from the local denominator only after scope review; local SQL/RLS/auth/production-refusal checks remain mandatory. Bare PostgreSQL cannot certify hosted API/protection. |
+| WT02 order cancellation and order soft deletion | NOT APPLICABLE to the current write contract: no exported Orders cancel/delete mutation. Verify unsupported method/path rejection and no delta; verify synthetic legacy cancelled/deleted records are retained/read correctly. A feature addition needs its own scope, not an invented successful mutation. |
+| WT03 unlink and shipment cancellation | NOT APPLICABLE as successful writes. No unlink export; the current status use case permits only draft → ready_to_ship → shipping → delivered. Test refusal of cancellation/backward transitions and synthetic legacy cancelled history. Do not infer a cancellation operation from the display enum. |
+| Copied historical-row edits | Replace with newly seeded synthetic legacy-shaped fixtures. All original 70,777 business rows, imported archive and original lookup identities remain immutable, including inside the test copies. Never select an original session/order/advance for mutation. |
+
+The relevant contract witnesses are the pinned Orders/Shipments route exports,
+`src/modules/shipments/application/update-shipment-status.ts`, and the immutable
+route fixture. Record framework 404/405 and validation responses from the current
+contract; do not force a uniform status. Until reviewed in the execution packet,
+these are **proposed** N/A/deferred dispositions, not PASS. If excluded behavior
+is actually required by the business, local completion stays BLOCKED pending a
+separately scoped feature decision. Combined local+hosted acceptance stays false.
+
+**2. Extend the test harness, preserving real operations.**
+Use actual React UI, HTTP handlers, PostgreSQL adapters/transactions and current
+application rules, with the offline Sheets-compatible oracle and independent
+financial/stock controls. Add test-only provider outcome ledgers and fault hooks;
+no production-source, route, schema or permission change is needed by this plan.
+Use synthetic users, events, files, dates and IDs; keep original lookup identifiers
+read-only and account configuration unambiguous. Account for any derived report
+delta caused by new fixtures without exempting original rows from hash checks.
+
+| Family | Remaining local work | Required pass evidence |
+| --- | --- | --- |
+| WT00–01 | Re-run target/UUID/role/TLS and all method auth/key gates; forged LINE-path bypass, invalid signatures and isolated production guard | Wrong targets stop before connection/mutation; ordinary token errors 401, invalid MAC 401, configured production/identity refusal 503; direct archive/elevated access denied; no business/journal/effect delta. No production setting is changed to test this. |
+| WT02–03 | Full item/bill edits and rejection rollback; synthetic old-shaped links; link retry, bill association, each permitted transition and forbidden transition; unsupported actions above | Exact relationships, amounts, retained history and response contracts; no orphan or duplicate link/upload; source-defined repeat link remains 200/no duplicate. |
+| WT04–05 | Missing/zero/invalid movement quantities, both supported journey modes, item edit/delete/image and repeated delivery; adjustment/reversal/replacement/return, invalid cross-account references and physical-count variance | Invalid delivery is atomic; each attributable stock effect occurs once; opening + delivered − net sales − other out + returned in and saved variance match per account/month; original rows unchanged. |
+| WT06 | Keep overlap/conflict/corrected-same-key retry regressions; add repeated cursors, cancelled receipts, store/date boundaries and filters, profit/cost-override create/edit/archive/replacement | Exact distinct receipt/item/payment/sync counts; cancelled/filter semantics match current client; no partial completion; dashboard/profit/stock and retained override payloads agree with controls. |
+| WT07–09 | Effective compensation and Bangkok day/month edges; valid multiple work shifts versus work/leave conflicts; synthetic unpaid legacy advance pay/cancel, stale settlement and settled-history retention; invalid shop/category mappings, soft-delete and monthly/profit totals | Existing month-selected pay/rounding rules preserved; no double pay/recovery/deduction; invalid edits atomic; independent payroll/expense/profit totals exact. No real employee/legacy ledger row is edited. |
+| WT10 | Every upload endpoint: zero, limit−1, exact limit, limit+1, MIME, mixed/multiple files; missing record, replacement, upload failure, SQL failure after upload, cleanup failure and ambiguous provider acceptance | Route-specific size/status contracts: Orders/shipping bill 10 MiB; movement raw image 20 MiB. Rejected input has no business delta; original references never fetched/deleted; every fake file is referenced, compensated, or explicitly unresolved with evidence. Unknown/orphan outcomes cannot be hidden by blind re-upload. |
+| WT11 | Full signed order bill/product/total journey and movement shop/quantity/photo/close/resume/summary; both supported movement modes, multiple events, regrouped/reordered redelivery, failed SQL, cleared/failed sessions and invalid command/image | Stable logical events commit once independent of reply token/batch grouping; exact checkpoint/history; failed SQL retries safely; fake replies attempted at most once; claimed/uncertain outcomes remain visible. Pin actual commands, not guessed labels. |
+| WT12–14 | Every ordinary method: same/changed JSON, query, multipart and **raw binary** content intent; stale revision, concurrent first execution, replay after unrelated writes, rollback at its write boundaries | Missing/malformed key 428; changed intent/stale fresh operation 409; replay preserves original body/status/headers/revision and adds no effect; binary comparison must distinguish actual bytes. Target rows, journals, statement-level revision and unrelated original rows match expected deltas. |
+| WT13 | Actual UI writes beyond Orders; desktop and mobile double-click, reload/reselection, intentional later identical action, post-commit response loss, lost acknowledgement and process restart | Same pending key survives uncertainty and resolves exactly once; a later intentional action gets a new key; no token in browser storage/bundles, blind new-key retry or Sheets fallback. Preserve visible error/retry/success evidence. |
+| WT15 | Crash before business commit, after business commit before effect claim, after claim before send, after fake acceptance before outcome recording, and after recorded outcome; regrouped redelivery/restart | Rollback before commit; no repeat of committed business work; at most one fake send attempt for each logical effect; sending/uncertain is retained without auto-resend. Pair SQL state with the independent fake provider outcome ledger. |
+
+Fakes must record attempt **and** acceptance/outcome, not merely that a call was
+made. Key fake pagination by immutable account/date/store/cursor fixtures so five
+clients cannot race a shared mutable page counter. Fault controls must target the
+intended command/transaction and record the exact reached boundary before a crash.
+Keep all fault trials separate from load and serialize their control changes.
+Test the harness with synthetic fixtures first, including wrong-target/redirect/
+provider denial and a deliberately failing control; never weaken an assertion to
+turn a discovered application defect into a pass. A needed behavior fix is a
+separate reviewed change followed by fresh affected-case runs.
+
+**3. Prepare fresh isolated execution checkpoints, then run correctness first.**
+Use only the previously created **task-owned** local cluster if its exact ID,
+volume, image, UUID and limits are reverified; otherwise provision a separately
+identified new local cluster in the execution packet. Never write in the original
+hosted project, existing read-only preview, production or the two original
+recovery containers. Preserve earlier failed/completed copies, backups and ledgers;
+create new named databases/build directories, rather than resetting them in place.
+
+Verify the independently recovered post-audit backup/checksums and complete
+51-table/15-metadata restore before setup; enumerate only approved copy identity/
+login deltas and reseal the baseline. Revalidate TLS expiry/CA and fresh copy-only
+credentials. No source credentials or real provider secrets enter the runner,
+build, app or browser. Pin source/harness/build/manifest/fixture hashes, actual
+hardware, exact local destinations, reviewer roles, workload and limits. Missing
+identity, comparator or isolation evidence is BLOCKED before the first test write.
+Original rows and all archive/security metadata must remain exact; only newly
+seeded synthetic entities and explicitly budgeted journals/effects may change.
+
+Run two independent clean functional campaigns using the **same** reviewed
+harness/case versions, each with a separate fake-provider ledger. Each ordinary
+method gets 20 fresh same-key concurrent pairs and 20 stale-state pairs where an
+actual state-changing operation exists; test no-op/replay routes against their
+existing contract instead of demanding an invented revision change. Cover every
+method's pre-commit failure point at least once and run ten trials per distinct
+multi-table rollback/fault class. Run ten trials **per** browser uncertainty and
+crash boundary above, not ten total over mixed faults. Earlier 20 Orders-only
+pairs and one mobile/crash sample do not satisfy this completion requirement.
+Set a proposed 60-minute budget per functional campaign; budget exhaustion is
+BLOCKED, not permission to drop trials. No load starts until local correctness,
+reviewed scope dispositions and harness controls pass.
+
+**4. Run the following bounded local capacity protocol.**
+This proposes the previous rehearsal latency limits for the **local** copy;
+it does not execute or replace the separate hosted capacity gate. Use the full
+saved dataset plus declared synthetic fixtures. Prepare distinct, valid per-client
+orders, expense masters, shipments ready to ship, account/month scopes and fake
+sales days before timing; seal that post-seed checkpoint. No copied historical row
+may be used as an editable load target. Start each load level from a fresh clone
+of this same checkpoint, so level two does not inherit level one's growth/cache.
+
+| Setting | Proposed protocol / pass criterion |
+| --- | --- |
+| Concurrency/duration | One client, then five clients. Each level has 2 minutes of unscored warmup and 10 measured minutes; drain all in-flight work afterward. Warmup/load/drain total budget 30 minutes. Record cold startup/first request separately. |
+| Pacing | At most one in-flight request per client and one new request/second/client; no queued catch-up backlog. Maximum measured requests 600 / 3,000. Record offered, started, completed, timed-out and unstarted slots plus actual throughput, not just concurrency. |
+| Fixed 20-request block | 12 GETs (4 Orders, 3 Inventory, 2 Sales/profit, 2 HR/payroll/advances, 1 Expenses); 5 simple writes (2 fresh orders, 1 expense, 1 stock count, 1 cost override); 3 compound writes (1 multipart order, 1 shipping-bill transition, 1 fresh fake sales sync). Pin concrete URLs, bodies, sequencing and fixtures before execution. |
+| Fixture sizing | Multipart uses two valid deterministic 256 KiB images, shipping uses a 256 KiB PDF; sales uses fixed two-page sale/refund data. Allocate distinct account/date/store/cursor and ready-shipment fixtures for every compound operation; no shared control-file edits during load. Oversize/failure cases stay outside normal load. |
+| Sampling | Measure from dispatch until full body consumption, including app/pool/lock/fake-provider delay. Keep per-route and per-class p50/p95/p99/max with nearest-rank percentiles. At least 20 successful samples per scheduled concrete route/variant; insufficient samples are INCONCLUSIVE, not PASS or an automatic longer/higher load. |
+| Latency | Warm read p95 ≤ 2 s; simple write p95 ≤ 3 s; compound write p95 ≤ 5 s; every normal request ≤ 10 s. Report each route as well as aggregates so cheap routes cannot hide a slow one. Cold samples are separate; a stalled normal request still fails the maximum. |
+| Reliability | Zero unexpected 5xx, timeout, deadlock or connection-limit errors; zero incorrect totals/partial commits/duplicate effects. No retries erase a failed normal sample. Deliberate conflicts/faults have separate phases and expected statuses, not a load error allowance. |
+| Database limits | Retain the reviewed 1 GiB memory / 1.5 CPU / no-swap container limits and pool max=2; do not tune them to pass. Reverify max_connections=24 and runtime-login limit=6 or block on drift. Keep total client backends ≤19 and runtime-login backends ≤4; reserve monitoring/recovery headroom. |
+| Other proposed budgets | App processes combined RSS ≤1 GiB, load driver ≤512 MiB, one functional-browser process group ≤1 GiB; at most one browser/context during functional UI trials, HTTP clients during load. These are budgets to approve/reverify, not allocations performed now. Heap limits alone are not RSS limits. |
+| Resource headroom | At least 20% free in each declared memory/connection/storage budget and on host/VM. Budget incremental test storage at 5 GiB, stop at 4 GiB growth, with at least 5 GiB absolute host free disk. Confirm room for clones/restores/evidence first. Stop on a hard-budget breach, OOM or unplanned restart; sustained CPU use above 80% of its 1.5-CPU quota for 10 seconds fails headroom. No resizing/stopping original resources. |
+
+Poll sanitized PostgreSQL counts/wait states, cgroup CPU/memory/pressure/OOM and
+app/driver RSS once per second; collect disk and database/index/WAL size every
+10 seconds. Keep timestamps and instrumentation overhead. Use short read-only
+monitor transactions and before/after counter deltas, without resetting stats or
+logging SQL text/binds. PostgreSQL stats can lag and are cached within a transaction,
+so a single long monitoring transaction is unsuitable ([PostgreSQL 17 monitoring](https://www.postgresql.org/docs/17/monitoring-stats.html)).
+Docker CPU/memory limits and memory+swap semantics must be verified, not inferred
+from a dashboard percentage ([Docker resource constraints](https://docs.docker.com/engine/containers/resource_constraints/)).
+Missing metrics, counter resets, machine contention or an unenforceable budget
+make the capacity result BLOCKED/INCONCLUSIVE; never stop unrelated workloads or
+increase limits silently. Report shared-host limitations and the offered workload;
+a pass is not an estimate of production peak traffic or hosted pooling behavior.
+
+At the end of each level, stop ingress, account for every acknowledged command,
+compare exact final rows/revisions/journals/effects to the seeded oracle and
+independent workload ledger, and rehash all original rows/archive/security
+metadata. Revision expectations count mutating SQL statements, not HTTP requests.
+Do not run full fingerprints/backups or large oracle computations during timed
+load; include their recovery cost afterward instead of distorting the sample.
+
+**5. Prove recovery/protected-state boundaries and publish a scoped result.**
+Freeze each completed checkpoint with its paired provider ledger, capture and
+restore into a fresh named local target, and match all 51 table hashes/15 metadata
+sections including commands/effects. Add a provider-denied, explicitly read-only
+app probe on the restored copy; the current write-only test preload will need a
+reviewed recovery-read-only mode before that probe. Never start a writable restored
+webhook or automatically resend sending/uncertain effects. RTO ≤15 minutes runs
+from declared new-target recovery start through restore, hash verification and
+read-only app readiness; backup capture duration is reported separately. RPO=0
+only for acknowledged operations inside that sealed checkpoint, not unknown
+provider outcomes or later writes. Keep the previous backup/tooling intact.
+
+With separately authorized read-only operator access, compare the original hosted
+staging 51-table/15-metadata snapshot before/after; verify production environment
+metadata is unchanged/Sheets without reading production Sheets or invoking live
+providers. Source access stays in a separate process, never in the writer.
+If source verification is unavailable, protected-state acceptance is BLOCKED;
+this plan itself performs no live read. Never freeze or modify original data for
+this local rehearsal.
+
+Stop immediately on isolation/permission/egress failure, original-row/metadata
+change, duplicate business effect, unexplained total, untracked orphan/uncertain
+outcome, resource breach or failed recovery. Disable only new-copy ingress, retain
+the failure/ledger/journals, and report FAIL/BLOCKED; no blind reset/new-key retry,
+Sheets fallback, original-data repair or cleanup of prior resources. Resume from
+a new approved checkpoint only after a scoped reviewed fix.
+
+Deliver a private 0600/0700 execution packet with per-variant results, API/UI
+proofs, expected/actual row and money/stock deltas, fault-hit records, paired
+provider outcomes, load distributions/resource curves and restore checksums.
+Publish only counts, case IDs, sanitized failures, commit/CI links and hashes.
+Operator/business/recovery reviewers sign their parts. A **LOCAL PASS** requires
+every in-scope supported variant in both campaigns, all repetition/resource/load/
+recovery/protected-state gates and explicit reviewed N/A/deferred dispositions.
+Any missing or flaky mandatory local variant is BLOCKED; assertion failure is
+FAIL. Hosted/full-platform/real-provider/production readiness remains NOT RUN or
+BLOCKED regardless of local success. This scoped local label supersedes no prior
+combined-acceptance result and never authorizes a production storage switch.
+
 ##### Cost-override deletion fix and two local reruns (2026-11-11)
 
 The owner authorized fixing the WT12 deletion defect and rerunning disposable

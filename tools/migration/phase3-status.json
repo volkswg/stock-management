@@ -1,6 +1,6 @@
 {
-  "version": 9,
-  "scope": "Receipt and cost-override deletion fixes verified in two disposable local runs; all implemented checks pass; full write/hosted acceptance remains incomplete; production remains Google Sheets",
+  "version": 10,
+  "scope": "PR62 fixes merged; remaining local write coverage and bounded capacity completion plan prepared only; no new private campaign executed; production remains Google Sheets",
   "reportedOnBangkok": "2026-11-11",
   "lastDataVerificationAtUtc": "2026-11-11T09:25:11.787205+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
@@ -94,7 +94,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Complete seven outstanding case-family variants and capacity/repetition checks before separately approved hosted write acceptance; production remains Google Sheets",
+  "nextStep": "Review the local completion plan and scope dispositions, then separately authorize harness implementation and the sealed local execution packet; do not change existing data or production storage",
   "cutoverBlockers": [
     "Receipt overlap and cost deletion fixed. Two local runs have no implemented-case failures, but seven mandatory families retain coverage gaps; hosted, realistic capacity and production authorization/activation acceptance are not complete.",
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
@@ -457,6 +457,107 @@
     "generatedCheckpointRestoreSecondsEach": [
       3.717,
       3.127
+    ]
+  },
+  "localCoverageCompletionPlan": {
+    "state": "prepared-not-executed",
+    "document": "docs/database-migration.md#remaining-local-coverage-and-capacity-completion-plan-prepared-only",
+    "baselineCommit": "40cc91cd2711559a249d43163ec38008385854d0",
+    "mergedPullRequest": 62,
+    "baselineCiRun": 42996521762,
+    "planningOnly": true,
+    "implementationPerformed": false,
+    "executionAuthorizedByThisPlan": false,
+    "privateWriteTestsRunByThisUpdate": false,
+    "capacityRunByThisUpdate": false,
+    "liveDataInspectedByThisUpdate": false,
+    "existingDataChanged": false,
+    "hostedChanges": false,
+    "productionCutoverPerformed": false,
+    "productionStorage": "google-sheets",
+    "all16FamiliesRequireVariantInventory": true,
+    "proposedDispositionsRequireScopeReview": true,
+    "hostedApiProtection": "DEFERRED-HOSTED, not local certification",
+    "unsupportedSuccessfulWrites": [
+      "Orders cancel/delete",
+      "Shipment unlink/cancel"
+    ],
+    "unsupportedActionRejectionAndSyntheticHistoryStillRequired": true,
+    "originalImportedRowsImmutableIncludingCopies": true,
+    "caseResults": "NOT RUN",
+    "functionalCampaignsProposed": 2,
+    "sameKeyPairsPerOrdinaryMethod": 20,
+    "staleStatePairsPerApplicableMethod": 20,
+    "trialsPerBrowserOrCrashBoundary": 10,
+    "functionalBudgetMinutesEach": 60,
+    "capacity": {
+      "scope": "local bounded rehearsal only",
+      "concurrency": [
+        1,
+        5
+      ],
+      "warmupMinutesEach": 2,
+      "measuredMinutesEach": 10,
+      "totalPhaseBudgetMinutes": 30,
+      "maximumNewRequestsPerSecondPerClient": 1,
+      "maximumInflightPerClient": 1,
+      "maximumMeasuredRequests": [
+        600,
+        3000
+      ],
+      "mixPer20Requests": {
+        "reads": 12,
+        "simpleWrites": 5,
+        "compoundWrites": 3
+      },
+      "minimumSuccessfulSamplesPerScheduledRouteVariant": 20,
+      "warmP95Ms": {
+        "read": 2000,
+        "simpleWrite": 3000,
+        "compoundWrite": 5000
+      },
+      "maximumNormalRequestMs": 10000,
+      "databaseMemoryBytes": 1073741824,
+      "databaseCpus": 1.5,
+      "databaseSwapBytes": 0,
+      "preserveApplicationPoolMax": 2,
+      "reverifyMaxConnections": 24,
+      "reverifyRuntimeConnectionLimit": 6,
+      "maximumTotalClientBackends": 19,
+      "maximumRuntimeBackends": 4,
+      "proposedApplicationRssBytes": 1073741824,
+      "proposedDriverRssBytes": 536870912,
+      "proposedBrowserGroupRssBytes": 1073741824,
+      "minimumHeadroomPercent": 20,
+      "incrementalStorageBudgetGiB": 5,
+      "storageStopAtGrowthGiB": 4,
+      "minimumHostFreeDiskGiB": 5,
+      "cpuQuotaUseStopPercent": 80,
+      "cpuQuotaUseStopSustainedSeconds": 10,
+      "freshSameSeedCheckpointPerLevel": true,
+      "automaticRetriesHideFailures": false,
+      "status": "NOT RUN"
+    },
+    "recovery": {
+      "tables": 51,
+      "metadataSections": 15,
+      "restoreTarget": "fresh named task-owned local target",
+      "readOnlyProviderDeniedAppProbeRequired": true,
+      "newRecoveryReadOnlyHarnessModeNeeded": true,
+      "rtoMinutes": 15,
+      "rtoIncludesNewTargetRestoreVerificationAndReadOnlyAppReadiness": true,
+      "rpoZeroOnlyForSealedAcknowledgedCheckpoint": true,
+      "providerAutoReplayPermitted": false,
+      "status": "NOT RUN"
+    },
+    "exitLabel": "LOCAL PASS only with all supported variants, exact data and resource/recovery gates plus reviewed scope dispositions",
+    "hostedAcceptanceCertifiedByLocalPass": false,
+    "requiredBeforeExecution": [
+      "reviewed per-variant matrix and N/A/deferred dispositions",
+      "source/harness/build/fixture/manifest hashes and independent harness controls",
+      "verified backup and clean local identity/TLS/runtime-role baselines",
+      "exact targets, resource budgets, seed/workload and reviewer roles",
+      "separate read-only protected-state verification channel"
     ]
   }
 }
