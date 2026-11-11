@@ -1,5 +1,30 @@
 # Refactoring progress and evidence
 
+## Local completion started — raw-image correctness failure (2026-11-11)
+
+PR #63 execution was authorized on fresh disposable copies. Added a real-app
+raw-binary intent gate plus deterministic, independently validated PNG collision
+fixtures; added the bounded capacity engine and synthetic controls to CI.
+The [run evidence](../database-migration.md#local-completion-started-raw-image-intent-failure-2026-11-11)
+records an actual failure: different valid raw PNG bytes reused the same operation
+key and received 200/replayed the old response instead of 409, because the route
+wrapper hashes decoded text. No production behavior fix is included.
+
+Two fresh local databases were prepared in a new limited container/volume. The
+first stopped after 83 HTTP requests; its app was shut down and evidence retained.
+The second was not exercised; application capacity was NOT RUN. All original
+70,777 rows, each copy's 24 archive tables/15 security metadata and the hosted
+51-table/15-metadata before/after state remain exact. Failed-checkpoint restore
+matches all 51 tables/15 metadata in 3.256 seconds; a recovery app probe remains
+pending. Production metadata is unchanged and storage remains Google Sheets.
+
+All 571 existing regressions and 18 synthetic harness controls pass; typecheck
+and credential-free isolated build pass. Lint has only the inherited warning.
+**Full implementation remains incomplete**: other variant/fake-outcome/LINE/UI/
+fault work, the actual capacity workload/observer/oracle integration, two complete
+correctness runs and full recovery checks await the scoped binary-intent fix.
+Receipt hash: `76ade0b3dd8850a7d274d7fa2b2e950f3461b35e7448b7ee15d560963b2be130`.
+
 ## Remaining local coverage/capacity — plan prepared only (2026-11-11)
 
 Baseline is merged PR #62, `40cc91cd2711559a249d43163ec38008385854d0`.

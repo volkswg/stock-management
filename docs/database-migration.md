@@ -917,6 +917,68 @@ commit `dff802bfddf5c522c013262ba8e56ba9532a8221`. The plan below retains its
 original requirements; a stopped/partial run is not full acceptance.
 Google Sheets remains production's store.
 
+##### Local completion started: raw-image intent failure (2026-11-11)
+
+The owner authorized PR #63 implementation and execution on fresh disposable
+local copies. **Implementation and full acceptance remain incomplete.** The
+priority raw-binary correctness check found an application defect, so the run
+stopped before a second campaign or capacity load, as the plan requires.
+Production remains Google Sheets; no existing data or production setting changed.
+
+Added `local-write/completion.cjs` to run priority identity/auth/seed and raw-image
+checks through the real private app/HTTP/PostgreSQL stack. Deterministic fixtures
+create two distinct valid 1×1 PNGs, each with correct chunk CRCs and identical
+pixels, whose ancillary binary bytes differ but decode to the same UTF-8 text.
+The fixture control independently checks PNG structure, CRCs, decompression,
+byte hashes and the decoded-text collision. Same-key identical bytes replay
+exactly; same-key changed bytes **must return 409**.
+
+The actual movement image route returned **200**, replaying the first image's
+response, for the different bytes. Root cause witness:
+`src/composition/postgres/route.ts` hashes `request.clone().text()` for non-multipart
+requests, losing binary identity. The first upload, identical replay and changed
+image received 200/200/200; no second upload/revision/business mutation occurred
+on replay. The assertion remains 409: no behavior fix or weakened expectation
+is included in this harness change.
+
+A separate bounded capacity engine adds one/five-client pacing without catch-up,
+60/25/15 mix checks, per-route/class nearest-rank percentiles, minimum samples,
+10-second request deadlines, resource freshness/headroom gates, exact reviewed
+correctness inventory/repetition/version prerequisites and failure cancellation.
+Its synthetic negative controls cover bad/missing telemetry, slow routes hidden
+by fast ones, undersampling, ignored aborts, and failure without retry. It is
+**engine/control implementation only**: the fixed app workload, live observer,
+fixture/oracle integration and real capacity run are still pending. CI runs the
+synthetic controls, never this private campaign or its copied records.
+
+| Evidence | Observed result |
+| --- | --- |
+| Backup/protected preflight | Independently recovered backup verified; protected staging 51 tables/15 metadata exact; bounded two-reader TLS check 21.60 s, no hosted writes. |
+| Fresh copies | New labelled container/volume and two newly restored disposable databases; 51 tables/15 metadata match before setup, only declared local identity/runtime-login setup deltas; original 70,777 rows retained. Prior clusters/copies untouched. |
+| First priority run | 83 HTTP requests; WT00 and implemented WT04 checks pass; WT01 retains hosted-only BLOCKED scope; `WT12-RAW-BYTES` FAIL. This is not full family/local acceptance. |
+| Stop boundary | New-copy app stopped after the first failure; failed database/provider ledger retained; second copy not exercised; no load/fault expansion or blind retry. |
+| Integrity afterward | All original copied rows unchanged; 24 archive tables/15 security metadata sections exact in both copies; unused second copy all 51 tables/15 metadata exact to baseline. |
+| Protected staging afterward | All 51 tables/15 metadata equal the before snapshot; read-only two-reader TLS check 26.32 s. |
+| Failed checkpoint recovery | Captured and restored into a third new local database; all 51 tables/15 metadata match, restore+hash 3.256 s; no app start/provider replay. Read-only app probe and full recovery acceptance remain NOT RUN. |
+| Production | All 14 production environment metadata entries match the PR #63 verified state; no STOCK_* override, no production credential/data read and no storage switch. |
+
+The unchanged application inputs passed all 571 existing regressions, typecheck
+and isolated credential-free private build (443 unchanged source/assets checked,
+one attested fake-Drive factory substitution). All 18 synthetic harness/oracle/
+fixture/capacity controls pass with loopback permission; an initial restricted
+redirect-server control failed with listen EPERM, then passed with loopback access.
+Lint retains only the inherited unused `shipmentRow` warning. Source, routes,
+schema, grants, original fixtures, environment and dependencies are unchanged;
+CI only adds the new synthetic test files to its existing harness check.
+
+Private evidence receipt SHA-256:
+`76ade0b3dd8850a7d274d7fa2b2e950f3461b35e7448b7ee15d560963b2be130`.
+Private identities, records, credentials and payloads remain outside Git.
+Next: a separately scoped review of binary intent preservation, then complete
+the remaining per-variant matrix/provider outcomes/upload/LINE/UI/fault controls
+and two fresh correctness campaigns before capacity and read-only recovery-app
+checks. The rest of PR #63 is **pending**, not silently marked implemented or PASS.
+
 ##### Remaining local coverage and capacity completion plan (prepared only)
 
 **Planning only: no new harness implementation, fixture write, fault, load run,

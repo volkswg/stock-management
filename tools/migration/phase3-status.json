@@ -1,8 +1,8 @@
 {
-  "version": 10,
-  "scope": "PR62 fixes merged; remaining local write coverage and bounded capacity completion plan prepared only; no new private campaign executed; production remains Google Sheets",
+  "version": 11,
+  "scope": "PR63 local completion started; raw-image byte-intent defect stopped first fresh-copy run; remaining implementation and capacity incomplete; production remains Google Sheets",
   "reportedOnBangkok": "2026-11-11",
-  "lastDataVerificationAtUtc": "2026-11-11T09:25:11.787205+00:00",
+  "lastDataVerificationAtUtc": "2026-11-11T10:31:29.979324+00:00",
   "repositoryBaseline": "5f21289ed1758fa37956c67d0b8eb2ad95f03546",
   "evidence": {
     "basis": "Retained private receipts from separately owner-authorized read-only hosted backup and local recovery/rehearsal; no new live Sheet inspection",
@@ -94,8 +94,9 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Review the local completion plan and scope dispositions, then separately authorize harness implementation and the sealed local execution packet; do not change existing data or production storage",
+  "nextStep": "Review a scoped raw-binary intent fix, then finish pending variant/provider/UI/fault/workload instrumentation and rerun fresh correctness copies before capacity; no existing-data changes or production cutover",
   "cutoverBlockers": [
+    "Fresh-copy WT12-RAW-BYTES failed: changed valid raw PNG bytes with the same key return 200 instead of 409. First priority run stopped; remaining coverage implementation, second campaign and capacity remain incomplete.",
     "Receipt overlap and cost deletion fixed. Two local runs have no implemented-case failures, but seven mandatory families retain coverage gaps; hosted, realistic capacity and production authorization/activation acceptance are not complete.",
     "Scoped private-schema pre/post-change recovery verified; broader Supabase platform and Drive image recovery are not certified",
     "Read-only hosted API/browser acceptance passed; write/provider workflows, production authorization/security and realistic capacity acceptance remain pending",
@@ -558,6 +559,37 @@
       "verified backup and clean local identity/TLS/runtime-role baselines",
       "exact targets, resource budgets, seed/workload and reviewer roles",
       "separate read-only protected-state verification channel"
-    ]
+    ],
+    "currentExecutionResult": "localCoverageCompletionRun; original planning-only fields describe PR63 preparation, not current run"
+  },
+  "localCoverageCompletionRun": {
+    "status": "FAIL: WT12-RAW-BYTES",
+    "fullLocalAcceptanceComplete": false,
+    "remainingImplementationComplete": false,
+    "copiesPrepared": 2,
+    "campaignsStarted": 1,
+    "httpRequests": 83,
+    "changedRawBytesExpected": 409,
+    "changedRawBytesActual": 200,
+    "allOriginal70777RowsUnchanged": true,
+    "protectedHosted51Tables15MetadataExact": true,
+    "archive24AndSecurity15UnchangedEach": true,
+    "secondCopyAll51Tables15MetadataExact": true,
+    "failedCheckpointRestore51Tables15MetadataExact": true,
+    "restoreAndHashSeconds": 3.256,
+    "readOnlyAppRecoveryProbe": "NOT IMPLEMENTED/NOT RUN",
+    "fullCapacity": "NOT RUN; correctness prerequisite failed",
+    "capacityImplementation": "bounded engine and synthetic controls only; fixed application workload, live observer and final oracle integration incomplete",
+    "hostedWrites": 0,
+    "productionCutoverPerformed": false,
+    "productionStorage": "google-sheets",
+    "at": "2026-11-11T10:31:29.979324+00:00",
+    "baselineCommit": "1a539656711ef5b202b34afaf454d28261e90c52",
+    "resultReceiptSha256": "76ade0b3dd8850a7d274d7fa2b2e950f3461b35e7448b7ee15d560963b2be130",
+    "evidenceDocument": "docs/database-migration.md#local-completion-started-raw-image-intent-failure-2026-11-11",
+    "newBehaviorFixIncluded": false,
+    "syntheticHarnessControlsPassed": 18,
+    "existingRegressionTestsPassed": 571,
+    "newCopiedExistingRowsEdited": 0
   }
 }
