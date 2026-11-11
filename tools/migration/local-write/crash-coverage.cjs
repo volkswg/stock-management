@@ -17,7 +17,13 @@ class CrashCampaign extends MethodCampaign {
                 const start = this.ledger().length, revision = await this.revision(), before = boundary.committed ? null : await this.seal();
                 this.control({ [boundary.control]: { remaining: 1 } });
                 let disconnected = false;
-                try { await this.line([event]); } catch { disconnected = true; }
+                try { await this.line([event]); } catch (error) {
+                    if (error.code === 'WT_BUDGET') throw error;
+                    // HTTP assertion failures and observer stops are not proof
+                    // that the injected process crash actually disconnected IO.
+                    if (!(error instanceof TypeError) || !error.message.includes('fetch failed')) throw error;
+                    disconnected = true;
+                }
                 assert.ok(disconnected, 'Crash boundary did not disconnect the actual request'); this.control({});
                 const phases = this.ledger().slice(start);
                 if (boundary.phase) assert.equal(phases.filter(e => e.kind === 'injected-fault' && e.phase === boundary.phase).length, 1);

@@ -79,7 +79,7 @@ class EdgeCampaign extends BrowserCampaign {
         // Cleanup rejection is expected to leave a visible, blocked operation,
         // rather than automatically upload or delete the same file again.
         const key = this.key('cleanup-failure'), before = await this.seal(), revision = await this.revision(), start = this.ledger().length;
-        this.control({ deleteFailure: true });
+        this.control({ driveDeleteFailure: true });
         try { await this.api('/api/movements/WT_missing/items/WT_missing/image', { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: 500, _probe: true }); } finally { this.control({}); }
         assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
         await this.api('/api/movements/WT_missing/items/WT_missing/image', { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: 503, _probe: true });

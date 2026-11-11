@@ -31,7 +31,7 @@ class StrictCampaign extends EdgeCampaign {
                 const body = structuredClone(input.body), numbers = Object.keys(body).filter(name => typeof body[name] === 'number'), names = Object.keys(body);
                 if (numbers.length) body[numbers[0]] += 1;
                 else if (Array.isArray(body.items)) body.items[0].quoteQuantity = (body.items[0].quoteQuantity || 0) + 1;
-                else { const name = names.find(name => typeof body[name] === 'string'); assert.ok(name); body[name] += '_changed'; }
+                else { const name = names.find(name => typeof body[name] === 'string'); if (name) body[name] += '_changed'; else { assert.equal(names.length, 0); body.WT_changed_input = true; } }
                 variants.push({ id: 'changed-json', body });
                 // Canonical object-key reordering is still the same intent.
                 const canonicalReplay = await this.api(input.url, { ...input, key, body: Object.fromEntries(Object.entries(input.body).reverse()) });
@@ -90,7 +90,7 @@ class StrictCampaign extends EdgeCampaign {
         const proofs = [], target = this.context.uploadRetryTarget, active = '/api/movements/' + target.masterId + '/items/' + target.itemId + '/image';
         for (const failure of ['accepted-response-lost', 'cleanup-rejected']) for (let trial = 0; trial < 10; trial++) {
             const url = failure === 'accepted-response-lost' ? active : '/api/movements/WT_missing/items/WT_missing/image', key = this.key('uncertain-' + failure), before = await this.seal(), revision = await this.revision(), start = this.ledger().length;
-            this.control(failure === 'accepted-response-lost' ? { driveUncertain: true } : { deleteFailure: true });
+            this.control(failure === 'accepted-response-lost' ? { driveUncertain: true } : { driveDeleteFailure: true });
             try { await this.api(url, { method: 'PATCH', key, body: PNG, headers: { 'content-type': 'image/png' }, status: 500, _probe: true }); } finally { this.control({}); }
             assert.deepEqual(await this.seal(), before); assert.equal(await this.revision(), revision);
             const prefix = 'UPLOAD:' + hashIntent({ kind: 'PATCH:' + url, key }) + ':';

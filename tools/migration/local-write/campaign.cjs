@@ -88,6 +88,7 @@ class Campaign {
         return method + ':' + match.route;
     }
     async api(url, { method = 'GET', body, key, auth = true, status = 200, headers = {}, _probe = false } = {}) {
+        await this.beforeRequest?.();
         const u = new URL(url, this.config.origin);
         assert.equal(u.origin, this.config.origin);
         assert.ok(u.pathname.startsWith('/api/'));

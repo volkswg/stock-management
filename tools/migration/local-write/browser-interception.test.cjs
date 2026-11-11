@@ -22,3 +22,19 @@ test('closing context cancels in-flight routes without leaking raw errors or los
     const closing = f.context.close(); await f.handler()(f.route); finish(); await closing;
     assert.deepEqual(f.saved, []);
 });
+
+test('browser transport checks the execution guard and preserves a budget stop without sending', async () => {
+    const f = fixture(); let sent = false;
+    f.campaign.beforeRequest = () => { const e = Error('budget'); e.code = 'WT_BUDGET'; throw e; };
+    f.route.fetch = async () => { sent = true; };
+    await BrowserCampaign.prototype.browserContext.call(f.campaign, f.browser, {}); await f.handler()(f.route);
+    await assert.rejects(f.context.close(), error => error.code === 'WT_BUDGET'); assert.equal(sent, false);
+    assert.equal(f.saved[0][1].budgetStopped, true);
+});
+test('crash matrix propagates guard and HTTP assertion failures instead of claiming disconnection', async () => {
+    const { CrashCampaign } = require('./crash-coverage.cjs');
+    for (const failure of [Object.assign(Error('budget'), { code: 'WT_BUDGET' }), new assert.AssertionError({ message: 'Unexpected HTTP status' })]) {
+        const campaign = { key: () => 'WT_case', event: () => ({}), ledger: () => [], revision: async () => 1, seal: async () => ({}), control: () => {}, line: async () => { throw failure; } };
+        await assert.rejects(CrashCampaign.prototype.WT_CRASH_MATRIX.call(campaign), error => error === failure);
+    }
+});
