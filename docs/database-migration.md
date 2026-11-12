@@ -1194,7 +1194,8 @@ merging a later planning PR, which would trigger another production deployment.
 
 ##### Hosted Supabase test target and execution packet (2026-11-12)
 
-**State: prepared for review; not executable or approved.** The companion
+**State: packet and offline adapter foundation prepared for review; hosted execution
+is disabled and unapproved.** The companion
 [declarative packet](../tools/migration/hosted-acceptance-plan.json) keeps execution,
 provisioning, hosted writes, pausing, paid resources and production changes disabled.
 It is not a script or permission to run commands. Planning baseline is merged
@@ -1210,6 +1211,72 @@ Existing staging token checks, LINE raw-body signatures, TLS, private-schema gra
 restricted runtime roles and the production refusal remain mandatory test controls.
 Private-copy isolation is not deferred. The production gap stays recorded for the
 final cutover decision; a hosted test PASS cannot waive it.
+
+**Offline adapter foundation (continued locally on 2026-11-12).**
+[`tools/migration/hosted-write`](../tools/migration/hosted-write) contains separate
+operator tools; the existing local harness and every application source file are
+unchanged. This is **not a complete hosted harness** or a hosted test result.
+
+- `policy.cjs` binds the new project/ref/UUID, Tokyo PostgreSQL 17 direct/session
+  endpoint, least-privilege login, preview project/deployment/origin and sealed
+  source/adapter/fixture/baseline hashes. Hard-coded protected source identities
+  and the known production hostname cannot be removed by editing the packet's
+  deny lists. URL TLS overrides, local-guard spoofing, production mode and real
+  provider credentials are rejected. Future execution additionally requires a
+  matching expiring approval and a separately reviewed complete runtime/campaign;
+  the checked-in packet cannot construct a hosted driver.
+- `driver.cjs` supplies keyed, exact-origin HTTP requests, bearer confinement,
+  redirect denial, streamed response bounds, timeouts and no automatic retries.
+  It reserves worst-case app HTTP traffic before dispatch and latches a stop after
+  uncertain transport or a failed live-profile check. Approval, metrics and quota
+  freshness are rechecked before each dispatch. Its byte accounting covers app
+  HTTP only, with an overhead allowance; it cannot enforce Supabase database wire
+  traffic, the organization's billing meter or concurrent source consumption.
+- `coordinator.cjs` is an **offline-only durable model**, with no listener or
+  hosted deployment entrypoint. Private exclusive files, one writer, fsynced
+  append records and a hash chain preserve synthetic Drive bytes and fake
+  LINE/Loyverse outcomes independently of app database transactions. Same-attempt
+  replay returns the recorded result; accepted/unfinished work stays unknown
+  across reopening instead of causing another upload. Orphans, compensated files,
+  unresolved attempts and corrupt/unrecorded blobs remain visible. A leftover
+  writer lock or incomplete/corrupt journal blocks reopening; no automatic repair
+  or stale-lock removal is provided. This is not distributed failover or proof of
+  durability on an unselected hosting/storage service.
+- `feasibility.cjs` refuses missing/coarse/stale telemetry, incomplete instance
+  aggregation, unknown quotas, connection-headroom breaches, incomplete traffic
+  forecasts, exhausted source allowance and unverified zero-cost hosting/storage.
+  Even a complete synthetic profile means eligible for testing, never capacity
+  PASS. Minute-scale metrics cannot satisfy the existing one-second/10-second
+  protocol. Actual multipart serialization measures 262,319 bytes for the 256 KiB
+  PNG fixture, 10,485,935 for a 10 MiB image and 20,971,701 for a 20 MiB PDF. The
+  latter two exceed the conservative 4,500,000-byte platform budget. These are
+  offline body-size checks, not valid-file MIME or hosted boundary acceptance.
+
+Reproduce the synthetic checks and a sanitized offline packet report:
+
+```sh
+env -i PATH="$PATH" node --test tools/migration/hosted-write/adapter.test.cjs
+env -i PATH="$PATH" node tools/migration/hosted-write/inspect-packet.cjs
+```
+
+All 51 new component checks pass locally, including actual loopback HTTP and
+fresh private synthetic file copies. The initial restricted run could not open a
+local listener and exposed a macOS temporary-path alias in the new test fixture;
+the fixture now resolves its canonical path without relaxing the symlink guard.
+The permitted local-only run passes. No existing database, backup or source row
+was accessed. The CI workflow adds these checks and the offline report alongside
+all existing regression/PostgreSQL/recovery/build checks; it receives no hosted
+credentials.
+
+**Remaining before hosted-adapter approval:** private-build instrumentation;
+browser isolation; verified TLS and SQL fault/crash controls; a reviewed durable
+coordinator transport/deployment and retention within verified allowances; and
+WT00–WT15 campaign/oracle/checkpoint/recovery integration. The model does not
+reuse local control files as serverless shared state. No hosted runtime,
+monitoring collector, provider proxy or scheduler is deployed. Actual telemetry,
+complete campaign egress and oversized-upload decisions remain blocking gates.
+Keep `hostedAdapterReady=false`; do not enable writes or reinterpret these
+component results as full application acceptance.
 
 **Proposed targets, not created.** The owner selected `volkswg's Org` for the quote
 only (`yntcfbkilwulyhkslhbx`). Read-only inspection found a Free subscription and

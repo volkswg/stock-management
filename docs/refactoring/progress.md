@@ -1,5 +1,40 @@
 # Refactoring progress and evidence
 
+## Hosted adapter foundation — synthetic components only (2026-11-12)
+
+Local continuation in draft [PR #65](https://github.com/volkswg/stock-management/pull/65)
+adds exact target/approval gates, a keyed HTTP driver, a private durable
+fake-provider coordinator model and conservative capacity/traffic/payload checks.
+The checked-in packet still refuses hosted execution. All existing local harness
+and application files remain byte-identical. No Supabase resource, hosted test
+app, real provider call, business-data access, production setting or database
+switch is performed by this work.
+
+The new 51 offline checks cover protected identities, exact preview/session-pooler
+binding, credential/redirect confinement, actual loopback HTTP, live-profile stop
+behavior, reserved app HTTP traffic, immutable fake catalogs, exact fake bytes,
+restart replay, unfinished/uncertain outcomes, concurrent callers, exclusive
+writer ownership and corrupt/incomplete evidence refusal. Initial local-listener
+restrictions and the new macOS temporary-path fixture alias are retained as
+diagnostics; the canonical-path fixture and permitted loopback run pass without
+weakening the original harness. The sanitized offline packet report is included
+in CI's synthetic artifact.
+
+These checks do not establish hosted TLS, serverless behavior, full WT00–WT15
+execution or checkpoint recovery. Private-build/browser/SQL-fault/campaign and
+durable coordinator transport integration remain pending. Managed metric cadence,
+actual quotas, complete organization egress/zero-cost allowances and oversized
+advertised uploads remain blocked. See the [canonical packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12).
+Production remains **NO-GO**; security remediation stays deferred and the separate
+user authentication roadmap remains planning only.
+
+Local validation: 600 application regressions, 39 unchanged local-harness checks
+and 51 new offline checks pass. Lint has zero errors and the one inherited
+`shipmentRow` warning; typecheck and the isolated credential-free build pass.
+The original route manifest and all 113 client bundle boundaries match. New-head
+independent CI and artifact publication are tracked on the draft PR; local
+component success does not certify hosted execution.
+
 ## Hosted Supabase test target — packet prepared only (2026-11-12)
 
 Owner authorized target/cost/test planning and deferred production security

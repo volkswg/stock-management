@@ -1,6 +1,6 @@
 {
-  "version": 15,
-  "scope": "Hosted Supabase target and execution packet prepared only; security remediation deferred by owner; existing controls preserved; no hosted writes/resources or production switch",
+  "version": 16,
+  "scope": "Hosted acceptance offline driver/coordinator foundation and feasibility gates; no hosted resources/writes or production switch; full hosted harness remains pending",
   "reportedOnBangkok": "2026-11-12",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
   "repositoryBaseline": "405c474578cec0b2fe84327687b90faf3f5b02f9",
@@ -94,7 +94,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
   },
-  "nextStep": "Review the disabled hosted target packet, implement/review hosted fake-provider adapters and resolve telemetry/traffic feasibility; obtain exact provisioning/write/pause approvals before execution",
+  "nextStep": "Complete/review private hosted-build/browser/SQL-fault/campaign integration and durable coordinator transport; resolve telemetry, whole-campaign traffic and payload decisions before requesting exact provisioning/write approval",
   "cutoverBlockers": [
     "Hosted capacity/pooling/protection/platform payload acceptance remains NOT RUN; local PASS uses a fixed 384 MiB app heap and does not certify the hosted runtime",
     "Disposable hosted write/protection/pooling acceptance and real-provider reconciliation remain separately authorized gates",
@@ -1073,7 +1073,10 @@
     "platformPayloadCompatibilityCertified": false,
     "backupManifestFilesLocallyRehashed": 14,
     "securityRemediation": "DEFERRED_BY_OWNER",
-    "productionCutover": "NO_GO"
+    "productionCutover": "NO_GO",
+    "offlineAdapterComponentsTestsPassed": 51,
+    "offlineAdapterState": "HTTP_DRIVER_AND_DURABLE_COORDINATOR_MODEL_ONLY",
+    "fullHostedHarnessRemaining": "Private-build/browser/TLS/SQL-fault/coordinator-transport/campaign/recovery integration; hosted execution remains disabled"
   },
   "pr64MergeReceipt": {
     "mergeCommit": "405c474578cec0b2fe84327687b90faf3f5b02f9",

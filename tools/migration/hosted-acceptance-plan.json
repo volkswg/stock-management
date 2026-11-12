@@ -116,7 +116,7 @@
     "existingPreviewMustNotBeReconfigured": true,
     "credentials": "New target-only server-side secrets; no values in this packet, browser bundles or logs",
     "providers": "fake-only; no LINE webhook registration or real LINE/Loyverse/Drive calls",
-    "harnessStatus": "HOSTED_ADAPTER_NOT_IMPLEMENTED_OR_APPROVED",
+    "harnessStatus": "OFFLINE_FOUNDATION_VALIDATED_FULL_HOSTED_HARNESS_PENDING",
     "localGuardMayBeDisabledOrRepointed": false,
     "localAppAgainstRemoteDatabaseCountsAsFullHostedAppAcceptance": false
   },
@@ -344,5 +344,29 @@
     "https://supabase.com/docs/guides/database/connecting-to-postgres",
     "https://supabase.com/changelog/supabase-cli-v3",
     "https://vercel.com/docs/errors/function_payload_too_large"
-  ]
+  ],
+  "offlineAdapterPreparation": {
+    "path": "tools/migration/hosted-write",
+    "state": "OFFLINE_SYNTHETIC_COMPONENTS_ONLY",
+    "implemented": [
+      "Exact target/preview/credential binding and disabled execution gates",
+      "Exact-origin keyed HTTP driver with redirect denial, response bounds and per-request live-profile recheck",
+      "App-HTTP reservation accounting; not database wire or organization billing enforcement",
+      "Offline private fsynced single-writer fake-provider coordinator model and byte/outcome graph",
+      "Offline resource/traffic/cost blockers and actual multipart body serialization"
+    ],
+    "remaining": [
+      "Hosted private-build instrumentation and browser isolation",
+      "TLS and SQL fault/crash integration against disposable targets",
+      "Reviewed durable coordinator deployment/transport and retention with verified zero-cost allowance",
+      "WT00-WT15 hosted campaign, oracle and checkpoint/recovery integration",
+      "Account telemetry entitlement, actual quotas and whole-campaign traffic meter/forecast",
+      "Platform-boundary tests and separate decision on oversized advertised uploads"
+    ],
+    "fullHostedAdapterReady": false,
+    "offlineTestsPassed": 51,
+    "hostedRequestsPerformed": 0,
+    "existingLocalGuardFilesChanged": false,
+    "reportCommand": "node tools/migration/hosted-write/inspect-packet.cjs"
+  }
 }
