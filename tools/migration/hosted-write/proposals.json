@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "state": "RESOLVED_RECOMMENDATIONS_NOT_ACTIVATED",
+  "executionEnabled": false,
+  "monitoring": {
+    "recommendation": "Retain original strict capacity gate. Separate hosted functional/latency evidence from strict resource certification.",
+    "originalStrictProtocol": "1-second fresh complete resource observations; sustained CPU window 10 seconds; at least 20% headroom",
+    "freeNativeMetricProtocol": "60-second scrapes; entitlement and underlying series freshness unverified",
+    "originalCapacityResult": "BLOCKED_UNTIL_EQUIVALENT_TELEMETRY",
+    "alternativeForOwnerReview": "Approve a separately named 60-second hosted-observation protocol for a later functional/latency pilot, with DB disk/connections, all observed runtime instances, driver memory, timeouts and quota stops; explicitly exclude 10-second CPU and complete infrastructure memory certification.",
+    "alternativeApproved": false,
+    "paidMonitoringSelected": false,
+    "coordinatorResources": "Seal and observe the additional persistent coordinator process and its host RAM/disk/CPU; it is not hidden in the existing app or driver budget.",
+    "coordinatorRssBudgetBytesProposed": 536870912,
+    "coordinatorQuotaAndHostHeadroomVerified": false
+  },
+  "traffic": {
+    "recommendation": "Measure a separately approved target-only pilot before full testing; seal every channel with 2x forecast plus 25% wire allowance, a 1 GB cap and at least 2 GB protected-source reserve.",
+    "pilotBudgetBytesProposed": 50000000,
+    "pilotApproved": false,
+    "requiredChannels": [
+      "functional",
+      "browser",
+      "load",
+      "database-wire",
+      "backup-recovery",
+      "coordinator-monitoring"
+    ],
+    "wholeCampaignAllowanceCertified": false,
+    "sharedSourceUsageCannotBeHardCappedByTestDriver": true,
+    "stopDecision": "If allowance, source consumption bound or complete forecast cannot be proved, stop; obtain an isolated test-organization quote or smaller explicitly approved scope. Do not upgrade the selected organization or spend its protected allowance.",
+    "newOrganizationSelectedOrCreated": false,
+    "automaticBudgetIncrease": false
+  },
+  "uploads": {
+    "recommendation": "Preserve existing application contracts. Keep full Vercel payload compatibility NO-GO and separate it from normal 256 KiB fixture acceptance.",
+    "applicationImageBytes": 10485760,
+    "applicationShippingFileBytes": 20971520,
+    "conservativeVercelBodyBytes": 4500000,
+    "multipartAggregateLimitPresent": false,
+    "fixed32MiBHostLimitProvesEntireContract": false,
+    "separateChangeForOwnerReview": "Review direct/streamed per-file uploads with durable command/effect ownership, or a separately quoted persistent app host plus an explicitly approved aggregate-request limit. Both require dedicated application/design acceptance, not a silent test-only limit reduction.",
+    "uploadArchitectureChanged": false,
+    "limitsReduced": false,
+    "fullPlatformCompatibility": "NO_GO"
+  },
+  "coordinator": {
+    "recommendation": "One persistent operator-owned coordinator with private HTTPS, separate runtime/operator tokens, exclusive durable storage and independent encrypted evidence. Never use serverless temporary files as the authority.",
+    "transportImplementedAndLocallyTested": true,
+    "hostingOrNetworkExposureApproved": false,
+    "verifiedExistingZeroCostAllowance": false,
+    "created": false
+  },
+  "sources": [
+    "https://supabase.com/docs/guides/observability/metrics",
+    "https://supabase.com/pricing",
+    "https://vercel.com/docs/errors/function_payload_too_large"
+  ]
+}

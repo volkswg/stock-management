@@ -10,8 +10,10 @@ async function inspectPacket(packet = plan) {
   return {
     version: 1, proof: 'OFFLINE_SYNTHETIC_ONLY', executionEnabled: packet.authorization.executionEnabled,
     cloudResourcesCreated: 0, hostedRequests: 0, existingDataReadsOrWrites: 0,
-    adapter: 'HTTP_DRIVER_AND_DURABLE_COORDINATOR_MODEL_ONLY',
-    fullHostedHarness: 'BLOCKED_RUNTIME_BUILD_BROWSER_SQL_FAULT_AND_CAMPAIGN_INTEGRATION_PENDING',
+    adapter: 'PRIVATE_BUILD_RUNTIME_BROWSER_COORDINATOR_CASE_LOAD_ORACLE_RECOVERY_TOOLING',
+    localTooling: 'IMPLEMENTED_FOR_REVIEW_HOSTED_EXECUTION_DISABLED',
+    fullHostedHarness: 'HOSTED_ENVIRONMENT_ACCEPTANCE_NOT_RUN',
+    proposals: require('./proposals.json'),
     strictResourceCapacity: assessProfile({ telemetry: { sampleIntervalMs: packet.acceptance?.capacity?.nativeMetricsGuidanceSeconds * 1000 } }),
     payloads, productionCutover: 'NO_GO',
   };

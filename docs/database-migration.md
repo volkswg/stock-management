@@ -1212,71 +1212,138 @@ restricted runtime roles and the production refusal remain mandatory test contro
 Private-copy isolation is not deferred. The production gap stays recorded for the
 final cutover decision; a hosted test PASS cannot waive it.
 
-**Offline adapter foundation (continued locally on 2026-11-12).**
-[`tools/migration/hosted-write`](../tools/migration/hosted-write) contains separate
-operator tools; the existing local harness and every application source file are
-unchanged. This is **not a complete hosted harness** or a hosted test result.
+**Hosted tooling completion, verified locally (2026-11-12).**
+[`tools/migration/hosted-write`](../tools/migration/hosted-write) now implements the
+private build, runtime, durable coordinator transport, browser controls, SQL and
+process fault hooks, 45-case runner, bounded load scheduler, independent load
+oracle transport and checkpoint/recovery integration. This completes the local
+implementation; **actual hosted environment acceptance is NOT RUN**. The existing
+local harness, production source, migration files and dependencies are unchanged.
 
-- `policy.cjs` binds the new project/ref/UUID, Tokyo PostgreSQL 17 direct/session
-  endpoint, least-privilege login, preview project/deployment/origin and sealed
-  source/adapter/fixture/baseline hashes. Hard-coded protected source identities
-  and the known production hostname cannot be removed by editing the packet's
-  deny lists. URL TLS overrides, local-guard spoofing, production mode and real
-  provider credentials are rejected. Future execution additionally requires a
-  matching expiring approval and a separately reviewed complete runtime/campaign;
-  the checked-in packet cannot construct a hosted driver.
-- `driver.cjs` supplies keyed, exact-origin HTTP requests, bearer confinement,
-  redirect denial, streamed response bounds, timeouts and no automatic retries.
-  It reserves worst-case app HTTP traffic before dispatch and latches a stop after
-  uncertain transport or a failed live-profile check. Approval, metrics and quota
-  freshness are rechecked before each dispatch. Its byte accounting covers app
-  HTTP only, with an overhead allowance; it cannot enforce Supabase database wire
-  traffic, the organization's billing meter or concurrent source consumption.
-- `coordinator.cjs` is an **offline-only durable model**, with no listener or
-  hosted deployment entrypoint. Private exclusive files, one writer, fsynced
-  append records and a hash chain preserve synthetic Drive bytes and fake
-  LINE/Loyverse outcomes independently of app database transactions. Same-attempt
-  replay returns the recorded result; accepted/unfinished work stays unknown
-  across reopening instead of causing another upload. Orphans, compensated files,
-  unresolved attempts and corrupt/unrecorded blobs remain visible. A leftover
-  writer lock or incomplete/corrupt journal blocks reopening; no automatic repair
-  or stale-lock removal is provided. This is not distributed failover or proof of
-  durability on an unselected hosting/storage service.
-- `feasibility.cjs` refuses missing/coarse/stale telemetry, incomplete instance
-  aggregation, unknown quotas, connection-headroom breaches, incomplete traffic
-  forecasts, exhausted source allowance and unverified zero-cost hosting/storage.
-  Even a complete synthetic profile means eligible for testing, never capacity
-  PASS. Minute-scale metrics cannot satisfy the existing one-second/10-second
-  protocol. Actual multipart serialization measures 262,319 bytes for the 256 KiB
-  PNG fixture, 10,485,935 for a 10 MiB image and 20,971,701 for a 20 MiB PDF. The
-  latter two exceed the conservative 4,500,000-byte platform budget. These are
-  offline body-size checks, not valid-file MIME or hosted boundary acceptance.
+`build-app.cjs` creates a new private copy without `.env` files or integration
+credentials. It attests exactly two existing-source overrides: instrumentation
+installs the test runtime and the Drive factory supplies its fake. One private
+`/api/ha-test` fixture/health route is added only to that copy; an independent
+operator token protects it. Original routes match after removing that addition,
+and client chunks contain no database, coordinator or staging secrets. Build-time
+Supabase selection includes the existing staging request-key script; production
+selection is unchanged. Runtime refuses a missing manifest, production mode,
+wrong endpoint/UUID, local-guard spoofing and real provider credentials.
 
-Reproduce the synthetic checks and a sanitized offline packet report:
+`rpc.cjs`/`serve-coordinator.cjs` provide private HTTPS with verified certificates,
+separate operator/runtime tokens and exact run/target namespaces. The coordinator
+keeps fake bytes, outcomes, one-shot faults and durable transaction-admission
+leases outside the app database. It allows only loopback listening in synthetic
+mode. Hosted startup requires a binding/expiring approval before secret-file
+reads or listening; no service, tunnel, domain or hosting resource was created.
+A persistent operator-owned host and private network must be approved and its
+zero-cost allowance verified. Serverless temporary files are not the authority.
+A stale writer lock or corrupt journal stops recovery without automatic repair.
+
+Provider snapshots use bounded incremental cursors rather than retransmitting
+the full journal per request. HTTP and RPC counters identify their own coverage;
+they are not Supabase wire/billing meters. SQL faults, lost commit acknowledgement
+and six actual process-exit boundaries keep independent durable witnesses. Admission starts closed; full 51/15 baseline, original-row and frozen-seed
+comparisons must pass before it opens. A closed barrier prevents new transactions
+across instances. Drain waits
+for explicit lease release or read-only proof that a particular backend has gone;
+leases never expire automatically. Missing backend-statistics permission blocks
+drain. Only newly created test-copy ingress is controlled.
+
+`campaign.cjs`/`run-packet.cjs` reuse the reviewed 45 case methods and repetitions.
+WT04 replaces only local-worker seeding with the same application owners through
+the private endpoint; WT13 uses the hosted browser transport. WT00 checks hosted
+TLS/role access. Two separately approved pinned movement-mode previews may share
+the new test project and coordinator; lifecycle probes select those existing
+previews and never deploy or mutate process-wide mode during a concurrent request.
+No preview has been created. The startup handshake uses Vercel's actual project /
+deployment system IDs to select a registered, approved manifest and sealed private
+runtime configuration from the coordinator. This avoids pre-baking an unknown
+deployment ID and redeploying to change it. The build has no database credentials;
+unapproved startup stays closed. A forged credential-free build phase disables
+business storage rather than bypassing the runtime guard. Runtime configuration
+cannot override Vercel identity or TLS variables, and credential values are never
+written into the coordinator event journal. Missing system identity/private-access
+evidence stops. [System identities](https://vercel.com/docs/environment-variables/system-environment-variables).
+
+New-project-only protected-preview access is separate from the existing staging
+API bearer. The driver/browser add its automation-access header only on the exact
+approved origin, including page assets; ordinary API authentication and LINE
+signatures still run behind it. No access token enters browser storage, URL query
+strings, foreign calls or public artifacts. Exact-origin browser interception
+rejects redirects and serves the real fake-file bytes.
+
+`run-load.cjs`/`load.cjs` retain 120-second warmup, 600 measured seconds, the 12/5/3 mix,
+one/five clients, one in-flight request/client, one new request/second, no catch-up,
+20 successful samples/variant, original latency limits and the combined 1,800-second
+clock. All client tasks settle on failure; a failed or ambiguous run cannot proceed
+to a checkpoint before ingress/backend reconciliation. Strict live observations
+remain mandatory, including a separately sealed coordinator budget and its host
+headroom; this extra process is not hidden in the app or driver measurement. `capacity-oracle.cjs` ports the original independent business
+projection unchanged, using a sealed frozen baseline instead of another active
+live source and a scoped read-only target observer. Archive timestamps and the
+baseline revision retain their PostgreSQL types. Its lifecycle precondition is
+closed durable admission plus drained backends. Original-row, complete archive /
+security metadata and generated-checkpoint recovery evidence remain mandatory.
+The load entrypoint captures a new checkpoint through a target-bound verify-full
+backup service and compares all 24 archive tables, environment identity and 15
+metadata sections; it never trusts a predeclared success flag. Recovery remains
+a paired subsequent gate. Component checks cannot certify a hosted target.
+
+`seals.cjs` binds source, app tree, fixture and adapter hashes. Every active CLI
+refuses the checked-in disabled packet before reading a supplied secret path.
+`protocol.cjs` checks the complete traffic forecast, original strict telemetry and
+recovery timer including retrieval/key recovery, any new-test-source pause,
+provisioning, restore and read-only readiness. The app runtime's coordinator
+round trips are part of measured latency; do not subtract their cost to pass.
+
+Local validation passes **600 application regressions, 39 unchanged local-harness
+checks, 82 new controls, lint/typecheck and both credential-free builds**. Lint has
+only the inherited `shipmentRow` warning. A new disposable synthetic PostgreSQL
+container exercised the actual built app, desktop/mobile forms, exact fake bytes,
+precommit rollback/retry, committed acknowledgement loss/replay, all six real process-exit boundaries
+(one synthetic trial each), accepted-reply uncertainty and correct restart replay. Its generated checkpoint
+restored all 51 tables/15 metadata sections. A SELECT-only login could not write
+or assume the writer role; the restored app read successfully, refused mutations,
+replayed no provider effect and left the complete fingerprints unchanged. Reader
+policies/roles belong only to these new synthetic fixtures and precede their
+checkpoint. No hosted permission was changed. This proves local adapter wiring,
+not hosted platform behavior, off-site encryption/key recovery, hosted RTO/RPO
+or a newly executed real capacity campaign.
 
 ```sh
-env -i PATH="$PATH" node --test tools/migration/hosted-write/adapter.test.cjs
-env -i PATH="$PATH" node tools/migration/hosted-write/inspect-packet.cjs
+env -i PATH="$PATH" node --test tools/migration/hosted-write/adapter.test.cjs tools/migration/hosted-write/integration.test.cjs tools/migration/hosted-write/protocol.test.cjs
+node tools/migration/hosted-write/inspect-packet.cjs
+node tools/migration/hosted-write/seals.cjs
+# Creates and removes only its new synthetic local container and private test copy:
+bash tools/migration/verify-hosted-tooling.sh
 ```
 
-All 51 new component checks pass locally, including actual loopback HTTP and
-fresh private synthetic file copies. The initial restricted run could not open a
-local listener and exposed a macOS temporary-path alias in the new test fixture;
-the fixture now resolves its canonical path without relaxing the symlink guard.
-The permitted local-only run passes. No existing database, backup or source row
-was accessed. The CI workflow adds these checks and the offline report alongside
-all existing regression/PostgreSQL/recovery/build checks; it receives no hosted
-credentials.
+The synthetic integration runner accepts an explicit existing local Docker socket;
+it never changes Docker context, reads saved registry credentials, resets retained
+databases or invokes hosted APIs. CI runs it alongside all prior checks and uploads
+only sanitized synthetic reports. Failed setup attempts are retained privately:
+Docker's missing Desktop credential helper, an underscore-prefixed Next route,
+test certificate ownership/names/CA wiring, absent build-time request-key script
+and the original handler's 500-versus-wrapper-503 distinction. Corrections preserve
+certificate validation, source routes and native status contracts.
 
-**Remaining before hosted-adapter approval:** private-build instrumentation;
-browser isolation; verified TLS and SQL fault/crash controls; a reviewed durable
-coordinator transport/deployment and retention within verified allowances; and
-WT00–WT15 campaign/oracle/checkpoint/recovery integration. The model does not
-reuse local control files as serverless shared state. No hosted runtime,
-monitoring collector, provider proxy or scheduler is deployed. Actual telemetry,
-complete campaign egress and oversized-upload decisions remain blocking gates.
-Keep `hostedAdapterReady=false`; do not enable writes or reinterpret these
-component results as full application acceptance.
+**Resolved recommendations, not activation.** The companion
+[`proposals.json`](../tools/migration/hosted-write/proposals.json) records these
+concrete decisions for review:
+
+| Subject | Recommendation | Current execution result |
+| --- | --- | --- |
+| Monitoring | Retain the original one-second / ten-second CPU capacity gate. A separately named 60-second functional/latency observation protocol may be reviewed, explicitly excluding unavailable short-window CPU and complete infrastructure-memory certification. No interpolation, resampling or automatic downgrade. | Strict capacity BLOCKED; alternative unapproved and inactive. |
+| Traffic | First approve a target-only pilot capped at 50 MB. Seal functional, browser, load, database-wire, backup/recovery and coordinator/monitoring upper bounds; use at least 2x forecast plus 25% wire allowance, a 1 GB test cap and at least 2 GB protected-source reserve. An absent/over-budget forecast stops. | Complete campaign not quoted/certified; no pilot run. |
+| Shared allowance | A driver cannot hard-cap unrelated source usage in the selected organization. If a current allowance and bounded source-consumption reserve cannot be established, stop and request an isolated test-organization quote or a smaller explicitly approved scope. Never upgrade or increase the cap automatically. | Original organization remains selected for its existing quote only; no new organization selected/created. |
+| Uploads | Keep the 10 MiB image / 20 MiB file contracts and separate normal 256 KiB fixtures from full compatibility. Recommend a separately reviewed direct/streamed-file design, or a separately quoted persistent app host with an explicitly approved aggregate-request contract. | Full Vercel payload compatibility NO-GO; no limit/provider/architecture changed. |
+
+The order endpoint also accepts multiple files without a finite aggregate limit;
+a fixed 32 MiB host setting alone cannot establish its whole contract. Vercel's
+body boundary applies regardless of whether Sheets or Supabase stores records.
+These recommendations make the blocking decisions reviewable; they do not waive
+the gates, approve an alternate protocol or authorize new resources/hosted writes.
 
 **Proposed targets, not created.** The owner selected `volkswg's Org` for the quote
 only (`yntcfbkilwulyhkslhbx`). Read-only inspection found a Free subscription and
@@ -1351,7 +1418,8 @@ after a Free restriction affects the source.
 1. Approve exact resource names/organization/region, cost and retention limits,
    project creation, target-only restore/setup/test writes, any new-target pause,
    and protected-source read-only comparison separately from production cutover.
-2. Implement and review a hosted fake-provider/egress/browser adapter. Current
+2. Review the locally completed hosted fake-provider/egress/browser adapter and
+   verify its actual private target/network/TLS behavior after approval. Current
    `runtime.cjs` and `capacity-context.cjs` deliberately refuse non-loopback targets,
    hosted authorization and Vercel environment variables. Never disable those
    guards or simply replace a local connection URL. A private local app connected

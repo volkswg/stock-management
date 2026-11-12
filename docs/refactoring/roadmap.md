@@ -19,12 +19,16 @@ PR64 merged as `405c474578cec0b2fe84327687b90faf3f5b02f9` after owner approval a
 fresh CI; its automatic deployment remains on Google Sheets. The next bounded
 task is the [hosted test target and execution packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12),
 with a [disabled declarative plan](../../tools/migration/hosted-acceptance-plan.json).
-Local continuation adds a separately tested HTTP driver, durable fake-provider
-coordinator model and feasibility gates under `tools/migration/hosted-write`.
-These are offline components; full hosted private-build/browser/SQL-fault and
-campaign/recovery integration still needs completion and review. Keep hosted
-execution disabled while telemetry, complete traffic allowances and platform
-upload compatibility remain blocked. Preserve the existing local guards.
+Local continuation completes the private-build/runtime/browser/fault/coordinator
+and 45-case tooling, bounded scheduler/oracle transport and generated-checkpoint
+recovery integration. Fresh synthetic app/browser/TLS/crash/restore checks pass;
+existing source, local guards and production behavior remain unchanged. The
+[resolved proposals](../../tools/migration/hosted-write/proposals.json) retain
+strict capacity and full-upload NO-GO, specify a measured pilot and complete
+traffic reserve, and require review of any alternative protocol or hosting.
+Next, review draft PR65 and those concrete decisions, then bind/verify private
+preview/coordinator/telemetry/cost allowances before requesting exact hosted
+execution approval. No local integration component remains a planning-only stub.
 Only local preparation, metadata inspection and the selected organization's read-only
 cost quote are authorized. No resource creation, hosted write, data change,
 deployment or later PR merge is authorized by that preparation.

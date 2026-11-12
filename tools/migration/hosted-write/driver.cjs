@@ -18,7 +18,7 @@ async function boundedBody(response, maximum) {
   }
   return Buffer.concat(chunks, length);
 }
-function transport({ appOrigin, token, budget, proof, beforeDispatch = () => {} }) {
+function transport({ appOrigin, token, deploymentAccessToken, budget, proof, beforeDispatch = () => {} }) {
   budget = Object.freeze(structuredClone(budget));
   const traffic = new TrafficBudget(budget), records = [];
   let stopped = false;
@@ -34,6 +34,7 @@ function transport({ appOrigin, token, budget, proof, beforeDispatch = () => {} 
       requireGate(!['authorization', 'host', 'cookie', 'proxy-authorization', 'x-vercel-protection-bypass'].some(name => h.has(name)), 'CALLER_CREDENTIAL_HEADER');
       requireGate(!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) || /^WT_[A-Za-z0-9_-]{1,180}$/.test(key || ''), 'WRITE_KEY');
       h.set('authorization', 'Bearer ' + token);
+      if (deploymentAccessToken) h.set('x-vercel-protection-bypass', deploymentAccessToken);
       if (key) h.set('idempotency-key', key);
       if (body !== undefined && !(body instanceof FormData) && !(body instanceof Blob) && !Buffer.isBuffer(body) && typeof body !== 'string') { h.set('content-type', 'application/json'); body = JSON.stringify(body); }
       const request = new Request(url, { method, headers: h, body, redirect: 'error', signal: AbortSignal.timeout(maximumMs) });
@@ -71,7 +72,7 @@ function createHostedDriver({ plan, binding, approval, env, readProfile }) {
   const assessment = assessProfile(profile);
   requireGate(!assessment.blockers.length, 'HOSTED_PROFILE_BLOCKED');
   requireGate(profile.budget.appHttpCapBytes > 0 && profile.budget.appHttpCapBytes <= profile.budget.campaignCapBytes, 'APP_TRAFFIC_ALLOCATION');
-  return transport({ appOrigin, token: env.STOCK_STAGING_AUTH_TOKEN, budget: { capBytes: profile.budget.appHttpCapBytes, responseMaximumBytes: profile.budget.responseMaximumBytes }, proof: 'HOSTED_REQUESTS_ONLY_NOT_ACCEPTANCE', beforeDispatch() {
+  return transport({ appOrigin, token: env.STOCK_STAGING_AUTH_TOKEN, deploymentAccessToken: env.STOCK_HA_DEPLOYMENT_ACCESS_TOKEN || env.VERCEL_AUTOMATION_BYPASS_SECRET, budget: { capBytes: profile.budget.appHttpCapBytes, responseMaximumBytes: profile.budget.responseMaximumBytes }, proof: 'HOSTED_REQUESTS_ONLY_NOT_ACCEPTANCE', beforeDispatch() {
     assertExecution(plan, binding, approval, env);
     requireGate(process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0', 'PROCESS_TLS_OVERRIDE');
     const current = readProfile();

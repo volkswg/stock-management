@@ -1,6 +1,6 @@
 {
-  "version": 16,
-  "scope": "Hosted acceptance offline driver/coordinator foundation and feasibility gates; no hosted resources/writes or production switch; full hosted harness remains pending",
+  "version": 17,
+  "scope": "Hosted-test tooling implemented and verified locally on fresh synthetic targets; monitoring/traffic/upload recommendations prepared; all hosted execution and production activation remain disabled",
   "reportedOnBangkok": "2026-11-12",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
   "repositoryBaseline": "405c474578cec0b2fe84327687b90faf3f5b02f9",
@@ -90,11 +90,11 @@
     "remainingRecoveryContainersAndSharedTlsPreserved": true
   },
   "operatorAccess": {
-    "credentialsAndNetworkInspectedByThisUpdate": true,
+    "credentialsAndNetworkInspectedByThisUpdate": false,
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
-    "scope": "Explicitly approved private staging-backup profiles and existing local restore infrastructure only; no credentials published"
+    "scope": "Existing local test-engine metadata and new synthetic TLS/roles only; no hosted or production credentials read by this update"
   },
-  "nextStep": "Complete/review private hosted-build/browser/SQL-fault/campaign integration and durable coordinator transport; resolve telemetry, whole-campaign traffic and payload decisions before requesting exact provisioning/write approval",
+  "nextStep": "Review locally completed draft PR65 and concrete proposals; bind actual private preview/coordinator/telemetry/traffic allowances and obtain exact hosted execution approval before any resource or hosted write",
   "cutoverBlockers": [
     "Hosted capacity/pooling/protection/platform payload acceptance remains NOT RUN; local PASS uses a fixed 384 MiB app heap and does not certify the hosted runtime",
     "Disposable hosted write/protection/pooling acceptance and real-provider reconciliation remain separately authorized gates",
@@ -1074,9 +1074,14 @@
     "backupManifestFilesLocallyRehashed": 14,
     "securityRemediation": "DEFERRED_BY_OWNER",
     "productionCutover": "NO_GO",
-    "offlineAdapterComponentsTestsPassed": 51,
-    "offlineAdapterState": "HTTP_DRIVER_AND_DURABLE_COORDINATOR_MODEL_ONLY",
-    "fullHostedHarnessRemaining": "Private-build/browser/TLS/SQL-fault/coordinator-transport/campaign/recovery integration; hosted execution remains disabled"
+    "offlineAdapterComponentsTestsPassed": 82,
+    "offlineAdapterState": "LOCAL_IMPLEMENTATION_COMPLETE_HOSTED_ACCEPTANCE_NOT_RUN",
+    "fullHostedHarnessRemaining": "Actual hosted environment acceptance, verified allowances/metrics/traffic forecast, upload-platform decision and explicit execution approval; no pending local runtime/browser/fault integration",
+    "hostedToolingImplemented": true,
+    "privateBuildAppBrowserFaultCrashRestoreSyntheticProof": "PASS",
+    "syntheticRecoveryTables": 51,
+    "syntheticRecoveryMetadataSections": 15,
+    "recommendations": "tools/migration/hosted-write/proposals.json"
   },
   "pr64MergeReceipt": {
     "mergeCommit": "405c474578cec0b2fe84327687b90faf3f5b02f9",

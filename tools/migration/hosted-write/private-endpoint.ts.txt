@@ -1,0 +1,49 @@
+import { timingSafeEqual } from "node:crypto";
+import { transaction, requireMutation } from "@/infrastructure/persistence/postgres/database";
+import { createPostgresService } from "@/composition/postgres/service";
+import { synchronizeMovementJourney, appendMovementJourneyItem } from "@/modules/inventory/server";
+import catalog from "./worksheets.json";
+type State = { manifest: { mode: string; appOrigin: string }; instanceId: string };
+function state() { return (globalThis as unknown as Record<symbol, State>)[Symbol.for("stock.hostedWriteHarness")]; }
+function authorized(request: Request) {
+  const token = process.env.STOCK_HA_SEED_TOKEN || "", value = request.headers.get("authorization") || "";
+  return token.length >= 48 && Buffer.byteLength(value) === Buffer.byteLength("Bearer " + token) && timingSafeEqual(Buffer.from(value), Buffer.from("Bearer " + token));
+}
+export async function endpoint(request: Request) {
+  if (!authorized(request) || !state()) return Response.json({ error: "Private test access denied." }, { status: 401 });
+  if (request.method === "GET") return Response.json({ instanceId: state().instanceId, mode: state().manifest.mode, movementMode: process.env.MOVEMENT_CREATE_MODE || "quantity_photo", rss: process.memoryUsage().rss });
+  if (state().manifest.mode !== "functional") return Response.json({ error: "Fixture writes denied." }, { status: 405 });
+  const input = await request.json();
+  try {
+    await transaction(true, async () => {
+      const service = createPostgresService(), client = requireMutation();
+      if (input.kind === "movement") {
+        const identity = input.identity;
+        if (!identity.masterId?.startsWith("WT_") || identity.userId !== "WT_seed" || identity.startedAt !== "2026-01-01T01:00:00.000Z") throw Error("Fixture identity");
+        if ((await client.query("SELECT id FROM stock_operational.movements WHERE id=$1", [identity.masterId])).rowCount) throw Error("Fixture exists");
+        await synchronizeMovementJourney(service, identity);
+        await appendMovementJourneyItem(service, () => ({ id: identity.masterId + "_ITEM", masterId: identity.masterId, shop: "WT Shop A", quantity: "3", remark: "WT seed", fromLocation: "", toLocation: "", imageUrl: state().manifest.appOrigin + "/__wt/images/WT_fixture", purchaseDetailId: "", status: "created", createdAt: identity.startedAt, updatedAt: identity.startedAt, stockCounted: true, isNewArrival: true }));
+        await synchronizeMovementJourney(service, identity, true);
+      } else if (input.kind === "history") {
+        const properties = { orders: "orders", shipments: "shipments", shipment_orders: "shipmentOrders", employee_advances: "employeeAdvances", user_state: "userState" } as const;
+        if (!Array.isArray(input.records) || !input.records.length || input.records.length > 12) throw Error("Fixture count");
+        for (const { table, row } of input.records) {
+          if (!Object.hasOwn(properties, table) || !row.id?.startsWith("WT_")) throw Error("Fixture table");
+          const headers = catalog[table as keyof typeof properties].headers;
+          if (!Object.keys(row).every(key => headers.includes(key)) || !Object.values(row).every(value => value === null || ["string", "boolean"].includes(typeof value) || typeof value === "number" && Number.isFinite(value))) throw Error("Fixture cells");
+          for (const key of ["orderId", "shipmentId"]) if (row[key] && !row[key].startsWith("WT_")) throw Error("Fixture reference");
+          if (table === "user_state" && (!row.userId?.startsWith("WT_") || !row.referenceId?.startsWith("WT_") || row.flowname !== "MovementCreate")) throw Error("Fixture state");
+          if ((await client.query("SELECT id FROM stock_operational." + table + " WHERE id=$1", [row.id])).rowCount) throw Error("Fixture exists");
+          if (table === "employee_advances") for (const [key, target] of [["employeeId", "employees"], ["shopId", "shops"]]) {
+            const found = await client.query("SELECT business_cells FROM stock_operational." + target + " WHERE id=$1 AND archived_at IS NULL", [row[key]]);
+            if (found.rowCount !== 1 || !found.rows[0].business_cells.some((value: unknown) => typeof value === "string" && value.startsWith("WT_"))) throw Error("Fixture ownership");
+          }
+          const cells = headers.map(key => row[key] ?? "");
+          const sheet = service[properties[table as keyof typeof properties]];
+          await sheet.appendRows("A:" + String.fromCharCode(64 + headers.length), [cells]);
+        }
+      } else throw Error("Fixture kind");
+    });
+    return Response.json({ seeded: true });
+  } catch { return Response.json({ error: "Private fixture rejected." }, { status: 400 }); }
+}

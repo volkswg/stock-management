@@ -1,6 +1,45 @@
 # Refactoring progress and evidence
 
+## Hosted tooling completed locally — execution disabled (2026-11-12)
+
+Owner authorized completing local tooling and proposals while keeping draft
+[PR65](https://github.com/volkswg/stock-management/pull/65) unmerged. The private
+build/runtime, HTTPS coordinator, transaction leases/drain, browser adapter,
+45-case bridge, fixed scheduler, independent oracle transport, code/fixture seals
+and checkpoint/recovery integration are implemented. The [canonical packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12)
+records operation and exact boundaries. Production source and every existing
+local-harness byte are unchanged; no hosted permission/schema/configuration or
+business-data access occurred.
+
+Fresh synthetic verification exercises the actual private production build,
+desktop/mobile form submissions, exact fake bytes, real SQL rollback/retry,
+committed-response replay and all six actual process-exit boundaries, including uncertain fake LINE acceptance.
+The external journal survives and restart does not resend. A generated checkpoint
+restores all 51 tables/15 metadata. Its actual read-only app uses a SELECT-only
+login, cannot write or assume the writer role, invokes no provider, and matches
+complete fingerprints before/after. Fixture reader grants/policies are confined
+to the new synthetic databases before capture; original/hosted grants are untouched.
+No off-site encryption/key recovery or hosted timing claim follows from this run.
+
+Local checks: 600 regressions, 39 existing controls, 82 new controls, lint/typecheck,
+original credential-free build and attested private build pass. Original routes
+and all 113 client boundary checks match; only inherited shipmentRow lint warning.
+CI adds actual private-app/TLS/browser/crash/restore integration and sanitized
+reports. Exact new-head CI and artifact verification are tracked on PR65.
+
+The [concrete proposals](../../tools/migration/hosted-write/proposals.json) retain
+strict capacity BLOCKED with minute-only metrics, require an explicitly approved
+50 MB pilot / measured complete forecast / protected source reserve, and retain
+full Vercel upload compatibility NO-GO while preserving existing limits. They
+recommend a separately reviewed telemetry scope and upload delivery/hosting
+decision; no alternative or spend is activated. Coordinator hosting/network,
+actual identities/allowances and all hosted tests remain unapproved/NOT RUN.
+Production remains Sheets and NO-GO; security remediation is deferred and user
+authentication remains its separate planning-only milestone.
+
 ## Hosted adapter foundation — synthetic components only (2026-11-12)
+
+Historical foundation-only checkpoint, superseded by the completion entry above.
 
 Local continuation in draft [PR #65](https://github.com/volkswg/stock-management/pull/65)
 adds exact target/approval gates, a keyed HTTP driver, a private durable

@@ -7,9 +7,9 @@ function assessProfile(profile, now = Date.now()) {
   check(telemetry.entitlementVerified === true, 'METRICS_ENTITLEMENT_UNVERIFIED');
   check(positive(telemetry.sampleIntervalMs) && telemetry.sampleIntervalMs <= 1000, 'METRICS_TOO_COARSE');
   check(positive(telemetry.seriesFreshnessMs) && telemetry.seriesFreshnessMs <= 2000, 'METRICS_STALE');
-  for (const scope of ['databaseMemory', 'databaseCpu', 'allAppInstances', 'driver', 'restartsAndOom', 'diskAndWal']) check(telemetry[scope] === true, 'METRICS_MISSING_' + scope.toUpperCase());
+  for (const scope of ['databaseMemory', 'databaseCpu', 'allAppInstances', 'driver', 'coordinator', 'restartsAndOom', 'diskAndWal']) check(telemetry[scope] === true, 'METRICS_MISSING_' + scope.toUpperCase());
   check(telemetry.cpuWindowMs === 10000, 'CPU_WINDOW_UNPROVEN');
-  for (const field of ['databaseMemoryBytes', 'appCombinedRssBytes', 'driverRssBytes', 'databaseDiskBytes']) check(positive(profile.limits?.[field]), 'LIMIT_UNSEALED_' + field.toUpperCase());
+  for (const field of ['databaseMemoryBytes', 'appCombinedRssBytes', 'driverRssBytes', 'coordinatorRssBytes', 'databaseDiskBytes']) check(positive(profile.limits?.[field]), 'LIMIT_UNSEALED_' + field.toUpperCase());
   check(connection.poolPerInstance === 2 && connection.runtimeLoginLimit === 6 && positive(connection.runtimeBackendsMaximum) && connection.runtimeBackendsMaximum <= 4, 'RUNTIME_CONNECTION_LIMIT');
   check(positive(connection.providerMaximum) && positive(connection.observedTotal) && connection.observedTotal <= Math.floor(connection.providerMaximum * .8) && connection.providerMaximum - connection.observedTotal >= 5, 'PROVIDER_CONNECTION_HEADROOM');
   check(positive(budget.remainingOrganizationBytes) && positive(budget.protectedSourceReserveBytes) && budget.protectedSourceReserveBytes >= 2000000000, 'SOURCE_EGRESS_RESERVE');

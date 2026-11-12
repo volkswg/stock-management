@@ -35,7 +35,7 @@ jobs:
           npm run lint 2>&1 | tee evidence/lint.log
           npm run typecheck 2>&1 | tee evidence/typecheck.log
           env -i PATH="$PATH" node --test tools/migration/local-write/guard.test.cjs tools/migration/local-write/oracle.test.cjs tools/migration/local-write/binary-fixtures.test.cjs tools/migration/local-write/capacity.test.cjs tools/migration/local-write/capacity-workload.test.cjs tools/migration/local-write/capacity-context.test.cjs tools/migration/local-write/provider-outcomes.test.cjs tools/migration/local-write/legacy-fixtures.test.cjs tools/migration/local-write/browser-interception.test.cjs tools/migration/local-write/recovery-readonly.test.cjs 2>&1 | tee evidence/local-write-harness.log
-          env -i PATH="$PATH" node --test tools/migration/hosted-write/adapter.test.cjs 2>&1 | tee evidence/hosted-adapter-offline.log
+          env -i PATH="$PATH" node --test tools/migration/hosted-write/adapter.test.cjs tools/migration/hosted-write/integration.test.cjs tools/migration/hosted-write/protocol.test.cjs 2>&1 | tee evidence/hosted-adapter-offline.log
           env -i PATH="$PATH" node tools/migration/hosted-write/inspect-packet.cjs > evidence/hosted-packet-offline.json
           python3 -m py_compile tools/migration/local-write/capacity-observer.py tools/migration/local-write/capacity-recovery.py tools/migration/local-write/capacity-start-app.py
           python3 -m unittest discover -s tools/migration -p 'test_*.py' -v 2>&1 | tee evidence/python.log
@@ -50,6 +50,7 @@ jobs:
           env -i PATH="$PATH" node --test tools/migration/readonly-staging.test.cjs 2>&1 | tee evidence/readonly-staging.log
           bash tools/migration/verify-operational.sh 2>&1 | tee evidence/operational-postgres.log
           bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee evidence/recovery-fingerprints.log
+          STOCK_HA_EVIDENCE_DIR="$PWD/evidence" bash tools/migration/verify-hosted-tooling.sh 2>&1 | tee evidence/hosted-tooling-integration.log
       - name: Credential-free production build and bundle boundaries
         run: |
           set -euo pipefail

@@ -116,9 +116,32 @@
     "existingPreviewMustNotBeReconfigured": true,
     "credentials": "New target-only server-side secrets; no values in this packet, browser bundles or logs",
     "providers": "fake-only; no LINE webhook registration or real LINE/Loyverse/Drive calls",
-    "harnessStatus": "OFFLINE_FOUNDATION_VALIDATED_FULL_HOSTED_HARNESS_PENDING",
+    "harnessStatus": "LOCAL_TOOLING_VERIFIED_HOSTED_EXECUTION_DISABLED",
     "localGuardMayBeDisabledOrRepointed": false,
-    "localAppAgainstRemoteDatabaseCountsAsFullHostedAppAcceptance": false
+    "localAppAgainstRemoteDatabaseCountsAsFullHostedAppAcceptance": false,
+    "previewModes": {
+      "quantity_photo": {
+        "deploymentId": null,
+        "appOrigin": null
+      },
+      "photo_only": {
+        "deploymentId": null,
+        "appOrigin": null
+      }
+    },
+    "previewModePolicy": "Separately approved pinned previews in the new test project; never mutate process-wide movement mode across concurrent serverless requests or create deployments during a campaign.",
+    "coordinator": {
+      "kind": "Single persistent private HTTPS operator service outside the app database",
+      "origin": null,
+      "listenHost": null,
+      "listenPort": null,
+      "publicNetworkExposureApproved": false,
+      "existingZeroCostAllowanceVerified": false,
+      "runtimeAndOperatorTokensDistinct": true,
+      "newTargetOnly": true
+    },
+    "deploymentBootstrap": "Immutable Vercel project/deployment system identities fetch an approved manifest and sealed server-only runtime configuration from the private coordinator after creation/private-access verification. No database credentials during build; no redeployment-ID cycle.",
+    "protectedPreviewAccess": "New-test-project-only automation access token on exact approved origins; separate application bearer preserved, browser storage and foreign requests excluded"
   },
   "backup": {
     "source": "Independently recovered post-audit-removal source backup, not a mutated local campaign",
@@ -347,26 +370,45 @@
   ],
   "offlineAdapterPreparation": {
     "path": "tools/migration/hosted-write",
-    "state": "OFFLINE_SYNTHETIC_COMPONENTS_ONLY",
+    "state": "LOCAL_IMPLEMENTATION_COMPLETE_HOSTED_ACCEPTANCE_NOT_RUN",
     "implemented": [
-      "Exact target/preview/credential binding and disabled execution gates",
-      "Exact-origin keyed HTTP driver with redirect denial, response bounds and per-request live-profile recheck",
-      "App-HTTP reservation accounting; not database wire or organization billing enforcement",
-      "Offline private fsynced single-writer fake-provider coordinator model and byte/outcome graph",
-      "Offline resource/traffic/cost blockers and actual multipart body serialization"
+      "Attested private app build with two existing-source overrides, one operator-only fixture/health endpoint, original route equality and client-secret scans",
+      "Preview/endpoint/UUID/role/TLS/source/fixture seals and execution gates; current CLI stops before secret-file reads",
+      "Private HTTPS coordinator RPC, distinct operator/runtime credentials, fsynced fake outcomes and exact fake bytes independent of app crashes",
+      "Durable admission leases plus observed-backend reconciliation; no automatic lease expiry, target reset or provider replay",
+      "SQL rollback, ambiguous commit and six process-crash boundaries with external witnesses; existing LINE signature and staging restrictions preserved",
+      "Hosted browser isolation and 45-case adapter; original WT04/WT13 assertions retained with local seed/browser transport replaced",
+      "Fixed one/five-client load scheduler, private HTTP/RPC byte ledgers, original independent capacity oracle with frozen baseline transport",
+      "Generated checkpoint recovery contract and actual fresh local restore with SELECT-only app login and complete before/after fingerprints",
+      "Concrete monitoring, traffic and upload proposals; original strict capacity and payload gates remain blocking"
     ],
     "remaining": [
-      "Hosted private-build instrumentation and browser isolation",
-      "TLS and SQL fault/crash integration against disposable targets",
-      "Reviewed durable coordinator deployment/transport and retention with verified zero-cost allowance",
-      "WT00-WT15 hosted campaign, oracle and checkpoint/recovery integration",
-      "Account telemetry entitlement, actual quotas and whole-campaign traffic meter/forecast",
-      "Platform-boundary tests and separate decision on oversized advertised uploads"
+      "Owner review of PR65 and proposed hosted protocols; no merge authorized",
+      "Verified coordinator/preview private-network and zero-cost allowances; actual endpoint bindings and credentials",
+      "Actual metric entitlement/freshness, complete all-instance visibility, source usage bound and measured whole-campaign forecast",
+      "Separate decision on full upload-platform incompatibility",
+      "Exact resource/setup/write/pause approval; hosted campaign, load, off-site key recovery and restore execution"
     ],
     "fullHostedAdapterReady": false,
-    "offlineTestsPassed": 51,
+    "offlineTestsPassed": 82,
     "hostedRequestsPerformed": 0,
     "existingLocalGuardFilesChanged": false,
-    "reportCommand": "node tools/migration/hosted-write/inspect-packet.cjs"
+    "reportCommand": "node tools/migration/hosted-write/inspect-packet.cjs",
+    "localImplementationComplete": true,
+    "hostedEnvironmentAcceptanceComplete": false,
+    "proposals": "tools/migration/hosted-write/proposals.json",
+    "privateAppSyntheticIntegration": "PASS",
+    "generatedStateRestoreTables": 51,
+    "generatedStateRestoreMetadataSections": 15,
+    "readOnlyRestoredApp": "PASS_SELECT_ONLY_LOGIN_NO_PROVIDER_REPLAY",
+    "entrypoints": [
+      "build-app.cjs",
+      "serve-coordinator.cjs",
+      "run-packet.cjs",
+      "run-load.cjs",
+      "capacity-oracle.cjs",
+      "inspect-packet.cjs",
+      "seals.cjs"
+    ]
   }
 }
