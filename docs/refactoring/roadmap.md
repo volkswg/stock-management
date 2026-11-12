@@ -15,10 +15,20 @@ This page describes the **current plan**, not the full migration diary. See the 
    covers login, sessions, roles, shop authorization, user administration and API
    access. It is planning only; no authentication implementation is authorized now.
 
-Continue independently authorized migration work in the existing cohesive PR.
-Final production cutover and paid infrastructure require explicit owner approval.
-The standing separation between disposable local work and separately approved
-hosted mutations/source synchronization remains in force.
+PR64 merged as `405c474578cec0b2fe84327687b90faf3f5b02f9` after owner approval and
+fresh CI; its automatic deployment remains on Google Sheets. The next bounded
+task is the [hosted test target and execution packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12),
+with a [disabled declarative plan](../../tools/migration/hosted-acceptance-plan.json).
+Only preparation, metadata inspection and the selected organization's read-only
+cost quote are authorized. No resource creation, hosted write, data change,
+deployment or later PR merge is authorized by that preparation.
+
+The owner explicitly defers production access-control remediation while migration
+preparation continues. Keep the existing controls unchanged and the documented
+gap open for the final cutover decision; this deferral is not a production GO.
+New user authentication remains planning only. Final production cutover and paid
+infrastructure still require explicit owner approval, as do exact hosted mutation
+and source synchronization scopes.
 
 ## Completed: modular architecture and legacy external cleanup
 
@@ -39,11 +49,18 @@ Merged PR44 removed the seven obsolete backend forwards and unused singular path
 
 Sheet mode uses the existing operational workbook only; remove the account-specific workbook setting and any workbook-selection fallback. Preserve env rollback, account validation/order, public metadata and credential confidentiality. The owner must restrict/audit workbook readers before storing tokens; hiding a tab does not isolate read access. No production workbook, sharing, Vercel setting or deployment changes are part of implementation.
 
-## Next: production-readiness gate (open, not implemented)
+<a id="next-production-readiness-gate-open-not-implemented"></a>
+
+## Deferred: production access-control remediation (open, not implemented)
 
 [Issue #38](https://github.com/volkswg/stock-management/issues/38) covers access controls for all production domains and sensitive APIs, independent CI, critical-path smoke tests and safe staging/provider isolation. Documentation cleanup was prioritized first at the owner's request; that sequencing does **not** remove the potential access-control risk. Verify external exposure before treating this deployment as safe for unrestricted production access.
 
-Do not merge security policy changes, launch write-capable smoke tests or touch real Google Sheets, LINE, Loyverse or payroll records as part of documentation maintenance. A separately reviewed implementation and operational verification are required.
+Production remediation is deferred by the owner while independent database
+preparation continues. Preserve and verify existing restrictions within isolated
+test scopes. Do not merge security policy changes, launch write-capable smoke
+tests or touch real Google Sheets, LINE, Loyverse or payroll records as part of
+planning. A separately reviewed implementation and operational verification are
+still required before the gap can be closed.
 
 ## Supabase migration
 

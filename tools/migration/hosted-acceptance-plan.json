@@ -1,0 +1,348 @@
+{
+  "version": 1,
+  "preparedOnBangkok": "2026-11-12",
+  "state": "PREPARED_ONLY_NOT_EXECUTABLE",
+  "sourceCommit": "405c474578cec0b2fe84327687b90faf3f5b02f9",
+  "document": "docs/database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12",
+  "authorization": {
+    "preparationOnly": true,
+    "executionEnabled": false,
+    "resourceCreationApproved": false,
+    "paidResourcesApproved": false,
+    "hostedWritesApproved": false,
+    "existingDataChangesApproved": false,
+    "sourceBusinessReadsApprovedByThisPacket": false,
+    "newSheetsExportApproved": false,
+    "realProviderCallsApproved": false,
+    "productionConfigurationChangesApproved": false,
+    "productionCutoverApproved": false,
+    "pauseOrDeleteExistingProjectsApproved": false,
+    "automaticCleanupEnabled": false
+  },
+  "securityScope": {
+    "productionRemediation": "DEFERRED_BY_OWNER",
+    "newUserAuthentication": "PLANNING_ONLY_SEPARATE_MILESTONE",
+    "preserveExistingApiTokenLineSignatureTlsRoleAndProductionGuards": true,
+    "privateTestIsolationRequired": true,
+    "productionAccessControlGapRemainsCutoverBlocker": true
+  },
+  "metadataInspection": {
+    "scope": "Organization and project metadata only; no SQL, keys or business rows",
+    "sourceOrganizationName": "volkswg's Org",
+    "sourceOrganizationPlan": "free",
+    "visibleProjects": 1,
+    "candidateTargetOrganizationId": "yntcfbkilwulyhkslhbx",
+    "organizationSelection": "CONFIRMED_BY_OWNER_FOR_QUOTE_ONLY",
+    "quoteStatus": "READ_ONLY_PROJECT_QUOTE_OBTAINED"
+  },
+  "protectedTargets": {
+    "forbiddenSupabaseProjectRefs": [
+      "orjnazrothkdgmzlsuto"
+    ],
+    "forbiddenIsolationIds": [
+      "160669bd-2f6f-4490-9259-bada5a1d02c4"
+    ],
+    "forbiddenVercelProjectIds": [
+      "prj_XH4nEje5cicuBuucGumuHgr73l1E"
+    ],
+    "productionStorage": "google-sheets",
+    "existingProjectsMustNotBeResetPausedResizedOrDeleted": true
+  },
+  "targetProposal": {
+    "kind": "New independent projects, not branches of the populated source",
+    "region": "ap-northeast-1",
+    "regionReason": "Match the verified Tokyo source for this rehearsal; do not relocate it",
+    "postgresMajor": 17,
+    "sourceObservedPostgresVersion": "17.11.0.018",
+    "targetExactPostgresVersion": null,
+    "targetVersionAndExtensionsMustBeSealedBeforeRestore": true,
+    "database": "postgres",
+    "primaryProposedName": "sm-ha-20261112-f",
+    "primaryProjectRef": null,
+    "primaryIsolationId": null,
+    "maxNewActiveFreeProjectsAtOnce": 1,
+    "reservedNames": [
+      {
+        "stage": "F",
+        "name": "sm-ha-20261112-f",
+        "purpose": "Fresh hosted functional campaign",
+        "projectRef": null
+      },
+      {
+        "stage": "RF",
+        "name": "sm-ha-20261112-rf",
+        "purpose": "Fresh restore of F checkpoint; read-only app",
+        "projectRef": null
+      },
+      {
+        "stage": "L1",
+        "name": "sm-ha-20261112-l1",
+        "purpose": "Fresh capacity seed and one-client profile",
+        "projectRef": null
+      },
+      {
+        "stage": "RL1",
+        "name": "sm-ha-20261112-rl1",
+        "purpose": "Fresh restore of L1 checkpoint; read-only app",
+        "projectRef": null
+      },
+      {
+        "stage": "L5",
+        "name": "sm-ha-20261112-l5",
+        "purpose": "Fresh clone of sealed L1 pre-load seed; five clients",
+        "projectRef": null
+      },
+      {
+        "stage": "RL5",
+        "name": "sm-ha-20261112-rl5",
+        "purpose": "Fresh restore of L5 checkpoint; read-only app",
+        "projectRef": null
+      }
+    ],
+    "freeSlotStrategy": "If confirmed eligible and separately approved: preserve and pause only completed newly created test projects before creating the next. Never pause the protected source. No reset or deletion.",
+    "pauseStrategyApproved": false,
+    "independentRecoveryArtifactsRequiredBeforeAnyTestProjectPause": true,
+    "projectRefsUuidsEndpointsAndCredentialReferencesMustBeBoundBeforeWrites": true,
+    "prePauseArtifactCheck": "Independent download/decryption/checksum/dump readability only; does not claim the later database restore has passed"
+  },
+  "applicationProposal": {
+    "proposedProjectName": "stock-management-hosted-acceptance",
+    "projectId": null,
+    "deploymentId": null,
+    "appOrigin": null,
+    "environment": "preview",
+    "productionDomainsAllowed": false,
+    "reuseProductionProjectOrCredentials": false,
+    "existingPreviewMustNotBeReconfigured": true,
+    "credentials": "New target-only server-side secrets; no values in this packet, browser bundles or logs",
+    "providers": "fake-only; no LINE webhook registration or real LINE/Loyverse/Drive calls",
+    "harnessStatus": "HOSTED_ADAPTER_NOT_IMPLEMENTED_OR_APPROVED",
+    "localGuardMayBeDisabledOrRepointed": false,
+    "localAppAgainstRemoteDatabaseCountsAsFullHostedAppAcceptance": false
+  },
+  "backup": {
+    "source": "Independently recovered post-audit-removal source backup, not a mutated local campaign",
+    "dumpSha256": "9c0f8c66c3cde756ad8f58db6b8711a60c4c38ced66eccaabcf35a79fbeb8594",
+    "fingerprintSha256": "f233867660305a0dbd343d3e52a2878b397cb38dc0d176d072e679eed8f4535a",
+    "manifestSha256": "3fbcab244b50351e771484e54262b87cfc681b6a1cfbdc754f2901ffdfd6ba93",
+    "manifestFilesLocallyRehashed": 14,
+    "independentDecryptionAnd51Table15MetadataRecoveryPreviouslyVerified": true,
+    "businessRows": 70777,
+    "tables": 51,
+    "metadataSections": 15,
+    "currentGoogleSheetsFreshnessCertified": false,
+    "recoveryToolSourcesMustBePinnedAndRehashedBeforeExecution": true,
+    "restoredBaselineComparisonMustPrecedeEnumeratedCopyIdentityRoleDeltas": true,
+    "newBaselineMustIncludeAllApprovedSetupDeltas": true
+  },
+  "costs": {
+    "currency": "USD",
+    "checkedOnBangkok": "2026-11-12",
+    "authorizedIncrementalSpend": 0,
+    "spentByPreparation": 0,
+    "selectedPaidOption": null,
+    "organizationSpecificQuote": {
+      "organizationId": "yntcfbkilwulyhkslhbx",
+      "type": "project",
+      "amount": 0,
+      "currency": "USD",
+      "recurrence": "monthly",
+      "scope": "New project quote only; not a full campaign traffic/hosting cost guarantee",
+      "resourceCreationAuthorized": false
+    },
+    "freeCandidate": {
+      "subscriptionMonthly": 0,
+      "projectComputeMonthly": 0,
+      "conditionalOn": [
+        "Confirmed Free organization and available member-level active-project quota",
+        "Measured disk, traffic and memory headroom",
+        "Private preview hosting within existing approved allowance",
+        "No paid add-on, branch, new subscription or upgrade"
+      ],
+      "freeSlotAvailableConfirmed": false,
+      "databaseQuotaBytes": 500000000,
+      "databaseStopBytes": 400000000,
+      "advertisedMaximumMemoryBytes": 500000000,
+      "actualMemoryLimitBytes": null,
+      "uncachedEgressQuotaBytesPerMonth": 5000000000,
+      "proposedMaximumTestEgressBytes": 1000000000,
+      "minimumProtectedOrganizationEgressReserveBytes": 2000000000,
+      "remainingOrganizationEgressBytes": null,
+      "quotaSharedWithExistingUsage": true,
+      "pausingProjectsDoesNotResetUsage": true,
+      "fullCampaignAffordabilityCertified": false
+    },
+    "paidComparisonOnlyNotAuthorized": {
+      "organizationUpgradeAllowed": false,
+      "separateProOrganizationBaseMonthly": 25,
+      "microHourlyPerProject": 0.01344,
+      "microApproximateMonthlyPerProject": 10,
+      "monthlyOrganizationComputeCredit": 10,
+      "oneRetainedMicroApproximateMonthlyTotal": 25,
+      "sixRetainedMicroApproximateMonthlyTotal": 75,
+      "excludes": [
+        "Taxes",
+        "Egress or disk overage",
+        "Vercel overage or subscriptions",
+        "Off-site artifact storage and egress",
+        "Optional add-ons"
+      ],
+      "paidProjectsCannotBeAssumedPausable": true,
+      "computeNotCoveredBySpendCap": true,
+      "paidRetentionAndStopCostRequireSeparateApproval": true
+    },
+    "branching": "Excluded: metered usage, not a free clone and not covered by compute credits",
+    "vercelAndOffsiteCosts": "Unquoted; existing allowance must be evidenced before execution. No free claim or purchase authorization.",
+    "automaticUpgradeOrSpendCapDisableAllowed": false
+  },
+  "executionOrder": [
+    "Obtain exact resource, quote, setup/write, pause and source-verification approvals; keep production cutover excluded",
+    "Implement and review hosted fake-provider/egress/browser adapters; seal source, case inventory, payloads, connection path and telemetry profile",
+    "Provision only the approved new empty F target and bind actual project/UUID/endpoint identities before restore",
+    "Restore and compare all 51 tables/15 metadata, enumerate only approved target identity/login deltas, reseal, seed synthetic records",
+    "Verify private preview and existing deny/signature/TLS/role controls with no original-row changes",
+    "Run one full supported hosted functional inventory plus platform/pooling/cold-start checks; local two-campaign evidence remains retained",
+    "Drain F, reconcile exact new rows/revisions/commands/effects, capture paired checkpoint/provider ledger and restore RF under the declared 900-second clock",
+    "Prepare fresh L1 and seal its pre-load fixture checkpoint; run the fixed one-client profile only if cost/telemetry gates pass",
+    "Verify L1 deltas and recover RL1; retain the original capacity clock",
+    "Restore the same pre-load fixture checkpoint into fresh L5 with explicit setup deltas; run five clients, verify and recover RL5",
+    "Recheck protected state through the separately approved read-only channel; publish sanitized results and retain private evidence",
+    "Stop test ingress. Do not promote, merge, activate backup schedules, delete projects, switch storage or automatically replay provider outcomes"
+  ],
+  "acceptance": {
+    "functionalInventory": "Same reviewed supported WT00-WT15 variants and repetitions from PR64, plus hosted platform-specific cases; retain explicit absent-operation N/A and every failure",
+    "hostedFunctionalCampaignsProposed": 1,
+    "localIndependentCampaignsAlreadyPassed": 2,
+    "originalBusinessRowsMustRemainExact": 70777,
+    "archiveTablesMustRemainExact": 24,
+    "securityMetadataSectionsMustRemainExactAfterApprovedSetup": 15,
+    "moneyStockPayrollTolerance": 0,
+    "unexpectedErrorsTimeoutsDeadlocksDuplicateEffectsOrOrphansAllowed": 0,
+    "intentionalUnknownOutcomes": "Must equal named fake fixtures exactly and remain guarded; never automatically resent",
+    "capacity": {
+      "clients": [
+        1,
+        5
+      ],
+      "warmupSecondsEach": 120,
+      "measuredSecondsEach": 600,
+      "totalWarmupLoadDrainBudgetSeconds": 1800,
+      "offeredMeasuredSlots": [
+        600,
+        3000
+      ],
+      "maxNewRequestsPerSecondPerClient": 1,
+      "maxInFlightPerClient": 1,
+      "catchUpAllowed": false,
+      "mixPer20": {
+        "read": 12,
+        "simpleWrite": 5,
+        "compoundWrite": 3
+      },
+      "fixtureFileBytes": 262144,
+      "minimumSuccessfulSamplesPerConcreteVariant": 20,
+      "p95Milliseconds": {
+        "read": 2000,
+        "simpleWrite": 3000,
+        "compoundWrite": 5000
+      },
+      "maximumNormalRequestMilliseconds": 10000,
+      "poolMaxPerAppInstance": 2,
+      "runtimeLoginConnectionLimit": 6,
+      "maximumRuntimeBackendsAcrossInstances": 4,
+      "minimumResourceHeadroomFraction": 0.2,
+      "providerMaxConnections": null,
+      "maxTotalBackendsRule": "floor(0.8 * observed max_connections), counting platform services, with at least five connections reserved; do not alter provider defaults to pass",
+      "appCombinedRssBudgetBytesProposed": 1073741824,
+      "driverRssBudgetBytesProposed": 536870912,
+      "driverHeapMiB": 256,
+      "localReferenceAppHeapMiB": 384,
+      "hostedHeapMemoryCpuInstanceAndPoolerProfile": null,
+      "strictResourceTelemetryGate": "BLOCKED until actual quota, metric definitions, all-instance aggregation and sample freshness can establish the original headroom/10-second CPU criteria; minute-only data cannot certify this",
+      "nativeMetricsGuidanceSeconds": 60,
+      "freeMetricsEndpointAvailability": "UNCONFIRMED; pricing excludes Metrics endpoint on Free",
+      "loadMayStartWithoutReviewedTelemetryAndEgressBudget": false
+    },
+    "platformPayload": {
+      "normalFixtureBytes": 262144,
+      "functionPayloadDocumentedLimitMB": 4.5,
+      "existingApplicationImageLimitMiB": 10,
+      "existingApplicationShippingFileLimitMiB": 20,
+      "expectedPlatform413IsProofOfApplicationLimitCompatibility": false,
+      "fullContractAcceptance": "BLOCKED if required currently advertised payloads cannot pass the platform boundary; retain the result and request a separate scope decision, never silently lower limits or change file providers"
+    },
+    "recovery": {
+      "newProjectRequired": true,
+      "rtoSecondsMaximum": 900,
+      "timerIncludes": [
+        "Checkpoint retrieval and key/decryption recovery used by this restore",
+        "Any new-test-source pause needed for a free slot",
+        "Target provisioning",
+        "Required role provisioning",
+        "Restore",
+        "All51Table15MetadataVerification",
+        "Provider-denied read-only app readiness"
+      ],
+      "backupCaptureDurationReportedSeparately": true,
+      "zeroAcknowledgedCheckpointCommandsLost": true,
+      "rpoScope": "Acknowledged work sealed in the paired checkpoint only",
+      "runtimeSqlWriteMustBeDenied": true,
+      "readOnlyAppBeforeAfterFingerprintMustMatch": true,
+      "realProviderReplayAllowed": false
+    }
+  },
+  "results": {
+    "preparation": "READY_FOR_REVIEW",
+    "hostedWrites": "NOT_RUN",
+    "hostedFunctional": "NOT_RUN",
+    "hostedLatencyReliability": "NOT_RUN",
+    "strictHostedResourceCapacity": "BLOCKED_PENDING_TELEMETRY_PROFILE",
+    "hostedRecovery": "NOT_RUN",
+    "fullPlatformPayloadCompatibility": "NOT_CERTIFIED",
+    "productionCutover": "NO_GO"
+  },
+  "stopOn": [
+    "Wrong project, UUID or endpoint",
+    "Any original-row or unexplained metadata change",
+    "Real provider egress or credential exposure",
+    "Incorrect totals or partial/duplicate effects",
+    "Resource, egress, budget or timeout breach",
+    "Missing/stale telemetry",
+    "Unexplained outcome or failed recovery"
+  ],
+  "evidence": {
+    "privatePermissions": "0700 directories, 0600 files",
+    "retain": [
+      "Exact source/harness/deployment hashes",
+      "Approved identities and setup deltas",
+      "Case-level results and repetitions",
+      "HTTP and provider ledgers",
+      "Latency distributions and actual traffic",
+      "Timestamped resource/cost curves",
+      "Original-row and complete metadata hashes",
+      "Checkpoint checksums and independent recovery proof",
+      "Failed and incomplete attempts"
+    ],
+    "publishOnly": [
+      "Counts",
+      "Case IDs",
+      "Sanitized errors",
+      "Digests",
+      "Commit/CI links",
+      "Explicit scope and blockers"
+    ],
+    "businessRowsSecretsRawLogsScreenshotsOrProviderPayloadsInGit": false
+  },
+  "sources": [
+    "https://supabase.com/pricing",
+    "https://supabase.com/docs/guides/platform/billing-faq",
+    "https://supabase.com/docs/guides/platform/manage-your-usage/compute",
+    "https://supabase.com/docs/guides/platform/manage-your-usage/egress",
+    "https://supabase.com/docs/guides/platform/manage-your-usage/branching",
+    "https://supabase.com/docs/guides/platform/free-project-pausing",
+    "https://supabase.com/docs/guides/observability/metrics",
+    "https://supabase.com/docs/guides/database/connecting-to-postgres",
+    "https://supabase.com/changelog/supabase-cli-v3",
+    "https://vercel.com/docs/errors/function_payload_too_large"
+  ]
+}

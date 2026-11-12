@@ -1,5 +1,44 @@
 # Refactoring progress and evidence
 
+## Hosted Supabase test target — packet prepared only (2026-11-12)
+
+Owner authorized target/cost/test planning and deferred production security
+remediation. The [canonical execution packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12)
+and [disabled manifest](../../tools/migration/hosted-acceptance-plan.json) propose a
+separate Tokyo PostgreSQL 17 target family, one supported hosted functional
+campaign, fresh one/five-client profiles and new-target recovery after each.
+The protected populated source and production app are never write/reset/pause
+targets. No security feature or runtime behavior is implemented.
+
+Read-only metadata confirms the selected `volkswg's Org` uses Free and has one
+visible active project. Its new-project quote is **$0/month**; this is not a
+whole-campaign cost guarantee or creation approval. The packet records Free
+disk/traffic/memory gates, an explicit $0 spending authorization, a conditional
+single-active-test-project sequence, paid comparison only, and unquoted hosting /
+off-site allowances. It does not presume paid projects can be paused or that a
+spend cap covers compute. No organization/plan was changed.
+
+Preparation locally rehashed all 14 retained post-audit backup-manifest entries
+and checked the prior independent download/decryption/51-table/15-metadata restore
+receipt. No new business-source or hosted SQL query ran. The snapshot remains a
+rehearsal source, not proof of current Sheets freshness. Existing runtime guards
+refuse hosted targets; a separate reviewed hosted fake-provider adapter is still
+needed. Minute-scale managed metrics and platform payload limits do not establish
+the original local resource/large-upload contract. These remain explicit gates,
+not silently weakened pass criteria.
+
+PR64 merged under separate owner approval as `405c474578cec0b2fe84327687b90faf3f5b02f9`;
+[fresh CI](https://github.com/volkswg/stock-management/actions/runs/43140502107)
+and report upload passed. The automatic deployment was verified READY, domain
+assigned, same 14 production configuration metadata entries and no STOCK override.
+That verification is a retained merge receipt, not a new live-data check during
+this preparation. Hosted tests, acceptance-project/deployment creation, restores, writes,
+pauses/deletions, real-provider actions, new Sheets exports, paid resources and
+the production switch remain NOT RUN / unauthorized. Final cutover is NO-GO.
+Offline plan/scope/link validation, 600 regressions, lint/typecheck and the isolated
+credential-free build pass; only the inherited shipmentRow warning remains.
+Routes are unchanged and all 113 client chunks retain private-data boundaries.
+
 ## Migration-first scope and bounded capacity continuation (2026-11-12)
 
 The owner prioritizes Supabase completion and makes new user authentication a

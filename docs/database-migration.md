@@ -928,10 +928,10 @@ switch, production deployment, paid infrastructure or writes to populated stagin
 | --- | --- |
 | PostgreSQL write acceptance | Two independent fresh local campaigns pass the supported scope, including retry, stale-state, rollback, crash and recovery proofs. Preserve raw BLOCKED labels for absent/hosted variants and explicit dispositions. |
 | Performance and capacity | Both fresh bounded one/five-client profiles pass timing, exact-data and recovery under the unchanged limits. The earlier default-heap and retained-cache failures remain preserved; local results never certify hosted capacity. |
-| Existing security | Recheck ordinary API denial, signed LINE entrypoint, production refusal, TLS/role restrictions and unchanged data. Production-wide exposure/protection and access policy still need verified acceptance; missing adequate controls are a NO-GO. |
+| Existing security | Production remediation is deferred by the owner for the current migration work. Preserve and verify existing API, LINE signature, TLS, role and isolation controls in test copies. The documented production access-control gap remains a final cutover NO-GO. |
 | Backup automation | Existing consistent capture/restore tools and independently recovered encrypted source backup are available. The scheduler/retention/monitoring proposal below stays disabled until identities, private off-site storage, key custody, alerts and a scheduled restore drill are approved and tested. No new backup deletion is authorized. |
 | Dedicated production database | Prepare exact project/UUID, region/version, least-privilege identities, pool/connection budgets, measured disk/index/WAL headroom, quotas and itemized costs. No project or paid service has been created. |
-| Hosted application acceptance | Separate disposable hosted copy, private preview, fake providers, full supported writes, pooling/security checks and platform payload/performance tests remain NOT RUN. Never use populated staging as a load target. |
+| Hosted application acceptance | The [target and execution packet](#hosted-supabase-test-target-and-execution-packet-2026-11-12) is prepared only, with a $0/month new-project quote. Resource creation, restores, writes, deployment and load remain NOT RUN. Harness, telemetry, quota and payload gates remain explicit. Never use populated staging as a load target. |
 | Final Google Sheets synchronization | Require an explicitly approved source/read identity and writer-freeze window; capture a consistent final export, reconcile every row/report into a fresh target and verify no intervening writes. No new Sheets business read/export is part of this update. |
 | Controlled cutover | Require all gates, security/business/recovery sign-offs and exact release/target/window approval. Single write authority, measured stop thresholds and rehearsed rollback; after any acknowledged PostgreSQL write, reconcile its delta before a return to Sheets. |
 
@@ -959,11 +959,15 @@ and no settings were changed. A separately approved control review must cover
 every production URL/API and preserve the signed LINE ingress; this finding
 does not authorize implementing the new user-authentication milestone early.
 
-Continue authorized local migration work in [PR #64](https://github.com/volkswg/stock-management/pull/64).
-Keep it unmerged because merging main deploys production. The
-[next-stage packet](#next-hosted-and-production-stage-plan) records the concrete
-backup configuration, target preparation, source freeze, rollback and independent
-approval boundaries. No owner may infer activation permission from a local PASS.
+[PR #64](https://github.com/volkswg/stock-management/pull/64) was explicitly approved
+for merge by the owner and merged as `405c474578cec0b2fe84327687b90faf3f5b02f9`.
+[Fresh CI](https://github.com/volkswg/stock-management/actions/runs/43140502107)
+and report upload passed. The automatic Sheets deployment was verified READY with
+the production domain assigned and the same 14 configuration metadata entries,
+without a STOCK override. This was a code release, not a Supabase cutover or data
+operation. Later planning PRs have no merge/deployment authorization. The
+[next-stage packet](#next-hosted-and-production-stage-plan) retains separate
+backup, production target, source freeze, rollback and activation approvals.
 
 ##### Bounded local capacity continuation (2026-11-12)
 
@@ -1182,40 +1186,193 @@ backup/monitoring, final Sheets freeze, deployment/rollback and exact approval g
 
 ##### Next hosted and production stage plan
 
-The autonomous local milestone authorizes code, isolated copies and documentation,
-not hosted mutations, billing, production provisioning, provider mutations or
-cutover. No configuration below is installed, scheduled or activated. PR #64 must
-not be auto-merged: this repository's main-branch integration triggers production
-deployment, even while the storage default remains Sheets.
+The current owner instruction authorizes preparation and read-only metadata/cost
+inspection only. No Supabase project/branch, acceptance-app deployment, credentials, schedule or
+hosted test has been created or activated. No existing project may be changed, paused,
+resized or deleted. The PR64 merge approval is complete and does not authorize
+merging a later planning PR, which would trigger another production deployment.
 
-**Hosted acceptance packet, separate from the populated staging source.** After
-local correctness and capacity have genuinely passed, identify a distinct disposable
-Supabase project/UUID, available free quota or an explicitly approved budget, and
-a private preview deployment. Restore the independently verified post-audit source backup there, not a local
-checkpoint containing synthetic test records. Do not write in the populated
-staging project. Enumerate only target identity/login setup
-deltas, verify all data and security hashes, and seal source/build/harness versions,
-read/write case inventory, workload, provider mode, exact limits and rollback
-conditions. Use separate owner, read-only, runtime and backup identities with
-verify-full TLS, nonprivileged application access and a private server token.
-Keep the Data API closed to anon/authenticated on private schemas and independently
-verify RLS/grants, pooling, login/protection, browser bundles and denied egress.
-Run the same supported case inventory and one/five-client profile with fake LINE,
-Loyverse and Drive; real-provider acceptance requires another explicit scope.
-Compare protected source staging before/after over a separate read-only channel.
-On failure, stop only disposable ingress, retain evidence, and fix/retest fresh
-copies. No automatic reset, source repair or production promotion.
+##### Hosted Supabase test target and execution packet (2026-11-12)
 
-Hosted upload acceptance must also exercise the platform boundary. Vercel Functions
-currently cap request bodies at 4.5 MB, including multipart overhead; these
-routes' 10 MiB/20 MiB application limits and multi-file forms exceed that cap.
-Local acceptance of those files does not certify a hosted upload. Record the
-platform's pre-handler 413 separately from application validation, and measure
-large read-response bodies against the hosting limit too. Supporting larger files
-needs a separately reviewed upload transport/provider/auth design; this work does
-not change storage providers, lower the existing application limits, or activate
-a hosted workaround. See the official [payload limit](https://vercel.com/docs/errors/function_payload_too_large)
-and [upload guidance](https://vercel.com/kb/guide/how-to-bypass-vercel-body-size-limit-serverless-functions).
+**State: prepared for review; not executable or approved.** The companion
+[declarative packet](../tools/migration/hosted-acceptance-plan.json) keeps execution,
+provisioning, hosted writes, pausing, paid resources and production changes disabled.
+It is not a script or permission to run commands. Planning baseline is merged
+PR64 `405c474578cec0b2fe84327687b90faf3f5b02f9`; existing local functional/capacity
+evidence is retained. The existing source is `stock-management`
+(`orjnazrothkdgmzlsuto`, Tokyo, observed PostgreSQL `17.11.0.018`) and is explicitly
+excluded from every write/reset/pause target. The production Vercel project and
+current protected read-only preview are also excluded from reconfiguration.
+
+**Deferred security work.** The owner defers production API/access remediation;
+this preparation implements no new login, sessions, roles or shop authorization.
+Existing staging token checks, LINE raw-body signatures, TLS, private-schema grants,
+restricted runtime roles and the production refusal remain mandatory test controls.
+Private-copy isolation is not deferred. The production gap stays recorded for the
+final cutover decision; a hosted test PASS cannot waive it.
+
+**Proposed targets, not created.** The owner selected `volkswg's Org` for the quote
+only (`yntcfbkilwulyhkslhbx`). Read-only inspection found a Free subscription and
+one visible active project. Use new independent projects, not a branch or reset of
+the populated source. Proposed region is `ap-northeast-1`, matching the source for
+this rehearsal; it does not assert optimal production latency. Pin PostgreSQL 17's
+actual target patch/extensions before restore and stop on incompatibility.
+
+| Stage | Proposed project name | Purpose |
+| --- | --- | --- |
+| F | `sm-ha-20261112-f` | Fresh supported functional campaign and platform checks |
+| RF | `sm-ha-20261112-rf` | New restore of F's generated checkpoint; read-only app |
+| L1 | `sm-ha-20261112-l1` | Fresh capacity fixtures and one-client profile |
+| RL1 | `sm-ha-20261112-rl1` | New restore of L1's generated checkpoint |
+| L5 | `sm-ha-20261112-l5` | Fresh copy of the same pre-load fixture checkpoint; five clients |
+| RL5 | `sm-ha-20261112-rl5` | New restore of L5's generated checkpoint |
+
+These are names for a proposed sequence, not six active deployments or known
+project references. Actual refs, UUIDs, endpoints and credential references remain
+unassigned until separately approved provisioning. Bind and recheck all identities
+before the first restore/setup write. Never use the source UUID
+`160669bd-2f6f-4490-9259-bada5a1d02c4` as a writable test identity. Recovery clones
+retain the writer's UUID only during exact comparison and stay endpoint/credential
+isolated. A duplicated UUID never establishes that an endpoint is safe.
+
+The Free candidate uses at most one new active project alongside the protected
+source. A completed new test project could be preserved and paused **only after
+separate explicit approval**, a paired checkpoint/ledger capture and independent
+download/decryption/checksum/dump-readability verification; then the next fresh project could use that active
+slot. This pre-pause artifact check is not the later full database-restore PASS.
+Do not reset old targets or delete evidence to fit a quota. If member-level
+eligibility, pausing or retention cannot support this sequence, mark it BLOCKED.
+Free paused-project restoration has a 90-day platform window; retain independently
+recoverable artifacts and an owner-reviewed retention date instead of relying on
+that window. [Quota rules](https://supabase.com/docs/guides/platform/billing-faq),
+[pausing](https://supabase.com/docs/guides/platform/free-project-pausing).
+
+**Costs checked 2026-11-12, USD; no purchase or spend confirmation.** The read-only
+new-project quote for the selected organization is **$0/month**. It is not a quote
+for the whole test campaign. The current authorized incremental spend is **$0**.
+
+| Item | Prepared cost / decision |
+| --- | --- |
+| New eligible Free project | Quoted $0/month; recheck quota and quote before each future creation. No project created. |
+| Free constraints | 500 MB database and up to 500 MB RAM; stop at 400 MB database usage and at 80% of actual measured memory allocation. This differs from the local 1 GiB profile. |
+| Traffic | Free uncached egress is 5 GB/month, shared with existing usage. Proposed test ceiling 1 GB, plus at least 2 GB reserved for the protected organization; actual remaining allowance is unknown and must be evidenced first. Pausing does not reset usage. |
+| Hosting / private artifacts | Vercel allowance and encrypted off-site storage/egress are unquoted. Require evidence of existing approved allowance; no subscription, add-on or paid collector may be activated. |
+| Paid comparison only | Micro is $0.01344/hour/project (about $10/month). A separate Pro organization starts at $25/month with $10 monthly compute credit: one retained Micro is about $25/month total; six retained Micros about $75/month, before usage/tax. No paid option selected; do not upgrade the existing organization. |
+| Branch alternative | Excluded: branching is metered and compute credits do not cover it. It is not a free copied-data restore. |
+
+Paid projects cannot be assumed pausable, and compute is outside the spend cap.
+Stopping a test app does not stop project compute charges. Any future paid proposal
+therefore needs a separately approved retention/stop-cost strategy; this packet
+does not authorize deletion. Sources: [pricing](https://supabase.com/pricing),
+[compute billing](https://supabase.com/docs/guides/platform/manage-your-usage/compute),
+[egress](https://supabase.com/docs/guides/platform/manage-your-usage/egress),
+[branching](https://supabase.com/docs/guides/platform/manage-your-usage/branching).
+
+A no-cost full campaign is **not yet established**. Local one/five-client database
+sizes were 78,042,803 / 81,196,723 bytes, but those measurements exclude a new
+hosted project's platform overhead and do not certify hosted memory. The load
+alone offers up to 4,320 warmup+measured requests, including 2,592 reads; functional,
+browser, backup and verification traffic is additional. At a hypothetical 4.5 MB
+per read, those HTTP responses alone would be 11.664 GB. That is an upper-bound
+illustration, not a measured forecast; database wire traffic also counts. Require
+a bounded target-only traffic pilot and conservative complete-run forecast before
+full writes/load are enabled. Stop before spending the protected allowance, not
+after a Free restriction affects the source.
+
+**Entry gates before later execution.** All are currently unapproved or unrun:
+
+1. Approve exact resource names/organization/region, cost and retention limits,
+   project creation, target-only restore/setup/test writes, any new-target pause,
+   and protected-source read-only comparison separately from production cutover.
+2. Implement and review a hosted fake-provider/egress/browser adapter. Current
+   `runtime.cjs` and `capacity-context.cjs` deliberately refuse non-loopback targets,
+   hosted authorization and Vercel environment variables. Never disable those
+   guards or simply replace a local connection URL. A private local app connected
+   to remote SQL can establish only that narrower scope, not hosted Vercel behavior.
+3. Use a separate test app project/preview (`stock-management-hosted-acceptance`,
+   actual ID/origin unassigned), real `VERCEL_ENV=preview`, private access and new
+   server-only target credentials. No production domain, source credentials or
+   real integration secrets. Preserve the production refusal; do not spoof it.
+4. Reseal source/build/fixture/inventory/adapter hashes, all target identities,
+   connection modes, provider quotas, complete traffic forecast and telemetry.
+   Prefer a verified session pooler path for the existing transaction-bound app;
+   validate any transaction-pooler alternative separately. Use direct TLS for
+   restore/backup where reachable, or a proven session-pooler alternative, never
+   transaction pooling for exported-snapshot/recovery sessions. No IPv4 add-on is
+   purchased; missing connectivity is BLOCKED. [Connection modes](https://supabase.com/docs/guides/database/connecting-to-postgres).
+5. Recheck the independently recovered **post-audit-removal** source backup, not a
+   mutated local test copy. Preparation rehashed all 14 retained manifest entries;
+   the saved receipt proves independent download/decryption and complete 51-table /
+   15-metadata recovery. Restore and compare before enumerated copy UUID/login
+   deltas, then reseal all 51/15. Seed only new synthetic records. This saved
+   snapshot does not certify current Sheets freshness; no new export is authorized.
+
+Keep private schemas inaccessible to Data API `anon`/`authenticated`; use separate
+owner, backup/read-only and nonprivileged runtime identities, verified TLS, login
+limit 6 and app pool max 2. Do not use a service-role/owner app connection. Preserve
+the existing token, signature-only LINE entrypoint and idempotency checks. Fake
+providers must fail closed on unknown calls and reconcile their complete outcome
+graph. No real LINE webhook registration, Loyverse sync, Drive upload or fallback.
+
+**Execution and pass/fail criteria.** Future execution is sequential: F → RF → L1
+→ RL1 → L5 → RL5, with frozen evidence before every transition. One full hosted
+functional campaign is proposed in addition to the two completed independent local
+campaigns; it is not a claim of two hosted campaigns. Run the same reviewed
+supported WT00–WT15 inventory and repetitions: 32 ordinary scenarios with 20
+same-key pairs, 20 stale-state pairs, 20 old-key replays and a precommit rollback;
+100 browser form / 20 raw-image trials; 60 crash, 80 compound rollback, 40 signed
+image rollback, 10 shipping rollback and 20 uncertainty trials. Preserve reviewed
+N/A for absent success operations and all deliberate fake unknown/orphan fixtures.
+Hosted-only fake adapter, pooling, cold start and platform tests are additional.
+
+| Gate | PASS | FAIL / BLOCKED |
+| --- | --- | --- |
+| Target/baseline | Approved new endpoint+ref+UUID; all 51 tables/15 metadata match, with only explicitly approved setup deltas resealed | Wrong/missing identity, unavailable baseline or unexplained delta: BLOCKED before traffic |
+| Existing controls | Unauthorized ordinary requests and invalid LINE signatures denied; valid signed fake events work; least privilege/TLS/private access intact | Any bypass, real egress or privilege drift: FAIL and stop ingress |
+| Write correctness | Exact deterministic cells, money/stock/payroll totals, revisions and command bodies/statuses; zero tolerance; all 70,777 copied originals, 24 archive tables and 15 security sections unchanged | Any wrong total, lost/partial commit, duplicate effect, changed original or unexplained outcome: FAIL |
+| Retry/fault behavior | Same-key replay is exact; changed intent/stale edits rejected; intentional unknowns equal named fixtures and stay guarded | Blind retry, automatic resend or untracked fake orphan: FAIL |
+| Capacity latency/reliability | One then five clients, each 120 s warmup + 600 s measured; original 12/5/3 mix, 256 KiB fixtures, no catch-up, one in-flight/client, at most 1 new request/s/client; at least 20 successful samples/variant; read/simple/compound p95 ≤2/3/5 s and every normal request ≤10 s; zero unexpected errors | Threshold/error/oracle breach: FAIL; insufficient samples, stale telemetry or exhausted combined 1,800 s budget: BLOCKED/INCONCLUSIVE |
+| Resource/cost | At least 20% headroom in actual sealed hosted budgets; pool 2/instance, runtime login 6 with ≤4 runtime backends total; provider backend/client limits include managed services; no quota or protected traffic reserve breach | Missing enforceable quota/telemetry/budget, unexpected restart/OOM, overage or scaled instance/pool breach: stop; never resize or increase budgets to pass |
+| Recovery | Every generated checkpoint restored into a new target; all 51/15 match before/after a provider-denied read-only app; writes denied; no provider replay; zero acknowledged sealed-checkpoint commands lost | Any mismatch, write/provider activity or readiness beyond 900 s: FAIL. Clock includes checkpoint retrieval/key recovery, any new-test-source pause, provisioning, role setup, restore and readiness; backup capture is reported separately |
+| Protected source/production | Approved separate read-only comparison matches source hashes; production storage/configuration unchanged | Missing source permission/proof: BLOCKED; an unexplained protected-state change: FAIL |
+
+Record nearest-rank p50/p95/p99/max per concrete route/client and class, cold start
+separately, offered/started/completed/timed-out/unstarted slots and actual traffic.
+The capacity levels must use fresh clones of the **same sealed pre-load seed**;
+never load-test the completed functional data or reuse level-one growth. Keep the
+original combined load clock through the intervening comparison/recovery stages.
+Provider default max_connections is read and sealed, not forced to the local 24;
+reserve ≥20% overall plus at least five connections. Capture the actual serverless
+instance count: pool max 2 is per instance, not a global connection cap.
+
+**Explicit observability and payload limits.** Supabase's public Metrics API guide
+recommends 60-second scrapes; current pricing excludes its endpoint on Free.
+Account entitlement and actual series freshness must be verified. Polling minute
+data every second cannot prove the local one-second resource/10-second CPU rule.
+Keep app/driver and SQL aggregate sampling where supported; a full hosted resource
+capacity PASS requires equivalent coverage or a separately reviewed explicit
+hosted protocol. Otherwise retain only measured latency/reliability results and
+mark strict resource capacity BLOCKED—never infer it from a green dashboard.
+[Metrics](https://supabase.com/docs/guides/observability/metrics),
+[sampling guidance](https://supabase.com/docs/guides/observability/metrics/vendor-agnostic).
+
+Vercel's 4.5 MB function-body limit also differs from the app's 10 MiB image /
+20 MiB file limits. Test normal 256 KiB payloads and exact serialized boundary
+sizes, including multipart overhead and large responses. A pre-handler 413 is
+platform-boundary evidence, not proof that the advertised application limit works.
+Full payload compatibility is BLOCKED where required flows cannot fit, pending a
+separate scope decision. Do not silently shrink limits, change file providers or
+add an upload workaround. [Platform limit](https://vercel.com/docs/errors/function_payload_too_large).
+
+**Evidence and stop behavior.** Keep private 0700 directories/0600 artifacts with
+source/deployment/adapter hashes, reviewed cases, private HTTP/provider journals,
+exact before/after projections, timestamped metrics/costs, paired backup/ledger
+checksums and fresh recovery proofs. Publish counts/case IDs/digests and sanitized
+failures only, never business rows, raw logs, credentials or screenshots. Stop
+only new-copy ingress on failure, drain/record uncertainty and retain every failed
+target. No reset, source repair, automatic cleanup, backup scheduling, provider
+resend, merge/promotion or production switch. Use PASS / FAIL / BLOCKED / NOT RUN
+per gate; preparation completion is not execution approval or production readiness.
 
 **Production requirements and price proposal — no purchase.** Choose the region
 with measured latency to the intended Vercel region, a separately identified
