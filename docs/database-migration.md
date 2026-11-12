@@ -936,6 +936,63 @@ permissions. The known access-protection gap remains recorded, not fixed or
 certified safe. Its disposition belongs in the explicit final cutover decision;
 this scope change authorizes no live configuration change or production switch.
 
+**Hosted execution started (2026-11-13 Bangkok): target ready; connection approval pending.**
+The owner's latest “Go ahead” authorizes the disposable hosted target and test
+writes within zero spend, not existing-target changes or production activation.
+Created `sm-ha-20261112-f` (`dcwyiayubrqdrloergax`) in the selected Free organization,
+Tokyo; project quote **$0/month**. It is ACTIVE_HEALTHY on PostgreSQL
+`17.11.0.019`, versus the retained source's `.018`; same-major compatibility still
+needs full native restore/application evidence. Protected staging is untouched.
+
+Completed only on the new target:
+
+- Installed the private archive migration: **24 tables**, zero retained rows.
+  Hosted synthetic precision/duplicate-key/deferred-FK probes passed and were
+  rolled back. The initial FK probe omitted `SET CONSTRAINTS ALL IMMEDIATE`;
+  correcting the probe confirmed the intended deferred constraint, not an app bug.
+- Confirmed `anon`/`authenticated` cannot use or read/write that schema.
+  Initial advisors report only informational private-owner-only RLS/no-policy
+  and empty-database unused-index notices; no policy/index changes were made.
+  [RLS notice](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy),
+  [index notice](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
+- Read the new project's exact session-pooler endpoint from its dashboard and
+  verified native TLS 1.3/hostname/CA **before authentication**, without sending
+  credentials. This is not an application/pooler-login PASS.
+- Rehashed the pinned post-audit backup manifest and **all 14 files**; the original
+  dump is 2,817,225 bytes. No new Sheets data was accessed or imported.
+
+Automatic approval review rejected creating a password-bearing test login because
+target/test-write approval did not specifically cover new credentialed access.
+No credentialed account was created. The proposed new administrator login is
+withdrawn. Operational-schema permission-install confirmations expired twice;
+`stock_operational` and `stock_runtime` are still absent. Do not relabel the archive
+preflight as full SQL application acceptance or bypass these blocked operations.
+
+The concrete additional request is three **24-hour maximum** target-only accounts:
+
+| Account | Permitted test access | Limit |
+| --- | --- | --- |
+| `stock_ha_runtime` | Restricted `stock_runtime` application writes; no archive, DDL or DELETE | 6 connections |
+| `stock_ha_observer` | Private-schema SELECT plus `pg_read_all_stats`; no business writes | 2 connections |
+| `stock_ha_backup` | Private-schema SELECT/export and explicit SELECT policies; no writer-role membership | 2 connections |
+
+All are NOSUPERUSER/NOCREATEDB/NOCREATEROLE/NOINHERIT/NOBYPASSRLS. Approval also
+covers the existing source-defined `stock_runtime` NOLOGIN role and private-schema
+grants/policies on **this new target only**. Passwords stay in private 0600 files;
+none is sent in chat. Existing owner access is used for restore rather than a
+new administrator login. The owner must personally set the new project's database
+password, then record it with the prepared hidden-input local helper; browser
+password entry/reset requires user handoff. Do not reset the protected source.
+The Mac is currently locked, so the remaining usage check/password handoff also
+awaits unlock. The approval questions are pending; expiry/silence is not approval.
+
+Current gate: **PARTIAL HOSTED DATABASE PREFLIGHT ONLY**. Native login, full
+51-table/15-metadata restore, application writes, private hosted app/coordinator,
+resource/traffic capacity and generated-checkpoint hosted recovery remain pending.
+Do not activate the full campaign: its existing checked-in CLI guards remain
+disabled until actual bindings/allowances/protocol/credential approvals are ready.
+No paid add-on, existing project pause/reset, production change, merge or cutover.
+
 **Production release path prepared locally (2026-11-12).** The staging-only
 accessor still rejects production. A separate production profile now exists in
 `database.ts`, used only when production explicitly selects Supabase and a complete
@@ -1001,8 +1058,14 @@ and a SELECT-only production reader unable to write or assume the writer role.
 The existing staging browser/crash/restore run and original credential-free build
 also pass. Initial migration-inventory and test-only TLS-observer diagnostics are
 retained; the inventory was extended to the new file and TLS is inspected on the
-actual verified application socket. The full current-head CI result is tracked
-on PR65; older CI43 remains the earlier baseline, not a test claim for this code.
+actual verified application socket. [CI45](https://github.com/volkswg/stock-management/actions/runs/43259664708)
+passed on executable commit `739011c64b81b4ff54f34de43c915aa27e19186f`:
+625 regressions, 39 existing harness controls, 83 hosted-tooling controls, 73 Python
+checks, native PostgreSQL/browser/recovery checks, typecheck/lint and isolated build.
+Report upload passed; all 19 downloaded files and artifact SHA-256
+`5a335d18836d586725b71e74871e0566a831852b03caa3f137a2e9c22782ce04` verify.
+Later documentation/disabled metadata does not relabel this as current-head or
+hosted acceptance; older CI43 is historical evidence.
 Hosted production/pooler behavior and real provider journeys remain NOT RUN.
 
 **Evidence already sufficient.** Two independent local functional campaigns,
@@ -1016,10 +1079,10 @@ All 18 downloaded reports and archive digest
 were verified. This update changes documentation/disabled metadata only; it does
 not rerun or relabel those tests as hosted acceptance.
 
-**Fresh metadata, not business-data inspection (2026-11-12).** Supabase lists only
+**Historical metadata before target creation (2026-11-12).** Supabase then listed only
 the protected `stock-management` staging project (`orjnazrothkdgmzlsuto`, Tokyo,
 PostgreSQL `17.11.0.018`, ACTIVE_HEALTHY). No separate acceptance/production target
-is visible. The selected organization is Free; its repeated new-project quote
+was visible then. The selected organization is Free; its repeated new-project quote
 is **$0/month for the project alone**, not a complete campaign/production quote.
 Vercel metadata still reports `all_except_custom_domains`, password and trusted-IP
 protection disabled, and the production domain attached. The active firewall
@@ -1543,9 +1606,10 @@ body boundary applies regardless of whether Sheets or Supabase stores records.
 These recommendations make the blocking decisions reviewable; they do not waive
 the gates, approve an alternate protocol or authorize new resources/hosted writes.
 
-**Proposed targets, not created.** The owner selected `volkswg's Org` for the quote
-only (`yntcfbkilwulyhkslhbx`). Read-only inspection found a Free subscription and
-one visible active project. Use new independent projects, not a branch or reset of
+**Target sequence: F is now created; the remaining targets are proposed only.** The owner selected `volkswg's Org` for the quote
+initially (`yntcfbkilwulyhkslhbx`); the later Go ahead covers the new
+Free test target/test writes. Initial inspection found one active project; the
+new F target is separate and consumes the second active slot. Use new independent projects, not a branch or reset of
 the populated source. Proposed region is `ap-northeast-1`, matching the source for
 this rehearsal; it does not assert optimal production latency. Pin PostgreSQL 17's
 actual target patch/extensions before restore and stop on incompatibility.

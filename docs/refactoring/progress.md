@@ -1,5 +1,27 @@
 # Refactoring progress and evidence
 
+## Hosted target created; database connection approval pending (2026-11-13)
+
+Owner authorized disposable hosted target/test writes, zero paid spend. Created
+`sm-ha-20261112-f` / `dcwyiayubrqdrloergax`, Free Tokyo PostgreSQL 17.11.0.019,
+$0/month project quote. Archive schema 24 tables installed; hosted numeric,
+duplicate and deferred-reference probes pass with full rollback and zero rows.
+Anonymous/authenticated schema access is denied; native pre-authentication TLS
+and all 14 pinned backup files verify. Existing staging and Sheets are untouched.
+
+Automatic approval review rejected the password-bearing login creation because
+new credentialed access was not explicitly covered. No account was created;
+the new-administrator-account proposal is withdrawn. Operational permissions
+confirmations expired twice and that schema/runtime role remain absent.
+The [single current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records the three temporary account/permission request, owner-only new-project
+password handoff, locked-Mac usage check, and exact evidence limits. Full native
+restore/application/load/hosted recovery are not passed. No rerun of sufficient
+synthetic campaigns; executable evidence remains
+[CI45](https://github.com/volkswg/stock-management/actions/runs/43259664708)
+on `739011c64b81b4ff54f34de43c915aa27e19186f`.
+
+
 ## Production identity profile implemented locally (2026-11-12)
 
 Draft PR65 adds the separate disabled production database profile while preserving
@@ -12,8 +34,9 @@ A new purpose-constraint migration changes no row, UUID, grant or staging defaul
 and has not been applied hosted. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
 records configuration, focused evidence and the remaining real target/activation
 gates. 25 focused checks and fresh native PostgreSQL/TLS/reader/LINE tests pass;
-CI for this executable change supersedes the earlier documentation-only evidence
-when verified. No existing data, hosted resource, production configuration, merge
+[CI45](https://github.com/volkswg/stock-management/actions/runs/43259664708)
+passes on `739011c64b81b4ff54f34de43c915aa27e19186f`, including report upload;
+all 19 artifact files and the archive digest were verified. No existing data, hosted resource, production configuration, merge
 or cutover changed. Existing access risks remain explicitly deferred, not fixed.
 
 
