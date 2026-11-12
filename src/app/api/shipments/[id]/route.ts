@@ -1,4 +1,5 @@
 import { withPersistence } from "@/composition/postgres/route";
+import { observeStagingDrive } from "@/infrastructure/persistence/postgres/uploads";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
@@ -122,7 +123,7 @@ async function PATCHOperation(
     workflow = await advanceShipmentStatusWithBill({
       shipmentId,
       shippingBill,
-      createDriveService: () => createGoogleDriveServiceFromConfig(config),
+      createDriveService: () => { const drive = createGoogleDriveServiceFromConfig(config); return drive && observeStagingDrive(drive); },
       updateStatus: (shippingBillUrl) => updateShipmentStatus({
         deliveryFee,
         googleSheetsService,

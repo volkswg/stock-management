@@ -1,4 +1,5 @@
 import { executeCommand, hashIntent } from "@/infrastructure/persistence/postgres/commands";
+import { executeUploadCommand } from "@/infrastructure/persistence/postgres/uploads";
 import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { currentTransaction, storageMode, stagingSettings, transaction, stagingReadOnly, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
@@ -20,6 +21,10 @@ async function requestIntent(request: Request) {
     for (const [key,value] of form.entries()) entries.push(typeof value === "string" ? [key,value] : [key,value.name,value.type,createHash("sha256").update(Buffer.from(await value.arrayBuffer())).digest("hex")]);
     return hashIntent(entries);
   }
+  const contentType = request.headers.get("content-type")?.split(";")[0] || "";
+  if (contentType.startsWith("image/")) {
+    return hashIntent({ contentType, sha256: createHash("sha256").update(Buffer.from(await request.clone().arrayBuffer())).digest("hex") });
+  }
   const text = await request.clone().text();
   try { return hashIntent(JSON.parse(text)); } catch { return hashIntent(text); }
 }
@@ -36,7 +41,7 @@ export function withPersistence<Args extends unknown[], Result extends Response>
       // Only the signature-verifying LINE entrypoint may opt into this boundary.
       // A caller-controlled URL must never exempt an ordinary handler from auth.
       const isLine = options.lineWebhook && new URL(request.url).pathname === "/api/line/webhook";
-      if (isLine) { stagingSettings(); return handler(...args); }
+      if (isLine) { stagingSettings(); return await handler(...args); }
       authorizeStaging(request);
       const method=request.method.toUpperCase();
       if (method === "GET" || method === "HEAD") return await transaction(false,async()=>{
@@ -45,7 +50,9 @@ export function withPersistence<Args extends unknown[], Result extends Response>
         return response;
       });
       const kind=method+":"+new URL(request.url).pathname;
-      const stored = await executeCommand<StoredResponse>(kind,request.headers.get("Idempotency-Key") || "",hashIntent({query:new URL(request.url).search,body:await requestIntent(request)}),async () => {
+      const contentType=request.headers.get("content-type") || "";
+      const execute=contentType.startsWith("image/") || contentType.includes("multipart/form-data") ? executeUploadCommand : executeCommand;
+      const stored = await execute<StoredResponse>(kind,request.headers.get("Idempotency-Key") || "",hashIntent({query:new URL(request.url).search,body:await requestIntent(request)}),async () => {
         const expected=request.headers.get("If-Match");
         if(expected && expected !== await readRevision()) throw new PersistenceFailure(409,"Storage revision changed. Refresh before retrying.");
         const response = await handler(...args);

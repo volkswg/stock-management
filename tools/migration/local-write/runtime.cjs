@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Private isolated-build instrumentation, never imported by production source. */
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), net = require('node:net');
+const { providerJournal, catalogReply } = require('./provider-outcomes.cjs');
 const STATE = Symbol.for('stock.localWriteHarness');
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j9N8AAAAASUVORK5CYII=', 'base64');
 function refused() {
@@ -36,11 +37,21 @@ function install() {
     if (digest(raw) !== env.STOCK_WRITE_MANIFEST_SHA256)
         throw refused();
     const manifest = JSON.parse(raw), config = validate(env, manifest), originalFetch = globalThis.fetch, connect = net.Socket.prototype.connect;
-    const ledger = event => fs.appendFileSync(env.STOCK_WRITE_LEDGER, JSON.stringify({
-        at: new Date().toISOString(), ...event
-    }) + '\n', {
-        mode: 0o600
-    });
+    const ledger = event => {
+        const fd = fs.openSync(env.STOCK_WRITE_LEDGER, 'a', 0o600);
+        try {
+            fs.writeSync(fd, JSON.stringify({ at: new Date().toISOString(), ...event }) + '\n');
+            if (event.kind.startsWith('fake-provider') || event.kind === 'injected-fault') fs.fsyncSync(fd);
+        } finally { fs.closeSync(fd); }
+    };
+    const journal = providerJournal(ledger);
+    let providerCatalog;
+    if (manifest.providerCatalog) {
+        if (manifest.providerCatalog.file !== path.join(config.root, 'provider-catalog.json')) throw refused();
+        const raw = fs.readFileSync(manifest.providerCatalog.file);
+        if (digest(raw) !== manifest.providerCatalog.sha256) throw refused();
+        providerCatalog = JSON.parse(raw);
+    }
     const control = () => JSON.parse(fs.readFileSync(env.STOCK_WRITE_CONTROL, 'utf8'));
     function consume(name, predicate) {
         const c = control();
@@ -103,35 +114,29 @@ function install() {
             const account = auth === 'Bearer WT_fake_only_A' ? 'A' : auth === 'Bearer WT_fake_only_B' ? 'B' : null;
             if (!account)
                 return denial('original-provider-account');
-            const cursor = url.searchParams.get('cursor') || '', page = (c.salesPages?.[account] || [[]])[cursor ? Number(cursor) : 0];
-            ledger({
-                kind: 'fake-provider', provider: 'loyverse', operation: 'receipt-page', account, cursor
-            });
-            if (c.salesFailCursor === cursor)
-                return new Response(JSON.stringify({
-                    error: 'WT fake page failure'
-                }), {
-                    status: 503
-                });
-            if (!page)
-                return new Response(JSON.stringify({
-                    receipts: [], cursor: null
-                }), {
-                    headers: {
-                        'content-type': 'application/json'
-                    }
-                });
+            const cursor = url.searchParams.get('cursor') || '';
+            const attempt = journal.begin('loyverse', 'receipt-page', { account, cursor, query: Object.fromEntries(url.searchParams) });
+            if (providerCatalog) {
+                let reply;
+                try { reply = catalogReply(providerCatalog, account, url); }
+                catch { attempt.rejected(); return denial('unknown-provider-fixture'); }
+                if (reply.status >= 400) attempt.rejected(); else { attempt.accepted(); attempt.completed(); }
+                return Response.json(reply.body, { status: reply.status });
+            }
+            if (c.salesFailCursor === cursor) {
+                attempt.rejected();
+                return Response.json({ error: 'WT fake page failure' }, { status: 503 });
+            }
+            const page = (c.salesPages?.[account] || [[]])[cursor ? Number(cursor) : 0];
             const more = (c.salesPages?.[account]?.length || 0) > ((cursor ? Number(cursor) : 0) + 1);
-            return Response.json({
-                receipts: page, cursor: c.salesRepeatCursor ? '1' : more ? String((cursor ? Number(cursor) : 0) + 1) : null
-            });
+            attempt.accepted(); attempt.completed();
+            return Response.json({ receipts: page || [], cursor: !page ? null : c.salesRepeatCursor ? '1' : more ? String((cursor ? Number(cursor) : 0) + 1) : null });
         }
         if (url.protocol === 'https:' && url.hostname === 'api-data.line.me' && /^\/v2\/bot\/message\/WT_[A-Za-z0-9_-]+\/content$/.test(url.pathname) && method === 'GET') {
             if (headers.get('authorization') !== 'Bearer WT_fake_line')
                 return denial('line-credential');
-            ledger({
-                kind: 'fake-provider', provider: 'line', operation: 'download'
-            });
+            const attempt = journal.begin('line', 'download');
+            attempt.accepted(); attempt.completed();
             return new Response(PNG, {
                 headers: {
                     'content-type': 'image/png'
@@ -156,30 +161,37 @@ function install() {
                 });
                 process.exit(86);
             }
-            ledger({
-                kind: 'fake-provider', provider: 'line', operation: url.pathname.endsWith('/reply') ? 'reply' : 'push', recipientHash: digest(String(payload.replyToken || payload.to)), messageCount: payload.messages?.length || 0
-            });
-            if (consume('exitAfterFakeReply', () => true))
-                process.exit(87);
-            if (c.lineFailure)
+            const attempt = journal.begin('line', url.pathname.endsWith('/reply') ? 'reply' : 'push', { recipientHash: digest(String(payload.replyToken || payload.to)), messageCount: payload.messages?.length || 0 });
+            attempt.accepted();
+            if (consume('exitAfterFakeReply', () => true)) process.exit(87);
+            if (c.lineFailure) {
+                attempt.uncertain();
                 throw new Error('WT simulated uncertain reply');
+            }
+            attempt.completed();
             return Response.json({});
         }
         return denial('fetch');
     };
-    const { Client } = require('pg'), query = Client.prototype.query, tags = new WeakMap();
+    const { Client } = require('pg'), query = Client.prototype.query, tags = new WeakMap(), commandKeys = new WeakMap();
     Client.prototype.query = function (...args) {
         const text = typeof args[0] === 'string' ? args[0] : args[0]?.text || '';
-        if (consume('sqlBefore', f => typeof f.match === 'string' && text.includes(f.match))) {
-            ledger({
-                kind: 'injected-fault', phase: 'before-sql'
-            });
+        const values = typeof args[0] === 'string' ? args[1] : args[0]?.values;
+        if (text.startsWith('BEGIN')) commandKeys.delete(this);
+        if (text.startsWith('SELECT intent,response,state FROM stock_operational.commands')) commandKeys.set(this, values?.[2]);
+        if (consume('sqlBefore', f => typeof f.match === 'string' && text.includes(f.match) && (!f.commandKey || f.commandKey === commandKeys.get(this)))) {
+            ledger({ kind: 'injected-fault', phase: 'before-sql', commandKey: commandKeys.get(this) || null, match: control().sqlBefore.match });
             return Promise.reject(new Error('WT injected pre-commit failure'));
         }
         if (text.startsWith('INSERT INTO stock_operational.side_effects'))
             tags.set(this, 'effect-claim');
         if (text.startsWith('UPDATE stock_operational.commands SET state='))
             tags.set(this, 'business');
+        if (text.startsWith('UPDATE stock_operational.side_effects SET state='))
+            tags.set(this, 'effect-record');
+        if (text === 'COMMIT' && tags.get(this) === 'business' && consume('exitBeforeBusinessCommit', () => true)) {
+            ledger({ kind: 'injected-fault', phase: 'before-business-commit' }); process.exit(89);
+        }
         const result = query.apply(this, args);
         if (!result?.then)
             return result;
@@ -187,6 +199,9 @@ function install() {
             if (text === 'COMMIT') {
                 const tag = tags.get(this);
                 tags.delete(this);
+                if (tag === 'business' && consume('exitAfterBusinessCommit', () => true)) {
+                    ledger({ kind: 'injected-fault', phase: 'after-business-commit-before-effect' }); process.exit(90);
+                }
                 if (tag === 'business' && consume('loseCommitAck', () => true)) {
                     ledger({
                         kind: 'injected-fault', phase: 'committed-ack-loss'
@@ -199,12 +214,15 @@ function install() {
                     });
                     process.exit(88);
                 }
+                if (tag === 'effect-record' && consume('exitAfterEffectRecorded', () => true)) {
+                    ledger({ kind: 'injected-fault', phase: 'after-effect-recorded' }); process.exit(91);
+                }
             }
             return value;
         });
     };
     const state = {
-        config, manifest, ledger, control, consume, restore() {
+        config, manifest, ledger, journal, control, consume, restore() {
             globalThis.fetch = originalFetch;
             net.Socket.prototype.connect = connect;
             Client.prototype.query = query;
@@ -225,11 +243,11 @@ class FakeDrive {
             throw refused();
         const c = s.control();
         const id = 'WT_FILE_' + crypto.randomUUID();
-        s.ledger({
-            kind: 'fake-provider', provider: 'drive', operation: 'upload', id, contentType: input.contentType, bytes: input.bytes.length, contentSha256: digest(input.bytes)
-        });
-        if (c.driveFailure)
-            throw new Error('WT simulated fake upload failure');
+        const attempt = s.journal.begin('drive', 'upload', { id, contentType: input.contentType, bytes: input.bytes.length, contentSha256: digest(input.bytes) });
+        if (c.driveFailure) { attempt.rejected(); throw new Error('WT simulated fake upload failure'); }
+        attempt.accepted();
+        if (c.driveUncertain) { attempt.uncertain(); throw new Error('WT simulated accepted upload with lost acknowledgement'); }
+        attempt.completed();
         return {
             id, name: input.fileName, webViewLink: s.config.origin + '/__wt/images/' + id, webContentLink: s.config.origin + '/__wt/images/' + id
         };
@@ -237,16 +255,18 @@ class FakeDrive {
     async deleteFile(id) {
         if (!String(id).startsWith('WT_FILE_'))
             throw refused();
-        globalThis[STATE].ledger({
-            kind: 'fake-provider', provider: 'drive', operation: 'delete', id
-        });
+        const s = globalThis[STATE];
+        if (!s) throw refused();
+        const attempt = s.journal.begin('drive', 'delete', { id });
+        if (s.control().driveDeleteFailure) { attempt.rejected(); throw new Error('WT simulated delete rejection'); }
+        attempt.accepted();
+        if (s.control().driveDeleteUncertain) { attempt.uncertain(); throw new Error('WT simulated uncertain delete'); }
+        attempt.completed();
     }
     async makeFileReadableByLink(id) {
-        if (!String(id).startsWith('WT_FILE_'))
-            throw refused();
-        globalThis[STATE].ledger({
-            kind: 'fake-provider', provider: 'drive', operation: 'share', id
-        });
+        if (!String(id).startsWith('WT_FILE_') || !globalThis[STATE]) throw refused();
+        const attempt = globalThis[STATE].journal.begin('drive', 'share', { id });
+        attempt.accepted(); attempt.completed();
     }
     async checkConnection() {
         if (!globalThis[STATE])

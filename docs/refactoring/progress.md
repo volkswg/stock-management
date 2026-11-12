@@ -1,5 +1,122 @@
 # Refactoring progress and evidence
 
+## Migration-first scope and bounded capacity continuation (2026-11-12)
+
+The owner prioritizes Supabase completion and makes new user authentication a
+separate planning-only milestone. The [current migration assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+is **production NO-GO**: existing hosting protection excludes production domains,
+legacy Sheets handlers receive no staging-wrapper authentication, and adequate
+production-wide API access control is not certified. No protection was weakened
+or new authentication feature implemented. The separate [authentication roadmap](../architecture/user-authentication-roadmap.md)
+covers login/sessions, roles/shop membership, administration and API/DB enforcement.
+
+The [bounded continuation](../database-migration.md#bounded-local-capacity-continuation-2026-11-12)
+records fresh one/five-client timing, exact-data and recovery PASS with the original
+limits. It preserves the earlier five-client default-heap RSS failure and the
+zero-traffic cached-database preflight block. A fixed 384 MiB local app heap and a
+new task-owned local cluster exclude retained rehearsal history without increasing
+budgets, changing the metric or deleting/resetting existing copies. All original
+70,777 rows remain exact; both restores match 51 tables/15 metadata and read-only
+readiness. No hosted/production performance claim follows from this local profile.
+
+Fresh validation: 600 regressions, 39 harness controls, 71 Python checks,
+lint/typecheck and isolated credential-free build pass; inherited warning only,
+unchanged routes and 113 clean client chunks. Existing API/LINE/role/TLS controls
+pass again. Protected hosted state rechecks exact over read-only TLS; production
+metadata retains the Sheets PR63 release. Disabled backup automation, production
+target specification, final Sheets synchronization and controlled cutover/rollback
+remain prepared gates. Hosted writes, paid infrastructure and cutover were not run.
+Continue in the single draft/unmerged [PR #64](https://github.com/volkswg/stock-management/pull/64).
+Combined private receipt SHA-256: `3ee617c4d155e9239fe86cceb020899e34a5b04b34425ff474c2f3bc59f9dcc5`.
+
+## Local acceptance milestone results (2026-11-12)
+
+Historical disk-blocked snapshot; superseded for current capacity by the continuation above.
+
+[PR #64](https://github.com/volkswg/stock-management/pull/64) fixes raw-image
+byte/MIME identity in server and browser, old-replay revision downgrade, upload
+rollback cleanup/uncertain resend and failed LINE command/counter retry handling.
+No original business calculation or route was changed; there is no new SQL
+migration, hosted grant write, production setting, audit table or dependency.
+Application source `0d142f7263e2daea3a968824465a5ec5fed6f14f` and harness
+`9f72ed3dbbe8ebbddf05d8f5ca13681881df263b` are pinned in private packets; original fixtures remain immutable.
+
+The [canonical combined WT00–WT15 matrix](../database-migration.md#local-acceptance-milestone-results)
+records two independent 45-entry campaigns, 7037 / 7037 journaled driver requests,
+38 PASS / 7 retained narrow BLOCKED labels / zero FAIL each. Supplemental local
+proofs resolve the local gaps; absent business writes are verified N/A and hosted
+protection remains deferred. Each campaign includes 32-scenario concurrency/intent
+proofs, 100 form and 20 raw-image browser trials, 60 crashes, 80 compound rollbacks,
+40 signed image and 10 shipping-file rollbacks, and 20 restarted uncertainty trials.
+All original 70,777 rows, 24 archive tables and 15 security sections remain exact.
+
+Both checkpoints restore with all 51 tables/15 metadata matching before and after
+read-only app readiness, with no provider replay. Timing: 401.657 s / 12.655 s; campaign one's
+conservative bound includes preserved initial auth-header probe failures. All
+injected fake unknowns/orphans are explicitly accounted for; no unexpected ones.
+600 regressions, 33 controls, 71 Python and 29 PG checks, lint/typecheck and an exact
+credential-free local build pass. CI run 43049889302 independently passes; the
+route manifest and 113 client chunks retain their boundaries.
+
+**Overall pre-production acceptance is NO-GO:** one/five-client capacity remains
+BLOCKED by 5.88% host disk free versus 20% required. No load percentiles or
+headroom pass is claimed. Limits/requirements are unchanged. Source hosted 51/15
+fingerprints and production's 14 metadata entries/Sheets main release are unchanged.
+The next-stage plan is prepared only; no hosted write, production change, provider
+mutation, new Sheets export, merge, provisioning or cutover occurred.
+Receipt SHA-256: `2433fbe33df2efc97db1bc14a0e530a0f17925dae8b9385436ede032ba91a949`.
+
+## Image retry fixed — two fresh implemented reruns pass (2026-11-11)
+
+The owner authorized the scoped image fix. The shared staging wrapper now hashes
+raw image bytes and media type without decoding them. Six focused regressions
+pass (three failed before); a separate real-PostgreSQL journal regression passes.
+JSON/text/multipart and Sheets behavior remain unchanged; older lossy-format
+image keys safely conflict without rewriting their history or auto-retrying.
+
+The [image-fix evidence](../database-migration.md#image-retry-fix-and-two-fresh-implemented-reruns-2026-11-11)
+records two fresh 461-request campaigns (922 total), each with 17 entries,
+10 implemented PASS / 7 broader BLOCKED and no FAIL. Changed image bytes/type
+return 409; a fresh intentional key uploads the different bytes; older successful
+keys replay without overwriting the newer image. All original 70,777 rows,
+24 archive tables and 15 security metadata remain unchanged. Both generated
+checkpoints restore with all 51 tables/15 metadata matching (3.819 / 4.626 s),
+with no provider replay or recovery app start. A prior 218-request harness-field
+failure is preserved; its copied original rows also match unchanged.
+
+Protected hosted staging before/after hashes are exact. Production environment
+metadata is unchanged and storage remains Sheets. All 577 regular tests,
+18 synthetic controls and one separate real-PG image regression pass; lint retains
+only the inherited warning, and typecheck plus isolated production/private builds
+pass. Source fix: `125543b26b485f7fa5a04c3ae0ab57a6b493be5f`.
+Full coverage/capacity/recovery-app acceptance remains incomplete.
+Receipt: `bf98821afdad1bf869e818503854442a7f54bd7f346ef3a812386d57ae982aef`.
+
+## Local completion started — raw-image correctness failure (2026-11-11)
+
+PR #63 execution was authorized on fresh disposable copies. Added a real-app
+raw-binary intent gate plus deterministic, independently validated PNG collision
+fixtures; added the bounded capacity engine and synthetic controls to CI.
+The [run evidence](../database-migration.md#local-completion-started-raw-image-intent-failure-2026-11-11)
+records an actual failure: different valid raw PNG bytes reused the same operation
+key and received 200/replayed the old response instead of 409, because the route
+wrapper hashes decoded text. No production behavior fix is included.
+
+Two fresh local databases were prepared in a new limited container/volume. The
+first stopped after 83 HTTP requests; its app was shut down and evidence retained.
+The second was not exercised; application capacity was NOT RUN. All original
+70,777 rows, each copy's 24 archive tables/15 security metadata and the hosted
+51-table/15-metadata before/after state remain exact. Failed-checkpoint restore
+matches all 51 tables/15 metadata in 3.256 seconds; a recovery app probe remains
+pending. Production metadata is unchanged and storage remains Google Sheets.
+
+All 571 existing regressions and 18 synthetic harness controls pass; typecheck
+and credential-free isolated build pass. Lint has only the inherited warning.
+**Full implementation remains incomplete**: other variant/fake-outcome/LINE/UI/
+fault work, the actual capacity workload/observer/oracle integration, two complete
+correctness runs and full recovery checks await the scoped binary-intent fix.
+Receipt hash: `76ade0b3dd8850a7d274d7fa2b2e950f3461b35e7448b7ee15d560963b2be130`.
+
 ## Remaining local coverage/capacity — plan prepared only (2026-11-11)
 
 Baseline is merged PR #62, `40cc91cd2711559a249d43163ec38008385854d0`.

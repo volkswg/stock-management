@@ -24,6 +24,31 @@ function fixture() {
         root, m, e
     };
 }
+test('crash controls distinguish pre-commit, committed business and recorded-effect boundaries', async () => {
+    const f = fixture(), previous = { ...process.env }, { Client } = require('pg'), query = Client.prototype.query, exit = process.exit;
+    let restore;
+    try {
+        Client.prototype.query = () => Promise.resolve({ rowCount: 1, rows: [] });
+        Object.assign(process.env, f.e); delete process.env.VERCEL_ENV;
+        process.exit = code => { const error = new Error('WT controlled exit'); error.exitCode = code; throw error; };
+        restore = install();
+        for (const [control, sql, code, phase] of [
+            ['exitBeforeBusinessCommit', "UPDATE stock_operational.commands SET state='complete'", 89, 'before-business-commit'],
+            ['exitAfterBusinessCommit', "UPDATE stock_operational.commands SET state='complete'", 90, 'after-business-commit-before-effect'],
+            ['exitAfterEffectRecorded', "UPDATE stock_operational.side_effects SET state='done'", 91, 'after-effect-recorded'],
+        ]) {
+            fs.writeFileSync(f.e.STOCK_WRITE_CONTROL, JSON.stringify({ [control]: { remaining: 1 } }));
+            const client = new Client(); await client.query(sql);
+            try { await client.query('COMMIT'); assert.fail('Missing controlled exit'); } catch (error) { assert.equal(error.exitCode, code); }
+            const events = fs.readFileSync(f.e.STOCK_WRITE_LEDGER, 'utf8').trim().split('\n').map(JSON.parse);
+            assert.equal(events.filter(e => e.kind === 'injected-fault' && e.phase === phase).length, 1);
+        }
+    } finally {
+        restore?.(); Client.prototype.query = query; process.exit = exit;
+        for (const key of Object.keys(process.env)) delete process.env[key]; Object.assign(process.env, previous);
+        fs.rmSync(f.root, { recursive: true });
+    }
+});
 test('local harness refuses remote databases, protected identities, environment leakage and unknown targets', () => {
     const f = fixture();
     try {
@@ -155,4 +180,34 @@ test('guard permits only the explicit loopback transport and catches HTTP redire
             recursive: true
         });
     }
+});
+test('runtime uses the sealed provider catalog rather than shared control pages and records durable acceptance', async () => {
+    const { catalogKey, classifyUploads } = require('./provider-outcomes.cjs');
+    const f = fixture(), previous = { ...process.env }, urls = [1, 2].map(day => new URL('https://api.loyverse.com/v1.0/receipts?store_id=WT_A&created_at_min=2026-01-0' + day));
+    let restore;
+    try {
+        const catalog = Object.fromEntries(urls.map((url, i) => [catalogKey('A', url), { status: 200, body: { receipts: [{ receipt_number: 'WT_' + i }], cursor: null } }]));
+        const file = path.join(f.root, 'provider-catalog.json'); fs.writeFileSync(file, JSON.stringify(catalog), { mode: 0o600 });
+        f.m.providerCatalog = { file, sha256: crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex') };
+        fs.writeFileSync(f.e.STOCK_WRITE_MANIFEST, JSON.stringify(f.m));
+        f.e.STOCK_WRITE_MANIFEST_SHA256 = crypto.createHash('sha256').update(fs.readFileSync(f.e.STOCK_WRITE_MANIFEST)).digest('hex');
+        Object.assign(process.env, f.e); delete process.env.VERCEL_ENV; restore = install();
+        fs.writeFileSync(f.e.STOCK_WRITE_CONTROL, JSON.stringify({ salesPages: { A: [[{ receipt_number: 'WRONG_SHARED_PAGE' }]] } }));
+        const responses = await Promise.all(Array.from({ length: 10 }, (_, i) => fetch(urls[i % 2], { headers: { authorization: 'Bearer WT_fake_only_A' } }).then(r => r.json())));
+        responses.forEach((r, i) => assert.equal(r.receipts[0].receipt_number, 'WT_' + (i % 2)));
+        const rows = fs.readFileSync(f.e.STOCK_WRITE_LEDGER, 'utf8').trim().split('\n').map(JSON.parse);
+        assert.equal(rows.filter(e => e.kind === 'fake-provider-outcome' && e.phase === 'accepted').length, 10);
+        assert.equal(classifyUploads(rows, []).pass, true);
+    } finally { restore?.(); process.env = previous; fs.rmSync(f.root, { recursive: true }); }
+});
+test('fake accepted upload with a lost response remains visible as uncertain and cannot be reported cleaned up', async () => {
+    const { classifyUploads } = require('./provider-outcomes.cjs');
+    const f = fixture(), previous = { ...process.env }; let restore;
+    try {
+        Object.assign(process.env, f.e); delete process.env.VERCEL_ENV; restore = install();
+        fs.writeFileSync(f.e.STOCK_WRITE_CONTROL, JSON.stringify({ driveUncertain: true }));
+        await assert.rejects(new FakeDrive().uploadImage({ contentType: 'image/png', fileName: 'WT.png', bytes: Buffer.from('WT') }));
+        const rows = fs.readFileSync(f.e.STOCK_WRITE_LEDGER, 'utf8').trim().split('\n').map(JSON.parse), proof = classifyUploads(rows, []);
+        assert.equal(proof.acceptedUploads, 1); assert.equal(proof.orphanIds.length, 1); assert.equal(proof.unresolvedAttempts.length, 1); assert.equal(proof.pass, false);
+    } finally { restore?.(); process.env = previous; fs.rmSync(f.root, { recursive: true }); }
 });

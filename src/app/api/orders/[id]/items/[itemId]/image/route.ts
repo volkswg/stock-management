@@ -1,3 +1,4 @@
+import { withStagingUploadCleanup } from "@/composition/staging-upload-cleanup";
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -44,17 +45,19 @@ async function PATCHOperation(
     if (!googleDriveService) {
       return NextResponse.json({ error: "Google Drive is not configured." }, { status: 503 });
     }
-    const item = await replaceOrderProductImage({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(config),
-      googleDriveService,
-      orderId,
-      itemId,
-      image,
+    return await withStagingUploadCleanup(googleDriveService, async (googleDriveService) => {
+      const item = await replaceOrderProductImage({
+        googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+        googleDriveService,
+        orderId,
+        itemId,
+        image,
+      });
+      if (!item) {
+        return NextResponse.json({ error: "Order product not found." }, { status: 404 });
+      }
+      return NextResponse.json({ item });
     });
-    if (!item) {
-      return NextResponse.json({ error: "Order product not found." }, { status: 404 });
-    }
-    return NextResponse.json({ item });
   } catch (error) {
     console.error("Failed to replace order product image", {
       orderId,

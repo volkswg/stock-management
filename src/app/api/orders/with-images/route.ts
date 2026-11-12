@@ -1,3 +1,4 @@
+import { withStagingUploadCleanup } from "@/composition/staging-upload-cleanup";
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
@@ -37,17 +38,19 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
     }
 
     const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
-    const order = await createOrderWithImages({
-      googleDriveService,
-      googleSheetsService,
-      images: input.images,
-      seller: input.seller,
-      totalPrice: input.totalPrice,
-      remark: input.remark,
-      createdBy: "web",
-    });
+    return await withStagingUploadCleanup(googleDriveService, async (googleDriveService) => {
+      const order = await createOrderWithImages({
+        googleDriveService,
+        googleSheetsService,
+        images: input.images,
+        seller: input.seller,
+        totalPrice: input.totalPrice,
+        remark: input.remark,
+        createdBy: "web",
+      });
 
-    return NextResponse.json({ order }, { status: 201 });
+      return NextResponse.json({ order }, { status: 201 });
+    });
   } catch (error) {
     console.error("Failed to create order with images", {
       error: error instanceof Error ? error.message : String(error),

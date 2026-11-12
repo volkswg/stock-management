@@ -216,11 +216,12 @@ function extend(Campaign) {
         this.control({
             driveFailure: true
         });
-        await this.post(target, make(PNG), {
+        const failed = await this.post(target, make(PNG), {
             status: 500
         });
         this.control({});
         assert.equal(await this.revision(), at);
+        this.save('pre-acceptance-upload-failure.json', { key: failed.key, url: target, noAcceptedProviderFile: true, retryRequiresReconciliation: true });
         this.blocked.push({
             id: 'WT10', variant: 'Oversize/orphan cleanup and product-image replacement', reason: 'Not yet executed by this local driver; successful upload and provider-failure rollback are narrower evidence.'
         });
@@ -319,44 +320,13 @@ function extend(Campaign) {
             executablePath: process.env.STOCK_CHROMIUM_EXECUTABLE || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true
         });
         try {
-            const context = await browser.newContext({
-                viewport: {
-                    width: 390, height: 844
-                }, serviceWorkers: 'block'
-            });
             let lost = false, key, committed;
-            await context.route('**/*', async (route) => {
-                const r = route.request(), u = new URL(r.url());
-                if (u.origin !== this.config.origin) {
-                    if (r.resourceType() === 'image')
-                        return route.fulfill({
-                            body: PNG, contentType: 'image/png'
-                        });
-                    return route.abort();
+            const context = await require('./browser-context.cjs').browserContext.call(this, browser, { width: 390, height: 844 }, async ({ request, response, url, route }) => {
+                if (request.method() === 'POST' && url.pathname === '/api/orders/with-images' && !lost) {
+                    key = request.headers()['idempotency-key']; committed = await response.json();
+                    assert.equal(response.status(), 201); lost = true; await route.abort('failed'); return true;
                 }
-                if (u.pathname.startsWith('/__wt/images/'))
-                    return route.fulfill({
-                        body: PNG, contentType: 'image/png'
-                    });
-                if (u.pathname.startsWith('/api/')) {
-                    const headers = {
-                        ...r.headers(), authorization: 'Bearer ' + this.env.STOCK_STAGING_AUTH_TOKEN
-                    };
-                    const response = await route.fetch({
-                        headers, maxRedirects: 0
-                    });
-                    if (r.method() === 'POST' && u.pathname === '/api/orders/with-images' && !lost) {
-                        key = r.headers()['idempotency-key'];
-                        committed = await response.json();
-                        assert.equal(response.status(), 201);
-                        lost = true;
-                        return route.abort('failed');
-                    }
-                    return route.fulfill({
-                        response
-                    });
-                }
-                return route.continue();
+                return false;
             });
             const page = await context.newPage();
             const fill = async () => {

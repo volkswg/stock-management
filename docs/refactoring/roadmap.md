@@ -2,6 +2,24 @@
 
 This page describes the **current plan**, not the full migration diary. See the [current ownership map](../architecture/migration-map.md), [merged PR ledger](progress.md#merged-implementation-ledger) and [verification evidence](verification.md).
 
+## Current priorities approved on 2026-11-12
+
+1. Complete Supabase migration acceptance, performance/capacity measurements,
+   backup automation preparation, dedicated production database preparation and
+   the final Sheets synchronization and controlled cutover plan. Preserve existing
+   authentication, LINE signatures, API restrictions and database permissions.
+   Inadequate existing production access control is a **NO-GO**, not permission to
+   weaken it or add authentication features within this milestone.
+2. User authentication is the next major milestone. The separate
+   [architecture and implementation roadmap](../architecture/user-authentication-roadmap.md)
+   covers login, sessions, roles, shop authorization, user administration and API
+   access. It is planning only; no authentication implementation is authorized now.
+
+Continue independently authorized migration work in the existing cohesive PR.
+Final production cutover and paid infrastructure require explicit owner approval.
+The standing separation between disposable local work and separately approved
+hosted mutations/source synchronization remains in force.
+
 ## Completed: modular architecture and legacy external cleanup
 
 - [PRs #1–37](progress.md#merged-implementation-ledger) completed the scoped modular migration and final composition. Feature business logic and worksheets have owners; Google/Drive/LINE/Loyverse transport moved to root infrastructure.
@@ -44,8 +62,10 @@ Phase 3 now has one [execution checklist and automation plan](../database-migrat
 including read-only source approval, secure artifacts, isolated deployment/import,
 business acceptance, capacity, recovery, freeze/final full-load and cutover/rollback.
 The immutable importer cannot merge changed/deleted rows; final delta review plans
-a fresh approved target. Production authentication/monitoring, production target
-enablement and reverse migration remain unimplemented release prerequisites.
+a fresh approved target. Verification of existing production access controls,
+monitoring, production target enablement and safe reverse reconciliation remain
+release prerequisites. New user authentication belongs to the separate next
+milestone; inadequate current controls are a NO-GO for activation.
 
 The approved real-data execution has advanced beyond preparation: isolated
 schema deployment, latest-source manual CSV import and record reconciliation
@@ -56,15 +76,20 @@ See the [current progress ledger](progress.md#database-migration--current-operat
 and [machine-readable status](../../tools/migration/phase3-status.json) for the
 verified counts, evidence timestamp and limitations.
 
-Post-import recovery verification is incomplete and paused by the owner; older
-verified backups and the retained local recovery setup remain available. The
-application still uses Google Sheets. Next is a scoped application-integration
-inspection and testing/cutover plan, with source freshness and all writer freezes
-reconfirmed before activation. Recovery remains an outstanding release gate.
-No schema replay, new data access, hosted writes, production setting change or
-cutover is authorized by this documentation update. Future Mac/Cloud operators
-must verify their own scoped credentials and network/TLS rather than assume
-access from an earlier session.
+Post-audit encrypted backup recovery and two complete disposable local functional
+campaigns have passed; their preserved evidence and remaining capacity/hosted
+gates are in the [current migration assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12).
+The earlier pause is historical and does not describe the currently authorized
+local work. Existing populated staging and production remain protected; the
+application still uses Google Sheets.
+
+Finish local write/capacity acceptance first. Prepare the separate hosted
+acceptance packet, disabled backup/restore automation configuration, dedicated
+production target specification, final source synchronization and controlled
+cutover/rollback gates. Hosted writes, production provisioning, new Sheets
+business reads/exports, production configuration and final cutover retain their
+separate approval boundaries. Future operators must verify their own scoped
+credentials and network/TLS rather than assume access from an earlier session.
 
 ## Deferred product decisions — not refactoring leftovers
 
