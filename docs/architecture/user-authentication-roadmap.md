@@ -17,6 +17,8 @@ approval. See the separate [migration runbook](../database-migration.md).
 
 The PostgreSQL adapter currently requires an isolated staging identity and shared
 server-side bearer token; `stagingSettings()` refuses `VERCEL_ENV=production`.
+A separate explicit production identity profile is now prepared locally but remains
+disabled/unbound; it preserves legacy app access rather than adding user login.
 The token identifies an allowed staging caller, not an individual staff member,
 role or shop. In PostgreSQL staging the ordinary API wrapper authenticates requests, while only the
 explicit LINE entrypoint may use the raw-body HMAC signature path. The database

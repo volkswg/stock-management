@@ -33,7 +33,7 @@ function fixture(mode = 'supabase') {
     assert.ok(['src/composition/postgres/route.ts', 'src/infrastructure/persistence/postgres/commands.ts'].includes(file));
     const exports = {}; cache.set(file, exports);
     const source = ts.transpileModule(readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-    new vm.Script(source, { filename: file }).runInNewContext({ exports, Buffer, Request, Response, URL, Error, require(spec) {
+    new vm.Script(source, { filename: file }).runInNewContext({ exports, process: { env: {} }, Buffer, Request, Response, URL, Error, require(spec) {
       if (spec === 'server-only') return {};
       if (spec === 'node:crypto') return crypto;
       if (spec === './database' || spec === '@/infrastructure/persistence/postgres/database') return db;

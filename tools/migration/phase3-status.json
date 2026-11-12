@@ -1,5 +1,5 @@
 {
-  "version": 19,
+  "version": 20,
   "scope": "CRITICAL-PATH CUTOVER MODE: preserve application/access behavior as-is; database migration first; new security implementation next phase; existing safeguards preserved and access gap retained for final cutover risk decision",
   "reportedOnBangkok": "2026-11-12",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -94,10 +94,10 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Finish hosted/production target and cost bindings, explicit production identity profile with as-is browser/API/LINE compatibility, hosted acceptance, backup/alerts and final full synchronization; no new owner-only access-policy prerequisite",
+  "nextStep": "Bind/approve actual hosted target and full cost/traffic scope, run hosted acceptance; production identity profile implemented locally but actual target/config/activation remain unassigned; prepare backup/alerts and final full Sheets refresh approvals",
   "cutoverBlockers": [
     "M1 existing access-protection risk retained for explicit final activation decision; implementation deferred by owner, no new access-policy choice blocks independent migration preparation",
-    "M2 explicit production release endpoint/UUID/purpose guard remains unimplemented; current staging-only refusal must not be bypassed",
+    "M2 production profile implemented locally; real production endpoint/UUID/purpose/role/release binding and hosted activation verification remain unassigned",
     "M3 approved hosted platform/write/one-five-client capacity and generated-checkpoint recovery not run",
     "M4 new production target/org/plan/headroom/quotas/budget unassigned",
     "M5 encrypted backup schedule, end-to-end recovery objectives, file recovery owner and alerts not activated",
@@ -1126,8 +1126,8 @@
       {
         "id": "M2",
         "classification": "MUST FIX before cutover",
-        "subject": "Production release identity path",
-        "state": "OPEN"
+        "subject": "Production identity profile locally implemented; actual target binding/hosted verification/activation outstanding",
+        "state": "LOCAL_IMPLEMENTATION_PASS_HOSTED_BINDING_PENDING"
       },
       {
         "id": "M3",
@@ -1283,6 +1283,24 @@
     "securityImplementation": "NEXT_PHASE_NOT_CURRENT_MIGRATION",
     "existingSecurityRisk": "OPEN_NOT_FIXED_NOT_CERTIFIED; explicit final cutover risk disposition required",
     "productionSecurityCertified": false,
-    "existingSafeguardsMustRemainEnabled": true
+    "existingSafeguardsMustRemainEnabled": true,
+    "productionIdentityPreparation": {
+      "state": "IMPLEMENTED_LOCALLY_DISABLED_UNBOUND",
+      "focusedTestsPassed": 25,
+      "nativePostgresTlsLegacyAccessReplayReadOnlyReaderAndLine": "PASS_FRESH_SYNTHETIC_ONLY",
+      "configurationInstalled": false,
+      "productionTargetAssigned": false,
+      "sourceReleaseAssigned": false,
+      "productionEnabled": false,
+      "purposeMigration": "20261112160852_allow_explicit_production_environment.sql",
+      "migrationAppliedHosted": false,
+      "existingRowsOrGrantsChangedByMigration": false,
+      "defaultProductionReadOnly": true,
+      "stagingBearerPreserved": true,
+      "legacyProductionAccessPolicy": "legacy-as-is",
+      "newAuthenticationImplemented": false,
+      "actualHostedAcceptance": "NOT_RUN",
+      "newHeadCi": "PENDING_ON_PR65"
+    }
   }
 }

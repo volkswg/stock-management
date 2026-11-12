@@ -1,5 +1,20 @@
 # Refactoring progress and evidence
 
+## Production identity profile implemented locally (2026-11-12)
+
+Draft PR65 adds the separate disabled production database profile while preserving
+current Sheets and user access behavior. Exact new target/UUID, project/commit,
+restricted role and purpose checks, strict TLS, read-only default and unchanged
+staging bearer/LINE checks are implemented; no new authentication system.
+A new purpose-constraint migration changes no row, UUID, grant or staging default
+and has not been applied hosted. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records configuration, focused evidence and the remaining real target/activation
+gates. 25 focused checks and fresh native PostgreSQL/TLS/reader/LINE tests pass;
+CI for this executable change supersedes the earlier documentation-only evidence
+when verified. No existing data, hosted resource, production configuration, merge
+or cutover changed. Existing access risks remain explicitly deferred, not fixed.
+
+
 ## Scope clarification: application as-is; security next (2026-11-12)
 
 Owner requests unchanged application/access behavior and database migration first.

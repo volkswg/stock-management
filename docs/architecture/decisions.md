@@ -288,7 +288,13 @@ there is no claim of atomic/exactly-once cross-provider effects.
 
 STOCK_STORAGE defaults to google-sheets. Supabase requires explicit isolated
 staging enablement, server-only credentials/token, verified TLS and a nonprivileged
-login capable of SET LOCAL ROLE stock_runtime. VERCEL_ENV=production is rejected.
+login capable of SET LOCAL ROLE stock_runtime. The staging accessor continues to
+reject VERCEL_ENV=production. The separately scoped production profile is prepared
+locally: it requires explicit server-only new-target/project/UUID/release/purpose
+binding, defaults to read-only and preserves the owner-selected legacy app access
+without distributing a staging bearer to the browser. It is disabled/unassigned;
+no live production selection, grant or database was changed. See the
+[current release preparation](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12).
 Regular staging APIs require an operator bearer token; only the explicitly
 registered LINE entrypoint uses its own signature boundary. A caller-controlled
 URL cannot exempt an ordinary handler. The runtime role has no archive access, DDL or DELETE, and

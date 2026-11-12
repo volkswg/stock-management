@@ -936,6 +936,63 @@ permissions. The known access-protection gap remains recorded, not fixed or
 certified safe. Its disposition belongs in the explicit final cutover decision;
 this scope change authorizes no live configuration change or production switch.
 
+**Production release path prepared locally (2026-11-12).** The staging-only
+accessor still rejects production. A separate production profile now exists in
+`database.ts`, used only when production explicitly selects Supabase and a complete
+server-side release binding is enabled. The current default remains Sheets; no
+release binding, production database or environment setting was installed.
+
+The profile requires `STOCK_PRODUCTION_ENABLED=true`, the actual
+`VERCEL_PROJECT_ID`/`VERCEL_GIT_COMMIT_SHA`, `STOCK_TARGET_ISOLATION_ID` and a private
+`STOCK_PRODUCTION_RELEASE_JSON` with **exactly** these fields:
+
+| Field | Required value |
+| --- | --- |
+| `version`, `accessPolicy` | `1`, `legacy-as-is` (the owner-selected current access behavior, not staff authorization) |
+| `projectRef`, `isolationId` | Approved new Supabase reference/UUID; protected staging reference/UUID are refused |
+| `databaseHost`, `connectionMode` | Exact approved direct host or Tokyo session-pooler host; port 5432 and database `postgres` only |
+| `runtimeUser` | Approved `stock_prod_*` restricted login; session-pooler username must include the same project suffix |
+| `vercelProjectId`, `sourceCommit` | Exact project and source commit of the approved production release; missing system identity fails closed |
+
+The existing `STOCK_DATABASE_URL`/`STOCK_DATABASE_CA` remain server-only, with
+verified TLS, no connection-query overrides and pool max=2. Production also checks
+login identity, NOINHERIT/no elevated role flags and connection limit=6, plus the
+actual environment UUID and `purpose=production` inside every transaction.
+Mixed staging/test configuration and cached-pool target/credential changes fail
+closed. No browser receives the staging bearer. Production APIs preserve legacy
+access only within that explicit valid profile; staging APIs still require their
+bearer and LINE still verifies its original raw-body signature.
+
+`STOCK_PRODUCTION_READ_ONLY` defaults to read-only; only literal `false` allows
+writer requests after a separately approved deployment/configuration change.
+Prepare separate restricted writer and SELECT-only reader logins for the new
+target. The reader needs the approved private-schema SELECT/RLS policy setup and
+must not assume `stock_runtime`. This profile does not provision those identities.
+The existing provider guard also denies fetches during read-only production
+validation. These are migration identity/freeze controls, not a new user login.
+
+The CLI-generated migration
+`20261112160852_allow_explicit_production_environment.sql` only extends the
+`environment.purpose` CHECK to admit `production`; its staging default, UUID,
+records, grants and roles are unchanged. It has **not** been applied hosted.
+On an approved new production target, first verify the restored backup's original
+51/15 fingerprints, then apply/review the named constraint delta and owner-only
+new UUID/purpose assignment, provision scoped logins, and seal the expected setup
+metadata. Never retag existing staging, run a production import onto the old
+snapshot or claim intentionally changed metadata still equals the old baseline.
+
+Local evidence: 25 focused production-profile checks pass. A fresh disposable
+PostgreSQL test verifies the actual application's TLS socket/certificate, as-is
+API access, one committed order with exact replay/changed-intent conflict, purpose
+rejection, read-only stop, real LINE invalid/valid signatures (empty event probe),
+and a SELECT-only production reader unable to write or assume the writer role.
+The existing staging browser/crash/restore run and original credential-free build
+also pass. Initial migration-inventory and test-only TLS-observer diagnostics are
+retained; the inventory was extended to the new file and TLS is inspected on the
+actual verified application socket. The full current-head CI result is tracked
+on PR65; older CI43 remains the earlier baseline, not a test claim for this code.
+Hosted production/pooler behavior and real provider journeys remain NOT RUN.
+
 **Evidence already sufficient.** Two independent local functional campaigns,
 local one/five-client capacity with exact-data oracles and recovery, and the
 locally completed hosted adapter are accepted implementation evidence. On code
@@ -963,7 +1020,7 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | ID | Classification | Exit evidence / action |
 | --- | --- | --- |
 | M1 | Requires owner approval | **Existing access-protection risk; implementation deferred.** The owner requests current application access behavior and security work in the next phase. Do not add an owner-only gate or block independent migration preparation on a new access-policy choice. Existing production-wide protection remains unproved; record that risk explicitly in the final activation decision, without marking it fixed, safe or security-certified. Existing safeguards remain enabled. |
-| M2 | MUST FIX before cutover | **Production release path and as-is compatibility.** `stagingSettings()` currently refuses production and transactions require `purpose=isolated-staging`. Prepare/review an explicit production endpoint+UUID+purpose+least-privilege identity profile that preserves current browser/API/LINE behavior. Keep the staging guard, TLS, no-fallback and wrong-target tests. Do not expose the staging bearer to browsers, broadly disable guards or turn populated staging into production. Activation still requires exact approval. |
+| M2 | MUST FIX before cutover | **Production release binding and as-is compatibility.** The separate production profile is now implemented locally and remains disabled/unbound. It validates the new endpoint/project/UUID, Vercel project/source commit, restricted login and database purpose, defaults to read-only and preserves legacy production API access without a browser bearer. Actual target identities, approved configuration, hosted verification and activation remain pending. Staging protections remain intact; populated staging is excluded. |
 | M3 | MUST FIX before cutover | **Actual hosted acceptance.** On new approved disposable copies verify managed connection/pooler/TLS/roles/private Data API denial, browser-to-API protection, signed LINE behavior, representative supported writes/replay, exact business data and no real-provider egress. Measure one/five-client hosted latency, errors, connections and growth on the intended production-equivalent profile. Existing local evidence cannot certify these platform differences. |
 | M4 | MUST FIX before cutover | **Dedicated final production target.** Record approved org/plan/region/version, new project/UUID, restricted runtime/backup identities, private schemas/RLS, pool and instance limits, measured database/index/WAL/growth headroom and cost/quotas. Current staging is protected and cannot be repurposed. A Free quote does not prove production capacity or uptime. |
 | M5 | MUST FIX before cutover | **Recoverability and minimum monitoring.** Activate a target-bound encrypted/off-site backup schedule, independent key recovery, one real hosted generated-checkpoint restore/read-only verification and actionable redacted alerts with named coverage. Prove the agreed production RPO and measured RTO; sealed-checkpoint RPO=0 is not ongoing disaster-recovery RPO=0. Drive file objects require their own inventory/recovery responsibility. |

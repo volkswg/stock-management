@@ -434,6 +434,7 @@
     "existingSafeguardsMandatory": true,
     "newSecurityImplementation": "DEFERRED_NEXT_PHASE",
     "asIsApplicationBehaviorRequired": true,
-    "finalSecurityRiskAssessmentStillRequired": true
+    "finalSecurityRiskAssessmentStillRequired": true,
+    "productionIdentityProfile": "IMPLEMENTED_LOCALLY_DISABLED_UNBOUND; actual target and activation require explicit approval"
   }
 }

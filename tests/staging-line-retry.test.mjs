@@ -8,7 +8,7 @@ test('the staging LINE request boundary translates asynchronous storage failures
   const exports = {};
   class PersistenceFailure extends Error { constructor(status = 503, message = 'WT safe retry') { super(message); this.status = status; } }
   const source = ts.transpileModule(readFileSync('src/composition/postgres/route.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  new vm.Script(source).runInNewContext({ exports, Buffer, Request, Response, URL, Error, require(spec) {
+  new vm.Script(source).runInNewContext({ exports, process: { env: {} }, Buffer, Request, Response, URL, Error, require(spec) {
     if (spec === 'server-only') return {};
     if (spec === 'node:crypto') return crypto;
     if (spec.endsWith('/commands')) return {};

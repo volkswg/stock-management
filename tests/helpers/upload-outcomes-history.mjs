@@ -6,7 +6,10 @@ const lineBoundaryHistory = JSON.parse(readFileSync('tests/fixtures/staging-line
 const lineCountersHistory = JSON.parse(readFileSync('tests/fixtures/staging-line-counters-before.json', 'utf8'));
 const lineRollbackHistory = JSON.parse(readFileSync('tests/fixtures/staging-line-rollback-before.json', 'utf8'));
 const hash = value => createHash('sha256').update(value).digest('hex');
+const productionHistory = JSON.parse(readFileSync('tests/fixtures/production-release-before.json', 'utf8'));
 export function restoreUploadOutcomesSource(file, source) {
+  const production = productionHistory.edits[file];
+  if (production) { assert.equal(hash(production.before), production.beforeHash, file); assert.equal(hash(source), production.afterHash, file); source = production.before; }
   const rollback = lineRollbackHistory.edits[file];
   if (rollback) {
     assert.equal(hash(rollback.before), rollback.beforeHash, file);

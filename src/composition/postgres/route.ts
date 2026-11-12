@@ -2,11 +2,13 @@ import { executeCommand, hashIntent } from "@/infrastructure/persistence/postgre
 import { executeUploadCommand } from "@/infrastructure/persistence/postgres/uploads";
 import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
-import { currentTransaction, storageMode, stagingSettings, transaction, stagingReadOnly, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
+import { currentTransaction, storageMode, stagingSettings, productionSettings, transaction, stagingReadOnly, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
 
 type StoredResponse = { status: number; body: string; headers: [string,string][] };
 function equal(a: string, b: string) { const left = Buffer.from(a), right = Buffer.from(b); return left.length === right.length && timingSafeEqual(left,right); }
 export function authorizeStaging(request: Request) {
+  // Production preserves the owner-selected legacy access behavior; staging still requires its bearer.
+  if (process.env.VERCEL_ENV === "production") { productionSettings(); return; }
   const { token } = stagingSettings();
   const supplied = request.headers.get("authorization") || "";
   if (!equal(supplied, `Bearer ${token}`)) throw new PersistenceFailure(401,"Staging authorization required.");
@@ -35,13 +37,13 @@ export function withPersistence<Args extends unknown[], Result extends Response>
       const request = args[0] as Request;
       if (!(request instanceof Request)) throw new PersistenceFailure(503,"A staging request context is required.");
       if (stagingReadOnly() && !["GET","HEAD"].includes(request.method.toUpperCase())) {
-        stagingSettings(); authorizeStaging(request);
+        authorizeStaging(request);
         return Response.json({error:"Staging is read-only."},{status:405,headers:{Allow:"GET, HEAD"}}) as Result;
       }
       // Only the signature-verifying LINE entrypoint may opt into this boundary.
       // A caller-controlled URL must never exempt an ordinary handler from auth.
       const isLine = options.lineWebhook && new URL(request.url).pathname === "/api/line/webhook";
-      if (isLine) { stagingSettings(); return await handler(...args); }
+      if (isLine) { if (process.env.VERCEL_ENV === "production") productionSettings(); else stagingSettings(); return await handler(...args); }
       authorizeStaging(request);
       const method=request.method.toUpperCase();
       if (method === "GET" || method === "HEAD") return await transaction(false,async()=>{
