@@ -25,6 +25,18 @@ Full hosted application/capacity/off-site recovery remain pending;
 production is Sheets and NO-GO. Keep PR65 draft; no new authentication features.
 
 
+## Concurrent hosted evidence reads serialized after CI46 failure (2026-11-13)
+
+CI46 passes the new restricted-backup regression but stops at the existing private
+app WT03 smoke. A deterministic regression reproduces duplicate journal events
+when parallel HTTP callbacks refresh the same cursor. The driver now serializes
+whole drains and fails queued reads closed after a failure. Two red/green cases,
+all 85 hosted controls, lint, and fresh actual private-app/browser/crash/recovery
+checks pass locally. New-head CI is pending on the same draft PR65; no application
+or hosted data/permission change. The native restore/checkpoint proof above is
+retained rather than repeated.
+
+
 ## Production identity profile implemented locally (2026-11-12)
 
 Draft PR65 adds the separate disabled production database profile while preserving

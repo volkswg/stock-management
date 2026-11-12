@@ -510,6 +510,8 @@
     "fingerprintDeadlineSecondsUnchanged": 150,
     "postCheckOpenHostedTestSessions": 0,
     "accountPasswordValidUntilBangkok": "2026-11-14 02:20",
-    "passwordExpiryDoesNotTerminateExistingSessions": true
+    "passwordExpiryDoesNotTerminateExistingSessions": true,
+    "driverEvidenceReads": "SERIALIZED_CURSOR_DRAIN_FAILURE_IS_STICKY",
+    "hostedControlsPassedLocally": 85
   }
 }

@@ -1,5 +1,5 @@
 {
-  "version": 23,
+  "version": 24,
   "scope": "CRITICAL-PATH CUTOVER MODE: preserve application/access behavior as-is; database migration first; new security implementation next phase; existing safeguards preserved and access gap retained for final cutover risk decision",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -1080,7 +1080,7 @@
     "backupManifestFilesLocallyRehashed": 14,
     "securityRemediation": "NEW_APP_SECURITY_NEXT_PHASE_EXISTING_TEST_ISOLATION_PRESERVED",
     "productionCutover": "NO_GO",
-    "offlineAdapterComponentsTestsPassed": 83,
+    "offlineAdapterComponentsTestsPassed": 85,
     "offlineAdapterState": "LOCAL_IMPLEMENTATION_COMPLETE_HOSTED_ACCEPTANCE_NOT_RUN",
     "fullHostedHarnessRemaining": "Actual hosted environment acceptance, verified allowances/metrics/traffic forecast, upload-platform decision and explicit execution approval; no pending local runtime/browser/fault integration",
     "hostedToolingImplemented": true,
@@ -1361,7 +1361,18 @@
       "checkpointLocalRestore": "EXACT_51_TABLE_15_METADATA_MATCH",
       "localeProvider": "icu en-US",
       "hostedRecoveryOrOffsiteEncryptionCertified": false,
-      "testSessionsRemaining": 0
+      "testSessionsRemaining": 0,
+      "ci46DriverFollowup": {
+        "failedRunId": 43299719494,
+        "oldSource": "d2a03495124338082b611dffec51415d89ec7275",
+        "failedStage": "private-app WT03 smoke after restricted-reader recovery passed",
+        "reproducedDefect": "concurrent ledger cursor reads duplicate events",
+        "fix": "serialize complete drains; fail queued reads closed",
+        "regressions": "2 fail before / pass after",
+        "hostedControlsPassedLocally": 85,
+        "freshPrivateAppBrowserCrashRecovery": "PASS",
+        "newHeadCi": "PENDING"
+      }
     }
   }
 }

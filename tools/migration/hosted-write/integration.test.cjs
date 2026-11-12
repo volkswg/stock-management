@@ -3,6 +3,24 @@ const test = require('node:test'), assert = require('node:assert/strict'), fs = 
 const { createClient, createCoordinator } = require('./rpc.cjs');
 const { configuration, install } = require('./runtime.cjs');
 const runtimeToken = 'WT_' + 'r'.repeat(60), operatorToken = 'WT_' + 'o'.repeat(60), targetId = 'WT_11111111-2222-4333-8444-555555555555';
+test('concurrent campaign ledger refreshes append each event once and keep the cursor valid', async () => {
+  require('../../../tests/helpers/postgres-runtime.cjs');
+  const campaign = Object.create(require('./campaign.cjs').HostedCampaign.prototype), events = [{ kind: 'WT_event' }], cursors = [];
+  campaign.providerEvents = []; campaign.operator = { async call(method, input) {
+    assert.equal(method, 'snapshot'); cursors.push(input.cursor); assert.ok(input.cursor <= events.length);
+    await Promise.resolve(); return { events: events.slice(input.cursor), cursor: events.length, endAt: events.length };
+  } };
+  await Promise.all([campaign.refreshLedger(), campaign.refreshLedger()]);
+  assert.deepEqual(campaign.ledger(), events); assert.deepEqual(cursors, [0, 1]);
+  await campaign.refreshLedger(); assert.deepEqual(campaign.ledger(), events);
+});
+test('a failed campaign ledger refresh stops queued reads without hiding incomplete evidence', async () => {
+  require('../../../tests/helpers/postgres-runtime.cjs');
+  const campaign = Object.create(require('./campaign.cjs').HostedCampaign.prototype); let reads = 0;
+  campaign.providerEvents = []; campaign.operator = { async call() { reads++; throw Error('WT evidence unavailable'); } };
+  const results = await Promise.allSettled([campaign.refreshLedger(), campaign.refreshLedger()]);
+  assert.ok(results.every(result => result.status === 'rejected')); assert.equal(reads, 1); assert.deepEqual(campaign.ledger(), []);
+});
 async function fixture(t, tls, activate = true) {
   const parent = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'ha-transport-'))), directory = path.join(parent, 'private');
   const service = createCoordinator({ directory, runId: 'WT_RPC', targetId, runtimeToken, operatorToken, tls });

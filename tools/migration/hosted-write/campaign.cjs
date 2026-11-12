@@ -36,8 +36,13 @@ class HostedCampaign extends UploadSupplementCampaign {
   }
   ledger() { return structuredClone(this.providerEvents); }
   async refreshLedger() {
-    let result;
-    do { result = await this.operator.call('snapshot', { cursor: this.providerEvents.length, includeEvidence: false }); this.providerEvents.push(...result.events); } while (result.cursor < result.endAt);
+    // Parallel HTTP probes and nested API cleanup share the same event cursor.
+    // Drain serially; a failed read keeps queued callers failed closed.
+    const refresh = (this.ledgerRefresh || Promise.resolve()).then(async () => {
+      let result;
+      do { result = await this.operator.call('snapshot', { cursor: this.providerEvents.length, includeEvidence: false }); this.providerEvents.push(...result.events); } while (result.cursor < result.endAt);
+    });
+    this.ledgerRefresh = refresh; await refresh;
   }
   async flush() { await this.profileGate(); if (this.pendingControl) { await this.operator.call('control', this.pendingControl); this.pendingControl = null; } }
   async api(...args) { try { return await super.api(...args); } finally { await this.refreshLedger(); } }

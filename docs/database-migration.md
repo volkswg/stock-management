@@ -1004,6 +1004,17 @@ the exact comparison and resolves them. No fingerprint normalization was added.
 This is local recovery of a hosted capture, not independent off-site decryption,
 a second hosted recovery target, RTO/RPO certification or activated backup automation.
 
+**CI failure corrected without application changes.** CI46 on `d2a0349` passes
+regression/type safety and the new restricted-backup restore, then fails the later
+private-app smoke at WT03. Diagnosis reproduces a driver race: parallel HTTP
+post-response hooks can read the same journal cursor and append events twice.
+Serialize complete ledger drains; after a read failure queued callers remain
+failed closed rather than hiding missing evidence. Two regressions fail before
+this change and pass after it. All **85** hosted controls and a fresh actual private
+app/browser/crash/checkpoint-recovery run pass locally. New source-matched CI is
+pending; CI46 is not a PASS. No application, schema or runtime permission changes
+are made by this driver-only correction.
+
 **Quota observations, not a complete traffic forecast.** Organization dashboard
 shows 1.582/5 GB uncached egress for 03 Nov–03 Dec, about 3.418 GB remaining; after
 retaining the 2 GB source reserve, at most 1.418 GB remains before unreported usage.
