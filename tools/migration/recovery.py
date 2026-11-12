@@ -167,8 +167,23 @@ def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revisi
     return rows
 
 
-def capture(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging'):
+def full_row_security_reader_sql():
+    # Opt-in exports must see every row, not merely a policy-filtered subset.
+    # An applicable permissive true policy plus no applicable restrictive policy
+    # proves full visibility without granting BYPASSRLS or assuming an owner role.
+    applies = "EXISTS (SELECT 1 FROM unnest(p.polroles) AS role_id WHERE CASE WHEN role_id=0 THEN true ELSE pg_has_role(current_user,role_id,'USAGE') END)"
+    return f"""SELECT 1 / (count(*)>0 AND bool_and(
+      has_table_privilege(current_user,c.oid,'SELECT') AND
+      (NOT c.relrowsecurity OR (
+        EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid=c.oid AND p.polcmd IN ('r','*') AND p.polpermissive AND pg_get_expr(p.polqual,p.polrelid)='true' AND {applies}) AND
+        NOT EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid=c.oid AND p.polcmd IN ('r','*') AND NOT p.polpermissive AND {applies})
+      ))))::int FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+      WHERE n.nspname IN ('stock_migration','stock_operational') AND c.relkind IN ('r','p');"""
+
+
+def capture(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', row_security_reader=False):
     validate_readers(workers)
+    if type(row_security_reader) is not bool: raise ValueError('row-security reader must be an explicit boolean')
     history = history_table(history)
     target = str(uuid.UUID(target))
     guard_sql(target, target_purpose)
@@ -176,10 +191,16 @@ def capture(directory, target, *, workers=1, history='revision', row_digests=Fal
     directory.mkdir(mode=0o700)  # Exclusive; never overwrite any prior backup.
     started = time.monotonic()
     with exported_snapshot(target, target_purpose) as snapshot:
+        if row_security_reader:
+            begin = f"BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SET TRANSACTION SNAPSHOT '{snapshot}';\n"
+            with read_session(begin + secure_connection_sql()+'\n'+guard_sql(target,target_purpose)) as session:
+                session.rows(full_row_security_reader_sql())
         records = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose)
         fd = os.open(directory / 'database.dump', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, 'wb') as stream:
-            run = subprocess.run(['pg_dump', '-w', '-Fc', '--snapshot=' + snapshot, '-n', 'stock_migration', '-n', 'stock_operational'], stdout=stream, stderr=subprocess.PIPE, env=client_environment(), timeout=1800)
+            args = ['pg_dump', '-w', '-Fc', '--snapshot=' + snapshot, '-n', 'stock_migration', '-n', 'stock_operational']
+            if row_security_reader: args.append('--enable-row-security')
+            run = subprocess.run(args, stdout=stream, stderr=subprocess.PIPE, env=client_environment(), timeout=1800)
         if run.returncode: raise ValueError('backup failed; incomplete directory must be quarantined')
         if fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose) != records: raise ValueError('security/sequence metadata changed during backup')
     with (directory / 'database.dump').open('rb') as stream:
@@ -191,6 +212,7 @@ def capture(directory, target, *, workers=1, history='revision', row_digests=Fal
                'durationSeconds': round(time.monotonic() - started, 3), 'consistentExportedSnapshot': True,
                'restoreVerified': False, 'encryptionVerified': False}
     if target_purpose != 'isolated-staging': receipt['sourcePurpose'] = target_purpose
+    if row_security_reader: receipt['fullRowSecurityReaderVerified'] = True
     if row_digests: receipt.update({'version':2,'fingerprintFormat':'sorted-row-sha256-v2'})
     write_private(directory / 'receipt.json', json.dumps(receipt, indent=2) + '\n')
     return receipt
@@ -221,6 +243,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('capture'); p.add_argument('--directory', required=True); p.add_argument('--target-id', required=True)
+    p.add_argument('--row-security-reader', action='store_true', help='Explicit restricted-reader export; requires full SELECT and unfiltered applicable RLS policies on every private table')
     p = sub.add_parser('verify'); p.add_argument('--directory', required=True); p.add_argument('--target-id', required=True); p.add_argument('--output', required=True)
     for p in sub.choices.values():
         p.add_argument('--workers', type=int, choices=(1,2), default=1, help='Bounded readers sharing the same snapshot and 150s deadline')
@@ -228,7 +251,7 @@ def main():
         p.add_argument('--target-purpose', choices=('isolated-staging','production'), default='isolated-staging', help='Explicit production opt-in; exact UUID and purpose are checked in every snapshot')
         p.add_argument('--history', choices=('audit','revision'), default='revision', help='Explicit source schema layout; never auto-fallback')
     args = parser.parse_args()
-    result = capture(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose) if args.command == 'capture' else verify(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose)
+    result = capture(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose, row_security_reader=args.row_security_reader) if args.command == 'capture' else verify(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose)
     if args.command == 'verify': write_private(args.output, json.dumps(result, indent=2) + '\n')
     print(json.dumps({'completed': True, 'restoreMatch': result.get('match'), 'differentSections':result.get('differentSections',[]), 'dumpChecksum': result.get('dumpSha256', result.get('backupDumpSha256'))}))
     return 0 if result.get('match', True) else 1

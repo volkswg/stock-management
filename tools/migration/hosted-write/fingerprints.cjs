@@ -19,7 +19,9 @@ function captureAndCompare(packet, { compareAll = false, directoryName = 'genera
   requireGate(service.host === binding.databaseHost && service.port === '5432' && service.dbname === 'postgres' && service.sslmode === 'verify-full' && service.user?.startsWith('stock_ha_backup') && (service.password || service.passfile), 'FINGERPRINT_SERVICE_TARGET');
   requireGate(binding.connectionMode === 'session' ? service.user.endsWith('.' + binding.projectRef) : !service.user.includes('.'), 'FINGERPRINT_POOLER_PROJECT');
   requireGate(['generated-checkpoint', 'preflight-checkpoint'].includes(directoryName), 'FINGERPRINT_DIRECTORY'); const directory = path.join(packet.evidenceDirectory, directoryName);
-  const result = cp.spawnSync('python3', [path.join(__dirname, '../recovery.py'), 'capture', '--directory', directory, '--target-id', binding.isolationId, '--workers', '2', '--row-digests'], { env: { PATH: process.env.PATH, PGSERVICEFILE: packet.backupServiceFile, PGSERVICE: packet.backupService }, encoding: 'utf8', timeout: 300000 });
+  // One snapshot holder plus one reader fits the approved two-connection backup login.
+  // The real managed capture took 368s; each fingerprint retains its 150s deadline.
+  const result = cp.spawnSync('python3', [path.join(__dirname, '../recovery.py'), 'capture', '--directory', directory, '--target-id', binding.isolationId, '--workers', '1', '--row-digests', '--row-security-reader'], { env: { PATH: process.env.PATH, PGSERVICEFILE: packet.backupServiceFile, PGSERVICE: packet.backupService }, encoding: 'utf8', timeout: 600000 });
   requireGate(result.status === 0, 'FINGERPRINT_CAPTURE');
   const actual = JSON.parse(fs.readFileSync(path.join(directory, 'fingerprint.json'))), expected = JSON.parse(baseline); const proof = compareProtected(expected, actual);
   if (compareAll) assert.deepEqual(actual, expected);

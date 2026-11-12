@@ -50,6 +50,7 @@ jobs:
           env -i PATH="$PATH" node --test tools/migration/readonly-staging.test.cjs 2>&1 | tee evidence/readonly-staging.log
           bash tools/migration/verify-operational.sh 2>&1 | tee evidence/operational-postgres.log
           bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee evidence/recovery-fingerprints.log
+          bash tools/migration/verify-restricted-backup.sh 2>&1 | tee evidence/restricted-backup.log
           STOCK_HA_EVIDENCE_DIR="$PWD/evidence" bash tools/migration/verify-hosted-tooling.sh 2>&1 | tee evidence/hosted-tooling-integration.log
       - name: Credential-free production build and bundle boundaries
         run: |

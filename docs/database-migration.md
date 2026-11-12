@@ -936,74 +936,88 @@ permissions. The known access-protection gap remains recorded, not fixed or
 certified safe. Its disposition belongs in the explicit final cutover decision;
 this scope change authorizes no live configuration change or production switch.
 
-**Hosted execution started (2026-11-13 Bangkok): temporary accounts approved; owner password handoff pending.**
-The owner's latest “Go ahead” authorizes the disposable hosted target and test
-writes within zero spend, not existing-target changes or production activation.
-Created `sm-ha-20261112-f` (`dcwyiayubrqdrloergax`) in the selected Free organization,
-Tokyo; project quote **$0/month**. It is ACTIVE_HEALTHY on PostgreSQL
-`17.11.0.019`, versus the retained source's `.018`; same-major compatibility still
-needs full native restore/application evidence. Protected staging is untouched.
+**Hosted database restore verified (2026-11-13 Bangkok); application acceptance pending.**
+The owner approved the new disposable Free target/test writes and three temporary
+accounts. `sm-ha-20261112-f` (`dcwyiayubrqdrloergax`, Tokyo PostgreSQL
+`17.11.0.019`) is separate from protected staging. The $0/month project quote is
+not a full campaign/production quote. No existing staging data, new Sheets data,
+production setting, paid resource, merge or cutover was changed.
 
-Completed only on the new target:
+- Rehashed all 14 pinned post-audit backup files. Native owner connection uses
+  the user-prepared private 0600 service/passfile and verified direct TLS.
+- Restored the original dump atomically in **94.702 seconds**. Two failed setup
+  attempts rolled back: cleaning absent policies and excluding schema definitions
+  with a restore filter. The corrected complete dump contains only the two
+  approved private schemas and all 51 tables; no database/login creation.
+- Pinned original verification matches **all 51 table fingerprints** and 13 of
+  15 metadata sections. The raw original comparison deliberately remains
+  `match=false` for `memberships`/`runtimeLogins`: each adds exactly the three
+  explicitly approved temporary accounts and their managed-owner administration
+  links, removes nothing, and changes no original role. Those enumerated deltas
+  are independently checked; do not claim an unqualified original 15/15 match.
+- Only after that review assigned the new test identity
+  `5f63d064-9658-4440-bf87-b4279b08c806`, purpose `isolated-staging`, and approved
+  reader policies/grants. The copied original UUID was used only for endpoint-
+  isolated read-only comparison. Production purpose/release binding stays disabled.
+- Runtime/observer/backup logins retain NOSUPERUSER/NOCREATEDB/NOCREATEROLE/
+  NOINHERIT/NOREPLICATION/NOBYPASSRLS, connection limits 6/2/2 and their original
+  less-than-24-hour expiry. No new administrator login. Runtime must explicitly
+  assume `stock_runtime`; direct operational/archive reads, owner assumption and
+  DELETE are denied. The other accounts cannot write or assume the writer role.
+- Supabase refuses granting `pg_read_all_stats` through its normal owner. After
+  explicit additional owner approval, the temporary observer inherits `pg_monitor`
+  for read-only diagnostics; its login flags, connection limit and expiry remain
+  unchanged. Runtime/backup do not receive that role. Exact native visibility passes.
+  Password validity ends 2026-11-14 02:20 Bangkok. VALID UNTIL governs new password
+  authentication; all test sessions must drain before expiry. Post-check inspection
+  confirms zero open hosted test-account sessions; no expiry extension is approved.
+- A native synthetic numeric insert verifies mapping and exact decimal precision,
+  then rolls back; order count, revision and zero retained test rows match before/
+  after. It uses an explicit unused positive row order to avoid advancing a
+  nontransactional identity sequence. This is **not** application/replay acceptance.
+- All three session logins pass client verified TLS. Direct native/server TLS also
+  passes; recovery uses direct TLS. The pooler's database-side hop reports
+  `ssl=false`, distinct from its TLS client socket; no TLS guard is bypassed.
+- Post-setup security/health advisors have no findings. The performance advisor
+  lists informational unused indexes on the new copy; preserve them.
+  [Index notice](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
 
-- Installed the private archive migration: **24 tables**, zero retained rows.
-  Hosted synthetic precision/duplicate-key/deferred-FK probes passed and were
-  rolled back. The initial FK probe omitted `SET CONSTRAINTS ALL IMMEDIATE`;
-  correcting the probe confirmed the intended deferred constraint, not an app bug.
-- Confirmed `anon`/`authenticated` cannot use or read/write that schema.
-  Initial advisors report only informational private-owner-only RLS/no-policy
-  and empty-database unused-index notices; no policy/index changes were made.
-  [RLS notice](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy),
-  [index notice](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
-- Read the new project's exact session-pooler endpoint from its dashboard and
-  verified native TLS 1.3/hostname/CA before authentication. After the owner
-  explicitly approved the three temporary accounts, all three session-pooler
-  logins passed with verified TLS. The runtime account also passes direct native
-  TLS and server-side `pg_stat_ssl`; use that verified direct path for recovery.
-  The pooler client uses TLS, while its database-side hop reports `ssl=false`;
-  do not bypass the recovery tool's server-side TLS guard or equate that hop with
-  client TLS. These are connection tests, not application acceptance.
-- Rehashed the pinned post-audit backup manifest and **all 14 files**; the original
-  dump is 2,817,225 bytes. No new Sheets data was accessed or imported.
+**Demonstrated backup-tool defect fixed locally.** A real export using the approved
+NOBYPASSRLS backup reader fails with the old owner-style `pg_dump` default. New
+explicit `capture --row-security-reader` verifies full table SELECT, an applicable
+permissive `USING (true)` policy for every RLS table and no applicable restrictive
+policy before allowing the row-security-aware dump. It never grants BYPASSRLS,
+assumes an owner or silently accepts a policy-filtered backup. The default path is
+unchanged. Hosted checkpoint tooling uses one reader plus one snapshot holder to
+fit the two-connection login, with a 600-second outer capture timeout; the individual
+150-second fingerprint deadlines stay unchanged. The real managed capture takes
+367.47 seconds and would exceed the former 300-second wrapper timeout. A fresh local regression captures/restores all 51
+tables/15 metadata sections, retains default refusal and rejects restrictive or
+missing access before creating a dump. The **hosted restricted checkpoint succeeds**,
+with dump SHA-256 `4389c710fba5a7b79ebfe1d0aa7f74adbd50c6fce4ea18e4e8292dc692452613`.
+Its 51 table fingerprints preserve every original business row; only the enumerated
+new environment UUID differs from the original table data. A fresh local restore
+of this exact checkpoint matches **all 51 tables and all 15 metadata sections**.
+The first local comparison exposed ordering differences, not definition changes,
+in constraints/triggers; matching the managed ICU `en-US` locale provider preserves
+the exact comparison and resolves them. No fingerprint normalization was added.
+This is local recovery of a hosted capture, not independent off-site decryption,
+a second hosted recovery target, RTO/RPO certification or activated backup automation.
 
-Automatic approval review initially rejected creating a password-bearing test
-login because target/test-write approval did not specifically cover credentialed
-access. The owner subsequently explicitly approved the three restricted accounts
-below. All three are now created, with **less than 24 hours** password validity;
-no administrator login was created. The source-defined `stock_runtime` NOLOGIN
-role is installed, including its expected managed-owner membership. Business
-grants/memberships remain unassigned until the original restore is compared.
-`stock_operational` is still absent; earlier installation confirmations expired.
-Do not relabel these connection/archive checks as full application acceptance.
+**Quota observations, not a complete traffic forecast.** Organization dashboard
+shows 1.582/5 GB uncached egress for 03 Nov–03 Dec, about 3.418 GB remaining; after
+retaining the 2 GB source reserve, at most 1.418 GB remains before unreported usage.
+The provider warns of up to one-hour refresh delay. Native post-restore database
+size is 79,869,619 bytes, below the 400 MB stop. These do not certify memory/CPU,
+complete wire traffic or a full campaign. Vercel shows Hobby; billing API returns
+`costs_not_found`, not proof of unused hosting allowance. No test app/coordinator
+endpoint or paid add-on was created.
 
-The approved three **24-hour maximum** target-only accounts are:
-
-| Account | Permitted test access | Limit |
-| --- | --- | --- |
-| `stock_ha_runtime` | Restricted `stock_runtime` application writes; no archive, DDL or DELETE | 6 connections |
-| `stock_ha_observer` | Private-schema SELECT plus `pg_read_all_stats`; no business writes | 2 connections |
-| `stock_ha_backup` | Private-schema SELECT/export and explicit SELECT policies; no writer-role membership | 2 connections |
-
-All are NOSUPERUSER/NOCREATEDB/NOCREATEROLE/NOINHERIT/NOBYPASSRLS. Approval also
-covers the existing source-defined `stock_runtime` NOLOGIN role and private-schema
-grants/policies on **this new target only**. Passwords stay in private 0600 files;
-none is sent in chat. Existing owner access is used for restore rather than a
-new administrator login. The owner must personally set the new project's database
-password, then record it with the prepared hidden-input local helper; browser
-password entry/reset requires user handoff. Do not reset the protected source.
-The Mac is unlocked and the new-target password dialog is open for user-only
-entry, confirmation and submission. Computer-use controls block Terminal access;
-the owner must launch the prepared hidden-input helper themselves. No owner
-password has been entered/reset by the agent or saved yet. The organization usage
-page rendered blank; remaining allowance is still unverified. Complete that check
-before full campaign traffic. No password is requested in chat.
-
-Current gate: **PARTIAL HOSTED DATABASE PREFLIGHT ONLY**. Owner login, full
-51-table/15-metadata restore, application writes, private hosted app/coordinator,
-resource/traffic capacity and generated-checkpoint hosted recovery remain pending.
-Do not activate the full campaign: its existing checked-in CLI guards remain
-disabled until actual bindings/allowances/protocol and owner connection are ready.
-No paid add-on, existing project pause/reset, production change, merge or cutover.
+Current gate: **HOSTED DATABASE RESTORE / ROLE PREFLIGHT ONLY**. Private hosted
+app/coordinator, bounded pilot/forecast and protocol/launch-envelope approvals,
+actual browser/API/LINE/replay, one/five-client measurements and hosted generated-
+checkpoint recovery remain pending. Preserve the original strict gates; the full
+campaign stays disabled. Review A1/A3 below for the remaining precise scope.
 
 **Production release path prepared locally (2026-11-12).** The staging-only
 accessor still rejects production. A separate production profile now exists in
@@ -1117,7 +1131,7 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | D1 | SAFE TO DEFER until after cutover | **New security/authentication implementation** is the next owner-selected phase: login, sessions, roles/shop permissions, user administration and new access restrictions. This is a sequencing decision, not a security PASS; the existing exposure remains M1 and must be explicit in the final cutover decision. Preserve existing safeguards throughout. |
 | D2 | SAFE TO DEFER until after cutover | Unrelated refactors, extra test abstractions, more synthetic fault repetitions, additional planning PRs, multi-region/HA, optional dashboards, restore certification for unused Supabase Auth/Storage, and automated backup pruning. Preserve evidence and retained backups; defer destructive cleanup. Recheck only affected behavior or demonstrated drift. |
 | D3 | SAFE TO DEFER until after cutover | Automatic reverse synchronization to Sheets is unnecessary if the owner accepts a **forward-recovery-only** incident policy after the first SQL write. No switch back after SQL writes is permitted without a separately reconciled reverse migration. A demand for immediate post-write Sheets rollback makes that implementation MUST FIX. |
-| A1 | Requires owner approval | Exact new disposable hosted resources, private preview/coordinator endpoints, restore/setup/test writes, test-only pause/disposal sequence and spend/traffic ceiling. Current quote is $0/project/month; full cost/allowance is unverified. Proposed first pilot 50 MB, full test cap 1 GB, protected-source reserve at least 2 GB; stop if the actual complete forecast/allowance fails. Never pause/reset existing staging. |
+| A1 | Requires owner approval | **F database creation/restore/test writes and temporary accounts are approved and completed as recorded above.** Remaining private preview/coordinator hosting, companion recovery/load targets, test-only pause/disposal sequence and spend/traffic ceiling need explicit scope/bindings. Current quote is $0/project/month; full cost/hosting allowance is unverified. Proposed first pilot 50 MB, full test cap 1 GB, protected-source reserve at least 2 GB; stop if the actual complete forecast/allowance fails. Never pause/reset existing staging. |
 | A2 | Requires owner approval | Production org/plan/resource budget, private backup destination/key custodian, recovery operator/on-call, retention and activation costs. Obtain an itemized account quote before purchase. Free is only a candidate; if measurements/backup/uptime needs exceed its limits, request a paid decision without creating or upgrading anything. |
 | A3 | Requires owner approval | **Bounded hosted acceptance scope and pre-existing limits.** Current access behavior is selected; no interim admin-only policy is pending. Approve the precise hosted protocol/launch envelope and monitoring/upload dispositions before changing disabled execution gates. No implicit relabeling of incomplete evidence. |
 | A4 | Requires owner approval | Exact operational workbook ID, read/export identity, native source backup/freeze permissions, all writer/event holds, final full export and import into the named new production target. No new Sheets access is authorized now. |
@@ -1661,7 +1675,7 @@ for the whole test campaign. The current authorized incremental spend is **$0**.
 
 | Item | Prepared cost / decision |
 | --- | --- |
-| New eligible Free project | Quoted $0/month; recheck quota and quote before each future creation. No project created. |
+| New eligible Free project | Quoted $0/month; recheck quota and quote before each future creation. F created after owner approval; later targets uncreated. |
 | Free constraints | 500 MB database and up to 500 MB RAM; stop at 400 MB database usage and at 80% of actual measured memory allocation. This differs from the local 1 GiB profile. |
 | Traffic | Free uncached egress is 5 GB/month, shared with existing usage. Proposed test ceiling 1 GB, plus at least 2 GB reserved for the protected organization; actual remaining allowance is unknown and must be evidenced first. Pausing does not reset usage. |
 | Hosting / private artifacts | Vercel allowance and encrypted off-site storage/egress are unquoted. Require evidence of existing approved allowance; no subscription, add-on or paid collector may be activated. |

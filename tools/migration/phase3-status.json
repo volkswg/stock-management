@@ -1,5 +1,5 @@
 {
-  "version": 22,
+  "version": 23,
   "scope": "CRITICAL-PATH CUTOVER MODE: preserve application/access behavior as-is; database migration first; new security implementation next phase; existing safeguards preserved and access gap retained for final cutover risk decision",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -94,7 +94,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Owner completes new-project password dialog and hidden local helper, recheck allowance, then direct-TLS original backup restore and complete fingerprint comparison before test permissions/identity deltas; no production or new Sheets access",
+  "nextStep": "Verify new-head CI; bind/approve private hosted app/coordinator and bounded native-resolution pilot/traffic envelope for application acceptance. Production, new Sheets access, paid infrastructure and cutover remain unapproved.",
   "cutoverBlockers": [
     "M1 existing access-protection risk retained for explicit final activation decision; implementation deferred by owner, no new access-policy choice blocks independent migration preparation",
     "M2 production profile implemented locally; real production endpoint/UUID/purpose/role/release binding and hosted activation verification remain unassigned",
@@ -1045,7 +1045,7 @@
   },
   "hostedAcceptancePreparation": {
     "reportedOnBangkok": "2026-11-13",
-    "state": "HOSTED_TARGET_ACCOUNTS_APPROVED_OWNER_PASSWORD_HANDOFF_PENDING",
+    "state": "HOSTED_ORIGINAL_RESTORE_ACCEPTED_WITH_APPROVED_ACCOUNT_DELTAS",
     "document": "docs/database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12",
     "plan": "tools/migration/hosted-acceptance-plan.json",
     "baselineCommit": "405c474578cec0b2fe84327687b90faf3f5b02f9",
@@ -1062,7 +1062,7 @@
     "primaryProposedName": "sm-ha-20261112-f",
     "region": "ap-northeast-1",
     "actualTargetProjectId": "dcwyiayubrqdrloergax",
-    "actualTargetIsolationId": null,
+    "actualTargetIsolationId": "5f63d064-9658-4440-bf87-b4279b08c806",
     "targetCreated": true,
     "testDeploymentCreated": false,
     "hostedWritesPerformed": true,
@@ -1326,24 +1326,42 @@
       "nativeTlsPreauth": "PASS",
       "backupFilesRehashed": 14,
       "credentialedRolesCreated": 3,
-      "operationalSchemaInstalled": false,
+      "operationalSchemaInstalled": true,
       "approvalReview": "INITIAL_REJECTION_RESOLVED_BY_EXPLICIT_THREE_ACCOUNT_APPROVAL",
       "newAdminRoleProposal": "WITHDRAWN",
       "pendingAccounts": [],
       "accountLifetimeHoursMaximum": 24,
-      "passwordReset": "USER_HANDOFF_PENDING_NEW_TARGET_ONLY",
-      "usageCheck": "UNVERIFIED_BLANK_DASHBOARD",
+      "passwordReset": "OWNER_HELPER_COMPLETED_NATIVE_OWNER_LOGIN_VERIFIED",
+      "usageCheck": "OBSERVED_1_582_OF_5_GB_DELAYED_METER",
       "noProtectedStagingOrProductionActions": true,
       "nativeDirectTls": "PASS_CLIENT_AND_SERVER_SSL",
       "newCredentialedAccessApproved": true,
       "internalRuntimeRoleInstalled": true,
-      "businessPermissionsInstalled": false,
+      "businessPermissionsInstalled": true,
       "createdAccounts": [
         "stock_ha_runtime",
         "stock_ha_observer",
         "stock_ha_backup"
       ],
-      "terminalComputerControl": "BLOCKED_BY_COMPUTER_USE_SAFETY"
+      "terminalComputerControl": "BLOCKED_BY_COMPUTER_USE_SAFETY",
+      "sourceRestoreTablesMatch": 51,
+      "sourceRestoreUnchangedMetadataSections": 13,
+      "rawOriginalAll15MetadataMatch": false,
+      "onlyApprovedAccountDeltas": true,
+      "newIsolationId": "5f63d064-9658-4440-bf87-b4279b08c806",
+      "monitorRole": "pg_monitor",
+      "monitorRoleSeparatelyApproved": true,
+      "nativeRoleAndRollbackProbes": "PASS",
+      "businessRows": 70777,
+      "newCheckpoint": "PASS_RESTRICTED_READER",
+      "securityAndHealthAdvisors": "NO_FINDINGS",
+      "existingDataOrProductionChanged": false,
+      "captureSeconds": 367.47,
+      "checkpointDumpSha256": "4389c710fba5a7b79ebfe1d0aa7f74adbd50c6fce4ea18e4e8292dc692452613",
+      "checkpointLocalRestore": "EXACT_51_TABLE_15_METADATA_MATCH",
+      "localeProvider": "icu en-US",
+      "hostedRecoveryOrOffsiteEncryptionCertified": false,
+      "testSessionsRemaining": 0
     }
   }
 }

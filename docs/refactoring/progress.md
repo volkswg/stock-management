@@ -1,24 +1,28 @@
 # Refactoring progress and evidence
 
-## Hosted target accounts approved; owner password handoff pending (2026-11-13)
+## Hosted original restore / roles verified; restricted-backup fix (2026-11-13)
 
-The owner explicitly approved the three temporary new-target accounts. Created
-and verified all three with less than 24-hour password validity and connection
-limits 6/2/2; no administrator, elevated flags, business grants or writer
-membership were added. The source-defined NOLOGIN `stock_runtime` is installed.
-All three session-pooler logins pass verified TLS; direct native/server TLS also
-passes. Recovery will use direct TLS, retaining its existing server-side guard.
+The new disposable target restores the pinned post-audit dump atomically. All 51
+original table fingerprints match; the only original metadata differences are
+exactly the three approved accounts and their managed-owner links in two sections.
+No original role was removed/changed. Reviewed those deltas before assigning the
+new isolated test UUID and reader/writer permissions. Native TLS, exact numeric
+rollback, role/write/DELETE denial and unchanged before/after order/revision counts
+pass. The separately approved temporary `pg_monitor` resolves managed-owner limits;
+no administrator login or existing-target changes. The [single current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records evidence and its limits.
 
-The new Free Tokyo target `sm-ha-20261112-f` / `dcwyiayubrqdrloergax` still holds
-only 24 empty archive tables. The [single current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-retains the rolled-back engine probes, all 14 verified backup files and initial
-approval rejection, now resolved for these accounts. The owner-only password
-change/hidden-input helper is pending; Terminal computer control is blocked and
-remaining organization allowance is unverified after a blank usage page. Full
-restore/application/load/hosted recovery are NOT RUN. No existing data or
-production changes; no repeated synthetic campaign. Executable evidence remains
-[CI45](https://github.com/volkswg/stock-management/actions/runs/43259664708)
-on `739011c64b81b4ff54f34de43c915aa27e19186f`; this update is status metadata only.
+A real restricted-reader export exposed the owner-style pg_dump/RLS incompatibility.
+The explicit full-visibility-guarded reader option and one-reader checkpoint fix
+pass fresh local 51-table/15-metadata restore plus incomplete-access refusal tests.
+625 regressions, 73 Python checks, 83 hosted controls, lint/typecheck and isolated
+build pass locally; new source-matched CI is pending. The restricted hosted capture
+passes in 367.47 seconds; its fresh local restore matches all 51 tables/15 metadata
+sections after matching the hosted ICU en-US sorting provider. Retain both the
+initial ordering diagnostic and final exact match. The outer capture limit is now
+600 seconds; individual fingerprint deadlines stay 150 seconds.
+Full hosted application/capacity/off-site recovery remain pending;
+production is Sheets and NO-GO. Keep PR65 draft; no new authentication features.
 
 
 ## Production identity profile implemented locally (2026-11-12)

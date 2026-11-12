@@ -1,7 +1,7 @@
 {
   "version": 1,
   "preparedOnBangkok": "2026-11-12",
-  "state": "HOSTED_TARGET_ACCOUNTS_APPROVED_OWNER_CREDENTIAL_HANDOFF_PENDING",
+  "state": "HOSTED_DATABASE_RESTORE_ROLES_RESTRICTED_CAPTURE_AND_LOCAL_RECOVERY_PASS_APP_PENDING",
   "sourceCommit": "405c474578cec0b2fe84327687b90faf3f5b02f9",
   "document": "docs/database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12",
   "authorization": {
@@ -62,7 +62,7 @@
     "database": "postgres",
     "primaryProposedName": "sm-ha-20261112-f",
     "primaryProjectRef": "dcwyiayubrqdrloergax",
-    "primaryIsolationId": null,
+    "primaryIsolationId": "5f63d064-9658-4440-bf87-b4279b08c806",
     "maxNewActiveFreeProjectsAtOnce": 1,
     "reservedNames": [
       {
@@ -219,7 +219,16 @@
     },
     "branching": "Excluded: metered usage, not a free clone and not covered by compute credits",
     "vercelAndOffsiteCosts": "Unquoted; existing allowance must be evidenced before execution. No free claim or purchase authorization.",
-    "automaticUpgradeOrSpendCapDisableAllowed": false
+    "automaticUpgradeOrSpendCapDisableAllowed": false,
+    "observedOrganizationUsage": {
+      "billingCycle": "03 Nov 2026 - 03 Dec 2026",
+      "uncachedEgressUsedGbDisplayed": 1.582,
+      "remainingGbInferred": 3.418,
+      "protectedReserveGb": 2,
+      "remainingAfterReserveGbInferred": 1.418,
+      "providerRefreshLagHoursMaximumDisplayed": 1,
+      "fullForecastCertified": false
+    }
   },
   "executionOrder": [
     "Obtain exact resource, quote, setup/write, pause and source-verification approvals; keep production cutover excluded",
@@ -443,10 +452,10 @@
     "ownerApprovedDisposableTargetAndTestWrites": true,
     "zeroIncrementalSpendOnly": true,
     "archiveSchemaTables": 24,
-    "retainedBusinessRows": 0,
+    "retainedBusinessRows": 70777,
     "syntheticArchiveEngineProbe": "PASS_ROLLED_BACK",
     "applicationAcceptance": "NOT_RUN",
-    "operationalSchemaInstalled": false,
+    "operationalSchemaInstalled": true,
     "nativeAuthenticatedLoginVerified": true,
     "nativeTlsPreauthentication": "PASS_TLS13_CA_HOSTNAME",
     "sourceBackupFilesRehashed": 14,
@@ -456,7 +465,7 @@
     "pendingTemporaryAccounts": [],
     "accountValidityMaximumHours": 24,
     "ownerPasswordSetupRequiresUserHandoff": true,
-    "usageDashboardCheck": "UNVERIFIED_PAGE_RENDERED_BLANK",
+    "usageDashboardCheck": "OBSERVED_1_582_OF_5_GB_REFRESH_LAG_UP_TO_1H",
     "fullCampaignExecutionEnabled": false,
     "generalAuthorizationFlagsApplyToFullHarnessNotThisRecordedSetup": true,
     "existingDataOrProductionChanged": false,
@@ -471,9 +480,36 @@
     "sessionDatabaseHopSsl": false,
     "recoveryConnectionMode": "DIRECT_VERIFIED_TLS",
     "internalRuntimeRoleInstalled": true,
-    "businessPermissionsInstalled": false,
-    "ownerConnectionReady": false,
-    "passwordHandoff": "PENDING_USER_ONLY_CHROME_RESET_AND_PRIVATE_HELPER",
-    "terminalComputerControl": "BLOCKED_BY_COMPUTER_USE_SAFETY"
+    "businessPermissionsInstalled": true,
+    "ownerConnectionReady": true,
+    "passwordHandoff": "COMPLETED_BY_OWNER_PRIVATE_HELPER",
+    "terminalComputerControl": "BLOCKED_BY_COMPUTER_USE_SAFETY",
+    "monitorRole": "pg_monitor",
+    "monitorRoleSeparatelyApproved": true,
+    "sourceRestoreTablesMatch": 51,
+    "sourceRestoreUnchangedMetadataSections": 13,
+    "rawOriginalAll15MetadataMatch": false,
+    "approvedOriginalMetadataDeltas": [
+      "THREE_TEMPORARY_LOGIN_DEFINITIONS",
+      "THREE_MANAGED_OWNER_MEMBERSHIP_EDGES"
+    ],
+    "newIsolationId": "5f63d064-9658-4440-bf87-b4279b08c806",
+    "nativeRoleRollbackProbes": "PASS_NO_RETAINED_TEST_ROWS_OR_REVISION_CHANGE",
+    "databaseBytes": 79869619,
+    "restrictedReaderCheckpoint": "PASS",
+    "restrictedReaderExportFix": "EXPLICIT_FULL_VISIBILITY_GUARD_NO_BYPASSRLS",
+    "readerWorkers": 1,
+    "sourceBusinessDataChanged": false,
+    "newHostedAppCreated": false,
+    "restrictedReaderCheckpointSeconds": 367.47,
+    "checkpointDumpSha256": "4389c710fba5a7b79ebfe1d0aa7f74adbd50c6fce4ea18e4e8292dc692452613",
+    "checkpointLocalRestore": "EXACT_51_TABLE_15_METADATA_MATCH",
+    "checkpointLocalLocaleProvider": "icu en-US",
+    "independentOffsiteDecryptionOrHostedRecoveryCertified": false,
+    "captureOuterTimeoutSeconds": 600,
+    "fingerprintDeadlineSecondsUnchanged": 150,
+    "postCheckOpenHostedTestSessions": 0,
+    "accountPasswordValidUntilBangkok": "2026-11-14 02:20",
+    "passwordExpiryDoesNotTerminateExistingSessions": true
   }
 }
