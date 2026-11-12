@@ -20,11 +20,14 @@
     "automaticCleanupEnabled": false
   },
   "securityScope": {
-    "productionRemediation": "MUST_FIX_BEFORE_CUTOVER_MINIMUM_PROTECTION",
+    "productionRemediation": "DEFERRED_BY_OWNER_TO_NEXT_PHASE",
     "newUserAuthentication": "PLANNING_ONLY_SEPARATE_MILESTONE",
     "preserveExistingApiTokenLineSignatureTlsRoleAndProductionGuards": true,
     "privateTestIsolationRequired": true,
-    "productionAccessControlGapRemainsCutoverBlocker": true
+    "currentApplicationAccessBehavior": "PRESERVE_AS_IS",
+    "existingAccessGapFixedOrSecurityCertified": false,
+    "gapDisposition": "Known unresolved release risk for explicit final cutover assessment; no new protection implementation now",
+    "productionAccessControlGapRequiresFinalOwnerRiskDecision": true
   },
   "metadataInspection": {
     "scope": "Organization and project metadata only; no SQL, keys or business rows",
@@ -419,7 +422,7 @@
     "optionalFrameworkExpansionStopped": true,
     "newProtocolOrUploadDispositionsApproved": false,
     "currentStrictExecutionGatesUnchanged": true,
-    "minimumProductionProtectionMandatory": true,
+    "minimumProductionProtectionMandatory": false,
     "newAuthentication": "NEXT_MILESTONE_PLANNING_ONLY",
     "approvalGroups": [
       "A1",
@@ -427,6 +430,10 @@
       "A3",
       "A4",
       "A5"
-    ]
+    ],
+    "existingSafeguardsMandatory": true,
+    "newSecurityImplementation": "DEFERRED_NEXT_PHASE",
+    "asIsApplicationBehaviorRequired": true,
+    "finalSecurityRiskAssessmentStillRequired": true
   }
 }

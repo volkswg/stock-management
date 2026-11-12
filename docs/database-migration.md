@@ -926,6 +926,16 @@ features, additional planning PRs and repeated synthetic campaigns. Reuse accept
 evidence; repeat a check only after a relevant change, drift or failure. Keep PR65
 draft/unmerged until separately approved. Google Sheets remains authoritative.
 
+**Latest owner scope: preserve the application as-is and finish database migration.**
+Keep current users, access behavior, screens, APIs and LINE workflows. Defer new
+security controls, owner-only restrictions, login, sessions, roles and shop
+authorization to the next phase. The earlier proposed interim admin-only policy
+is withdrawn; no further audience decision is needed to continue migration work.
+Preserve existing LINE signatures, staging restrictions, TLS and database
+permissions. The known access-protection gap remains recorded, not fixed or
+certified safe. Its disposition belongs in the explicit final cutover decision;
+this scope change authorizes no live configuration change or production switch.
+
 **Evidence already sufficient.** Two independent local functional campaigns,
 local one/five-client capacity with exact-data oracles and recovery, and the
 locally completed hosted adapter are accepted implementation evidence. On code
@@ -952,20 +962,20 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 
 | ID | Classification | Exit evidence / action |
 | --- | --- | --- |
-| M1 | MUST FIX before cutover | **Minimum production access protection.** Prove deny-by-default protection for every page/API, production/custom/deployment alias and sensitive report/file. Named allowed operators must work, anonymous/direct calls must fail before data access, and browser requests must work without a shared secret in client code/storage. The staging bearer is not staff authentication. Existing metadata/source do not meet this exit. |
-| M2 | MUST FIX before cutover | **Production release path.** `stagingSettings()` refuses production and transactions require `purpose=isolated-staging`. Implement/review an explicit production endpoint+UUID+purpose+least-privilege identity allowlist after M1's access boundary is settled. Keep staging refusal, TLS, no-fallback and wrong-target tests. Do not change the guard to make the current staging database production. |
+| M1 | Requires owner approval | **Existing access-protection risk; implementation deferred.** The owner requests current application access behavior and security work in the next phase. Do not add an owner-only gate or block independent migration preparation on a new access-policy choice. Existing production-wide protection remains unproved; record that risk explicitly in the final activation decision, without marking it fixed, safe or security-certified. Existing safeguards remain enabled. |
+| M2 | MUST FIX before cutover | **Production release path and as-is compatibility.** `stagingSettings()` currently refuses production and transactions require `purpose=isolated-staging`. Prepare/review an explicit production endpoint+UUID+purpose+least-privilege identity profile that preserves current browser/API/LINE behavior. Keep the staging guard, TLS, no-fallback and wrong-target tests. Do not expose the staging bearer to browsers, broadly disable guards or turn populated staging into production. Activation still requires exact approval. |
 | M3 | MUST FIX before cutover | **Actual hosted acceptance.** On new approved disposable copies verify managed connection/pooler/TLS/roles/private Data API denial, browser-to-API protection, signed LINE behavior, representative supported writes/replay, exact business data and no real-provider egress. Measure one/five-client hosted latency, errors, connections and growth on the intended production-equivalent profile. Existing local evidence cannot certify these platform differences. |
 | M4 | MUST FIX before cutover | **Dedicated final production target.** Record approved org/plan/region/version, new project/UUID, restricted runtime/backup identities, private schemas/RLS, pool and instance limits, measured database/index/WAL/growth headroom and cost/quotas. Current staging is protected and cannot be repurposed. A Free quote does not prove production capacity or uptime. |
 | M5 | MUST FIX before cutover | **Recoverability and minimum monitoring.** Activate a target-bound encrypted/off-site backup schedule, independent key recovery, one real hosted generated-checkpoint restore/read-only verification and actionable redacted alerts with named coverage. Prove the agreed production RPO and measured RTO; sealed-checkpoint RPO=0 is not ongoing disaster-recovery RPO=0. Drive file objects require their own inventory/recovery responsibility. |
 | M6 | MUST FIX before cutover | **Final full Sheets synchronization.** After A4 only: freeze every writer, capture the final full source, profile/import/promote into a fresh empty target and reconcile all 23 business tables/IDs/types/totals/reports. Retained 70,777-row evidence is historical, not current freshness. Never delta-merge changed/deleted/reordered rows with the append-only importer. |
 | M7 | MUST FIX before cutover | **Writer freeze and external events.** Prove manual edits, old deployments, scripts, scheduled sync and LINE cannot cross the boundary. Provide durable receipt/hold plus ordered keyed replay, or another explicitly reviewed loss-safe procedure. Current immediate webhook handling is not a maintenance queue; LINE redelivery is not guaranteed and reply tokens expire. Never acknowledge unpersisted events or assume retries preserve them. |
 | M8 | MUST FIX before cutover | **Release and incident sign-off.** Seal the exact final release/target/source/backup; complete read-only smoke while frozen, verify accepted normal-size uploads and provider connectivity under approved scope, and name decision/abort times and an incident lead. Before SQL writes, Sheets rollback is possible; after SQL writes use freeze/forward recovery and reconciliation, never automatic Sheets fallback. |
-| D1 | SAFE TO DEFER until after cutover | **New user-authentication system** stays the next priority: login, sessions, roles/shop permissions and administration remain planning-only. This is safe only if M1 protects the approved interim audience and data scope. If that audience requires role/shop restrictions, those restrictions become a cutover MUST FIX; this roadmap cannot waive them. |
+| D1 | SAFE TO DEFER until after cutover | **New security/authentication implementation** is the next owner-selected phase: login, sessions, roles/shop permissions, user administration and new access restrictions. This is a sequencing decision, not a security PASS; the existing exposure remains M1 and must be explicit in the final cutover decision. Preserve existing safeguards throughout. |
 | D2 | SAFE TO DEFER until after cutover | Unrelated refactors, extra test abstractions, more synthetic fault repetitions, additional planning PRs, multi-region/HA, optional dashboards, restore certification for unused Supabase Auth/Storage, and automated backup pruning. Preserve evidence and retained backups; defer destructive cleanup. Recheck only affected behavior or demonstrated drift. |
 | D3 | SAFE TO DEFER until after cutover | Automatic reverse synchronization to Sheets is unnecessary if the owner accepts a **forward-recovery-only** incident policy after the first SQL write. No switch back after SQL writes is permitted without a separately reconciled reverse migration. A demand for immediate post-write Sheets rollback makes that implementation MUST FIX. |
 | A1 | Requires owner approval | Exact new disposable hosted resources, private preview/coordinator endpoints, restore/setup/test writes, test-only pause/disposal sequence and spend/traffic ceiling. Current quote is $0/project/month; full cost/allowance is unverified. Proposed first pilot 50 MB, full test cap 1 GB, protected-source reserve at least 2 GB; stop if the actual complete forecast/allowance fails. Never pause/reset existing staging. |
 | A2 | Requires owner approval | Production org/plan/resource budget, private backup destination/key custodian, recovery operator/on-call, retention and activation costs. Obtain an itemized account quote before purchase. Free is only a candidate; if measurements/backup/uptime needs exceed its limits, request a paid decision without creating or upgrading anything. |
-| A3 | Requires owner approval | **Bounded migration acceptance scope**, interim staff access policy and two pre-existing limits below. Approve the precise hosted protocol/launch envelope before changing disabled gates; no implicit waiver or relabeling. |
+| A3 | Requires owner approval | **Bounded hosted acceptance scope and pre-existing limits.** Current access behavior is selected; no interim admin-only policy is pending. Approve the precise hosted protocol/launch envelope and monitoring/upload dispositions before changing disabled execution gates. No implicit relabeling of incomplete evidence. |
 | A4 | Requires owner approval | Exact operational workbook ID, read/export identity, native source backup/freeze permissions, all writer/event holds, final full export and import into the named new production target. No new Sheets access is authorized now. |
 | A5 | Requires owner approval | Exact PR65/release merge, any live security/environment/webhook changes, final target and dated maintenance window, then the final activation decision. Paid infrastructure and production cutover remain separately prohibited until explicitly approved. No blanket approval to bypass M1–M8. |
 
@@ -985,14 +995,14 @@ project+UUID, incident lead and dated window. No complete target-bound A1–A5 a
 activate the disabled packet or permit bypassing a failed gate.
 
 **Shortest implementation and execution sequence.** Use this PR; do not open another
-planning PR. Resolve A3's interim access policy and A1/A2's target/cost choices first.
-Prepare only the minimum access boundary and production identity release change,
-with targeted security/identity checks and the existing regressions for changed code.
-Provision/restore/test only after its exact approval. Run hosted platform acceptance
-once, including one/five-client load and a hosted restore; fix demonstrated failures
-and rerun only affected checks. In parallel bind backup/alerts and prepare the fresh
-production target. Once M1–M5 and M7 are proven, request A4/A5 and execute the final
-full-refresh/cutover runbook below. No further framework expansion is a prerequisite.
+planning PR. Focus first on hosted/production target and cost bindings, the guarded
+production release profile and as-is browser/API/LINE compatibility. Run approved
+hosted platform acceptance once, including one/five-client load and a hosted
+restore; fix demonstrated failures and rerun affected checks only. In parallel
+bind backup/alerts and prepare the fresh production target. Then obtain A4/A5 for
+the final full Sheets refresh, writer freeze and controlled activation. New access
+features are deferred, and no interim owner-only policy is a preparation dependency.
+The final activation assessment must still state M1's unresolved security risk.
 
 Recommended A3 scope: retain the completed local correctness/fault evidence rather
 than repeat every local repetition in the cloud. Require hosted platform, business
@@ -1012,20 +1022,17 @@ limitation for the database-only release. If larger uploads are required for lau
 the upload fix is MUST FIX. Do not silently reduce limits, alter the provider or
 claim that a successful 256 KiB fixture proves large-file compatibility.
 
-**Minimum security closure.** Prefer an existing platform access boundary over
-building staff login now. Vercel now offers all-deployment authentication without
-an additional protection charge; verify account entitlement and the exact permitted
-staff list. Enabling it alone can block LINE, and a browser without the staging
-bearer still cannot use SQL APIs. The reviewed solution must prove both browser/API
-identity propagation and a narrowly isolated signed webhook ingress. Deployment
-exceptions are domain-wide; OPTIONS allowlists do not exempt POST. A project-wide
-bypass token in a LINE URL is not a path-scoped permission and is not a proposed
-shortcut. No anonymous ordinary API access, client-visible bearer, trusted
-user-supplied identity header or disabled signature verification is acceptable.
-The interim access policy question is pending; no new authentication system,
-production setting or gateway deployment was implemented by this scope update.
-[Protection availability](https://vercel.com/changelog/protect-production-deployments-for-free-on-every-plan),
-[bypass scope](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection).
+**Security implementation deferred; current behavior preserved.** Do not introduce
+an admin-only launch, new login, gateway, roles, shop permissions or production
+protection settings during this migration work. Preserve existing access controls,
+raw-body LINE HMAC verification, staging API checks, verified TLS and restricted
+database roles. Private test copies remain isolated from real integrations.
+The ordinary browser must work after migration without receiving a shared staging
+bearer. Production target/configuration compatibility remains migration work;
+simply bypassing staging checks is not an approved production release path.
+Existing protection gaps stay documented as M1, with no claim of adequate security
+or general production safety. The next security phase and the eventual explicit
+cutover risk decision are separate from permission to continue database preparation.
 
 **Backup/monitoring activation packet — prepared, disabled.** Assign the new target,
 scoped read/export login, verified-TLS endpoint, operator-owned scheduler/private
@@ -1084,9 +1091,9 @@ promised. LINE retries alone are not a queue
 
 **Next priority remains user authentication.** The existing
 [roadmap](architecture/user-authentication-roadmap.md) is unchanged in scope and
-planning-only. Minimum migration access protection is mandatory; full user login,
-sessions, roles/shop authorization and administration follow the database milestone
-unless the approved interim policy makes a subset necessary before activation.
+planning-only. The owner defers new security/access implementation; login, sessions, roles/shop
+authorization and administration follow the database milestone. Preserve all
+existing safeguards and carry unresolved access risk into the final cutover report.
 
 ##### Bounded local capacity continuation (2026-11-12)
 
@@ -1324,8 +1331,9 @@ evidence is retained. The existing source is `stock-management`
 excluded from every write/reset/pause target. The production Vercel project and
 current protected read-only preview are also excluded from reconfiguration.
 
-**Security scope update.** The current critical-path report supersedes the earlier
-production API/access deferral: minimum protection is mandatory before cutover.
+**Security scope update.** The latest owner instruction preserves application
+access behavior and defers new security implementation to the next phase. Existing
+access gaps remain recorded for the final activation assessment.
 This preparation implements no new login, sessions, roles or shop authorization.
 Existing staging token checks, LINE raw-body signatures, TLS, private-schema grants,
 restricted runtime roles and the production refusal remain mandatory test controls.

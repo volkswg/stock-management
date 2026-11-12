@@ -1,5 +1,17 @@
 # Refactoring progress and evidence
 
+## Scope clarification: application as-is; security next (2026-11-12)
+
+Owner requests unchanged application/access behavior and database migration first.
+New protection/authentication implementation is deferred; the proposed interim
+owner/admin-only launch is withdrawn. Update the same draft PR65 and current
+readiness report. Preserve existing LINE/staging/TLS/database safeguards. The
+known production access gap remains open as a final activation risk decision;
+no security PASS, live change or cutover is implied. Hosted acceptance, production
+identity readiness, backup/alerts and final full Sheets synchronization remain
+the migration work. Documentation/disabled metadata only; no repeated campaigns.
+
+
 ## Critical-path cutover mode (2026-11-12)
 
 Owner reprioritized the existing draft PR65 toward database completion. The
@@ -8,8 +20,8 @@ now separates MUST FIX, SAFE TO DEFER and owner approvals, reuses CI43/local
 acceptance evidence, and defines minimum production security, actual hosted
 proof, production target/backup/alerts, final full Sheets refresh and a conditional
 02:00–06:00 Bangkok window. No new framework or repeated synthetic campaign.
-Earlier security deferral is superseded for minimum cutover protection; new user
-authentication stays the next planning-only milestone.
+Historical priority snapshot: superseded by the latest scope clarification above.
+New user authentication stays the next planning-only milestone.
 
 Fresh control-plane metadata still shows only protected staging, a $0/month
 new-Free-project quote (not complete costs), and no established protection across all production URLs; firewall configuration

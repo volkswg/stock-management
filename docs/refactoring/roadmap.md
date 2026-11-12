@@ -13,21 +13,20 @@ on Sheets. CI43 and completed local correctness/capacity/recovery evidence are
 accepted; do not expand the framework, rerun sufficient synthetic campaigns or
 open additional planning PRs. Recheck relevant changes, drift or failures only.
 
-Critical order: settle interim access policy and target/cost approvals; close
-minimum protection and the guarded production release path; prove actual hosted
-behavior/capacity/recovery and activate approved backup/alerts; then obtain exact
-Sheets export/freeze and final release/window approval. No paid infrastructure,
-new Sheets access, live production modification or cutover is authorized now.
-Other hosted setup/write scopes remain disabled pending exact target/cost approval.
-Keep PR65 draft/unmerged. Never repurpose populated staging or weaken LINE/TLS/roles.
+Current owner direction: preserve the application as-is and finish the database
+migration. Work on hosted/production target and cost bindings, the guarded
+production release profile, actual hosted browser/API/LINE compatibility,
+capacity/recovery, backup/alerts and final full Sheets synchronization. The
+proposed owner/admin-only interim launch is withdrawn; do not require that choice
+or implement new access restrictions before continuing independent migration work.
 
-Minimum production access protection is now on the critical path, superseding its
-earlier deferral. Full user authentication remains the next major milestone and
-[planning only](../architecture/user-authentication-roadmap.md). Inadequate interim
-access protection remains a hard NO-GO; role/shop permissions cannot be deferred
-if required by the approved interim audience. Unrelated refactoring, extra test
-abstractions, optional dashboards, destructive cleanup and automatic reverse-sync
-are outside this migration milestone. See the report for conditional deferrals.
+New security controls and the full [authentication milestone](../architecture/user-authentication-roadmap.md)
+are deferred to the next phase. Preserve existing LINE signatures, staging
+restrictions, TLS and database permissions. Existing production access protection
+is not certified adequate: retain the known risk explicitly for the final cutover
+assessment, without claiming it fixed or safe. No paid resources, new Sheets
+access, live production changes, merge or cutover are authorized by this scope
+change. Keep PR65 draft/unmerged and reuse sufficient existing evidence.
 
 ## Completed: modular architecture and legacy external cleanup
 
@@ -50,15 +49,14 @@ Sheet mode uses the existing operational workbook only; remove the account-speci
 
 <a id="next-production-readiness-gate-open-not-implemented"></a>
 
-## Required before cutover: minimum production access protection
+## Next phase: security and user authentication
 
-[Issue #38](https://github.com/volkswg/stock-management/issues/38) covers access controls for all production domains and sensitive APIs, independent CI, critical-path smoke tests and safe staging/provider isolation. Documentation cleanup was prioritized first at the owner's request; that sequencing does **not** remove the potential access-control risk. Verify external exposure before treating this deployment as safe for unrestricted production access.
-
-The critical-path instruction supersedes the earlier remediation deferral. Close
-the minimum approved access boundary and verify ordinary browser/API and signed
-LINE ingress together before activation. Live changes and data/provider operations
-retain explicit approval boundaries; the full user-authentication system remains
-next, rather than part of an unrelated refactor.
+[Issue #38](https://github.com/volkswg/stock-management/issues/38) remains open.
+The owner chooses current application behavior while the database migration
+finishes. Do not implement new access controls or an owner-only launch in this
+phase. Preserve existing safeguards, privately isolate testing and keep the
+existing access-protection gap visible in the final activation risk assessment.
+Deferral is not a security certification or permission to modify live production.
 
 ## Supabase migration
 

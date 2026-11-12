@@ -62,6 +62,7 @@
     "monitoring": "Recommend native-resolution operational release evidence; strict 1s/10s CPU certificate remains BLOCKED, no safety/security waiver",
     "traffic": "Retain measured 50 MB pilot / full forecast / 1 GB cap / protected reserve; no execution or spend approved",
     "uploads": "Pre-existing platform incompatibility may be deferred for database-only cutover only with owner acceptance and unchanged normal-flow proof; required large-file support means MUST FIX",
-    "priorRecommendationsNotActivated": true
+    "priorRecommendationsNotActivated": true,
+    "securityScope": "Owner selects current application/access behavior; new security implementation next phase; existing safeguards and unresolved-risk reporting preserved"
   }
 }
