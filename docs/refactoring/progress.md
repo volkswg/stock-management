@@ -6,6 +6,8 @@ Draft PR65 adds the separate disabled production database profile while preservi
 current Sheets and user access behavior. Exact new target/UUID, project/commit,
 restricted role and purpose checks, strict TLS, read-only default and unchanged
 staging bearer/LINE checks are implemented; no new authentication system.
+Backup/recovery now has explicit production-purpose selection and receipt binding,
+while staging remains the default; full native capture/restore is verified locally.
 A new purpose-constraint migration changes no row, UUID, grant or staging default
 and has not been applied hosted. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
 records configuration, focused evidence and the remaining real target/activation

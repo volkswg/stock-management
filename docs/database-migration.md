@@ -981,6 +981,18 @@ new UUID/purpose assignment, provision scoped logins, and seal the expected setu
 metadata. Never retag existing staging, run a production import onto the old
 snapshot or claim intentionally changed metadata still equals the old baseline.
 
+The existing backup/restore tool now accepts explicit `--target-purpose production`
+for an approved production UUID/PGSERVICE. Its default guard remains
+`isolated-staging`; production cannot select protected staging's UUID. Every
+exported snapshot and fingerprint worker checks the selected purpose. Production
+capture receipts record `sourcePurpose=production`, and verify rejects a missing
+or different purpose before any connection (older receipts remain staging-only).
+The new path is read/export/verify only: it cannot provision, retag, restore over a
+live target or activate schedules. Continue requiring scoped verified-TLS service
+configuration, encryption/off-site key custody and separate restore approval.
+A fresh local production-tagged capture/restore verifies all 51 tables and 15
+metadata sections; it does not claim off-site encryption or hosted recovery timing.
+
 Local evidence: 25 focused production-profile checks pass. A fresh disposable
 PostgreSQL test verifies the actual application's TLS socket/certificate, as-is
 API access, one committed order with exact replay/changed-intent conflict, purpose

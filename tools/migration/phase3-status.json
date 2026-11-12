@@ -1300,7 +1300,14 @@
       "legacyProductionAccessPolicy": "legacy-as-is",
       "newAuthenticationImplemented": false,
       "actualHostedAcceptance": "NOT_RUN",
-      "newHeadCi": "PENDING_ON_PR65"
+      "newHeadCi": "PENDING_ON_PR65",
+      "backupRecoveryProductionPurpose": "EXPLICIT_OPT_IN_DEFAULT_STAGING_RECEIPT_BOUND",
+      "productionTaggedLocalRecovery": {
+        "state": "PASS_FRESH_SYNTHETIC_51_TABLES_15_METADATA",
+        "tablesExpected": 51,
+        "metadataSectionsExpected": 15,
+        "hostedOrOffsiteClaimed": false
+      }
     }
   }
 }

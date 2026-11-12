@@ -77,5 +77,10 @@ EXECUTE format('CREATE POLICY production_fixture_reader ON stock_operational.%I 
 END LOOP; END $$;
 PRODUCTION_READER_FIXTURE
 env -i PATH="$PATH" STOCK_PRODUCTION_FIXTURE_PORT="$port" STOCK_PRODUCTION_FIXTURE_CA_FILE="$artifacts/cert" node --test tools/migration/production-release-postgres.test.cjs
-if [ -n "${STOCK_HA_EVIDENCE_DIR:-}" ]; then cp "$artifacts/smoke-result.json" "$STOCK_HA_EVIDENCE_DIR/hosted-private-app-smoke.json"; cp "$artifacts/build-attestation.json" "$STOCK_HA_EVIDENCE_DIR/hosted-private-build.json"; cp "$artifacts/recovery-app-result.json" "$STOCK_HA_EVIDENCE_DIR/hosted-recovery-app.json"; fi
+# The same capture/restore tools now require explicit production purpose and retain it in the receipt.
+STOCK_HA_WRAPPER_DATABASE=postgres PATH="$artifacts:$PATH" python3 tools/migration/recovery.py capture --directory "$artifacts/production-recovery" --target-id "$identity" --target-purpose production --workers 2 --row-digests
+pg createdb -U postgres ha_synthetic_production_restore
+pg pg_restore -U postgres -d ha_synthetic_production_restore --single-transaction --exit-on-error < "$artifacts/production-recovery/database.dump"
+STOCK_HA_WRAPPER_DATABASE=ha_synthetic_production_restore PATH="$artifacts:$PATH" python3 tools/migration/recovery.py verify --directory "$artifacts/production-recovery" --target-id "$identity" --target-purpose production --workers 2 --row-digests --output "$artifacts/production-recovery-result.json"
+if [ -n "${STOCK_HA_EVIDENCE_DIR:-}" ]; then cp "$artifacts/production-recovery-result.json" "$STOCK_HA_EVIDENCE_DIR/production-profile-recovery.json"; cp "$artifacts/smoke-result.json" "$STOCK_HA_EVIDENCE_DIR/hosted-private-app-smoke.json"; cp "$artifacts/build-attestation.json" "$STOCK_HA_EVIDENCE_DIR/hosted-private-build.json"; cp "$artifacts/recovery-app-result.json" "$STOCK_HA_EVIDENCE_DIR/hosted-recovery-app.json"; fi
 echo 'PASS: hosted tooling private app, browser, durable fake outcomes, TLS, SQL faults, process crash and generated-checkpoint recovery; hosted execution NOT RUN'

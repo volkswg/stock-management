@@ -30,9 +30,11 @@ def checksum(path):
     return result.hexdigest()
 
 
-def guard_sql(target):
+def guard_sql(target, target_purpose='isolated-staging'):
     target = str(uuid.UUID(target))
-    return f"SELECT 1 / ((SELECT count(*)=1 AND bool_and(isolation_id='{target}'::uuid AND purpose='isolated-staging') FROM stock_operational.environment))::int;"
+    if target_purpose not in ('isolated-staging', 'production'): raise ValueError('invalid approved target purpose')
+    if target_purpose == 'production' and target == '160669bd-2f6f-4490-9259-bada5a1d02c4': raise ValueError('protected staging cannot be a production recovery target')
+    return f"SELECT 1 / ((SELECT count(*)=1 AND bool_and(isolation_id='{target}'::uuid AND purpose='{target_purpose}') FROM stock_operational.environment))::int;"
 
 
 def history_table(history):
@@ -86,7 +88,8 @@ def fingerprint_sql(history='revision'):
 
 
 @contextmanager
-def exported_snapshot(target):
+def exported_snapshot(target, target_purpose='isolated-staging'):
+    guard_sql(target, target_purpose)  # Validate explicit production opt-in before opening any connection.
     target = str(uuid.UUID(target))
     # Hold both cooperative writer locks until dump + fingerprints finish.
     # No SQL or driver error body is forwarded to ordinary logs.
@@ -94,7 +97,7 @@ def exported_snapshot(target):
     try:
         # Session locks precede BEGIN so the repeatable snapshot is established
         # after earlier writers drain, rather than before a lock wait.
-        process.stdin.write("SET lock_timeout='10s';\nSET statement_timeout='120s';\n"+secure_connection_sql()+"\nSELECT pg_advisory_lock_shared(835107241);\nSELECT pg_advisory_lock_shared(835107242);\nBEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL idle_in_transaction_session_timeout='30min';\n" + guard_sql(target) + "\nSELECT 'snapshot:'||pg_export_snapshot();\n")
+        process.stdin.write("SET lock_timeout='10s';\nSET statement_timeout='120s';\n"+secure_connection_sql()+"\nSELECT pg_advisory_lock_shared(835107241);\nSELECT pg_advisory_lock_shared(835107242);\nBEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL idle_in_transaction_session_timeout='30min';\n" + guard_sql(target, target_purpose) + "\nSELECT 'snapshot:'||pg_export_snapshot();\n")
         process.stdin.flush()
         snapshot = None
         for line in process.stdout:
@@ -111,22 +114,22 @@ def exported_snapshot(target):
             process.kill(); process.communicate()
 
 
-def fingerprint(target, snapshot=None, *, workers=1, history='revision', row_digests=False):
+def fingerprint(target, snapshot=None, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging'):
     validate_readers(workers)
     history = history_table(history)
     deadline=time.monotonic()+150
     if snapshot is None:
-        with exported_snapshot(target) as held:
-            return _fingerprint_snapshot(target,held,deadline,workers,history,row_digests)
-    return _fingerprint_snapshot(target,snapshot,deadline,workers,history,row_digests)
+        with exported_snapshot(target, target_purpose) as held:
+            return _fingerprint_snapshot(target,held,deadline,workers,history,row_digests,target_purpose)
+    return _fingerprint_snapshot(target,snapshot,deadline,workers,history,row_digests,target_purpose)
 
 
-def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revision', row_digests=False):
+def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging'):
     sql = 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n'
     if snapshot:
         if not re.fullmatch(r'[A-Fa-f0-9-]+', snapshot): raise ValueError('invalid snapshot')
         sql += f"SET TRANSACTION SNAPSHOT '{snapshot}';\n"
-    sql += "SET LOCAL statement_timeout='120s'; SET LOCAL client_encoding='UTF8';\n" + secure_connection_sql()+'\n'+guard_sql(target) + '\n'
+    sql += "SET LOCAL statement_timeout='120s'; SET LOCAL client_encoding='UTF8';\n" + secure_connection_sql()+'\n'+guard_sql(target, target_purpose) + '\n'
     sql += history_guard_sql(history) + '\n'
     sql += 'SELECT pg_advisory_xact_lock_shared(835107241);\nSELECT pg_advisory_xact_lock_shared(835107242);\n'
     # The complete frozen snapshot is much larger than individual business rows.
@@ -164,20 +167,21 @@ def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revisi
     return rows
 
 
-def capture(directory, target, *, workers=1, history='revision', row_digests=False):
+def capture(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging'):
     validate_readers(workers)
     history = history_table(history)
     target = str(uuid.UUID(target))
+    guard_sql(target, target_purpose)
     directory = Path(directory)
     directory.mkdir(mode=0o700)  # Exclusive; never overwrite any prior backup.
     started = time.monotonic()
-    with exported_snapshot(target) as snapshot:
-        records = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests)
+    with exported_snapshot(target, target_purpose) as snapshot:
+        records = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose)
         fd = os.open(directory / 'database.dump', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, 'wb') as stream:
             run = subprocess.run(['pg_dump', '-w', '-Fc', '--snapshot=' + snapshot, '-n', 'stock_migration', '-n', 'stock_operational'], stdout=stream, stderr=subprocess.PIPE, env=client_environment(), timeout=1800)
         if run.returncode: raise ValueError('backup failed; incomplete directory must be quarantined')
-        if fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests) != records: raise ValueError('security/sequence metadata changed during backup')
+        if fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose) != records: raise ValueError('security/sequence metadata changed during backup')
     with (directory / 'database.dump').open('rb') as stream:
         check = subprocess.run(['pg_restore', '--list'], stdin=stream, capture_output=True, timeout=60)
     if check.returncode: raise ValueError('backup archive is unreadable')
@@ -186,21 +190,24 @@ def capture(directory, target, *, workers=1, history='revision', row_digests=Fal
                'dumpSha256': checksum(directory / 'database.dump'), 'fingerprintSha256': checksum(directory / 'fingerprint.json'),
                'durationSeconds': round(time.monotonic() - started, 3), 'consistentExportedSnapshot': True,
                'restoreVerified': False, 'encryptionVerified': False}
+    if target_purpose != 'isolated-staging': receipt['sourcePurpose'] = target_purpose
     if row_digests: receipt.update({'version':2,'fingerprintFormat':'sorted-row-sha256-v2'})
     write_private(directory / 'receipt.json', json.dumps(receipt, indent=2) + '\n')
     return receipt
 
 
-def verify(directory, target, *, workers=1, history='revision', row_digests=False):
+def verify(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging'):
     validate_readers(workers)
     history = history_table(history)
     directory = Path(directory); receipt = json.loads((directory / 'receipt.json').read_text())
     if checksum(directory / 'database.dump') != receipt['dumpSha256'] or checksum(directory / 'fingerprint.json') != receipt['fingerprintSha256']:
         raise ValueError('backup artifact checksum mismatch')
+    guard_sql(target, target_purpose)
+    if receipt.get('sourcePurpose', 'isolated-staging') != target_purpose: raise ValueError('backup target purpose mismatch')
     chosen = 'sorted-row-sha256-v2' if row_digests else 'legacy-jsonb-text-v1'
     if receipt.get('fingerprintFormat','legacy-jsonb-text-v1') != chosen: raise ValueError('backup fingerprint format mismatch')
     expected = json.loads((directory / 'fingerprint.json').read_text())
-    with exported_snapshot(target) as snapshot: actual = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests)
+    with exported_snapshot(target, target_purpose) as snapshot: actual = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose)
     key = lambda row: row.get('table', row.get('metadata'))
     before, after = ({key(row): row for row in rows} for rows in [expected, actual])
     differences = sorted(k for k in before.keys() | after.keys() if before.get(k) != after.get(k))
@@ -218,9 +225,10 @@ def main():
     for p in sub.choices.values():
         p.add_argument('--workers', type=int, choices=(1,2), default=1, help='Bounded readers sharing the same snapshot and 150s deadline')
         p.add_argument('--row-digests', action='store_true', help='Explicit version 2 sorted full-row SHA256 fingerprints; reduces network transfer')
+        p.add_argument('--target-purpose', choices=('isolated-staging','production'), default='isolated-staging', help='Explicit production opt-in; exact UUID and purpose are checked in every snapshot')
         p.add_argument('--history', choices=('audit','revision'), default='revision', help='Explicit source schema layout; never auto-fallback')
     args = parser.parse_args()
-    result = capture(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests) if args.command == 'capture' else verify(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests)
+    result = capture(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose) if args.command == 'capture' else verify(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose)
     if args.command == 'verify': write_private(args.output, json.dumps(result, indent=2) + '\n')
     print(json.dumps({'completed': True, 'restoreMatch': result.get('match'), 'differentSections':result.get('differentSections',[]), 'dumpChecksum': result.get('dumpSha256', result.get('backupDumpSha256'))}))
     return 0 if result.get('match', True) else 1
