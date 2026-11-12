@@ -1,5 +1,5 @@
 {
-  "version": 24,
+  "version": 25,
   "scope": "CRITICAL-PATH CUTOVER MODE: preserve application/access behavior as-is; database migration first; new security implementation next phase; existing safeguards preserved and access gap retained for final cutover risk decision",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -94,7 +94,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Verify new-head CI; bind/approve private hosted app/coordinator and bounded native-resolution pilot/traffic envelope for application acceptance. Production, new Sheets access, paid infrastructure and cutover remain unapproved.",
+  "nextStep": "Approve and bind the private hosted app/coordinator plus a bounded native-resolution pilot/traffic envelope; full hosted application/latency/capacity and hosted off-site recovery remain pending. Do not merge, access new Sheets data, create paid resources or switch production without approval.",
   "cutoverBlockers": [
     "M1 existing access-protection risk retained for explicit final activation decision; implementation deferred by owner, no new access-policy choice blocks independent migration preparation",
     "M2 production profile implemented locally; real production endpoint/UUID/purpose/role/release binding and hosted activation verification remain unassigned",
@@ -1371,7 +1371,26 @@
         "regressions": "2 fail before / pass after",
         "hostedControlsPassedLocally": 85,
         "freshPrivateAppBrowserCrashRecovery": "PASS",
-        "newHeadCi": "PENDING"
+        "newHeadCi": "CI47_PASS"
+      },
+      "currentExecutableCi": {
+        "sourceCommit": "e4e7498ec3c7d1aba3b6f28ee8301aeab7f396a0",
+        "runId": 43302788584,
+        "conclusion": "success",
+        "reportUpload": "success",
+        "downloadedReportFilesVerified": 20,
+        "artifactSha256": "e2104cf50cea5949a4a87878df333d203430c66b981d98b7344b4988148fe91c",
+        "regressions": 625,
+        "existingControls": 39,
+        "hostedControls": 85,
+        "pythonTests": 73,
+        "actualHostedAppAcceptance": "NOT_RUN"
+      },
+      "completeCheckpointPackage": {
+        "files": 14,
+        "manifestSha256": "e2cc5e80420082c1297d2532cbcc7ef0973607e111dd939bb669e6162a649693",
+        "passwordsIncluded": false,
+        "independentOffsiteEncryptionVerified": false
       }
     }
   }

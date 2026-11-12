@@ -512,6 +512,14 @@
     "accountPasswordValidUntilBangkok": "2026-11-14 02:20",
     "passwordExpiryDoesNotTerminateExistingSessions": true,
     "driverEvidenceReads": "SERIALIZED_CURSOR_DRAIN_FAILURE_IS_STICKY",
-    "hostedControlsPassedLocally": 85
+    "hostedControlsPassedLocally": 85,
+    "currentExecutableCi": {
+      "sourceCommit": "e4e7498ec3c7d1aba3b6f28ee8301aeab7f396a0",
+      "runId": 43302788584,
+      "conclusion": "success",
+      "reportUpload": "success",
+      "reportsVerified": 20
+    },
+    "completeCheckpointPackageFiles": 14
   }
 }

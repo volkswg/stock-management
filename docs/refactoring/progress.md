@@ -15,8 +15,8 @@ records evidence and its limits.
 A real restricted-reader export exposed the owner-style pg_dump/RLS incompatibility.
 The explicit full-visibility-guarded reader option and one-reader checkpoint fix
 pass fresh local 51-table/15-metadata restore plus incomplete-access refusal tests.
-625 regressions, 73 Python checks, 83 hosted controls, lint/typecheck and isolated
-build pass locally; new source-matched CI is pending. The restricted hosted capture
+625 regressions, 73 Python checks, 85 hosted controls, lint/typecheck and isolated
+build pass; source-matched CI47 and its 20 reports are verified below. The restricted hosted capture
 passes in 367.47 seconds; its fresh local restore matches all 51 tables/15 metadata
 sections after matching the hosted ICU en-US sorting provider. Retain both the
 initial ordering diagnostic and final exact match. The outer capture limit is now
@@ -32,8 +32,11 @@ app WT03 smoke. A deterministic regression reproduces duplicate journal events
 when parallel HTTP callbacks refresh the same cursor. The driver now serializes
 whole drains and fails queued reads closed after a failure. Two red/green cases,
 all 85 hosted controls, lint, and fresh actual private-app/browser/crash/recovery
-checks pass locally. New-head CI is pending on the same draft PR65; no application
-or hosted data/permission change. The native restore/checkpoint proof above is
+checks pass locally. [CI47](https://github.com/volkswg/stock-management/actions/runs/43302788584)
+passes on executable commit `e4e7498ec3c7d1aba3b6f28ee8301aeab7f396a0`,
+including report upload; all 20 files, source SHA and ZIP digest verify. The current
+report records the exact evidence and the complete private checkpoint package.
+No application or hosted data/permission change. The native restore/checkpoint proof above is
 retained rather than repeated.
 
 

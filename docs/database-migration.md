@@ -1001,6 +1001,10 @@ of this exact checkpoint matches **all 51 tables and all 15 metadata sections**.
 The first local comparison exposed ordering differences, not definition changes,
 in constraints/triggers; matching the managed ICU `en-US` locale provider preserves
 the exact comparison and resolves them. No fingerprint normalization was added.
+The complete 14-file checkpoint package also includes password-free role metadata/
+recreation reference, the actual new-project migration ledger and pinned recovery
+tools; all entries rehash. Manifest SHA-256:
+`e2cc5e80420082c1297d2532cbcc7ef0973607e111dd939bb669e6162a649693`.
 This is local recovery of a hosted capture, not independent off-site decryption,
 a second hosted recovery target, RTO/RPO certification or activated backup automation.
 
@@ -1011,9 +1015,15 @@ post-response hooks can read the same journal cursor and append events twice.
 Serialize complete ledger drains; after a read failure queued callers remain
 failed closed rather than hiding missing evidence. Two regressions fail before
 this change and pass after it. All **85** hosted controls and a fresh actual private
-app/browser/crash/checkpoint-recovery run pass locally. New source-matched CI is
-pending; CI46 is not a PASS. No application, schema or runtime permission changes
-are made by this driver-only correction.
+app/browser/crash/checkpoint-recovery run pass locally. [CI47](https://github.com/volkswg/stock-management/actions/runs/43302788584)
+passes on executable commit `e4e7498ec3c7d1aba3b6f28ee8301aeab7f396a0`:
+625 regressions, 39 existing controls, 85 hosted controls, 73 Python checks, native
+PostgreSQL/browser/crash/restore checks, lint/typecheck and isolated build. Report
+upload passes; all 20 downloaded files, exact source SHA and archive digest
+`e2104cf50cea5949a4a87878df333d203430c66b981d98b7344b4988148fe91c` verify.
+CI46 remains a retained failed diagnostic, not a PASS. This later report-only update
+does not rerun or relabel CI47 as a test of another executable commit. No
+application, schema or runtime permission changes are made by this driver-only correction.
 
 **Quota observations, not a complete traffic forecast.** Organization dashboard
 shows 1.582/5 GB uncached egress for 03 Nov–03 Dec, about 3.418 GB remaining; after
@@ -1024,7 +1034,7 @@ complete wire traffic or a full campaign. Vercel shows Hobby; billing API return
 `costs_not_found`, not proof of unused hosting allowance. No test app/coordinator
 endpoint or paid add-on was created.
 
-Current gate: **HOSTED DATABASE RESTORE / ROLE PREFLIGHT ONLY**. Private hosted
+Current gate: **HOSTED DATABASE + LOCAL RECOVERY VERIFIED; HOSTED APP PENDING**. Private hosted
 app/coordinator, bounded pilot/forecast and protocol/launch-envelope approvals,
 actual browser/API/LINE/replay, one/five-client measurements and hosted generated-
 checkpoint recovery remain pending. Preserve the original strict gates; the full
