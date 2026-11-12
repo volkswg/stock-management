@@ -21,7 +21,7 @@ complete fingerprints before/after. Fixture reader grants/policies are confined
 to the new synthetic databases before capture; original/hosted grants are untouched.
 No off-site encryption/key recovery or hosted timing claim follows from this run.
 
-Local checks: 600 regressions, 39 existing controls, 82 new controls, lint/typecheck,
+Local checks: 600 regressions, 39 existing controls, 83 new controls, lint/typecheck,
 original credential-free build and attested private build pass. Original routes
 and all 113 client boundary checks match; only inherited shipmentRow lint warning.
 CI adds actual private-app/TLS/browser/crash/restore integration and sanitized

@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Approved prepared-copy load only. No project creation, fixture reset or budget increase. */
 const fs = require('node:fs'), path = require('node:path'), cp = require('node:child_process');
 const { requireGate, assertExecution, sha } = require('./policy.cjs');
+function taskEvidence(task) {
+  const form = task.body instanceof FormData;
+  return { intent: form ? Object.fromEntries([...task.body].filter(([, value]) => typeof value === 'string')) : task.body, fileBytes: form ? [...task.body].filter(([, value]) => typeof value !== 'string').map(([field, value]) => ({ field, name: value.name, type: value.type, size: value.size })) : undefined };
+}
 async function runLoadPacket(packet) {
   const { plan, binding, approval, env, manifest } = packet;
   assertExecution(plan, binding, approval, env); require('./seals.cjs').verifySeals(binding);
@@ -45,8 +49,7 @@ async function runLoadPacket(packet) {
     const result = await runLevel({ clients: packet.clients, clockStart: clockReceipt.startedAtMs, clock, resourceGate, block: (client, index, level) => block(workload, client, index, level),
       async execute(task) {
         const at = new Date().toISOString(), response = await driver.api(task.url, { method: task.method, body: task.body, key: task.key, maximumMs: 10000 });
-        const intent = task.body instanceof FormData ? Object.fromEntries([...task.body].filter(([, value]) => typeof value === 'string')) : task.body;
-        return { ...response, at, completedAt: new Date().toISOString(), method: task.method, url: task.url, key: task.key, variant: task.variant, fixture: task.fixture, intent, response: JSON.parse(response.body.toString()) };
+        return { ...response, at, completedAt: new Date().toISOString(), method: task.method, url: task.url, key: task.key, variant: task.variant, fixture: task.fixture, ...taskEvidence(task), response: JSON.parse(response.body.toString()) };
       },
       async ledger(row, response) {
         const fd = fs.openSync(path.join(packet.evidenceDirectory, packet.levelLabel + '-http-ledger.jsonl'), 'a', 0o600);
@@ -68,7 +71,7 @@ async function runLoadPacket(packet) {
     require('./seals.cjs').verifySeals(binding); return result;
   } finally { try { await operator.call('ingress', { open: false }); } catch { save('ingress-stop-uncertain.json', { stopUncertain: true, manualReviewRequired: true }); } await observer.admin?.end(); }
 }
-module.exports = { runLoadPacket };
+module.exports = { runLoadPacket, taskEvidence };
 if (require.main === module) (async () => {
   try { requireGate(require('../hosted-acceptance-plan.json').authorization.executionEnabled === true, 'EXECUTION_DISABLED'); requireGate(process.argv.length === 3, 'PRIVATE_LOAD_PACKET'); console.log(JSON.stringify(await runLoadPacket(JSON.parse(fs.readFileSync(process.argv[2]))))); }
   catch (error) { console.error('Hosted load stopped: ' + (error.code || 'PRIVATE_REVIEW_REQUIRED')); process.exitCode = 1; }

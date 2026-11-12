@@ -390,7 +390,7 @@
       "Exact resource/setup/write/pause approval; hosted campaign, load, off-site key recovery and restore execution"
     ],
     "fullHostedAdapterReady": false,
-    "offlineTestsPassed": 82,
+    "offlineTestsPassed": 83,
     "hostedRequestsPerformed": 0,
     "existingLocalGuardFilesChanged": false,
     "reportCommand": "node tools/migration/hosted-write/inspect-packet.cjs",

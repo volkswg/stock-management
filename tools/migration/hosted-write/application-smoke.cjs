@@ -71,6 +71,16 @@ async function port() { const server = net.createServer(); await new Promise(res
     assert.equal((await request('/api/orders', commit)).status, 503); await operator.call('control', {});
     assert.equal((await request('/api/orders', commit)).status, 201);
     assert.equal((await observer.query('SELECT count(*)::int n FROM stock_operational.orders WHERE seller=$1', ['WT_COMMIT_ACK'])).rows[0].n, 1); proofs.push('actual-commit-ack-loss-exact-replay');
+    stage = 'multipart-load-evidence';
+    const { sizedPng } = require('../local-write/binary-fixtures.cjs'), { BYTES } = require('../local-write/capacity-workload.cjs');
+    const uploadBytes = sizedPng(BYTES), upload = new FormData(); upload.set('seller', 'WT_LOAD_UPLOAD'); upload.set('totalPrice', '42.13');
+    for (const field of ['billImages', 'productImages']) upload.set(field, new Blob([uploadBytes], { type: 'image/png' }), 'WT-' + field + '.png');
+    const uploadRecord = require('./run-load.cjs').taskEvidence({ body: upload });
+    assert.equal((await request('/api/orders/with-images', { method: 'POST', headers: { authorization: 'Bearer ' + apiToken, 'idempotency-key': 'WT_LOAD_UPLOAD' }, body: upload })).status, 201);
+    const witnessed = Object.entries(uploadRecord.intent); for (const file of uploadRecord.fileBytes) { assert.equal(file.size, BYTES); witnessed.push([file.field, file.name, file.type, crypto.createHash('sha256').update(uploadBytes).digest('hex')]); }
+    const { hashIntent } = require('../../../src/infrastructure/persistence/postgres/commands.ts');
+    assert.equal((await observer.query('SELECT intent FROM stock_operational.commands WHERE key=$1', ['WT_LOAD_UPLOAD'])).rows[0].intent, hashIntent({ query: '', body: hashIntent(witnessed) }));
+    proofs.push('load-multipart-ledger-matches-actual-stored-command-intent');
     stage = 'durable-ingress-stop'; await operator.call('ingress', { open: false });
     const stopped = { ...options, headers: { ...options.headers, 'idempotency-key': 'WT_STOPPED' }, body: JSON.stringify({ seller: 'WT_STOPPED', totalPrice: 1 }) };
     assert.equal((await request('/api/orders', stopped)).status, 503); assert.equal((await observer.query('SELECT count(*)::int n FROM stock_operational.orders WHERE seller=$1', ['WT_STOPPED'])).rows[0].n, 0);

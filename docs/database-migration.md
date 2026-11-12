@@ -1298,10 +1298,11 @@ provisioning, restore and read-only readiness. The app runtime's coordinator
 round trips are part of measured latency; do not subtract their cost to pass.
 
 Local validation passes **600 application regressions, 39 unchanged local-harness
-checks, 82 new controls, lint/typecheck and both credential-free builds**. Lint has
+checks, 83 new controls, lint/typecheck and both credential-free builds**. Lint has
 only the inherited `shipmentRow` warning. A new disposable synthetic PostgreSQL
 container exercised the actual built app, desktop/mobile forms, exact fake bytes,
-precommit rollback/retry, committed acknowledgement loss/replay, all six real process-exit boundaries
+precommit rollback/retry, committed acknowledgement loss/replay, multipart load-ledger
+metadata matching the actual stored command intent, all six real process-exit boundaries
 (one synthetic trial each), accepted-reply uncertainty and correct restart replay. Its generated checkpoint
 restored all 51 tables/15 metadata sections. A SELECT-only login could not write
 or assume the writer role; the restored app read successfully, refused mutations,

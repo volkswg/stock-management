@@ -80,3 +80,14 @@ test('post-load protected fingerprints require all 51 tables, 15 metadata sectio
   assert.equal(compareProtected(before, structuredClone(before)).archiveTables, 24);
   const changed = structuredClone(before); changed[0].sha256 = 'changed'; assert.throws(() => compareProtected(before, changed)); assert.throws(() => compareProtected(before, before.slice(1)));
 });
+
+test('load evidence retains exact multipart fields and file metadata needed by the independent intent oracle', async () => {
+  const { taskEvidence } = require('./run-load.cjs'), { block, plan, BYTES } = require('../local-write/capacity-workload.cjs');
+  const workload = plan('WT_LEDGER'); for (const client of workload.clients) { Object.assign(client, { orderId: 'WT_ORDER', shopId: 'WT_SHOP', categoryId: 'WT_CATEGORY' }); for (const fixture of client.blocks) fixture.shipmentId = 'WT_SHIPMENT'; }
+  for (const task of block(workload, 0, 0, 1).filter(task => task.body instanceof FormData)) {
+    const record = taskEvidence(task); assert.equal(record.fileBytes.length, task.url.includes('with-images') ? 2 : 1);
+    assert.deepEqual(Object.entries(record.intent), [...task.body].filter(([, value]) => typeof value === 'string'));
+    for (const file of record.fileBytes) { const blob = task.body.get(file.field); assert.equal(file.size, BYTES); assert.deepEqual([file.name, file.type, file.size], [blob.name, blob.type, (await blob.arrayBuffer()).byteLength]); }
+  }
+  assert.equal(taskEvidence({ body: { seller: 'WT_JSON' } }).fileBytes, undefined);
+});
