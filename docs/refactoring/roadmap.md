@@ -2,43 +2,32 @@
 
 This page describes the **current plan**, not the full migration diary. See the [current ownership map](../architecture/migration-map.md), [merged PR ledger](progress.md#merged-implementation-ledger) and [verification evidence](verification.md).
 
-## Current priorities approved on 2026-11-12
+## Current milestone: CRITICAL-PATH CUTOVER MODE (2026-11-12)
 
-1. Complete Supabase migration acceptance, performance/capacity measurements,
-   backup automation preparation, dedicated production database preparation and
-   the final Sheets synchronization and controlled cutover plan. Preserve existing
-   authentication, LINE signatures, API restrictions and database permissions.
-   Inadequate existing production access control is a **NO-GO**, not permission to
-   weaken it or add authentication features within this milestone.
-2. User authentication is the next major milestone. The separate
-   [architecture and implementation roadmap](../architecture/user-authentication-roadmap.md)
-   covers login, sessions, roles, shop authorization, user administration and API
-   access. It is planning only; no authentication implementation is authorized now.
+Finish the Supabase migration in the existing draft [PR65](https://github.com/volkswg/stock-management/pull/65).
+The [single current readiness report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+classifies every blocker and records the exact approvals, minimal security exit,
+hosted acceptance, production target, backup/alerts, final full refresh and
+conditional four-hour Bangkok cutover window. Production is **NO-GO** and stays
+on Sheets. CI43 and completed local correctness/capacity/recovery evidence are
+accepted; do not expand the framework, rerun sufficient synthetic campaigns or
+open additional planning PRs. Recheck relevant changes, drift or failures only.
 
-PR64 merged as `405c474578cec0b2fe84327687b90faf3f5b02f9` after owner approval and
-fresh CI; its automatic deployment remains on Google Sheets. The next bounded
-task is the [hosted test target and execution packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12),
-with a [disabled declarative plan](../../tools/migration/hosted-acceptance-plan.json).
-Local continuation completes the private-build/runtime/browser/fault/coordinator
-and 45-case tooling, bounded scheduler/oracle transport and generated-checkpoint
-recovery integration. Fresh synthetic app/browser/TLS/crash/restore checks pass;
-existing source, local guards and production behavior remain unchanged. The
-[resolved proposals](../../tools/migration/hosted-write/proposals.json) retain
-strict capacity and full-upload NO-GO, specify a measured pilot and complete
-traffic reserve, and require review of any alternative protocol or hosting.
-Next, review draft PR65 and those concrete decisions, then bind/verify private
-preview/coordinator/telemetry/cost allowances before requesting exact hosted
-execution approval. No local integration component remains a planning-only stub.
-Only local preparation, metadata inspection and the selected organization's read-only
-cost quote are authorized. No resource creation, hosted write, data change,
-deployment or later PR merge is authorized by that preparation.
+Critical order: settle interim access policy and target/cost approvals; close
+minimum protection and the guarded production release path; prove actual hosted
+behavior/capacity/recovery and activate approved backup/alerts; then obtain exact
+Sheets export/freeze and final release/window approval. No paid infrastructure,
+new Sheets access, live production modification or cutover is authorized now.
+Other hosted setup/write scopes remain disabled pending exact target/cost approval.
+Keep PR65 draft/unmerged. Never repurpose populated staging or weaken LINE/TLS/roles.
 
-The owner explicitly defers production access-control remediation while migration
-preparation continues. Keep the existing controls unchanged and the documented
-gap open for the final cutover decision; this deferral is not a production GO.
-New user authentication remains planning only. Final production cutover and paid
-infrastructure still require explicit owner approval, as do exact hosted mutation
-and source synchronization scopes.
+Minimum production access protection is now on the critical path, superseding its
+earlier deferral. Full user authentication remains the next major milestone and
+[planning only](../architecture/user-authentication-roadmap.md). Inadequate interim
+access protection remains a hard NO-GO; role/shop permissions cannot be deferred
+if required by the approved interim audience. Unrelated refactoring, extra test
+abstractions, optional dashboards, destructive cleanup and automatic reverse-sync
+are outside this migration milestone. See the report for conditional deferrals.
 
 ## Completed: modular architecture and legacy external cleanup
 
@@ -61,16 +50,15 @@ Sheet mode uses the existing operational workbook only; remove the account-speci
 
 <a id="next-production-readiness-gate-open-not-implemented"></a>
 
-## Deferred: production access-control remediation (open, not implemented)
+## Required before cutover: minimum production access protection
 
 [Issue #38](https://github.com/volkswg/stock-management/issues/38) covers access controls for all production domains and sensitive APIs, independent CI, critical-path smoke tests and safe staging/provider isolation. Documentation cleanup was prioritized first at the owner's request; that sequencing does **not** remove the potential access-control risk. Verify external exposure before treating this deployment as safe for unrestricted production access.
 
-Production remediation is deferred by the owner while independent database
-preparation continues. Preserve and verify existing restrictions within isolated
-test scopes. Do not merge security policy changes, launch write-capable smoke
-tests or touch real Google Sheets, LINE, Loyverse or payroll records as part of
-planning. A separately reviewed implementation and operational verification are
-still required before the gap can be closed.
+The critical-path instruction supersedes the earlier remediation deferral. Close
+the minimum approved access boundary and verify ordinary browser/API and signed
+LINE ingress together before activation. Live changes and data/provider operations
+retain explicit approval boundaries; the full user-authentication system remains
+next, rather than part of an unrelated refactor.
 
 ## Supabase migration
 
@@ -110,10 +98,9 @@ The earlier pause is historical and does not describe the currently authorized
 local work. Existing populated staging and production remain protected; the
 application still uses Google Sheets.
 
-Finish local write/capacity acceptance first. Prepare the separate hosted
-acceptance packet, disabled backup/restore automation configuration, dedicated
-production target specification, final source synchronization and controlled
-cutover/rollback gates. Hosted writes, production provisioning, new Sheets
+Local write/capacity acceptance is complete. Reuse it and finish actual hosted
+acceptance, minimum production access/release readiness, target/backup/monitoring
+activation preparation, final full synchronization and controlled cutover gates. Hosted writes, production provisioning, new Sheets
 business reads/exports, production configuration and final cutover retain their
 separate approval boundaries. Future operators must verify their own scoped
 credentials and network/TLS rather than assume access from an earlier session.

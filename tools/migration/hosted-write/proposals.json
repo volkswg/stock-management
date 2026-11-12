@@ -55,5 +55,13 @@
     "https://supabase.com/docs/guides/observability/metrics",
     "https://supabase.com/pricing",
     "https://vercel.com/docs/errors/function_payload_too_large"
-  ]
+  ],
+  "criticalPathDisposition": {
+    "readinessReport": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
+    "ownerApprovalRequired": true,
+    "monitoring": "Recommend native-resolution operational release evidence; strict 1s/10s CPU certificate remains BLOCKED, no safety/security waiver",
+    "traffic": "Retain measured 50 MB pilot / full forecast / 1 GB cap / protected reserve; no execution or spend approved",
+    "uploads": "Pre-existing platform incompatibility may be deferred for database-only cutover only with owner acceptance and unchanged normal-flow proof; required large-file support means MUST FIX",
+    "priorRecommendationsNotActivated": true
+  }
 }

@@ -919,55 +919,174 @@ Google Sheets remains production's store.
 
 ##### Current migration go/no-go assessment (2026-11-12)
 
-**Production decision: NO-GO.** The owner prioritizes completing the Supabase
-migration, with new user authentication as a separate planning-only milestone.
-Production remains on Google Sheets. This assessment does not authorize a final
-switch, production deployment, paid infrastructure or writes to populated staging.
+**Mode: CRITICAL-PATH CUTOVER. Production decision: NO-GO.**
+This is the single current readiness report for draft [PR65](https://github.com/volkswg/stock-management/pull/65).
+The objective is the database switch. Stop unrelated refactoring, optional framework
+features, additional planning PRs and repeated synthetic campaigns. Reuse accepted
+evidence; repeat a check only after a relevant change, drift or failure. Keep PR65
+draft/unmerged until separately approved. Google Sheets remains authoritative.
 
-| Migration gate | Current evidence / required exit |
+**Evidence already sufficient.** Two independent local functional campaigns,
+local one/five-client capacity with exact-data oracles and recovery, and the
+locally completed hosted adapter are accepted implementation evidence. On code
+commit `06eafe921e92842ecc3b87739238396e191dd47d`, [CI43](https://github.com/volkswg/stock-management/actions/runs/43248306690)
+passed 600 regressions, 39 existing controls, 83 hosted-tooling controls and 71
+Python checks, builds, actual browser/crash/restore checks and report upload.
+All 18 downloaded reports and archive digest
+`b8b132ffd05bbf4b7cc2866c3d15483b1dd8c7d98799e8d16ff0626d89480fb5`
+were verified. This update changes documentation/disabled metadata only; it does
+not rerun or relabel those tests as hosted acceptance.
+
+**Fresh metadata, not business-data inspection (2026-11-12).** Supabase lists only
+the protected `stock-management` staging project (`orjnazrothkdgmzlsuto`, Tokyo,
+PostgreSQL `17.11.0.018`, ACTIVE_HEALTHY). No separate acceptance/production target
+is visible. The selected organization is Free; its repeated new-project quote
+is **$0/month for the project alone**, not a complete campaign/production quote.
+Vercel metadata still reports `all_except_custom_domains`, password and trusted-IP
+protection disabled, and the production domain attached. The active firewall
+configuration API returned 404; this is **unverified**, not proof of no firewall.
+No production business endpoint, database SQL, key or new Sheets data was read.
+
+**Blocker register.** Every outstanding item has one primary classification.
+Owner decisions do not turn an unproved MUST FIX into PASS.
+
+| ID | Classification | Exit evidence / action |
+| --- | --- | --- |
+| M1 | MUST FIX before cutover | **Minimum production access protection.** Prove deny-by-default protection for every page/API, production/custom/deployment alias and sensitive report/file. Named allowed operators must work, anonymous/direct calls must fail before data access, and browser requests must work without a shared secret in client code/storage. The staging bearer is not staff authentication. Existing metadata/source do not meet this exit. |
+| M2 | MUST FIX before cutover | **Production release path.** `stagingSettings()` refuses production and transactions require `purpose=isolated-staging`. Implement/review an explicit production endpoint+UUID+purpose+least-privilege identity allowlist after M1's access boundary is settled. Keep staging refusal, TLS, no-fallback and wrong-target tests. Do not change the guard to make the current staging database production. |
+| M3 | MUST FIX before cutover | **Actual hosted acceptance.** On new approved disposable copies verify managed connection/pooler/TLS/roles/private Data API denial, browser-to-API protection, signed LINE behavior, representative supported writes/replay, exact business data and no real-provider egress. Measure one/five-client hosted latency, errors, connections and growth on the intended production-equivalent profile. Existing local evidence cannot certify these platform differences. |
+| M4 | MUST FIX before cutover | **Dedicated final production target.** Record approved org/plan/region/version, new project/UUID, restricted runtime/backup identities, private schemas/RLS, pool and instance limits, measured database/index/WAL/growth headroom and cost/quotas. Current staging is protected and cannot be repurposed. A Free quote does not prove production capacity or uptime. |
+| M5 | MUST FIX before cutover | **Recoverability and minimum monitoring.** Activate a target-bound encrypted/off-site backup schedule, independent key recovery, one real hosted generated-checkpoint restore/read-only verification and actionable redacted alerts with named coverage. Prove the agreed production RPO and measured RTO; sealed-checkpoint RPO=0 is not ongoing disaster-recovery RPO=0. Drive file objects require their own inventory/recovery responsibility. |
+| M6 | MUST FIX before cutover | **Final full Sheets synchronization.** After A4 only: freeze every writer, capture the final full source, profile/import/promote into a fresh empty target and reconcile all 23 business tables/IDs/types/totals/reports. Retained 70,777-row evidence is historical, not current freshness. Never delta-merge changed/deleted/reordered rows with the append-only importer. |
+| M7 | MUST FIX before cutover | **Writer freeze and external events.** Prove manual edits, old deployments, scripts, scheduled sync and LINE cannot cross the boundary. Provide durable receipt/hold plus ordered keyed replay, or another explicitly reviewed loss-safe procedure. Current immediate webhook handling is not a maintenance queue; LINE redelivery is not guaranteed and reply tokens expire. Never acknowledge unpersisted events or assume retries preserve them. |
+| M8 | MUST FIX before cutover | **Release and incident sign-off.** Seal the exact final release/target/source/backup; complete read-only smoke while frozen, verify accepted normal-size uploads and provider connectivity under approved scope, and name decision/abort times and an incident lead. Before SQL writes, Sheets rollback is possible; after SQL writes use freeze/forward recovery and reconciliation, never automatic Sheets fallback. |
+| D1 | SAFE TO DEFER until after cutover | **New user-authentication system** stays the next priority: login, sessions, roles/shop permissions and administration remain planning-only. This is safe only if M1 protects the approved interim audience and data scope. If that audience requires role/shop restrictions, those restrictions become a cutover MUST FIX; this roadmap cannot waive them. |
+| D2 | SAFE TO DEFER until after cutover | Unrelated refactors, extra test abstractions, more synthetic fault repetitions, additional planning PRs, multi-region/HA, optional dashboards, restore certification for unused Supabase Auth/Storage, and automated backup pruning. Preserve evidence and retained backups; defer destructive cleanup. Recheck only affected behavior or demonstrated drift. |
+| D3 | SAFE TO DEFER until after cutover | Automatic reverse synchronization to Sheets is unnecessary if the owner accepts a **forward-recovery-only** incident policy after the first SQL write. No switch back after SQL writes is permitted without a separately reconciled reverse migration. A demand for immediate post-write Sheets rollback makes that implementation MUST FIX. |
+| A1 | Requires owner approval | Exact new disposable hosted resources, private preview/coordinator endpoints, restore/setup/test writes, test-only pause/disposal sequence and spend/traffic ceiling. Current quote is $0/project/month; full cost/allowance is unverified. Proposed first pilot 50 MB, full test cap 1 GB, protected-source reserve at least 2 GB; stop if the actual complete forecast/allowance fails. Never pause/reset existing staging. |
+| A2 | Requires owner approval | Production org/plan/resource budget, private backup destination/key custodian, recovery operator/on-call, retention and activation costs. Obtain an itemized account quote before purchase. Free is only a candidate; if measurements/backup/uptime needs exceed its limits, request a paid decision without creating or upgrading anything. |
+| A3 | Requires owner approval | **Bounded migration acceptance scope**, interim staff access policy and two pre-existing limits below. Approve the precise hosted protocol/launch envelope before changing disabled gates; no implicit waiver or relabeling. |
+| A4 | Requires owner approval | Exact operational workbook ID, read/export identity, native source backup/freeze permissions, all writer/event holds, final full export and import into the named new production target. No new Sheets access is authorized now. |
+| A5 | Requires owner approval | Exact PR65/release merge, any live security/environment/webhook changes, final target and dated maintenance window, then the final activation decision. Paid infrastructure and production cutover remain separately prohibited until explicitly approved. No blanket approval to bypass M1–M8. |
+
+A1 is approval to use `volkswg's Org` (`yntcfbkilwulyhkslhbx`) for the new
+`sm-ha-20261112-f` test target and only the named restore/load companions in the
+existing disabled packet, using the retained verified post-audit backup and fake
+providers. It is not approval to refresh Sheets or write populated staging.
+Resource identity bindings must be recorded after creation; private app/coordinator
+hosting and zero-incremental-cost allowances must be established before creation.
+At most one new Free target may be active alongside protected staging; any pause
+sequence applies only to newly created disposable targets and needs approval.
+A2 must name the production organization/plan and a maximum recurring/usage budget;
+this decision is still unassigned, so no production purchase is actionable.
+A4 must supply the exact workbook ID and read/export principal before any capture;
+an older export approval is insufficient. A5 must name the release SHA, final
+project+UUID, incident lead and dated window. No complete target-bound A1–A5 approval is recorded; this mode change does not
+activate the disabled packet or permit bypassing a failed gate.
+
+**Shortest implementation and execution sequence.** Use this PR; do not open another
+planning PR. Resolve A3's interim access policy and A1/A2's target/cost choices first.
+Prepare only the minimum access boundary and production identity release change,
+with targeted security/identity checks and the existing regressions for changed code.
+Provision/restore/test only after its exact approval. Run hosted platform acceptance
+once, including one/five-client load and a hosted restore; fix demonstrated failures
+and rerun only affected checks. In parallel bind backup/alerts and prepare the fresh
+production target. Once M1–M5 and M7 are proven, request A4/A5 and execute the final
+full-refresh/cutover runbook below. No further framework expansion is a prerequisite.
+
+Recommended A3 scope: retain the completed local correctness/fault evidence rather
+than repeat every local repetition in the cloud. Require hosted platform, business
+correctness, latency/reliability, recovery and operational monitoring evidence. The
+original one-second/ten-second CPU **strict resource certificate remains BLOCKED**
+without equivalent observations; a separately approved native-resolution operational
+protocol may replace that certificate as a migration release gate, with its blind
+spots and tested concurrency envelope explicit. It cannot waive resource exhaustion,
+missing live alerts, capacity failure or security. Existing disabled CLI gates remain
+unchanged until that approval, so the alternate protocol is not executable yet.
+
+The 4.5 MB Vercel request boundary predates the database switch; the app advertises
+10 MiB images/20 MiB files. Full advertised upload compatibility remains NO-GO.
+Recommend deferring a new upload delivery design **only after** normal production
+flows are proved unchanged and the owner explicitly accepts this pre-existing
+limitation for the database-only release. If larger uploads are required for launch,
+the upload fix is MUST FIX. Do not silently reduce limits, alter the provider or
+claim that a successful 256 KiB fixture proves large-file compatibility.
+
+**Minimum security closure.** Prefer an existing platform access boundary over
+building staff login now. Vercel now offers all-deployment authentication without
+an additional protection charge; verify account entitlement and the exact permitted
+staff list. Enabling it alone can block LINE, and a browser without the staging
+bearer still cannot use SQL APIs. The reviewed solution must prove both browser/API
+identity propagation and a narrowly isolated signed webhook ingress. Deployment
+exceptions are domain-wide; OPTIONS allowlists do not exempt POST. A project-wide
+bypass token in a LINE URL is not a path-scoped permission and is not a proposed
+shortcut. No anonymous ordinary API access, client-visible bearer, trusted
+user-supplied identity header or disabled signature verification is acceptable.
+The interim access policy question is pending; no new authentication system,
+production setting or gateway deployment was implemented by this scope update.
+[Protection availability](https://vercel.com/changelog/protect-production-deployments-for-free-on-every-plan),
+[bypass scope](https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection).
+
+**Backup/monitoring activation packet — prepared, disabled.** Assign the new target,
+scoped read/export login, verified-TLS endpoint, operator-owned scheduler/private
+storage, encryption key custody separate from artifacts and a named responder.
+Recommended initial recovery objective for owner approval: recoverable-checkpoint
+age at most 60 minutes and RTO at most 15 minutes. Capture every 30 minutes and
+before releases; prove capture+encryption+off-site delivery within 30 minutes,
+alert at 45-minute checkpoint age and stop/incident review at 60. If this cannot
+meet the approved budget/duration, stop and re-approve an honest RPO or PITR cost.
+Keep the earlier daily-only proposal as historical, not sufficient for a one-hour
+RPO. Reuse current snapshot/hash tools; never rely on a dump-success message alone.
+Before GO, independently download/decrypt a generated backup, restore to a new
+isolated endpoint and verify all 51 tables/15 metadata plus the SELECT-only app,
+write/role denial and no provider replay. A restored target is never exposed as a
+writer just because its UUID matches. Backup retention/deletion stays disabled
+until the destination forecast and policy are approved. Database dumps do not
+recover Drive file bytes; name the file-recovery owner and verify retained references.
+[Backup scope](https://supabase.com/docs/guides/platform/backups).
+
+Sample operational signals at their supported fresh cadence (proposed 60 seconds):
+application errors/timeouts and class latency; DB pool/backends/locks/disk/WAL/growth;
+provider failures and sending/uncertain effects; backup freshness/restore failures;
+and access denials. No record bodies, SQL values or credentials in alerts. Warn at
+70% resource/quota use; halt acceptance at 80% or fewer than five spare provider
+connections. In production, route those thresholds to the named incident lead's
+writer-freeze procedure. Any identity/TLS/access bypass, wrong totals, unexplained
+effect or failed recovery means immediate NO-GO/freeze. Alert delivery and responder
+coverage must be tested before opening writers; no notification was sent now.
+
+**Final full-refresh/cutover window — conditional, not booked.** Reserve **02:00–06:00
+Asia/Bangkok (four hours)** only after the same-size hosted end-to-end full-refresh
+rehearsal completes within 90 minutes, hosted recovery meets its agreed RTO and
+all preflight gates pass. No current evidence times a latest Sheets export plus
+hosted final load; local 1,478.491-second capacity and ~5.5-second local restores
+cannot justify a shorter production outage. There is no defensible fixed go-live
+date yet. Allow roughly **3–5 working days after decisions/access approvals** for
+minimum security/release work, hosted proof and operations setup; this is an
+engineering estimate, not a promise, and required upload/authorization fixes or
+failed hosted gates extend it.
+
+| Window | Action and decision |
 | --- | --- |
-| PostgreSQL write acceptance | Two independent fresh local campaigns pass the supported scope, including retry, stale-state, rollback, crash and recovery proofs. Preserve raw BLOCKED labels for absent/hosted variants and explicit dispositions. |
-| Performance and capacity | Both fresh bounded one/five-client profiles pass timing, exact-data and recovery under the unchanged limits. The earlier default-heap and retained-cache failures remain preserved; local results never certify hosted capacity. |
-| Existing security | Production remediation is deferred by the owner for the current migration work. Preserve and verify existing API, LINE signature, TLS, role and isolation controls in test copies. The documented production access-control gap remains a final cutover NO-GO. |
-| Backup automation | Existing consistent capture/restore tools and independently recovered encrypted source backup are available. The scheduler/retention/monitoring proposal below stays disabled until identities, private off-site storage, key custody, alerts and a scheduled restore drill are approved and tested. No new backup deletion is authorized. |
-| Dedicated production database | Prepare exact project/UUID, region/version, least-privilege identities, pool/connection budgets, measured disk/index/WAL headroom, quotas and itemized costs. No project or paid service has been created. |
-| Hosted application acceptance | The [target and execution packet](#hosted-supabase-test-target-and-execution-packet-2026-11-12) is prepared only, with a $0/month new-project quote. Resource creation, restores, writes, deployment and load remain NOT RUN. Harness, telemetry, quota and payload gates remain explicit. Never use populated staging as a load target. |
-| Final Google Sheets synchronization | Require an explicitly approved source/read identity and writer-freeze window; capture a consistent final export, reconcile every row/report into a fresh target and verify no intervening writes. No new Sheets business read/export is part of this update. |
-| Controlled cutover | Require all gates, security/business/recovery sign-offs and exact release/target/window approval. Single write authority, measured stop thresholds and rehearsed rollback; after any acknowledged PostgreSQL write, reconcile its delta before a return to Sheets. |
+| Before maintenance | Prepare the empty production target, reviewed protected release, scheduled backups/alerts and approved event hold. Rehearse using an already approved frozen artifact; no new Sheets read without A4. Sign the preflight packet and name the incident lead/business verifier. |
+| 02:00–02:15 | Freeze browser/API/manual/script/sync/LINE writers; drain and verify hold durability. Record last accepted IDs/events and native Sheets backup. If any writer cannot be stopped safely, abort before capture. |
+| 02:15–03:45 | Capture the approved final full source; hash/profile/delta-review offline; import/promote into the fresh target; reconcile 23 tables and original business/report invariants. No acceptance writes on this final target and no in-place delta merge. Any source activity invalidates the snapshot. |
+| 03:45–04:15 | Seal/encrypt/off-site the final SQL checkpoint, verify planned recovery evidence and current permissions, perform protected read-only browser/API/report checks, and record the target/release/source/backup digests. No launch if any required gate remains unknown. |
+| 04:15 decision; 04:30 latest writer activation | Incident lead records GO plus explicit owner activation approval. Otherwise abort while Sheets is authoritative; reconcile held work and resume Sheets only after verification. This is the last simple rollback point. |
+| Through 06:00 | Open SQL writers exactly once, retire old Sheets writer routes, release held work using original keys and observe controls/totals/alerts. On failure freeze, preserve SQL state and recover/forward-fix; never flip to stale Sheets. |
 
-The current staging bearer is an operator restriction, not a complete staff
-login/role/shop policy. Preserve it, raw-body LINE signature verification, private
-schemas, nonprivileged runtime permissions and the production guard. Do not remove
-those controls or introduce new authentication features to make this milestone
-pass. Review the adequacy of the actual deployment and every API; if it cannot
-meet the approved production policy, report the security blocker explicitly.
-The separate [user authentication roadmap](architecture/user-authentication-roadmap.md)
-is planning only.
+The dated window must be approved after actual rehearsal timing; if the complete
+refresh cannot fit the 90-minute segment plus verification/abort reserve, enlarge
+or reschedule it. Never compress integrity checks or open SQL while old writers
+remain active. After the first SQL write, no guaranteed 06:00 Sheets fallback is
+promised. LINE retries alone are not a queue
+([delivery limitations](https://developers.line.biz/en/docs/messaging-api/receiving-messages/)).
 
-**Existing production access control: NO-GO.** Read-only hosting metadata checked
-on 2026-11-12 Bangkok shows Vercel Authentication enabled with
-`all_except_custom_domains` and password protection disabled. The production
-domain is attached to this project. Vercel documents that setting as Standard
-Protection, which excludes production domains
-([scope definition](https://vercel.com/docs/deployment-protection),
-[API setting](https://vercel.com/docs/deployment-protection/methods-to-protect-deployments/vercel-authentication)).
-The production Sheets branch retains legacy handlers and receives no API
-authentication from the staging wrapper. These facts do not establish adequate
-production-wide API access control, so activation must remain blocked. No live
-business endpoint was probed, no protected records were read through the app,
-and no settings were changed. A separately approved control review must cover
-every production URL/API and preserve the signed LINE ingress; this finding
-does not authorize implementing the new user-authentication milestone early.
-
-[PR #64](https://github.com/volkswg/stock-management/pull/64) was explicitly approved
-for merge by the owner and merged as `405c474578cec0b2fe84327687b90faf3f5b02f9`.
-[Fresh CI](https://github.com/volkswg/stock-management/actions/runs/43140502107)
-and report upload passed. The automatic Sheets deployment was verified READY with
-the production domain assigned and the same 14 configuration metadata entries,
-without a STOCK override. This was a code release, not a Supabase cutover or data
-operation. Later planning PRs have no merge/deployment authorization. The
-[next-stage packet](#next-hosted-and-production-stage-plan) retains separate
-backup, production target, source freeze, rollback and activation approvals.
+**Next priority remains user authentication.** The existing
+[roadmap](architecture/user-authentication-roadmap.md) is unchanged in scope and
+planning-only. Minimum migration access protection is mandatory; full user login,
+sessions, roles/shop authorization and administration follow the database milestone
+unless the approved interim policy makes a subset necessary before activation.
 
 ##### Bounded local capacity continuation (2026-11-12)
 
@@ -1205,8 +1324,9 @@ evidence is retained. The existing source is `stock-management`
 excluded from every write/reset/pause target. The production Vercel project and
 current protected read-only preview are also excluded from reconfiguration.
 
-**Deferred security work.** The owner defers production API/access remediation;
-this preparation implements no new login, sessions, roles or shop authorization.
+**Security scope update.** The current critical-path report supersedes the earlier
+production API/access deferral: minimum protection is mandatory before cutover.
+This preparation implements no new login, sessions, roles or shop authorization.
 Existing staging token checks, LINE raw-body signatures, TLS, private-schema grants,
 restricted runtime roles and the production refusal remain mandatory test controls.
 Private-copy isolation is not deferred. The production gap stays recorded for the
@@ -1535,7 +1655,7 @@ External encrypted-backup storage/egress, Vercel plan changes, optional PITR,
 additional compute and real Drive storage need their own measured cost/approval.
 No paid resource is implied by this proposal.
 
-**Backup/monitoring configuration proposal — disabled.** Operator-owned scheduler
+**Historical daily backup/monitoring proposal — disabled, superseded by the current critical-path activation packet.** Operator-owned scheduler
 configuration (UTC schedules; do not add it to a live service now):
 
 ```yaml

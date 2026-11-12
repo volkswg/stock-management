@@ -1,5 +1,25 @@
 # Refactoring progress and evidence
 
+## Critical-path cutover mode (2026-11-12)
+
+Owner reprioritized the existing draft PR65 toward database completion. The
+[one current readiness report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+now separates MUST FIX, SAFE TO DEFER and owner approvals, reuses CI43/local
+acceptance evidence, and defines minimum production security, actual hosted
+proof, production target/backup/alerts, final full Sheets refresh and a conditional
+02:00–06:00 Bangkok window. No new framework or repeated synthetic campaign.
+Earlier security deferral is superseded for minimum cutover protection; new user
+authentication stays the next planning-only milestone.
+
+Fresh control-plane metadata still shows only protected staging, a $0/month
+new-Free-project quote (not complete costs), and no established protection across all production URLs; firewall configuration
+could not be verified (404). No SQL,
+new Sheets/business access, resource creation, hosted writes, live settings,
+notifications, merge or cutover. Production NO-GO. Documentation/disabled-metadata
+changes receive focused consistency checks; code acceptance remains CI43 on
+`06eafe921e92842ecc3b87739238396e191dd47d`, not a claim of tests on later prose.
+
+
 ## Hosted tooling completed locally — execution disabled (2026-11-12)
 
 Owner authorized completing local tooling and proposals while keeping draft

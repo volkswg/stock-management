@@ -20,7 +20,7 @@
     "automaticCleanupEnabled": false
   },
   "securityScope": {
-    "productionRemediation": "DEFERRED_BY_OWNER",
+    "productionRemediation": "MUST_FIX_BEFORE_CUTOVER_MINIMUM_PROTECTION",
     "newUserAuthentication": "PLANNING_ONLY_SEPARATE_MILESTONE",
     "preserveExistingApiTokenLineSignatureTlsRoleAndProductionGuards": true,
     "privateTestIsolationRequired": true,
@@ -409,6 +409,24 @@
       "capacity-oracle.cjs",
       "inspect-packet.cjs",
       "seals.cjs"
+    ]
+  },
+  "criticalPathMode": {
+    "mode": "CRITICAL-PATH CUTOVER MODE",
+    "readinessReport": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
+    "acceptedImplementationEvidenceCommit": "06eafe921e92842ecc3b87739238396e191dd47d",
+    "reuseExistingLocalEvidence": true,
+    "optionalFrameworkExpansionStopped": true,
+    "newProtocolOrUploadDispositionsApproved": false,
+    "currentStrictExecutionGatesUnchanged": true,
+    "minimumProductionProtectionMandatory": true,
+    "newAuthentication": "NEXT_MILESTONE_PLANNING_ONLY",
+    "approvalGroups": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5"
     ]
   }
 }
