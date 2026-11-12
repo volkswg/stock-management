@@ -936,7 +936,7 @@ permissions. The known access-protection gap remains recorded, not fixed or
 certified safe. Its disposition belongs in the explicit final cutover decision;
 this scope change authorizes no live configuration change or production switch.
 
-**Hosted execution started (2026-11-13 Bangkok): target ready; connection approval pending.**
+**Hosted execution started (2026-11-13 Bangkok): temporary accounts approved; owner password handoff pending.**
 The owner's latest “Go ahead” authorizes the disposable hosted target and test
 writes within zero spend, not existing-target changes or production activation.
 Created `sm-ha-20261112-f` (`dcwyiayubrqdrloergax`) in the selected Free organization,
@@ -956,19 +956,27 @@ Completed only on the new target:
   [RLS notice](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy),
   [index notice](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
 - Read the new project's exact session-pooler endpoint from its dashboard and
-  verified native TLS 1.3/hostname/CA **before authentication**, without sending
-  credentials. This is not an application/pooler-login PASS.
+  verified native TLS 1.3/hostname/CA before authentication. After the owner
+  explicitly approved the three temporary accounts, all three session-pooler
+  logins passed with verified TLS. The runtime account also passes direct native
+  TLS and server-side `pg_stat_ssl`; use that verified direct path for recovery.
+  The pooler client uses TLS, while its database-side hop reports `ssl=false`;
+  do not bypass the recovery tool's server-side TLS guard or equate that hop with
+  client TLS. These are connection tests, not application acceptance.
 - Rehashed the pinned post-audit backup manifest and **all 14 files**; the original
   dump is 2,817,225 bytes. No new Sheets data was accessed or imported.
 
-Automatic approval review rejected creating a password-bearing test login because
-target/test-write approval did not specifically cover new credentialed access.
-No credentialed account was created. The proposed new administrator login is
-withdrawn. Operational-schema permission-install confirmations expired twice;
-`stock_operational` and `stock_runtime` are still absent. Do not relabel the archive
-preflight as full SQL application acceptance or bypass these blocked operations.
+Automatic approval review initially rejected creating a password-bearing test
+login because target/test-write approval did not specifically cover credentialed
+access. The owner subsequently explicitly approved the three restricted accounts
+below. All three are now created, with **less than 24 hours** password validity;
+no administrator login was created. The source-defined `stock_runtime` NOLOGIN
+role is installed, including its expected managed-owner membership. Business
+grants/memberships remain unassigned until the original restore is compared.
+`stock_operational` is still absent; earlier installation confirmations expired.
+Do not relabel these connection/archive checks as full application acceptance.
 
-The concrete additional request is three **24-hour maximum** target-only accounts:
+The approved three **24-hour maximum** target-only accounts are:
 
 | Account | Permitted test access | Limit |
 | --- | --- | --- |
@@ -983,14 +991,18 @@ none is sent in chat. Existing owner access is used for restore rather than a
 new administrator login. The owner must personally set the new project's database
 password, then record it with the prepared hidden-input local helper; browser
 password entry/reset requires user handoff. Do not reset the protected source.
-The Mac is currently locked, so the remaining usage check/password handoff also
-awaits unlock. The approval questions are pending; expiry/silence is not approval.
+The Mac is unlocked and the new-target password dialog is open for user-only
+entry, confirmation and submission. Computer-use controls block Terminal access;
+the owner must launch the prepared hidden-input helper themselves. No owner
+password has been entered/reset by the agent or saved yet. The organization usage
+page rendered blank; remaining allowance is still unverified. Complete that check
+before full campaign traffic. No password is requested in chat.
 
-Current gate: **PARTIAL HOSTED DATABASE PREFLIGHT ONLY**. Native login, full
+Current gate: **PARTIAL HOSTED DATABASE PREFLIGHT ONLY**. Owner login, full
 51-table/15-metadata restore, application writes, private hosted app/coordinator,
 resource/traffic capacity and generated-checkpoint hosted recovery remain pending.
 Do not activate the full campaign: its existing checked-in CLI guards remain
-disabled until actual bindings/allowances/protocol/credential approvals are ready.
+disabled until actual bindings/allowances/protocol and owner connection are ready.
 No paid add-on, existing project pause/reset, production change, merge or cutover.
 
 **Production release path prepared locally (2026-11-12).** The staging-only

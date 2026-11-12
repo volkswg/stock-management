@@ -1,5 +1,5 @@
 {
-  "version": 21,
+  "version": 22,
   "scope": "CRITICAL-PATH CUTOVER MODE: preserve application/access behavior as-is; database migration first; new security implementation next phase; existing safeguards preserved and access gap retained for final cutover risk decision",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -94,7 +94,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Obtain explicit approval for three temporary new-target DB accounts/schema-role permissions; unlock Mac and complete owner-only new-project password handoff, then native restore/application acceptance; no production or new Sheets access",
+  "nextStep": "Owner completes new-project password dialog and hidden local helper, recheck allowance, then direct-TLS original backup restore and complete fingerprint comparison before test permissions/identity deltas; no production or new Sheets access",
   "cutoverBlockers": [
     "M1 existing access-protection risk retained for explicit final activation decision; implementation deferred by owner, no new access-policy choice blocks independent migration preparation",
     "M2 production profile implemented locally; real production endpoint/UUID/purpose/role/release binding and hosted activation verification remain unassigned",
@@ -1045,7 +1045,7 @@
   },
   "hostedAcceptancePreparation": {
     "reportedOnBangkok": "2026-11-13",
-    "state": "HOSTED_TARGET_CREATED_ARCHIVE_PREFLIGHT_ONLY",
+    "state": "HOSTED_TARGET_ACCOUNTS_APPROVED_OWNER_PASSWORD_HANDOFF_PENDING",
     "document": "docs/database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12",
     "plan": "tools/migration/hosted-acceptance-plan.json",
     "baselineCommit": "405c474578cec0b2fe84327687b90faf3f5b02f9",
@@ -1266,7 +1266,7 @@
       "merge": false,
       "cutover": false,
       "resourceCreationScope": "Only the new disposable Free test target dcwyiayubrqdrloergax; no paid or production resources",
-      "hostedWritesScope": "Only approved disposable-target setup/test writes; new credentialed access and full campaign bindings remain pending"
+      "hostedWritesScope": "Only approved disposable-target setup/test writes and three explicitly approved temporary accounts; full campaign bindings/allowance and owner password handoff remain pending"
     },
     "metadataOnlyObservation": {
       "visibleSupabaseProjects": 1,
@@ -1322,22 +1322,28 @@
       "archiveTables": 24,
       "retainedRows": 0,
       "fullHostedAppAcceptance": "NOT_RUN",
-      "nativeLogin": "PENDING_EXPLICIT_CREDENTIAL_APPROVAL",
+      "nativeLogin": "THREE_TEMPORARY_LOGINS_PASS_NOT_APP_ACCEPTANCE",
       "nativeTlsPreauth": "PASS",
       "backupFilesRehashed": 14,
-      "credentialedRolesCreated": 0,
+      "credentialedRolesCreated": 3,
       "operationalSchemaInstalled": false,
-      "approvalReview": "REJECTED_NEW_CREDENTIALS_NOT_SPECIFICALLY_AUTHORIZED",
+      "approvalReview": "INITIAL_REJECTION_RESOLVED_BY_EXPLICIT_THREE_ACCOUNT_APPROVAL",
       "newAdminRoleProposal": "WITHDRAWN",
-      "pendingAccounts": [
+      "pendingAccounts": [],
+      "accountLifetimeHoursMaximum": 24,
+      "passwordReset": "USER_HANDOFF_PENDING_NEW_TARGET_ONLY",
+      "usageCheck": "UNVERIFIED_BLANK_DASHBOARD",
+      "noProtectedStagingOrProductionActions": true,
+      "nativeDirectTls": "PASS_CLIENT_AND_SERVER_SSL",
+      "newCredentialedAccessApproved": true,
+      "internalRuntimeRoleInstalled": true,
+      "businessPermissionsInstalled": false,
+      "createdAccounts": [
         "stock_ha_runtime",
         "stock_ha_observer",
         "stock_ha_backup"
       ],
-      "accountLifetimeHoursMaximum": 24,
-      "passwordReset": "USER_HANDOFF_NEW_TARGET_ONLY",
-      "usageCheck": "MAC_LOCKED",
-      "noProtectedStagingOrProductionActions": true
+      "terminalComputerControl": "BLOCKED_BY_COMPUTER_USE_SAFETY"
     }
   }
 }

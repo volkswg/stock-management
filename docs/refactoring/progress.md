@@ -1,25 +1,24 @@
 # Refactoring progress and evidence
 
-## Hosted target created; database connection approval pending (2026-11-13)
+## Hosted target accounts approved; owner password handoff pending (2026-11-13)
 
-Owner authorized disposable hosted target/test writes, zero paid spend. Created
-`sm-ha-20261112-f` / `dcwyiayubrqdrloergax`, Free Tokyo PostgreSQL 17.11.0.019,
-$0/month project quote. Archive schema 24 tables installed; hosted numeric,
-duplicate and deferred-reference probes pass with full rollback and zero rows.
-Anonymous/authenticated schema access is denied; native pre-authentication TLS
-and all 14 pinned backup files verify. Existing staging and Sheets are untouched.
+The owner explicitly approved the three temporary new-target accounts. Created
+and verified all three with less than 24-hour password validity and connection
+limits 6/2/2; no administrator, elevated flags, business grants or writer
+membership were added. The source-defined NOLOGIN `stock_runtime` is installed.
+All three session-pooler logins pass verified TLS; direct native/server TLS also
+passes. Recovery will use direct TLS, retaining its existing server-side guard.
 
-Automatic approval review rejected the password-bearing login creation because
-new credentialed access was not explicitly covered. No account was created;
-the new-administrator-account proposal is withdrawn. Operational permissions
-confirmations expired twice and that schema/runtime role remain absent.
-The [single current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-records the three temporary account/permission request, owner-only new-project
-password handoff, locked-Mac usage check, and exact evidence limits. Full native
-restore/application/load/hosted recovery are not passed. No rerun of sufficient
-synthetic campaigns; executable evidence remains
+The new Free Tokyo target `sm-ha-20261112-f` / `dcwyiayubrqdrloergax` still holds
+only 24 empty archive tables. The [single current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+retains the rolled-back engine probes, all 14 verified backup files and initial
+approval rejection, now resolved for these accounts. The owner-only password
+change/hidden-input helper is pending; Terminal computer control is blocked and
+remaining organization allowance is unverified after a blank usage page. Full
+restore/application/load/hosted recovery are NOT RUN. No existing data or
+production changes; no repeated synthetic campaign. Executable evidence remains
 [CI45](https://github.com/volkswg/stock-management/actions/runs/43259664708)
-on `739011c64b81b4ff54f34de43c915aa27e19186f`.
+on `739011c64b81b4ff54f34de43c915aa27e19186f`; this update is status metadata only.
 
 
 ## Production identity profile implemented locally (2026-11-12)
