@@ -531,7 +531,26 @@
     "fullCampaignEnabled": false,
     "optionalMonitoringCoordinatorAndNewHostedAppRequired": false,
     "finalVercelProductionCompatibilityVerified": false,
-    "productionCutoverApproved": false
+    "productionCutoverApproved": false,
+    "databaseBackupDeferral": {
+      "deferredByOwner": true,
+      "ownerInstruction": "no need for db backup for now defer it to next phase",
+      "recordedAtUtc": "2026-11-13T03:22:41.788181+00:00",
+      "nextPhase": true,
+      "currentCutoverGate": false,
+      "covers": [
+        "new SQL checkpoints/backups",
+        "backup scheduling",
+        "off-site encryption/delivery",
+        "backup failure/freshness alerts",
+        "production RPO/RTO certification"
+      ],
+      "existingVerifiedArtifactsRetained": true,
+      "existingBackupRolesOrToolsRemoved": false,
+      "automatedProtectionActive": false,
+      "ongoingRecoverabilityCertified": false,
+      "freshSheetsOrActivationApproved": false
+    }
   },
   "finalProductionCandidate": {
     "projectRef": "hzynvirpedqnvtbifobx",

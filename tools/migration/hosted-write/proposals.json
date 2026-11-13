@@ -70,9 +70,10 @@
     "essentialManagedPostgresSmoke": "PASS",
     "customMonitoringAndCoordinator": "DEFERRED_NOT_REQUIRED_FOR_ESSENTIAL_SMOKE",
     "strictCapacityCertificate": "NOT_CLAIMED_NOT_AN_ESSENTIAL_SMOKE_GATE",
-    "productionBackupFailureAndFreshnessAlerts": "REQUIRED_NOT_ACTIVATED",
+    "productionBackupFailureAndFreshnessAlerts": "DEFERRED_BY_OWNER_NEXT_PHASE_NOT_CURRENT_GATE",
     "originalFullCampaignEnabled": false,
     "noNewProtectionImplementation": true,
-    "unprovedExistingProtection": "ACTIVATION_NO_GO"
+    "unprovedExistingProtection": "ACTIVATION_NO_GO",
+    "databaseBackupWork": "DEFERRED_BY_OWNER_NO_NEW_JOBS_RUNS_OR_ALERTS"
   }
 }

@@ -1,5 +1,21 @@
 # Refactoring progress and evidence
 
+## Database backup work deferred by owner (2026-11-13)
+
+Owner moves database backups, further checkpoints, automation, encrypted off-site
+delivery, backup alerts and RPO/RTO certification to the next phase. M5 and its
+operating decisions no longer block the current cutover scope; the runbook skips
+the backup step and removes new SQL checkpoint/backup-alert requirements from
+launch and its window. Preserve verified artifacts, tools and accounts. This is a
+scope deferral, not a recovery PASS or guarantee for new post-cutover records.
+Source-copy/export integrity, full reconciliation, loss-safe writer/event hold,
+existing security and exact release/activation approval remain unchanged. Only
+canonical documentation/disabled metadata changes; no backup is run, schedule or
+alert activated, existing artifact deleted, source record read, merge or live
+production setting changed. Earlier backup requirements below are historical;
+this entry and the current assessment supersede them for this milestone.
+
+
 ## Final empty production database prepared and verified (2026-11-13)
 
 Free Tokyo target `hzynvirpedqnvtbifobx`, UUID

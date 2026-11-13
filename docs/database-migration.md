@@ -937,6 +937,19 @@ activation still requires evidence that existing protection is effective; owner
 risk acceptance alone does not establish that evidence. This does not block
 independent database preparation or authorize live configuration changes.
 
+**Owner scope update — database backup work deferred (2026-11-13).**
+The owner says: “no need for db backup for now defer it to next phase”. Defer
+further SQL backup/checkpoint work, backup automation, encrypted off-site delivery,
+backup failure/freshness alerts and production recovery-objective certification.
+These are **not current cutover prerequisites**. Preserve all existing verified
+backups, recovery tools and restricted accounts; do not delete artifacts, disable
+existing controls or label the deferred work PASS. Existing empty baseline recovery
+covers schema/metadata, not new business writes after cutover. Ongoing recovery
+coverage remains unproven until the deferred work is completed. Final source-copy/
+export integrity, reconciliation, writer/event hold, existing security, incident
+handling and explicit activation approval remain in scope. This is a scope change,
+not authority to read fresh Sheets, change Vercel or switch production.
+
 **Final empty production database prepared and verified (2026-11-13 Bangkok).**
 `stock-management-production` (`hzynvirpedqnvtbifobx`) is ACTIVE_HEALTHY in
 `volkswg's Org`, Tokyo, PostgreSQL `17.11.0.019`, Free / quoted **$0 per month**.
@@ -991,8 +1004,9 @@ preparation, not source import, final deployment or activation.
 A private read-only production configuration is prepared with the exact endpoint,
 UUID and restricted reader, but its deployment/source SHA remains unbound and it
 is **not installed**. Both project ref and UUID are excluded from the old disabled
-disposable campaign. Remaining work is M2/M5/M6/M7/M8 plus the existing protection
-assessment M1, not another production-target creation/account approval.
+disposable campaign. Remaining work is M2/M6/M7/M8 plus the existing protection
+assessment M1; M5 database backup work is owner-deferred to the next phase. No
+new production-target creation/account approval is needed.
 Completion receipt SHA-256: `4f85d888c06bac83569b71e590b6220eac7c2201555c898e594bbcf75124bd32`.
 
 **Essential hosted PostgreSQL smoke completed (2026-11-13 Bangkok).**
@@ -1045,7 +1059,7 @@ certification, more fault campaigns, a persistent coordinator/tunnel and a new
 hosted test app are not prerequisites for this migration-only smoke. The old full
 campaign stays disabled and its strict result is not relabeled PASS. Existing
 dashboards plus bounded errors/connections/storage checks suffice for the small
-smoke. Essential backup failure/freshness alerts still need a named responder.
+smoke. Backup failure/freshness alerts are deferred with database backup work.
 The executable operator sequence below supersedes older full-campaign proposals.
 
 **Retained hosted database restore/recovery evidence (before essential smoke).**
@@ -1149,7 +1163,7 @@ endpoint or paid add-on was created.
 Current gate: **ESSENTIAL MANAGED POSTGRESQL SMOKE AND LOCAL RECOVERY PASS;
 FINAL PRODUCTION BINDINGS/OPERATIONS PENDING**. No new hosted-test app, coordinator
 or full-capacity campaign is required for this scoped evidence. Final-host
-read-only compatibility, actual production target, backup/alerts, fresh source/
+read-only compatibility, actual production target and fresh source/
 freeze/reconciliation and explicit release approval remain outstanding. Production
 is still Sheets; no activation or new Sheets read occurred.
 
@@ -1259,15 +1273,15 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | M2 | MUST FIX before cutover | **Final release binding/hosting proof.** Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed. |
 | M3 | SATISFIED for essential scope | **Essential managed PostgreSQL smoke PASS.** Prior actual hosted writes/replay/LINE/transaction checks are retained. New final candidate adds verified native service access/rollback and actual read-only application checks. Final deployment compatibility remains M2; no full capacity certificate is claimed. |
 | M4 | SATISFIED for empty target preparation | **Dedicated final database prepared.** Free Tokyo `hzynvirpedqnvtbifobx`, UUID `349b9289-f684-4ec5-ac22-924b2be1946b`; six source-version migrations, 51 RLS tables, approved restricted persistent accounts, native TLS/rollback, reader app and exact empty backup/restore pass. Remains isolated-staging purpose and empty. Final-load/headroom and deployed configuration are checked under M6/M2; no repeated resource/account approval needed. |
-| M5 | MUST FIX before cutover | **Backup automation and recovery.** Capture/restricted reader and exact hosted-capture/local restore pass. Production runner/destination/unattended encryption/key custody, independent fresh recovery, measured accepted RPO/RTO, retention/forecast and tested redacted failure/staleness alerts with named coverage are not activated. Extra monitoring tools are deferred. Drive bytes need a separate recovery owner. |
+| M5 | DEFERRED BY OWNER — next phase | **Database backup work is not a current cutover gate.** Further checkpoints, automation, encrypted off-site delivery, backup alerts and RPO/RTO certification are deferred. Retain verified artifacts/tools/accounts. This records scope, not recovery certification; new SQL business data has no verified ongoing backup coverage yet. |
 | M6 | MUST FIX before cutover | **Final full Sheets synchronization.** After explicit workbook/principal/native-backup/freeze/export/import approval only: fresh full 23-tab source into a new empty candidate, exact reconciliation and original application/report parity. Historical 70,777-row evidence is not current freshness; no in-place delta merge. |
 | M7 | MUST FIX before cutover | **Loss-safe writer/event hold.** Stop every manual/API/deployment/script/scheduled/LINE writer, drain commands/effects and retain accepted/uncertain keys. Exact durable capture/replay or proven producer-pause procedure remains unassigned. LINE retries/webhook disablement alone are insufficient; never acknowledge unpersisted events. |
-| M8 | MUST FIX before cutover | **Release and incident approval.** Seal exact target/deployment/source/backup, finish read-only checks while frozen, obtain separately scoped provider verification if needed, name lead/abort times and approve dated activation. Before SQL writes, verified Sheets rollback is possible; afterward freeze/forward recover and reconcile, never automatic stale-Sheets fallback. |
+| M8 | MUST FIX before cutover | **Release and incident approval.** Seal exact target/deployment/source, retain existing verification evidence, finish read-only checks while frozen, name lead/abort times and approve dated activation. Database backup work is deferred. Before SQL writes, verified Sheets rollback is possible; afterward freeze/forward recover and reconcile, never automatic stale-Sheets fallback. |
 | D1 | SAFE TO DEFER until after cutover | **New security/authentication implementation** is the next owner-selected phase: login, sessions, roles/shop permissions, user administration and new access restrictions. This is a sequencing decision, not a security PASS; the existing exposure remains M1 and must be explicit in the final cutover decision. Preserve existing safeguards throughout. |
 | D2 | SAFE TO DEFER until after cutover | Unrelated refactors, extra test abstractions, more synthetic fault repetitions, additional planning PRs, multi-region/HA, optional dashboards, restore certification for unused Supabase Auth/Storage, and automated backup pruning. Preserve evidence and retained backups; defer destructive cleanup. Recheck only affected behavior or demonstrated drift. |
 | D3 | SAFE TO DEFER until after cutover | Automatic reverse synchronization to Sheets is unnecessary if the owner accepts a **forward-recovery-only** incident policy after the first SQL write. No switch back after SQL writes is permitted without a separately reconciled reverse migration. A demand for immediate post-write Sheets rollback makes that implementation MUST FIX. |
 | A1 | Requires owner approval | **Existing test approval is sufficient for the completed essential smoke.** No further test resources, public tunnel, monitoring protocol or full campaign are prerequisites. Additional resources, paid work or provider calls would require their own approval. |
-| A2 | Requires owner approval for remaining operations only | **Free target and persistent DB accounts approved/completed.** No paid-plan choice is needed now. Backup runner/destination/unattended key custody/retention/recovery objectives/responder and alert test still need concrete operational decisions. Future nonzero spending requires explicit approval. |
+| A2 | SATISFIED for current scope | **Free target and persistent DB accounts approved/completed.** Backup runner/destination/key custody/retention/recovery/alert decisions move to the next phase with M5 and do not block this migration scope. Any later nonzero spending still requires explicit approval. |
 | A3 | Requires owner approval | **Only material launch limitations.** Existing 10/20 MiB upload versus hosting body-limit mismatch predates migration. Preserve behavior; do not make upload redesign, custom monitoring or sustained capacity certification a migration prerequisite. If large uploads are required at launch, resolve or explicitly disposition that requirement; no full-platform PASS is claimed. |
 | A4 | Requires owner approval | **Final source/freeze.** Exact workbook ID and read/export identity, native frozen backup, all writer/event holds, final full export and import into the named new production candidate. No fresh source access is authorized now. |
 | A5 | Requires owner approval | **Release/live actions.** PR65 merge/exact release SHA, target+UUID/deployment/configuration, explicitly scoped provider checks/notifications, incident lead and dated maintenance window, then a separate final activation decision. No blanket approval or bypass of unmet prerequisites. |
@@ -1276,7 +1290,7 @@ A1's existing approval covers the completed essential smoke on
 `sm-ha-20261112-f` only; no new hosting, monitoring or full-campaign decision is
 needed to continue this migration scope. Additional resources or paid work still
 require exact approval. A2 target/account approval is satisfied for the Free
-candidate; backup/alert custody and operating decisions remain. A4 must supply
+candidate; M5 backup/alert operating decisions are deferred. A4 must supply
 the exact workbook/read-export principal,
 writer/event-hold and final full export/import permission; older export authority
 is insufficient. A5 names exact release/project+UUID, live actions, incident lead
@@ -1285,8 +1299,8 @@ a CI pass, prose mode change, test-target approval or deferred security work.
 
 **Shortest remaining sequence.** Reuse the essential hosted PostgreSQL smoke,
 CI47/local browser/fault/recovery evidence and the verified hosted checkpoint. Bind
-the already prepared Free target to the approved final deployment and backup
-operations; finish final-host read-only compatibility once. Obtain final workbook/
+the already prepared Free target to the approved final deployment; finish
+final-host read-only compatibility once. Obtain final workbook/
 freeze/export/import approval; rehearse the full refresh with an approved artifact to size the outage.
 Only after every mandatory gate and dated owner approval perform final capture,
 reconciliation, read-only release and explicit writer activation. Keep all work in
@@ -1314,33 +1328,13 @@ Existing protection gaps stay documented as M1, with no claim of adequate securi
 or general production safety. The next security phase is separate from permission
 to continue database preparation. Missing/unproved effective existing protection remains activation NO-GO.
 
-**Backup/monitoring activation packet — prepared, disabled.** Assign the new target,
-scoped read/export login, verified-TLS endpoint, operator-owned scheduler/private
-storage, encryption key custody separate from artifacts and a named responder.
-Recommended initial recovery objective for owner approval: recoverable-checkpoint
-age at most 60 minutes and RTO at most 15 minutes. Capture every 30 minutes and
-before releases; prove capture+encryption+off-site delivery within 30 minutes,
-alert at 45-minute checkpoint age and stop/incident review at 60. If this cannot
-meet the approved budget/duration, stop and re-approve an honest RPO or PITR cost.
-Keep the earlier daily-only proposal as historical, not sufficient for a one-hour
-RPO. Reuse current snapshot/hash tools; never rely on a dump-success message alone.
-Before GO, independently download/decrypt a generated backup, restore to a new
-isolated endpoint and verify all 51 tables/15 metadata plus the SELECT-only app,
-write/role denial and no provider replay. A restored target is never exposed as a
-writer just because its UUID matches. Backup retention/deletion stays disabled
-until the destination forecast and policy are approved. Database dumps do not
-recover Drive file bytes; name the file-recovery owner and verify retained references.
-[Backup scope](https://supabase.com/docs/guides/platform/backups).
-
-Sample operational signals at their supported fresh cadence (proposed 60 seconds):
-application errors/timeouts and class latency; DB pool/backends/locks/disk/WAL/growth;
-provider failures and sending/uncertain effects; backup freshness/restore failures;
-and access denials. No record bodies, SQL values or credentials in alerts. Warn at
-70% resource/quota use; halt acceptance at 80% or fewer than five spare provider
-connections. In production, route those thresholds to the named incident lead's
-writer-freeze procedure. Any identity/TLS/access bypass, wrong totals, unexplained
-effect or failed recovery means immediate NO-GO/freeze. Alert delivery and responder
-coverage must be tested before opening writers; no notification was sent now.
+**Database backup activation — deferred to the next phase.** Preserve the verified
+empty checkpoint, historical encrypted artifacts and existing recovery tools. Do
+not schedule captures, add off-site delivery/backup alerts, require fresh SQL
+checkpoints or certify the previously proposed 30/60-minute RPO/15-minute RTO as
+part of this cutover. The detailed recipe in Step 1 is retained as a deferred
+reference only. Basic application errors, timeouts, identity/TLS, connection/storage
+limits and data reconciliation remain current operational checks.
 
 ###### Executable production cutover runbook
 
@@ -1358,7 +1352,7 @@ Earlier Gate 0–8 sections supply detail; this is the current operator sequence
 | Endpoint/login | New exact `db.<approved-ref>.supabase.co:5432/postgres`, verified CA/hostname; a Tokyo session endpoint is an alternative only after final-host proof. No transaction-mode/6543 assumption: current production parser supports direct/session 5432. |
 | Accounts | Approved, created and verified: `stock_prod_runtime` (6), `stock_prod_reader` (6), `stock_prod_backup` (2); restricted persistent service credentials private, no administrator or RLS bypass. Internal `stock_runtime` stays NOLOGIN. No old credentials reused or installed in Vercel. |
 | Source | **UNASSIGNED** final workbook ID, read/export principal, native-backup/freeze permission and private 23-tab mapping. Historical data is not source freshness. |
-| Operations | New 0700 artifact directory/0600 service and passfiles; stable backup runner, destination/key custody, alert recipient, incident lead, business verifier, recovery objectives/retention and durable event-hold procedure. All unassigned/unactivated. |
+| Operations | Private artifact/service files are prepared. Name incident lead/business verifier and a loss-safe writer/event hold for current cutover. Backup runner, destination/key custody, backup alerts, retention and recovery objectives are owner-deferred to the next phase; no schedule/alert is activated. |
 
 **Step 0 — current resource decision and empty-candidate setup.** The owner chose
 the existing Free organization after pausing only the disposable test copy.
@@ -1417,7 +1411,14 @@ DELETE/DDL denial, private Data API schemas and anon/authenticated denial. Pool 
 retain five spare connections, stop on pool timeout/errors or >=80% quota. Measure
 actual final-plan disk/growth headroom; do not infer it from the 80 MB test copy.
 
-**Step 1 — bind backup automation and prove its failure path.** The existing
+**Step 1 — SKIP: database backup work deferred by the owner.** No new backup,
+schedule, off-site transfer, backup alert or recovery-objective decision is required
+for this migration scope. Keep existing verified artifacts. Continue with Step 2.
+
+<details>
+<summary>Deferred backup reference for the next phase — do not execute now</summary>
+
+**Prior backup recipe — future-phase reference only.** The existing
 production-purpose capture/verify tools and restricted reader are implemented;
 hosted capture (367.47 s) and exact fresh local 51-table/15-metadata restore pass.
 Historical independent off-site encryption/key recovery passes. These do not mean
@@ -1459,13 +1460,15 @@ incident procedure. Prepare alert delivery/acknowledgment testing, but send noth
 without the separate recipient/channel approval. No schedule or notification is
 activated here; runner/destination/key/recipient are explicit prerequisites.
 
-Before GO, independently download/decrypt a generated package, restore to a fresh
+Before activating backups in the next phase, independently download/decrypt a generated package, restore to a fresh
 approved isolated recovery target, recreate custom role secrets via separate
 custody, match managed ICU `en-US` ordering, verify all 51 tables/15 metadata and
 SELECT-only app/no provider replay. Include retrieval/key access/provisioning/role
 setup/restore/readiness in RTO. Existing local restore time is not hosted incident
 recovery time. If the proposed objectives fail, agree honest bounds or separately
 price a remedy. Assign Drive object-byte recovery separately from SQL.
+
+</details>
 
 **Step 2 — stage configuration and a loss-safe freeze.** Prepare, do not install,
 the existing production binding: `STOCK_STORAGE=supabase`,
@@ -1544,23 +1547,23 @@ failed target and obtain approval for a new empty candidate, never truncate it.
 
 **Step 4 — seal, read-only validate and obtain final GO.** Only after reconciliation
 does the owner perform the reviewed new-candidate-only purpose change to production;
-UUID stays fixed. Record that intentional metadata delta, capture/encrypt/off-site
-and verify a production-purpose checkpoint, and seal source/release/endpoint/role/
-backup digests. With separate live-change approval, deploy the protected SQL
-read-only configuration and compare expected totals/statuses/URLs. Keep held events
+UUID stays fixed. Record that intentional metadata delta and seal source/release/
+endpoint/role digests. Retain existing backup evidence; new SQL checkpoints and
+off-site verification are deferred. With separate live-change approval, deploy
+the protected SQL read-only configuration and compare expected totals/statuses/URLs. Keep held events
 and providers stopped. Any identity/TLS/access bypass, source drift, mismatch,
-pool exhaustion/timeout, missing event, unavailable backup/alert or unproved
-recovery is NO-GO. Owner must approve exact SHA, project+UUID and dated window.
+pool exhaustion/timeout or missing event is NO-GO. Deferred backup work is
+not a current launch gate. Owner must approve exact SHA, project+UUID and dated
+window.
 
 **Step 5 — separately authorized activation.** Operator installs the sealed writer
 URL/release binding and literal `STOCK_PRODUCTION_READ_ONLY=false` once. Prove old
 Sheets writers remain stopped, release held work with original stable keys and
-outcome reconciliation, observe existing dashboards/errors/connections/storage and
-backup/alert heartbeat. A CI pass or test-target approval never activates production.
+outcome reconciliation, observe existing dashboards/errors/connections/storage. A CI pass or test-target approval never activates production.
 Before any SQL business write, abort may restore approved Sheets routing only after
 proving SQL accepted no new business commands and reconciling held events. **After
 the first SQL write, freeze and prefer forward recovery; never automatically flip
-to stale Sheets.** Preserve SQL/journal/effects, last accepted IDs and a new backup;
+to stale Sheets.** Preserve SQL/journal/effects and last accepted IDs;
 reconcile every post-freeze mutation before a separately approved reverse transfer.
 If DB is lost/corrupt, freeze ingress/providers, retrieve/decrypt and restore to a
 new approved target, verify exact data/permissions and reconcile writes since the
@@ -1569,23 +1572,23 @@ blindly resend sending/uncertain provider effects or overwrite protected staging
 
 **Final full-refresh/cutover window — conditional, not booked.** Reserve **02:00–06:00
 Asia/Bangkok (four hours)** only after the same-size hosted end-to-end full-refresh
-rehearsal completes within 90 minutes, hosted recovery meets its agreed RTO and
-all preflight gates pass. No current evidence times a latest Sheets export plus
+rehearsal completes within 90 minutes and all current preflight gates pass.
+Database backup/RPO/RTO certification is deferred. No current evidence times a latest Sheets export plus
 hosted final load; local 1,478.491-second capacity and ~5.5-second local restores
 cannot justify a shorter production outage. There is no defensible fixed go-live
 date yet. Allow roughly **3–5 working days after decisions/access approvals** for
-target/release bindings, final-host proof and backup operations setup; this is an
+target/release bindings, final-host proof and source/freeze coordination; this is an
 engineering estimate, not a promise, and required upload/authorization fixes or
 failed hosted gates extend it.
 
 | Window | Action and decision |
 | --- | --- |
-| Before maintenance | Prepare the empty production target, reviewed protected release, scheduled backups/alerts and approved event hold. Rehearse using an already approved frozen artifact; no new Sheets read without A4. Sign the preflight packet and name the incident lead/business verifier. |
+| Before maintenance | Verify the prepared empty target, reviewed release and approved event hold. Rehearse using an already approved frozen artifact; no new Sheets read without A4. Sign the preflight packet and name incident lead/business verifier. Database backup work is deferred. |
 | 02:00–02:15 | Freeze browser/API/manual/script/sync/LINE writers; drain and verify hold durability. Record last accepted IDs/events and native Sheets backup. If any writer cannot be stopped safely, abort before capture. |
 | 02:15–03:45 | Capture the approved final full source; hash/profile/delta-review offline; import/promote into the fresh target; reconcile 23 tables and original business/report invariants. No acceptance writes on this final target and no in-place delta merge. Any source activity invalidates the snapshot. |
-| 03:45–04:15 | Seal/encrypt/off-site the final SQL checkpoint, verify planned recovery evidence and current permissions, perform protected read-only browser/API/report checks, and record the target/release/source/backup digests. No launch if any required gate remains unknown. |
+| 03:45–04:15 | Verify target/permissions/source/release hashes and protected read-only browser/API/report results. Retain existing recovery evidence. Do not start deferred database backup/off-site/alert work as a launch gate. No launch if any current required gate is unknown. |
 | 04:15 decision; 04:30 latest writer activation | Incident lead records GO plus explicit owner activation approval. Otherwise abort while Sheets is authoritative; reconcile held work and resume Sheets only after verification. This is the last simple rollback point. |
-| Through 06:00 | Open SQL writers exactly once, retire old Sheets writer routes, release held work using original keys and observe controls/totals/alerts. On failure freeze, preserve SQL state and recover/forward-fix; never flip to stale Sheets. |
+| Through 06:00 | Open SQL writers exactly once, retire old Sheets writer routes, release held work using original keys and observe errors/connections/totals in existing dashboards. On failure freeze and preserve SQL state; never flip to stale Sheets. |
 
 The dated window must be approved after actual rehearsal timing; if the complete
 refresh cannot fit the 90-minute segment plus verification/abort reserve, enlarge

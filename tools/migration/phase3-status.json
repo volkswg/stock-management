@@ -1,5 +1,5 @@
 {
-  "version": 28,
+  "version": 29,
   "scope": "SUPABASE MIGRATION-ONLY CUTOVER MODE: essential managed PostgreSQL smoke; no new auth/access-protection implementation; final activation remains gated; no optional monitoring/coordinator/full campaign",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -805,7 +805,6 @@
     "migrationWork": [
       "PostgreSQL write acceptance",
       "Performance and capacity",
-      "Backup automation preparation and verified restore",
       "Dedicated production database specification",
       "Final Google Sheets synchronization",
       "Controlled cutover and rollback plan"
@@ -834,7 +833,7 @@
     "paidInfrastructureRequiresExplicitApproval": true,
     "populatedHostedStagingWritesAuthorized": false,
     "newSheetsBusinessReadsOrExportsAuthorized": false,
-    "backupAutomation": "PREPARED_DISABLED; proposed 30-minute capture / <=60-minute recoverable-checkpoint age and <=15-minute RTO require owner approval, verified delivery/restore and named on-call",
+    "backupAutomation": "DEFERRED_BY_OWNER_TO_NEXT_PHASE_NOT_CURRENT_CUTOVER_GATE_EXISTING_EVIDENCE_RETAINED",
     "dedicatedProductionDatabase": "SPECIFICATION_ONLY; not provisioned",
     "productionDecision": "NO-GO",
     "assessmentDocument": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
@@ -851,7 +850,26 @@
     },
     "productionSecurityRemediation": "DEFERRED_BY_OWNER_TO_NEXT_PHASE; preserve existing controls; known access gap remains final cutover risk decision",
     "hostedPreparationDocument": "docs/database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12",
-    "mode": "CRITICAL-PATH CUTOVER MODE"
+    "mode": "CRITICAL-PATH CUTOVER MODE",
+    "databaseBackupDeferral": {
+      "deferredByOwner": true,
+      "ownerInstruction": "no need for db backup for now defer it to next phase",
+      "recordedAtUtc": "2026-11-13T03:22:41.788181+00:00",
+      "nextPhase": true,
+      "currentCutoverGate": false,
+      "covers": [
+        "new SQL checkpoints/backups",
+        "backup scheduling",
+        "off-site encryption/delivery",
+        "backup failure/freshness alerts",
+        "production RPO/RTO certification"
+      ],
+      "existingVerifiedArtifactsRetained": true,
+      "existingBackupRolesOrToolsRemoved": false,
+      "automatedProtectionActive": false,
+      "ongoingRecoverabilityCertified": false,
+      "freshSheetsOrActivationApproved": false
+    }
   },
   "localCapacityContinuation": {
     "at": "2026-11-11T20:12:01.954364+00:00",
@@ -1101,7 +1119,7 @@
   },
   "criticalPathCutoverMode": {
     "mode": "SUPABASE MIGRATION-ONLY CUTOVER MODE",
-    "reportedAtUtc": "2026-11-13T02:52:31.841957+00:00",
+    "reportedAtUtc": "2026-11-13T03:22:41.788181+00:00",
     "decision": "NO_GO",
     "singleDraftPr": 65,
     "singleReadinessReport": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
@@ -1143,9 +1161,9 @@
       },
       {
         "id": "M5",
-        "classification": "MUST FIX before cutover",
-        "subject": "Backup automation and recovery. Capture/restricted reader and exact hosted-capture/local restore pass. Production runner/destination/unattended encryption/key custody, independent fresh recovery, measured accepted RPO/RTO, retention/forecast and tested redacted failure/staleness alerts with named coverage are not activated. Extra monitoring tools are deferred. Drive bytes need a separate recovery owner.",
-        "state": "OPEN"
+        "classification": "DEFERRED BY OWNER \u2014 next phase",
+        "subject": "Further database backups, automation, off-site delivery, backup alerts and recovery-objective certification move to next phase; retain existing artifacts/tools/accounts",
+        "state": "DEFERRED_NOT_CURRENT_CUTOVER_GATE_NOT_CERTIFIED"
       },
       {
         "id": "M6",
@@ -1162,7 +1180,7 @@
       {
         "id": "M8",
         "classification": "MUST FIX before cutover",
-        "subject": "Release and incident approval. Seal exact target/deployment/source/backup, finish read-only checks while frozen, obtain separately scoped provider verification if needed, name lead/abort times and approve dated activation. Before SQL writes, verified Sheets rollback is possible; afterward freeze/forward recover and reconcile, never automatic stale-Sheets fallback.",
+        "subject": "Exact release/target/source binding, read-only checks, incident lead, dated owner activation; database backup work deferred; no automatic stale-Sheets fallback after SQL writes",
         "state": "OPEN"
       },
       {
@@ -1191,9 +1209,9 @@
       },
       {
         "id": "A2",
-        "classification": "Requires owner approval",
-        "subject": "No new resource/account approval needed; bind remaining backup/key/alert operating decisions and any future nonzero spending",
-        "state": "FREE_TARGET_AND_PERSISTENT_ACCOUNTS_APPROVED_OPERATIONS_DECISIONS_REMAIN"
+        "classification": "SATISFIED for current scope",
+        "subject": "No new current resource/account/backup decision needed; any future nonzero spend still requires approval",
+        "state": "FREE_TARGET_ACCOUNTS_APPROVED_BACKUP_DECISIONS_DEFERRED"
       },
       {
         "id": "A3",
@@ -1239,7 +1257,10 @@
       "deletionEnabled": false,
       "destinationAssigned": false,
       "keyCustodianAssigned": false,
-      "onCallAssigned": false
+      "onCallAssigned": false,
+      "deferredByOwner": true,
+      "currentCutoverGate": false,
+      "proposedScheduleNotRequiredForCurrentCutover": true
     },
     "window": {
       "timezone": "Asia/Bangkok",
@@ -1248,7 +1269,7 @@
       "hours": 4,
       "date": null,
       "booked": false,
-      "condition": "All critical gates; same-size hosted end-to-end full-refresh rehearsal <=90 minutes and agreed hosted RTO; exact owner approval",
+      "condition": "All remaining current gates; measured full-refresh rehearsal and explicit dated activation approval; database backup/RPO/RTO gates deferred",
       "abortDecisionLocal": "04:15",
       "latestWriterActivationLocal": "04:30",
       "engineeringLeadTimeWorkingDaysAfterApprovalsEstimate": [
@@ -1402,7 +1423,7 @@
       "retainedSyntheticOrders": 1,
       "currentResourceState": "PAUSED_NOT_DELETED_OWNER_SELECTED_SLOT_RELEASE"
     },
-    "mandatoryMonitoring": "Existing dashboards/basic errors/connections/storage plus production backup failure and freshness alerts; no optional monitoring tooling",
+    "mandatoryMonitoring": "Existing dashboards/basic errors/timeouts/connections/storage/data checks; database backup alerts deferred by owner",
     "essentialHostedPostgresSmoke": {
       "state": "PASS_COMPOSITE_EVIDENCE",
       "projectRef": "dcwyiayubrqdrloergax",
@@ -1557,6 +1578,25 @@
       "operatorSecretsKeptPrivate": true,
       "applicationCiSourceReused": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
       "ciRunReused": 43342345150
+    },
+    "databaseBackupDeferral": {
+      "deferredByOwner": true,
+      "ownerInstruction": "no need for db backup for now defer it to next phase",
+      "recordedAtUtc": "2026-11-13T03:22:41.788181+00:00",
+      "nextPhase": true,
+      "currentCutoverGate": false,
+      "covers": [
+        "new SQL checkpoints/backups",
+        "backup scheduling",
+        "off-site encryption/delivery",
+        "backup failure/freshness alerts",
+        "production RPO/RTO certification"
+      ],
+      "existingVerifiedArtifactsRetained": true,
+      "existingBackupRolesOrToolsRemoved": false,
+      "automatedProtectionActive": false,
+      "ongoingRecoverabilityCertified": false,
+      "freshSheetsOrActivationApproved": false
     }
   }
 }
