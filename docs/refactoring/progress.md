@@ -1,5 +1,28 @@
 # Refactoring progress and evidence
 
+## Migration-only essential hosted smoke and executable cutover sequence (2026-11-13)
+
+PR65 remains draft/unmerged. Actual application routes against the already approved
+managed test DB pass read/write, atomic rollback, overlapping retry/replay/conflict,
+LINE raw-body signatures, verified TLS, target/read-only guards and runtime role
+denial. All 70,777 original business rows and 47 archive/business table digests are
+unchanged; one synthetic order/command remains on the disposable target. No provider
+calls, production changes, new Sheets reads or paid resources. The canonical
+[current assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records the composite receipt, retained harness diagnostics and exact limitations.
+Reuse passing checks rather than repeat writes after the final diagnostic alias
+fix. Extra monitoring, coordinator/tunnel, new hosted app and full campaign are
+deferred. The existing document now contains the current operator runbook: explicit
+unassigned production bindings, itemized cost baselines, backup automation/alerts
+prerequisites, full source/freeze/import commands and rollback boundaries. New
+access-protection/auth/RBAC implementation stays deferred; unproved effective
+existing protection is activation NO-GO. No schedule, alert or cutover is activated.
+Local verification: 625 regressions, typecheck, lint (one inherited warning),
+credential-free build/routes/113 client chunks, operator-entrypoint syntax and
+private-input redaction/protected-target rejection pass. CI for this update is
+pending; prior CI47 is retained application evidence.
+
+
 ## Hosted original restore / roles verified; restricted-backup fix (2026-11-13)
 
 The new disposable target restores the pinned post-audit dump atomically. All 51

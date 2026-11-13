@@ -1,6 +1,6 @@
 {
-  "version": 25,
-  "scope": "CRITICAL-PATH CUTOVER MODE: preserve application/access behavior as-is; database migration first; new security implementation next phase; existing safeguards preserved and access gap retained for final cutover risk decision",
+  "version": 26,
+  "scope": "SUPABASE MIGRATION-ONLY CUTOVER MODE: essential managed PostgreSQL smoke; no new auth/access-protection implementation; final activation remains gated; no optional monitoring/coordinator/full campaign",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
   "repositoryBaseline": "405c474578cec0b2fe84327687b90faf3f5b02f9",
@@ -1100,8 +1100,8 @@
     "basis": "Retained owner-approved merge verification; no new live-data check in this preparation"
   },
   "criticalPathCutoverMode": {
-    "mode": "CRITICAL-PATH CUTOVER MODE",
-    "reportedAtUtc": "2026-11-12T15:46:00Z",
+    "mode": "SUPABASE MIGRATION-ONLY CUTOVER MODE",
+    "reportedAtUtc": "2026-11-13T01:01:17Z",
     "decision": "NO_GO",
     "singleDraftPr": 65,
     "singleReadinessReport": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
@@ -1119,50 +1119,50 @@
     "blockers": [
       {
         "id": "M1",
-        "classification": "Requires owner approval",
-        "subject": "Known existing access-protection risk; remediation deferred; final activation risk disposition",
-        "state": "DEFERRED_IMPLEMENTATION_RISK_OPEN"
+        "classification": "MUST FIX before cutover",
+        "subject": "Minimum effective existing protection. Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied.",
+        "state": "ACTIVATION_NO_GO_UNPROVED_EXISTING_PROTECTION_IMPLEMENTATION_DEFERRED"
       },
       {
         "id": "M2",
         "classification": "MUST FIX before cutover",
-        "subject": "Production identity profile locally implemented; actual target binding/hosted verification/activation outstanding",
+        "subject": "Final release binding/hosting proof. Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed.",
         "state": "LOCAL_IMPLEMENTATION_PASS_HOSTED_BINDING_PENDING"
       },
       {
         "id": "M3",
         "classification": "MUST FIX before cutover",
-        "subject": "Actual hosted acceptance",
-        "state": "OPEN"
+        "subject": "Scoped hosted acceptance: essential PG smoke PASS. Nine groups plus stronger write-transaction permission denial pass; all original business records unchanged. Existing local browser/fault evidence is reused. Only final deployment/target compatibility remains mandatory under M2; strict telemetry/full synthetic campaigns are deferred, not certified.",
+        "state": "ESSENTIAL_MANAGED_POSTGRESQL_SMOKE_PASS_FINAL_HOST_PENDING_M2"
       },
       {
         "id": "M4",
         "classification": "MUST FIX before cutover",
-        "subject": "Dedicated production target",
+        "subject": "Dedicated final production target/cost. Actual approved org/plan/region/version/project/UUID, runtime/reader/backup roles, final-plan quotas/headroom and account quote remain unassigned. Both current staging and disposable test targets are excluded. No purchase, upgrade, retag or pause is authorized.",
         "state": "OPEN"
       },
       {
         "id": "M5",
         "classification": "MUST FIX before cutover",
-        "subject": "Backup recovery and monitoring",
+        "subject": "Backup automation and recovery. Capture/restricted reader and exact hosted-capture/local restore pass. Production runner/destination/unattended encryption/key custody, independent fresh recovery, measured accepted RPO/RTO, retention/forecast and tested redacted failure/staleness alerts with named coverage are not activated. Extra monitoring tools are deferred. Drive bytes need a separate recovery owner.",
         "state": "OPEN"
       },
       {
         "id": "M6",
         "classification": "MUST FIX before cutover",
-        "subject": "Final full Sheets synchronization",
+        "subject": "Final full Sheets synchronization. After explicit workbook/principal/native-backup/freeze/export/import approval only: fresh full 23-tab source into a new empty candidate, exact reconciliation and original application/report parity. Historical 70,777-row evidence is not current freshness; no in-place delta merge.",
         "state": "OPEN"
       },
       {
         "id": "M7",
         "classification": "MUST FIX before cutover",
-        "subject": "Writer freeze and loss-safe event hold",
+        "subject": "Loss-safe writer/event hold. Stop every manual/API/deployment/script/scheduled/LINE writer, drain commands/effects and retain accepted/uncertain keys. Exact durable capture/replay or proven producer-pause procedure remains unassigned. LINE retries/webhook disablement alone are insufficient; never acknowledge unpersisted events.",
         "state": "OPEN"
       },
       {
         "id": "M8",
         "classification": "MUST FIX before cutover",
-        "subject": "Release and incident sign-off",
+        "subject": "Release and incident approval. Seal exact target/deployment/source/backup, finish read-only checks while frozen, obtain separately scoped provider verification if needed, name lead/abort times and approve dated activation. Before SQL writes, verified Sheets rollback is possible; afterward freeze/forward recover and reconcile, never automatic stale-Sheets fallback.",
         "state": "OPEN"
       },
       {
@@ -1186,40 +1186,41 @@
       {
         "id": "A1",
         "classification": "Requires owner approval",
-        "subject": "Exact disposable resources/setup/write/pause and test cost/traffic",
-        "state": "PENDING_OWNER"
+        "subject": "Existing test approval is sufficient for the completed essential smoke. No further test resources, public tunnel, monitoring protocol or full campaign are prerequisites. Additional resources, paid work or provider calls would require their own approval.",
+        "state": "EXISTING_APPROVAL_SATISFIED_ESSENTIAL_SCOPE_ONLY"
       },
       {
         "id": "A2",
         "classification": "Requires owner approval",
-        "subject": "Production org/plan/budget, backup/key/on-call/retention activation",
+        "subject": "Production target/operations. Choose exact org/plan and recurring/usage ceiling (planning baseline separate Pro/Micro about $25/month, current org with three Micro about $45/month before extras); approve new dedicated target/setup/import roles and backup runner/destination/key/retention/RPO/RTO/responder/alert test. No purchase or message is sent now.",
         "state": "PENDING_OWNER"
       },
       {
         "id": "A3",
         "classification": "Requires owner approval",
-        "subject": "Bounded hosted protocol, monitoring and pre-existing upload dispositions; current access behavior selected",
+        "subject": "Only material launch limitations. Existing 10/20 MiB upload versus hosting body-limit mismatch predates migration. Preserve behavior; do not make upload redesign, custom monitoring or sustained capacity certification a migration prerequisite. If large uploads are required at launch, resolve or explicitly disposition that requirement; no full-platform PASS is claimed.",
         "state": "PENDING_OWNER"
       },
       {
         "id": "A4",
         "classification": "Requires owner approval",
-        "subject": "Exact workbook/read identity, backup/freeze/final full export/import",
+        "subject": "Final source/freeze. Exact workbook ID and read/export identity, native frozen backup, all writer/event holds, final full export and import into the named new production candidate. No fresh source access is authorized now.",
         "state": "PENDING_OWNER"
       },
       {
         "id": "A5",
         "classification": "Requires owner approval",
-        "subject": "Exact release/merge, live changes, dated window and final activation",
+        "subject": "Release/live actions. PR65 merge/exact release SHA, target+UUID/deployment/configuration, explicitly scoped provider checks/notifications, incident lead and dated maintenance window, then a separate final activation decision. No blanket approval or bypass of unmet prerequisites.",
         "state": "PENDING_OWNER"
       }
     ],
-    "interimAccessPolicy": "AS_IS_CURRENT_APPLICATION_BEHAVIOR_SELECTED_BY_OWNER; proposed owner/admin-only interim restriction withdrawn",
+    "interimAccessPolicy": "Preserve current behavior and existing controls; no new access-protection implementation; cannot certify activation safety without effective existing protection",
     "proposedOperationalProtocol": {
-      "approved": false,
+      "approved": true,
       "nativeResolutionSignalsSeconds": 60,
-      "strict1s10sCpuCertificate": "BLOCKED_NOT_RELABELED",
-      "noSecurityCapacityOrIntegrityWaiver": true
+      "strict1s10sCpuCertificate": "DEFERRED_NOT_CERTIFIED_NOT_A_MIGRATION_SMOKE_GATE",
+      "noSecurityCapacityOrIntegrityWaiver": true,
+      "approvalScope": "Essential bounded migration-only smoke on already approved target; custom monitoring deferred; no capacity certificate or full campaign activation"
     },
     "uploadDisposition": {
       "ownerApprovalRequired": true,
@@ -1266,7 +1267,7 @@
       "merge": false,
       "cutover": false,
       "resourceCreationScope": "Only the new disposable Free test target dcwyiayubrqdrloergax; no paid or production resources",
-      "hostedWritesScope": "Only approved disposable-target setup/test writes and three explicitly approved temporary accounts; full campaign bindings/allowance and owner password handoff remain pending"
+      "hostedWritesScope": "Approved isolated-target essential synthetic smoke only; no protected staging, production, fresh Sheets, providers, paid resources or additional hosting"
     },
     "metadataOnlyObservation": {
       "visibleSupabaseProjects": 1,
@@ -1283,7 +1284,7 @@
       "businessRowsRead": false
     },
     "securityImplementation": "NEXT_PHASE_NOT_CURRENT_MIGRATION",
-    "existingSecurityRisk": "OPEN_NOT_FIXED_NOT_CERTIFIED; explicit final cutover risk disposition required",
+    "existingSecurityRisk": "UNPROVED_EFFECTIVE_EXISTING_PROTECTION_IS_ACTIVATION_NO_GO; implementation deferred; independent migration preparation continues",
     "productionSecurityCertified": false,
     "existingSafeguardsMustRemainEnabled": true,
     "productionIdentityPreparation": {
@@ -1302,7 +1303,7 @@
       "legacyProductionAccessPolicy": "legacy-as-is",
       "newAuthenticationImplemented": false,
       "actualHostedAcceptance": "NOT_RUN",
-      "newHeadCi": "PENDING_ON_PR65",
+      "newHeadCi": "PR_UPDATE_PENDING_CI; local 625 regressions/lint/typecheck/isolated build PASS; existing application evidence CI47 reused",
       "backupRecoveryProductionPurpose": "EXPLICIT_OPT_IN_DEFAULT_STAGING_RECEIPT_BOUND",
       "productionTaggedLocalRecovery": {
         "state": "PASS_FRESH_SYNTHETIC_51_TABLES_15_METADATA",
@@ -1318,9 +1319,8 @@
       "region": "ap-northeast-1",
       "version": "17.11.0.019",
       "projectQuoteUsdMonthly": 0,
-      "scope": "NEW_DISPOSABLE_ARCHIVE_SCHEMA_AND_ROLLED_BACK_SYNTHETIC_PROBES_ONLY",
+      "scope": "APPROVED_DISPOSABLE_RESTORE_AND_ESSENTIAL_APPLICATION_SMOKE_ONLY",
       "archiveTables": 24,
-      "retainedRows": 0,
       "fullHostedAppAcceptance": "NOT_RUN",
       "nativeLogin": "THREE_TEMPORARY_LOGINS_PASS_NOT_APP_ACCEPTANCE",
       "nativeTlsPreauth": "PASS",
@@ -1391,7 +1391,58 @@
         "manifestSha256": "e2cc5e80420082c1297d2532cbcc7ef0973607e111dd939bb669e6162a649693",
         "passwordsIncluded": false,
         "independentOffsiteEncryptionVerified": false
+      },
+      "essentialHostedAppToDatabaseSmoke": "PASS_FROM_OPERATOR_MAC_NOT_VERCEL_RUNTIME",
+      "retainedSyntheticOrders": 1
+    },
+    "mandatoryMonitoring": "Existing dashboards/basic errors/connections/storage plus production backup failure and freshness alerts; no optional monitoring tooling",
+    "essentialHostedPostgresSmoke": {
+      "state": "PASS_COMPOSITE_EVIDENCE",
+      "projectRef": "dcwyiayubrqdrloergax",
+      "isolationId": "5f63d064-9658-4440-bf87-b4279b08c806",
+      "applicationSourceCommit": "19d9ba11a86511863b3251b644d529416f6472ef",
+      "receiptSha256": "4d0cf4aad54cdcda951677febe51e3d8f841fce701463395c5eba838c7b73748",
+      "applicationCheckGroups": 9,
+      "originalBusinessRowsUnchanged": 70777,
+      "originalArchiveAndBusinessTableDigestsUnchanged": 47,
+      "retainedSyntheticOrders": 1,
+      "completeSyntheticCommands": 1,
+      "providerCalls": 0,
+      "runtimeSessionsAfter": 0,
+      "databaseBytesAfter": 79886003,
+      "concurrentRetries": 5,
+      "concurrentRetryElapsedMilliseconds": 4528,
+      "runtimeTlsVerified": true,
+      "rolePermissionSqlState": "42501",
+      "finalAliasDiagnosticCompletedReadOnly": true,
+      "priorFailedReceiptsRetained": true,
+      "capacityCertified": false,
+      "vercelRuntimeCertified": false,
+      "productionCertified": false,
+      "finalEntryPointChecks": {
+        "syntax": "PASS",
+        "lint": "PASS",
+        "malformedPrivateInputRedaction": "PASS",
+        "protectedTargetRejectedBeforeConnection": "PASS",
+        "newHeadFullHostedWriteRerun": false
       }
+    },
+    "productionOperationsBindings": {
+      "targetAssigned": false,
+      "testTargetIsProduction": false,
+      "newTargetNameProposed": "stock-management-production",
+      "vercelProjectId": "prj_XH4nEje5cicuBuucGumuHgr73l1E",
+      "productionRef": null,
+      "productionIsolationId": null,
+      "planSelected": false,
+      "separateProOrgOneMicroPlanningUsdMonthly": 25,
+      "currentOrgThreeMicroPlanningUsdMonthly": 45,
+      "accountCheckoutQuoteVerified": false,
+      "backupAutomationActivated": false,
+      "alertDeliveryTested": false,
+      "freshSheetsAuthorized": false,
+      "freezeEventHoldAssigned": false,
+      "runbook": "docs/database-migration.md#executable-production-cutover-runbook"
     }
   }
 }

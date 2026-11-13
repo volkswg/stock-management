@@ -64,5 +64,15 @@
     "uploads": "Pre-existing platform incompatibility may be deferred for database-only cutover only with owner acceptance and unchanged normal-flow proof; required large-file support means MUST FIX",
     "priorRecommendationsNotActivated": true,
     "securityScope": "Owner selects current application/access behavior; new security implementation next phase; existing safeguards and unresolved-risk reporting preserved"
+  },
+  "migrationOnlyDisposition": {
+    "mode": "SUPABASE MIGRATION-ONLY CUTOVER",
+    "essentialManagedPostgresSmoke": "PASS",
+    "customMonitoringAndCoordinator": "DEFERRED_NOT_REQUIRED_FOR_ESSENTIAL_SMOKE",
+    "strictCapacityCertificate": "NOT_CLAIMED_NOT_AN_ESSENTIAL_SMOKE_GATE",
+    "productionBackupFailureAndFreshnessAlerts": "REQUIRED_NOT_ACTIVATED",
+    "originalFullCampaignEnabled": false,
+    "noNewProtectionImplementation": true,
+    "unprovedExistingProtection": "ACTIVATION_NO_GO"
   }
 }

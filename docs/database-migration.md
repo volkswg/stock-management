@@ -919,7 +919,7 @@ Google Sheets remains production's store.
 
 ##### Current migration go/no-go assessment (2026-11-12)
 
-**Mode: CRITICAL-PATH CUTOVER. Production decision: NO-GO.**
+**Mode: SUPABASE MIGRATION-ONLY CUTOVER. Production activation: NO-GO.**
 This is the single current readiness report for draft [PR65](https://github.com/volkswg/stock-management/pull/65).
 The objective is the database switch. Stop unrelated refactoring, optional framework
 features, additional planning PRs and repeated synthetic campaigns. Reuse accepted
@@ -932,11 +932,54 @@ security controls, owner-only restrictions, login, sessions, roles and shop
 authorization to the next phase. The earlier proposed interim admin-only policy
 is withdrawn; no further audience decision is needed to continue migration work.
 Preserve existing LINE signatures, staging restrictions, TLS and database
-permissions. The known access-protection gap remains recorded, not fixed or
-certified safe. Its disposition belongs in the explicit final cutover decision;
-this scope change authorizes no live configuration change or production switch.
+permissions. No access-protection implementation is part of this work. Production
+activation still requires evidence that existing protection is effective; owner
+risk acceptance alone does not establish that evidence. This does not block
+independent database preparation or authorize live configuration changes.
 
-**Hosted database restore verified (2026-11-13 Bangkok); application acceptance pending.**
+**Essential hosted PostgreSQL smoke completed (2026-11-13 Bangkok).**
+The actual application route owners run from the operator Mac against the approved
+managed target using its temporary runtime/observer accounts. No new hosted app,
+coordinator, tunnel, paid resource or monitoring integration. Application source is
+unchanged from `19d9ba1`; the bounded entrypoint is
+[`hosted-postgres-smoke.cjs`](../tools/migration/hosted-postgres-smoke.cjs).
+
+- Nine groups pass: target/expiry/headroom, missing staging bearer rejection,
+  actual application socket CA/hostname and server TLS, LINE missing/wrong/tampered
+  signatures and valid signed empty events, atomic business/journal rollback,
+  five overlapping identical create requests committing once, changed-intent
+  conflict and actual GET, read-only/wrong-UUID denial, archive/DELETE/owner-role
+  denial. Native follow-up proves all three role denials are `42501` inside write
+  transactions, rather than relying on a read-only transaction's refusal.
+- Five concurrent retries complete in **4.528 seconds total**. This is a small
+  correctness smoke, not throughput/sustained-load/resource certification.
+- All **70,777 original business rows** and **47 archive/business table
+  fingerprints** remain exact. Environment, revision, command and effect controls
+  are separate. One synthetic order/complete command is retained on the disposable
+  target; revision advances once to 70,779. Database size is **79,886,003 bytes**.
+  Zero real-provider calls and zero open runtime sessions after drain.
+- Retain harness diagnostics for pg's numeric socket form, diagnostic visibility
+  after SET ROLE, and the final SQL alias case mismatch. All nine application
+  checks and 47-table comparisons passed before that last alias assertion. Correct
+  it and finish only postflight/stronger permission checks, without repeating
+  committed writes. Composite private receipt SHA-256:
+  `4d0cf4aad54cdcda951677febe51e3d8f841fce701463395c5eba838c7b73748`.
+
+This closes the **essential managed PostgreSQL smoke**, not final Vercel networking/
+browser acceptance, real provider delivery, sustained capacity, off-site backup
+activation or production GO. Reuse the passing local browser/fault/recovery
+evidence; check the final protected deployment's read-only database path once after
+its exact target/configuration is approved. No deployment/provider call is approved.
+
+**Scope precedence:** extra monitoring tools, one-second telemetry, ten-second CPU
+certification, more fault campaigns, a persistent coordinator/tunnel and a new
+hosted test app are not prerequisites for this migration-only smoke. The old full
+campaign stays disabled and its strict result is not relabeled PASS. Existing
+dashboards plus bounded errors/connections/storage checks suffice for the small
+smoke. Essential backup failure/freshness alerts still need a named responder.
+The executable operator sequence below supersedes older full-campaign proposals.
+
+**Retained hosted database restore/recovery evidence (before essential smoke).**
 The owner approved the new disposable Free target/test writes and three temporary
 accounts. `sm-ha-20261112-f` (`dcwyiayubrqdrloergax`, Tokyo PostgreSQL
 `17.11.0.019`) is separate from protected staging. The $0/month project quote is
@@ -1034,11 +1077,12 @@ complete wire traffic or a full campaign. Vercel shows Hobby; billing API return
 `costs_not_found`, not proof of unused hosting allowance. No test app/coordinator
 endpoint or paid add-on was created.
 
-Current gate: **HOSTED DATABASE + LOCAL RECOVERY VERIFIED; HOSTED APP PENDING**. Private hosted
-app/coordinator, bounded pilot/forecast and protocol/launch-envelope approvals,
-actual browser/API/LINE/replay, one/five-client measurements and hosted generated-
-checkpoint recovery remain pending. Preserve the original strict gates; the full
-campaign stays disabled. Review A1/A3 below for the remaining precise scope.
+Current gate: **ESSENTIAL MANAGED POSTGRESQL SMOKE AND LOCAL RECOVERY PASS;
+FINAL PRODUCTION BINDINGS/OPERATIONS PENDING**. No new hosted-test app, coordinator
+or full-capacity campaign is required for this scoped evidence. Final-host
+read-only compatibility, actual production target, backup/alerts, fresh source/
+freeze/reconciliation and explicit release approval remain outstanding. Production
+is still Sheets; no activation or new Sheets read occurred.
 
 **Production release path prepared locally (2026-11-12).** The staging-only
 accessor still rejects production. A separate production profile now exists in
@@ -1141,57 +1185,43 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 
 | ID | Classification | Exit evidence / action |
 | --- | --- | --- |
-| M1 | Requires owner approval | **Existing access-protection risk; implementation deferred.** The owner requests current application access behavior and security work in the next phase. Do not add an owner-only gate or block independent migration preparation on a new access-policy choice. Existing production-wide protection remains unproved; record that risk explicitly in the final activation decision, without marking it fixed, safe or security-certified. Existing safeguards remain enabled. |
-| M2 | MUST FIX before cutover | **Production release binding and as-is compatibility.** The separate production profile is now implemented locally and remains disabled/unbound. It validates the new endpoint/project/UUID, Vercel project/source commit, restricted login and database purpose, defaults to read-only and preserves legacy production API access without a browser bearer. Actual target identities, approved configuration, hosted verification and activation remain pending. Staging protections remain intact; populated staging is excluded. |
-| M3 | MUST FIX before cutover | **Actual hosted acceptance.** On new approved disposable copies verify managed connection/pooler/TLS/roles/private Data API denial, browser-to-API protection, signed LINE behavior, representative supported writes/replay, exact business data and no real-provider egress. Measure one/five-client hosted latency, errors, connections and growth on the intended production-equivalent profile. Existing local evidence cannot certify these platform differences. |
-| M4 | MUST FIX before cutover | **Dedicated final production target.** Record approved org/plan/region/version, new project/UUID, restricted runtime/backup identities, private schemas/RLS, pool and instance limits, measured database/index/WAL/growth headroom and cost/quotas. Current staging is protected and cannot be repurposed. A Free quote does not prove production capacity or uptime. |
-| M5 | MUST FIX before cutover | **Recoverability and minimum monitoring.** Activate a target-bound encrypted/off-site backup schedule, independent key recovery, one real hosted generated-checkpoint restore/read-only verification and actionable redacted alerts with named coverage. Prove the agreed production RPO and measured RTO; sealed-checkpoint RPO=0 is not ongoing disaster-recovery RPO=0. Drive file objects require their own inventory/recovery responsibility. |
-| M6 | MUST FIX before cutover | **Final full Sheets synchronization.** After A4 only: freeze every writer, capture the final full source, profile/import/promote into a fresh empty target and reconcile all 23 business tables/IDs/types/totals/reports. Retained 70,777-row evidence is historical, not current freshness. Never delta-merge changed/deleted/reordered rows with the append-only importer. |
-| M7 | MUST FIX before cutover | **Writer freeze and external events.** Prove manual edits, old deployments, scripts, scheduled sync and LINE cannot cross the boundary. Provide durable receipt/hold plus ordered keyed replay, or another explicitly reviewed loss-safe procedure. Current immediate webhook handling is not a maintenance queue; LINE redelivery is not guaranteed and reply tokens expire. Never acknowledge unpersisted events or assume retries preserve them. |
-| M8 | MUST FIX before cutover | **Release and incident sign-off.** Seal the exact final release/target/source/backup; complete read-only smoke while frozen, verify accepted normal-size uploads and provider connectivity under approved scope, and name decision/abort times and an incident lead. Before SQL writes, Sheets rollback is possible; after SQL writes use freeze/forward recovery and reconciliation, never automatic Sheets fallback. |
+| M1 | MUST FIX before cutover | **Minimum effective existing protection.** Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied. |
+| M2 | MUST FIX before cutover | **Final release binding/hosting proof.** Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed. |
+| M3 | MUST FIX before cutover | **Scoped hosted acceptance: essential PG smoke PASS.** Nine groups plus stronger write-transaction permission denial pass; all original business records unchanged. Existing local browser/fault evidence is reused. Only final deployment/target compatibility remains mandatory under M2; strict telemetry/full synthetic campaigns are deferred, not certified. |
+| M4 | MUST FIX before cutover | **Dedicated final production target/cost.** Actual approved org/plan/region/version/project/UUID, runtime/reader/backup roles, final-plan quotas/headroom and account quote remain unassigned. Both current staging and disposable test targets are excluded. No purchase, upgrade, retag or pause is authorized. |
+| M5 | MUST FIX before cutover | **Backup automation and recovery.** Capture/restricted reader and exact hosted-capture/local restore pass. Production runner/destination/unattended encryption/key custody, independent fresh recovery, measured accepted RPO/RTO, retention/forecast and tested redacted failure/staleness alerts with named coverage are not activated. Extra monitoring tools are deferred. Drive bytes need a separate recovery owner. |
+| M6 | MUST FIX before cutover | **Final full Sheets synchronization.** After explicit workbook/principal/native-backup/freeze/export/import approval only: fresh full 23-tab source into a new empty candidate, exact reconciliation and original application/report parity. Historical 70,777-row evidence is not current freshness; no in-place delta merge. |
+| M7 | MUST FIX before cutover | **Loss-safe writer/event hold.** Stop every manual/API/deployment/script/scheduled/LINE writer, drain commands/effects and retain accepted/uncertain keys. Exact durable capture/replay or proven producer-pause procedure remains unassigned. LINE retries/webhook disablement alone are insufficient; never acknowledge unpersisted events. |
+| M8 | MUST FIX before cutover | **Release and incident approval.** Seal exact target/deployment/source/backup, finish read-only checks while frozen, obtain separately scoped provider verification if needed, name lead/abort times and approve dated activation. Before SQL writes, verified Sheets rollback is possible; afterward freeze/forward recover and reconcile, never automatic stale-Sheets fallback. |
 | D1 | SAFE TO DEFER until after cutover | **New security/authentication implementation** is the next owner-selected phase: login, sessions, roles/shop permissions, user administration and new access restrictions. This is a sequencing decision, not a security PASS; the existing exposure remains M1 and must be explicit in the final cutover decision. Preserve existing safeguards throughout. |
 | D2 | SAFE TO DEFER until after cutover | Unrelated refactors, extra test abstractions, more synthetic fault repetitions, additional planning PRs, multi-region/HA, optional dashboards, restore certification for unused Supabase Auth/Storage, and automated backup pruning. Preserve evidence and retained backups; defer destructive cleanup. Recheck only affected behavior or demonstrated drift. |
 | D3 | SAFE TO DEFER until after cutover | Automatic reverse synchronization to Sheets is unnecessary if the owner accepts a **forward-recovery-only** incident policy after the first SQL write. No switch back after SQL writes is permitted without a separately reconciled reverse migration. A demand for immediate post-write Sheets rollback makes that implementation MUST FIX. |
-| A1 | Requires owner approval | **F database creation/restore/test writes and temporary accounts are approved and completed as recorded above.** Remaining private preview/coordinator hosting, companion recovery/load targets, test-only pause/disposal sequence and spend/traffic ceiling need explicit scope/bindings. Current quote is $0/project/month; full cost/hosting allowance is unverified. Proposed first pilot 50 MB, full test cap 1 GB, protected-source reserve at least 2 GB; stop if the actual complete forecast/allowance fails. Never pause/reset existing staging. |
-| A2 | Requires owner approval | Production org/plan/resource budget, private backup destination/key custodian, recovery operator/on-call, retention and activation costs. Obtain an itemized account quote before purchase. Free is only a candidate; if measurements/backup/uptime needs exceed its limits, request a paid decision without creating or upgrading anything. |
-| A3 | Requires owner approval | **Bounded hosted acceptance scope and pre-existing limits.** Current access behavior is selected; no interim admin-only policy is pending. Approve the precise hosted protocol/launch envelope and monitoring/upload dispositions before changing disabled execution gates. No implicit relabeling of incomplete evidence. |
-| A4 | Requires owner approval | Exact operational workbook ID, read/export identity, native source backup/freeze permissions, all writer/event holds, final full export and import into the named new production target. No new Sheets access is authorized now. |
-| A5 | Requires owner approval | Exact PR65/release merge, any live security/environment/webhook changes, final target and dated maintenance window, then the final activation decision. Paid infrastructure and production cutover remain separately prohibited until explicitly approved. No blanket approval to bypass M1–M8. |
+| A1 | Requires owner approval | **Existing test approval is sufficient for the completed essential smoke.** No further test resources, public tunnel, monitoring protocol or full campaign are prerequisites. Additional resources, paid work or provider calls would require their own approval. |
+| A2 | Requires owner approval | **Production target/operations.** Choose exact org/plan and recurring/usage ceiling (planning baseline separate Pro/Micro about $25/month, current org with three Micro about $45/month before extras); approve new dedicated target/setup/import roles and backup runner/destination/key/retention/RPO/RTO/responder/alert test. No purchase or message is sent now. |
+| A3 | Requires owner approval | **Only material launch limitations.** Existing 10/20 MiB upload versus hosting body-limit mismatch predates migration. Preserve behavior; do not make upload redesign, custom monitoring or sustained capacity certification a migration prerequisite. If large uploads are required at launch, resolve or explicitly disposition that requirement; no full-platform PASS is claimed. |
+| A4 | Requires owner approval | **Final source/freeze.** Exact workbook ID and read/export identity, native frozen backup, all writer/event holds, final full export and import into the named new production candidate. No fresh source access is authorized now. |
+| A5 | Requires owner approval | **Release/live actions.** PR65 merge/exact release SHA, target+UUID/deployment/configuration, explicitly scoped provider checks/notifications, incident lead and dated maintenance window, then a separate final activation decision. No blanket approval or bypass of unmet prerequisites. |
 
-A1 is approval to use `volkswg's Org` (`yntcfbkilwulyhkslhbx`) for the new
-`sm-ha-20261112-f` test target and only the named restore/load companions in the
-existing disabled packet, using the retained verified post-audit backup and fake
-providers. It is not approval to refresh Sheets or write populated staging.
-Resource identity bindings must be recorded after creation; private app/coordinator
-hosting and zero-incremental-cost allowances must be established before creation.
-At most one new Free target may be active alongside protected staging; any pause
-sequence applies only to newly created disposable targets and needs approval.
-A2 must name the production organization/plan and a maximum recurring/usage budget;
-this decision is still unassigned, so no production purchase is actionable.
-A4 must supply the exact workbook ID and read/export principal before any capture;
-an older export approval is insufficient. A5 must name the release SHA, final
-project+UUID, incident lead and dated window. No complete target-bound A1–A5 approval is recorded; this mode change does not
-activate the disabled packet or permit bypassing a failed gate.
+A1's existing approval covers the completed essential smoke on
+`sm-ha-20261112-f` only; no new hosting, monitoring or full-campaign decision is
+needed to continue this migration scope. Additional resources or paid work still
+require exact approval. A2 must name production org/plan/budget and backup/alert
+custody/operations. A4 must supply the exact workbook/read-export principal,
+writer/event-hold and final full export/import permission; older export authority
+is insufficient. A5 names exact release/project+UUID, live actions, incident lead
+and dated window, then separate writer activation. No permission is inferred from
+a CI pass, prose mode change, test-target approval or deferred security work.
 
-**Shortest implementation and execution sequence.** Use this PR; do not open another
-planning PR. Focus first on hosted/production target and cost bindings, the guarded
-production release profile and as-is browser/API/LINE compatibility. Run approved
-hosted platform acceptance once, including one/five-client load and a hosted
-restore; fix demonstrated failures and rerun affected checks only. In parallel
-bind backup/alerts and prepare the fresh production target. Then obtain A4/A5 for
-the final full Sheets refresh, writer freeze and controlled activation. New access
-features are deferred, and no interim owner-only policy is a preparation dependency.
-The final activation assessment must still state M1's unresolved security risk.
-
-Recommended A3 scope: retain the completed local correctness/fault evidence rather
-than repeat every local repetition in the cloud. Require hosted platform, business
-correctness, latency/reliability, recovery and operational monitoring evidence. The
-original one-second/ten-second CPU **strict resource certificate remains BLOCKED**
-without equivalent observations; a separately approved native-resolution operational
-protocol may replace that certificate as a migration release gate, with its blind
-spots and tested concurrency envelope explicit. It cannot waive resource exhaustion,
-missing live alerts, capacity failure or security. Existing disabled CLI gates remain
-unchanged until that approval, so the alternate protocol is not executable yet.
+**Shortest remaining sequence.** Reuse the essential hosted PostgreSQL smoke,
+CI47/local browser/fault/recovery evidence and the verified hosted checkpoint. Bind
+an approved dedicated production target/cost and backup operations; finish final-
+host read-only compatibility once. Obtain final workbook/freeze/export/import
+approval; rehearse the full refresh with an approved artifact to size the outage.
+Only after every mandatory gate and dated owner approval perform final capture,
+reconciliation, read-only release and explicit writer activation. Keep all work in
+PR65. Do not implement new protection/authentication, optional monitoring, another
+coordinator or repeated full campaigns. Unproved existing protection still means
+production activation NO-GO, without stopping independent migration preparation.
 
 The 4.5 MB Vercel request boundary predates the database switch; the app advertises
 10 MiB images/20 MiB files. Full advertised upload compatibility remains NO-GO.
@@ -1210,8 +1240,8 @@ The ordinary browser must work after migration without receiving a shared stagin
 bearer. Production target/configuration compatibility remains migration work;
 simply bypassing staging checks is not an approved production release path.
 Existing protection gaps stay documented as M1, with no claim of adequate security
-or general production safety. The next security phase and the eventual explicit
-cutover risk decision are separate from permission to continue database preparation.
+or general production safety. The next security phase is separate from permission
+to continue database preparation. Missing/unproved effective existing protection remains activation NO-GO.
 
 **Backup/monitoring activation packet — prepared, disabled.** Assign the new target,
 scoped read/export login, verified-TLS endpoint, operator-owned scheduler/private
@@ -1241,6 +1271,229 @@ writer-freeze procedure. Any identity/TLS/access bypass, wrong totals, unexplain
 effect or failed recovery means immediate NO-GO/freeze. Alert delivery and responder
 coverage must be tested before opening writers; no notification was sent now.
 
+###### Executable production cutover runbook
+
+**Unapproved actions remain blocked.**
+No exact production endpoint exists yet. Do not invent one or default to staging.
+Complete the bindings below, independently review them, then execute this sequence
+from the clean approved release checkout. Missing values or authority mean STOP.
+Earlier Gate 0–8 sections supply detail; this is the current operator sequence.
+
+| Required binding | Current value / operator action |
+| --- | --- |
+| Release | `volkswg/stock-management`, draft PR65; exact merge/deployment SHA and deployment ID require approval. |
+| Production database | **UNASSIGNED** new dedicated `stock-management-production`, proposed Tokyo. Both protected staging `orjnazrothkdgmzlsuto` / `160669bd-2f6f-4490-9259-bada5a1d02c4` and used disposable test `dcwyiayubrqdrloergax` / `5f63d064-9658-4440-bf87-b4279b08c806` are forbidden production destinations. |
+| Production application | Existing Vercel project `prj_XH4nEje5cicuBuucGumuHgr73l1E`; no settings/deployment changed. Privately inventory every active alias/domain and old writer. |
+| Endpoint/login | New exact `db.<approved-ref>.supabase.co:5432/postgres`, verified CA/hostname; a Tokyo session endpoint is an alternative only after final-host proof. No transaction-mode/6543 assumption: current production parser supports direct/session 5432. |
+| Accounts | Separate new `stock_prod_runtime`, `stock_prod_reader`, `stock_prod_backup`; no owner login in the app or backups, no reuse of expiring test credentials. |
+| Source | **UNASSIGNED** final workbook ID, read/export principal, native-backup/freeze permission and private 23-tab mapping. Historical data is not source freshness. |
+| Operations | New 0700 artifact directory/0600 service and passfiles; stable backup runner, destination/key custody, alert recipient, incident lead, business verifier, recovery objectives/retention and durable event-hold procedure. All unassigned/unactivated. |
+
+**Step 0 — approve plan/cost and prepare an empty final candidate.** Current org
+already has two active Free projects; preserve both. Public planning baseline
+checked 2026-11-13: a separate Pro organization with one Micro is about **$25/month**;
+upgrading the current organization and keeping all three on Micro is about
+**$45/month** ($25 + $30 compute - $10 credit). Neither is an account checkout quote.
+Both exclude tax/overages, off-site storage/egress, runner/alerts and any Vercel
+change. Obtain an itemized recurring/usage ceiling before any purchase. No paid
+resource, organization upgrade, PITR or recovery project is created. Pro includes
+seven daily backups, which alone cannot meet a one-hour RPO. Free has no spare
+slot here and is not an approved production substitute.
+[Pricing](https://supabase.com/pricing),
+[backup retention/scope](https://supabase.com/docs/guides/platform/backups).
+
+After exact-target creation/DDL approval, inspect its empty catalogs and apply the
+six reviewed migrations through migration tracking, retaining `--skip-vault`, with
+no seed/reset/repair/automatic confirmation. Review the actual pending ledger;
+never copy the historical staging command's hard-coded ref. Do not restore old
+business rows into the final destination. Owner assigns its new UUID while empty;
+keep `purpose=isolated-staging` through extraction/reconciliation because those
+tools deliberately reject production purpose. Record the six migration hashes,
+51-table/role/RLS/index/trigger metadata and verified endpoint/service-file hash.
+Before every mutation recheck that service and the actual UUID/purpose.
+
+After approved empty-target setup, run this catalog-only guard immediately before
+each import/promotion step, with the service file's exact approved host/database,
+role, `sslmode=verify-full` and CA already independently checked. It returns no
+business rows. Bind the service-file hash in the operator record; stop if it changes.
+
+```sh
+: "${PGSERVICE:?approved new candidate service required}"
+: "${STOCK_TARGET_ISOLATION_ID:?approved new candidate UUID required}"
+psql -XqAtw -v ON_ERROR_STOP=1 -v approved_uuid="$STOCK_TARGET_ISOLATION_ID" <<'SQL'
+BEGIN READ ONLY;
+SET LOCAL statement_timeout='10s';
+SELECT 1 / (:'approved_uuid' NOT IN ('160669bd-2f6f-4490-9259-bada5a1d02c4','5f63d064-9658-4440-bf87-b4279b08c806'))::int;
+SELECT 1 / ((SELECT count(*)=1 AND bool_and(isolation_id=:'approved_uuid'::uuid AND purpose='isolated-staging') FROM stock_operational.environment))::int;
+SELECT 1 / (coalesce((SELECT ssl FROM pg_stat_ssl WHERE pid=pg_backend_pid()),false))::int;
+COMMIT;
+SQL
+```
+
+Use the approved owner service for this native diagnostic, not the restricted
+runtime after SET ROLE. After the deliberate production-purpose change, use the
+existing production-purpose capture/runtime identity guards instead; never relax
+this candidate guard to make it accept a different destination.
+
+Runtime/reader satisfy the production parser: NOSUPERUSER/NOCREATEDB/NOCREATEROLE/
+NOINHERIT/NOREPLICATION/NOBYPASSRLS, connection cap 6; writer alone may SET LOCAL
+ROLE `stock_runtime`. Reader/backup have full SELECT/unfiltered SELECT policies,
+no writer membership/owner assumption; backup cap 2. Verify effective memberships,
+DELETE/DDL denial, private Data API schemas and anon/authenticated denial. Pool max
+2 per application instance is not a global cap; record real provider max/backends,
+retain five spare connections, stop on pool timeout/errors or >=80% quota. Measure
+actual final-plan disk/growth headroom; do not infer it from the 80 MB test copy.
+
+**Step 1 — bind backup automation and prove its failure path.** The existing
+production-purpose capture/verify tools and restricted reader are implemented;
+hosted capture (367.47 s) and exact fresh local 51-table/15-metadata restore pass.
+Historical independent off-site encryption/key recovery passes. These do not mean
+production scheduling, unattended encryption, destination, alerts or RTO are ready.
+A sleeping Mac cannot be the sole always-on backup runner.
+
+Use this existing capture command in the approved runner's serialized job after
+binding its private PGSERVICE/PGPASS/CA and fresh exclusive run-directory path:
+
+```sh
+set -eu
+umask 077
+: "${PGSERVICE:?approved production backup service required}"
+: "${PGSERVICEFILE:?private service file required}"
+: "${STOCK_PRODUCTION_ISOLATION_ID:?approved production UUID required}"
+: "${STOCK_BACKUP_RUN_DIRECTORY:?new exclusive private directory required}"
+python3 tools/migration/recovery.py capture --directory "$STOCK_BACKUP_RUN_DIRECTORY" \
+  --target-id "$STOCK_PRODUCTION_ISOLATION_ID" --target-purpose production \
+  --row-security-reader --workers 1 --row-digests
+```
+
+Package dump/receipt/fingerprint, password-free role recreation/ledger, source/
+target/release digests and pinned recovery sources. Use the existing verified
+encryption/retrieval procedure, with separately approved unattended key access;
+the interactive helper is not a scheduled solution. Preserve/quarantine partial
+jobs, no pruning. Publish success only after encryption, off-site upload and
+independent ciphertext retrieval/hash verification. Record snapshot start before
+capture: receipt `createdAt` is completion and cannot stand in for the recovery
+point. No private keys/passphrases/passwords in backups, Git or logs.
+
+Owner proposal: every 30 minutes, complete snapshot-to-offsite <=30 minutes,
+recoverable checkpoint age <=60 minutes, warning at 45, RTO <=15 minutes. Bind a
+stable runner's 30-minute schedule and an independent five-minute freshness check
+only after objectives/costs are approved and measured. Any capture/encryption/hash/
+upload/retrieval/identity/restore failure suppresses the success heartbeat and
+alerts the named responder with stage/target/time only. The independent watchdog
+must detect a dead runner. At 60-minute age follow the approved writer-freeze
+incident procedure. Prepare alert delivery/acknowledgment testing, but send nothing
+without the separate recipient/channel approval. No schedule or notification is
+activated here; runner/destination/key/recipient are explicit prerequisites.
+
+Before GO, independently download/decrypt a generated package, restore to a fresh
+approved isolated recovery target, recreate custom role secrets via separate
+custody, match managed ICU `en-US` ordering, verify all 51 tables/15 metadata and
+SELECT-only app/no provider replay. Include retrieval/key access/provisioning/role
+setup/restore/readiness in RTO. Existing local restore time is not hosted incident
+recovery time. If the proposed objectives fail, agree honest bounds or separately
+price a remedy. Assign Drive object-byte recovery separately from SQL.
+
+**Step 2 — stage configuration and a loss-safe freeze.** Prepare, do not install,
+the existing production binding: `STOCK_STORAGE=supabase`,
+`STOCK_PRODUCTION_ENABLED=true`, exact `STOCK_TARGET_ISOLATION_ID`, verified
+`STOCK_DATABASE_URL`/`STOCK_DATABASE_CA`, `STOCK_PRODUCTION_READ_ONLY=true` and the
+exact nine-field `STOCK_PRODUCTION_RELEASE_JSON` documented above. Use
+`stock_prod_reader` first; the later writer binding/URL uses `stock_prod_runtime`.
+Bind Vercel's real project/commit, no staging/local/HA settings or browser DB secrets.
+Keep LINE HMAC and all existing controls. No new user auth/RBAC/shop features.
+Existing protection must be effective across production business API aliases;
+LINE HMAC/DB RLS alone do not establish this. If absent/unproved, activation is
+NO-GO; defer implementation and continue database preparation.
+
+After deployment/configuration approval, verify final-host TLS/networking and
+read-only browser/API/report results once. Mac direct connectivity does not prove
+Vercel IPv6; session mode must be actually verified before selecting it. No TLS
+workaround, production setting or real-provider call is authorized now.
+
+Before freeze, name/hold every browser/API/Sheets editor, old deployment, script,
+scheduled sync and external/LINE writer. Drain commands/effects and record last
+accepted keys plus uncertain outcomes. Approve either durable held-event receipt
+with keyed ordered replay or a producer pause with a proven complete capture/replay
+procedure. Webhook disablement/LINE retries/reply-token assumptions are insufficient.
+Never acknowledge unpersisted events. Exact hold remains unassigned; do not start
+the outage or build an optional queue as part of this preparation.
+
+**Step 3 — approved fresh full source and empty-target import.** After explicit
+workbook/principal/native-backup/freeze/export/import approval, take the frozen
+native copy and record writer acknowledgments, copy revision and UTC/Bangkok times.
+Set the variables below, the private read-only token and reviewed mapping in a new
+0700 directory. No credential worksheet is read. Export checks headers, then takes
+two full raw/formatted/formula captures of all 23 business worksheets and rejects
+drift. Recheck source revision/writer state afterward; matching captures alone do
+not prove a freeze.
+
+```sh
+set -eu
+umask 077
+: "${STOCK_FINAL_DIRECTORY:?new private artifact directory required}"
+: "${STOCK_FINAL_WORKBOOK_ID:?approved workbook required}"
+python3 tools/migration/migrate.py export --workbook "$STOCK_FINAL_WORKBOOK_ID" \
+  --mapping "$STOCK_FINAL_DIRECTORY/mapping.json" --output "$STOCK_FINAL_DIRECTORY/source.json"
+python3 tools/migration/profile.py "$STOCK_FINAL_DIRECTORY/source.json" --output "$STOCK_FINAL_DIRECTORY/profile.json"
+python3 tools/migration/migrate.py plan "$STOCK_FINAL_DIRECTORY/source.json" \
+  --snapshot-encoding gzip-json-v1 --output "$STOCK_FINAL_DIRECTORY/import.sql"
+```
+
+STOP for profile/unknown-tab/source/freeze review, exact-target empty-state and
+migration-ledger checks, generated-SQL review and explicit import approval. Then
+use the approved private owner service, with the exact UUID exported as
+`STOCK_TARGET_ISOLATION_ID` and approved verify-full service/passfiles:
+
+```sh
+set -eu
+umask 077
+: "${PGSERVICE:?approved empty production-candidate owner service required}"
+: "${STOCK_TARGET_ISOLATION_ID:?approved candidate UUID required}"
+: "${STOCK_FINAL_DIRECTORY:?reviewed private artifact directory required}"
+psql -Xw -v ON_ERROR_STOP=1 -f "$STOCK_FINAL_DIRECTORY/import.sql" >"$STOCK_FINAL_DIRECTORY/import.log" 2>&1
+python3 tools/migration/migrate.py database-snapshot --source "$STOCK_FINAL_DIRECTORY/source.json" --output "$STOCK_FINAL_DIRECTORY/archive.json"
+python3 tools/migration/migrate.py reconcile "$STOCK_FINAL_DIRECTORY/source.json" "$STOCK_FINAL_DIRECTORY/archive.json" --output "$STOCK_FINAL_DIRECTORY/archive-reconciliation.json"
+psql -Xw -v ON_ERROR_STOP=1 -f tools/migration/promote.sql >"$STOCK_FINAL_DIRECTORY/promote.log" 2>&1
+# The explicitly bound service/target UUID still has isolated-staging purpose:
+python3 tools/migration/phase3.py operational-snapshot --source "$STOCK_FINAL_DIRECTORY/source.json" --output "$STOCK_FINAL_DIRECTORY/operational.json"
+python3 tools/migration/acceptance.py "$STOCK_FINAL_DIRECTORY/source.json" "$STOCK_FINAL_DIRECTORY/archive.json" "$STOCK_FINAL_DIRECTORY/operational.json" --output "$STOCK_FINAL_DIRECTORY/acceptance.json"
+env -i PATH="$PATH" node tools/migration/application-parity.cjs --source "$STOCK_FINAL_DIRECTORY/source.json" --operational "$STOCK_FINAL_DIRECTORY/operational.json" --config "$STOCK_FINAL_DIRECTORY/parity-config.json" --output "$STOCK_FINAL_DIRECTORY/parity.json"
+```
+
+This is a supervised sequence: the separate STOP paragraph is an operator
+decision boundary. Keep `set -eu`, private logs, exact TLS service/UUID and
+freeze checks at each step. Parity config needs reviewed frozen clock/all history
+months/account/shop identities, no tokens. Require all 23 table/ID/cell/type/FK/
+exact-money checks and original report parity to pass. No silent cleanup/delta
+merge or synthetic writes on this final target. A mismatch stops; retain the
+failed target and obtain approval for a new empty candidate, never truncate it.
+
+**Step 4 — seal, read-only validate and obtain final GO.** Only after reconciliation
+does the owner perform the reviewed new-candidate-only purpose change to production;
+UUID stays fixed. Record that intentional metadata delta, capture/encrypt/off-site
+and verify a production-purpose checkpoint, and seal source/release/endpoint/role/
+backup digests. With separate live-change approval, deploy the protected SQL
+read-only configuration and compare expected totals/statuses/URLs. Keep held events
+and providers stopped. Any identity/TLS/access bypass, source drift, mismatch,
+pool exhaustion/timeout, missing event, unavailable backup/alert or unproved
+recovery is NO-GO. Owner must approve exact SHA, project+UUID and dated window.
+
+**Step 5 — separately authorized activation.** Operator installs the sealed writer
+URL/release binding and literal `STOCK_PRODUCTION_READ_ONLY=false` once. Prove old
+Sheets writers remain stopped, release held work with original stable keys and
+outcome reconciliation, observe existing dashboards/errors/connections/storage and
+backup/alert heartbeat. A CI pass or test-target approval never activates production.
+Before any SQL business write, abort may restore approved Sheets routing only after
+proving SQL accepted no new business commands and reconciling held events. **After
+the first SQL write, freeze and prefer forward recovery; never automatically flip
+to stale Sheets.** Preserve SQL/journal/effects, last accepted IDs and a new backup;
+reconcile every post-freeze mutation before a separately approved reverse transfer.
+If DB is lost/corrupt, freeze ingress/providers, retrieve/decrypt and restore to a
+new approved target, verify exact data/permissions and reconcile writes since the
+snapshot plus uncertain effects. Resume only on incident-owner approval; never
+blindly resend sending/uncertain provider effects or overwrite protected staging.
+
 **Final full-refresh/cutover window — conditional, not booked.** Reserve **02:00–06:00
 Asia/Bangkok (four hours)** only after the same-size hosted end-to-end full-refresh
 rehearsal completes within 90 minutes, hosted recovery meets its agreed RTO and
@@ -1248,7 +1501,7 @@ all preflight gates pass. No current evidence times a latest Sheets export plus
 hosted final load; local 1,478.491-second capacity and ~5.5-second local restores
 cannot justify a shorter production outage. There is no defensible fixed go-live
 date yet. Allow roughly **3–5 working days after decisions/access approvals** for
-minimum security/release work, hosted proof and operations setup; this is an
+target/release bindings, final-host proof and backup operations setup; this is an
 engineering estimate, not a promise, and required upload/authorization fixes or
 failed hosted gates extend it.
 
