@@ -1,5 +1,381 @@
 # Refactoring progress and evidence
 
+## Actual private Vercel-to-Supabase read-only smoke passes (2026-11-14)
+
+Seven bounded checks pass on READY Tokyo Preview
+`dpl_4QoQD5Qbh3Q1DrBu7WM1w2hmKn12`, new protected Hobby project
+`prj_ZuMOG7faVjIakAQDd3zmDbMSNxq9`: Vercel SSO redirect, missing app bearer 401,
+two actual orders reads 200/empty/revision zero, order and LINE POST denial 405,
+and application page 200. Exact source `6b89d86` has no final application changes;
+852 uploaded files exclude secrets and the old Vercel link. The test project has
+only Preview reader/staging settings, no real provider credentials or Git link.
+
+Resolved CLI/environment execution defects: bundled Node.js sign-in works; a
+large CA input was truncated to 16 KB, causing the actual certificate-chain error.
+A complete 1,367-character Supabase root already trusted by the original bundle
+fixes it with strict TLS preserved. A private redacted diagnostic proves the cause
+and is removed from the final app source; earlier failures remain private evidence.
+Only the new test project gets a credential-free, unaliased static first-deployment
+bootstrap. CLI automation access is scoped to that protected test project only.
+
+All 46 archive/operational business-table counts sum to zero before and after;
+commands/effects/revision/import batches and UUID/purpose are unchanged. Live Sheets
+production remains latest/READY on `405c474` with the same aliases. The
+[single runbook](../database-migration.md#executable-production-cutover-runbook)
+records exact IDs, certificate/proof digests and remaining release/freeze/data
+approvals. No paid resource, fresh Sheets read, SQL write, backup, protected-staging
+change, merge or production switch. Backups stay deferred; PR65 stays draft. Reuse
+CI48 for unchanged app code; this is new actual private-host proof, not final
+production-purpose/release or fresh-data acceptance.
+
+
+## Private Vercel test prepared; email verification blocks CLI sign-in (2026-11-13)
+
+Pinned official CLI 65.15.0 is installed within the task directory; global software
+and repository dependencies are unchanged. A clean Git archive of `6b89d86`,
+preview-only restricted reader config and seven bounded test cases are prepared
+privately, with secrets outside the upload directory and no real provider keys.
+The selected team reports Hobby; no paid resource or new project is created.
+Vercel's device login reaches email verification; the owner reports Outlook is
+unavailable. `whoami` confirms logged out and even deployment dry-run stops for
+missing credentials. Cancel the pending device flow and restart with a fresh code
+when email works. **Actual private Vercel-to-Supabase smoke remains NOT RUN.**
+No anonymous temporary deployment, security bypass, old-project reconfiguration,
+new source reads, SQL writes, backup, merge or production change. The canonical
+runbook and private execution packet preserve the prepared source/target and
+current blocker. Reuse passing connection/27 guard/CI48 evidence without reruns.
+
+
+## Final candidate connection resolved; deployment guards verified (2026-11-13)
+
+The exact project Connect panel, inspected through native Chrome, assigns
+`aws-1-ap-northeast-1.pooler.supabase.com:5432`; the previous `aws-0` test endpoint
+caused the tenant-not-found failure. Correct the private, undeployed session profile
+and its host/mode release binding; passwords, permissions and application source
+are unchanged. Actual read-only application checks pass 401/200/405 with verified
+client TLS and no provider calls. Reader and runtime logins separately pass exact
+UUID/purpose/nonprivileged-role checks in read-only transactions; no writes or
+backup operations. Database controls remain pristine; health advisors have no findings.
+
+All 27 focused production-release/read-only/provider-guard checks pass. Live Vercel
+metadata still pins READY main `405c474`, the same immutable Sheets deployment and
+production aliases; no business endpoint was called. These are local/Mac and
+control-plane checks, **not Vercel-to-Supabase runtime proof**. The current connector
+lacks isolated per-deployment env/no-alias controls, and no local Vercel CLI was found in the checked paths. A separately scoped private read-only deployment remains the
+hosting execution step; no preview/protected-staging reconfiguration, production
+purpose change, deployment, live setting, merge or cutover is performed.
+The [single runbook](../database-migration.md#executable-production-cutover-runbook)
+and current private packet retain exact progress and limits. CI48 is reused for
+unchanged application code; backup work stays owner-deferred and no fresh Sheets
+records are read. PR65 stays draft/unmerged.
+
+
+## Final synchronization and deployment checks prepared (2026-11-13)
+
+The private packet binds the retained workbook and all 23 tab mappings; export
+preview passes without token access, HTTP or fresh records. Historical parity
+metadata (two accounts/ten months) is explicitly a seed. Current target control
+checks confirm exact UUID, isolated-staging purpose, revision/commands/effects/
+import batches zero, 51 RLS tables and six migrations. No source import or SQL
+business write occurred. Live Vercel metadata pins READY Sheets deployment
+`dpl_7YdPW3SSSnRJgBcNedq3MviazqwW`/main `405c474` and its aliases; actual region
+is Virginia, so Tokyo hosting is a proposal rather than an observed setting.
+
+Historical preparation snapshot, superseded by the connection-resolution entry above:
+the reused test session endpoint rejects the new tenant (`XX000`) before any
+business transaction. Its assigned project endpoint and final Vercel connectivity
+remain open; no guessed alternative/TLS bypass or paid IPv4 change. The connection
+panel could not be inspected because Chrome browser control was unavailable.
+The [canonical runbook](../database-migration.md#executable-production-cutover-runbook)
+now records exact staging/release checks, a source-writer permission freeze proposal,
+LINE hold requirements and rollback boundaries. All live changes/fresh source
+reads/merge/activation remain unapproved. Backups stay deferred; CI48 is reused
+for unchanged application code. PR65 remains draft/unmerged.
+
+
+## Database backup work deferred by owner (2026-11-13)
+
+Owner moves database backups, further checkpoints, automation, encrypted off-site
+delivery, backup alerts and RPO/RTO certification to the next phase. M5 and its
+operating decisions no longer block the current cutover scope; the runbook skips
+the backup step and removes new SQL checkpoint/backup-alert requirements from
+launch and its window. Preserve verified artifacts, tools and accounts. This is a
+scope deferral, not a recovery PASS or guarantee for new post-cutover records.
+Source-copy/export integrity, full reconciliation, loss-safe writer/event hold,
+existing security and exact release/activation approval remain unchanged. Only
+canonical documentation/disabled metadata changes; no backup is run, schedule or
+alert activated, existing artifact deleted, source record read, merge or live
+production setting changed. Earlier backup requirements below are historical;
+this entry and the current assessment supersede them for this milestone.
+
+
+## Final empty production database prepared and verified (2026-11-13)
+
+Free Tokyo target `hzynvirpedqnvtbifobx`, UUID
+`349b9289-f684-4ec5-ac22-924b2be1946b`, now has six exact source-version migrations,
+51 RLS tables/no audit and the three explicitly approved restricted persistent
+service logins (6/6/2). Initial account auto-review rejection executes nothing;
+owner's explicit production-role approval resolves it. Private native continuation
+preserves source hashes and original connector receipt. All native TLS/logins and
+eight role denials pass; exact-decimal rollback preserves every row count, revision
+and order sequence. Current actual read-only app owners return 401/200/405 over
+verified TLS with zero provider calls. The restricted empty capture restores in a
+fresh network-isolated local container: all 51 tables/15 metadata match, as does
+the subsequent hosted check. Fourteen pinned package files exclude passwords and
+service files. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records digests and scope; no source records loaded, hosted Vercel proof, off-site
+recovery/automation claim or activation. New UUID joins the disabled test denylist.
+Application source stays unchanged from CI48; no repeated synthetic campaign or
+new authentication features. Earlier handoff-pending snapshot below is historical.
+
+
+## Final Free production candidate created; native handoff pending (2026-11-13)
+
+Owner selected releasing the disposable test slot. Paused, did not delete,
+`dcwyiayubrqdrloergax`; verified both retained 14-file packages. Created new Tokyo
+Free project `hzynvirpedqnvtbifobx` at quoted $0/month. Protected staging and live
+Vercel/Sheets remain untouched. Archive migration creates 24 empty tables; the
+operational migration connector confirmation expires twice with no partial schema.
+Native continuation requires the owner-only password/helper handoff; Mac is locked.
+Fresh local empty-role and native migration-record rehearsals pass. Private sources,
+credentials/helper and receipts stay outside Git. Add the new final target to the
+existing disposable campaign's denylist; that campaign remains disabled. The
+[single current assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records exact progress and the remaining handoff, not a ready/activated database.
+Application code is unchanged; CI48 is reused, not rerun for operational metadata.
+All 85 existing offline controls pass with the new target denylist. Initial local
+loopback-permission and container-readiness diagnostics are retained; the scoped
+rehearsals pass after correcting their local launch conditions.
+
+
+## Migration-only essential hosted smoke and executable cutover sequence (2026-11-13)
+
+PR65 remains draft/unmerged. Actual application routes against the already approved
+managed test DB pass read/write, atomic rollback, overlapping retry/replay/conflict,
+LINE raw-body signatures, verified TLS, target/read-only guards and runtime role
+denial. All 70,777 original business rows and 47 archive/business table digests are
+unchanged; one synthetic order/command remains on the disposable target. No provider
+calls, production changes, new Sheets reads or paid resources. The canonical
+[current assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records the composite receipt, retained harness diagnostics and exact limitations.
+Reuse passing checks rather than repeat writes after the final diagnostic alias
+fix. Extra monitoring, coordinator/tunnel, new hosted app and full campaign are
+deferred. The existing document now contains the current operator runbook: explicit
+unassigned production bindings, itemized cost baselines, backup automation/alerts
+prerequisites, full source/freeze/import commands and rollback boundaries. New
+access-protection/auth/RBAC implementation stays deferred; unproved effective
+existing protection is activation NO-GO. No schedule, alert or cutover is activated.
+Local verification: 625 regressions, typecheck, lint (one inherited warning),
+credential-free build/routes/113 client chunks, operator-entrypoint syntax and
+private-input redaction/protected-target rejection pass. [CI48](https://github.com/volkswg/stock-management/actions/runs/43342345150) passes
+on `8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b`, including report upload. All 20
+downloaded files/source SHA/archive digest verify; the report-only follow-up does
+not repeat or relabel that executable evidence.
+
+
+## Hosted original restore / roles verified; restricted-backup fix (2026-11-13)
+
+The new disposable target restores the pinned post-audit dump atomically. All 51
+original table fingerprints match; the only original metadata differences are
+exactly the three approved accounts and their managed-owner links in two sections.
+No original role was removed/changed. Reviewed those deltas before assigning the
+new isolated test UUID and reader/writer permissions. Native TLS, exact numeric
+rollback, role/write/DELETE denial and unchanged before/after order/revision counts
+pass. The separately approved temporary `pg_monitor` resolves managed-owner limits;
+no administrator login or existing-target changes. The [single current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records evidence and its limits.
+
+A real restricted-reader export exposed the owner-style pg_dump/RLS incompatibility.
+The explicit full-visibility-guarded reader option and one-reader checkpoint fix
+pass fresh local 51-table/15-metadata restore plus incomplete-access refusal tests.
+625 regressions, 73 Python checks, 85 hosted controls, lint/typecheck and isolated
+build pass; source-matched CI47 and its 20 reports are verified below. The restricted hosted capture
+passes in 367.47 seconds; its fresh local restore matches all 51 tables/15 metadata
+sections after matching the hosted ICU en-US sorting provider. Retain both the
+initial ordering diagnostic and final exact match. The outer capture limit is now
+600 seconds; individual fingerprint deadlines stay 150 seconds.
+Full hosted application/capacity/off-site recovery remain pending;
+production is Sheets and NO-GO. Keep PR65 draft; no new authentication features.
+
+
+## Concurrent hosted evidence reads serialized after CI46 failure (2026-11-13)
+
+CI46 passes the new restricted-backup regression but stops at the existing private
+app WT03 smoke. A deterministic regression reproduces duplicate journal events
+when parallel HTTP callbacks refresh the same cursor. The driver now serializes
+whole drains and fails queued reads closed after a failure. Two red/green cases,
+all 85 hosted controls, lint, and fresh actual private-app/browser/crash/recovery
+checks pass locally. [CI47](https://github.com/volkswg/stock-management/actions/runs/43302788584)
+passes on executable commit `e4e7498ec3c7d1aba3b6f28ee8301aeab7f396a0`,
+including report upload; all 20 files, source SHA and ZIP digest verify. The current
+report records the exact evidence and the complete private checkpoint package.
+No application or hosted data/permission change. The native restore/checkpoint proof above is
+retained rather than repeated.
+
+
+## Production identity profile implemented locally (2026-11-12)
+
+Draft PR65 adds the separate disabled production database profile while preserving
+current Sheets and user access behavior. Exact new target/UUID, project/commit,
+restricted role and purpose checks, strict TLS, read-only default and unchanged
+staging bearer/LINE checks are implemented; no new authentication system.
+Backup/recovery now has explicit production-purpose selection and receipt binding,
+while staging remains the default; full native capture/restore is verified locally.
+A new purpose-constraint migration changes no row, UUID, grant or staging default
+and has not been applied hosted. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records configuration, focused evidence and the remaining real target/activation
+gates. 25 focused checks and fresh native PostgreSQL/TLS/reader/LINE tests pass;
+[CI45](https://github.com/volkswg/stock-management/actions/runs/43259664708)
+passes on `739011c64b81b4ff54f34de43c915aa27e19186f`, including report upload;
+all 19 artifact files and the archive digest were verified. No existing data, hosted resource, production configuration, merge
+or cutover changed. Existing access risks remain explicitly deferred, not fixed.
+
+
+## Scope clarification: application as-is; security next (2026-11-12)
+
+Owner requests unchanged application/access behavior and database migration first.
+New protection/authentication implementation is deferred; the proposed interim
+owner/admin-only launch is withdrawn. Update the same draft PR65 and current
+readiness report. Preserve existing LINE/staging/TLS/database safeguards. The
+known production access gap remains open as a final activation risk decision;
+no security PASS, live change or cutover is implied. Hosted acceptance, production
+identity readiness, backup/alerts and final full Sheets synchronization remain
+the migration work. Documentation/disabled metadata only; no repeated campaigns.
+
+
+## Critical-path cutover mode (2026-11-12)
+
+Owner reprioritized the existing draft PR65 toward database completion. The
+[one current readiness report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+now separates MUST FIX, SAFE TO DEFER and owner approvals, reuses CI43/local
+acceptance evidence, and defines minimum production security, actual hosted
+proof, production target/backup/alerts, final full Sheets refresh and a conditional
+02:00–06:00 Bangkok window. No new framework or repeated synthetic campaign.
+Historical priority snapshot: superseded by the latest scope clarification above.
+New user authentication stays the next planning-only milestone.
+
+Fresh control-plane metadata still shows only protected staging, a $0/month
+new-Free-project quote (not complete costs), and no established protection across all production URLs; firewall configuration
+could not be verified (404). No SQL,
+new Sheets/business access, resource creation, hosted writes, live settings,
+notifications, merge or cutover. Production NO-GO. Documentation/disabled-metadata
+changes receive focused consistency checks; code acceptance remains CI43 on
+`06eafe921e92842ecc3b87739238396e191dd47d`, not a claim of tests on later prose.
+
+
+## Hosted tooling completed locally — execution disabled (2026-11-12)
+
+Owner authorized completing local tooling and proposals while keeping draft
+[PR65](https://github.com/volkswg/stock-management/pull/65) unmerged. The private
+build/runtime, HTTPS coordinator, transaction leases/drain, browser adapter,
+45-case bridge, fixed scheduler, independent oracle transport, code/fixture seals
+and checkpoint/recovery integration are implemented. The [canonical packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12)
+records operation and exact boundaries. Production source and every existing
+local-harness byte are unchanged; no hosted permission/schema/configuration or
+business-data access occurred.
+
+Fresh synthetic verification exercises the actual private production build,
+desktop/mobile form submissions, exact fake bytes, real SQL rollback/retry,
+committed-response replay and all six actual process-exit boundaries, including uncertain fake LINE acceptance.
+The external journal survives and restart does not resend. A generated checkpoint
+restores all 51 tables/15 metadata. Its actual read-only app uses a SELECT-only
+login, cannot write or assume the writer role, invokes no provider, and matches
+complete fingerprints before/after. Fixture reader grants/policies are confined
+to the new synthetic databases before capture; original/hosted grants are untouched.
+No off-site encryption/key recovery or hosted timing claim follows from this run.
+
+Local checks: 600 regressions, 39 existing controls, 83 new controls, lint/typecheck,
+original credential-free build and attested private build pass. Original routes
+and all 113 client boundary checks match; only inherited shipmentRow lint warning.
+CI adds actual private-app/TLS/browser/crash/restore integration and sanitized
+reports. Exact new-head CI and artifact verification are tracked on PR65.
+
+The [concrete proposals](../../tools/migration/hosted-write/proposals.json) retain
+strict capacity BLOCKED with minute-only metrics, require an explicitly approved
+50 MB pilot / measured complete forecast / protected source reserve, and retain
+full Vercel upload compatibility NO-GO while preserving existing limits. They
+recommend a separately reviewed telemetry scope and upload delivery/hosting
+decision; no alternative or spend is activated. Coordinator hosting/network,
+actual identities/allowances and all hosted tests remain unapproved/NOT RUN.
+Production remains Sheets and NO-GO; security remediation is deferred and user
+authentication remains its separate planning-only milestone.
+
+## Hosted adapter foundation — synthetic components only (2026-11-12)
+
+Historical foundation-only checkpoint, superseded by the completion entry above.
+
+Local continuation in draft [PR #65](https://github.com/volkswg/stock-management/pull/65)
+adds exact target/approval gates, a keyed HTTP driver, a private durable
+fake-provider coordinator model and conservative capacity/traffic/payload checks.
+The checked-in packet still refuses hosted execution. All existing local harness
+and application files remain byte-identical. No Supabase resource, hosted test
+app, real provider call, business-data access, production setting or database
+switch is performed by this work.
+
+The new 51 offline checks cover protected identities, exact preview/session-pooler
+binding, credential/redirect confinement, actual loopback HTTP, live-profile stop
+behavior, reserved app HTTP traffic, immutable fake catalogs, exact fake bytes,
+restart replay, unfinished/uncertain outcomes, concurrent callers, exclusive
+writer ownership and corrupt/incomplete evidence refusal. Initial local-listener
+restrictions and the new macOS temporary-path fixture alias are retained as
+diagnostics; the canonical-path fixture and permitted loopback run pass without
+weakening the original harness. The sanitized offline packet report is included
+in CI's synthetic artifact.
+
+These checks do not establish hosted TLS, serverless behavior, full WT00–WT15
+execution or checkpoint recovery. Private-build/browser/SQL-fault/campaign and
+durable coordinator transport integration remain pending. Managed metric cadence,
+actual quotas, complete organization egress/zero-cost allowances and oversized
+advertised uploads remain blocked. See the [canonical packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12).
+Production remains **NO-GO**; security remediation stays deferred and the separate
+user authentication roadmap remains planning only.
+
+Local validation: 600 application regressions, 39 unchanged local-harness checks
+and 51 new offline checks pass. Lint has zero errors and the one inherited
+`shipmentRow` warning; typecheck and the isolated credential-free build pass.
+The original route manifest and all 113 client bundle boundaries match. New-head
+independent CI and artifact publication are tracked on the draft PR; local
+component success does not certify hosted execution.
+
+## Hosted Supabase test target — packet prepared only (2026-11-12)
+
+Owner authorized target/cost/test planning and deferred production security
+remediation. The [canonical execution packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12)
+and [disabled manifest](../../tools/migration/hosted-acceptance-plan.json) propose a
+separate Tokyo PostgreSQL 17 target family, one supported hosted functional
+campaign, fresh one/five-client profiles and new-target recovery after each.
+The protected populated source and production app are never write/reset/pause
+targets. No security feature or runtime behavior is implemented.
+
+Read-only metadata confirms the selected `volkswg's Org` uses Free and has one
+visible active project. Its new-project quote is **$0/month**; this is not a
+whole-campaign cost guarantee or creation approval. The packet records Free
+disk/traffic/memory gates, an explicit $0 spending authorization, a conditional
+single-active-test-project sequence, paid comparison only, and unquoted hosting /
+off-site allowances. It does not presume paid projects can be paused or that a
+spend cap covers compute. No organization/plan was changed.
+
+Preparation locally rehashed all 14 retained post-audit backup-manifest entries
+and checked the prior independent download/decryption/51-table/15-metadata restore
+receipt. No new business-source or hosted SQL query ran. The snapshot remains a
+rehearsal source, not proof of current Sheets freshness. Existing runtime guards
+refuse hosted targets; a separate reviewed hosted fake-provider adapter is still
+needed. Minute-scale managed metrics and platform payload limits do not establish
+the original local resource/large-upload contract. These remain explicit gates,
+not silently weakened pass criteria.
+
+PR64 merged under separate owner approval as `405c474578cec0b2fe84327687b90faf3f5b02f9`;
+[fresh CI](https://github.com/volkswg/stock-management/actions/runs/43140502107)
+and report upload passed. The automatic deployment was verified READY, domain
+assigned, same 14 production configuration metadata entries and no STOCK override.
+That verification is a retained merge receipt, not a new live-data check during
+this preparation. Hosted tests, acceptance-project/deployment creation, restores, writes,
+pauses/deletions, real-provider actions, new Sheets exports, paid resources and
+the production switch remain NOT RUN / unauthorized. Final cutover is NO-GO.
+Offline plan/scope/link validation, 600 regressions, lint/typecheck and the isolated
+credential-free build pass; only the inherited shipmentRow warning remains.
+Routes are unchanged and all 113 client chunks retain private-data boundaries.
+
 ## Migration-first scope and bounded capacity continuation (2026-11-12)
 
 The owner prioritizes Supabase completion and makes new user authentication a

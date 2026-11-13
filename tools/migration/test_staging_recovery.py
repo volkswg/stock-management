@@ -26,6 +26,7 @@ class StagingRecoveryTests(unittest.TestCase):
             '20261109205118_timesheet_loyverse_account_reference.sql',
             '20261110011351_normalize_nullable_json_projections.sql',
             '20261111034402_remove_operational_audit.sql',
+            '20261112160852_allow_explicit_production_environment.sql',
         ])
         for entry in result['migrations']: self.assertEqual(checksum(entry['file']), entry['sha256'])
         commands = '\n'.join(result['steps'])
@@ -53,6 +54,25 @@ class StagingRecoveryTests(unittest.TestCase):
         for part in ['pg_policies', 'pg_get_constraintdef', 'pg_indexes', 'pg_get_triggerdef', 'pg_get_functiondef', 'pg_sequences', 'pg_default_acl', 'rolbypassrls']:
             self.assertIn(part, sql)
         with self.assertRaises(ValueError): guard_sql("bad';DROP TABLE x;")
+
+    def test_production_recovery_requires_explicit_purpose_and_excludes_protected_staging(self):
+        target = '00000000-0000-4000-8000-000000000001'
+        self.assertIn("purpose='isolated-staging'", guard_sql(target))
+        self.assertIn("purpose='production'", guard_sql(target, 'production'))
+        for purpose in ['unknown', "production';DROP TABLE x;"]:
+            with self.assertRaises(ValueError): guard_sql(target, purpose)
+        with self.assertRaises(ValueError): guard_sql('160669bd-2f6f-4490-9259-bada5a1d02c4', 'production')
+
+    def test_recovery_refuses_a_different_receipt_purpose_before_connection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); (p/'database.dump').write_bytes(b'fixture'); (p/'fingerprint.json').write_text('[]')
+            receipt = {'dumpSha256': checksum(p/'database.dump'), 'fingerprintSha256': checksum(p/'fingerprint.json'), 'sourcePurpose': 'production'}
+            (p/'receipt.json').write_text(json.dumps(receipt))
+            with patch('recovery.exported_snapshot', side_effect=AssertionError('no connection')):
+                with self.assertRaises(ValueError): verify(directory, '00000000-0000-4000-8000-000000000001')
+            receipt.pop('sourcePurpose'); (p/'receipt.json').write_text(json.dumps(receipt))
+            with patch('recovery.exported_snapshot', side_effect=AssertionError('no connection')):
+                with self.assertRaises(ValueError): verify(directory, '00000000-0000-4000-8000-000000000001', target_purpose='production')
 
     def test_existing_backup_directory_and_invalid_uuid_fail_before_connection(self):
         with tempfile.TemporaryDirectory() as directory, patch('subprocess.Popen', side_effect=AssertionError('no connection')):

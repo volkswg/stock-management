@@ -2,23 +2,31 @@
 
 This page describes the **current plan**, not the full migration diary. See the [current ownership map](../architecture/migration-map.md), [merged PR ledger](progress.md#merged-implementation-ledger) and [verification evidence](verification.md).
 
-## Current priorities approved on 2026-11-12
+## Current milestone: CRITICAL-PATH CUTOVER MODE (2026-11-12)
 
-1. Complete Supabase migration acceptance, performance/capacity measurements,
-   backup automation preparation, dedicated production database preparation and
-   the final Sheets synchronization and controlled cutover plan. Preserve existing
-   authentication, LINE signatures, API restrictions and database permissions.
-   Inadequate existing production access control is a **NO-GO**, not permission to
-   weaken it or add authentication features within this milestone.
-2. User authentication is the next major milestone. The separate
-   [architecture and implementation roadmap](../architecture/user-authentication-roadmap.md)
-   covers login, sessions, roles, shop authorization, user administration and API
-   access. It is planning only; no authentication implementation is authorized now.
+Finish the Supabase migration in the existing draft [PR65](https://github.com/volkswg/stock-management/pull/65).
+The [single current readiness report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+classifies every blocker and records the exact approvals, minimal security exit,
+hosted acceptance, production target, backup/alerts, final full refresh and
+conditional four-hour Bangkok cutover window. Production is **NO-GO** and stays
+on Sheets. CI43 and completed local correctness/capacity/recovery evidence are
+accepted; do not expand the framework, rerun sufficient synthetic campaigns or
+open additional planning PRs. Recheck relevant changes, drift or failures only.
 
-Continue independently authorized migration work in the existing cohesive PR.
-Final production cutover and paid infrastructure require explicit owner approval.
-The standing separation between disposable local work and separately approved
-hosted mutations/source synchronization remains in force.
+Current owner direction: preserve the application as-is and finish the database
+migration. Work on hosted/production target and cost bindings, the guarded
+production release profile, actual hosted browser/API/LINE compatibility,
+capacity/recovery, backup/alerts and final full Sheets synchronization. The
+proposed owner/admin-only interim launch is withdrawn; do not require that choice
+or implement new access restrictions before continuing independent migration work.
+
+New security controls and the full [authentication milestone](../architecture/user-authentication-roadmap.md)
+are deferred to the next phase. Preserve existing LINE signatures, staging
+restrictions, TLS and database permissions. Existing production access protection
+is not certified adequate: retain the known risk explicitly for the final cutover
+assessment, without claiming it fixed or safe. No paid resources, new Sheets
+access, live production changes, merge or cutover are authorized by this scope
+change. Keep PR65 draft/unmerged and reuse sufficient existing evidence.
 
 ## Completed: modular architecture and legacy external cleanup
 
@@ -39,11 +47,16 @@ Merged PR44 removed the seven obsolete backend forwards and unused singular path
 
 Sheet mode uses the existing operational workbook only; remove the account-specific workbook setting and any workbook-selection fallback. Preserve env rollback, account validation/order, public metadata and credential confidentiality. The owner must restrict/audit workbook readers before storing tokens; hiding a tab does not isolate read access. No production workbook, sharing, Vercel setting or deployment changes are part of implementation.
 
-## Next: production-readiness gate (open, not implemented)
+<a id="next-production-readiness-gate-open-not-implemented"></a>
 
-[Issue #38](https://github.com/volkswg/stock-management/issues/38) covers access controls for all production domains and sensitive APIs, independent CI, critical-path smoke tests and safe staging/provider isolation. Documentation cleanup was prioritized first at the owner's request; that sequencing does **not** remove the potential access-control risk. Verify external exposure before treating this deployment as safe for unrestricted production access.
+## Next phase: security and user authentication
 
-Do not merge security policy changes, launch write-capable smoke tests or touch real Google Sheets, LINE, Loyverse or payroll records as part of documentation maintenance. A separately reviewed implementation and operational verification are required.
+[Issue #38](https://github.com/volkswg/stock-management/issues/38) remains open.
+The owner chooses current application behavior while the database migration
+finishes. Do not implement new access controls or an owner-only launch in this
+phase. Preserve existing safeguards, privately isolate testing and keep the
+existing access-protection gap visible in the final activation risk assessment.
+Deferral is not a security certification or permission to modify live production.
 
 ## Supabase migration
 
@@ -83,10 +96,9 @@ The earlier pause is historical and does not describe the currently authorized
 local work. Existing populated staging and production remain protected; the
 application still uses Google Sheets.
 
-Finish local write/capacity acceptance first. Prepare the separate hosted
-acceptance packet, disabled backup/restore automation configuration, dedicated
-production target specification, final source synchronization and controlled
-cutover/rollback gates. Hosted writes, production provisioning, new Sheets
+Local write/capacity acceptance is complete. Reuse it and finish actual hosted
+acceptance, minimum production access/release readiness, target/backup/monitoring
+activation preparation, final full synchronization and controlled cutover gates. Hosted writes, production provisioning, new Sheets
 business reads/exports, production configuration and final cutover retain their
 separate approval boundaries. Future operators must verify their own scoped
 credentials and network/TLS rather than assume access from an earlier session.

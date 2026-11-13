@@ -5,16 +5,20 @@ migration remains priority 1. User authentication is the next major milestone;
 this roadmap authorizes no login implementation, schema deployment, identity
 provider activation, invitations or production configuration change.
 
-Migration acceptance must preserve the existing API restrictions, LINE signature
-verification and database privileges. If those controls do not adequately protect
-production activation, the migration assessment remains **NO-GO**. Deferring this
-milestone does not waive that security gate or authorize weakening the current
-production refusal. See the separate [migration runbook](../database-migration.md).
+The latest owner clarification preserves the application/access behavior as-is
+and defers new security implementation until after the database milestone.
+Preserve existing API restrictions, LINE signature verification, TLS and database
+privileges; no interim owner-only launch is selected. Keep existing access gaps
+explicit in the final activation risk assessment rather than marking them fixed
+or security-certified. Live changes and final cutover still require explicit
+approval. See the separate [migration runbook](../database-migration.md).
 
 ## Existing boundary
 
 The PostgreSQL adapter currently requires an isolated staging identity and shared
 server-side bearer token; `stagingSettings()` refuses `VERCEL_ENV=production`.
+A separate explicit production identity profile is now prepared locally but remains
+disabled/unbound; it preserves legacy app access rather than adding user login.
 The token identifies an allowed staging caller, not an individual staff member,
 role or shop. In PostgreSQL staging the ordinary API wrapper authenticates requests, while only the
 explicit LINE entrypoint may use the raw-body HMAC signature path. The database

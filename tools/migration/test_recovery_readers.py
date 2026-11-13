@@ -44,7 +44,7 @@ class RecoveryReadersTests(unittest.TestCase):
                 self.assertGreater(timeout,0);self.assertLessEqual(timeout,150)
     def test_invalid_layout_or_reader_count_fails_before_any_io(self):
         with tempfile.TemporaryDirectory() as d,patch('subprocess.Popen',side_effect=AssertionError('no IO')):
-            for kwargs in [{'workers':0},{'workers':3},{'workers':True},{'history':'other'}]:
+            for kwargs in [{'workers':0},{'workers':3},{'workers':True},{'history':'other'},{'row_security_reader':1},{'row_security_reader':'true'}]:
                 dest=Path(d)/'new'
                 with self.assertRaises(ValueError):capture(dest,'00000000-0000-0000-0000-000000000001',**kwargs)
                 self.assertFalse(dest.exists())
