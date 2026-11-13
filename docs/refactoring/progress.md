@@ -1,5 +1,22 @@
 # Refactoring progress and evidence
 
+## Private Vercel test prepared; email verification blocks CLI sign-in (2026-11-13)
+
+Pinned official CLI 65.15.0 is installed within the task directory; global software
+and repository dependencies are unchanged. A clean Git archive of `6b89d86`,
+preview-only restricted reader config and seven bounded test cases are prepared
+privately, with secrets outside the upload directory and no real provider keys.
+The selected team reports Hobby; no paid resource or new project is created.
+Vercel's device login reaches email verification; the owner reports Outlook is
+unavailable. `whoami` confirms logged out and even deployment dry-run stops for
+missing credentials. Cancel the pending device flow and restart with a fresh code
+when email works. **Actual private Vercel-to-Supabase smoke remains NOT RUN.**
+No anonymous temporary deployment, security bypass, old-project reconfiguration,
+new source reads, SQL writes, backup, merge or production change. The canonical
+runbook and private execution packet preserve the prepared source/target and
+current blocker. Reuse passing connection/27 guard/CI48 evidence without reruns.
+
+
 ## Final candidate connection resolved; deployment guards verified (2026-11-13)
 
 The exact project Connect panel, inspected through native Chrome, assigns

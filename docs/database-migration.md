@@ -1410,14 +1410,36 @@ Database controls still show revision/commands/effects/import batches zero, 51 R
 tables and six migrations; health advisors report no findings.
 
 **Not yet performed:** a private Vercel-to-new-candidate read-only application smoke.
-No new deployment, preview credentials, production-purpose change, production env
+No new deployment, installed preview credentials, production-purpose change, production env
 update or alias promotion occurred. The current connector still cannot express
-per-deployment private env plus production no-alias staging, and no local Vercel CLI was found in the checked paths. This is the precise remaining hosting execution step;
+per-deployment private env plus production no-alias staging. CLI setup and its
+current sign-in blocker are recorded below. This is the remaining hosting execution step;
 it does not reopen the resolved Supabase endpoint issue. Before final activation,
 execute the separately scoped private read-only deployment with existing protection,
 no real provider credentials, exact candidate/commit and no production alias/config
 change; retain the new deployment ID and actual runtime results. Do not label local
 checks as Vercel PASS. Backups and fresh source access remain deferred/unapproved.
+
+**Private Vercel test execution update (2026-11-13).** The owner authorizes CLI
+setup and the private read-only test. Official **Vercel CLI 65.15.0** is installed
+locally in this task folder, with isolated private CLI configuration; application
+dependencies and global software are unchanged. The prepared copy is an exact Git
+archive of `6b89d861a80112e6c9c230731d73e2ff691614d1`, without credentials or an old
+Vercel link. A proposed new Hobby test project `stock-management-prod-readonly-check`
+will receive preview-only reader/staging configuration, verified TLS and the existing
+staging bearer/read-only safeguards, with no real integration credentials, Git
+connection or custom domain. No existing staging/production project is repointed.
+
+The official device sign-in reaches Vercel email verification. The owner reports
+Outlook is unavailable, so **CLI authentication is the current execution blocker**;
+`whoami` confirms `loggedIn=false`. The deployment dry-run also stops for missing
+credentials and is not a PASS. The waiting device flow is cancelled; restart it
+with a new code after email verification becomes available. The source, private
+environment and seven bounded read/private-access/mutation-denial cases are ready.
+No project/deployment, anonymous temporary deployment, credential/grant change,
+fresh Sheets access, SQL write, backup or production change is performed. Do not
+bypass verification or weaken deployment protection. The actual hosted smoke is
+NOT RUN until sign-in and exact private project/preview scope are verified.
 
 **Release preparation.** Pin the eventual approved merge SHA, Vercel project ID,
 reader username, selected verified endpoint and immutable deployment ID. Build
@@ -1428,8 +1450,8 @@ suppressed and verify aliases stayed on the pinned Sheets release before any
 smoke call. The current MCP deployment wrapper cannot express both private
 per-deployment environment overrides and suppression of alias assignment; verify
 the supported CLI/REST path before executing. Do not issue its plain production
-create call. Production-purpose change, deployment/configuration/region changes,
-merge, any provider checks and activation all require separate approval.
+create call. Production-purpose change, live production deployment/configuration/region changes,
+merge, real provider checks and activation all require separate approval.
 
 **Concrete freeze proposal — prepare only.** Inventory each source writer's
 principal and every old immutable/preview deployment, not just the three aliases.

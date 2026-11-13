@@ -1,5 +1,5 @@
 {
-  "version": 31,
+  "version": 32,
   "scope": "SUPABASE MIGRATION-ONLY CUTOVER MODE: essential managed PostgreSQL smoke; no new auth/access-protection implementation; final activation remains gated; no optional monitoring/coordinator/full campaign",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -94,7 +94,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Supabase session route resolved and 27 deployment guards pass. Complete separately scoped private Vercel read-only runtime smoke; then obtain final source/principal/freeze/export/import and exact release approval. No fresh Sheets reads or production changes; backups deferred.",
+  "nextStep": "Complete Vercel CLI device sign-in when email verification is available, verify exact private project/preview scope, then run the prepared read-only hosted smoke. No fresh Sheets access, database writes, backup, merge or production change.",
   "cutoverBlockers": [
     "M1 Minimum effective existing protection. Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied.",
     "M2 Final release binding/hosting proof. Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed.",
@@ -1684,8 +1684,43 @@
         "finalVercelRuntimeVerified": false,
         "remainingExecution": "Private read-only application deployment; no production alias/config change; exact source/project/UUID; no real providers",
         "connectorPerDeploymentPrivateEnvAndNoAliasControls": "NOT_EXPOSED",
-        "localCliAvailableInCheckedPaths": false
+        "localCliAvailableInCheckedPaths": true,
+        "cliVersion": "65.15.0",
+        "cliAuthenticated": false,
+        "currentExecutionBlocker": "Vercel email verification; owner reports Outlook unavailable"
       }
+    },
+    "privateVercelReadonlyTestPreparation": {
+      "reportedAtUtc": "2026-11-13T04:18:12.556293+00:00",
+      "state": "CLI_INSTALLED_PRIVATE_TEST_PREPARED_AUTHENTICATION_BLOCKED",
+      "cliVersion": "65.15.0",
+      "cliOfficialNpmIntegrity": "sha512-uejXkDZ1RdFAc5lg1+MN3kDbDnvT0fbChcVYvaHrZxaStG1cgKlLisk/9XicyOXDxEI6lF3WQZiRfviMNuXcXQ==",
+      "globalInstall": false,
+      "repoDependenciesChanged": false,
+      "cliConfigPrivate": true,
+      "cliLoggedIn": false,
+      "deviceFlowStarted": true,
+      "verificationUiObserved": true,
+      "blocker": "Vercel requires email verification; owner reports Outlook unavailable",
+      "pendingLoginCancelled": true,
+      "newDeviceCodeRequiredOnResume": true,
+      "preparedSourceCommit": "6b89d861a80112e6c9c230731d73e2ff691614d1",
+      "preparedSourceArchiveSha256": "e08284b44b755095680a779872c737554ae549e13a507566c685ac74f30f0d61",
+      "sourceContainsOnlyEnvExample": true,
+      "envValuesOutsideUploadDirectory": true,
+      "dryRun": "BLOCKED_NO_EXISTING_CREDENTIALS_NOT_PASS",
+      "privateTestCaseCount": 7,
+      "projectNameProposed": "stock-management-prod-readonly-check",
+      "teamId": "team_bkDqHUBMbLyAXmwZqvCmovcu",
+      "planObserved": "hobby",
+      "projectCreated": false,
+      "deploymentCreated": false,
+      "hostedRuntimeTestRun": false,
+      "existingVercelProjectsReconfigured": false,
+      "freshSheetsRead": false,
+      "databaseWrites": false,
+      "backupsDeferred": true,
+      "productionChanged": false
     }
   }
 }
