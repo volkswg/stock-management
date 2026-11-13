@@ -19,8 +19,10 @@ access-protection/auth/RBAC implementation stays deferred; unproved effective
 existing protection is activation NO-GO. No schedule, alert or cutover is activated.
 Local verification: 625 regressions, typecheck, lint (one inherited warning),
 credential-free build/routes/113 client chunks, operator-entrypoint syntax and
-private-input redaction/protected-target rejection pass. CI for this update is
-pending; prior CI47 is retained application evidence.
+private-input redaction/protected-target rejection pass. [CI48](https://github.com/volkswg/stock-management/actions/runs/43342345150) passes
+on `8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b`, including report upload. All 20
+downloaded files/source SHA/archive digest verify; the report-only follow-up does
+not repeat or relabel that executable evidence.
 
 
 ## Hosted original restore / roles verified; restricted-backup fix (2026-11-13)

@@ -971,6 +971,17 @@ activation or production GO. Reuse the passing local browser/fault/recovery
 evidence; check the final protected deployment's read-only database path once after
 its exact target/configuration is approved. No deployment/provider call is approved.
 
+**Current update CI verified.** [CI48](https://github.com/volkswg/stock-management/actions/runs/43342345150)
+passes on executable commit `8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b`:
+625 regressions, 39 existing controls, 85 hosted controls, 73 Python checks,
+PostgreSQL/browser/crash/recovery and restricted-backup checks, lint/typecheck,
+credential-free build, unchanged routes/113 client chunks and report upload. All
+20 downloaded reports, exact source SHA and archive SHA-256
+`c6d46f670909f5401a2925d334fba66182e3fcce154e2c2c4825167ed7cf5346`
+verify. Both retained 14-file backup packages rehash exactly. This report-only
+follow-up reuses that executable evidence; it is not a new hosted write run or a
+claim that CI48 tested a later documentation commit.
+
 **Scope precedence:** extra monitoring tools, one-second telemetry, ten-second CPU
 certification, more fault campaigns, a persistent coordinator/tunnel and a new
 hosted test app are not prerequisites for this migration-only smoke. The old full

@@ -1106,11 +1106,11 @@
     "singleDraftPr": 65,
     "singleReadinessReport": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
     "acceptedCodeEvidence": {
-      "commit": "06eafe921e92842ecc3b87739238396e191dd47d",
-      "ciRun": 43248306690,
-      "ciRunNumber": 43,
-      "artifactSha256": "b8b132ffd05bbf4b7cc2866c3d15483b1dd8c7d98799e8d16ff0626d89480fb5",
-      "downloadedReportsVerified": 18,
+      "commit": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
+      "ciRun": 43342345150,
+      "ciRunNumber": 48,
+      "artifactSha256": "c6d46f670909f5401a2925d334fba66182e3fcce154e2c2c4825167ed7cf5346",
+      "downloadedReportsVerified": 20,
       "newDocumentationHeadTestsClaimed": false
     },
     "doNotRepeatSufficientSyntheticCampaigns": true,
@@ -1303,7 +1303,7 @@
       "legacyProductionAccessPolicy": "legacy-as-is",
       "newAuthenticationImplemented": false,
       "actualHostedAcceptance": "NOT_RUN",
-      "newHeadCi": "PR_UPDATE_PENDING_CI; local 625 regressions/lint/typecheck/isolated build PASS; existing application evidence CI47 reused",
+      "newHeadCi": "CI48_PASS_EXECUTABLE_8ba836b_REPORT_ONLY_FOLLOWUP_NOT_RETESTED",
       "backupRecoveryProductionPurpose": "EXPLICIT_OPT_IN_DEFAULT_STAGING_RECEIPT_BOUND",
       "productionTaggedLocalRecovery": {
         "state": "PASS_FRESH_SYNTHETIC_51_TABLES_15_METADATA",
@@ -1443,6 +1443,22 @@
       "freshSheetsAuthorized": false,
       "freezeEventHoldAssigned": false,
       "runbook": "docs/database-migration.md#executable-production-cutover-runbook"
+    },
+    "migrationOnlyCi": {
+      "sourceCommit": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
+      "runId": 43342345150,
+      "runNumber": 48,
+      "conclusion": "success",
+      "reportUpload": "success",
+      "artifactId": 13999748446,
+      "artifactSha256": "c6d46f670909f5401a2925d334fba66182e3fcce154e2c2c4825167ed7cf5346",
+      "downloadedReportFilesVerified": 20,
+      "regressions": 625,
+      "existingControls": 39,
+      "hostedControls": 85,
+      "pythonTests": 73,
+      "freshHostedWriteRunClaimed": false,
+      "laterReportOnlyHeadTestClaimed": false
     }
   }
 }
