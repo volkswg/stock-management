@@ -1,5 +1,34 @@
 # Refactoring progress and evidence
 
+## Actual private Vercel-to-Supabase read-only smoke passes (2026-11-14)
+
+Seven bounded checks pass on READY Tokyo Preview
+`dpl_4QoQD5Qbh3Q1DrBu7WM1w2hmKn12`, new protected Hobby project
+`prj_ZuMOG7faVjIakAQDd3zmDbMSNxq9`: Vercel SSO redirect, missing app bearer 401,
+two actual orders reads 200/empty/revision zero, order and LINE POST denial 405,
+and application page 200. Exact source `6b89d86` has no final application changes;
+852 uploaded files exclude secrets and the old Vercel link. The test project has
+only Preview reader/staging settings, no real provider credentials or Git link.
+
+Resolved CLI/environment execution defects: bundled Node.js sign-in works; a
+large CA input was truncated to 16 KB, causing the actual certificate-chain error.
+A complete 1,367-character Supabase root already trusted by the original bundle
+fixes it with strict TLS preserved. A private redacted diagnostic proves the cause
+and is removed from the final app source; earlier failures remain private evidence.
+Only the new test project gets a credential-free, unaliased static first-deployment
+bootstrap. CLI automation access is scoped to that protected test project only.
+
+All 46 archive/operational business-table counts sum to zero before and after;
+commands/effects/revision/import batches and UUID/purpose are unchanged. Live Sheets
+production remains latest/READY on `405c474` with the same aliases. The
+[single runbook](../database-migration.md#executable-production-cutover-runbook)
+records exact IDs, certificate/proof digests and remaining release/freeze/data
+approvals. No paid resource, fresh Sheets read, SQL write, backup, protected-staging
+change, merge or production switch. Backups stay deferred; PR65 stays draft. Reuse
+CI48 for unchanged app code; this is new actual private-host proof, not final
+production-purpose/release or fresh-data acceptance.
+
+
 ## Private Vercel test prepared; email verification blocks CLI sign-in (2026-11-13)
 
 Pinned official CLI 65.15.0 is installed within the task directory; global software

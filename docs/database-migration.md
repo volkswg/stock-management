@@ -1270,7 +1270,7 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | ID | Classification | Exit evidence / action |
 | --- | --- | --- |
 | M1 | MUST FIX before cutover | **Minimum effective existing protection.** Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied. |
-| M2 | MUST FIX before cutover | **Final release binding/hosting proof.** Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed. |
+| M2 | MUST FIX before cutover | **Final release binding/hosting proof.** Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Private Tokyo Vercel-to-final-candidate smoke now passes 7/7 with strict TLS and reader-only access. Still bind the approved final merge/deployment SHA, production purpose and reader/writer configuration, then verify reconciled-data browser/API/reports under the final freeze. No live production setting changed. |
 | M3 | SATISFIED for essential scope | **Essential managed PostgreSQL smoke PASS.** Prior actual hosted writes/replay/LINE/transaction checks are retained. New final candidate adds verified native service access/rollback and actual read-only application checks. Final deployment compatibility remains M2; no full capacity certificate is claimed. |
 | M4 | SATISFIED for empty target preparation | **Dedicated final database prepared.** Free Tokyo `hzynvirpedqnvtbifobx`, UUID `349b9289-f684-4ec5-ac22-924b2be1946b`; six source-version migrations, 51 RLS tables, approved restricted persistent accounts, native TLS/rollback, reader app and exact empty backup/restore pass. Remains isolated-staging purpose and empty. Final-load/headroom and deployed configuration are checked under M6/M2; no repeated resource/account approval needed. |
 | M5 | DEFERRED BY OWNER — next phase | **Database backup work is not a current cutover gate.** Further checkpoints, automation, encrypted off-site delivery, backup alerts and RPO/RTO certification are deferred. Retain verified artifacts/tools/accounts. This records scope, not recovery certification; new SQL business data has no verified ongoing backup coverage yet. |
@@ -1378,8 +1378,7 @@ reports **`iad1` (Virginia)**, while PostgreSQL is Tokyo. Proposed `hnd1` is not
 applied; verify the actual staged release region and response behavior. Region
 location alone is not a demonstrated functional failure.
 
-**Application connection resolved; final Vercel runtime check still open
-(2026-11-13).** Native Chrome inspection of this exact project's Connect / Direct /
+**Application connection resolved (2026-11-13); private Vercel proof below.** Native Chrome inspection of this exact project's Connect / Direct /
 Session pooler panel confirms **`aws-1-ap-northeast-1.pooler.supabase.com:5432`**.
 The earlier `aws-0` host belongs to the previous test connection and caused the
 `XX000 tenant/user not found` failure; its failed private receipt is retained.
@@ -1409,37 +1408,59 @@ aliases and verified production domain, with no live endpoint/business request.
 Database controls still show revision/commands/effects/import batches zero, 51 RLS
 tables and six migrations; health advisors report no findings.
 
-**Not yet performed:** a private Vercel-to-new-candidate read-only application smoke.
-No new deployment, installed preview credentials, production-purpose change, production env
-update or alias promotion occurred. The current connector still cannot express
-per-deployment private env plus production no-alias staging. CLI setup and its
-current sign-in blocker are recorded below. This is the remaining hosting execution step;
-it does not reopen the resolved Supabase endpoint issue. Before final activation,
-execute the separately scoped private read-only deployment with existing protection,
-no real provider credentials, exact candidate/commit and no production alias/config
-change; retain the new deployment ID and actual runtime results. Do not label local
-checks as Vercel PASS. Backups and fresh source access remain deferred/unapproved.
+**Private Vercel-to-Supabase read-only smoke — PASS (2026-11-14).**
+The owner-authorized private test is complete on Hobby project
+`stock-management-prod-readonly-check` / `prj_ZuMOG7faVjIakAQDd3zmDbMSNxq9`,
+using Node.js 24 and Tokyo `hnd1`. Final application Preview
+`dpl_4QoQD5Qbh3Q1DrBu7WM1w2hmKn12` is READY, has no aliases and uses exact
+application source from `6b89d861a80112e6c9c230731d73e2ff691614d1`.
+The 852-file upload contains no database password/URL, staging token or old Vercel
+link; these values are private Preview settings on the new test project only.
+No Google/LINE/Drive/Loyverse credentials or Git auto-deployment link are installed.
+Vercel authentication and the existing staging bearer remain enabled. The CLI's
+automation-access secret is scoped only to this new protected test project.
 
-**Private Vercel test execution update (2026-11-13).** The owner authorizes CLI
-setup and the private read-only test. Official **Vercel CLI 65.15.0** is installed
-locally in this task folder, with isolated private CLI configuration; application
-dependencies and global software are unchanged. The prepared copy is an exact Git
-archive of `6b89d861a80112e6c9c230731d73e2ff691614d1`, without credentials or an old
-Vercel link. A proposed new Hobby test project `stock-management-prod-readonly-check`
-will receive preview-only reader/staging configuration, verified TLS and the existing
-staging bearer/read-only safeguards, with no real integration credentials, Git
-connection or custom domain. No existing staging/production project is repointed.
+All **seven** bounded checks pass: anonymous access redirects to Vercel SSO (302),
+Vercel-authenticated access without the app bearer returns 401, two authorized
+actual orders reads return 200/empty/total zero/revision zero, order POST and LINE
+webhook POST return 405 before execution, and `/orders` serves its page (200).
+This is actual Vercel application-to-PostgreSQL evidence, not a Mac-only claim.
+The read-only LINE check proves no processing; earlier signature tests remain the
+accepted HMAC evidence and no real LINE event/provider is invoked.
 
-The official device sign-in reaches Vercel email verification. The owner reports
-Outlook is unavailable, so **CLI authentication is the current execution blocker**;
-`whoami` confirms `loggedIn=false`. The deployment dry-run also stops for missing
-credentials and is not a PASS. The waiting device flow is cancelled; restart it
-with a new code after email verification becomes available. The source, private
-environment and seven bounded read/private-access/mutation-denial cases are ready.
-No project/deployment, anonymous temporary deployment, credential/grant change,
-fresh Sheets access, SQL write, backup or production change is performed. Do not
-bypass verification or weaken deployment protection. The actual hosted smoke is
-NOT RUN until sign-in and exact private project/preview scope are verified.
+The first authorized read exposed an environment-transfer defect: CLI stdin
+installed only 16,384 characters of the 179,747-character CA bundle. A private,
+bearer-protected diagnostic returned `SELF_SIGNED_CERT_IN_CHAIN`. Extract the
+complete **1,367-character Supabase Root 2021 CA already in the trusted bundle**
+and install it only on the new Preview; verify its complete value and actual app
+TLS. Fingerprint SHA-256 is
+`80:70:25:AD:50:D4:ED:21:9D:2C:9C:7D:29:9C:00:4F:82:4E:B0:0C:F7:F6:5A:FE:F6:07:D0:7B:72:E6:CA:FA`.
+Certificate/hostname verification stays strict; no TLS bypass, password change,
+permission change or database write. The temporary diagnostic is removed from the
+final source; original failed receipts and its separate private build are retained.
+For future configuration transfers, read back non-secret certificate length/hash
+and completeness; do not assume a successful CLI submission preserves a large input.
+The corrected production reader profile remains private, NOT INSTALLED, with final
+source SHA null; this does not activate or bind the production release.
+
+CLI 65.15.0's native sign-in failed to save approval; its bundled Node.js entry point
+succeeds. Use isolated task-local CLI data/cache/config paths. Vercel requires a
+first deployment before Preview: only the new test project received an empty static
+bootstrap (`dpl_GyacEdD9udHQDdLArDT6rFrxfNC3`) in its own Production environment,
+with no credentials or aliases. The stock-management production project was never
+targeted. Default Hobby build resources are used; no paid selection/upgrade occurs.
+Retain CLI/redirect diagnostics rather than treating them as application defects.
+
+Before/after checks across all 46 archive/operational business tables sum to **zero**;
+commands/effects/revision/import batches also remain zero, with the same UUID and
+isolated-staging purpose. The live Sheets deployment remains READY at
+`dpl_7YdPW3SSSnRJgBcNedq3MviazqwW`, main `405c474`, with the same three aliases;
+it is still the latest production deployment. Composite private receipt SHA-256:
+`c0a4054eb084c01d2f5fec79f4bad811a2982c371707c0c2c6cbde1b657ef2d8`.
+No fresh Sheets read, business write, real provider invocation, backup, protected
+staging change, merge or production switch occurred. Backup work stays deferred.
+This closes the private hosting smoke; exact final production-purpose/release
+binding and reconciled-data checks still follow the approved cutover sequence.
 
 **Release preparation.** Pin the eventual approved merge SHA, Vercel project ID,
 reader username, selected verified endpoint and immutable deployment ID. Build

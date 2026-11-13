@@ -1,7 +1,7 @@
 {
-  "version": 32,
+  "version": 33,
   "scope": "SUPABASE MIGRATION-ONLY CUTOVER MODE: essential managed PostgreSQL smoke; no new auth/access-protection implementation; final activation remains gated; no optional monitoring/coordinator/full campaign",
-  "reportedOnBangkok": "2026-11-13",
+  "reportedOnBangkok": "2026-11-14",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
   "repositoryBaseline": "405c474578cec0b2fe84327687b90faf3f5b02f9",
   "evidence": {
@@ -94,10 +94,10 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Complete Vercel CLI device sign-in when email verification is available, verify exact private project/preview scope, then run the prepared read-only hosted smoke. No fresh Sheets access, database writes, backup, merge or production change.",
+  "nextStep": "Private hosted read-only stage complete. Review draft PR65 and approve exact release/merge separately; coordinate final all-writer/LINE hold, source/export/import and dated cutover approvals. No fresh Sheets access or production activation authorized; backups deferred.",
   "cutoverBlockers": [
     "M1 Minimum effective existing protection. Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied.",
-    "M2 Final release binding/hosting proof. Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed.",
+    "M2 Private Vercel-to-final-empty-candidate read-only smoke 7/7 PASS; bind approved final production release/SHA/purpose/reader-writer configuration and verify reconciled data during the final freeze.",
     "M6 Final full Sheets synchronization. After explicit workbook/principal/native-backup/freeze/export/import approval only: fresh full 23-tab source into a new empty candidate, exact reconciliation and original application/report parity. Historical 70,777-row evidence is not current freshness; no in-place delta merge.",
     "M7 Loss-safe writer/event hold. Stop every manual/API/deployment/script/scheduled/LINE writer, drain commands/effects and retain accepted/uncertain keys. Exact durable capture/replay or proven producer-pause procedure remains unassigned. LINE retries/webhook disablement alone are insufficient; never acknowledge unpersisted events.",
     "M8 Exact release/target/source binding, read-only checks, incident lead, dated owner activation; database backup work deferred; no automatic stale-Sheets fallback after SQL writes"
@@ -1115,7 +1115,7 @@
   },
   "criticalPathCutoverMode": {
     "mode": "SUPABASE MIGRATION-ONLY CUTOVER MODE",
-    "reportedAtUtc": "2026-11-13T03:22:41.788181+00:00",
+    "reportedAtUtc": "2026-11-13T20:24:30.284108+00:00",
     "decision": "NO_GO",
     "singleDraftPr": 65,
     "singleReadinessReport": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
@@ -1140,7 +1140,7 @@
       {
         "id": "M2",
         "classification": "MUST FIX before cutover",
-        "subject": "Final release binding/hosting proof. Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed.",
+        "subject": "Private Vercel-to-final-empty-candidate read-only smoke 7/7 PASS; bind approved final production release/SHA/purpose/reader-writer configuration and verify reconciled data during the final freeze.",
         "state": "LOCAL_IMPLEMENTATION_PASS_HOSTED_BINDING_PENDING"
       },
       {
@@ -1323,7 +1323,7 @@
       "stagingBearerPreserved": true,
       "legacyProductionAccessPolicy": "legacy-as-is",
       "newAuthenticationImplemented": false,
-      "actualHostedAcceptance": "FINAL_CANDIDATE_NATIVE_AND_MAC_READONLY_APP_PASS_NOT_VERCEL_RUNTIME",
+      "actualHostedAcceptance": "PRIVATE_VERCEL_PREVIEW_READONLY_PASS_FINAL_CANDIDATE_STILL_ISOLATED",
       "newHeadCi": "CI48_PASS_EXECUTABLE_8ba836b_REPORT_ONLY_FOLLOWUP_NOT_RETESTED",
       "backupRecoveryProductionPurpose": "EXPLICIT_OPT_IN_DEFAULT_STAGING_RECEIPT_BOUND",
       "productionTaggedLocalRecovery": {
@@ -1483,7 +1483,9 @@
       "finalSourceMappingPrepared": true,
       "applicationSessionHost": "aws-1-ap-northeast-1.pooler.supabase.com",
       "applicationSessionPort": 5432,
-      "sessionConnectionVerifiedFromMac": true
+      "sessionConnectionVerifiedFromMac": true,
+      "privateVercelReadonlyVerified": true,
+      "productionReleaseVerified": false
     },
     "migrationOnlyCi": {
       "sourceCommit": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
@@ -1577,7 +1579,10 @@
       "protectedStagingChanged": false,
       "operatorSecretsKeptPrivate": true,
       "applicationCiSourceReused": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
-      "ciRunReused": 43342345150
+      "ciRunReused": 43342345150,
+      "privateVercelRuntimeVerified": true,
+      "finalProductionRuntimeVerified": false,
+      "actualReadonlyApplicationFromVercel": "PASS_7_PRIVATE_PREVIEW_CASES_TOKYO_STRICT_TLS_NO_PROVIDER_CALLS"
     },
     "databaseBackupDeferral": {
       "deferredByOwner": true,
@@ -1651,7 +1656,7 @@
         "state": "RESOLVED_FROM_MAC_NOT_YET_VERCEL",
         "newProjectAssignedEndpointVerified": true,
         "businessTransactionStarted": false,
-        "vercelRuntimeVerified": false,
+        "vercelRuntimeVerified": true,
         "browserConnectionPanel": "VERIFIED_NATIVE_CHROME",
         "previousHostTested": "aws-0-ap-northeast-1.pooler.supabase.com",
         "host": "aws-1-ap-northeast-1.pooler.supabase.com",
@@ -1664,7 +1669,8 @@
         "configurationInstalledInVercel": false,
         "priorFailedReceiptRetained": true,
         "priorSqlState": "XX000",
-        "priorFailureReason": "tenant/user not found"
+        "priorFailureReason": "tenant/user not found",
+        "vercelRuntimeScope": "Private Preview against empty isolated-staging candidate, not production activation"
       },
       "freezePlan": "Remove Sheets edit access from inventoried service writers while retaining reader access; stop manual/script/scheduled writers; separately hold/drain LINE/providers with complete keyed replay; prepare only",
       "databaseBackupsDeferred": true,
@@ -1680,47 +1686,58 @@
         "actualRegion": "iad1",
         "regionChanged": false,
         "freshBusinessEndpointCalls": false,
-        "newDeploymentCreated": false,
-        "finalVercelRuntimeVerified": false,
-        "remainingExecution": "Private read-only application deployment; no production alias/config change; exact source/project/UUID; no real providers",
+        "newDeploymentCreated": true,
+        "finalVercelRuntimeVerified": true,
+        "remainingExecution": "Approved exact production release/purpose/configuration and reconciled-data checks after final source freeze/import",
         "connectorPerDeploymentPrivateEnvAndNoAliasControls": "NOT_EXPOSED",
         "localCliAvailableInCheckedPaths": true,
         "cliVersion": "65.15.0",
-        "cliAuthenticated": false,
-        "currentExecutionBlocker": "Vercel email verification; owner reports Outlook unavailable"
+        "cliAuthenticated": true,
+        "currentExecutionBlocker": null,
+        "finalVercelRuntimeScope": "PRIVATE_PREVIEW_ONLY",
+        "privatePreviewDeploymentId": "dpl_4QoQD5Qbh3Q1DrBu7WM1w2hmKn12"
       }
     },
     "privateVercelReadonlyTestPreparation": {
-      "reportedAtUtc": "2026-11-13T04:18:12.556293+00:00",
-      "state": "CLI_INSTALLED_PRIVATE_TEST_PREPARED_AUTHENTICATION_BLOCKED",
+      "state": "PRIVATE_VERCEL_READONLY_PASS_NOT_PRODUCTION_ACTIVATION",
+      "reportedOnBangkok": "2026-11-14",
       "cliVersion": "65.15.0",
-      "cliOfficialNpmIntegrity": "sha512-uejXkDZ1RdFAc5lg1+MN3kDbDnvT0fbChcVYvaHrZxaStG1cgKlLisk/9XicyOXDxEI6lF3WQZiRfviMNuXcXQ==",
-      "globalInstall": false,
-      "repoDependenciesChanged": false,
-      "cliConfigPrivate": true,
-      "cliLoggedIn": false,
-      "deviceFlowStarted": true,
-      "verificationUiObserved": true,
-      "blocker": "Vercel requires email verification; owner reports Outlook unavailable",
-      "pendingLoginCancelled": true,
-      "newDeviceCodeRequiredOnResume": true,
-      "preparedSourceCommit": "6b89d861a80112e6c9c230731d73e2ff691614d1",
-      "preparedSourceArchiveSha256": "e08284b44b755095680a779872c737554ae549e13a507566c685ac74f30f0d61",
-      "sourceContainsOnlyEnvExample": true,
-      "envValuesOutsideUploadDirectory": true,
-      "dryRun": "BLOCKED_NO_EXISTING_CREDENTIALS_NOT_PASS",
-      "privateTestCaseCount": 7,
-      "projectNameProposed": "stock-management-prod-readonly-check",
-      "teamId": "team_bkDqHUBMbLyAXmwZqvCmovcu",
-      "planObserved": "hobby",
-      "projectCreated": false,
-      "deploymentCreated": false,
-      "hostedRuntimeTestRun": false,
-      "existingVercelProjectsReconfigured": false,
+      "cliLoggedIn": true,
+      "cliEntryPoint": "bundled Node.js CLI",
+      "plan": "hobby",
+      "projectId": "prj_ZuMOG7faVjIakAQDd3zmDbMSNxq9",
+      "projectName": "stock-management-prod-readonly-check",
+      "projectCreated": true,
+      "deploymentCreated": true,
+      "deploymentId": "dpl_4QoQD5Qbh3Q1DrBu7WM1w2hmKn12",
+      "region": "hnd1",
+      "previewOnlyApp": true,
+      "staticBootstrapOnlyOwnTestProductionEnvironment": true,
+      "bootstrapNoCredentialsOrAliases": true,
+      "sourceCommit": "6b89d861a80112e6c9c230731d73e2ff691614d1",
+      "sourceArchiveSha256": "e08284b44b755095680a779872c737554ae549e13a507566c685ac74f30f0d61",
+      "uploadedFiles": 852,
+      "testCaseCount": 7,
+      "testCasesPassed": 7,
+      "hostedRuntimeTestRun": true,
+      "compositeReceiptSha256": "c0a4054eb084c01d2f5fec79f4bad811a2982c371707c0c2c6cbde1b657ef2d8",
+      "databaseBeforeAndAfterUnchanged": true,
+      "businessRows": 0,
+      "commands": 0,
+      "sideEffects": 0,
+      "revision": 0,
+      "purpose": "isolated-staging",
+      "correctedPublicCaCharacters": 1367,
+      "priorTruncatedCaCharacters": 16384,
+      "strictTlsPreserved": true,
+      "appSourceChanged": false,
+      "temporaryDiagnosticInFinalSource": false,
+      "realProviderCredentials": false,
       "freshSheetsRead": false,
-      "databaseWrites": false,
+      "businessWrites": false,
       "backupsDeferred": true,
-      "productionChanged": false
+      "productionChanged": false,
+      "productionReleaseBindingVerified": false
     }
   }
 }
