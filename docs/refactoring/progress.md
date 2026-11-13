@@ -1,5 +1,29 @@
 # Refactoring progress and evidence
 
+## Final candidate connection resolved; deployment guards verified (2026-11-13)
+
+The exact project Connect panel, inspected through native Chrome, assigns
+`aws-1-ap-northeast-1.pooler.supabase.com:5432`; the previous `aws-0` test endpoint
+caused the tenant-not-found failure. Correct the private, undeployed session profile
+and its host/mode release binding; passwords, permissions and application source
+are unchanged. Actual read-only application checks pass 401/200/405 with verified
+client TLS and no provider calls. Reader and runtime logins separately pass exact
+UUID/purpose/nonprivileged-role checks in read-only transactions; no writes or
+backup operations. Database controls remain pristine; health advisors have no findings.
+
+All 27 focused production-release/read-only/provider-guard checks pass. Live Vercel
+metadata still pins READY main `405c474`, the same immutable Sheets deployment and
+production aliases; no business endpoint was called. These are local/Mac and
+control-plane checks, **not Vercel-to-Supabase runtime proof**. The current connector
+lacks isolated per-deployment env/no-alias controls, and no local Vercel CLI was found in the checked paths. A separately scoped private read-only deployment remains the
+hosting execution step; no preview/protected-staging reconfiguration, production
+purpose change, deployment, live setting, merge or cutover is performed.
+The [single runbook](../database-migration.md#executable-production-cutover-runbook)
+and current private packet retain exact progress and limits. CI48 is reused for
+unchanged application code; backup work stays owner-deferred and no fresh Sheets
+records are read. PR65 stays draft/unmerged.
+
+
 ## Final synchronization and deployment checks prepared (2026-11-13)
 
 The private packet binds the retained workbook and all 23 tab mappings; export
@@ -11,7 +35,8 @@ business write occurred. Live Vercel metadata pins READY Sheets deployment
 `dpl_7YdPW3SSSnRJgBcNedq3MviazqwW`/main `405c474` and its aliases; actual region
 is Virginia, so Tokyo hosting is a proposal rather than an observed setting.
 
-The reused test session endpoint rejects the new tenant (`XX000`) before any
+Historical preparation snapshot, superseded by the connection-resolution entry above:
+the reused test session endpoint rejects the new tenant (`XX000`) before any
 business transaction. Its assigned project endpoint and final Vercel connectivity
 remain open; no guessed alternative/TLS bypass or paid IPv4 change. The connection
 panel could not be inspected because Chrome browser control was unavailable.

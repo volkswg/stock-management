@@ -1,5 +1,5 @@
 {
-  "version": 30,
+  "version": 31,
   "scope": "SUPABASE MIGRATION-ONLY CUTOVER MODE: essential managed PostgreSQL smoke; no new auth/access-protection implementation; final activation remains gated; no optional monitoring/coordinator/full campaign",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -94,7 +94,7 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Resolve exact new-project application session endpoint, then obtain specific final source/principal/freeze/export/import and release/deployment approval. No fresh Sheets access, merge, Vercel changes or activation yet; database backups deferred.",
+  "nextStep": "Supabase session route resolved and 27 deployment guards pass. Complete separately scoped private Vercel read-only runtime smoke; then obtain final source/principal/freeze/export/import and exact release approval. No fresh Sheets reads or production changes; backups deferred.",
   "cutoverBlockers": [
     "M1 Minimum effective existing protection. Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied.",
     "M2 Final release binding/hosting proof. Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed.",
@@ -1480,7 +1480,10 @@
       "emptyBaselineCheckpointVerified": true,
       "finalVercelRuntimeVerified": false,
       "releaseCommitBound": false,
-      "finalSourceMappingPrepared": true
+      "finalSourceMappingPrepared": true,
+      "applicationSessionHost": "aws-1-ap-northeast-1.pooler.supabase.com",
+      "applicationSessionPort": 5432,
+      "sessionConnectionVerifiedFromMac": true
     },
     "migrationOnlyCi": {
       "sourceCommit": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
@@ -1645,20 +1648,44 @@
         "productionSwitched": false
       },
       "sessionConnection": {
-        "state": "FAILED_READER_TENANT_ROUTING_UNVERIFIED_NOT_VERCEL_READY",
-        "hostTested": "aws-0-ap-northeast-1.pooler.supabase.com",
-        "sqlState": "XX000",
-        "reason": "tenant/user not found",
-        "newProjectAssignedEndpointVerified": false,
+        "state": "RESOLVED_FROM_MAC_NOT_YET_VERCEL",
+        "newProjectAssignedEndpointVerified": true,
         "businessTransactionStarted": false,
         "vercelRuntimeVerified": false,
-        "browserConnectionPanel": "UNAVAILABLE_CHROME_BROWSER_NOT_AVAILABLE"
+        "browserConnectionPanel": "VERIFIED_NATIVE_CHROME",
+        "previousHostTested": "aws-0-ap-northeast-1.pooler.supabase.com",
+        "host": "aws-1-ap-northeast-1.pooler.supabase.com",
+        "port": 5432,
+        "endpointSource": "Exact Supabase project Connect panel via native Chrome",
+        "actualReadonlyApp": "PASS_401_200_405_VERIFIED_CLIENT_TLS_ZERO_PROVIDER_CALLS",
+        "readerAndRuntimeNativeLogin": "PASS_READONLY_EXACT_UUID_PURPOSE_ROLE_FLAGS",
+        "privateReleaseHostAndModeCorrected": true,
+        "finalReleaseShaBound": false,
+        "configurationInstalledInVercel": false,
+        "priorFailedReceiptRetained": true,
+        "priorSqlState": "XX000",
+        "priorFailureReason": "tenant/user not found"
       },
       "freezePlan": "Remove Sheets edit access from inventoried service writers while retaining reader access; stop manual/script/scheduled writers; separately hold/drain LINE/providers with complete keyed replay; prepare only",
       "databaseBackupsDeferred": true,
       "productionSettingsChanged": false,
       "sourceImported": false,
-      "productionSwitched": false
+      "productionSwitched": false,
+      "deploymentChecks": {
+        "focusedTestsPassed": 27,
+        "productionMetadataUnchanged": true,
+        "productionDomainVerified": true,
+        "productionDeployment": "dpl_7YdPW3SSSnRJgBcNedq3MviazqwW",
+        "productionCommit": "405c474578cec0b2fe84327687b90faf3f5b02f9",
+        "actualRegion": "iad1",
+        "regionChanged": false,
+        "freshBusinessEndpointCalls": false,
+        "newDeploymentCreated": false,
+        "finalVercelRuntimeVerified": false,
+        "remainingExecution": "Private read-only application deployment; no production alias/config change; exact source/project/UUID; no real providers",
+        "connectorPerDeploymentPrivateEnvAndNoAliasControls": "NOT_EXPOSED",
+        "localCliAvailableInCheckedPaths": false
+      }
     }
   }
 }

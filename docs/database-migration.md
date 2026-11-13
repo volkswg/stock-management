@@ -1350,7 +1350,7 @@ Earlier Gate 0–8 sections supply detail; this is the current operator sequence
 | Release | `volkswg/stock-management`, draft PR65; exact merge/deployment SHA and deployment ID require approval. |
 | Production database | Prepared Free Tokyo `stock-management-production`, project `hzynvirpedqnvtbifobx`, UUID `349b9289-f684-4ec5-ac22-924b2be1946b`. Current purpose isolated-staging until final import/reconciliation. Protected staging `orjnazrothkdgmzlsuto` and paused test `dcwyiayubrqdrloergax` remain forbidden production destinations. |
 | Production application | Existing Vercel project `prj_XH4nEje5cicuBuucGumuHgr73l1E`; no settings/deployment changed. Current production is READY at `dpl_7YdPW3SSSnRJgBcNedq3MviazqwW`, main `405c474578cec0b2fe84327687b90faf3f5b02f9`, alias `inventra-beta-one.vercel.app`; complete the old-writer inventory before freeze. |
-| Endpoint/login | Owner/import direct endpoint `db.hzynvirpedqnvtbifobx.supabase.co:5432/postgres` has verified CA/hostname. The older test endpoint `aws-0-ap-northeast-1.pooler.supabase.com` does not recognize this reader/tenant; verify the project-assigned endpoint and user routing before application use. No transaction-mode/6543 assumption: current production parser supports direct/session 5432. |
+| Endpoint/login | Owner/import direct endpoint `db.hzynvirpedqnvtbifobx.supabase.co:5432/postgres` has verified CA/hostname. The project-assigned application session endpoint is **`aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres`**, verified with both approved reader/runtime accounts from the Mac. Session usernames include `.hzynvirpedqnvtbifobx`; keep direct owner access for import. No transaction-mode/6543 assumption: current production parser supports direct/session 5432. |
 | Accounts | Approved, created and verified: `stock_prod_runtime` (6), `stock_prod_reader` (6), `stock_prod_backup` (2); restricted persistent service credentials private, no administrator or RLS bypass. Internal `stock_runtime` stays NOLOGIN. No old credentials reused or installed in Vercel. |
 | Source | Retained exact workbook ID and all 23 mappings are prepared privately; final source identity must be reconfirmed. Read/export principal and native-copy/freeze/export/import approval remain **UNASSIGNED**. Historical data is not source freshness. |
 | Operations | Private artifact/service files are prepared. Name incident lead/business verifier and a loss-safe writer/event hold for current cutover. Backup runner, destination/key custody, backup alerts, retention and recovery objectives are owner-deferred to the next phase; no schedule/alert is activated. |
@@ -1378,16 +1378,46 @@ reports **`iad1` (Virginia)**, while PostgreSQL is Tokyo. Proposed `hnd1` is not
 applied; verify the actual staged release region and response behavior. Region
 location alone is not a demonstrated functional failure.
 
-**Application connection remains an actual open check.** Direct native/actual app
-access from the Mac already passes. A read-only attempt using the older test
-project's Tokyo session endpoint fails at connection with SQLSTATE `XX000`,
-`tenant/user … not found`; no business transaction starts. This connection route has not passed; the error alone does not distinguish
-an incorrect endpoint from tenant/user routing and proves no general pooler outage. The
-connector does not expose the assigned pooler address and browser access was
-unavailable. Obtain the endpoint from this exact project's Connect panel, verify
-TLS/UUID using the approved reader, then prove connectivity once from Vercel.
-Do not guess more endpoints, purchase IPv4, use transaction port 6543, disable TLS
-or call this a Vercel PASS. Preserve the failed private receipt.
+**Application connection resolved; final Vercel runtime check still open
+(2026-11-13).** Native Chrome inspection of this exact project's Connect / Direct /
+Session pooler panel confirms **`aws-1-ap-northeast-1.pooler.supabase.com:5432`**.
+The earlier `aws-0` host belongs to the previous test connection and caused the
+`XX000 tenant/user not found` failure; its failed private receipt is retained.
+No password reset, grant, schema change, paid IPv4 add-on or TLS bypass is needed.
+The corrected private reader profile also binds this host and `connectionMode=session`
+in its release JSON; final source SHA remains null/unapproved and nothing is installed.
+
+Actual application owners use the corrected session route: missing staging bearer
+401, authorized GET 200 with empty orders, mutation 405; the actual client socket
+verifies CA/hostname, and all provider network calls are blocked. Separate native
+**read-only** transactions verify reader/runtime logins, exact candidate UUID and
+purpose, cap six and unchanged nonprivileged flags. The runtime can use its existing
+`SET LOCAL ROLE stock_runtime` membership; no write test or backup is performed.
+This proves client-to-pooler TLS, not an independently observed pooler-to-database
+TLS hop or Vercel runtime connectivity. Direct owner/import TLS remains the existing
+verified path.
+
+**Deployment checks performed:** all **27** existing focused production-release /
+read-only/provider-denial tests pass. They cover exact project/commit/target/user,
+wrong-purpose refusal, mixed staging/production settings, TLS-override refusal,
+bounded connections, read-only mutation denial and preserved staging controls.
+The corrected real-host reader/runtime bindings also pass the actual local release
+parser against a clearly identified candidate checkout; that is configuration
+validation, not forged deployed identity or an approved final release SHA.
+Fresh Vercel metadata confirms the same READY Sheets deployment, main SHA, three
+aliases and verified production domain, with no live endpoint/business request.
+Database controls still show revision/commands/effects/import batches zero, 51 RLS
+tables and six migrations; health advisors report no findings.
+
+**Not yet performed:** a private Vercel-to-new-candidate read-only application smoke.
+No new deployment, preview credentials, production-purpose change, production env
+update or alias promotion occurred. The current connector still cannot express
+per-deployment private env plus production no-alias staging, and no local Vercel CLI was found in the checked paths. This is the precise remaining hosting execution step;
+it does not reopen the resolved Supabase endpoint issue. Before final activation,
+execute the separately scoped private read-only deployment with existing protection,
+no real provider credentials, exact candidate/commit and no production alias/config
+change; retain the new deployment ID and actual runtime results. Do not label local
+checks as Vercel PASS. Backups and fresh source access remain deferred/unapproved.
 
 **Release preparation.** Pin the eventual approved merge SHA, Vercel project ID,
 reader username, selected verified endpoint and immutable deployment ID. Build
