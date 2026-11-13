@@ -1339,7 +1339,8 @@ limits and data reconciliation remain current operational checks.
 ###### Executable production cutover runbook
 
 **Unapproved actions remain blocked.**
-No exact production endpoint exists yet. Do not invent one or default to staging.
+The exact empty production candidate below is prepared; its final application
+connection endpoint and release binding are not yet verified. Never default to staging.
 Complete the bindings below, independently review them, then execute this sequence
 from the clean approved release checkout. Missing values or authority mean STOP.
 Earlier Gate 0–8 sections supply detail; this is the current operator sequence.
@@ -1348,11 +1349,75 @@ Earlier Gate 0–8 sections supply detail; this is the current operator sequence
 | --- | --- |
 | Release | `volkswg/stock-management`, draft PR65; exact merge/deployment SHA and deployment ID require approval. |
 | Production database | Prepared Free Tokyo `stock-management-production`, project `hzynvirpedqnvtbifobx`, UUID `349b9289-f684-4ec5-ac22-924b2be1946b`. Current purpose isolated-staging until final import/reconciliation. Protected staging `orjnazrothkdgmzlsuto` and paused test `dcwyiayubrqdrloergax` remain forbidden production destinations. |
-| Production application | Existing Vercel project `prj_XH4nEje5cicuBuucGumuHgr73l1E`; no settings/deployment changed. Privately inventory every active alias/domain and old writer. |
-| Endpoint/login | New exact `db.<approved-ref>.supabase.co:5432/postgres`, verified CA/hostname; a Tokyo session endpoint is an alternative only after final-host proof. No transaction-mode/6543 assumption: current production parser supports direct/session 5432. |
+| Production application | Existing Vercel project `prj_XH4nEje5cicuBuucGumuHgr73l1E`; no settings/deployment changed. Current production is READY at `dpl_7YdPW3SSSnRJgBcNedq3MviazqwW`, main `405c474578cec0b2fe84327687b90faf3f5b02f9`, alias `inventra-beta-one.vercel.app`; complete the old-writer inventory before freeze. |
+| Endpoint/login | Owner/import direct endpoint `db.hzynvirpedqnvtbifobx.supabase.co:5432/postgres` has verified CA/hostname. The older test endpoint `aws-0-ap-northeast-1.pooler.supabase.com` does not recognize this reader/tenant; verify the project-assigned endpoint and user routing before application use. No transaction-mode/6543 assumption: current production parser supports direct/session 5432. |
 | Accounts | Approved, created and verified: `stock_prod_runtime` (6), `stock_prod_reader` (6), `stock_prod_backup` (2); restricted persistent service credentials private, no administrator or RLS bypass. Internal `stock_runtime` stays NOLOGIN. No old credentials reused or installed in Vercel. |
-| Source | **UNASSIGNED** final workbook ID, read/export principal, native-backup/freeze permission and private 23-tab mapping. Historical data is not source freshness. |
+| Source | Retained exact workbook ID and all 23 mappings are prepared privately; final source identity must be reconfirmed. Read/export principal and native-copy/freeze/export/import approval remain **UNASSIGNED**. Historical data is not source freshness. |
 | Operations | Private artifact/service files are prepared. Name incident lead/business verifier and a loss-safe writer/event hold for current cutover. Backup runner, destination/key custody, backup alerts, retention and recovery objectives are owner-deferred to the next phase; no schedule/alert is activated. |
+
+**Final synchronization/deployment preparation (2026-11-13).** The private
+`final-sync-preparation-2026-11-13/private` packet retains the exact historical
+workbook binding, reviewed 23-tab mapping, unapproved source/freeze request,
+all-writer checklist, deployment metadata and ordered import/reconciliation checks.
+The existing export **dry-run passes with no token access, HTTP or fresh source
+file**. The original credential-free parity seed covers two accounts/ten months;
+it is explicitly NOT FINAL. Rebuild all-history month/account coverage and frozen
+`asOf` from the approved final snapshot; historical acceptance is not freshness.
+No database backup is captured or required by this packet.
+
+Fresh candidate control checks match UUID `349b9289-f684-4ec5-ac22-924b2be1946b`,
+`purpose=isolated-staging`, revision/commands/effects/import batches all zero,
+51 RLS tables and six migrations. Keep this purpose through all extraction/parity
+steps. No schema bootstrap, role reset or test writes are needed.
+
+Deployment metadata pins the unchanged Sheets release above and its immutable URL
+`stock-management-oy2atdhzi-volkswgs-projects.vercel.app`; the other returned aliases
+are `stock-management-volkswgs-projects.vercel.app` and
+`stock-management-git-main-volkswgs-projects.vercel.app`. The current deployment
+reports **`iad1` (Virginia)**, while PostgreSQL is Tokyo. Proposed `hnd1` is not
+applied; verify the actual staged release region and response behavior. Region
+location alone is not a demonstrated functional failure.
+
+**Application connection remains an actual open check.** Direct native/actual app
+access from the Mac already passes. A read-only attempt using the older test
+project's Tokyo session endpoint fails at connection with SQLSTATE `XX000`,
+`tenant/user … not found`; no business transaction starts. This connection route has not passed; the error alone does not distinguish
+an incorrect endpoint from tenant/user routing and proves no general pooler outage. The
+connector does not expose the assigned pooler address and browser access was
+unavailable. Obtain the endpoint from this exact project's Connect panel, verify
+TLS/UUID using the approved reader, then prove connectivity once from Vercel.
+Do not guess more endpoints, purchase IPv4, use transaction port 6543, disable TLS
+or call this a Vercel PASS. Preserve the failed private receipt.
+
+**Release preparation.** Pin the eventual approved merge SHA, Vercel project ID,
+reader username, selected verified endpoint and immutable deployment ID. Build
+from Git so provider-injected `VERCEL_GIT_COMMIT_SHA` matches the nine-field release
+binding; never forge system identity or assume a prebuilt deployment supplies it.
+Keep SQL read-only until final activation. Stage with production alias assignment
+suppressed and verify aliases stayed on the pinned Sheets release before any
+smoke call. The current MCP deployment wrapper cannot express both private
+per-deployment environment overrides and suppression of alias assignment; verify
+the supported CLI/REST path before executing. Do not issue its plain production
+create call. Production-purpose change, deployment/configuration/region changes,
+merge, any provider checks and activation all require separate approval.
+
+**Concrete freeze proposal — prepare only.** Inventory each source writer's
+principal and every old immutable/preview deployment, not just the three aliases.
+Verify ownership/delegation first: an owner or impersonated writer requires a
+separately proved stop mechanism. During the approved window, retain source read
+permission but remove edit permission for all application/service writer principals, pause owner-run Apps
+Script/schedules and manual editors, and verify no alternative writer remains.
+This can also stop old immutable deployments writing Sheets without removing the
+read access still needed by `loyverse_accounts`. Record exact permission changes
+and the pre-write rollback reversal before executing; do not read that credential
+worksheet for this preparation. Mere `STOCK_PRODUCTION_READ_ONLY=true` does not
+freeze Sheets mode, and a Vercel project pause covers production, not proof of every
+preview/immutable writer. Provider/LINE ingress must separately be stopped/drained
+with complete durable event capture or proven producer pause and keyed replay;
+HTTP 503, disabling a webhook or relying on LINE retries is not sufficient.
+All permission/ingress/schedule changes above are proposals, not performed actions.
+Before SQL writes, resume Sheets only after restoring approved writer permissions
+and reconciling held events. After SQL writes, keep legacy Sheets writers disabled.
 
 **Step 0 — current resource decision and empty-candidate setup.** The owner chose
 the existing Free organization after pausing only the disposable test copy.
@@ -1361,8 +1426,8 @@ and retained backups are preserved. The actual new-project quote is **$0/month**
 no Pro organization/upgrade or paid add-on is selected or authorized. The previous
 $25/$45 Pro estimates are alternatives only if an approved need later requires
 one, not blockers for this database preparation. Free still has its actual storage/
-connection/egress and automatic-pausing limits; native quota/headroom checks and
-an owner-approved backup arrangement remain necessary. No final activation is
+connection/egress and automatic-pausing limits; native final-load quota/headroom checks remain necessary. Database backup
+arrangements are deferred by the owner, not a current gate. No final activation is
 implied by Free project creation.
 [Free plan and pausing](https://supabase.com/pricing),
 [backup scope](https://supabase.com/docs/guides/platform/backups).

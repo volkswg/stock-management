@@ -1,5 +1,27 @@
 # Refactoring progress and evidence
 
+## Final synchronization and deployment checks prepared (2026-11-13)
+
+The private packet binds the retained workbook and all 23 tab mappings; export
+preview passes without token access, HTTP or fresh records. Historical parity
+metadata (two accounts/ten months) is explicitly a seed. Current target control
+checks confirm exact UUID, isolated-staging purpose, revision/commands/effects/
+import batches zero, 51 RLS tables and six migrations. No source import or SQL
+business write occurred. Live Vercel metadata pins READY Sheets deployment
+`dpl_7YdPW3SSSnRJgBcNedq3MviazqwW`/main `405c474` and its aliases; actual region
+is Virginia, so Tokyo hosting is a proposal rather than an observed setting.
+
+The reused test session endpoint rejects the new tenant (`XX000`) before any
+business transaction. Its assigned project endpoint and final Vercel connectivity
+remain open; no guessed alternative/TLS bypass or paid IPv4 change. The connection
+panel could not be inspected because Chrome browser control was unavailable.
+The [canonical runbook](../database-migration.md#executable-production-cutover-runbook)
+now records exact staging/release checks, a source-writer permission freeze proposal,
+LINE hold requirements and rollback boundaries. All live changes/fresh source
+reads/merge/activation remain unapproved. Backups stay deferred; CI48 is reused
+for unchanged application code. PR65 remains draft/unmerged.
+
+
 ## Database backup work deferred by owner (2026-11-13)
 
 Owner moves database backups, further checkpoints, automation, encrypted off-site

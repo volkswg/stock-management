@@ -1,5 +1,5 @@
 {
-  "version": 29,
+  "version": 30,
   "scope": "SUPABASE MIGRATION-ONLY CUTOVER MODE: essential managed PostgreSQL smoke; no new auth/access-protection implementation; final activation remains gated; no optional monitoring/coordinator/full campaign",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -94,17 +94,13 @@
     "macPluginAndCloudAccessMustBeVerifiedIndependently": true,
     "scope": "Fresh organization/project/production protection metadata and account quote only; no SQL, new Sheets/business reads, production credentials or live setting changes"
   },
-  "nextStep": "Approve and bind the private hosted app/coordinator plus a bounded native-resolution pilot/traffic envelope; full hosted application/latency/capacity and hosted off-site recovery remain pending. Do not merge, access new Sheets data, create paid resources or switch production without approval.",
+  "nextStep": "Resolve exact new-project application session endpoint, then obtain specific final source/principal/freeze/export/import and release/deployment approval. No fresh Sheets access, merge, Vercel changes or activation yet; database backups deferred.",
   "cutoverBlockers": [
-    "M1 existing access-protection risk retained for explicit final activation decision; implementation deferred by owner, no new access-policy choice blocks independent migration preparation",
-    "M2 production profile implemented locally; real production endpoint/UUID/purpose/role/release binding and hosted activation verification remain unassigned",
-    "M3 approved hosted platform/write/one-five-client capacity and generated-checkpoint recovery not run",
-    "M4 new production target/org/plan/headroom/quotas/budget unassigned",
-    "M5 encrypted backup schedule, end-to-end recovery objectives, file recovery owner and alerts not activated",
-    "M6 final full Sheets snapshot/import/reconciliation requires exact source and freeze approval",
-    "M7 loss-safe all-writer/provider event hold and ordered keyed release remain unproven",
-    "M8 exact production release/window/activation and post-write forward recovery sign-off pending",
-    "A1-A5 exact setup/spend/scope/source/live-change approvals outstanding; see criticalPathCutoverMode"
+    "M1 Minimum effective existing protection. Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied.",
+    "M2 Final release binding/hosting proof. Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed.",
+    "M6 Final full Sheets synchronization. After explicit workbook/principal/native-backup/freeze/export/import approval only: fresh full 23-tab source into a new empty candidate, exact reconciliation and original application/report parity. Historical 70,777-row evidence is not current freshness; no in-place delta merge.",
+    "M7 Loss-safe writer/event hold. Stop every manual/API/deployment/script/scheduled/LINE writer, drain commands/effects and retain accepted/uncertain keys. Exact durable capture/replay or proven producer-pause procedure remains unassigned. LINE retries/webhook disablement alone are insufficient; never acknowledge unpersisted events.",
+    "M8 Exact release/target/source binding, read-only checks, incident lead, dated owner activation; database backup work deferred; no automatic stale-Sheets fallback after SQL writes"
   ],
   "cutoverReady": false,
   "readOnlyApplicationAcceptance": {
@@ -1483,7 +1479,8 @@
       "ownerCredentialHandoffComplete": true,
       "emptyBaselineCheckpointVerified": true,
       "finalVercelRuntimeVerified": false,
-      "releaseCommitBound": false
+      "releaseCommitBound": false,
+      "finalSourceMappingPrepared": true
     },
     "migrationOnlyCi": {
       "sourceCommit": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
@@ -1597,6 +1594,71 @@
       "automatedProtectionActive": false,
       "ongoingRecoverabilityCertified": false,
       "freshSheetsOrActivationApproved": false
+    },
+    "finalSynchronizationPreparation": {
+      "state": "PREPARED_NOT_EXECUTED",
+      "reportedAtUtc": "2026-11-13T03:52:46.617167+00:00",
+      "mappingTables": 23,
+      "workbookBindingPrivate": true,
+      "sourceRecordAccess": false,
+      "exportDryRun": "PASS_WITHOUT_TOKEN_HTTP_OR_FRESH_SOURCE_FILE",
+      "paritySeedAccounts": 2,
+      "paritySeedMonths": 10,
+      "paritySeedIsFinal": false,
+      "candidateControlCheck": {
+        "isolationId": "349b9289-f684-4ec5-ac22-924b2be1946b",
+        "purpose": "isolated-staging",
+        "revision": 0,
+        "commands": 0,
+        "sideEffects": 0,
+        "importBatches": 0,
+        "privateTables": 51,
+        "allRls": true,
+        "migrations": 6
+      },
+      "currentVercelProduction": {
+        "id": "dpl_7YdPW3SSSnRJgBcNedq3MviazqwW",
+        "name": "stock-management",
+        "url": "stock-management-oy2atdhzi-volkswgs-projects.vercel.app",
+        "readyState": "READY",
+        "target": "production",
+        "regions": [
+          "iad1"
+        ],
+        "alias": [
+          "inventra-beta-one.vercel.app",
+          "stock-management-volkswgs-projects.vercel.app",
+          "stock-management-git-main-volkswgs-projects.vercel.app"
+        ],
+        "git": {
+          "sha": "405c474578cec0b2fe84327687b90faf3f5b02f9",
+          "ref": "main"
+        },
+        "teamId": "team_bkDqHUBMbLyAXmwZqvCmovcu",
+        "projectId": "prj_XH4nEje5cicuBuucGumuHgr73l1E",
+        "inspection": "CONTROL_PLANE_METADATA_ONLY_NO_BUSINESS_ENDPOINT_CALL",
+        "nextReleaseSha": null,
+        "nextDeploymentId": null,
+        "proposedSqlRegion": "hnd1",
+        "proposedRegionApplied": false,
+        "configurationInstalled": false,
+        "productionSwitched": false
+      },
+      "sessionConnection": {
+        "state": "FAILED_READER_TENANT_ROUTING_UNVERIFIED_NOT_VERCEL_READY",
+        "hostTested": "aws-0-ap-northeast-1.pooler.supabase.com",
+        "sqlState": "XX000",
+        "reason": "tenant/user not found",
+        "newProjectAssignedEndpointVerified": false,
+        "businessTransactionStarted": false,
+        "vercelRuntimeVerified": false,
+        "browserConnectionPanel": "UNAVAILABLE_CHROME_BROWSER_NOT_AVAILABLE"
+      },
+      "freezePlan": "Remove Sheets edit access from inventoried service writers while retaining reader access; stop manual/script/scheduled writers; separately hold/drain LINE/providers with complete keyed replay; prepare only",
+      "databaseBackupsDeferred": true,
+      "productionSettingsChanged": false,
+      "sourceImported": false,
+      "productionSwitched": false
     }
   }
 }
