@@ -1,5 +1,5 @@
 {
-  "version": 27,
+  "version": 28,
   "scope": "SUPABASE MIGRATION-ONLY CUTOVER MODE: essential managed PostgreSQL smoke; no new auth/access-protection implementation; final activation remains gated; no optional monitoring/coordinator/full campaign",
   "reportedOnBangkok": "2026-11-13",
   "lastDataVerificationAtUtc": "2026-11-11T20:11:43.322877+00:00",
@@ -1101,7 +1101,7 @@
   },
   "criticalPathCutoverMode": {
     "mode": "SUPABASE MIGRATION-ONLY CUTOVER MODE",
-    "reportedAtUtc": "2026-11-13T02:12:11.905216+00:00",
+    "reportedAtUtc": "2026-11-13T02:52:31.841957+00:00",
     "decision": "NO_GO",
     "singleDraftPr": 65,
     "singleReadinessReport": "docs/database-migration.md#current-migration-go-no-go-assessment-2026-11-12",
@@ -1131,15 +1131,15 @@
       },
       {
         "id": "M3",
-        "classification": "MUST FIX before cutover",
-        "subject": "Scoped hosted acceptance: essential PG smoke PASS. Nine groups plus stronger write-transaction permission denial pass; all original business records unchanged. Existing local browser/fault evidence is reused. Only final deployment/target compatibility remains mandatory under M2; strict telemetry/full synthetic campaigns are deferred, not certified.",
-        "state": "ESSENTIAL_MANAGED_POSTGRESQL_SMOKE_PASS_FINAL_HOST_PENDING_M2"
+        "classification": "SATISFIED for essential scope",
+        "subject": "Essential hosted PostgreSQL acceptance passed; final deployment compatibility is M2",
+        "state": "PASS_REUSE_PRIOR_WRITES_AND_NEW_CANDIDATE_READONLY"
       },
       {
         "id": "M4",
-        "classification": "MUST FIX before cutover",
-        "subject": "New Free Tokyo target hzynvirpedqnvtbifobx created; native schema/role/UUID/TLS setup awaits owner credential; no nonzero resource purchase required",
-        "state": "CREATED_FREE_NATIVE_SETUP_HANDOFF_PENDING"
+        "classification": "SATISFIED for empty target preparation",
+        "subject": "Free final target/UUID/51-table schema/persistent roles/TLS/rollback/reader app/empty checkpoint restore verified; final import and Vercel activation are separate",
+        "state": "PASS_EMPTY_FINAL_CANDIDATE_PREPARED"
       },
       {
         "id": "M5",
@@ -1192,8 +1192,8 @@
       {
         "id": "A2",
         "classification": "Requires owner approval",
-        "subject": "Existing Free org and new $0 candidate selected; remaining backup operations and any later nonzero cost need exact approval",
-        "state": "FREE_TARGET_AND_TEST_PAUSE_SELECTED_BACKUP_OPERATIONS_DECISIONS_REMAIN"
+        "subject": "No new resource/account approval needed; bind remaining backup/key/alert operating decisions and any future nonzero spending",
+        "state": "FREE_TARGET_AND_PERSISTENT_ACCOUNTS_APPROVED_OPERATIONS_DECISIONS_REMAIN"
       },
       {
         "id": "A3",
@@ -1270,9 +1270,9 @@
       "hostedWritesScope": "New empty production candidate schema/role preparation only; no fresh source import, live production writes or protected-staging changes"
     },
     "metadataOnlyObservation": {
-      "visibleSupabaseProjects": 1,
-      "productionTargetVisible": false,
-      "testTargetVisible": false,
+      "visibleSupabaseProjects": 3,
+      "productionTargetVisible": true,
+      "testTargetVisible": true,
       "selectedOrganizationId": "yntcfbkilwulyhkslhbx",
       "plan": "free",
       "newProjectQuoteUsdPerMonth": 0,
@@ -1281,7 +1281,11 @@
       "passwordProtectionEnabled": false,
       "trustedIpsEnabled": false,
       "firewall": "UNVERIFIED_API_404",
-      "businessRowsRead": false
+      "businessRowsRead": false,
+      "protectedStagingState": "ACTIVE_HEALTHY",
+      "testTargetState": "INACTIVE",
+      "productionCandidateState": "ACTIVE_HEALTHY",
+      "finalProductionDataLoaded": false
     },
     "securityImplementation": "NEXT_PHASE_NOT_CURRENT_MIGRATION",
     "existingSecurityRisk": "UNPROVED_EFFECTIVE_EXISTING_PROTECTION_IS_ACTIVATION_NO_GO; implementation deferred; independent migration preparation continues",
@@ -1296,13 +1300,13 @@
       "sourceReleaseAssigned": false,
       "productionEnabled": false,
       "purposeMigration": "20261112160852_allow_explicit_production_environment.sql",
-      "migrationAppliedHosted": false,
+      "migrationAppliedHosted": true,
       "existingRowsOrGrantsChangedByMigration": false,
       "defaultProductionReadOnly": true,
       "stagingBearerPreserved": true,
       "legacyProductionAccessPolicy": "legacy-as-is",
       "newAuthenticationImplemented": false,
-      "actualHostedAcceptance": "NOT_RUN",
+      "actualHostedAcceptance": "FINAL_CANDIDATE_NATIVE_AND_MAC_READONLY_APP_PASS_NOT_VERCEL_RUNTIME",
       "newHeadCi": "CI48_PASS_EXECUTABLE_8ba836b_REPORT_ONLY_FOLLOWUP_NOT_RETESTED",
       "backupRecoveryProductionPurpose": "EXPLICIT_OPT_IN_DEFAULT_STAGING_RECEIPT_BOUND",
       "productionTaggedLocalRecovery": {
@@ -1310,7 +1314,9 @@
         "tablesExpected": 51,
         "metadataSectionsExpected": 15,
         "hostedOrOffsiteClaimed": false
-      }
+      },
+      "emptyCandidatePrepared": true,
+      "migrationAppliedHostedProjectRef": "hzynvirpedqnvtbifobx"
     },
     "hostedTargetStart": {
       "reportedOnBangkok": "2026-11-13",
@@ -1434,7 +1440,7 @@
       "newTargetNameProposed": "stock-management-production",
       "vercelProjectId": "prj_XH4nEje5cicuBuucGumuHgr73l1E",
       "productionRef": "hzynvirpedqnvtbifobx",
-      "productionIsolationId": null,
+      "productionIsolationId": "349b9289-f684-4ec5-ac22-924b2be1946b",
       "planSelected": true,
       "separateProOrgOneMicroPlanningUsdMonthly": 25,
       "currentOrgThreeMicroPlanningUsdMonthly": 45,
@@ -1444,13 +1450,19 @@
       "freshSheetsAuthorized": false,
       "freezeEventHoldAssigned": false,
       "runbook": "docs/database-migration.md#executable-production-cutover-runbook",
-      "productionIdentityAssigned": false,
+      "productionIdentityAssigned": true,
       "selectedPlan": "free",
       "selectedOrganizationId": "yntcfbkilwulyhkslhbx",
       "actualQuotedProjectUsdMonthly": 0,
       "newTargetCreated": true,
-      "nativeSetupState": "OWNER_CREDENTIAL_HANDOFF_PENDING",
-      "paidResourcesCreated": false
+      "nativeSetupState": "PASS_EMPTY_CANDIDATE_NOT_ACTIVATED",
+      "paidResourcesCreated": false,
+      "persistentServiceAccountsApproved": true,
+      "persistentServiceAccountsNativeVerified": true,
+      "ownerCredentialHandoffComplete": true,
+      "emptyBaselineCheckpointVerified": true,
+      "finalVercelRuntimeVerified": false,
+      "releaseCommitBound": false
     },
     "migrationOnlyCi": {
       "sourceCommit": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
@@ -1469,50 +1481,82 @@
       "laterReportOnlyHeadTestClaimed": false
     },
     "productionCandidatePreparation": {
-      "reportedAtUtc": "2026-11-13T02:12:11.905216+00:00",
-      "state": "NEW_FREE_CANDIDATE_CREATED_NATIVE_OWNER_CREDENTIAL_REQUIRED",
+      "reportedAtUtc": "2026-11-13T02:52:31.841957+00:00",
+      "state": "EMPTY_PRODUCTION_DATABASE_PREPARATION_PASS_NOT_ACTIVATED",
       "projectRef": "hzynvirpedqnvtbifobx",
+      "name": "stock-management-production",
       "organizationId": "yntcfbkilwulyhkslhbx",
       "plan": "free",
       "quoteUsdMonthly": 0,
       "region": "ap-northeast-1",
       "version": "17.11.0.019",
-      "schemaState": {
-        "archiveTables": 24,
-        "operationalTables": 0,
-        "businessRows": 0,
-        "migrationLedger": [
-          {
-            "version": "20261113013218",
-            "name": "stock_business_staging"
-          }
-        ]
-      },
-      "operationalMigrationConnectorAttempts": [
-        {
-          "result": "confirmation_expired",
-          "partialOperationalSchema": false
-        },
-        {
-          "result": "confirmation_expired",
-          "partialOperationalSchema": false
-        }
+      "databaseHost": "db.hzynvirpedqnvtbifobx.supabase.co",
+      "database": "postgres",
+      "databasePort": 5432,
+      "isolationId": "349b9289-f684-4ec5-ac22-924b2be1946b",
+      "purpose": "isolated-staging",
+      "schemaTables": 51,
+      "archiveTables": 24,
+      "operationalTables": 27,
+      "migrations": 6,
+      "migrationVersionsMatchSource": true,
+      "initialConnectorVersionMappingPreservedInReceipt": true,
+      "serviceLogins": [
+        "stock_prod_runtime",
+        "stock_prod_reader",
+        "stock_prod_backup"
       ],
-      "nativeContinuation": "finish-empty-candidate.py",
-      "nativeContinuationAppliedHosted": false,
-      "localEmptySetupReceiptSha256": "be2656c3de1c65b4f3c5796f91d1abb6936f9f52d207de84963cb38041d8acc9",
-      "localNativeContinuationReceiptSha256": "75c32987dcabd7a6cc883335f6d770596c2b9451bdd701eec9c9694b9d6cbc54",
-      "ownerConnectionFilesReady": false,
-      "macWasLockedDuringSettingsHandoff": true,
-      "pausedTestProject": "dcwyiayubrqdrloergax",
+      "serviceLoginConnectionLimits": [
+        6,
+        6,
+        2
+      ],
+      "internalRoleNoLogin": "stock_runtime",
+      "roleOwnerApprovalRecorded": true,
+      "priorRoleApprovalReviewRejectionResolved": true,
+      "newAdministrators": 0,
+      "roleRlsBypass": false,
+      "newUserAuthenticationImplemented": false,
+      "nativeHostnameCaAndServerTls": true,
+      "permissionDenialsVerified": 8,
+      "writeProbeFullyRolledBack": true,
+      "all51CountsRevisionAndOrderSequenceUnchanged": true,
+      "businessRows": 0,
+      "retainedSyntheticRows": 0,
+      "revision": 0,
+      "allPrivateTablesRls": true,
+      "anonAndAuthenticatedPrivateSchemasDenied": true,
+      "nativeServiceSessionsAfter": 0,
+      "databaseBytes": 14939827,
+      "connectionsObserved": 14,
+      "maxConnections": 60,
+      "actualReadonlyApplicationFromMac": "PASS_401_200_405_VERIFIED_SOCKET_NO_PROVIDER_CALLS",
+      "finalVercelRuntimeVerified": false,
+      "emptyCheckpoint": {
+        "captureSeconds": 246.994,
+        "dumpSha256": "c869bd1896790a725432bec411cea28b6c75fd96e0a25e0f8cb057382863a19f",
+        "files": 14,
+        "manifestSha256": "e0a495396f03c0960f3fd37b456fb300853882909077dbe2b258859bc668752a",
+        "hostedAfterApp51Tables15MetadataMatch": true,
+        "freshLocal51Tables15MetadataRestoreMatch": true,
+        "credentialsIncluded": false,
+        "offsiteEncryptionVerified": false
+      },
+      "securityAdvisors": "NO_FINDINGS",
+      "healthAdvisors": "NO_FINDINGS",
+      "privateReaderProductionProfilePrepared": true,
+      "releaseSourceCommitAssigned": false,
+      "configurationInstalledInVercel": false,
+      "backupAutomationActivated": false,
+      "freshSheetsRead": false,
+      "sourceImported": false,
+      "productionPurposeEnabled": false,
+      "productionActivated": false,
+      "testProjectPaused": "dcwyiayubrqdrloergax",
       "protectedStagingChanged": false,
-      "productionApplicationChanged": false,
-      "newSheetsRead": false,
-      "productionActivation": false,
-      "newProductionTargetExcludedFromDisposableHarness": true,
-      "offlineControlsPassed": 85,
-      "offlineControlEvidenceSha256": "6e3974e90800d5e5c7ad48b605f9522716a59008f9e255a6caa5dad934d763c2",
-      "initialOfflineLoopbackPermissionDiagnosticRetained": true
+      "operatorSecretsKeptPrivate": true,
+      "applicationCiSourceReused": "8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b",
+      "ciRunReused": 43342345150
     }
   }
 }

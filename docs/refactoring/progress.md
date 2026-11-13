@@ -1,5 +1,25 @@
 # Refactoring progress and evidence
 
+## Final empty production database prepared and verified (2026-11-13)
+
+Free Tokyo target `hzynvirpedqnvtbifobx`, UUID
+`349b9289-f684-4ec5-ac22-924b2be1946b`, now has six exact source-version migrations,
+51 RLS tables/no audit and the three explicitly approved restricted persistent
+service logins (6/6/2). Initial account auto-review rejection executes nothing;
+owner's explicit production-role approval resolves it. Private native continuation
+preserves source hashes and original connector receipt. All native TLS/logins and
+eight role denials pass; exact-decimal rollback preserves every row count, revision
+and order sequence. Current actual read-only app owners return 401/200/405 over
+verified TLS with zero provider calls. The restricted empty capture restores in a
+fresh network-isolated local container: all 51 tables/15 metadata match, as does
+the subsequent hosted check. Fourteen pinned package files exclude passwords and
+service files. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records digests and scope; no source records loaded, hosted Vercel proof, off-site
+recovery/automation claim or activation. New UUID joins the disabled test denylist.
+Application source stays unchanged from CI48; no repeated synthetic campaign or
+new authentication features. Earlier handoff-pending snapshot below is historical.
+
+
 ## Final Free production candidate created; native handoff pending (2026-11-13)
 
 Owner selected releasing the disposable test slot. Paused, did not delete,

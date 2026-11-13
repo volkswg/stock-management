@@ -44,7 +44,8 @@
       "hzynvirpedqnvtbifobx"
     ],
     "forbiddenIsolationIds": [
-      "160669bd-2f6f-4490-9259-bada5a1d02c4"
+      "160669bd-2f6f-4490-9259-bada5a1d02c4",
+      "349b9289-f684-4ec5-ac22-924b2be1946b"
     ],
     "forbiddenVercelProjectIds": [
       "prj_XH4nEje5cicuBuucGumuHgr73l1E"
@@ -534,8 +535,15 @@
   },
   "finalProductionCandidate": {
     "projectRef": "hzynvirpedqnvtbifobx",
-    "state": "CREATED_FREE_NATIVE_SETUP_PENDING",
+    "state": "EMPTY_CANDIDATE_PREPARED_VERIFIED_NOT_ACTIVATED",
     "forbiddenForDisposableCampaign": true,
-    "liveApplicationActivated": false
+    "liveApplicationActivated": false,
+    "isolationId": "349b9289-f684-4ec5-ac22-924b2be1946b",
+    "persistentDbRolesApproved": true,
+    "nativeTlsVerified": true,
+    "macReadonlyAppVerified": true,
+    "emptyBaselineRestoreVerified": true,
+    "sourceImported": false,
+    "finalVercelRuntimeVerified": false
   }
 }
