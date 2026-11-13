@@ -937,6 +937,31 @@ activation still requires evidence that existing protection is effective; owner
 risk acceptance alone does not establish that evidence. This does not block
 independent database preparation or authorize live configuration changes.
 
+**Final production candidate created; native setup handoff pending (2026-11-13).**
+The owner chose to release the disposable test slot. Paused `sm-ha-20261112-f`
+(`dcwyiayubrqdrloergax`), retaining it and both verified 14-file backup packages;
+no permanent deletion or protected-staging change. The new dedicated
+`stock-management-production` (`hzynvirpedqnvtbifobx`) is ACTIVE_HEALTHY in
+`volkswg's Org`, Tokyo, PostgreSQL `17.11.0.019`, **Free / quoted $0 per month**.
+No paid upgrade or live application change. This resolves target selection and
+creation; it does not mean schema, accounts or production activation are ready.
+
+The first pinned archive migration applies: 24 empty archive tables, zero
+operational tables/business rows. Two operational-migration connector confirmation
+expirations leave no partial operational schema; catalog/ledger inspection confirms
+that before switching to a private native connection. The owner must set only
+this new project's database password and run its private connection helper; the
+Mac was locked during the UI handoff. Do not reset either older project.
+Native continuation and scoped account setup pass fresh local rehearsals using a
+non-superuser owner-like role: six source migrations/51 tables, read-only grants,
+restricted role denials, atomic nonempty/wrong-target rejection and canonical
+source-version tracking. Keep initial connector receipts and the local startup
+readiness diagnostic. No new authentication system or optional test framework.
+Remaining native work includes recording the exact new UUID, restricted service
+credentials/TLS verification and the empty baseline checkpoint. Passwords/private
+connection files and all operator receipts stay outside Git. Prior application
+CI48 remains valid; this is operational preparation, not another app-code change.
+
 **Essential hosted PostgreSQL smoke completed (2026-11-13 Bangkok).**
 The actual application route owners run from the operator Mac against the approved
 managed target using its temporary runtime/observer accounts. No new hosted app,
@@ -1199,7 +1224,7 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | M1 | MUST FIX before cutover | **Minimum effective existing protection.** Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied. |
 | M2 | MUST FIX before cutover | **Final release binding/hosting proof.** Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Bind the actual new target, exact deployment/SHA and restricted reader/writer; verify final-host TLS/connectivity and read-only browser/API/report compatibility once after approval. No production setting changed. |
 | M3 | MUST FIX before cutover | **Scoped hosted acceptance: essential PG smoke PASS.** Nine groups plus stronger write-transaction permission denial pass; all original business records unchanged. Existing local browser/fault evidence is reused. Only final deployment/target compatibility remains mandatory under M2; strict telemetry/full synthetic campaigns are deferred, not certified. |
-| M4 | MUST FIX before cutover | **Dedicated final production target/cost.** Actual approved org/plan/region/version/project/UUID, runtime/reader/backup roles, final-plan quotas/headroom and account quote remain unassigned. Both current staging and disposable test targets are excluded. No purchase, upgrade, retag or pause is authorized. |
+| M4 | MUST FIX before cutover | **Final candidate exists; finish native setup.** Free Tokyo project `hzynvirpedqnvtbifobx` is created after approved disposable-test pause. Archive migration only; operational schema/roles/UUID/native TLS and final-plan headroom remain pending the private owner-credential handoff. Neither old target was reused. No paid-plan decision is required for current $0 preparation. |
 | M5 | MUST FIX before cutover | **Backup automation and recovery.** Capture/restricted reader and exact hosted-capture/local restore pass. Production runner/destination/unattended encryption/key custody, independent fresh recovery, measured accepted RPO/RTO, retention/forecast and tested redacted failure/staleness alerts with named coverage are not activated. Extra monitoring tools are deferred. Drive bytes need a separate recovery owner. |
 | M6 | MUST FIX before cutover | **Final full Sheets synchronization.** After explicit workbook/principal/native-backup/freeze/export/import approval only: fresh full 23-tab source into a new empty candidate, exact reconciliation and original application/report parity. Historical 70,777-row evidence is not current freshness; no in-place delta merge. |
 | M7 | MUST FIX before cutover | **Loss-safe writer/event hold.** Stop every manual/API/deployment/script/scheduled/LINE writer, drain commands/effects and retain accepted/uncertain keys. Exact durable capture/replay or proven producer-pause procedure remains unassigned. LINE retries/webhook disablement alone are insufficient; never acknowledge unpersisted events. |
@@ -1208,7 +1233,7 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | D2 | SAFE TO DEFER until after cutover | Unrelated refactors, extra test abstractions, more synthetic fault repetitions, additional planning PRs, multi-region/HA, optional dashboards, restore certification for unused Supabase Auth/Storage, and automated backup pruning. Preserve evidence and retained backups; defer destructive cleanup. Recheck only affected behavior or demonstrated drift. |
 | D3 | SAFE TO DEFER until after cutover | Automatic reverse synchronization to Sheets is unnecessary if the owner accepts a **forward-recovery-only** incident policy after the first SQL write. No switch back after SQL writes is permitted without a separately reconciled reverse migration. A demand for immediate post-write Sheets rollback makes that implementation MUST FIX. |
 | A1 | Requires owner approval | **Existing test approval is sufficient for the completed essential smoke.** No further test resources, public tunnel, monitoring protocol or full campaign are prerequisites. Additional resources, paid work or provider calls would require their own approval. |
-| A2 | Requires owner approval | **Production target/operations.** Choose exact org/plan and recurring/usage ceiling (planning baseline separate Pro/Micro about $25/month, current org with three Micro about $45/month before extras); approve new dedicated target/setup/import roles and backup runner/destination/key/retention/RPO/RTO/responder/alert test. No purchase or message is sent now. |
+| A2 | Requires owner approval | **Resource choice resolved for Free preparation.** Existing org, new $0 candidate and disposable-test pause are selected; protected staging preserved. Remaining decisions concern backup runner/destination/key custody/retention/RPO/RTO/responder and any future nonzero cost. No paid upgrade or notification is authorized. |
 | A3 | Requires owner approval | **Only material launch limitations.** Existing 10/20 MiB upload versus hosting body-limit mismatch predates migration. Preserve behavior; do not make upload redesign, custom monitoring or sustained capacity certification a migration prerequisite. If large uploads are required at launch, resolve or explicitly disposition that requirement; no full-platform PASS is claimed. |
 | A4 | Requires owner approval | **Final source/freeze.** Exact workbook ID and read/export identity, native frozen backup, all writer/event holds, final full export and import into the named new production candidate. No fresh source access is authorized now. |
 | A5 | Requires owner approval | **Release/live actions.** PR65 merge/exact release SHA, target+UUID/deployment/configuration, explicitly scoped provider checks/notifications, incident lead and dated maintenance window, then a separate final activation decision. No blanket approval or bypass of unmet prerequisites. |
@@ -1293,25 +1318,25 @@ Earlier Gate 0–8 sections supply detail; this is the current operator sequence
 | Required binding | Current value / operator action |
 | --- | --- |
 | Release | `volkswg/stock-management`, draft PR65; exact merge/deployment SHA and deployment ID require approval. |
-| Production database | **UNASSIGNED** new dedicated `stock-management-production`, proposed Tokyo. Both protected staging `orjnazrothkdgmzlsuto` / `160669bd-2f6f-4490-9259-bada5a1d02c4` and used disposable test `dcwyiayubrqdrloergax` / `5f63d064-9658-4440-bf87-b4279b08c806` are forbidden production destinations. |
+| Production database | New Free `stock-management-production`, `hzynvirpedqnvtbifobx`, Tokyo, created and healthy; exact environment UUID/account/native setup pending. Both protected staging `orjnazrothkdgmzlsuto` / `160669bd-2f6f-4490-9259-bada5a1d02c4` and used disposable test `dcwyiayubrqdrloergax` / `5f63d064-9658-4440-bf87-b4279b08c806` are forbidden production destinations. |
 | Production application | Existing Vercel project `prj_XH4nEje5cicuBuucGumuHgr73l1E`; no settings/deployment changed. Privately inventory every active alias/domain and old writer. |
 | Endpoint/login | New exact `db.<approved-ref>.supabase.co:5432/postgres`, verified CA/hostname; a Tokyo session endpoint is an alternative only after final-host proof. No transaction-mode/6543 assumption: current production parser supports direct/session 5432. |
 | Accounts | Separate new `stock_prod_runtime`, `stock_prod_reader`, `stock_prod_backup`; no owner login in the app or backups, no reuse of expiring test credentials. |
 | Source | **UNASSIGNED** final workbook ID, read/export principal, native-backup/freeze permission and private 23-tab mapping. Historical data is not source freshness. |
 | Operations | New 0700 artifact directory/0600 service and passfiles; stable backup runner, destination/key custody, alert recipient, incident lead, business verifier, recovery objectives/retention and durable event-hold procedure. All unassigned/unactivated. |
 
-**Step 0 — approve plan/cost and prepare an empty final candidate.** Current org
-already has two active Free projects; preserve both. Public planning baseline
-checked 2026-11-13: a separate Pro organization with one Micro is about **$25/month**;
-upgrading the current organization and keeping all three on Micro is about
-**$45/month** ($25 + $30 compute - $10 credit). Neither is an account checkout quote.
-Both exclude tax/overages, off-site storage/egress, runner/alerts and any Vercel
-change. Obtain an itemized recurring/usage ceiling before any purchase. No paid
-resource, organization upgrade, PITR or recovery project is created. Pro includes
-seven daily backups, which alone cannot meet a one-hour RPO. Free has no spare
-slot here and is not an approved production substitute.
-[Pricing](https://supabase.com/pricing),
-[backup retention/scope](https://supabase.com/docs/guides/platform/backups).
+**Step 0 — current resource decision and empty-candidate setup.** The owner chose
+the existing Free organization after pausing only the disposable test copy.
+Protected staging and the new final candidate use the two active slots; test data
+and retained backups are preserved. The actual new-project quote is **$0/month**;
+no Pro organization/upgrade or paid add-on is selected or authorized. The previous
+$25/$45 Pro estimates are alternatives only if an approved need later requires
+one, not blockers for this database preparation. Free still has its actual storage/
+connection/egress and automatic-pausing limits; native quota/headroom checks and
+an owner-approved backup arrangement remain necessary. No final activation is
+implied by Free project creation.
+[Free plan and pausing](https://supabase.com/pricing),
+[backup scope](https://supabase.com/docs/guides/platform/backups).
 
 After exact-target creation/DDL approval, inspect its empty catalogs and apply the
 six reviewed migrations through migration tracking, retaining `--skip-vault`, with

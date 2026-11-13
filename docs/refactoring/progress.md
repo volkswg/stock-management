@@ -1,5 +1,24 @@
 # Refactoring progress and evidence
 
+## Final Free production candidate created; native handoff pending (2026-11-13)
+
+Owner selected releasing the disposable test slot. Paused, did not delete,
+`dcwyiayubrqdrloergax`; verified both retained 14-file packages. Created new Tokyo
+Free project `hzynvirpedqnvtbifobx` at quoted $0/month. Protected staging and live
+Vercel/Sheets remain untouched. Archive migration creates 24 empty tables; the
+operational migration connector confirmation expires twice with no partial schema.
+Native continuation requires the owner-only password/helper handoff; Mac is locked.
+Fresh local empty-role and native migration-record rehearsals pass. Private sources,
+credentials/helper and receipts stay outside Git. Add the new final target to the
+existing disposable campaign's denylist; that campaign remains disabled. The
+[single current assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records exact progress and the remaining handoff, not a ready/activated database.
+Application code is unchanged; CI48 is reused, not rerun for operational metadata.
+All 85 existing offline controls pass with the new target denylist. Initial local
+loopback-permission and container-readiness diagnostics are retained; the scoped
+rehearsals pass after correcting their local launch conditions.
+
+
 ## Migration-only essential hosted smoke and executable cutover sequence (2026-11-13)
 
 PR65 remains draft/unmerged. Actual application routes against the already approved

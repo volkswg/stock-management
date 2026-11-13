@@ -40,7 +40,8 @@
   },
   "protectedTargets": {
     "forbiddenSupabaseProjectRefs": [
-      "orjnazrothkdgmzlsuto"
+      "orjnazrothkdgmzlsuto",
+      "hzynvirpedqnvtbifobx"
     ],
     "forbiddenIsolationIds": [
       "160669bd-2f6f-4490-9259-bada5a1d02c4"
@@ -530,5 +531,11 @@
     "optionalMonitoringCoordinatorAndNewHostedAppRequired": false,
     "finalVercelProductionCompatibilityVerified": false,
     "productionCutoverApproved": false
+  },
+  "finalProductionCandidate": {
+    "projectRef": "hzynvirpedqnvtbifobx",
+    "state": "CREATED_FREE_NATIVE_SETUP_PENDING",
+    "forbiddenForDisposableCampaign": true,
+    "liveApplicationActivated": false
   }
 }
