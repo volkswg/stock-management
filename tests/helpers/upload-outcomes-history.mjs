@@ -7,7 +7,10 @@ const lineCountersHistory = JSON.parse(readFileSync('tests/fixtures/staging-line
 const lineRollbackHistory = JSON.parse(readFileSync('tests/fixtures/staging-line-rollback-before.json', 'utf8'));
 const hash = value => createHash('sha256').update(value).digest('hex');
 const productionHistory = JSON.parse(readFileSync('tests/fixtures/production-release-before.json', 'utf8'));
+const readonlyAccountsHistory = JSON.parse(readFileSync('tests/fixtures/readonly-account-configuration-before.json', 'utf8'));
 export function restoreUploadOutcomesSource(file, source) {
+  const accounts = readonlyAccountsHistory.edits[file];
+  if (accounts) { assert.equal(hash(accounts.before), accounts.beforeHash, file); assert.equal(hash(source), accounts.afterHash, file); source = accounts.before; }
   const production = productionHistory.edits[file];
   if (production) { assert.equal(hash(production.before), production.beforeHash, file); assert.equal(hash(source), production.afterHash, file); source = production.before; }
   const rollback = lineRollbackHistory.edits[file];

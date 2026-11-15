@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "sourceCommit": "78c6884721987a9ac376d481dd3d85ea18c7fc39",
+  "edits": {
+    "src/infrastructure/runtime/staging-read-only.ts": {
+      "before": "import \"server-only\";\n// Installed only in the isolated read-only Supabase process. No provider URL,\n// request body or credential is included in the error or normal logs.\nexport function installReadOnlyProviderGuard() {\n  const readOnly = process.env.VERCEL_ENV === \"production\" ? process.env.STOCK_PRODUCTION_READ_ONLY !== \"false\" : process.env.STOCK_STAGING_READ_ONLY === \"true\";\n  if (process.env.STOCK_STORAGE !== \"supabase\" || !readOnly) return;\n  globalThis.fetch = async () => { throw new Error(\"External requests are disabled in read-only staging.\"); };\n}\n",
+      "beforeHash": "1683383d827bb89ac459f8f639613ca1665461ca3789e1c020632741d9bd1232",
+      "afterHash": "231fa0aad6d669fbde408781d26db976bee954cee572370f35e68dff08ed480b"
+    }
+  }
+}

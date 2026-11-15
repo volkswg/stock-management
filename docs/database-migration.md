@@ -1270,12 +1270,12 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | ID | Classification | Exit evidence / action |
 | --- | --- | --- |
 | M1 | MUST FIX before cutover | **Minimum effective existing protection.** Implementation of new access protection, user login/RBAC/shop permissions is deferred. Preserve existing controls. Effective protection of production business reads/writes across all aliases remains unproved; LINE signatures and DB RLS do not cover ordinary APIs. Activation remains NO-GO if absent/unproved; no risk waiver or new auth implementation is implied. |
-| M2 | MUST FIX before cutover | **Final release binding/hosting proof.** Production identity/profile/read-only guards pass locally; essential application-to-hosted-PG smoke passes. Private Tokyo Vercel-to-final-candidate smoke now passes 7/7 with strict TLS and reader-only access. Still bind the approved final merge/deployment SHA, production purpose and reader/writer configuration, then verify reconciled-data browser/API/reports under the final freeze. No live production setting changed. |
+| M2 | MUST FIX before cutover | **Actual production checks: NO-GO, 7/9 pass.** Production reader dpl_7Z7y64RPJvy7sEQpBN3Xwhy7QLVZ is READY/STAGED on server-verified 78c6884, hnd1; live Sheets aliases stay unchanged. Orders/HR match, writes are denied and LINE is blocked. Stock and sales return HTTP 500 because the existing private Sheets account-configuration reader cannot read settings. Local unchanged-client header read passes; hosted credential/runtime cause remains unproved. Resolve that reader and rerun the two failed reports; do not replace the real failure with a dummy-account PASS. |
 | M3 | SATISFIED for essential scope | **Essential managed PostgreSQL smoke PASS.** Prior actual hosted writes/replay/LINE/transaction checks are retained. New final candidate adds verified native service access/rollback and actual read-only application checks. Final deployment compatibility remains M2; no full capacity certificate is claimed. |
-| M4 | SATISFIED for empty target preparation | **Dedicated final database prepared.** Free Tokyo `hzynvirpedqnvtbifobx`, UUID `349b9289-f684-4ec5-ac22-924b2be1946b`; six source-version migrations, 51 RLS tables, approved restricted persistent accounts, native TLS/rollback, reader app and exact empty backup/restore pass. Remains isolated-staging purpose and empty. Final-load/headroom and deployed configuration are checked under M6/M2; no repeated resource/account approval needed. |
+| M4 | SATISFIED for synchronized candidate | **Dedicated final database loaded and verified.** Free Tokyo `hzynvirpedqnvtbifobx`, UUID `349b9289-f684-4ec5-ac22-924b2be1946b`; 70,818 records in each archive/operational projection, six migrations and 51 RLS tables. Restricted roles and TLS remain intact. Database size 160,986,803 bytes, 32.20% of a conservative 500 MB allowance; at least 43 spare connections at final validation. Purpose is now production after separate owner approval for the staged reader; live traffic remains Sheets. Do not rerun empty setup/import or overwrite this candidate. |
 | M5 | DEFERRED BY OWNER — next phase | **Database backup work is not a current cutover gate.** Further checkpoints, automation, encrypted off-site delivery, backup alerts and RPO/RTO certification are deferred. Retain verified artifacts/tools/accounts. This records scope, not recovery certification; new SQL business data has no verified ongoing backup coverage yet. |
-| M6 | MUST FIX before cutover | **Final full Sheets synchronization.** After explicit workbook/principal/native-backup/freeze/export/import approval only: fresh full 23-tab source into a new empty candidate, exact reconciliation and original application/report parity. Historical 70,777-row evidence is not current freshness; no in-place delta merge. |
-| M7 | MUST FIX before cutover | **Loss-safe writer/event hold.** Stop every manual/API/deployment/script/scheduled/LINE writer, drain commands/effects and retain accepted/uncertain keys. Exact durable capture/replay or proven producer-pause procedure remains unassigned. LINE retries/webhook disablement alone are insufficient; never acknowledge unpersisted events. |
+| M6 | MUST FIX before future cutover | **Source reopened; previous synchronization is historical.** Owner resumed normal Sheets/LINE operation and explicitly restored the original app Editor. Effective canEdit=true, revision6761 (already6760 before restoration versus captured6755). Require a new freeze, fresh full capture/import/reconciliation before activation. Retain the 70,818-row evidence; do not reset/overwrite the candidate or assume an automatic delta. |
+| M7 | Requires approval at next cutover | **LINE/Sheets operation resumed.** Temporary maintenance rule removed in firewallv4; normal signature rejection401 verified and other protections unchanged. Owner explicitly restored original app Editor. Establish a new approved source/producer freeze and LINE hold for a future cutover; SQL LINE reopening is still not approved. |
 | M8 | MUST FIX before cutover | **Release and incident approval.** Seal exact target/deployment/source, retain existing verification evidence, finish read-only checks while frozen, name lead/abort times and approve dated activation. Database backup work is deferred. Before SQL writes, verified Sheets rollback is possible; afterward freeze/forward recover and reconcile, never automatic stale-Sheets fallback. |
 | D1 | SAFE TO DEFER until after cutover | **New security/authentication implementation** is the next owner-selected phase: login, sessions, roles/shop permissions, user administration and new access restrictions. This is a sequencing decision, not a security PASS; the existing exposure remains M1 and must be explicit in the final cutover decision. Preserve existing safeguards throughout. |
 | D2 | SAFE TO DEFER until after cutover | Unrelated refactors, extra test abstractions, more synthetic fault repetitions, additional planning PRs, multi-region/HA, optional dashboards, restore certification for unused Supabase Auth/Storage, and automated backup pruning. Preserve evidence and retained backups; defer destructive cleanup. Recheck only affected behavior or demonstrated drift. |
@@ -1283,30 +1283,25 @@ Owner decisions do not turn an unproved MUST FIX into PASS.
 | A1 | Requires owner approval | **Existing test approval is sufficient for the completed essential smoke.** No further test resources, public tunnel, monitoring protocol or full campaign are prerequisites. Additional resources, paid work or provider calls would require their own approval. |
 | A2 | SATISFIED for current scope | **Free target and persistent DB accounts approved/completed.** Backup runner/destination/key custody/retention/recovery/alert decisions move to the next phase with M5 and do not block this migration scope. Any later nonzero spending still requires explicit approval. |
 | A3 | Requires owner approval | **Only material launch limitations.** Existing 10/20 MiB upload versus hosting body-limit mismatch predates migration. Preserve behavior; do not make upload redesign, custom monitoring or sustained capacity certification a migration prerequisite. If large uploads are required at launch, resolve or explicitly disposition that requirement; no full-platform PASS is claimed. |
-| A4 | Requires owner approval | **Final source/freeze.** Exact workbook ID and read/export identity, native frozen backup, all writer/event holds, final full export and import into the named new production candidate. No fresh source access is authorized now. |
-| A5 | Requires owner approval | **Release/live actions.** PR65 merge/exact release SHA, target+UUID/deployment/configuration, explicitly scoped provider checks/notifications, incident lead and dated maintenance window, then a separate final activation decision. No blanket approval or bypass of unmet prerequisites. |
+| A4 | SATISFIED for completed synchronization | **Owner-approved source/freeze/export/import completed.** Exact retained workbook and app identity, owner pause, verified Viewer fence, 23-tab full capture and reconciled candidate import are recorded privately. No native copy or SQL backup was created; backup work stays deferred. Further source changes, provider actions or production activation are not implied. |
+| A5 | Requires separate final cutover approval | **Reader setup/LINE block approved and executed; switch not approved.** Owner additionally approved the exact database purpose-label change and a 10-minute staged-deployment access link after initial automatic-review rejections. Purpose is now production; the test link was revoked and its cookie rejected. Resolve the two real report failures first, then obtain separate dated browser-writer/live-alias activation GO. No LINE reopening, credential repair, paid resources or broad access change is implied. |
 
-A1's existing approval covers the completed essential smoke on
-`sm-ha-20261112-f` only; no new hosting, monitoring or full-campaign decision is
-needed to continue this migration scope. Additional resources or paid work still
-require exact approval. A2 target/account approval is satisfied for the Free
-candidate; M5 backup/alert operating decisions are deferred. A4 must supply
-the exact workbook/read-export principal,
-writer/event-hold and final full export/import permission; older export authority
-is insufficient. A5 names exact release/project+UUID, live actions, incident lead
-and dated window, then separate writer activation. No permission is inferred from
-a CI pass, prose mode change, test-target approval or deferred security work.
+A1's existing approval covers the retained essential hosted smoke. A2 resource/
+account approval is complete; M5 backup work remains deferred. A4 now covers the
+completed frozen full-source synchronization. A5 still requires actual production
+purpose/configuration, LINE maintenance deny, immutable reader deployment and
+separate dated browser-writer/alias activation. No paid infrastructure, real
+provider action, LINE reopening or production switch is authorized by these checks.
 
-**Shortest remaining sequence.** Reuse the essential hosted PostgreSQL smoke,
-CI47/local browser/fault/recovery evidence and the verified hosted checkpoint. Bind
-the already prepared Free target to the approved final deployment; finish
-final-host read-only compatibility once. Obtain final workbook/
-freeze/export/import approval; rehearse the full refresh with an approved artifact to size the outage.
-Only after every mandatory gate and dated owner approval perform final capture,
-reconciliation, read-only release and explicit writer activation. Keep all work in
-PR65. Do not implement new protection/authentication, optional monitoring, another
-coordinator or repeated full campaigns. Unproved existing protection still means
-production activation NO-GO, without stopping independent migration preparation.
+**Shortest remaining sequence.** Normal Google Sheets/LINE operation is resumed;
+do not stop users again on the old window's authority. Resolve the hosted private
+account-configuration reader on the staged read-only app, then rerun the two failed
+reports. Before a future cutover obtain a new dated window, freeze/hold approval
+and fresh full-source synchronization into an explicitly approved safe target;
+the populated candidate is not an authorized reset/delta destination. Reuse prior
+passing code evidence, preserve existing controls and backups deferral, and obtain
+separate final writer/alias GO. Never activate the old source snapshot merely
+because its historical comparisons passed.
 
 The 4.5 MB Vercel request boundary predates the database switch; the app advertises
 10 MiB images/20 MiB files. Full advertised upload compatibility remains NO-GO.
@@ -1474,23 +1469,518 @@ the supported CLI/REST path before executing. Do not issue its plain production
 create call. Production-purpose change, live production deployment/configuration/region changes,
 merge, real provider checks and activation all require separate approval.
 
-**Concrete freeze proposal — prepare only.** Inventory each source writer's
-principal and every old immutable/preview deployment, not just the three aliases.
-Verify ownership/delegation first: an owner or impersonated writer requires a
-separately proved stop mechanism. During the approved window, retain source read
-permission but remove edit permission for all application/service writer principals, pause owner-run Apps
-Script/schedules and manual editors, and verify no alternative writer remains.
-This can also stop old immutable deployments writing Sheets without removing the
-read access still needed by `loyverse_accounts`. Record exact permission changes
-and the pre-write rollback reversal before executing; do not read that credential
-worksheet for this preparation. Mere `STOCK_PRODUCTION_READ_ONLY=true` does not
-freeze Sheets mode, and a Vercel project pause covers production, not proof of every
-preview/immutable writer. Provider/LINE ingress must separately be stopped/drained
-with complete durable event capture or proven producer pause and keyed replay;
-HTTP 503, disabling a webhook or relying on LINE retries is not sufficient.
-All permission/ingress/schedule changes above are proposals, not performed actions.
-Before SQL writes, resume Sheets only after restoring approved writer permissions
-and reconciling held events. After SQL writes, keep legacy Sheets writers disabled.
+###### Final write-freeze and LINE producer-pause procedure (2026-11-14)
+
+**Selected procedure, not execution approval.** The owner confirms that every
+person/group using the LINE bot can stop business messages for the window.
+Hold work at its source; no new queue, audit table or hosting service is required.
+Keep operational database backups deferred. PR65 is merged as `78c6884`; CI49 and
+the private Vercel smoke already pass. The known Sheets rollback deployment is
+`dpl_7ArXt5jbje4jGTykK9rgjsnYvsZq`, project
+`prj_XH4nEje5cicuBuucGumuHgr73l1E`; recheck metadata at execution time.
+The private `final-freeze-procedure-2026-11-14/private` packet binds the retained
+workbook/23-tab mapping and supplies blank receipts/exceptions. No new records,
+permissions, firewall draft, message, deployment or source export are touched now.
+
+**Required sign-off before F1.** Name incident lead, Sheets-permission operator,
+LINE coordinator and business verifier; bind the actual source file, all writer
+principals, actual channel/webhook destination and dated Bangkok/UTC window.
+Approve source permission reductions, the temporary LINE maintenance rule and its
+restoration, private metadata/probe reads, final source capture/import separately,
+and later activation. The earlier “everyone can pause” answer selects this method;
+it does not approve performing the freeze or certify actual acknowledgments.
+The owner subsequently selected a browser-only cutover with LINE kept paused.
+For that path the cutoff guard is required before LINE reopening, not before the
+source freeze or browser release. A technical LINE deny still precedes SQL writer
+activation. The completed synchronization below supersedes preparation-only flags.
+If any sender/job cannot pause, STOP and revisit the method rather than inventing
+an unapproved live inbox. Existing production access adequacy remains its own M1.
+
+**Concrete source fence.** The current Sheets composition uses
+`GOOGLE_SERVICE_ACCOUNT_EMAIL`/private key, not Drive's separate OAuth preference
+(`src/composition/google-sheets/GoogleSheetsService.ts`). At execution, record the
+non-secret principal/permission ID and original effective role for **every**
+current/legacy deployment and external writer. Reduce app/service writers and
+non-owner editors on this exact workbook to effective **Reader**, retaining read
+access for the existing account-configuration reader. Pause owner/manual edits,
+Apps Script, cron and external synchronization. Do not rotate shared Google
+credentials or alter Drive folder permissions as a shortcut.
+
+Check effective `files.capabilities.canEdit=false` **as each writer principal**,
+using metadata-only access; review inherited/group/domain/shared-drive grants.
+A direct Reader entry alone is not sufficient. If an app identity owns the file,
+or inherited rights cannot be reduced without affecting unrelated resources,
+STOP for a scoped owner decision. Never transfer ownership automatically or probe
+with a synthetic source write. Keep app principals Reader after SQL activation:
+this fences old immutable/preview deployments even if their old secrets remain.
+[Drive roles](https://developers.google.com/workspace/drive/api/guides/ref-roles),
+[effective capabilities and inherited permissions](https://developers.google.com/workspace/drive/api/guides/manage-sharing).
+
+**LINE ingress fence.** Prepare one project-level maintenance deny for POST to the
+actual normalized `/api/line/webhook` route, including trailing-slash/rewrite paths,
+across production and preview. Inventory every alias/immutable URL and any other
+project hosting this channel before applying it. Keep URL, channel secret, raw-body
+signature verification and webhook/redelivery settings unchanged. Do not return a
+fake 200 or send a bot acknowledgment while business processing is stopped.
+Inspect the existing configuration/rule order and free-plan capacity; preserve all
+other protection and stop if a paid upgrade or broader change would be needed.
+Draft log mode, owner review, preview denial verification, then owner-published
+production denial form the rollout; record configuration versions/rule IDs and
+precise inverse changes. Do not replace the complete firewall configuration.
+Existing bypass rules must not defeat the maintenance deny. Verify coverage using
+invalid-signature, empty-event POSTs and rule hits, not real business events or
+newly generated bypass credentials. A 401 from the app alone does not prove the
+edge fence. `STOCK_PRODUCTION_READ_ONLY` does not freeze Sheets mode, and project
+pause alone does not prove preview/immutable coverage.
+[Project rules](https://vercel.com/docs/vercel-firewall/vercel-waf/custom-rules),
+[rule evaluation/actions](https://vercel.com/docs/vercel-firewall/vercel-waf/rule-configuration).
+
+| Phase | Operator action | Pass evidence / stop condition |
+| --- | --- | --- |
+| F0 — authority | Complete the source, actor, channel, writer, rule and rollback bindings above; obtain a dated scope. Keep the final candidate `hzynvirpedqnvtbifobx` / UUID `349b9289-f684-4ec5-ac22-924b2be1946b`, isolated-staging through import/reconciliation. | No blank mandatory binding, unresolved cutoff implementation or unapproved action. No freeze/export starts on this preparation alone. |
+| F1 — people/jobs pause | Owner announces the window outside the bot workflow. Every sender/group coordinator, editor and job owner acknowledges. Finish each current LINE journey or explicitly park its state/record reference. Hold new business work outside the authoritative workbook; do not send it to the bot. | Complete roster, individual acknowledgments, last completed business outcome and all parked/uncertain work. Do not clear `user_state`, cancel records or fabricate completion to make this pass. |
+| F2 — LINE fence and drain | After producers stop, owner publishes the reviewed LINE deny. Let already admitted handlers, uploads/syncs and external effects finish. Set the drain deadline from the largest actual configured runtime/job/network bound plus a documented margin; verify request completion and outcomes. | No active admitted work and no unresolved provider outcome. A fixed sleep, HTTP 200 or an empty SQL journal is not a drain proof for Sheets mode. If a bound/outcome is unknown, stop. |
+| F3 — workbook fence | Apply the recorded Reader changes; pause owner edits/scripts/triggers and verify every writer's effective metadata capability. Record permission/configuration versions and freeze times after these changes settle. | All machine/editor paths fenced; owners/jobs acknowledge. This source-level fence, not just changing live app env, covers legacy deployments. No test append/update/delete or `checkConnection`/header repair on the source. |
+| F4 — authorized final capture | With separate A4 permission, execute the existing full 23-tab double raw/formatted/formula export and reviewed empty-target import/reconciliation/parity. Keep people, source and LINE fences throughout. | Same file, stable source metadata/captures and zero reconciliation differences; seal source digest and actual post-import revision/command/effect baseline. Never assume that imported revision is zero. Any source change invalidates the snapshot; no in-place delta repair/truncate/reset. |
+| F5 — read-only SQL release | After separate live-change approval, bind the approved final code/deployment, target/purpose and reader. Validate reconciled reports in read-only mode while LINE remains denied and source principals remain Reader. | Correct identity/TLS/source/release, matching totals/records and unchanged post-import baseline. No acceptance writes or real provider replay. |
+| F6 — separately approved reopening | Owner records GO. Enable app SQL writers only; preserve the Sheets Reader fence. Reopen LINE only through the signed future cutoff procedure below, then announce reopening and process agreed fresh work/session continuations one at a time. | Final release/cutoff checks pass, no exception outstanding, original outcomes reconciled and existing controls intact. If not ready, keep LINE denied and everyone paused. |
+
+**Real prerequisite before automatic LINE reopening — not implemented here.**
+Code review finds that `processPostgresWebhook` deduplicates `webhookEventId` in
+SQL `commands`; promotion does not import Sheets-era event history. The current
+LINE entrypoint has no migration timestamp boundary. Therefore an old delivery
+could be treated as new work after cutover even though all people paused.
+This is a data-handover gap, not a request for new user authentication.
+
+The minimum implementation must preserve the exact HMAC check, then validate the
+whole event batch **before any business/DB/provider action**. For approved
+production Supabase LINE processing only, require an explicitly configured UTC
+reopening floor (proposed server setting `STOCK_LINE_ACCEPT_EVENTS_AT_OR_AFTER_UTC`).
+Reject a missing/invalid boundary, any invalid/missing event timestamp, any event
+before that floor, or a mixed old/new batch without partial processing. A rejected
+batch returns non-2xx (proposed 503), records only private IDs/times/reason and
+never receives a success acknowledgment or an automatic provider send. Preserve
+fresh-event idempotency and existing Sheets/staging behavior. An empty, correctly
+signed verification payload may still succeed without processing business work.
+Do not deploy a dummy success receiver or “fix” the gap by suppressing signatures.
+The private packet specifies six focused acceptance cases; all are **NOT RUN**
+because this task finalizes the procedure and changes no application code.
+
+Choose `T_LINE` in the future, with the guard deployment validated before that
+instant. After explicit GO, remove only the temporary LINE deny shortly before
+`T_LINE`; the application boundary still rejects older events. Keep people paused
+until the coordinator announces reopening at/after `T_LINE`. If the build/checks
+miss the chosen time, keep the edge fence and select/validate a later floor before
+opening; do not reuse an obsolete floor that would admit pause-window events.
+The Google Sheets Reader fence stays in place permanently after SQL writes.
+
+**Unexpected message/request or uncertain work.** Stop advancement/reopening and
+keep both fences. The LINE coordinator records only known event/message IDs,
+sender/chat reference, timestamps, business-intent reference and outcome in the
+private exception file **outside the source workbook**. Do not log tokens,
+credentials or raw message bodies. Classify each case as not admitted, already
+applied, not applied or uncertain, using separately authorized source/provider
+inspection and the sender's confirmation. Unrecoverable intent or uncertainty is
+NO-GO. A blocked request alone does not require reimport if non-admission and an
+unchanged source are proven; a real source change invalidates the capture. No raw
+webhook batch is replayed across the database boundary. After GO, agree a fresh
+business instruction or continuation with a new LINE event, checking existing
+records first so re-entry does not duplicate a completed operation.
+
+LINE delivery can repeat or arrive out of order; provider retries do not guarantee
+recovery, and text is not retrievable later through the Messaging API. Do not use
+that mechanism as the hold. [Delivery constraints](https://developers.line.biz/en/docs/messaging-api/receiving-messages/).
+Reply tokens are single-use and short-lived, so the reopening procedure does not
+reuse a token from the maintenance period. [Reply-token constraints](https://developers.line.biz/en/reference/messaging-api/nojs/#send-reply-message).
+
+**Abort/rollback.** Before any SQL business write, keep LINE closed and prove the
+SQL target still matches its sealed post-import baseline, with no new commands,
+effects or provider outcomes. With owner approval restore only the recorded
+original source roles/routing, reconcile every exception and coordinate Sheets
+reopening. After the first SQL business write, keep old Sheets writers fenced;
+freeze new SQL ingress and use forward recovery or a separately approved,
+fully reconciled reverse migration. Never automatically reopen stale Sheets.
+No database checkpoint, backup schedule, off-site delivery or backup alert is
+introduced by this procedure.
+
+###### Maintenance preparation and exact reader blocker (2026-11-16)
+
+**Current: preparation resumed; activation NO-GO.** The owner supervises until
+**16 November 22:00 Bangkok**, reports all producers stopped, and confirms pending
+LINE/upload outcomes are accounted for. No new technical fence has been applied:
+live routing remains Sheets, its app principal can still edit, and the LINE
+webhook remains active. Source metadata is now revision6811; the prior verified
+full23/70,842 snapshot is historical. The populated candidate remains revision23,
+zero commands/effects, unchanged roles/permissions and production purpose. Prior
+window replacement approval is not standing authority for another refresh.
+
+**Exact M2 cause proved.** The approved refreshed staged app still returns500 for
+stock and sales. Its Google configuration is valid: a separately approved protected
+temporary diagnostic passes OAuth, fixed configuration headers and account
+validation, returning only status/validation metadata. Actual current account
+composition with synthetic credentials reproduces the exact hosted error when
+production read-only instrumentation is installed: it unconditionally denies
+outbound fetch before the required Google account-configuration read. The same
+composition passes with mocked responses without that guard. This does not
+justify disabling the provider guard or changing credentials/permissions.
+
+The narrow correction is now implemented locally in the existing guard owner.
+Only the configured fixed account range and exact readonly OAuth scope/principal/
+audience are permitted; redirects, other ranges, mutations and provider requests
+remain denied. Isolated staging still denies all external traffic. **626 regressions,
+six focused actual-owner checks, lint/typecheck and the credential-free build pass**;
+the original route manifest remains byte-identical. One inherited unused-import
+lint warning remains. Older fixtures stay unchanged through an exact source inverse.
+CI and the exact changed-code protected staged stock/sales retest are pending. The approval for unchanged78c6884 does not
+cover deploying changed application code. No broad acceptance rerun is needed.
+
+Diagnostic cleanup is verified: its600-second link is revoked, only the newly
+approved diagnostic deployment is deleted, and its issued cookie receives404.
+The earlier deletion attempt required native CLI confirmation; the explicitly
+approved deletion completed afterward. Global environment/protection and actual
+live target remain unchanged. All credential/configuration artifacts stay private
+on the Mac. No new full23 capture, database import, live fence, paid resource,
+backup work or live deployment occurred. The diagnostic itself changed no product source;
+the subsequent local guard correction is not installed on any hosted app.
+
+**Shortest next sequence:** review/CI the local fix and pass the staged two reports; reconfirm the operator
+window and complete loss-safe producer stop; obtain exact fence/full23 read and
+existing-candidate replacement approvals; drain, capture and fully reconcile;
+verify the exact staged browser release, then request separate activation GO.
+Keep LINE paused at browser cutover until its stale-event/recovery boundary is
+ready. There is no evidence-supported cutover time while the reports still fail
+and the fresh frozen snapshot is missing. Existing protection assessment remains
+separate; new authentication and operational backups remain owner-deferred.
+
+###### Full resync verified; Sheets and LINE reopened (2026-11-15)
+
+**Current operation: Google Sheets, writable; LINE open. Cutover maintenance is on
+hold at the owner's request until a later owner-scheduled window.** The original
+app principal is restored to Editor, independently verified canEdit=true, source
+metadata revision 6791; every other permission matches the pre-window state.
+Only the temporary LINE rule was removed (firewall version 6); all other firewall
+settings match the original. An invalid-signature empty-event probe again reaches
+the existing application 401 signature guard. Live production remains Sheets
+`dpl_7ArXt5jbje4jGTykK9rgjsnYvsZq`, Git `78c6884`; no STOCK settings, routing,
+application deployment, real business provider event or new authentication feature
+was activated. Operational backup work stays owner-deferred.
+
+The owner explicitly approved replacing only the prior candidate import on
+`hzynvirpedqnvtbifobx` / UUID `349b9289-f684-4ec5-ac22-924b2be1946b`, superseding
+the earlier no-overwrite rule for this one refresh. A supervised producer/job pause,
+accounted pending LINE outcomes, exact LINE deny/drain and independently verified
+Reader fence preceded the latest full double capture: **23 tabs, 70,842 records**,
+frozen source revision 6790. It contains 24 added and five changed rows versus the
+prior capture, with no removed identities. The raw/formatted/formula/legacy capture,
+complete account/month coverage and stable source metadata pass.
+
+The guarded replacement committed with full old-baseline and new-source SQL row
+comparisons. It preserves schema, migrations, RLS, service roles, credentials and
+retained Mac evidence. Rollback, identity, nonempty-journal, sequence and trigger
+boundaries passed focused local rehearsal. Independent indexed 500-row reads then
+matched **all 23 archive and operational tables** (322 pages), including typed cells,
+identities and source order. The full stored snapshot check had already passed on
+the same immutable batch before the original reader failed later in extraction;
+that passing evidence was reused with exact source/batch identity checks. Earlier
+whole-table/session reader deadlines failed; paged verification completed without
+changing database settings or weakening TLS, identity, RLS or read-only controls.
+All **66 original-application read comparisons pass** on the new captured data.
+
+Final controls show 70,842 records per projection, revision 23, zero commands and
+side effects, six migrations and 51 RLS tables; roles, limits and permissions are
+unchanged. The candidate's original production purpose label was restored only
+after a separate explicit owner approval; automatic review had initially blocked
+that separate metadata cleanup. This label restoration does not activate app SQL
+routing. All data, generated SQL and receipts remain private on the Mac; no new
+PR, GitHub upload, paid infrastructure or operational database backup was created.
+
+**Fastest later cutover path:** while Sheets remains open, resolve the retained
+stock/sales configuration-reader failure and rerun the affected real application
+checks; establish that existing production access controls are effective without
+introducing the deferred user-login system. When the owner supplies a new window,
+reconfirm loss-safe producer stop/drain, freeze all writers, take a fresh full
+23-tab capture and reconcile the exact approved target. Obtain separate browser
+activation GO; keep LINE paused if its SQL reopening boundary/recovery is not ready.
+Complete that signed stale-event/hold handling before LINE SQL reopening. Reuse
+passing correctness/load/capacity evidence; do not start another broad test campaign.
+
+The verified snapshot is **historical once normal source writing resumes**. It is
+not automatic synchronization and is not an activation approval. This window's
+pause/import approvals must not be treated as standing permission for a later
+window or production cutover. Further migration work is on hold as requested.
+
+###### Fastest refresh path: requested reuse of existing candidate (2026-11-15)
+
+**Current execution update:** the owner explicitly approved replacing only the
+old candidate import, is supervising until midnight Bangkok (00:00 on Nov 16),
+and confirmed all producers/jobs paused and pending LINE outcomes accounted for.
+Stop/review at 23:30 Bangkok on Nov 15. After exact effects-preview approval,
+LINE rule `rule_migration_line_refresh_pause_2026_11_15_HY7i3w` is active in firewall
+version 5; other settings are preserved. Public webhook/slash probes receive WAF
+403, other aliases receive existing Vercel Authentication 401. Complete private
+mutating-request logs contain only rejected probes, and source metadata stayed
+stable through the configured 300-second handler bound plus 30-second margin.
+The exact app principal is now Reader, effective canEdit=false, revision 6790;
+independent app and owner reads verify the fence and unchanged other permissions.
+The fresh 23-tab capture is running. No SQL replacement or production routing
+change has occurred yet. Historical preparation statements below are superseded
+by these narrowly scoped approvals, not by general activation authority.
+
+The owner requests another freeze/full synchronization and asks to reuse the
+created production project. Reusing `hzynvirpedqnvtbifobx` avoids a new project,
+plan upgrade or changes to protected staging. **It requires specific approval to
+replace the previous imported candidate records**, superseding the earlier
+no-overwrite instruction. The latest verified state has no application commands
+or side effects; recheck that condition and exact retained-import identity before
+any replacement. The question about reuse is not destructive execution approval.
+
+The private continuation packet now specifies the exact proposed scope: replace
+only the 46 archive/operational business tables and old import-batch receipt;
+preserve schema, migrations, RLS, roles, credentials, limits, UUID and retained
+Mac evidence. Never clear commands/effects to make a precondition pass. The
+existing extraction tools need the isolated-staging purpose during reconciliation,
+so the candidate-purpose transition must be included in the explicit approval.
+Prepare/rehearse only the new guarded replacement/abort/sequence boundary locally;
+reuse existing capture, normalization, import, promotion and reconciliation logic.
+Do not bypass an empty-target guard or blindly run the historical helpers.
+
+**Shortest sequence:** finish the hosted stock/sales configuration-reader fix and
+replacement preparation while Sheets remains open; then obtain a named supervisor,
+approved dated window and complete producer/job stop acknowledgments. Apply the
+approved LINE fence/drain and effective Sheets Reader fence, capture/profile the
+stable full 23-tab source, perform the explicitly approved guarded refresh and
+full reconciliation, and run the affected application reports plus final identity
+checks. Reuse passing load/capacity evidence. Do not activate on a mismatch or
+unexplained prior SQL write. Keep LINE paused for the initial browser cutover;
+its reopening guard/recovery remains a separate step. Existing access protection
+must remain effective; new authentication and operational backups stay deferred.
+
+The owner's “pause for all user” answer does not establish actual stop completion,
+a supervising operator or start/end/abort times. **Nothing is paused yet.** Obtain
+those facts and the specific candidate-replacement approval before changing live
+permissions/handling or executing the fresh capture/import. Final activation stays
+separately unapproved. There is no evidence-supported fixed cutover duration until
+the reader failure and replacement boundary are resolved and timed.
+
+###### Read-only continuation checkpoint (2026-11-15)
+
+**Resume point: retain completed evidence; no new freeze/capture/import is ready.**
+GitHub main remains `78c6884721987a9ac376d481dd3d85ea18c7fc39` (merged PR65,
+CI49 retained). Local base `a028c7b` differs only in documentation/status; no
+application change or additional test campaign/PR is needed for this inspection.
+All three live aliases and Vercel's actual production target still serve Sheets
+`dpl_7ArXt5jbje4jGTykK9rgjsnYvsZq`. The latest-created deployment is the retained
+READY/STAGED SQL reader `dpl_7Z7y64RPJvy7sEQpBN3Xwhy7QLVZ`; latest-created does
+not mean promoted. Project-wide STOCK_* variables remain absent and existing
+protection settings/temporary-access revocation remain intact.
+
+Read-only LINE settings GET using the Mac's configured connection confirms the
+active webhook points to the existing live app; no message/body/event was read
+or submitted. Firewall v4 has no temporary maintenance rule. Same-principal
+Google metadata confirms Editor/canEdit=true and current source revision **6789**,
+versus frozen revision 6755. The owner and app account are visible writers; owner-based
+Apps Script/schedulers/external jobs and every current producer have not supplied
+a complete next-window stop roster/acknowledgment. No stopability claim follows
+from a permission listing alone. No fresh worksheet business records were read.
+
+The production database `hzynvirpedqnvtbifobx`, UUID
+`349b9289-f684-4ec5-ac22-924b2be1946b`, is ACTIVE_HEALTHY and **populated**, purpose
+production: 70,818 records per archive/operational projection, revision 23,
+zero commands/side effects, one import batch, six migrations and 51 RLS tables. Native
+verify-full TLS and restricted-role/count metadata match the retained baseline.
+It is not an empty candidate. Never reset/truncate/overwrite it, restore the old
+empty checkpoint over it or treat append/delta import as implicitly approved.
+Protected staging and the inactive old test project are also not approved empty
+destinations; production has no development branches. No new target is authorized.
+The selected organization's project quote is $0/month, but a quote does not grant
+capacity: two projects are active and the Free plan allows two. Branch quote is
+$0.01344/hour, not a verified all-in price/eligibility or spending approval. Obtain
+an explicit target/capacity decision without pausing an existing project now.
+[Supabase pricing](https://supabase.com/pricing).
+
+**Existing private evidence verified, not recreated:** approved 23-tab mapping
+hash matches retained capture/mapping files; 211 files across selected final-sync,
+production-check, restoration and empty-checkpoint manifests pass with zero
+mismatches. The frozen snapshot's full stored-archive reconciliation and 66
+original-application comparisons remain historical PASS. Private preview 9/9 and
+actual production 7/9 are reused; stock/sales account-configuration HTTP 500 remains
+unresolved. Historical pre/post-audit ciphertexts match their separately downloaded
+copies and prior independent decryption receipts pass. No key/passphrase was read,
+no decryption/restore/new backup ran, and ongoing populated-production backup
+coverage is not certified. Backup automation remains owner-deferred.
+
+**Prerequisites before pausing anything:** (1) authorize and independently verify
+an actually empty exact target; (2) prove a loss-safe LINE hold and all-writer stop
+method; (3) bind a supervising human/operator, coordinators and an approved dated
+Bangkok/UTC window with abort/resume boundaries. There is no durable incoming
+LINE hold in the current route. Existing SQL command/event deduplication is not
+an ingress queue and does not preserve Sheets-era pending deliveries. A WAF deny
+stores nothing. LINE retries are not a loss-safe hold. The prior coordinated
+producer pause remains an option only after new complete acknowledgments and
+accepted/in-flight/provider-outcome reconciliation; it is not current proof. If
+messages must continue, a signature-verified durable receiver on the Mac or
+approved private storage needs a separately approved implementation/rollout and
+private persistence/recovery proof before changing handling. Never acknowledge an unpersisted event with a dummy HTTP 200.
+[LINE delivery limits](https://developers.line.biz/en/docs/messaging-api/receiving-messages/).
+
+The existing private freeze packet now has a `checkpoint-review-20261115`
+assessment and **BLOCKED** next-execution binding: empty target/UUID, hold proof,
+operators and window remain null/unapproved; all live-change/fresh-record/import/
+activation permissions are false. Reuse existing lossless capture, profiling,
+reviewed SQL, extraction, reconciliation and application-parity tools after exact
+new-target/source/output rebinding and approval. **Do not execute old hardcoded
+hzyn/isolated-staging examples as a fresh migration.** Next action is the owner
+empty-target/capacity choice plus operator/window and qualified hold/writer-stop
+plan; only then request exact freeze/fresh-capture/import approval. Nothing was
+paused, imported, provisioned, sent, granted or promoted by this inspection, and
+no private artifacts/business data were published to GitHub.
+
+###### Normal Sheets/LINE operation restored (2026-11-15)
+
+**Current operating state: Google Sheets, writable; LINE maintenance block removed.**
+The owner requested resuming app use, then explicitly approved restoring the
+original service account from Viewer to its previous Editor role. Same-principal
+metadata verifies `canEdit=true`, source revision 6761. The migration-only rule
+`rule_migration_line_pause_2026_11_15_UP76hT` is removed in active firewall version4;
+other protections are unchanged. An empty invalid-signature request reaches the
+unchanged LINE signature guard and returns401, rather than the maintenance403.
+No actual business message/transaction or provider effect was generated for this
+verification. All three live aliases still point to Sheets
+`dpl_7ArXt5jbje4jGTykK9rgjsnYvsZq`; Supabase and the staged reader were untouched.
+
+**The prior final source snapshot is no longer current for cutover.** Source
+metadata was already revision6760 before restoring Editor, versus captured6755;
+this metadata drift does not by itself identify which records changed. Normal
+Sheet/LINE writes are now permitted. Retain the earlier 70,818-row reconciliation
+as historical evidence; require a new freeze, fresh full capture/import and exact
+reconciliation before any future activation. Do not overwrite/reset the populated
+candidate or apply an automatic delta. The staged stock/sales configuration-reader
+failure remains unresolved; backup work stays deferred. The following LINE-block/
+freeze snapshots describe the earlier window, not the current operating state.
+
+###### Production deployment checks and LINE block (2026-11-15 Bangkok)
+
+**NO-GO: 7/9 actual production HTTP checks pass; stock and sales reports fail.**
+Staged production reader `dpl_7Z7y64RPJvy7sEQpBN3Xwhy7QLVZ` is READY/STAGED,
+server Git source/provider SHA `78c6884721987a9ac376d481dd3d85ea18c7fc39`, exact
+project `prj_XH4nEje5cicuBuucGumuHgr73l1E`, restricted `stock_prod_reader`,
+`STOCK_PRODUCTION_READ_ONLY=true`, verified TLS and hnd1 (deployment metadata plus
+`sin1::hnd1` response routing). `autoAssignCustomDomains=false` is verified.
+A generated non-live SHA branch alias exists, still protected. All three existing
+live aliases and the project's production target remain on Sheets
+`dpl_7ArXt5jbje4jGTykK9rgjsnYvsZq`. No project-wide STOCK_* variables were installed.
+
+Passed: anonymous hosting protection, two source-matching orders reads, app
+write refusal 405, authenticated LINE deny 403, orders HTML and source-matching
+employee reads. **Stock and sales each return 500** with the safely wrapped error
+“Unable to read private Loyverse account storage.” These routes retain the
+existing read-only Sheets credential/configuration reader. The original client
+from this Mac, using the verified source/principal, reads its six expected header
+cells successfully; no credential rows are inspected/exported. That proves source
+header/access validity for the local credential, not hosted credential correctness.
+Do not claim a bad password, corrupt migration, or exact permission/root cause
+without evidence; fix hosted configuration access and rerun both real reports.
+No dummy account substitution, credential repair, new auth system or product-code
+change was made to hide the failure. CI49/application source remain unchanged.
+
+**LINE blocking completed.** Exact project rule
+`rule_migration_line_pause_2026_11_15_UP76hT`, active firewall config version 3,
+denies POST to canonical and rewritten `/api/line/webhook` prefixes across
+environments/aliases. Log mode matched the intended harmless invalid-signature
+probe; preview-only deny was configured, but its unauthenticated probe stopped at
+existing hosting protection (not claimed as a WAF-specific PASS). The owner-
+approved production deny returns 403 with `x-vercel-mitigated: deny` for the live
+public canonical/trailing-slash paths and the authenticated staged endpoint.
+Other existing aliases reject unauthenticated requests with their existing 401
+hosting gate. The API change is immediately active, not a pending CLI draft;
+other protections/CRS/IP/bypass settings are preserved. No valid LINE event,
+message, acknowledgment or provider business operation was submitted. Keep the
+rule and producer pause; LINE reopening/cutoff remain a separate phase.
+
+**Two approval boundaries were enforced and resolved.** Automatic review initially
+rejected a preview share link and the purpose transition as outside the preceding
+specific consent. The owner then explicitly approved the exact final candidate's
+purpose-label change and a private 10-minute link for this staged reader only.
+Only that candidate's environment purpose changed from isolated-staging to
+production, after all 46 business-table counts, UUID, revision/journals and TLS
+checks. Business data/roles are unchanged: 70,818 records in each projection,
+revision 23, commands/effects zero, 51 RLS tables. Prior isolated-staging preview
+access now fails its purpose guard as designed; use the staged production reader.
+The temporary link was revoked without regeneration and its retained cookie now
+redirects to SSO. No project-wide automation bypass or live protection change.
+
+Final source metadata remains revision 6755, modification time
+`2026-11-14T06:10:01.228Z`, app effective `canEdit=false`; people/jobs remain owner-
+paused. Operational backups remain owner-deferred; no backup/checkpoint/schedule
+or paid resource was created, protected staging was never modified, and no live
+browser writer/alias activation occurred. Private request/failed-check/access
+and final metadata receipts are in `production-deployment-checks-2026-11-15/private`;
+no credentials or business records enter this repository. Existing M1 is unchanged.
+The previous synchronization snapshot below predates this approved purpose change.
+
+###### Completed browser-only synchronization and checks (2026-11-14 UTC)
+
+Latest metadata/count readback on **2026-11-15 Bangkok** confirms the same frozen
+source, loaded SQL baseline and unchanged Sheets production release.
+
+**Data synchronization PASS; production activation remains NO-GO pending its
+release checks and explicit owner approval.** The owner approved final full
+synchronization, confirmed every browser/LINE/manual writer and job paused, and
+set the existing app service account to Viewer. Metadata as that same account
+proves `canEdit=false`; the exact source revision is `6755`, modification time
+`2026-11-14T06:10:01.228Z`. No source business records or credential worksheet
+records were edited/exported. Keep people/jobs paused and that Reader fence in
+place. Credential configuration deliberately retains its existing read-only
+Sheets reader; this migration moves business persistence, not provider secrets.
+
+Full double capture: **70,818 records / 23 business tabs**. Raw, formatted,
+formula, serial-date and legacy order-item fields are retained privately. Source
+checksum `a5791ac5b5d09da326343487540c929b3172b05963529b045b453baafbf80414`.
+Import used the reviewed compressed-snapshot representation and the existing
+promotion SQL, with exact UUID/purpose/pristine-target checks inside the guarded
+transactions. Complete stored snapshot verification and every source/archive/
+operational record, total, identifier and relationship comparison pass. Original
+application parity passes **66/66**, covering all ten months February–November
+2026 and both configured accounts. No missing account/month coverage.
+
+The dedicated candidate is now **populated**, still `isolated-staging`:
+`hzynvirpedqnvtbifobx` / `349b9289-f684-4ec5-ac22-924b2be1946b`. Actual sealed
+post-import baseline: **revision 23**, commands 0, side effects 0, one archive
+batch and 70,818 records in each archive/operational projection. Validation left
+all counts, revision, UUID/purpose and role metadata unchanged. All 51 tables
+retain RLS; restricted logins, membership boundaries and strict TLS remain.
+Size **160,986,803 bytes / 32.20%** of a conservative 500 MB allowance; final
+validation found at least **43 spare connections**. No new SQL backup, native
+Sheets copy, backup schedule, off-site delivery or backup alert was created.
+
+Protected private Tokyo preview `dpl_GfWrBngvDwWn7tB6G8otM5bRuMPU` passes **9/9**:
+hosting protection, missing bearer rejection, two orders reads compared with the
+source, order/LINE read-only denials, app HTML, stock and sales report comparisons.
+Its 853 original source blobs match accepted `6b89d86`; the application files
+are identical to merged `78c6884` (only three documentation/status files differ).
+An initial stock check exposed an empty-account **test configuration**; preserving
+that failure, the preview alone received the two known account IDs/shop names
+with dummy provider tokens and was rebuilt. No real provider credential/call or
+application-code fix was needed. Preview proof is not production release proof.
+
+The exact `78c6884` production reader profile is prepared and parses locally with
+the verified complete Supabase CA. **Not installed.** Production stays on Sheets
+`dpl_7ArXt5jbje4jGTykK9rgjsnYvsZq`, unchanged aliases/iad1, with no STOCK_* env
+settings. No production purpose/configuration/deployment/alias/region change or
+LINE technical deny was applied. Current firewall metadata explicitly reports
+no custom configuration, with default firewall protection retained; existing M1
+is unresolved, not certified safe. LINE remains owner-paused; its technical deny
+is a prerequisite of later browser SQL writer activation. The missing event
+cutoff is deferred **only until LINE reopening**, which is not authorized.
+
+Private receipts, initial failed check, corrected preview, source checks and
+hashed manifest stay in `final-sync-execution-2026-11-14/private`; no business
+records or secrets enter this repository. CI49 is reused because application
+code is unchanged. Protected populated staging was never modified. The earlier
+empty-candidate/import commands below are historical/operator reference: **do not
+rerun them against this populated candidate**. Before any later switch recheck
+the sealed source and SQL baseline; after the first new application SQL write,
+freeze/forward recover rather than automatically reopening stale Sheets.
 
 **Step 0 — current resource decision and empty-candidate setup.** The owner chose
 the existing Free organization after pausing only the disposable test copy.
@@ -1627,11 +2117,11 @@ workaround, production setting or real-provider call is authorized now.
 
 Before freeze, name/hold every browser/API/Sheets editor, old deployment, script,
 scheduled sync and external/LINE writer. Drain commands/effects and record last
-accepted keys plus uncertain outcomes. Approve either durable held-event receipt
-with keyed ordered replay or a producer pause with a proven complete capture/replay
-procedure. Webhook disablement/LINE retries/reply-token assumptions are insufficient.
-Never acknowledge unpersisted events. Exact hold remains unassigned; do not start
-the outage or build an optional queue as part of this preparation.
+accepted keys plus uncertain outcomes. Use the owner-selected coordinated producer pause and the explicit
+exception/re-entry procedure above; do not add a message queue. Webhook disablement/LINE retries/reply-token assumptions are insufficient.
+Never acknowledge unpersisted events. The owner-selected producer-pause procedure above now defines the hold. Actual
+fence/drain evidence, dated authority and the legacy-event cutoff guard are still
+required before reopening; do not start the outage from this preparation.
 
 **Step 3 — approved fresh full source and empty-target import.** After explicit
 workbook/principal/native-backup/freeze/export/import approval, take the frozen
@@ -1696,8 +2186,9 @@ window.
 
 **Step 5 — separately authorized activation.** Operator installs the sealed writer
 URL/release binding and literal `STOCK_PRODUCTION_READ_ONLY=false` once. Prove old
-Sheets writers remain stopped, release held work with original stable keys and
-outcome reconciliation, observe existing dashboards/errors/connections/storage. A CI pass or test-target approval never activates production.
+Sheets writers remain stopped, resume agreed fresh work/parked sessions with outcome reconciliation; LINE stays
+fenced until the future cutoff guard is validated and its separate reopening time
+is reached. Observe existing dashboards/errors/connections/storage. A CI pass or test-target approval never activates production.
 Before any SQL business write, abort may restore approved Sheets routing only after
 proving SQL accepted no new business commands and reconciling held events. **After
 the first SQL write, freeze and prefer forward recovery; never automatically flip
@@ -1726,7 +2217,7 @@ failed hosted gates extend it.
 | 02:15–03:45 | Capture the approved final full source; hash/profile/delta-review offline; import/promote into the fresh target; reconcile 23 tables and original business/report invariants. No acceptance writes on this final target and no in-place delta merge. Any source activity invalidates the snapshot. |
 | 03:45–04:15 | Verify target/permissions/source/release hashes and protected read-only browser/API/report results. Retain existing recovery evidence. Do not start deferred database backup/off-site/alert work as a launch gate. No launch if any current required gate is unknown. |
 | 04:15 decision; 04:30 latest writer activation | Incident lead records GO plus explicit owner activation approval. Otherwise abort while Sheets is authoritative; reconcile held work and resume Sheets only after verification. This is the last simple rollback point. |
-| Through 06:00 | Open SQL writers exactly once, retire old Sheets writer routes, release held work using original keys and observe errors/connections/totals in existing dashboards. On failure freeze and preserve SQL state; never flip to stale Sheets. |
+| Through 06:00 | Open SQL writers exactly once, retire old Sheets writer routes, reopen LINE only with the validated future cutoff and agreed fresh work; observe errors/connections/totals in existing dashboards. On failure freeze and preserve SQL state; never flip to stale Sheets. |
 
 The dated window must be approved after actual rehearsal timing; if the complete
 refresh cannot fit the 90-minute segment plus verification/abort reserve, enlarge
