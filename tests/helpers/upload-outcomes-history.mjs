@@ -9,7 +9,17 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 const productionHistory = JSON.parse(readFileSync('tests/fixtures/production-release-before.json', 'utf8'));
 const readonlyAccountsHistory = JSON.parse(readFileSync('tests/fixtures/readonly-account-configuration-before.json', 'utf8'));
 const lineCutoffHistory = JSON.parse(readFileSync('tests/fixtures/line-cutoff-before.json', 'utf8'));
+export const orderCreateKeyHistory = JSON.parse(readFileSync('tests/fixtures/order-create-key-before.json', 'utf8'));
+export function restoreOrderCreateKeySource(file, source) {
+  const orderCreate = orderCreateKeyHistory.edits[file];
+  if (!orderCreate) return source;
+  assert.equal(hash(orderCreate.before), orderCreate.beforeHash, file);
+  if (source === orderCreate.before) return source;
+  assert.equal(hash(source), orderCreate.afterHash, file);
+  return orderCreate.before;
+}
 export function restoreUploadOutcomesSource(file, source) {
+  source = restoreOrderCreateKeySource(file, source);
   const cutoff = lineCutoffHistory.edits[file];
   if (cutoff) { assert.equal(hash(cutoff.before), cutoff.beforeHash, file); assert.equal(hash(source), cutoff.afterHash, file); source = cutoff.before; }
   const accounts = readonlyAccountsHistory.edits[file];

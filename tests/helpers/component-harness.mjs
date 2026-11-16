@@ -6,11 +6,16 @@ import { loadSource } from "./load-source.mjs";
 
 // Executes component callbacks/effects against element descriptors. This does
 // not simulate React DOM, Ant Design validation, layout, focus or Strict Mode.
-export function componentHarness(path, { api = {}, globals = {} } = {}) {
+export function componentHarness(path, { api = {}, globals = {}, load = loadSource } = {}) {
   const slots = [], pending = [], notifications = [], navigation = [], formEvents = [], listeners = new Map();
   let cursor = 0, component, props;
   const same = (a, b) => a && b && a.length === b.length && a.every((item, i) => Object.is(item, b[i]));
   const react = {
+    useRef(initial) {
+      const index = cursor++;
+      slots[index] ??= { value: { current: initial } };
+      return slots[index].value;
+    },
     useState(initial) {
       const index = cursor++;
       slots[index] ??= { value: typeof initial === "function" ? initial() : initial };
@@ -61,7 +66,7 @@ export function componentHarness(path, { api = {}, globals = {} } = {}) {
       imports[name] = Object.fromEntries(node.importClause.namedBindings.elements.map((entry) => [entry.propertyName?.text ?? entry.name.text, entry.propertyName?.text ?? entry.name.text]));
     } else throw new Error(`Unexpected component dependency: ${name}`);
   }
-  const componentModule = loadSource(canonicalPath(path), { imports, globals: {
+  const componentModule = load(canonicalPath(path), { imports, globals: {
     Error, AbortController, HTMLElement: class HTMLElement {},
     window: { addEventListener: (name, listener) => listeners.set(name, listener), removeEventListener: (name, listener) => { if (listeners.get(name) === listener) listeners.delete(name); } },
     ...globals,

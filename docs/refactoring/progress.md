@@ -1472,3 +1472,28 @@ owner approval; no scheduled jobs, source writes or provider actions are enabled
 
 Final local regression: 632/632 pass, zero failures/skips. The route manifest is
 unchanged and all 113 client chunks contain no private database strings.
+
+## Order creation idempotency correction — 2026-11-16
+
+The feature-owned multipart client now supplies a stable per-intent key without
+relying on the ambient Supabase fetch helper. Exact byte fingerprints, session
+identity, an immediate form lock and shared in-flight requests protect retries,
+reloads and double-clicks. Unknown outcomes keep the same reference; the existing
+server ledger replays completed work or refuses uncertain uploads before a provider
+call. Sheets and older unproven helper operations are held for operator review.
+
+Sixteen current-source regressions reproduce the original 428 and cover successful
+creation, new intentional operations, concurrency, lost commit acknowledgement,
+changed input, provider uncertainty, revision checks, malformed success, reload,
+legacy-helper interoperability and unavailable storage/crypto. They execute the
+actual client, form callbacks and unchanged command/upload guards with synthetic
+transaction/provider adapters. Callback tests do not simulate React DOM or Ant
+Design validation. New bounded before/after witnesses preserve every inherited
+fixture; no server/persistence/schema/dependency changes are included. Production
+remains untouched; deployment and its source binding require separate approval.
+
+Final local validation: 648/648 regressions pass, including all 16 focused cases.
+Lint has zero errors and the existing unused `shipmentRow` warning; typecheck and
+the credential-free build pass. The route manifest is unchanged and all 113 client
+chunks contain no private database strings. No production request was used to
+create an order or exercise a real upload provider.

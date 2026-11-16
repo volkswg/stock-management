@@ -3972,3 +3972,28 @@ future UTC floor, deploy and validate that exact configuration with LINE still
 blocked, then remove only the temporary LINE deny after owner approval. If the
 chosen time is missed, keep the deny and select a later time. Do not replay raw
 pause-window webhooks or automatically resume an unverified writer.
+
+## Order creation request identity repair (2026-11-16)
+
+The order multipart client previously omitted `Idempotency-Key`, relying on the
+separately initialized global fetch helper; PostgreSQL correctly rejected an
+unkeyed request with 428 before uploads or business writes. The order client now
+owns one persisted key for the exact fields and file bytes, coalesces concurrent
+submissions and retains identity on lost/invalid acknowledgements. Same-tab reload
+requires the same details and reselected files. A read-only HEAD pins PostgreSQL
+retry support and supplies the existing `If-Match` revision. An explicit retry
+passes through the unchanged command/upload journals: completed results replay;
+unresolved provider outcomes remain blocked for operator reconciliation.
+
+Sheets keeps its multipart contract. Uncertain Sheets saves and older global-helper
+pending references require operator review; do not clear storage to force another
+attempt. Only a valid success ends the intent; confirmed pre-upload 400 validation
+allows corrected input. Stored identity contains hashes and a key, not form values
+or image bytes. Disabled/corrupt storage fails before the multipart POST.
+
+`PostgresRecords` continues reading/writing authoritative `business_cells`; existing
+typed-column triggers, server validation and upload safeguards are unchanged. No
+database migration is needed. Release requires separate approval, a tested source
+commit bound in `STOCK_PRODUCTION_RELEASE_JSON.sourceCommit`, and users reloading
+the updated app. Preserve the active LINE cutoff/state and old Sheets read-only
+access. This PR does not change production data, schema, security or Vercel settings.
