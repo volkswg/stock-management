@@ -529,3 +529,20 @@ No merge, deployment, production schema access, record replacement or provider c
 is performed. Pending uploads/commands and all post-release writes must survive any
 owner-approved compatibility rollback. Final-removal recovery cannot be represented
 as a lossless old-snapshot restoration.
+
+### Independent merge acceptance (2026-11-17 Asia/Bangkok)
+
+[PR71 run 43949628762](https://github.com/volkswg/stock-management/actions/runs/43949628762)
+passed on cf547ff603bbd2f162cef6d204876aed7b2e5f33.
+[PR72 run 43950202121](https://github.com/volkswg/stock-management/actions/runs/43950202121)
+passed on e7e72d98850341f3c388f779194d9952948a4240, including all 658 regressions,
+complete PostgreSQL/browser/recovery acceptance and the credential-free build.
+The independent 500MB compact import/capture/restore gate passed with a sampled
+working peak of 60,919,808 bytes, no extra swap, OOM or published ports. This resolves
+the verification gate blocked by the local host's missing cgroup resize path;
+the local failure above remains preserved as evidence. Hosted acceptance and private
+production recovery/reconciliation remain unverified and require separate approval.
+
+Owner approval now authorizes merging PR71 then PR72, without deployment or hosted
+schema execution. A repository Git-deployment guard on main prevents automatic
+publication ahead of the required frozen maintenance/database transition.

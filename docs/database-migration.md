@@ -4114,6 +4114,13 @@ mapped field's null, empty, scalar type, high-precision number and JSON spelling
 
 ### Maintenance sequence and writer contract
 
+Merging this release must not publish the new application before its database
+transition. Repository vercel.json disables automatic Git deployments from main
+using git.deploymentEnabled.main=false. This preserves the running deployment;
+no Vercel project setting or environment is changed. Keep this guard in place until
+the separately approved maintenance release; removing it is itself a release
+configuration change and must not be bundled into an ordinary merge.
+
 Obtain separate owner approval for exact migration bytes, reviewed application SHA,
 target identity and maintenance window. Freeze all browser/business writes and
 pause LINE processing through the existing approved operational controls; do not
