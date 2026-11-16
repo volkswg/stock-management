@@ -1555,3 +1555,10 @@ then [guarded final removal #72](https://github.com/volkswg/stock-management/pul
 Both are drafts and unmerged. The dependent PR enables the same credential-free
 Migration acceptance workflow for its named-authority base branch so physical
 removal tests can receive independent CI before any retarget/merge.
+
+Final review adds an UPDATE OF business_cells guard: even an explicit unchanged
+array supplied beside a changed named value must agree with the named projection.
+The separate final-removal SQL also requires the independently verified target
+UUID in stock.expected_isolation_id; unset approval and incorrect identity are
+tested to fail before any column disappears. Compatibility and final-schema
+operational/browser acceptance pass with both guards installed.

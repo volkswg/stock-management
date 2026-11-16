@@ -2,6 +2,7 @@
 BEGIN;
 SET LOCAL lock_timeout='5s';
 SELECT 1 / coalesce((current_setting('stock.allow_final_cells_removal',true)='reviewed-named-columns-v1'),false)::int;
+SELECT 1 / coalesce((SELECT count(*)=1 AND bool_and(isolation_id::text=current_setting('stock.expected_isolation_id',true)) FROM stock_operational.environment),false)::int;
 SELECT pg_advisory_xact_lock(835107241);
 SELECT pg_advisory_xact_lock(835107242);
 SELECT 1 / (NOT EXISTS(SELECT FROM stock_operational.orders t WHERE business_cells IS DISTINCT FROM stock_operational.project_orders(t)))::int;

@@ -488,8 +488,10 @@ production authorization/monitoring remain explicit unverified gates.
 
 Baseline is current main `6bd55519f83b59b34b66285b010eeb8ffa880642`, independently
 copied with git archive and no integration environment: **655/655 pass**. Final
-current-source regression: **657/657 pass**, zero failures/skips; both additional
-checks audit all 23 explicit mappings and exact historical source witnesses. All
+current-source compatibility regression: **657/657 pass**, zero failures/skips;
+the dependent removal branch adds a third focused guard check (658 tests total).
+The additional checks audit all 23 explicit mappings, exact historical source
+witnesses and exclusion of destructive SQL from ordinary deployment discovery. All
 previous fixtures remain byte-identical; new fixtures archive the changed adapter
 and prior operational assertions. Canonical current-source operational tests retain
 the remark scenarios and intentionally replace the previous conflicting-dual-write
@@ -505,7 +507,7 @@ precedence assertion with rejection, as required by the new authority contract.
 | verify-operational.sh | Pass: populated authority upgrade, 32 actual application/concurrency/LINE/journal/remark checks, Chromium/API and complete archive+application recovery/security comparisons |
 | verify-restricted-backup.sh | Pass: nonprivileged two-connection dump/restore of all 51 tables and 15 metadata sections; incomplete/filtered access refused |
 | verify-named-columns.sh | Compatibility upgrade, fresh complete install, 92 all-column round-trip cases, explicit null updates, legacy/dual-writer rejection, ordering/identity guards and compatibility rollback preserving post-release writes pass |
-| Dependent final removal acceptance | Guard refuses an unset setting; all 23 columns physically absent; 32 operational tests and Chromium/API retry tests pass in each schema, plus actual adapter null/update/direct-edit/archive case after removal |
+| Dependent final removal acceptance | Guard refuses an unset setting or incorrect expected target UUID; all 23 columns physically absent; 32 operational tests and Chromium/API retry tests pass in each schema, plus actual adapter null/update/direct-edit/archive case after removal |
 
 The full-app localhost smoke in verify-hosted-tooling.sh uses an isolated private
 production build and fake providers, including desktop/mobile Orders browser

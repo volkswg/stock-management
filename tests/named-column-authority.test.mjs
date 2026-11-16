@@ -33,6 +33,7 @@ test('destructive removal is excluded from ordinary deployments and denies a mis
  const files=readdirSync('tools/migration/final-removal');assert.equal(files.length,1);
  const sql=read('tools/migration/final-removal/'+files[0]);
  assert.ok(sql.includes("coalesce((current_setting('stock.allow_final_cells_removal',true)='reviewed-named-columns-v1'),false)"));
+ assert.ok(sql.includes("isolation_id::text=current_setting('stock.expected_isolation_id',true)"));
  assert.doesNotMatch(sql,/CASCADE/i);
  for(const table of Object.keys(catalog))assert.ok(sql.includes(`ALTER TABLE stock_operational.${table} DROP COLUMN business_cells;`));
 });
