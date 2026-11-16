@@ -4169,7 +4169,9 @@ another approved freeze/drain, zero old writers or consumers, exact reconciliati
 a fresh verified backup/recovery receipt and owner approval of the exact removal
 file. The operator-only SQL additionally requires the same connection to set
 `stock.allow_final_cells_removal='reviewed-named-columns-v1'`; without this explicit
-setting it fails. It drops compatibility triggers, dormant mapping functions and
+setting it fails. The operator must also set `stock.expected_isolation_id` to the
+independently verified approved target UUID in that same connection; missing or
+wrong identity fails before DDL. It drops compatibility triggers, dormant mapping functions and
 business_cells from all 23 operational tables without CASCADE. Historical migrations,
 staging source_cells and immutable evidence fixtures remain.
 

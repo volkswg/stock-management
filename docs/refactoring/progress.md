@@ -1537,7 +1537,30 @@ and the [explicit mapping/release contract](../database-migration.md#named-colum
 Review/execution order: named authority and reversible compatibility release first;
 a dependent PR carries operator-only final removal outside normal migration discovery
 and physical-absence acceptance. A mandatory drained write freeze fences old writers.
-Neither PR authorizes merge, deployment, hosted DDL or final removal. Independent CI,
-the environment-blocked 500MB recovery check, private production reconciliation,
+The implementation PRs originally withheld merge and release approval. The owner
+subsequently approved merging only. Independent CI now passes, including the 500MB
+recovery check that the local host could not run; private production reconciliation,
 verified recovery evidence and separate owner maintenance/DDL/release approvals
 remain gates. No private Mac evidence is assumed available.
+
+The dependent final-removal branch adds the separately guarded, CLI-versioned SQL
+under tools/migration/final-removal, leaving normal Supabase discovery unchanged.
+Acceptance refuses accidental execution without the operator setting, verifies all
+23 physical columns are absent and runs the same 32 operational cases and actual
+Chromium/API retry check in each schema. The actual adapter also preserves explicit
+nulls, named direct edits and archive behavior after removal. This is prepared and
+synthetically verified code, not evidence that production removal has occurred.
+
+Review PRs: [named authority #71](https://github.com/volkswg/stock-management/pull/71),
+then [guarded final removal #72](https://github.com/volkswg/stock-management/pull/72).
+Owner approval now authorizes merging in that order; production deployment and
+schema execution remain separately gated. The dependent PR enables the same credential-free
+Migration acceptance workflow for its named-authority base branch so physical
+removal tests can receive independent CI before any retarget/merge.
+
+Final review adds an UPDATE OF business_cells guard: even an explicit unchanged
+array supplied beside a changed named value must agree with the named projection.
+The separate final-removal SQL also requires the independently verified target
+UUID in stock.expected_isolation_id; unset approval and incorrect identity are
+tested to fail before any column disappears. Compatibility and final-schema
+operational/browser acceptance pass with both guards installed.
