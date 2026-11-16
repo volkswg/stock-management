@@ -35,7 +35,7 @@ class HistoricalCampaign extends AcceptanceCampaign {
         const employeeId = this.context.employee.id, time = '2026-02-01T01:00:00.000Z';
         const common = { employeeId, shopId: this.context.shop, requestedDate: '2026-02-01', payrollMonth: '2026-02', requestedAmount: 15.25, paidAmount: 0, paidDate: '', reference: '', note: 'WT legacy', createdAt: time, updatedAt: time };
         const paidId = this.prefix + '_LEGACY_PAY', cancelId = this.prefix + '_LEGACY_CANCEL';
-        const settlements = () => this.sql('SELECT id,business_cells,revision::text FROM stock_operational.payroll_settlements WHERE "employeeId"=$1 ORDER BY row_order', [employeeId]);
+        const settlements = () => this.sql('SELECT id,stock_operational.project_payroll_settlements(r) AS business_cells,revision::text FROM stock_operational.payroll_settlements r WHERE "employeeId"=$1 ORDER BY row_order', [employeeId]);
         const settledBefore = await settlements();
         await this.seedHistory([{ table: 'employee_advances', row: { ...common, id: paidId, status: 'requested' } }, { table: 'employee_advances', row: { ...common, id: cancelId, status: 'approved' } }], 'legacy-advances');
         const pay = { id: paidId, action: 'pay', updatedAt: time, paidDate: '2026-02-02', paidAmount: 10.01, reference: 'WT legacy paid' };

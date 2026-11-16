@@ -25,7 +25,7 @@ async function connect(name){
  const c=new Client({connectionString:u.toString(),ssl:{rejectUnauthorized:true,ca:config.ssl.ca},connectionTimeoutMillis:5000});await c.connect();const role=(await c.query('SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole FROM pg_roles WHERE rolname=current_user')).rows[0];requireGate(role&&[role.rolsuper,role.rolbypassrls,role.rolcreatedb,role.rolcreaterole].every(v=>v===false),'ORACLE_OBSERVER_PRIVILEGES');await c.query('SET default_transaction_read_only=on');
  const i=(await c.query('SELECT isolation_id::text AS target FROM stock_operational.environment WHERE singleton')).rows[0];requireGate(i.target===m.targetIsolationId,'ORACLE_TARGET_IDENTITY');return c;
 }
-async function table(c,name){return (await c.query('SELECT row_order::text n,business_cells,revision::text revision,archived_at FROM stock_operational.'+name+' ORDER BY row_order')).rows;}
+async function table(c,name){return (await c.query('SELECT row_order::text n,stock_operational.project_'+name+'(r) AS business_cells,revision::text revision,archived_at FROM stock_operational.'+name+' r ORDER BY row_order')).rows;}
 function object(table,row){return Object.fromEntries(catalog[table].headers.map((name,i)=>[name,row.business_cells[i]]));}
 async function at(instant,run){assert.ok(Number.isFinite(Date.parse(instant)));const RealDate=global.Date;global.Date=class extends RealDate{constructor(...args){super(...(args.length?args:[instant]));}static now(){return RealDate.parse(instant);}};try{return await run();}finally{global.Date=RealDate;}}
 function boundedTime(time,record){assert.ok(Date.parse(time)>=Date.parse(record.at)&&Date.parse(time)<=Date.parse(record.completedAt),'Nondeterministic timestamp outside its HTTP operation');return time;}

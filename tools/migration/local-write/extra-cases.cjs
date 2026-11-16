@@ -237,13 +237,13 @@ function extend(Campaign) {
         const saved=(await this.post(overrides, {
             month: this.inventoryMonth, accountId: 'WT_ACCOUNT_A', averageItemCost: 2.5, note: 'WT cost control'
         })).body.costOverride;
-        const retainedBefore=(await this.sql('SELECT id,business_cells,revision::text FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[saved.id]))[0];
+        const retainedBefore=(await this.sql('SELECT id,stock_operational.project_sales_profit_cost_overrides(r) AS business_cells,revision::text FROM stock_operational.sales_profit_cost_overrides r WHERE id=$1',[saved.id]))[0];
         await this.api(overrides, {
             method: 'DELETE', key: this.key(), body: {
                 month: this.inventoryMonth, accountId: 'WT_ACCOUNT_A'
             }
         });
-        const retainedAfter=(await this.sql('SELECT id,business_cells,revision::text,archived_at FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[saved.id]))[0];
+        const retainedAfter=(await this.sql('SELECT id,stock_operational.project_sales_profit_cost_overrides(r) AS business_cells,revision::text,archived_at FROM stock_operational.sales_profit_cost_overrides r WHERE id=$1',[saved.id]))[0];
         assert.equal(retainedAfter.id,retainedBefore.id);assert.deepEqual(retainedAfter.business_cells,retainedBefore.business_cells);assert.ok(retainedAfter.archived_at);assert.equal(Number(retainedAfter.revision),Number(retainedBefore.revision)+1);
         const revisionAfterDelete=await this.revision();
         const repeated=await this.api(overrides,{method:'DELETE',key:this.key(),body:{month:this.inventoryMonth,accountId:'WT_ACCOUNT_A'}});

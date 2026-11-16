@@ -4016,3 +4016,161 @@ bodies, credentials, URLs and image/business content are excluded. This improves
 it does not establish a provider failure cause, repair credentials, clear pending
 claims, replay events or authorize production recovery. Existing file outcomes
 must be reconciled before retrying an uncertain operation.
+
+## Named-column authority release (prepared; production execution not authorized)
+
+Current operational context supersedes the historical Phase 2/3 plans above:
+production already uses Supabase, LINE is open and old business Sheets remain
+read-only. This task accesses no hosted project, real business rows or private Mac
+evidence. New changes are based on main `6bd55519f83b59b34b66285b010eeb8ffa880642`;
+PR69 request identity and PR70 uncertain-upload feedback remain intact.
+
+### Mapping and representation
+
+`tools/migration/worksheets.json` remains the explicit 23-table mapping. Each list
+below is the exact projection order; unmarked columns are PostgreSQL `text`,
+`N` is unconstrained `numeric`, `I` is `bigint`, `B` is `boolean`, and `J` is
+`jsonb`. Existing keys, references, constraints and indexes remain. Dates and
+Bangkok timestamps stay text verbatim: there is no timezone conversion. IDs, image
+URLs and LINE state/flow/reference fields remain text. Compensation records retain
+`migration_id` separately from the projected fields.
+
+| Table | Ordered named fields |
+| --- | --- |
+| orders | id, status, seller, totalPrice (N), remark, createdAt, updatedAt, deletedAt, createdBy |
+| order_items | id, orderId, imageUrl, quoteQuantity (N), deliveredQuantity (N), productCode, createdAt, updatedAt, deletedAt, createdBy |
+| order_bills | id, orderId, imageUrl, createdAt, updatedAt, deletedAt, createdBy |
+| shipments | id, status, carrier, poNumber, shippingFee (N), remark, shippedAt, deliveredAt, createdAt, updatedAt, deletedAt, createdBy, shippingBillUrl |
+| shipment_orders | id, shipmentId, orderId, createdAt, updatedAt, deletedAt, createdBy |
+| employees | id, name, phone, status, hiredDate, terminatedDate, createdAt, updatedAt, createdBy |
+| employee_compensations | employeeId, baseSalary (N), commission (N), createdAt, updatedAt, updatedBy, effectiveFrom, compensationType, commissionType, commissionBucketSales (N), commissionBucketAmount (N), commissionRoundupThreshold (N) |
+| employee_timesheets | id, employeeId, shopId, status, createdAt, updatedAt, workdayType |
+| employee_advances | id, employeeId, shopId, requestedDate, payrollMonth, requestedAmount (N), paidAmount (N), status, paidDate, reference, note, createdAt, updatedAt |
+| payroll_settlements | id, employeeId, month, paidDate, reference, createdAt, snapshot (J) |
+| expenses | id, month, expenseDate, shopId, scope, categoryId, name, amount (N), note, createdAt, updatedAt, createdBy, deletedAt |
+| expense_categories | id, name, active (B), createdAt, updatedAt |
+| shops | id, name, active (B), loyverseAccountId, createdAt, updatedAt |
+| sales_receipts | id, salesDate, accountId, shopName, receiptNumber, receiptType, refundFor, order, receiptDate, createdAt, updatedAt, cancelledAt, source, storeId, employeeId, customerId, posDeviceId, diningOption, totalMoney (N), totalTax (N), totalDiscount (N), tip (N), surcharge (N), pointsEarned (N), pointsDeducted (N), syncedAt |
+| sales_receipt_items | id, receiptId, lineItemId, itemId, variantId, itemName, variantName, sku, quantity (N), price (N), grossTotalMoney (N), totalDiscount (N), totalMoney (N), cost (N), costTotal (N), taxes (N), lineNote, lineDiscountsJson (J), lineTaxesJson (J), lineModifiersJson (J), syncedAt |
+| sales_receipt_payments | id, receiptId, paymentIndex (I), paymentTypeId, paymentName, paymentType, moneyAmount (N), paidAt, paymentDetailsJson (J), syncedAt |
+| sales_receipt_syncs | id, salesDate, accountId, shopName, status, receiptCount (I), itemCount (I), paymentCount (I), syncedAt |
+| sales_profit_cost_overrides | id, month, accountId, averageItemCost (N), note, createdAt, updatedAt, createdBy |
+| stock_counts | id, month, accountId, shopName, physicalCount (N), note, countedAt, updatedAt, updatedBy |
+| stock_adjustments | id, accountId, shopName, date, direction, reason, employeeId, employeeName, quantity (N), itemDescription, photoUrl, note, reversesId, replacesId, createdAt, createdBy, notInLoyverse (B) |
+| movements | id, userId, packingDate, deliverDateTime, status, totalQuantity (N), createdAt, updatedAt |
+| movement_details | id, movementMasterId, shopName, quantity (N), remark, fromLocation, toLocation, productImageUrl, purchaseDetailId, status, createdAt, updatedAt, stockCounted (B), isNewArrival (B) |
+| user_state | id, userId, flowname, referenceId, state, createdAt, updatedAt, context (J) |
+
+Typed columns alone cannot retain empty versus JSON-null cells, short row width,
+scalar string/number/boolean identity, numeric strings with trailing zeros or
+exponents, boolean spelling, or JSON text whitespace/key order. The release keeps
+`cell_kinds` (one scalar-type character per existing header position, also encoding
+width) and a named `<field>__lexeme` text column for each numeric/integer/boolean/
+JSON field. Text business values are never duplicated in another canonical row.
+A lexeme is representation evidence: projection validates its parsed value against
+the named typed column and aborts on disagreement. JSON lexemes preserve the exact
+original payload string while the named JSON column owns its parsed value. These
+per-field spelling columns remain necessary after final removal. They are not a
+replacement positional JSON column. SQL NULL represents absent/empty typed values;
+encoding distinguishes original empty text from explicit JSON null. JSON text
+`null` retains the existing SQL-NULL projection convention. Numeric/bigint values
+are never routed through a JavaScript Number to construct the stored named value.
+The existing JavaScript consumption of JSON numeric tokens has its existing limits;
+strings and JSON payload strings retain arbitrary decimal precision.
+
+Upgrade checks all 23 populated tables for exact `business_cells = project_table(row)`
+inside the DDL transaction; failure aborts everything, including metadata backfill.
+Archived rows participate and retain cells, row order, identity and revision. No
+unsupported value is silently discarded. The synthetic codec matrix tests each
+mapped field's null, empty, scalar type, high-precision number and JSON spelling.
+
+### Dependency inventory and current tooling
+
+* Runtime: PostgresRecords reads `project_<table>(row)` and inserts/updates explicit
+  named columns from `input_<table>(transient array)`. The array exists only as a
+  feature-interface/input projection. Existing feature calculations, routes and
+  business application interfaces are unchanged.
+* Database: the old `map_cells` triggers are replaced with `a_validate` and
+  `z_compat`; old mapper functions stay dormant only for compatibility rollback.
+  Validation normalizes empty text to the existing SQL NULL convention, protects
+  immutable business keys and row order, refuses archived changes and advances
+  row revision once. Existing statement revision triggers, command/effect journals,
+  transactions, writer locks, connection/TLS guards, grants and RLS remain.
+* Reconciliation: phase3 operational extraction uses the named projection and
+  validates it against named types. It remains a frozen-import comparison, so it
+  intentionally refuses mutated/archived targets; it is not ongoing production
+  business acceptance. Recovery fingerprints and dumps include all named fields,
+  representation evidence, journals, schema and permissions automatically.
+* Legacy import/promotion: immutable staging source_cells and historical SQL remain.
+  promote.sql rejects the named-column schema before any promotion. Old Sheets
+  exports must never replace live records. Historical nullable-JSON upgrade checks
+  stop before this authority migration; they retain the prior behavior assertions.
+* Synthetic local-write and hosted-write oracles, retained-row assertions, fixture
+  checks and capacity image scans now query named projections. Their result field
+  alias business_cells remains only an in-memory evidence interface. Frozen
+  baseline readers accept both historical and named-projection query forms, without
+  connecting to a source. Archived prepared manifests/approvals cannot authorize a
+  new schema or current hosted run. Current release acceptance is verify-named-columns.sh.
+
+### Maintenance sequence and writer contract
+
+Obtain separate owner approval for exact migration bytes, reviewed application SHA,
+target identity and maintenance window. Freeze all browser/business writes and
+pause LINE processing through the existing approved operational controls; do not
+change its cutoff, webhook or provider configuration as part of this preparation.
+Drain in-flight requests, old server instances and external direct writers. Preserve
+pending command/upload/effect claims; do not clear or replay uncertain outcomes.
+Take an owner-approved consistent backup and verify recovery privately. No private
+backup evidence was available to this task.
+
+Apply only the new named_column_authority migration. Named columns become
+immediately authoritative. Legacy array-only inserts/changed array-only updates
+are rejected. When both arrays and named values change, arrays must exactly equal
+the named projection or the entire statement fails. A no-op assignment cannot be
+distinguished from an omitted assignment in a row trigger; unchanged arrays are
+regenerated from named columns. The old mapper never executes. **Mixed old/new
+application writes are unsupported: a write freeze is mandatory**, not a rolling
+write deployment. Publish the reviewed new app only under separate approval, update
+the existing release binding to its exact SHA, and retire/drain every old instance
+before reopening. Browser, LINE, configuration and direct maintenance writers all
+need that same window; no production deployment is authorized here.
+
+Before reopening, privately verify 23-table counts, exact typed/projection equality,
+archived rows/order/revisions, schema functions/triggers/permissions/RLS, image
+references, Bangkok dates and representative Orders/Shipments/Inventory/Sales/
+Expenses/HR/LINE state through the reviewed app. Direct named-column maintenance,
+including orders.remark, persists and synchronizes compatibility cells. It does
+not run application workflows, recalculate related rows or send LINE/provider
+messages. Reader roles provisioned after migration need EXECUTE on the relevant
+project functions and cell_projection, in addition to existing SELECT/RLS grants;
+existing authorized private SELECT roles are granted these automatically.
+
+Compatibility rollback requires another freeze and drained writers. Run the
+reviewed named-columns-rollback.sql before restoring the exact older app/release
+binding. It first checks synchronized projections, then restores the historical
+mapping triggers; it does not restore an old snapshot. It preserves writes created
+and edited after release, including archived rows. Preserve extra representation
+columns. Rollback is not idempotent and a subsequent retransition needs a reviewed
+new migration, not blind reapplication of the applied migration. Reopen only after
+reconciliation and review of unresolved uploads/commands. Never fall back to Sheets.
+
+### Final removal approval gate
+
+Final removal is a separately reviewed dependent change, outside ordinary
+supabase/migrations discovery. Do not put its SQL into a normal db push. It requires
+another approved freeze/drain, zero old writers or consumers, exact reconciliation,
+a fresh verified backup/recovery receipt and owner approval of the exact removal
+file. The operator-only SQL additionally requires the same connection to set
+`stock.allow_final_cells_removal='reviewed-named-columns-v1'`; without this explicit
+setting it fails. It drops compatibility triggers, dormant mapping functions and
+business_cells from all 23 operational tables without CASCADE. Historical migrations,
+staging source_cells and immutable evidence fixtures remain.
+
+After removal, the old app and compatibility rollback SQL cannot run. Snapshot
+restoration alone loses writes since that snapshot and is **not lossless rollback**.
+Recovery requires an approved forward repair/reconstruction from current named
+columns and representation evidence, or an explicitly accepted recovery point with
+reconciliation of all subsequent commands, uploads and external effects. Do not
+replay providers or replace records from an old export. Production removal remains
+unexecuted; no hosted acceptance, maintenance approval or independent CI pass is
+implied by local synthetic tests.

@@ -132,3 +132,14 @@ and original-reader comparison reports, and capture consistent exported-snapshot
 backups with complete recovery/security fingerprints. Hosted metadata shows an
 empty Tokyo staging candidate; no real export/import/schema deployment occurred.
 The machine-readable status keeps actual record counts unknown until authorized.
+
+## Named-column authority ownership (prepared release)
+
+Shared PostgresRecords retains only the feature row/range interface; values are
+stored in named typed columns through table-specific SQL input/projection codecs.
+The explicit 23-table mapping remains tools/migration/worksheets.json. Named-column
+validation, scalar spelling evidence and compatibility synchronization live in the
+new versioned migration. The [current runbook](../database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized)
+owns maintenance, old-writer fencing, reversible compatibility rollback and the
+separate final-removal approval gate. Historical Sheets/staging plans above do not
+describe current production selection. Feature calculations and UI owners do not change.

@@ -39,7 +39,7 @@ def operational_snapshot(source):
     queries = [f"SELECT 1 / ((SELECT count(*)=1 AND bool_and(isolation_id='{target}'::uuid AND purpose='isolated-staging') FROM stock_operational.environment))::int;",
                "SELECT json_build_object('environment',to_jsonb(t)) FROM stock_operational.environment t;"]
     for table in CATALOG:
-        queries.append(f"SELECT json_build_object('table','{table}','row',row_order+1,'cells',business_cells,'typed',to_jsonb(t)) FROM stock_operational.{table} t ORDER BY row_order;")
+        queries.append(f"SELECT json_build_object('table','{table}','row',row_order+1,'cells',stock_operational.project_{table}(t),'typed',to_jsonb(t)) FROM stock_operational.{table} t ORDER BY row_order;")
     sql = "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\nSET LOCAL statement_timeout='120s';\n"+secure_connection_sql()+"\nSELECT pg_advisory_xact_lock_shared(835107242);\n" + '\n'.join(queries) + '\nCOMMIT;'
     run = subprocess.run(['psql', '-XAtw', '-v', 'ON_ERROR_STOP=1'], input=sql, text=True, capture_output=True, env=client_environment(), timeout=150)
     if run.returncode:

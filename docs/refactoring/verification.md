@@ -483,3 +483,47 @@ No src/public/runtime/migration SQL or lockfile changed in Phase 3. All old fixt
 remain unchanged. Hosted source/target approvals, Cloud connection/network/TLS,
 real-record/profile/business acceptance, hosted restore RTO/RPO, plan quotas and
 production authorization/monitoring remain explicit unverified gates.
+
+## Named-column authority — synthetic acceptance (2026-11-16)
+
+Baseline is current main `6bd55519f83b59b34b66285b010eeb8ffa880642`, independently
+copied with git archive and no integration environment: **655/655 pass**. Final
+current-source regression: **657/657 pass**, zero failures/skips; both additional
+checks audit all 23 explicit mappings and exact historical source witnesses. All
+previous fixtures remain byte-identical; new fixtures archive the changed adapter
+and prior operational assertions. Canonical current-source operational tests retain
+the remark scenarios and intentionally replace the previous conflicting-dual-write
+precedence assertion with rejection, as required by the new authority contract.
+
+| Check | Local result |
+| --- | --- |
+| Python migration/tool suite | 73/73 pass |
+| npm lint / typecheck | Pass; inherited unused shipmentRow warning only |
+| Isolated credential-free production build | Pass; matching source/public bytes, unchanged route manifest, 113 clean client chunks |
+| Offline local/hosted adapter tooling | 124/124 pass; loopback/fakes only |
+| verify-postgres.sh | Pass: archive constraints, RLS, exact 23-table extraction, repeat/conflict handling and backup/restore |
+| verify-operational.sh | Pass: populated authority upgrade, 32 actual application/concurrency/LINE/journal/remark checks, Chromium/API and complete archive+application recovery/security comparisons |
+| verify-restricted-backup.sh | Pass: nonprivileged two-connection dump/restore of all 51 tables and 15 metadata sections; incomplete/filtered access refused |
+| verify-named-columns.sh | Compatibility upgrade, fresh complete install, 92 all-column round-trip cases, explicit null updates, legacy/dual-writer rejection, ordering/identity guards and compatibility rollback preserving post-release writes pass |
+| Dependent final removal acceptance | Guard refuses an unset setting; all 23 columns physically absent; 32 operational tests and Chromium/API retry tests pass in each schema, plus actual adapter null/update/direct-edit/archive case after removal |
+
+The full-app localhost smoke in verify-hosted-tooling.sh uses an isolated private
+production build and fake providers, including desktop/mobile Orders browser
+behavior, uncertain outcomes, SQL faults/crash recovery, read-only restored app and
+real TLS production-profile *synthetic* checks. It does not access hosted Supabase.
+Its original WT01/02/03 labels remain BLOCKED and are not promoted to acceptance.
+The final full-app smoke passed with 11 proofs and zero hosted requests; its runner also passed read-only restored-app, synthetic TLS production-profile and checkpoint recovery checks. This is separate from those inherited BLOCKED labels.
+
+One required environment check remains incomplete: verify-recovery-fingerprints.sh
+passes its original fingerprint oracle and 96MiB JSONB checks under the initial 2GiB
+cap, then Docker cannot resize its container to 500MB because the host cgroup
+memory.max path is absent. The 500MB compact import/capture/independent-restore
+portion is **unverified**, not a pass. The runnable test and its original assertions
+remain unchanged; require a passing run on a runner supporting that cgroup operation.
+
+All results are local, not independent CI or real-record/hosted/provider acceptance.
+See the [current maintenance and approval contract](../database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized).
+No merge, deployment, production schema access, record replacement or provider call
+is performed. Pending uploads/commands and all post-release writes must survive any
+owner-approved compatibility rollback. Final-removal recovery cannot be represented
+as a lossless old-snapshot restoration.

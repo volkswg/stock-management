@@ -10,7 +10,7 @@ trap cleanup EXIT
 python3 tools/migration/integration.py > "$artifacts/import.sql"
 docker --host=unix:///var/run/docker.sock run -d --name "$name" -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.7 >/dev/null
 for attempt in $(seq 1 60); do
-  if docker --host=unix:///var/run/docker.sock exec "$name" pg_isready -U postgres >/dev/null 2>&1; then break; fi
+  if docker --host=unix:///var/run/docker.sock exec "$name" pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; then break; fi
   sleep 1
 done
 pg() { docker --host=unix:///var/run/docker.sock exec -i "$name" "$@"; }

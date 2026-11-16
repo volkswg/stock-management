@@ -41,9 +41,9 @@ class EdgeCampaign extends BrowserCampaign {
         const first = (await this.post(target, input)).body.costOverride;
         const edited = (await this.post(target, { ...input, averageItemCost: 3.25, note: 'WT edited override' })).body.costOverride; assert.equal(edited.id, first.id);
         await this.api(target, { method: 'DELETE', key: this.key('delete-override'), body: input });
-        const archived = (await this.sql('SELECT business_cells,archived_at FROM stock_operational.sales_profit_cost_overrides WHERE id=$1', [first.id]))[0]; assert.ok(archived.archived_at);
+        const archived = (await this.sql('SELECT stock_operational.project_sales_profit_cost_overrides(r) AS business_cells,archived_at FROM stock_operational.sales_profit_cost_overrides r WHERE id=$1', [first.id]))[0]; assert.ok(archived.archived_at);
         const replacement = (await this.post(target, { ...input, averageItemCost: 4.75, note: 'WT replacement override' })).body.costOverride; assert.notEqual(replacement.id, first.id);
-        assert.deepEqual((await this.sql('SELECT business_cells FROM stock_operational.sales_profit_cost_overrides WHERE id=$1', [first.id]))[0].business_cells, archived.business_cells);
+        assert.deepEqual((await this.sql('SELECT stock_operational.project_sales_profit_cost_overrides(r) AS business_cells FROM stock_operational.sales_profit_cost_overrides r WHERE id=$1', [first.id]))[0].business_cells, archived.business_cells);
         this.save('sales-edge-proof.json', { inclusiveBangkokBoundaries: true, outsideDateExcluded: 2, canceledReceiptRetainedAndExcludedFromNet: true, isolatedStoreQueryVerified: true, netA: 30, netB: 40, repeatedCursorRollback: true, correctedSameKeyRetry: true, overrideEditArchiveReplacementHistory: true });
     }
     async WT_HR_DATE_EDGES() {

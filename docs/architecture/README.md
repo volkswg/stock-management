@@ -2,7 +2,7 @@
 
 ## Current system
 
-Business workflows belong to the Orders, Shipments, Inventory, Sales, Expenses, HR and LINE modules. Feature-owned persistence mappers implement application ports, using Google Sheets by default or private PostgreSQL operational bindings in isolated staging, with a separately disabled production identity profile prepared for approved cutover. Shared Google auth/Sheets/Drive and LINE/Loyverse transports live in `src/infrastructure/`; `src/composition/` wires the existing aggregate Sheets service and cross-feature readers. Pure protocols and utilities live in `src/shared/`.
+Business workflows belong to the Orders, Shipments, Inventory, Sales, Expenses, HR and LINE modules. Production already uses Supabase and LINE is open; former business Sheets remain read-only. The prepared named-column release replaces authoritative business_cells arrays with named typed values and validated per-field representation evidence, retaining synchronized arrays during a reversible compatibility window. Final removal requires a separate manual approval and migration outside ordinary deployment discovery. See the [current release runbook](../database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized). No production changes are executed by this preparation. Shared provider transports remain in `src/infrastructure/`; composition wires the existing feature interfaces.
 
 The external compatibility directory `src/externals/` was retired in [PR #40](https://github.com/volkswg/stock-management/pull/40); the pure aggregate Sheets service contract is at `src/infrastructure/persistence/google-sheets/service-contracts.ts`. The seven `src/features/` forwards and unused `@/feature/*` alias are also retired; their canonical owners are unchanged. Reviewed `services/` and standalone script compatibility surfaces remain. This is a structural milestone, **not** a database replacement or production-security certification.
 
@@ -22,7 +22,7 @@ The external compatibility directory `src/externals/` was retired in [PR #40](ht
 
 ## Database migration preparation
 
-The [database migration runbook](../database-migration.md) describes the private PostgreSQL schemas, source audit, offline tools, synthetic verification and the comprehensive [Phase 3 execution checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover). Phase 2 adds opt-in isolated PostgreSQL persistence through the [operational persistence decision](decisions.md#phase-2-postgresql-operational-persistence); production remains on Sheets. Source export, hosted DDL/import, production configuration and cutover each require separate approval.
+The [database migration runbook](../database-migration.md) describes the private PostgreSQL schemas, source audit, offline tools, synthetic verification and the comprehensive [Phase 3 execution checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover). Phase 2 adds opt-in isolated PostgreSQL persistence through the [operational persistence decision](decisions.md#phase-2-postgresql-operational-persistence); that section records historical preparation. Production has since cut over, as recorded in the current release runbook. Further hosted schema execution and deployment require separate approval.
 
 Phase 3 preparation adds exact historical JSON-number handling, guarded/private
 extraction and reconciliation, existing-application snapshot parity, deployment

@@ -11,7 +11,14 @@ const readonlyAccountsHistory = JSON.parse(readFileSync('tests/fixtures/readonly
 const lineCutoffHistory = JSON.parse(readFileSync('tests/fixtures/line-cutoff-before.json', 'utf8'));
 export const orderCreateKeyHistory = JSON.parse(readFileSync('tests/fixtures/order-create-key-before.json', 'utf8'));
 const lineUploadFeedbackHistory = JSON.parse(readFileSync('tests/fixtures/line-upload-feedback-before.json', 'utf8'));
+const namedColumnsHistory = JSON.parse(readFileSync('tests/fixtures/named-columns-before.json', 'utf8'));
 export function restoreOrderCreateKeySource(file, source) {
+  const named = namedColumnsHistory.edits[file];
+  if (named && source !== named.before) {
+    assert.equal(hash(named.before), named.beforeHash, file);
+    assert.equal(hash(source), named.afterHash, file);
+    source = named.before;
+  }
   const feedback = lineUploadFeedbackHistory.edits[file];
   if (feedback && source !== feedback.before) {
     assert.equal(hash(feedback.before), feedback.beforeHash, file);

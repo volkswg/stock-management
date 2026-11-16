@@ -54,10 +54,10 @@ test('raw-image retries compare exact bytes and media type through the actual Po
 test('cost-override deletion archives the original identity and payload, is repeatable, and permits a fresh replacement',async()=>{
  const accountId='WT_COST_DELETE_REGRESSION',month='2024-03';
  const override=await command(()=>sales.setSalesProfitCostOverride({googleSheetsService:service,accountId,month,averageItemCost:2.5,note:'WT retained history',createdBy:'synthetic'}));
- const before=await transaction(false,async()=>(await currentTransaction().query('SELECT id,business_cells,row_order::text,revision::text FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[override.id])).rows[0]);
+ const before=await transaction(false,async()=>(await currentTransaction().query('SELECT id,stock_operational.project_sales_profit_cost_overrides(t) AS business_cells,row_order::text,revision::text FROM stock_operational.sales_profit_cost_overrides t WHERE id=$1',[override.id])).rows[0]);
  await assert.rejects(command(()=>service.salesProfitCostOverrides.updateRows(`A${Number(before.row_order)+1}:H${Number(before.row_order)+1}`,[['WT_CHANGED_ID',...before.business_cells.slice(1)]])),PersistenceFailure);
  assert.equal(await command(()=>sales.removeSalesProfitCostOverride({googleSheetsService:service,accountId,month})),true);
- const archived=await transaction(false,async()=>(await currentTransaction().query('SELECT id,business_cells,archived_at,revision::text FROM stock_operational.sales_profit_cost_overrides WHERE id=$1',[override.id])).rows[0]);
+ const archived=await transaction(false,async()=>(await currentTransaction().query('SELECT id,stock_operational.project_sales_profit_cost_overrides(t) AS business_cells,archived_at,revision::text FROM stock_operational.sales_profit_cost_overrides t WHERE id=$1',[override.id])).rows[0]);
  assert.equal(archived.id,before.id);assert.deepEqual(archived.business_cells,before.business_cells);assert.ok(archived.archived_at);assert.equal(Number(archived.revision),Number(before.revision)+1);
  assert.equal((await transaction(false,()=>sales.listSalesProfitCostOverrides({googleSheetsService:service,year:'2024'}))).some(x=>x.id===override.id),false);
  assert.equal(await command(()=>sales.removeSalesProfitCostOverride({googleSheetsService:service,accountId,month})),false);
@@ -271,7 +271,7 @@ test('actual committed SQL followed by a lost COMMIT acknowledgement replays wit
 test('capacity and primary-key query plan measured on an explicitly synthetic 2000-row workload',async()=>{
  const start=performance.now();
  await command(async()=>{
-  await requireMutation().query(`INSERT INTO stock_operational.orders(business_cells,row_order) SELECT jsonb_build_array('capacity-'||g::text,'complete','Synthetic',0,'','2026-11-01','2026-11-01','','synthetic'),1000+g FROM generate_series(1,2000) g`);
+  await requireMutation().query(`INSERT INTO stock_operational.orders(id,status,seller,"totalPrice","createdAt","updatedAt","createdBy",row_order) SELECT 'capacity-'||g::text,'complete','Synthetic',0,'2026-11-01','2026-11-01','synthetic',1000+g FROM generate_series(1,2000) g`);
  });
  await transaction(false,async()=>{
   const plan=await currentTransaction().query("EXPLAIN (ANALYZE,FORMAT TEXT) SELECT id FROM stock_operational.orders WHERE id=$1",['capacity-1000']);
@@ -385,13 +385,13 @@ test('audit-free revision is transactional and rejects legacy tokens',async()=>{
  const revision=(await reader(request('',{},'GET'))).headers.get('x-stock-revision');
  assert.match(revision,/^"stock-v2-\d+"$/);
  const writer=withPersistence(async()=>{
-  await currentTransaction().query('UPDATE stock_operational.orders SET business_cells=business_cells WHERE id=$1',['order-valid']);
+  await currentTransaction().query('UPDATE stock_operational.orders SET remark=remark WHERE id=$1',['order-valid']);
   return Response.json({ok:true});
  });
  const stale=request('legacy-revision-key');stale.headers.set('If-Match','"stock-0"');
  assert.equal((await writer(stale)).status,409);
  await assert.rejects(command(async()=>{
-  await currentTransaction().query('UPDATE stock_operational.orders SET business_cells=business_cells WHERE id=$1',['order-valid']);
+  await currentTransaction().query('UPDATE stock_operational.orders SET remark=remark WHERE id=$1',['order-valid']);
   throw new Error('rollback revision');
  }));
  assert.equal((await reader(request('',{},'GET'))).headers.get('x-stock-revision'),revision);
@@ -407,7 +407,7 @@ test('audit-free revision is transactional and rejects legacy tokens',async()=>{
 test('direct Supabase order remark edits persist in canonical cells and the actual app GET/PATCH',async()=>{
  const id='direct-remark-order';
  await command(()=>orders.createOrder({googleSheetsService:service,id,seller:'Synthetic seller',totalPrice:12.34,remark:'Original',createdBy:'synthetic'}));
- const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT to_jsonb(o) AS row FROM stock_operational.orders o WHERE id=$1',[id])).rows[0].row);
+ const read=()=>transaction(false,async()=>(await currentTransaction().query(`SELECT to_jsonb(o)||jsonb_build_object('business_cells',stock_operational.project_orders(o)) AS row FROM stock_operational.orders o WHERE id=$1`,[id])).rows[0].row);
  const before=await read();
  const text='หมายเหตุจาก Supabase 📝\nSecond line';
  const revisionBefore=await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value);
@@ -416,7 +416,7 @@ test('direct Supabase order remark edits persist in canonical cells and the actu
  assert.equal(after.remark,text);assert.equal(after.business_cells[4],text);
  assert.equal(after.revision,before.revision+1);
  assert.equal(await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value),String(BigInt(revisionBefore)+1n));
- const expected={...before,remark:text,revision:before.revision+1,business_cells:before.business_cells.map((cell,index)=>index===4?text:cell)};
+ const expected={...before,cell_kinds:after.cell_kinds,remark:text,revision:before.revision+1,business_cells:before.business_cells.map((cell,index)=>index===4?text:cell)};
  assert.deepEqual(after,expected); // No implicit timestamp, price, identity or ordering changes.
  const route=require('../../src/app/api/orders/[id]/route.ts');
  const context=()=>({params:Promise.resolve({id})});
@@ -435,9 +435,9 @@ test('direct Supabase order remark edits persist in canonical cells and the actu
 test('direct Supabase order remark clearing and short historical rows preserve column positions',async()=>{
  for(let length=1;length<=4;length++){
   const id=`direct-remark-short-${length}`,cells=[id,'complete','Synthetic',7].slice(0,length);
-  await transaction(true,()=>requireMutation().query('INSERT INTO stock_operational.orders(business_cells,row_order) SELECT $1::jsonb,coalesce(max(row_order),0)+1 FROM stock_operational.orders',[JSON.stringify(cells)]));
+  await command(()=>service.orders.appendRows('A:I',[cells]));
   await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=remark WHERE id=$1',[id]));
-  const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT remark,business_cells,revision::text FROM stock_operational.orders WHERE id=$1',[id])).rows[0]);
+  const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT remark,stock_operational.project_orders(t) AS business_cells,revision::text FROM stock_operational.orders t WHERE id=$1',[id])).rows[0]);
   assert.deepEqual((await read()).business_cells,cells); // A no-op does not pad existing data.
   await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',['Short row note',id]));
   const padded=[...cells];while(padded.length<4)padded.push('');padded.push('Short row note');
@@ -451,12 +451,14 @@ test('direct Supabase order remark clearing and short historical rows preserve c
  }
 });
 
-test('direct Supabase order remark mapping preserves canonical app precedence, rollback and archive guards',async()=>{
+test('direct Supabase order remark mapping rejects conflicting dual writes and preserves rollback and archive guards',async()=>{
  const id='direct-remark-guards',cells=[id,'complete','Synthetic',1,'Original','','','','synthetic'];
- await transaction(true,()=>requireMutation().query('INSERT INTO stock_operational.orders(business_cells,row_order) SELECT $1::jsonb,coalesce(max(row_order),0)+1 FROM stock_operational.orders',[JSON.stringify(cells)]));
- const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT to_jsonb(o) AS row FROM stock_operational.orders o WHERE id=$1',[id])).rows[0].row);
+ await command(()=>service.orders.appendRows('A:I',[cells]));
+ const read=()=>transaction(false,async()=>(await currentTransaction().query(`SELECT to_jsonb(o)||jsonb_build_object('business_cells',stock_operational.project_orders(o)) AS row FROM stock_operational.orders o WHERE id=$1`,[id])).rows[0].row);
  const changed=[...cells];changed[4]='Canonical app value';
- await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET business_cells=$1::jsonb,remark=$2 WHERE id=$3',[JSON.stringify(changed),'Conflicting typed value',id]));
+ await assert.rejects(transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET business_cells=$1::jsonb,remark=$2 WHERE id=$3',[JSON.stringify(changed),'Conflicting typed value',id])),PersistenceFailure);
+ assert.equal((await read()).remark,'Original');
+ await command(async()=>service.orders.updateRows(`E${Number((await read()).row_order)+1}`,[['Canonical app value']]));
  assert.equal((await read()).remark,'Canonical app value');
  const before=await read();
  const globalBefore=await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value);

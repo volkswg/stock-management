@@ -14,7 +14,9 @@ function baselineClient(input, revision) {
   }
   return { async query(text) {
     if (text === 'SELECT value::text v FROM stock_operational.revision WHERE singleton') return { rows: [{ v: revision }] };
-    const match = /^SELECT row_order::text n,business_cells,revision::text revision,archived_at FROM stock_operational\.([a-z_]+) ORDER BY row_order$/.exec(text);
+    const legacyMatch = /^SELECT row_order::text n,business_cells,revision::text revision,archived_at FROM stock_operational\.([a-z_]+) ORDER BY row_order$/.exec(text);
+    const namedMatch = /^SELECT row_order::text n,stock_operational\.project_([a-z_]+)\(r\) AS business_cells,revision::text revision,archived_at FROM stock_operational\.([a-z_]+) r ORDER BY row_order$/.exec(text);
+    const match = legacyMatch || (namedMatch && namedMatch[1] === namedMatch[2] ? namedMatch : null);
     requireGate(match && Object.hasOwn(baseline, match[1]), 'BASELINE_READ_ONLY_QUERY'); return { rows: structuredClone(baseline[match[1]]) };
   }, async end() {} };
 }

@@ -28,7 +28,7 @@ if (require.main === module) (async () => {
             for (const { table, row } of records) {
                 assert.equal((await client.query('SELECT id FROM stock_operational.' + table + ' WHERE id=$1', [row.id])).rowCount, 0);
                 if (table === 'employee_advances') for (const [key, target] of [['employeeId', 'employees'], ['shopId', 'shops']]) {
-                    const found = await client.query('SELECT business_cells FROM stock_operational.' + target + ' WHERE id=$1 AND archived_at IS NULL', [row[key]]);
+                    const found = await client.query('SELECT stock_operational.project_' + target + '(r) AS business_cells FROM stock_operational.' + target + ' r WHERE id=$1 AND archived_at IS NULL', [row[key]]);
                     assert.equal(found.rowCount, 1); assert.ok(found.rows[0].business_cells.some(value => typeof value === 'string' && value.startsWith('WT_')));
                 }
                 const headers = catalog[table].headers, values = headers.map(key => row[key] ?? '');

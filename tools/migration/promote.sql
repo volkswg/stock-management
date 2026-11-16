@@ -3,6 +3,7 @@ BEGIN;
 SET LOCAL lock_timeout='10s';
 SELECT pg_advisory_xact_lock(835107241);
 SELECT pg_advisory_xact_lock(835107242);
+DO $$ BEGIN IF to_regprocedure('stock_operational.input_orders(jsonb)') IS NOT NULL THEN RAISE EXCEPTION 'Legacy promotion is incompatible with named-column schema'; END IF; END $$;
 SET CONSTRAINTS ALL DEFERRED;
 SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.commands))::int;
 SELECT 1 / ((SELECT count(*)=1 AND min(value)=0 FROM stock_operational.revision))::int;

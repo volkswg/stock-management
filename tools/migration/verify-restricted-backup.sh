@@ -13,11 +13,11 @@ printf '{"auths":{}}\n' > "$artifacts/docker-client/config.json"
 export DOCKER_CONFIG="$artifacts/docker-client"
 containerId=$(docker --host="$host" run -d --memory=1g --cpus=1 -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.7)
 pg(){ docker --host="$host" exec -i "$containerId" "$@"; }
-for attempt in $(seq 1 60); do if pg pg_isready -U postgres >/dev/null 2>&1; then break; fi; sleep 1; done
+for attempt in $(seq 1 60); do if pg pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; then break; fi; sleep 1; done
 pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated;' > "$artifacts/setup.log"
 for file in supabase/migrations/*.sql; do pg psql -U postgres -v ON_ERROR_STOP=1 < "$file" >> "$artifacts/setup.log"; done
 pg psql -U postgres -v ON_ERROR_STOP=1 >> "$artifacts/setup.log" <<'FIXTURE'
-INSERT INTO stock_operational.orders(business_cells) VALUES ('["WT_BACKUP_READER","draft","WT",12.34,"","2026-01-01","2026-01-01","","WT"]');
+INSERT INTO stock_operational.orders(id,status,seller,"totalPrice","createdAt","updatedAt","createdBy") VALUES ('WT_BACKUP_READER','draft','WT',12.34,'2026-01-01','2026-01-01','WT');
 CREATE ROLE ha_backup LOGIN CONNECTION LIMIT 2 NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
 GRANT USAGE ON SCHEMA stock_migration,stock_operational TO ha_backup;
 GRANT SELECT ON ALL TABLES IN SCHEMA stock_migration,stock_operational TO ha_backup;
