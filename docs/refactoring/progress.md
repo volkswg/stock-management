@@ -1549,3 +1549,9 @@ Acceptance refuses accidental execution without the operator setting, verifies a
 Chromium/API retry check in each schema. The actual adapter also preserves explicit
 nulls, named direct edits and archive behavior after removal. This is prepared and
 synthetically verified code, not evidence that production removal has occurred.
+
+Review PRs: [named authority #71](https://github.com/volkswg/stock-management/pull/71),
+then [guarded final removal #72](https://github.com/volkswg/stock-management/pull/72).
+Both are drafts and unmerged. The dependent PR enables the same credential-free
+Migration acceptance workflow for its named-authority base branch so physical
+removal tests can receive independent CI before any retarget/merge.
