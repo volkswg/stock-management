@@ -185,17 +185,31 @@ async function saveImage<Bytes>({ state, event, eventId, context, drive, line, c
             await replyText(line, event, `⚠️ Photo upload is unavailable\nShop: ${state.shop} | Quantity: ${state.quantity}\nYour progress is saved, but this item is not saved yet.\n\nAsk an administrator to configure Google Drive, then resend the photo.`);
             return;
         }
+        let uploadStage = "line_download";
         try {
             const image = await line.downloadMessageContent(event.message!.id);
             const extension = image.contentType === "image/png" ? ".png" : image.contentType === "image/webp" ? ".webp" : ".jpg";
+            uploadStage = "drive_upload";
             const file = await drive.uploadImage({ fileName: `${state.itemId}${extension}`, contentType: image.contentType, bytes: image.bytes });
+            uploadStage = "drive_result";
             if (!file.webViewLink?.trim())
                 throw new Error("Google Drive returned no image URL.");
             imageUrl = file.webViewLink;
             if (imageUpload)
                 imageUpload.uploaded = true;
         }
-        catch {
+        catch (error) {
+            // Never log provider bodies, tokens, URLs or image/business content.
+            const message = error instanceof Error ? error.message : "";
+            const status = /^(?:Google OAuth refresh failed|Google Drive (?:upload|permission setup|file deletion) failed): (\d{3})\b/.exec(message);
+            const reason = /\b(invalid_grant|invalid_client|access_denied|insufficientPermissions|storageQuotaExceeded|rateLimitExceeded|dailyLimitExceeded|notFound|permissionDenied|quotaExceeded)\b/.exec(message);
+            runtime.error("Movement image upload failed", () => ({
+                webhookEventId: event.webhookEventId,
+                messageId: event.message?.id,
+                stage: uploadStage,
+                providerStatus: status ? Number(status[1]) : undefined,
+                providerReason: reason?.[1] || "unclassified",
+            }));
             if (imageUpload)
                 imageUpload.failed = true;
             await replyText(line, event, `⚠️ Photo upload failed\nShop: ${state.shop} | Quantity: ${state.quantity}\nThis item is not saved yet. Your entered quantity is kept.\n\n➡️ Send the product photo again to save this item.`);

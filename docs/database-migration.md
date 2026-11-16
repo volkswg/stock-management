@@ -3997,3 +3997,19 @@ database migration is needed. Release requires separate approval, a tested sourc
 commit bound in `STOCK_PRODUCTION_RELEASE_JSON.sourceCommit`, and users reloading
 the updated app. Preserve the active LINE cutoff/state and old Sheets read-only
 access. This PR does not change production data, schema, security or Vercel settings.
+
+## LINE movement image failure feedback (2026-11-17)
+
+A failed image upload must retain its uncertain claim and roll back business work.
+The PostgreSQL LINE wrapper now sends a generic review notice after rollback under
+a separate `failure-reply` effect key. It never sends a queued success from failed
+work; duplicate failures cannot consume the later successful event's reply claim.
+Guard-rejected uncertain image retries also receive this bounded feedback without
+re-entering the upload operation. Missing reply tokens do not claim a notice.
+
+Movement upload diagnostics now record only event/message identity, stage, bounded
+HTTP status and an allowlisted provider reason. Raw provider bodies, credentials,
+URLs and image/business content are excluded. This improves diagnosis and feedback;
+it does not establish a provider failure cause, repair credentials, clear pending
+claims, replay events or authorize production recovery. Existing file outcomes
+must be reconciled before retrying an uncertain operation.

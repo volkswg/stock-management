@@ -22,6 +22,18 @@ export async function processPostgresWebhook<Bytes>(input: Parameters<typeof pro
     // Reply tokens and redelivery flags may change; the durable event intent may not.
     const intent=Object.fromEntries(Object.entries(event).filter(([name])=>!["replyToken","deliveryContext"].includes(name)));
     const execute=event.message?.type === "image" ? executeUploadCommand : executeCommand;
+    const notifyImageFailure = async () => {
+      if (event.message?.type !== "image" || !event.replyToken) return;
+      try {
+        // Outside the rolled-back business transaction, with a separate key:
+        // failure feedback must not consume a later successful event's reply.
+        await attemptEffectOnce(`LINE:${key}:failure-reply`, () => input.lineBotService.sendReply(event.replyToken, [{
+          type: "text", text: "⚠️ The photo could not be confirmed. Your movement progress is retained. Keep this photo and contact the operator before resending; its upload outcome needs review.",
+        }]));
+      } catch {
+        input.runtime.error("LINE image failure notice could not be confirmed", () => ({ webhookEventId: key }));
+      }
+    };
     let result: EventResult;
     try { result=await execute("LINE",key,hashIntent(intent),async () => {
       await requireMutation().query("SAVEPOINT event_business");
@@ -51,8 +63,12 @@ export async function processPostgresWebhook<Bytes>(input: Parameters<typeof pro
       await requireMutation().query("RELEASE SAVEPOINT event_business");
       return { movementFailed:run.movementFailed, counts:run.imageCounts(),images:run.imageUploads,replies };
     }); } catch (error) {
-      if (!(error instanceof RolledBackEvent)) throw error;
+      if (!(error instanceof RolledBackEvent)) {
+        if (error instanceof PersistenceFailure) await notifyImageFailure();
+        throw error;
+      }
       result=error.result;
+      await notifyImageFailure();
     }
     for (const [index,reply] of result.replies.entries()) {
       await attemptEffectOnce(`LINE:${key}:reply:${index}`,()=>input.lineBotService.sendReply(reply.token,reply.messages));

@@ -1497,3 +1497,18 @@ Lint has zero errors and the existing unused `shipmentRow` warning; typecheck an
 the credential-free build pass. The route manifest is unchanged and all 113 client
 chunks contain no private database strings. No production request was used to
 create an order or exercise a real upload provider.
+
+## LINE movement image failure feedback — 2026-11-17
+
+Fixed the missing post-rollback image failure notice and added bounded upload-stage
+diagnostics. Failure notices use a separate durable effect key, preserve unknown
+upload outcomes and cannot emit rolled-back success messages. No persistence
+adapter, trigger, authentication, schema or configuration changes are included.
+
+Local verification: 653/653 regressions pass, including five current-source cases
+for sanitized diagnostics, post-rollback feedback, uncertain retry refusal, notice
+deduplication, recovered success and missing reply tokens. Lint has zero errors
+and the inherited unused shipmentRow warning. Typecheck and the credential-free
+build pass; route manifest and all 113 client-chunk privacy checks remain intact.
+New bounded inverses retain inherited fixtures unchanged. No real provider upload,
+production write, event replay or deployment was used to verify this source fix.
