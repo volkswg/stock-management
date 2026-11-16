@@ -1431,3 +1431,22 @@ real profiling/application parity/reconciliation, hosted role/pooler performance
 capacity and recovery. Production auth/authorization/monitoring, final fresh target,
 write freeze/provider hold and preservation/recovery of post-cutover writes remain
 cutover blockers. Existing production Supabase guard stays enabled.
+
+
+## Order remark Table Editor fix — 2026-11-16
+
+A focused `map_orders` migration enables direct changes to
+`stock_operational.orders.remark` while retaining canonical app-write precedence.
+The regression reproduced the lost remark before the fix. The disposable PostgreSQL
+application suite passes 32/32, including real order GET/PATCH and replay, Thai text,
+clearing, short rows, rollback and immutable/archive protections. A populated local
+upgrade and function-only rollback/reapply preserve rows, revisions, function
+identity/privileges, RLS and trigger bindings. Lint/typecheck and the isolated build
+pass; the existing unused `shipmentRow` lint warning remains. No app source, route,
+environment, dependency or business record changes are part of this fix. LINE stays
+paused; production routing and the existing deployment remain unchanged.
+
+Hosted verification: the tested function body is installed, with unchanged function
+OID/owner/ACL, search path, table RLS/grants, policies and trigger bindings. Security
+and health advisors report no notices. No production business records were written
+by the migration. Offline acceptance passes 626/626; LINE remains paused.

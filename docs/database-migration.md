@@ -3918,3 +3918,25 @@ matrix, capacity/latency, restored-state comparisons/RTO/RPO, unresolved risks,
 freeze/activation times, recovery owner and go/no-go. Any unchecked critical gate
 means **no cutover**. PR49 can be reviewed as an isolated persistence milestone;
 real-data/hosted/production acceptance remains pending separate authorization.
+
+
+## Direct order remark editing (2026-11-16)
+
+The live editable field is `stock_operational.orders.remark`. Its mapper previously
+replaced a direct column edit with the old fifth `business_cells` value. The focused
+mapper fix copies a changed remark into that cell when the canonical payload is
+unchanged. Normal app writes still take precedence when they change the payload.
+Refresh the app after a direct edit to see the saved remark. Empty/NULL remarks use
+the existing empty-cell/NULL projection convention; short imported rows are padded
+without moving their other cells. Existing records and timestamps are not rewritten.
+
+The migration preserves function ownership/security, RLS, permissions, trigger
+bindings, identity/archive guards and revision behavior. Local evidence covers
+direct edits, Unicode, clearing, short/no-op rows, actual order GET/PATCH and retry,
+canonical payload precedence, rollback and populated upgrade preservation. LINE
+remains paused; this database fix does not require a Vercel deployment.
+
+Hosted verification: the tested function body is installed, with unchanged function
+OID/owner/ACL, search path, table RLS/grants, policies and trigger bindings. Security
+and health advisors report no notices. No production business records were written
+by the migration. Offline acceptance passes 626/626; LINE remains paused.

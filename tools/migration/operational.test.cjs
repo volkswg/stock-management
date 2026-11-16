@@ -399,3 +399,74 @@ test('audit-free revision is transactional and rejects legacy tokens',async()=>{
   assert.equal((await currentTransaction().query('SELECT count(*) FROM stock_operational.revision')).rows[0].count,'1');
  });
 });
+
+test('direct Supabase order remark edits persist in canonical cells and the actual app GET/PATCH',async()=>{
+ const id='direct-remark-order';
+ await command(()=>orders.createOrder({googleSheetsService:service,id,seller:'Synthetic seller',totalPrice:12.34,remark:'Original',createdBy:'synthetic'}));
+ const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT to_jsonb(o) AS row FROM stock_operational.orders o WHERE id=$1',[id])).rows[0].row);
+ const before=await read();
+ const text='หมายเหตุจาก Supabase 📝\nSecond line';
+ const revisionBefore=await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value);
+ await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',[text,id]));
+ const after=await read();
+ assert.equal(after.remark,text);assert.equal(after.business_cells[4],text);
+ assert.equal(after.revision,before.revision+1);
+ assert.equal(await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value),String(BigInt(revisionBefore)+1n));
+ const expected={...before,remark:text,revision:before.revision+1,business_cells:before.business_cells.map((cell,index)=>index===4?text:cell)};
+ assert.deepEqual(after,expected); // No implicit timestamp, price, identity or ordering changes.
+ const route=require('../../src/app/api/orders/[id]/route.ts');
+ const context=()=>({params:Promise.resolve({id})});
+ const get=()=>route.GET(new Request(`https://example.test/api/orders/${id}`,{headers:auth}),context());
+ const response=await get();assert.equal(response.status,200);assert.equal((await response.json()).order.remark,text);
+ const patch=(key,body)=>route.PATCH(new Request(`https://example.test/api/orders/${id}`,{method:'PATCH',headers:{...auth,'Idempotency-Key':key,'content-type':'application/json'},body:JSON.stringify(body)}),context());
+ assert.equal((await patch('direct-remark-price-update',{totalPrice:20})).status,200);
+ assert.equal((await read()).remark,text); // An ordinary app price edit keeps the direct remark.
+ const saved=await patch('direct-remark-app-update',{remark:'  From app  '});
+ assert.equal(saved.status,200);const body=await saved.json();assert.equal(body.order.remark,'From app');
+ assert.deepEqual(await (await patch('direct-remark-app-update',{remark:'  From app  '})).json(),body);
+ assert.equal((await read()).business_cells[4],'From app');
+ assert.equal((await (await get()).json()).order.remark,'From app');
+});
+
+test('direct Supabase order remark clearing and short historical rows preserve column positions',async()=>{
+ for(let length=1;length<=4;length++){
+  const id=`direct-remark-short-${length}`,cells=[id,'complete','Synthetic',7].slice(0,length);
+  await transaction(true,()=>requireMutation().query('INSERT INTO stock_operational.orders(business_cells,row_order) SELECT $1::jsonb,coalesce(max(row_order),0)+1 FROM stock_operational.orders',[JSON.stringify(cells)]));
+  await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=remark WHERE id=$1',[id]));
+  const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT remark,business_cells,revision::text FROM stock_operational.orders WHERE id=$1',[id])).rows[0]);
+  assert.deepEqual((await read()).business_cells,cells); // A no-op does not pad existing data.
+  await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',['Short row note',id]));
+  const padded=[...cells];while(padded.length<4)padded.push('');padded.push('Short row note');
+  assert.deepEqual((await read()).business_cells,padded);
+  for(const value of [null,'Another note','']){
+   const before=await read();
+   await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',[value,id]));
+   const after=await read();assert.equal(after.remark,value||null);assert.equal(after.business_cells[4],value||'');
+   assert.deepEqual(after.business_cells.slice(0,4),padded.slice(0,4));assert.equal(Number(after.revision),Number(before.revision)+1);
+  }
+ }
+});
+
+test('direct Supabase order remark mapping preserves canonical app precedence, rollback and archive guards',async()=>{
+ const id='direct-remark-guards',cells=[id,'complete','Synthetic',1,'Original','','','','synthetic'];
+ await transaction(true,()=>requireMutation().query('INSERT INTO stock_operational.orders(business_cells,row_order) SELECT $1::jsonb,coalesce(max(row_order),0)+1 FROM stock_operational.orders',[JSON.stringify(cells)]));
+ const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT to_jsonb(o) AS row FROM stock_operational.orders o WHERE id=$1',[id])).rows[0].row);
+ const changed=[...cells];changed[4]='Canonical app value';
+ await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET business_cells=$1::jsonb,remark=$2 WHERE id=$3',[JSON.stringify(changed),'Conflicting typed value',id]));
+ assert.equal((await read()).remark,'Canonical app value');
+ const before=await read();
+ const globalBefore=await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value);
+ await assert.rejects(transaction(true,async()=>{
+  await requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',['Rolled back',id]);
+  throw new Error('Synthetic rollback');
+ }),PersistenceFailure);
+ assert.deepEqual(await read(),before);
+ assert.equal(await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value),globalBefore);
+ const differentId=[...changed];differentId[0]='forbidden-identity';
+ await assert.rejects(transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET business_cells=$1::jsonb,remark=$2 WHERE id=$3',[JSON.stringify(differentId),'Forbidden',id])),PersistenceFailure);
+ assert.deepEqual(await read(),before);
+ await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET archived_at=now() WHERE id=$1',[id]));
+ const archived=await read();
+ await assert.rejects(transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',['Forbidden archived edit',id])),PersistenceFailure);
+ assert.deepEqual(await read(),archived);
+});
