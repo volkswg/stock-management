@@ -1516,3 +1516,28 @@ fake providers. Failed-batch assertions verify exactly one separate failure-repl
 effect, no completed business command and no duplicate failure notice. New bounded
 inverses retain inherited fixtures unchanged. No real provider upload,
 production write, event replay or deployment was used to verify this source fix.
+
+## Named-column authority implementation (prepared for review)
+
+Based on refreshed main `6bd55519f83b59b34b66285b010eeb8ffa880642`; inspected open
+PR47 is unrelated Product Master work and supplies no removal implementation.
+Retains completed PR69 order request identity and PR70 LINE uncertain-upload feedback.
+Supabase production/LINE-open context supersedes historical Sheets/staging plans.
+
+The new versioned migration explicitly maps all 23 tables, preserves per-field
+numeric/boolean/JSON spelling and null/short-row shape, validates named authority,
+replaces mapper triggers and synchronizes compatibility cells for verification and
+rollback. The existing record interface now persists named fields; feature workflows,
+HTTP/UI, business rules, journals, locks and connection safeguards are unchanged.
+Reconciliation, synthetic oracles, private fixture queries and backup checks read
+named projections; incompatible legacy promotion fails before writing. Historical
+SQL and prior fixtures are preserved. See [verification evidence](verification.md#named-column-authority--synthetic-acceptance-2026-11-16)
+and the [explicit mapping/release contract](../database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized).
+
+Review/execution order: named authority and reversible compatibility release first;
+a dependent PR carries operator-only final removal outside normal migration discovery
+and physical-absence acceptance. A mandatory drained write freeze fences old writers.
+Neither PR authorizes merge, deployment, hosted DDL or final removal. Independent CI,
+the environment-blocked 500MB recovery check, private production reconciliation,
+verified recovery evidence and separate owner maintenance/DDL/release approvals
+remain gates. No private Mac evidence is assumed available.

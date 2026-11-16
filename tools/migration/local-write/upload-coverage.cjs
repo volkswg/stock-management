@@ -7,7 +7,7 @@ const { classifyUploads } = require('./provider-outcomes.cjs');
 const catalog = require('../worksheets.json');
 class UploadCampaign extends CompletionCampaign {
     async fileReferences() {
-        const branches = Object.keys(catalog).map(table => 'SELECT business_cells::text AS payload FROM stock_operational.' + table);
+        const branches = Object.keys(catalog).map(table => 'SELECT stock_operational.project_' + table + '(r)::text AS payload FROM stock_operational.' + table + ' r');
         branches.push("SELECT CASE WHEN response->'value'->>'body' IS NOT NULL THEN convert_from(decode(response->'value'->>'body','base64'),'UTF8') ELSE response::text END AS payload FROM stock_operational.commands WHERE response IS NOT NULL");
         branches.push('SELECT to_jsonb(t)::text AS payload FROM stock_operational.side_effects t');
         const rows = await this.sql("WITH data AS (" + branches.join(' UNION ALL ') + ") SELECT DISTINCT match[1] AS id FROM data CROSS JOIN LATERAL regexp_matches(payload,'(WT_FILE_[0-9a-f-]{36})','g') AS match ORDER BY 1");

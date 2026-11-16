@@ -39,7 +39,7 @@ async function runLoadPacket(packet) {
     save('preflight-fingerprint-proof.json', require('./fingerprints.cjs').captureAndCompare(packet, { compareAll: true, directoryName: 'preflight-checkpoint' }));
     const baseline = require('./baseline-client.cjs').baselineClient(JSON.parse(baselineBytes), binding.baselineRevision), actual = await observer.owner();
     for (const name of Object.keys(require('../worksheets.json'))) {
-      const sql = 'SELECT row_order::text n,business_cells,revision::text revision,archived_at FROM stock_operational.' + name + ' ORDER BY row_order';
+      const sql = 'SELECT row_order::text n,stock_operational.project_' + name + '(r) AS business_cells,revision::text revision,archived_at FROM stock_operational.' + name + ' r ORDER BY row_order';
       require('node:assert/strict').deepEqual((await actual.query(sql)).rows, (await baseline.query(sql)).rows);
     }
     const revisionSql = 'SELECT value::text v FROM stock_operational.revision WHERE singleton'; require('node:assert/strict').deepEqual((await actual.query(revisionSql)).rows, (await baseline.query(revisionSql)).rows);

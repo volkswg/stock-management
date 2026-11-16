@@ -23,7 +23,7 @@ export class PostgresRecords {
   async checkConnection() { await this.ensureExists(); }
   private async rows() {
     return (await currentTransaction().query<{ row_order: string; business_cells: GoogleSheetRow; revision: string; archived_at: string | null }>(
-      `SELECT row_order,business_cells,revision,archived_at FROM ${this.table} ORDER BY row_order`)).rows;
+      `SELECT row_order,stock_operational.project_${this.definition.table}(t) AS business_cells,revision,archived_at FROM ${this.table} t ORDER BY row_order`)).rows;
   }
   async readRows(range = "A:ZZ"): Promise<GoogleSheetRow[]> {
     const stored = await this.rows(), rows: GoogleSheetRow[] = [[...this.definition.headers]];
@@ -36,16 +36,18 @@ export class PostgresRecords {
     const b = bounds(range, this.definition.headers.length, rows.length);
     return rows.slice(b.start, b.end).map(row => row.slice(b.x, b.y));
   }
+  private async columns(): Promise<string[]> {
+    const result = await currentTransaction().query<{column_name: string}>(`SELECT column_name FROM information_schema.columns WHERE table_schema='stock_operational' AND table_name=$1 ORDER BY ordinal_position`, [this.definition.table]);
+    return result.rows.map(r => r.column_name).filter(c => this.definition.headers.includes(c) || c === 'cell_kinds' || (c.endsWith('__lexeme') && this.definition.headers.includes(c.slice(0,-8))));
+  }
   private async insert(cells: GoogleSheetRow) {
     const client = requireMutation(), key = this.definition.key || "id";
     if (cells.length > this.definition.headers.length || !cells.length) throw new PersistenceFailure(409, "Invalid record width.");
     const id = key === "migration_id" ? undefined : cells[this.definition.headers.indexOf(key)];
     if (key !== "migration_id" && (typeof id !== "string" || !id)) throw new PersistenceFailure(409, "Business identity is required.");
-    if (key === "migration_id") {
-      await client.query(`INSERT INTO ${this.table}(migration_id,business_cells,row_order) SELECT 'COMP-'||gen_random_uuid()::text,$1::jsonb,coalesce(max(row_order),0)+1 FROM ${this.table}`, [JSON.stringify(cells)]);
-    } else {
-      await client.query(`INSERT INTO ${this.table}(business_cells,row_order) SELECT $1::jsonb,coalesce(max(row_order),0)+1 FROM ${this.table}`, [JSON.stringify(cells)]);
-    }
+    const columns = await this.columns();
+    const names = columns.map(c => `"${c}"`).join(',');
+    await client.query(`INSERT INTO ${this.table}(${key === "migration_id" ? 'migration_id,' : ''}${names},row_order) SELECT ${key === "migration_id" ? "'COMP-'||gen_random_uuid()::text," : ''}${columns.map(c => `i."${c}"`).join(',')},(SELECT coalesce(max(row_order),0)+1 FROM ${this.table}) FROM stock_operational.input_${this.definition.table}($1::jsonb) i`, [JSON.stringify(cells)]);
   }
   async appendRows(_range: string, values: GoogleSheetRow[]) { for (const row of values) await this.insert(row); }
   async updateRows(range: string, values: GoogleSheetRow[]) {
@@ -72,7 +74,8 @@ export class PostgresRecords {
         }
         throw new PersistenceFailure(409, "Business identity cannot change.");
       }
-      const result = await client.query(`UPDATE ${this.table} SET business_cells=$1::jsonb, revision=revision+1 WHERE row_order=$2 AND revision=$3 AND archived_at IS NULL`, [JSON.stringify(next), old.row_order, old.revision]);
+      const columns = await this.columns();
+      const result = await client.query(`UPDATE ${this.table} t SET ${columns.map(c => `"${c}"=i."${c}"`).join(',')} FROM stock_operational.input_${this.definition.table}($1::jsonb) i WHERE t.row_order=$2 AND t.revision=$3 AND t.archived_at IS NULL`, [JSON.stringify(next), old.row_order, old.revision]);
       if (result.rowCount !== 1) throw new PersistenceFailure(409, "Stale record revision.");
     }
   }

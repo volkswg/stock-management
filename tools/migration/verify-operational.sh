@@ -8,12 +8,12 @@ cleanup(){ docker --host=unix:///var/run/docker.sock rm -fv "$name" >/dev/null; 
 trap cleanup EXIT
 docker --host=unix:///var/run/docker.sock run -d --name "$name" -p 127.0.0.1::5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.7 >/dev/null
 for attempt in $(seq 1 60); do
- if docker --host=unix:///var/run/docker.sock exec "$name" pg_isready -U postgres >/dev/null 2>&1; then break; fi
+ if docker --host=unix:///var/run/docker.sock exec "$name" pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; then break; fi
  sleep 1
 done
 pg(){ docker --host=unix:///var/run/docker.sock exec -i "$name" "$@"; }
 pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated;'
-for file in supabase/migrations/*.sql; do pg psql -U postgres -v ON_ERROR_STOP=1 < "$file" > "$artifacts/migration.log"; done
+for file in supabase/migrations/*.sql; do [[ "$file" == *named_column_authority.sql ]] && continue; pg psql -U postgres -v ON_ERROR_STOP=1 < "$file" > "$artifacts/migration.log"; done
 pg psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE stock_test LOGIN PASSWORD 'synthetic-only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS; GRANT stock_runtime TO stock_test;"
 # Exercise removal against populated pre-upgrade data in a separate database.
 pg createdb -U postgres audit_history_test
@@ -24,7 +24,7 @@ sys.path.insert(0,'tools/migration')
 from core import import_sql
 from test_migration import precision_fixture
 for path in sorted(Path('supabase/migrations').glob('*.sql')):
- if not path.name.endswith('_remove_operational_audit.sql'): print(path.read_text())
+ if not path.name.endswith(('_remove_operational_audit.sql','_named_column_authority.sql')): print(path.read_text())
 print(import_sql(precision_fixture()))
 print(Path('tools/migration/promote.sql').read_text().replace('SELECT 1 / ((SELECT count(*)=1 AND min(value)=0 FROM stock_operational.revision))::int;', 'SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.audit))::int;'))
 PYHISTORY
@@ -45,6 +45,7 @@ pg psql -U postgres -v ON_ERROR_STOP=1 < "$artifacts/import.sql" > "$artifacts/i
 pg psql -U postgres -v ON_ERROR_STOP=1 < "$artifacts/import.sql" > "$artifacts/reimport.log"
 pg psql -U postgres -v ON_ERROR_STOP=1 < tools/migration/promote.sql > "$artifacts/promote.log"
 pg psql -U postgres -v ON_ERROR_STOP=1 -c "SELECT 1 / ((SELECT snapshot->>'totalPay'='9007199254740993.01' AND jsonb_typeof(snapshot->'totalPay')='number' FROM stock_migration.payroll_settlements))::int; SELECT 1 / ((SELECT snapshot->>'totalPay'='9007199254740993.01' AND jsonb_typeof(snapshot->'totalPay')='number' FROM stock_operational.payroll_settlements))::int;" > "$artifacts/json-precision.log"
+pg psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/*named_column_authority.sql > "$artifacts/named-upgrade.log"
 # Extract the actual promoted operational tables through the read-only CLI.
 cat > "$artifacts/psql" <<'WRAPPER'
 #!/usr/bin/env bash
@@ -159,7 +160,7 @@ identity=$(pg psql -U postgres -At -c 'SELECT isolation_id FROM stock_operationa
 if STOCK_VERIFY_CONTAINER="$name" STOCK_VERIFY_DATABASE=recovery_postgres PATH="$artifacts:$PATH" python3 tools/migration/recovery.py verify --directory "$artifacts/recovery-postgres" --target-id "$identity" --workers 2 --row-digests --output "$artifacts/altered-grant.json"; then
  echo 'Recovery must detect changed grants' >&2; exit 1
 fi
-pg psql -U postgres -d recovery_application_test -v ON_ERROR_STOP=1 -c "UPDATE stock_operational.orders SET business_cells=jsonb_set(business_cells,'{3}','999.11'::jsonb) WHERE id='order-valid';" > "$artifacts/record-probe.log"
+pg psql -U postgres -d recovery_application_test -v ON_ERROR_STOP=1 -c "UPDATE stock_operational.orders SET \"totalPrice\"=999.11 WHERE id='order-valid';" > "$artifacts/record-probe.log"
 identity=$(pg psql -U postgres -d application_test -At -c 'SELECT isolation_id FROM stock_operational.environment')
 if STOCK_VERIFY_CONTAINER="$name" STOCK_VERIFY_DATABASE=recovery_application_test PATH="$artifacts:$PATH" python3 tools/migration/recovery.py verify --directory "$artifacts/recovery-application_test" --target-id "$identity" --workers 2 --row-digests --output "$artifacts/altered-record.json"; then
  echo 'Recovery must detect changed records' >&2; exit 1

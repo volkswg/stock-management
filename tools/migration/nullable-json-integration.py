@@ -5,7 +5,7 @@ from test_nullable_json import nullable_json_fixture
 
 root = Path(__file__).resolve().parents[2]
 fix = next((root / 'supabase/migrations').glob('*_normalize_nullable_json_projections.sql'))
-migrations = sorted((root / 'supabase/migrations').glob('*.sql'))
+migrations = [path for path in sorted((root / 'supabase/migrations').glob('*.sql')) if not path.name.endswith('_named_column_authority.sql')]
 source = nullable_json_fixture()
 script = ["SELECT 1 / (current_database()='json_null_test' AND inet_client_addr() IS NULL)::int;"]
 script.extend(path.read_text() for path in migrations if path.name < fix.name)

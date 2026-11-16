@@ -16,7 +16,7 @@ cleanup(){ if [ -n "$containerId" ]; then docker --host="$host" rm -fv "$contain
 trap cleanup EXIT
 containerId=$(docker --host="$host" run -d --name "$name" --memory=1g --cpus=1 -p 127.0.0.1::5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17.7)
 pg(){ docker --host="$host" exec -i "$containerId" "$@"; }
-for attempt in $(seq 1 60); do if pg pg_isready -U postgres >/dev/null 2>&1; then break; fi; sleep 1; done
+for attempt in $(seq 1 60); do if pg pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; then break; fi; sleep 1; done
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 -keyout "$artifacts/key" -out "$artifacts/cert" -subj /CN=localhost -addext 'subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:db.abcdefghijklmnopqrst.supabase.co' > "$artifacts/tls.log" 2>&1
 docker --host="$host" cp "$artifacts/cert" "$containerId:/tmp/ha-cert" >/dev/null
 docker --host="$host" cp "$artifacts/key" "$containerId:/tmp/ha-key" >/dev/null
@@ -35,6 +35,7 @@ pg psql -U postgres -d ha_synthetic_app -v ON_ERROR_STOP=1 >> "$artifacts/setup.
 CREATE ROLE ha_readonly LOGIN PASSWORD 'WT_readonly_only' CONNECTION LIMIT 6 NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
 GRANT USAGE ON SCHEMA stock_operational TO ha_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA stock_operational TO ha_readonly;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA stock_operational TO ha_readonly;
 DO $$ DECLARE item record; BEGIN
 FOR item IN SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='stock_operational' AND c.relrowsecurity LOOP
 EXECUTE format('CREATE POLICY ha_synthetic_readonly ON stock_operational.%I FOR SELECT TO ha_readonly USING (true)',item.relname);
