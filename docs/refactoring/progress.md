@@ -1537,8 +1537,9 @@ and the [explicit mapping/release contract](../database-migration.md#named-colum
 Review/execution order: named authority and reversible compatibility release first;
 a dependent PR carries operator-only final removal outside normal migration discovery
 and physical-absence acceptance. A mandatory drained write freeze fences old writers.
-Neither PR authorizes merge, deployment, hosted DDL or final removal. Independent CI,
-the environment-blocked 500MB recovery check, private production reconciliation,
+The implementation PRs originally withheld merge and release approval. The owner
+subsequently approved merging only. Independent CI now passes, including the 500MB
+recovery check that the local host could not run; private production reconciliation,
 verified recovery evidence and separate owner maintenance/DDL/release approvals
 remain gates. No private Mac evidence is assumed available.
 
@@ -1552,7 +1553,8 @@ synthetically verified code, not evidence that production removal has occurred.
 
 Review PRs: [named authority #71](https://github.com/volkswg/stock-management/pull/71),
 then [guarded final removal #72](https://github.com/volkswg/stock-management/pull/72).
-Both are drafts and unmerged. The dependent PR enables the same credential-free
+Owner approval now authorizes merging in that order; production deployment and
+schema execution remain separately gated. The dependent PR enables the same credential-free
 Migration acceptance workflow for its named-authority base branch so physical
 removal tests can receive independent CI before any retarget/merge.
 
