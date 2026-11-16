@@ -10,7 +10,14 @@ const productionHistory = JSON.parse(readFileSync('tests/fixtures/production-rel
 const readonlyAccountsHistory = JSON.parse(readFileSync('tests/fixtures/readonly-account-configuration-before.json', 'utf8'));
 const lineCutoffHistory = JSON.parse(readFileSync('tests/fixtures/line-cutoff-before.json', 'utf8'));
 export const orderCreateKeyHistory = JSON.parse(readFileSync('tests/fixtures/order-create-key-before.json', 'utf8'));
+const lineUploadFeedbackHistory = JSON.parse(readFileSync('tests/fixtures/line-upload-feedback-before.json', 'utf8'));
 export function restoreOrderCreateKeySource(file, source) {
+  const feedback = lineUploadFeedbackHistory.edits[file];
+  if (feedback && source !== feedback.before) {
+    assert.equal(hash(feedback.before), feedback.beforeHash, file);
+    assert.equal(hash(source), feedback.afterHash, file);
+    source = feedback.before;
+  }
   const orderCreate = orderCreateKeyHistory.edits[file];
   if (!orderCreate) return source;
   assert.equal(hash(orderCreate.before), orderCreate.beforeHash, file);
