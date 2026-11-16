@@ -1545,7 +1545,7 @@ pause alone does not prove preview/immutable coverage.
 | F5 — read-only SQL release | After separate live-change approval, bind the approved final code/deployment, target/purpose and reader. Validate reconciled reports in read-only mode while LINE remains denied and source principals remain Reader. | Correct identity/TLS/source/release, matching totals/records and unchanged post-import baseline. No acceptance writes or real provider replay. |
 | F6 — separately approved reopening | Owner records GO. Enable app SQL writers only; preserve the Sheets Reader fence. Reopen LINE only through the signed future cutoff procedure below, then announce reopening and process agreed fresh work/session continuations one at a time. | Final release/cutoff checks pass, no exception outstanding, original outcomes reconciled and existing controls intact. If not ready, keep LINE denied and everyone paused. |
 
-**Real prerequisite before automatic LINE reopening — not implemented here.**
+**LINE migration cutoff implemented; reopening remains owner-controlled (2026-11-16).**
 Code review finds that `processPostgresWebhook` deduplicates `webhookEventId` in
 SQL `commands`; promotion does not import Sheets-era event history. The current
 LINE entrypoint has no migration timestamp boundary. Therefore an old delivery
@@ -1563,8 +1563,15 @@ never receives a success acknowledgment or an automatic provider send. Preserve
 fresh-event idempotency and existing Sheets/staging behavior. An empty, correctly
 signed verification payload may still succeed without processing business work.
 Do not deploy a dummy success receiver or “fix” the gap by suppressing signatures.
-The private packet specifies six focused acceptance cases; all are **NOT RUN**
-because this task finalizes the procedure and changes no application code.
+The six focused cases now pass against the actual HMAC/request boundary and
+PostgreSQL event-processing owner with synthetic transports: missing/invalid floor,
+old/mixed batches, invalid raw timestamps, signature/JSON validation, fresh-event
+replay and signed empty verification. No business, SQL or provider work occurs for
+rejected batches. The legacy parser cannot silently discard an unsafe raw entry.
+The server-only `STOCK_LINE_ACCEPT_EVENTS_AT_OR_AFTER_UTC` setting is required for
+nonempty production Supabase LINE batches; missing/blank means 503 and no processing.
+The deployed setting remains blank until an owner-approved future reopening time.
+The existing LINE edge deny remains enabled until separate reopening approval.
 
 Choose `T_LINE` in the future, with the guard deployment validated before that
 instant. After explicit GO, remove only the temporary LINE deny shortly before
@@ -3940,3 +3947,28 @@ Hosted verification: the tested function body is installed, with unchanged funct
 OID/owner/ACL, search path, table RLS/grants, policies and trigger bindings. Security
 and health advisors report no notices. No production business records were written
 by the migration. Offline acceptance passes 626/626; LINE remains paused.
+
+
+## LINE cutoff release and scheduler audit (2026-11-16)
+
+The boundary is applied after the existing raw-body signature check and JSON parse,
+before calling business processing. It validates the entire raw event array,
+including entries the legacy projection filters out. Old, invalid or mixed batches
+fail closed with 503; private server diagnostics contain only event IDs/timestamps
+and a reason. Browser APIs, Sheets/staging behavior and fresh-event idempotency stay
+unchanged. No new authentication, schema changes, source resync or provider replay
+is part of this release. Existing backups remain deferred.
+
+Read-only scheduling checks found no Vercel cron definitions, no GitHub schedule
+trigger and no PostgreSQL pg_cron installation/job table. The owner confirms no
+external scheduled jobs. The existing manual Loyverse sync endpoint remains behind
+`withPersistence`; its storage factory selects PostgreSQL when `STOCK_STORAGE` is
+`supabase`, with no Sheets write fallback. No job was started or provider called.
+
+The original workbook service account still has `canEdit=false`, verified through
+Drive metadata only; no source records or permissions were changed. Keep the old
+workbook read-only permanently after SQL writes. Before reopening, set a fresh
+future UTC floor, deploy and validate that exact configuration with LINE still
+blocked, then remove only the temporary LINE deny after owner approval. If the
+chosen time is missed, keep the deny and select a later time. Do not replay raw
+pause-window webhooks or automatically resume an unverified writer.

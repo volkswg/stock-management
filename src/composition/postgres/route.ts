@@ -76,3 +76,37 @@ async function readRevision(): Promise<string> {
   return `"stock-v2-${result.rows[0].revision}"`;
 }
 export function activeDatabase() { return currentTransaction(); }
+
+// Call only after the original raw-body HMAC check and JSON validation.
+// Validate the raw batch, since the legacy parser filters malformed entries.
+export function assertProductionLineCutoff(rawBody: Buffer): void {
+  if (storageMode() !== "supabase" || process.env.VERCEL_ENV !== "production") return;
+  const payload: unknown = JSON.parse(rawBody.toString("utf8"));
+  const record = (value: unknown): value is Record<string, unknown> =>
+    value !== null && typeof value === "object" && !Array.isArray(value);
+  const events = record(payload) && Array.isArray(payload.events) ? payload.events : undefined;
+  const reject = (reason: string): never => {
+    // Private server logs contain only delivery identities/times and disposition.
+    console.warn("LINE migration cutoff rejected batch", {
+      reason,
+      events: events?.map((event: unknown) => ({
+        id: record(event) && typeof event.webhookEventId === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(event.webhookEventId) ? event.webhookEventId : null,
+        timestamp: record(event) && typeof event.timestamp === "number" && Number.isSafeInteger(event.timestamp) ? event.timestamp : null,
+      })),
+    });
+    throw new PersistenceFailure(503, "LINE is paused for the database migration. Please wait for reopening.");
+  };
+  if (!events) return reject("invalid_batch");
+  // LINE's signed empty verification payload performs no business work.
+  if (events.length === 0) return;
+  const configured = process.env.STOCK_LINE_ACCEPT_EVENTS_AT_OR_AFTER_UTC;
+  if (!configured || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(configured)) return reject("invalid_cutoff");
+  const floor = Date.parse(configured);
+  const canonical = configured.includes(".") ? configured : configured.replace("Z", ".000Z");
+  if (!Number.isFinite(floor) || new Date(floor).toISOString() !== canonical) return reject("invalid_cutoff");
+  for (const event of events) {
+    if (!record(event) || typeof event.type !== "string" || typeof event.timestamp !== "number" ||
+        !Number.isSafeInteger(event.timestamp) || event.timestamp < 0 || !Number.isFinite(new Date(event.timestamp).getTime())) return reject("invalid_timestamp");
+    if (event.timestamp < floor) return reject("old_event");
+  }
+}
