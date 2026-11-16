@@ -1450,3 +1450,25 @@ Hosted verification: the tested function body is installed, with unchanged funct
 OID/owner/ACL, search path, table RLS/grants, policies and trigger bindings. Security
 and health advisors report no notices. No production business records were written
 by the migration. Offline acceptance passes 626/626; LINE remains paused.
+
+
+## LINE migration cutoff release — 2026-11-16
+
+Implemented a production-Supabase-only, signature-preserving admission boundary
+before all business/SQL/provider processing. Six actual-owner focused cases pass;
+old/mixed batches and malformed raw entries cannot partially execute. Missing or
+invalid UTC configuration returns 503; signed empty verification remains available.
+Browser behavior and fresh command/reply deduplication are unchanged. The first
+broad regression run caught five historical environment-template hash mismatches;
+the new bounded inverse records this authorized delta without changing any inherited
+fixture. Focused account/source-contract checks then passed. Lint/typecheck and
+credential-free build pass, with the existing shipmentRow warning only.
+
+Scheduling metadata shows no Vercel/GitHub/pg_cron jobs; the owner confirms no
+external scheduler. Existing manual sales sync selects Supabase through the shared
+storage factory. Original Sheets service-account edit capability remains false.
+LINE stays edge-blocked and the reopening floor stays unset/blank until separate
+owner approval; no scheduled jobs, source writes or provider actions are enabled.
+
+Final local regression: 632/632 pass, zero failures/skips. The route manifest is
+unchanged and all 113 client chunks contain no private database strings.

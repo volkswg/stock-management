@@ -1,4 +1,4 @@
-import { withPersistence } from "@/composition/postgres/route";
+import { withPersistence, assertProductionLineCutoff } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import {
@@ -45,6 +45,7 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
     );
   }
 
+  assertProductionLineCutoff(rawBody);
   const result=await processLineWebhook({events:payload.events,lineBotService,getGoogleSheetsService,getGoogleDriveService,getCreateMode:()=>config.movementCreateMode,getPublicBaseUrl:()=>config.movementPublicBaseUrl||config.publicBaseUrl});
   if (result.movementFailed) {
     return NextResponse.json(
