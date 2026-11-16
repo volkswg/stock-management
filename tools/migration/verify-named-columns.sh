@@ -37,4 +37,20 @@ target=$(pg psql -U postgres -d application_test -At -c 'SELECT isolation_id FRO
 run_app(){ env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-/usr/bin/chromium}" STOCK_TARGET_ISOLATION_ID="$target" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/application_test" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test "$@"; }
 run_app tools/migration/operational.test.cjs
 run_app tools/migration/browser-acceptance.test.cjs
-echo "PASS: populated upgrade, fresh installation, all-column codecs, compatibility rollback and operational/browser acceptance"
+if pg psql -U postgres -d application_test -v ON_ERROR_STOP=1 < tools/migration/final-removal/*remove_business_cells.sql > "$artifacts/guard-denial.log" 2>&1; then
+ echo 'Final removal must fail without explicit operator setting' >&2; exit 1
+fi
+pg psql -U postgres -d application_test -v ON_ERROR_STOP=1 -c "SELECT 1 / ((SELECT count(*)=23 FROM information_schema.columns WHERE table_schema='stock_operational' AND column_name='business_cells'))::int;"
+pg psql -U postgres -d application_test -v ON_ERROR_STOP=1 -c "SET stock.allow_final_cells_removal='reviewed-named-columns-v1';" -f /dev/stdin < tools/migration/final-removal/*remove_business_cells.sql > "$artifacts/removal.log"
+pg psql -U postgres -d application_test -v ON_ERROR_STOP=1 -c "SELECT 1 / (NOT EXISTS(SELECT FROM information_schema.columns WHERE table_schema='stock_operational' AND column_name='business_cells'))::int;"
+# Run the final schema against a separate fresh database, with the full suite.
+run_app tools/migration/named-columns-final.test.cjs
+pg createdb -U postgres final_test
+for file in supabase/migrations/*.sql; do pg psql -U postgres -d final_test -v ON_ERROR_STOP=1 < "$file" > "$artifacts/final-schema.log"; done
+pg psql -U postgres -d final_test -v ON_ERROR_STOP=1 -c "SET stock.allow_final_cells_removal='reviewed-named-columns-v1';" -f /dev/stdin < tools/migration/final-removal/*remove_business_cells.sql > "$artifacts/final-removal.log"
+target=$(pg psql -U postgres -d final_test -At -c 'SELECT isolation_id FROM stock_operational.environment')
+run_final(){ env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-/usr/bin/chromium}" STOCK_TARGET_ISOLATION_ID="$target" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/final_test" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test "$@"; }
+run_final tools/migration/operational.test.cjs
+run_final tools/migration/browser-acceptance.test.cjs
+
+echo "PASS: populated upgrade, complete installation, all-column codecs, compatibility rollback, guarded physical removal and operational/browser acceptance in both schemas"

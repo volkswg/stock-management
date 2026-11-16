@@ -1541,3 +1541,11 @@ Neither PR authorizes merge, deployment, hosted DDL or final removal. Independen
 the environment-blocked 500MB recovery check, private production reconciliation,
 verified recovery evidence and separate owner maintenance/DDL/release approvals
 remain gates. No private Mac evidence is assumed available.
+
+The dependent final-removal branch adds the separately guarded, CLI-versioned SQL
+under tools/migration/final-removal, leaving normal Supabase discovery unchanged.
+Acceptance refuses accidental execution without the operator setting, verifies all
+23 physical columns are absent and runs the same 32 operational cases and actual
+Chromium/API retry check in each schema. The actual adapter also preserves explicit
+nulls, named direct edits and archive behavior after removal. This is prepared and
+synthetically verified code, not evidence that production removal has occurred.

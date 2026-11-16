@@ -26,3 +26,13 @@ test('historical adapter and operational assertions retain exact source witnesse
  assert.match(operational.source,/preserves canonical app precedence/);
  assert.match(read('tools/migration/operational.test.cjs'),/rejects conflicting dual writes/);
 });
+
+test('destructive removal is excluded from ordinary deployments and denies a missing operator setting',()=>{
+ const ordinary=readdirSync('supabase/migrations');
+ assert.ok(ordinary.every(n=>!n.endsWith('_remove_business_cells.sql')));
+ const files=readdirSync('tools/migration/final-removal');assert.equal(files.length,1);
+ const sql=read('tools/migration/final-removal/'+files[0]);
+ assert.ok(sql.includes("coalesce((current_setting('stock.allow_final_cells_removal',true)='reviewed-named-columns-v1'),false)"));
+ assert.doesNotMatch(sql,/CASCADE/i);
+ for(const table of Object.keys(catalog))assert.ok(sql.includes(`ALTER TABLE stock_operational.${table} DROP COLUMN business_cells;`));
+});
