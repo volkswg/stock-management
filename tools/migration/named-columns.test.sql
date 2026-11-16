@@ -119,3 +119,9 @@ UPDATE stock_operational.orders t SET seller=i.seller,cell_kinds=i.cell_kinds
 FROM stock_operational.input_orders('["NC_TEST","",null,"12.3400","after release","","","",""]'::jsonb) i WHERE t.id='NC_TEST';
 SELECT 1 / ((SELECT business_cells->2='null'::jsonb FROM stock_operational.orders WHERE id='NC_TEST'))::int;
 ROLLBACK;
+
+DO $$ BEGIN
+ BEGIN UPDATE stock_operational.orders SET business_cells=business_cells,remark='inconsistent explicit no-op cells' WHERE id='NC_TEST'; RAISE EXCEPTION 'Explicit inconsistent dual write accepted'; EXCEPTION WHEN raise_exception THEN IF SQLERRM='Explicit inconsistent dual write accepted' THEN RAISE; END IF; END;
+END $$;
+UPDATE stock_operational.orders SET remark='consistent',business_cells=jsonb_set(business_cells,'{4}','"consistent"') WHERE id='NC_TEST';
+UPDATE stock_operational.orders SET remark='after release' WHERE id='NC_TEST';

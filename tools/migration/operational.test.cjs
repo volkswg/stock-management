@@ -461,6 +461,8 @@ test('direct Supabase order remark mapping rejects conflicting dual writes and p
  await command(async()=>service.orders.updateRows(`E${Number((await read()).row_order)+1}`,[['Canonical app value']]));
  assert.equal((await read()).remark,'Canonical app value');
  const before=await read();
+ await assert.rejects(transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET business_cells=business_cells,remark=$1 WHERE id=$2',['Inconsistent unchanged cells',id])),PersistenceFailure);
+ assert.deepEqual(await read(),before);
  const globalBefore=await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value);
  await assert.rejects(transaction(true,async()=>{
   await requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',['Rolled back',id]);

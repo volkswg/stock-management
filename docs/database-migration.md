@@ -4090,7 +4090,7 @@ mapped field's null, empty, scalar type, high-precision number and JSON spelling
   named columns from `input_<table>(transient array)`. The array exists only as a
   feature-interface/input projection. Existing feature calculations, routes and
   business application interfaces are unchanged.
-* Database: the old `map_cells` triggers are replaced with `a_validate` and
+* Database: the old `map_cells` triggers are replaced with `a_validate`, an explicit-column dual-write guard, and
   `z_compat`; old mapper functions stay dormant only for compatibility rollback.
   Validation normalizes empty text to the existing SQL NULL convention, protects
   immutable business keys and row order, refuses archived changes and advances
@@ -4126,9 +4126,9 @@ backup evidence was available to this task.
 Apply only the new named_column_authority migration. Named columns become
 immediately authoritative. Legacy array-only inserts/changed array-only updates
 are rejected. When both arrays and named values change, arrays must exactly equal
-the named projection or the entire statement fails. A no-op assignment cannot be
-distinguished from an omitted assignment in a row trigger; unchanged arrays are
-regenerated from named columns. The old mapper never executes. **Mixed old/new
+the named projection or the entire statement fails. An UPDATE OF business_cells trigger detects explicit array assignments, including
+unchanged arrays supplied alongside changed named values; inconsistent assignments
+are rejected. Named-only updates regenerate compatibility arrays. The old mapper never executes. **Mixed old/new
 application writes are unsupported: a write freeze is mandatory**, not a rolling
 write deployment. Publish the reviewed new app only under separate approval, update
 the existing release binding to its exact SHA, and retire/drain every old instance
