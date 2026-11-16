@@ -20,8 +20,8 @@ import {
   type UploadFile,
 } from "antd";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { createOrder } from "../api";
+import { useEffect, useRef, useState } from "react";
+import { createOrder, getPendingOrderCreationNotice } from "../api";
 import styles from "./orderCreate.module.css";
 
 const { Text, Title } = Typography;
@@ -41,13 +41,25 @@ export function OrderCreatePage() {
   const [form] = Form.useForm<OrderFormValues>();
   const [messageApi, messageContextHolder] = message.useMessage();
   const [submitting, setSubmitting] = useState(false);
+  const submissionLocked = useRef(false);
+  const [pendingNotice, setPendingNotice] = useState<string>();
   const [error, setError] = useState<string>();
   const [billImageFiles, setBillImageFiles] = useState<UploadFile[]>([]);
   const [productImageFiles, setProductImageFiles] = useState<UploadFile[]>([]);
   const [billImageError, setBillImageError] = useState<string>();
   const [productImageError, setProductImageError] = useState<string>();
 
+  useEffect(() => {
+    // Read browser storage after hydration; do not update an unmounted form.
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) setPendingNotice(getPendingOrderCreationNotice());
+    });
+    return () => { active = false; };
+  }, []);
+
   const submitOrder = async (values: OrderFormValues): Promise<void> => {
+    if (submissionLocked.current) return;
     const billImages = getFiles(billImageFiles);
     const productImages = getFiles(productImageFiles);
     setBillImageError(
@@ -62,10 +74,12 @@ export function OrderCreatePage() {
       return;
     }
 
+    submissionLocked.current = true;
     setSubmitting(true);
     setError(undefined);
     setBillImageError(undefined);
     setProductImageError(undefined);
+    let completed = false;
     try {
       const response = await createOrder({
         ...values,
@@ -73,16 +87,21 @@ export function OrderCreatePage() {
         productImages,
       });
 
+      completed = true;
       messageApi.success("Order created.");
       router.push(`/orders/${encodeURIComponent(response.order.id)}`);
     } catch (submitError) {
+      setPendingNotice(getPendingOrderCreationNotice());
       setError(
         submitError instanceof Error
           ? submitError.message
           : "Failed to create order.",
       );
     } finally {
-      setSubmitting(false);
+      if (!completed) {
+        submissionLocked.current = false;
+        setSubmitting(false);
+      }
     }
   };
 
@@ -116,6 +135,15 @@ export function OrderCreatePage() {
           </header>
 
           <Card className={styles.formCard} title="Order information">
+            {pendingNotice && !error ? (
+              <Alert
+                className={styles.errorAlert}
+                title="Previous order needs confirmation"
+                description={pendingNotice}
+                showIcon
+                type="warning"
+              />
+            ) : null}
             {error ? (
               <Alert
                 className={styles.errorAlert}
@@ -226,7 +254,7 @@ export function OrderCreatePage() {
                     loading={submitting}
                     type="primary"
                   >
-                    Create order
+                    {pendingNotice ? "Check saved outcome" : "Create order"}
                   </Button>
                 </Space>
               </div>

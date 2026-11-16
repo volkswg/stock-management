@@ -139,20 +139,154 @@ export async function createOrder(
     formData.append("productImages", image);
   }
 
-  const response = await fetch("/api/orders/with-images", {
-    method: "POST",
-    headers: { Accept: "application/json" },
-    body: formData,
-  });
+  const fingerprint = fingerprintOrderCreation(formData);
+  const active = orderCreationInFlight;
+  if (active) {
+    if ((await fingerprint) !== (await active.fingerprint)) {
+      throw pendingOrderError();
+    }
+    return active.response;
+  }
+  const operation = {
+    fingerprint,
+    response: sendOrderCreation(formData, fingerprint),
+  };
+  orderCreationInFlight = operation;
+  try {
+    return await operation.response;
+  } finally {
+    if (orderCreationInFlight === operation) orderCreationInFlight = undefined;
+  }
+}
 
-  const body: unknown = await response.json();
+type PendingOrderCreation = {
+  version: 1;
+  key: string;
+  fingerprint: string;
+  phase: "prepared" | "pending" | "review" | "rejected";
+  retrySafe: boolean;
+};
+const pendingOrderStorageKey = "stock-orders-pending-creation:v1";
+let orderCreationInFlight: {
+  fingerprint: Promise<string>;
+  response: Promise<CreateOrderResponse>;
+} | undefined;
+
+function pendingOrderError(key?: string): Error {
+  return new Error(`A previous order still needs confirmation. Restore the same details and images to check its outcome; do not start another order.${key ? ` Reference: ${key}.` : ""}`);
+}
+function readPendingOrder(): PendingOrderCreation | undefined {
+  try {
+    const raw = sessionStorage.getItem(pendingOrderStorageKey);
+    if (raw === null) return undefined;
+    const value: unknown = JSON.parse(raw);
+    if (
+      !isRecord(value) || value.version !== 1 ||
+      typeof value.key !== "string" || !/^order-create:[a-f0-9-]{36}$/.test(value.key) ||
+      typeof value.fingerprint !== "string" || !/^[a-f0-9]{64}$/.test(value.fingerprint) ||
+      typeof value.retrySafe !== "boolean" || typeof value.phase !== "string" ||
+      !["prepared", "pending", "review", "rejected"].includes(value.phase)
+    ) throw new Error();
+    return value as PendingOrderCreation;
+  } catch {
+    throw new Error("This browser cannot recover a pending order safely. Review any previous attempt before creating another order.");
+  }
+}
+function savePendingOrder(value: PendingOrderCreation): void {
+  try {
+    const raw = JSON.stringify(value);
+    sessionStorage.setItem(pendingOrderStorageKey, raw);
+    if (sessionStorage.getItem(pendingOrderStorageKey) !== raw) throw new Error();
+  } catch {
+    throw new Error("This browser cannot preserve the order reference. Enable session storage before submitting an order.");
+  }
+}
+export function getPendingOrderCreationNotice(): string | undefined {
+  try {
+    const pending = readPendingOrder();
+    if (!pending || pending.phase === "rejected") return undefined;
+    return pending.phase === "review"
+      ? `The previous upload outcome needs review. Contact the operator before checking this same request again. Reference: ${pending.key}.`
+      : `A previous order is unconfirmed. Reselect the same images and restore the same details to check its outcome. Reference: ${pending.key}.`;
+  } catch (error) {
+    return error instanceof Error ? error.message : "Review the previous order before submitting again.";
+  }
+}
+async function fingerprintOrderCreation(form: FormData): Promise<string> {
+  if (typeof crypto === "undefined" || !crypto?.subtle || typeof crypto.randomUUID !== "function") {
+    throw new Error("A secure browser is required to preserve an order reference safely.");
+  }
+  const digest = async (bytes: BufferSource) => Array.from(
+    new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)),
+    b => b.toString(16).padStart(2, "0"),
+  ).join("");
+  const entries: unknown[] = [];
+  for (const [name, value] of form.entries()) {
+    entries.push(typeof value === "string" ? [name, value] : [name, value.name, value.type, await digest(await value.arrayBuffer())]);
+  }
+  return digest(new TextEncoder().encode(JSON.stringify([
+    "POST", "/api/orders/with-images", "", entries,
+  ])));
+}
+async function orderCreationRevision(): Promise<string | undefined> {
+  try {
+    // HEAD is read-only and carries the existing PostgreSQL revision header.
+    // Pin support before the first POST: a Sheets-era uncertainty must not be
+    // retried just because the application later switches storage backends.
+    const response = await fetch("/api/orders", { method: "HEAD", cache: "no-store" });
+    const revision = response.headers.get("x-stock-revision");
+    return response.ok && revision && /^"stock-v2-\d+"$/.test(revision) ? revision : undefined;
+  } catch { return undefined; }
+}
+async function sendOrderCreation(formData: FormData, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
+  const intent = await fingerprint;
+  let pending = readPendingOrder();
+  if (pending && pending.fingerprint !== intent && pending.phase !== "rejected") throw pendingOrderError(pending.key);
+  if (!pending || pending.fingerprint !== intent) {
+    // Older versions left keys in the global fetch helper's namespace. Do not
+    // replace one with a fresh key: its original backend/outcome is unproven.
+    const legacyKey = sessionStorage.getItem(`stock-pending-operation:${intent}`);
+    if (legacyKey !== null) throw pendingOrderError(legacyKey);
+    pending = {
+      version: 1,
+      key: `order-create:${crypto.randomUUID()}`,
+      fingerprint: intent,
+      phase: "prepared",
+      retrySafe: false,
+    };
+    savePendingOrder(pending);
+  }
+  const retry = pending.phase !== "prepared" && pending.phase !== "rejected";
+  if (retry && !pending.retrySafe) throw new Error(`The previous request cannot be retried safely on this storage backend. Review the order and uploads with the operator. Reference: ${pending.key}.`);
+  const revision = await orderCreationRevision();
+  if (retry && !revision) throw new Error(`Cannot confirm safe retry support. Keep this order pending and contact the operator. Reference: ${pending.key}.`);
+  pending = { ...pending, phase: "pending", retrySafe: revision !== undefined };
+  savePendingOrder(pending); // Must persist before any multipart POST can leave.
+  let response: Response, body: unknown;
+  try {
+    response = await fetch("/api/orders/with-images", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Idempotency-Key": pending.key,
+        ...(revision ? { "If-Match": revision } : {}),
+      },
+      body: formData,
+    });
+    body = await response.json();
+  } catch {
+    throw pendingOrderError(pending.key); // Lost HTTP/JSON acknowledgement is not proof of rollback.
+  }
   if (!response.ok) {
-    throw new Error(getErrorMessage(body));
+    // This route's 400 validation runs before any upload/business operation.
+    pending.phase = response.status === 400 ? "rejected" : "review";
+    savePendingOrder(pending);
+    if (response.status === 400) throw new Error(getErrorMessage(body));
+    const reason = response.status < 500 ? getErrorMessage(body) : "The order or upload outcome needs review.";
+    throw new Error(`${reason} Check this same request after reviewing the saved result; do not create another order. Reference: ${pending.key}.`);
   }
-  if (!isCreateOrderResponse(body)) {
-    throw new Error("The order API returned an invalid response.");
-  }
-
+  if (!isCreateOrderResponse(body)) throw pendingOrderError(pending.key);
+  sessionStorage.removeItem(pendingOrderStorageKey); // Only a validated successful acknowledgement ends the intent.
   return body;
 }
 
@@ -316,7 +450,7 @@ function isOrderResponse(value: unknown): value is OrderResponse {
 }
 
 function isCreateOrderResponse(value: unknown): value is CreateOrderResponse {
-  return isRecord(value) && isRecord(value.order);
+  return isRecord(value) && isRecord(value.order) && typeof value.order.id === "string" && value.order.id.trim().length > 0;
 }
 
 function isUpdateOrderProductsResponse(value: unknown): value is UpdateOrderProductsResponse {
