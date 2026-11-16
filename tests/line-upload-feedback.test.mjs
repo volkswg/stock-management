@@ -7,7 +7,7 @@ import ts from 'typescript';
 function current(path, imports) {
   const exports = {};
   const code = ts.transpileModule(readFileSync(path, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  new vm.Script(code).runInNewContext({ exports, Error, Object, Map, Date, require(name) { assert.ok(Object.hasOwn(imports, name), name); return imports[name]; } });
+  new vm.Script(code).runInNewContext({ exports, Error, Object, Map, Date, URLSearchParams, require(name) { assert.ok(Object.hasOwn(imports, name), name); return imports[name]; } });
   return exports;
 }
 test('movement upload diagnostics identify the safe stage/status/reason without disclosing provider body or credentials', async () => {
@@ -28,7 +28,54 @@ test('movement upload diagnostics identify the safe stage/status/reason without 
   });
   assert.equal(appends, 0); assert.equal(replies.length, 1);
   assert.equal(logs[0].stage, 'drive_upload'); assert.equal(logs[0].providerStatus, 400); assert.equal(logs[0].providerReason, 'invalid_grant');
+  assert.equal(logs[0].failureType, 'google_oauth_refresh_rejected');
+  assert.equal(logs[0].recoveryAction, 'renew_google_oauth_credentials_and_redeploy');
   assert.doesNotMatch(JSON.stringify(logs), /DO_NOT_LOG|private.example|WT_bytes/);
+});
+
+async function diagnoseUpload(uploadImage) {
+  const logs = [];
+  const app = current('src/modules/line-workflows/application/movement-events.ts', {
+    '@/shared/types/line-protocol': { LineMessageType: { Image: 'image' } },
+    '@/modules/orders/rules': {}, '@/modules/inventory/quantity': {}, '../contracts': {},
+    './classify-event': { isMovementStartCommand: () => false }, './sessions': {},
+    './reply': { replyText: async () => {} },
+  });
+  await app.handleMovementEvent({ event: { webhookEventId: 'WT_event', source: { userId: 'WT_user' }, message: { type: 'image', id: 'WT_image' } },
+    session: { processed: false, photoItems: [], state: { step: 'close_bag', shop: 'NJ', itemId: 'WT_item', masterId: 'WT_master' } },
+    context: { inventory: { append() { assert.fail('Failed upload created business data'); } } }, createMode: 'photo_only',
+    drive: () => ({ uploadImage }), line: { downloadMessageContent: async () => ({ contentType: 'image/png', bytes: 'WT_bytes' }) },
+    imageUpload: {}, runtime: { error: (label, details) => logs.push({ label, ...details() }) },
+  });
+  return logs;
+}
+test('actual OAuth adapter expired/revoked refresh rejection reaches the movement log with safe recovery guidance', async () => {
+  let attempts = 0;
+  class FakeAccessTokenProvider {
+    getCachedAccessToken() { return undefined; }
+    async exchangeAccessToken(parameters) {
+      attempts++;
+      assert.equal(parameters.get('grant_type'), 'refresh_token');
+      return Response.json({ error: 'invalid_grant', error_description: 'Token has been expired or revoked. PRIVATE_PROVIDER_BODY' }, { status: 400 });
+    }
+  }
+  const { GoogleOAuthRefreshTokenAuth } = current('src/infrastructure/persistence/google-sheets/google-auth/GoogleOAuthRefreshTokenAuth.ts', {
+    './GoogleAccessTokenProvider': { GoogleAccessTokenProvider: FakeAccessTokenProvider },
+  });
+  const auth = new GoogleOAuthRefreshTokenAuth({ clientId: 'PRIVATE_CLIENT_ID', clientSecret: 'PRIVATE_CLIENT_SECRET', refreshToken: 'PRIVATE_REFRESH_TOKEN' });
+  const logs = await diagnoseUpload(() => auth.getAccessToken());
+  assert.equal(attempts, 1); assert.equal(logs.length, 1);
+  assert.equal(logs[0].providerStatus, 400); assert.equal(logs[0].providerReason, 'invalid_grant');
+  assert.equal(logs[0].failureType, 'google_oauth_refresh_rejected');
+  assert.equal(logs[0].recoveryAction, 'renew_google_oauth_credentials_and_redeploy');
+  assert.doesNotMatch(JSON.stringify(logs), /PRIVATE_|expired or revoked|WT_bytes/);
+});
+test('a different upload failure does not falsely diagnose an expired OAuth token', async () => {
+  const logs = await diagnoseUpload(() => { throw Error('Google Drive upload failed: 403 {"reason":"insufficientPermissions","description":"invalid_grant PRIVATE_PROVIDER_BODY"}'); });
+  assert.equal(logs[0].providerStatus, 403);
+  assert.equal(logs[0].failureType, 'image_upload_failed');
+  assert.equal(logs[0].recoveryAction, 'review_upload_outcome');
+  assert.doesNotMatch(JSON.stringify(logs), /PRIVATE_PROVIDER_BODY/);
 });
 
 function fixture() {

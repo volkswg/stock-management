@@ -203,12 +203,17 @@ async function saveImage<Bytes>({ state, event, eventId, context, drive, line, c
             const message = error instanceof Error ? error.message : "";
             const status = /^(?:Google OAuth refresh failed|Google Drive (?:upload|permission setup|file deletion) failed): (\d{3})\b/.exec(message);
             const reason = /\b(invalid_grant|invalid_client|access_denied|insufficientPermissions|storageQuotaExceeded|rateLimitExceeded|dailyLimitExceeded|notFound|permissionDenied|quotaExceeded)\b/.exec(message);
+            // invalid_grant can mean an expired, revoked or otherwise invalid
+            // refresh token. Preserve Google's code without guessing which one.
+            const oauthRefreshRejected = message.startsWith("Google OAuth refresh failed:") && reason?.[1] === "invalid_grant";
             runtime.error("Movement image upload failed", () => ({
                 webhookEventId: event.webhookEventId,
                 messageId: event.message?.id,
                 stage: uploadStage,
                 providerStatus: status ? Number(status[1]) : undefined,
                 providerReason: reason?.[1] || "unclassified",
+                failureType: oauthRefreshRejected ? "google_oauth_refresh_rejected" : "image_upload_failed",
+                recoveryAction: oauthRefreshRejected ? "renew_google_oauth_credentials_and_redeploy" : "review_upload_outcome",
             }));
             if (imageUpload)
                 imageUpload.failed = true;

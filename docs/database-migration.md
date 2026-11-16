@@ -4008,8 +4008,11 @@ Guard-rejected uncertain image retries also receive this bounded feedback withou
 re-entering the upload operation. Missing reply tokens do not claim a notice.
 
 Movement upload diagnostics now record only event/message identity, stage, bounded
-HTTP status and an allowlisted provider reason. Raw provider bodies, credentials,
-URLs and image/business content are excluded. This improves diagnosis and feedback;
+HTTP status and an allowlisted provider reason. Google OAuth `invalid_grant` is
+classified as `google_oauth_refresh_rejected`, with the recovery action
+`renew_google_oauth_credentials_and_redeploy`. It can indicate an expired, revoked
+or otherwise invalid refresh token; the log does not guess which. Raw provider
+bodies, credentials, URLs and image/business content are excluded. This improves diagnosis and feedback;
 it does not establish a provider failure cause, repair credentials, clear pending
 claims, replay events or authorize production recovery. Existing file outcomes
 must be reconciled before retrying an uncertain operation.

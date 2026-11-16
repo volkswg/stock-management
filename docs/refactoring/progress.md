@@ -1505,10 +1505,14 @@ diagnostics. Failure notices use a separate durable effect key, preserve unknown
 upload outcomes and cannot emit rolled-back success messages. No persistence
 adapter, trigger, authentication, schema or configuration changes are included.
 
-Local verification: 653/653 regressions pass, including five current-source cases
-for sanitized diagnostics, post-rollback feedback, uncertain retry refusal, notice
-deduplication, recovered success and missing reply tokens. Lint has zero errors
+Local verification: 655/655 regressions pass, including seven current-source cases
+for sanitized diagnostics, the actual OAuth adapter expired/revoked-token path,
+non-OAuth failure classification, post-rollback feedback, uncertain retry refusal,
+notice deduplication, recovered success and missing reply tokens. Lint has zero errors
 and the inherited unused shipmentRow warning. Typecheck and the credential-free
 build pass; route manifest and all 113 client-chunk privacy checks remain intact.
-New bounded inverses retain inherited fixtures unchanged. No real provider upload,
+The real PostgreSQL suite passes 32/32 on a fresh disposable local instance with
+fake providers. Failed-batch assertions verify exactly one separate failure-reply
+effect, no completed business command and no duplicate failure notice. New bounded
+inverses retain inherited fixtures unchanged. No real provider upload,
 production write, event replay or deployment was used to verify this source fix.
