@@ -578,3 +578,10 @@ Active business selections intentionally retain legacy precedence through explic
 selection reads; this compatibility release does not authorize dropping row_order,
 changing production, rewriting session data or promoting an older positional LINE
 writer. Release requirements and rollback limitations are in the database runbook.
+
+PR73 CI bootstrap correction: historical pre-named-column fixtures defer both
+named-column authority and its dependent ID/date migration. The populated current
+schema applies named-column authority first, then the ID/date upgrade; fresh
+installs still apply every migration. The corrected complete operational
+PostgreSQL/browser/reconciliation/backup/restore pipeline and all 73 Python
+migration tests pass locally. Application code and migration SQL are unchanged.

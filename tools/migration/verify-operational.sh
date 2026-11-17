@@ -13,7 +13,9 @@ for attempt in $(seq 1 60); do
 done
 pg(){ docker --host=unix:///var/run/docker.sock exec -i "$name" "$@"; }
 pg psql -U postgres -v ON_ERROR_STOP=1 -c 'CREATE ROLE anon; CREATE ROLE authenticated;'
-for file in supabase/migrations/*.sql; do [[ "$file" == *named_column_authority.sql ]] && continue; pg psql -U postgres -v ON_ERROR_STOP=1 < "$file" > "$artifacts/migration.log"; done
+# This fixture is promoted before named-column authority. Defer its dependent
+# ID/date upgrade too; fresh application installs below still apply every file.
+for file in supabase/migrations/*.sql; do [[ "$file" == *named_column_authority.sql || "$file" == *stable_record_ids_created_at.sql ]] && continue; pg psql -U postgres -v ON_ERROR_STOP=1 < "$file" > "$artifacts/migration.log"; done
 pg psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE stock_test LOGIN PASSWORD 'synthetic-only' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS; GRANT stock_runtime TO stock_test;"
 # Exercise removal against populated pre-upgrade data in a separate database.
 pg createdb -U postgres audit_history_test
@@ -24,7 +26,7 @@ sys.path.insert(0,'tools/migration')
 from core import import_sql
 from test_migration import precision_fixture
 for path in sorted(Path('supabase/migrations').glob('*.sql')):
- if not path.name.endswith(('_remove_operational_audit.sql','_named_column_authority.sql')): print(path.read_text())
+ if not path.name.endswith(('_remove_operational_audit.sql','_named_column_authority.sql','_stable_record_ids_created_at.sql')): print(path.read_text())
 print(import_sql(precision_fixture()))
 print(Path('tools/migration/promote.sql').read_text().replace('SELECT 1 / ((SELECT count(*)=1 AND min(value)=0 FROM stock_operational.revision))::int;', 'SELECT 1 / ((SELECT count(*)=0 FROM stock_operational.audit))::int;'))
 PYHISTORY
@@ -46,6 +48,7 @@ pg psql -U postgres -v ON_ERROR_STOP=1 < "$artifacts/import.sql" > "$artifacts/r
 pg psql -U postgres -v ON_ERROR_STOP=1 < tools/migration/promote.sql > "$artifacts/promote.log"
 pg psql -U postgres -v ON_ERROR_STOP=1 -c "SELECT 1 / ((SELECT snapshot->>'totalPay'='9007199254740993.01' AND jsonb_typeof(snapshot->'totalPay')='number' FROM stock_migration.payroll_settlements))::int; SELECT 1 / ((SELECT snapshot->>'totalPay'='9007199254740993.01' AND jsonb_typeof(snapshot->'totalPay')='number' FROM stock_operational.payroll_settlements))::int;" > "$artifacts/json-precision.log"
 pg psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/*named_column_authority.sql > "$artifacts/named-upgrade.log"
+pg psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/*stable_record_ids_created_at.sql > "$artifacts/id-date-upgrade.log"
 # Extract the actual promoted operational tables through the read-only CLI.
 cat > "$artifacts/psql" <<'WRAPPER'
 #!/usr/bin/env bash
