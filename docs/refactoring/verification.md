@@ -546,3 +546,42 @@ production recovery/reconciliation remain unverified and require separate approv
 Owner approval now authorizes merging PR71 then PR72, without deployment or hosted
 schema execution. A repository Git-deployment guard on main prevents automatic
 publication ahead of the required frozen maintenance/database transition.
+
+
+## Stable-ID compatibility verification (2026-11-17; local only)
+
+Final source: 658/658 regression tests pass, including preserved original/current
+Sheets traces and immutable historical source witnesses. New bounded witnesses
+record only the reviewed adapter delta; older fixtures remain unchanged. Lint
+has zero errors and the existing unused shipmentRow test warning; typecheck passes.
+
+The complete verify-named-columns.sh pipeline passes locally with cached
+PostgreSQL 17.11 (CI retains its existing 17.7 image). It checks the populated
+precision-fixture upgrade against exact hashes of all 27 operational tables,
+excluding only added metadata, retaining original revisions/journals/order. It
+also covers fresh installation, compatibility rollback, business_cells-removal
+guards and both physical schemas. Both schemas pass 32 existing operational
+cases, nine new ID/date/permission/LINE cases, and the existing real browser/API
+acceptance for scoped authorization, committed response loss, reload and exact
+idempotent replay. A separate populated, already-business_cells-free local upgrade
+also preserved an archived row and global/record revisions. All 23 row_order
+columns remain. No production data, credentials or real providers were used.
+
+The isolated credential-free default production build passes against byte-identical
+current src/public, with the original route manifest hash and 113 client chunks
+containing no private database/configuration strings. The exploratory webpack
+mode encountered the unchanged parseEmployeeInput route-export restriction; the
+required default build and clean typecheck pass without changing route exports
+or Next configuration. Private logs retain both diagnostics and passing evidence.
+
+Active business selections intentionally retain legacy precedence through explicit
+selection reads; this compatibility release does not authorize dropping row_order,
+changing production, rewriting session data or promoting an older positional LINE
+writer. Release requirements and rollback limitations are in the database runbook.
+
+PR73 CI bootstrap correction: historical pre-named-column fixtures defer both
+named-column authority and its dependent ID/date migration. The populated current
+schema applies named-column authority first, then the ID/date upgrade; fresh
+installs still apply every migration. The corrected complete operational
+PostgreSQL/browser/reconciliation/backup/restore pipeline and all 73 Python
+migration tests pass locally. Application code and migration SQL are unchanged.

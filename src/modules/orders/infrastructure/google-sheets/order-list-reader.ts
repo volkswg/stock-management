@@ -1,4 +1,5 @@
 import "server-only";
+import { readReversedCreationRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { OrderListItem, OrderProductImage } from "../../contracts";
 import type { OrderListReader } from "../../application/ports/order-list-reader";
@@ -9,7 +10,7 @@ export class GoogleSheetsOrderListReader implements OrderListReader {
 
   async readOrderList(): Promise<OrderListItem[]> {
     const [orderRows, orderItemRows, shipmentOrderRows] = await Promise.all([
-      this.googleSheetsService.orders.readRows("A:I"),
+      readReversedCreationRows(this.googleSheetsService.orders, "A:I"),
       this.googleSheetsService.orderItems.readRows(),
       this.googleSheetsService.shipmentOrders.readRows(),
     ]);

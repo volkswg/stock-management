@@ -79,3 +79,12 @@ history, while separate current-source, real-PostgreSQL and client-bundle checks
 verify the actual new branch. Historical Sheets harnesses explicitly select their
 original backend; they are not evidence of SQL behavior. Existing negative
 ownership rules and all prior fixtures remain enabled and unchanged.
+
+
+The stable-ID compatibility stage adds one exact root infrastructure bridge,
+`infrastructure/persistence/google-sheets/record-reference.ts`, consumed only by
+feature persistence adapters. It delegates identity/revision handling to PostgreSQL
+and preserves true Sheets range operations on the Sheets path. Application/domain
+ports and browser DTOs never receive a database key/revision handle or row position.
+This does not permit root infrastructure to import feature code or relax provider,
+browser, dynamic-import or cross-feature restrictions.

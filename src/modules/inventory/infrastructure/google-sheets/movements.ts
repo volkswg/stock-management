@@ -1,4 +1,5 @@
 import "server-only";
+import { updateRecord, archiveRecord } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import type { ProductMovementRecord, ProductMovementMasterRecord } from "../../contracts";
 import type { MovementStore, MovementItemReference, MovementMasterEdit } from "../../application/ports/movements";
@@ -10,19 +11,19 @@ type MovementSheets = {
 };
 export function createMovementStore(service: MovementSheets): MovementStore {
     function itemReference(rows: GoogleSheetRow[], index: number): MovementItemReference {
-        return { remark: () => cell(rows[index][4]), async delete() { const sheet = service.movementDetails; if (!sheet.deleteRow)
-                throw new Error("Movement row deletion is unavailable."); await sheet.deleteRow(index + 1); }, edit() {
+        return { remark: () => cell(rows[index][4]), async delete() { const sheet = service.movementDetails; if (!sheet.deleteRow && !sheet.referenceRow)
+                throw new Error("Movement row deletion is unavailable."); await archiveRecord(sheet, rows[index], index + 1); }, edit() {
                 const nextRow = [...rows[index]];
                 while (nextRow.length < DETAIL_HEADERS.length)
                     nextRow.push("");
-                return { quantity: v => { nextRow[3] = v; }, remark: v => { nextRow[4] = v; }, stockCounted: v => { nextRow[12] = v; }, isNewArrival: v => { nextRow[13] = v; }, image: v => { nextRow[7] = v; }, updatedAt: v => { nextRow[11] = v; }, save: () => service.movementDetails.updateRows(`A${index + 1}:N${index + 1}`, [nextRow]) };
+                return { quantity: v => { nextRow[3] = v; }, remark: v => { nextRow[4] = v; }, stockCounted: v => { nextRow[12] = v; }, isNewArrival: v => { nextRow[13] = v; }, image: v => { nextRow[7] = v; }, updatedAt: v => { nextRow[11] = v; }, save: () => updateRecord(service.movementDetails, rows[index], `A${index + 1}:N${index + 1}`, [nextRow]) };
             } };
     }
     function masterEdit(row: GoogleSheetRow, index: number): MovementMasterEdit {
         const nextRow = [...row];
         while (nextRow.length < MASTER_HEADERS.length)
             nextRow.push("");
-        return { project: details => rowToMovementMaster(nextRow, details), quantity: v => { nextRow[5] = v; }, delivered: now => { nextRow[3] = now; nextRow[4] = "delivered"; nextRow[7] = now; }, updatedAt: v => { nextRow[7] = v; }, save: () => service.movementMasters.updateRows(`A${index + 1}:H${index + 1}`, [nextRow]) };
+        return { project: details => rowToMovementMaster(nextRow, details), quantity: v => { nextRow[5] = v; }, delivered: now => { nextRow[3] = now; nextRow[4] = "delivered"; nextRow[7] = now; }, updatedAt: v => { nextRow[7] = v; }, save: () => updateRecord(service.movementMasters, row, `A${index + 1}:H${index + 1}`, [nextRow]) };
     }
     return {
         prepareMasters: () => ensureHeader(service.movementMasters, MASTER_HEADERS, "H"), prepareDetails: () => ensureHeader(service.movementDetails, DETAIL_HEADERS, "N"),
@@ -40,7 +41,7 @@ export function createMovementStore(service: MovementSheets): MovementStore {
                 records: () => rows.map(rowToMovement),
                 find(itemId, masterId) { const index = rows.findIndex((row, index) => index > 0 && cell(row[0]).toUpperCase() === itemId.toUpperCase() && cell(row[1]).toUpperCase() === masterId.toUpperCase()); return index < 0 ? undefined : itemReference(rows, index); },
                 matching(masterId) { const indexes = rows.flatMap((row, index) => index > 0 && cell(row[1]).toUpperCase() === masterId.toUpperCase() ? [index] : []); return { hasItems: indexes.length > 0, someQuantity: predicate => indexes.some(index => predicate(cell(rows[index][3]))), async deliver(now) { await Promise.all(indexes.map(index => { const nextRow = [...rows[index]]; while (nextRow.length < DETAIL_HEADERS.length)
-                        nextRow.push(""); nextRow[9] = "delivered"; nextRow[11] = now; return service.movementDetails.updateRows(`A${index + 1}:N${index + 1}`, [nextRow]); })); } }; }
+                        nextRow.push(""); nextRow[9] = "delivered"; nextRow[11] = now; return updateRecord(service.movementDetails, rows[index], `A${index + 1}:N${index + 1}`, [nextRow]); })); } }; }
             };
         }
     };

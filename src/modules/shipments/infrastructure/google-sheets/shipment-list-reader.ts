@@ -1,4 +1,5 @@
 import "server-only";
+import { readReversedCreationRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import { OrderStatus } from "@/modules/orders/contracts";
 import {
@@ -18,7 +19,7 @@ export class GoogleSheetsShipmentListReader implements ShipmentListReader {
   async readShipmentList({ includeOrders }: { includeOrders: boolean }): Promise<ShipmentReadModel> {
     const [shipmentRows, shipmentOrderRows, orderRows, orderItemRows] =
       await Promise.all([
-        this.googleSheetsService.shipments.readRows(),
+        readReversedCreationRows(this.googleSheetsService.shipments),
         includeOrders
           ? this.googleSheetsService.shipmentOrders.readRows()
           : Promise.resolve([]),

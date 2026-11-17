@@ -1,8 +1,10 @@
+import {readStableRecordHistory} from "./stable-record-ids-history.mjs";
 import {readPostgresHistory} from "./postgres-history.mjs";
 import {featureFiles,featuresHistory,restoreFeatureSource} from "./features-retirement-history.mjs";
 import assert from 'node:assert/strict';
 import {accountNewFiles,accountChanged,restoreAccountSource} from './loyverse-accounts-history.mjs';
-import {readFileSync,existsSync,readdirSync} from 'node:fs';
+import {existsSync,readdirSync} from 'node:fs';
+const readFileSync=readStableRecordHistory;
 import {createHash} from 'node:crypto';
 import {resolve,relative,posix} from 'node:path';
 export const retirement=JSON.parse(readFileSync('tests/fixtures/externals-retirement-before.json','utf8'));

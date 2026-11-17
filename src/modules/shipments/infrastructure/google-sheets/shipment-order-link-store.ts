@@ -1,4 +1,5 @@
 import "server-only";
+import { readSelectionRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const";
 import { SHIPMENT_ORDERS_SHEET_HEADERS } from "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const";
@@ -14,7 +15,7 @@ export class GoogleSheetsShipmentOrderLinkStore implements ShipmentOrderLinkStor
     const [shipmentRows, orderRows, shipmentOrderRows] = await Promise.all([
       this.googleSheetsService.shipments.readRows(),
       this.googleSheetsService.orders.readRows("A:I"),
-      this.googleSheetsService.shipmentOrders.readRows(),
+      readSelectionRows(this.googleSheetsService.shipmentOrders),
     ]);
     return {
       findActiveShipment(shipmentId) {

@@ -51,7 +51,7 @@ const scopes={
     "../../contracts"
   ],
   "src/modules/sales/domain/receipt-ids.ts": [],
-  "src/modules/sales/infrastructure/google-sheets/sales-reader.ts": [
+  "src/modules/sales/infrastructure/google-sheets/sales-reader.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "../../application/ports/sales-reader",
@@ -76,7 +76,7 @@ const scopes={
   "src/modules/sales/infrastructure/google-sheets/receipt-row-mapping.ts": [
     "../../application/ports/receipt-source"
   ],
-  "src/modules/sales/infrastructure/google-sheets/cost-overrides.ts": [
+  "src/modules/sales/infrastructure/google-sheets/cost-overrides.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "./profit-cost-overrides/const",

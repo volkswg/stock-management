@@ -53,7 +53,7 @@ export const shipmentsServerBoundaries = [
   {
     files: ["src/modules/shipments/infrastructure/google-sheets/shipment-list-reader.ts"],
     rules: {
-      "no-restricted-imports": onlyImports([
+      "no-restricted-imports": onlyImports(['@/infrastructure/persistence/google-sheets/record-reference',
         "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "@/modules/orders/contracts",
         "../../contracts", "../../application/ports/shipment-list-reader",
       ]),
@@ -74,7 +74,7 @@ export const shipmentsServerBoundaries = [
   {
     files: ["src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts"],
     rules: {
-      "no-restricted-imports": onlyImports([
+      "no-restricted-imports": onlyImports(['@/infrastructure/persistence/google-sheets/record-reference',
         "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "@/infrastructure/persistence/google-sheets/const",
         "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const", "../../contracts",
         "../../application/ports/shipment-order-link-store",
@@ -96,7 +96,7 @@ export const shipmentsServerBoundaries = [
   {
     files: ["src/modules/shipments/infrastructure/google-sheets/shipment-status-store.ts"],
     rules: {
-      "no-restricted-imports": onlyImports([
+      "no-restricted-imports": onlyImports(['@/infrastructure/persistence/google-sheets/record-reference',
         "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "../../contracts",
         "../../application/ports/shipment-status-store",
       ]),
@@ -133,7 +133,7 @@ export const shipmentsServerBoundaries = [
   {
     files: ["src/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection.ts"],
     rules: {
-      "no-restricted-imports": onlyImports([
+      "no-restricted-imports": onlyImports(['@/infrastructure/persistence/google-sheets/record-reference',
         "server-only", "@/infrastructure/persistence/google-sheets/service-contracts", "../../contracts",
         "@/modules/orders/contracts", "@/modules/orders/application/ports/order-detail-shipment-projection",
       ]),

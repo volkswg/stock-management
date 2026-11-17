@@ -189,7 +189,7 @@ const scopes = {
         "@/infrastructure/files/google-drive/types",
         "../../application/ports/shipment-bill-storage"
     ],
-    "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts": [
+    "src/modules/shipments/infrastructure/google-sheets/shipment-order-link-store.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
         "server-only",
         "@/infrastructure/persistence/google-sheets/service-contracts",
         "@/infrastructure/persistence/google-sheets/const",

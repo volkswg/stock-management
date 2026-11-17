@@ -1,3 +1,4 @@
+import {restoreStableRecordSource} from "./helpers/stable-record-ids-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
@@ -20,7 +21,7 @@ test('every operational binding has an explicit named input, projection and vali
 test('historical adapter and operational assertions retain exact source witnesses',()=>{
  const history=JSON.parse(read('tests/fixtures/named-columns-before.json'));
  const hash=s=>createHash('sha256').update(s).digest('hex');
- for(const [file,e] of Object.entries(history.edits)){assert.equal(hash(e.before),e.beforeHash);assert.equal(hash(read(file)),e.afterHash);}
+ for(const [file,e] of Object.entries(history.edits)){assert.equal(hash(e.before),e.beforeHash);assert.equal(hash(restoreStableRecordSource(file)),e.afterHash);}
  const operational=JSON.parse(read('tests/fixtures/named-columns-operational-before.json'));
  assert.equal(hash(operational.source),operational.sha256);
  assert.match(operational.source,/preserves canonical app precedence/);

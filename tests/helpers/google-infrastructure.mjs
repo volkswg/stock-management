@@ -1,3 +1,4 @@
+import {restoreStableRecordSource} from "./stable-record-ids-history.mjs";
 import {sheetsPersistenceStub} from "./sheets-persistence-stub.mjs";
 import {retirement,canonicalExports,registryProjection,worksheetProjection,archivedRelative,readEvidence} from "./retirement-history.mjs";
 import {cleanupHistory} from "./cleanup-history.mjs";
@@ -29,7 +30,7 @@ export function assertGoogleHistory(file,expected) {
   for(const statement of ast.statements){assert.ok(ts.isExportDeclaration(statement)&&statement.exportClause&&ts.isNamedExports(statement.exportClause),file);assert.ok(statement.moduleSpecifier.text.startsWith("@/infrastructure/"),file);}
  }else{
   assert.equal(file,googleBefore.types.path);assert.equal(expected,googleBefore.types.sha256);assert.equal(hash(googleBefore.types.source),expected);
-  const original=declarations(googleBefore.types.source), retained=declarations(readEvidence(file,"utf8")), generic=declarations(readFileSync(googleDestinations.at(-1),"utf8"));
+  const original=declarations(googleBefore.types.source), retained=declarations(readEvidence(file,"utf8")), generic=declarations(restoreStableRecordSource(googleDestinations.at(-1)));
   assert.equal(retained.length+generic.length,original.length);for(const declaration of original)assert.equal([...retained,...generic].filter(d=>d===declaration).length,1);
  }
 }

@@ -1564,3 +1564,19 @@ The separate final-removal SQL also requires the independently verified target
 UUID in stock.expected_isolation_id; unset approval and incorrect identity are
 tested to fail before any column disappears. Compatibility and final-schema
 operational/browser acceptance pass with both guards installed.
+
+
+## Stable-ID compatibility implementation (2026-11-17; review pending)
+
+Implemented ID/revision-bound PostgreSQL references behind the existing feature
+ports, with a narrow adapter bridge for actual Sheets fallback. Creation ordering
+uses parsed timestamps and deterministic ID ties; numeric LINE/attachment IDs are
+allocated independently of row positions, including parallel operations.
+The schema change is additive: 23 row_order columns remain, source timestamps and
+representation metadata are preserved, historical unknown dates are not fabricated.
+
+No feature application/domain calculations or HTTP/DTO contracts changed. Explicit
+legacy selection order is retained for LINE sessions, compensation, shipment links
+and financial inputs. Final row_order removal needs those dependencies resolved
+and a separately approved recovery/maintenance release. Current production is
+unchanged. See the database runbook and verification ledger for release boundaries.

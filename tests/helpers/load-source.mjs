@@ -1,3 +1,4 @@
+import {recordReferences} from "./sheets-persistence-stub.mjs";
 import {featureFiles} from "./features-retirement-history.mjs";
 import {accountGraph} from "./loyverse-accounts.mjs";
 import {retirement} from "./retirement-history.mjs";
@@ -52,6 +53,7 @@ export function loadSource(path, { imports = {}, globals = {} } = {}) {
     fetch: () => { throw new Error("Live network is forbidden in regression tests"); },
     ...globals,
     require: (specifier) => {
+      if (specifier === "@/infrastructure/persistence/google-sheets/record-reference") return recordReferences;
       // Existing characterization harnesses select the unchanged Sheets branch.
       // PostgreSQL tests execute actual wrappers through postgres-runtime.cjs.
       if(specifier === "@/composition/postgres/route") return {withPersistence: handler => handler};

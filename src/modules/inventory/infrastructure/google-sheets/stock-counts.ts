@@ -1,4 +1,5 @@
 import "server-only";
+import { updateRecord } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import { STOCK_COUNT_HEADERS } from "./stock-counts/const";
 import type { StockCountRecord } from "../../contracts";
@@ -12,7 +13,7 @@ export function createStockCountStore(googleSheetsService: IGoogleSheetsService)
             return {
                 records: () => rows.map(mapStockCountRow).filter((record): record is StockCountRecord => Boolean(record)),
                 find(month, accountId) { const rowIndex = rows.findIndex((row, index) => index > 0 && toStringValue(row[1]) === month && toStringValue(row[2]) === accountId); if (rowIndex < 0)
-                    return undefined; return { record: () => mapStockCountRow(rows[rowIndex]), save: record => googleSheetsService.stockCounts.updateRows(`A${rowIndex + 1}:I${rowIndex + 1}`, [stockCountToRow(record)]) }; }
+                    return undefined; return { record: () => mapStockCountRow(rows[rowIndex]), save: record => updateRecord(googleSheetsService.stockCounts, rows[rowIndex], `A${rowIndex + 1}:I${rowIndex + 1}`, [stockCountToRow(record)]) }; }
             };
         }, append: record => googleSheetsService.stockCounts.appendRows("A:I", [stockCountToRow(record)]) };
 }

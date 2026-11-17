@@ -126,10 +126,10 @@ test('Shipments create, link and read use existing business ports in one transac
 test('retained deletes, immutable archive, restricted runtime access and stale revisions',async()=>{
  await command(async()=>{
   await service.userState.appendRows('A:H',[['session-synthetic','user','OrderCreate','order-valid','waiting_for_bill_image','2026-11-09','2026-11-09','']]);
-  await service.userState.deleteRow(2);
+  await (await service.userState.referenceId('session-synthetic')).archive();
  });
  await transaction(false,async()=>{
-  assert.deepEqual((await service.userState.readRows())[1],[]);
+  assert.ok(!(await service.userState.readRows()).some(r=>r[0]==='session-synthetic'));
   const row=(await currentTransaction().query('SELECT archived_at FROM stock_operational.user_state WHERE id=$1',['session-synthetic'])).rows[0];assert.ok(row.archived_at);
  });
  const pool=new Pool({connectionString:process.env.STOCK_DATABASE_URL});
@@ -458,7 +458,7 @@ test('direct Supabase order remark mapping rejects conflicting dual writes and p
  const changed=[...cells];changed[4]='Canonical app value';
  await assert.rejects(transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET business_cells=$1::jsonb,remark=$2 WHERE id=$3',[JSON.stringify(changed),'Conflicting typed value',id])),PersistenceFailure);
  assert.equal((await read()).remark,'Original');
- await command(async()=>service.orders.updateRows(`E${Number((await read()).row_order)+1}`,[['Canonical app value']]));
+ await command(async()=> (await service.orders.referenceId((await read()).id)).update('E',['Canonical app value']));
  assert.equal((await read()).remark,'Canonical app value');
  const before=await read();
  await assert.rejects(transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET business_cells=business_cells,remark=$1 WHERE id=$2',['Inconsistent unchanged cells',id])),PersistenceFailure);

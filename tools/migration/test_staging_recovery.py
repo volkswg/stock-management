@@ -29,6 +29,7 @@ class StagingRecoveryTests(unittest.TestCase):
             '20261112160852_allow_explicit_production_environment.sql',
             '20261116133534_fix_order_remark_column_edits.sql',
             '20261116200541_named_column_authority.sql',
+            '20261117024806_stable_record_ids_created_at.sql',
         ])
         for entry in result['migrations']: self.assertEqual(checksum(entry['file']), entry['sha256'])
         commands = '\n'.join(result['steps'])
