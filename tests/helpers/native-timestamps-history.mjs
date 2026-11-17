@@ -10,7 +10,8 @@ export function restoreNativeTimestampSource(file,source){
  const current=source??readFileSync(file,'utf8'),edit=nativeTimestampHistory.edits[name];
  if(!edit)return current;
  assert.equal(hash(edit.before),edit.beforeSha256,name);
- if(hash(current)===edit.beforeSha256)return current;
- assert.equal(hash(current),edit.afterSha256,name);
+ const physical=readFileSync(file,'utf8');
+ assert.equal(hash(physical),edit.afterSha256,name);
+ if(source!==undefined&&source!==physical&&source!==edit.before)return source;
  return edit.before;
 }

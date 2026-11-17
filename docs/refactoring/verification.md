@@ -638,7 +638,11 @@ values on archived rows, missing/wrong/stale approvals, function drift and a
 RESTRICT dependency must roll back atomically. All 51 original table inventories
 match after only the intended timestamp normalization; remaining metadata/function
 owners/ACLs/RLS/grants are checked exactly. Original historical fixtures stay
-frozen, with one bounded source inverse for the compatible transport.
+frozen, with bounded existing-file inverses and one explicitly inventoried pure
+comparison leaf. Current executable loaders allow only that exact new leaf; real
+PostgreSQL/browser cases exercise the physical source without historical overlays.
+Two new native witnesses reproduce and correct mixed millisecond/microsecond
+compensation tie selection and stock-history warnings without truncating values.
 
 The new workflow reuses the existing retained-column acceptance, then runs native
 acceptance; operator SQL is outside automatic migration discovery, so historical

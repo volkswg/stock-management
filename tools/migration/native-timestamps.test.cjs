@@ -76,3 +76,20 @@ test('formerly dateless tables default only new records and preserve first-obser
  const before=await read();assert.ok(before);
  await (await service.stockCounts.referenceId('NT_COUNT')).update('F',['changed']);assert.equal(await read(),before);
 }));
+test('precise compensation creation wins over its millisecond-aligned predecessor without changing effective-date priority',async()=>transaction(true,async()=>{
+ await service.employeeCompensations.appendRows('A:L',[
+  ['NT_EMP','100','','2026-11-01T01:00:00.123Z','','synthetic','2026-11-01','monthly','','','',''],
+  ['NT_EMP','200','','2026-11-01T01:00:00.123001Z','','synthetic','2026-11-01','monthly','','','','']]);
+ const selected=(await hr.listEmployees({googleSheetsService:service})).find(e=>e.id==='NT_EMP').compensation.baseSalary;
+ if(selected!==200)console.error('Synthetic microsecond compensation witness:',selected);
+ assert.equal(selected,200);
+}));
+test('stock history one microsecond after a saved millisecond count is reported as newer',async()=>transaction(true,async()=>{
+ const inventory=require('../../src/modules/inventory/server.ts'),account={id:'NT_MICRO_ACCOUNT',shopName:'Synthetic'};
+ await service.stockCounts.appendRows('A:I',[['NT_MICRO_COUNT','2026-11',account.id,account.shopName,'0','','2026-11-01T01:00:00.123Z','','synthetic']]);
+ await service.stockAdjustments.appendRows('A:Q',[['NT_MICRO_ADJUST',account.id,account.shopName,'2026-11-01','out','damage','','','1','Synthetic','','','','','2026-11-01T01:00:00.123001Z','synthetic',true]]);
+ const rows=await inventory.getMonthlyStockCounts({googleSheetsService:service,accounts:[account],month:'2026-11'});
+ const newer=rows[0].warnings.some(w=>w.startsWith('Adjustment history changed'));
+ if(!newer)console.error('Synthetic microsecond stock warning witness:',newer);
+ assert.ok(newer);
+}));

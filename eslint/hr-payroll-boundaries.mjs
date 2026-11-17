@@ -4,7 +4,7 @@ const paths={
  [h+'domain/salary-rules.ts']:['../contracts'],
  [h+'domain/payroll-calculation.ts']:['../contracts','./salary-rules'],
  [h+'application/ports/payroll.ts']:['../../contracts'],
- [h+'application/salary-advances.ts']:['../contracts','../domain/salary-rules','./ports/payroll','./ports/salary-advance-shops'],
+ [h+'application/salary-advances.ts']:['../contracts','../domain/salary-rules','./ports/payroll','./ports/salary-advance-shops','@/shared/lib/utc-timestamp'],
  [h+'application/calculate-payroll.ts']:['../contracts','../domain/payroll-calculation','./salary-advances','./ports/payroll'],
  [h+'application/settle-payroll.ts']:['../domain/salary-rules','./salary-advances','./ports/payroll'],
  [h+'infrastructure/google-sheets/salary-store.ts']:['@/infrastructure/persistence/google-sheets/record-reference','server-only','@/infrastructure/persistence/google-sheets/types','../../contracts','../../domain/salary-rules','../../application/ports/payroll','./employee-advances/const'],

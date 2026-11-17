@@ -1,4 +1,5 @@
 import type { EmployeeCompensation } from "../contracts";
+import { utcTimestampComparisonKey } from "@/shared/lib/utc-timestamp";
 
 export function currentCompensationsByEmployeeId(
   entries: Iterable<EmployeeCompensation | null>,
@@ -12,7 +13,7 @@ export function currentCompensationsByEmployeeId(
       !existing ||
       compensation.effectiveFrom > existing.effectiveFrom ||
       (compensation.effectiveFrom === existing.effectiveFrom &&
-        compensation.createdAt > existing.createdAt)
+        utcTimestampComparisonKey(compensation.createdAt) > utcTimestampComparisonKey(existing.createdAt))
     ) {
       current.set(compensation.employeeId, compensation);
     }

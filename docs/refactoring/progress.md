@@ -1614,6 +1614,10 @@ with native PostgreSQL `timestamptz` types. The focused implementation covers 47
 existing fields and retires the redundant creation instant; it adds no missing
 lifecycle fields, timestamp text sidecars, authentication or runtime dependency.
 The compatible record transport supports the retained text and native schemas.
+One pure shared comparison key preserves microsecond chronology for existing HR
+and Inventory creation-time comparisons without changing DTO/update-token spelling;
+actual native tests reproduce the prior wrong compensation tie and missing stock
+warning and verify both corrections. Other business-date priorities remain.
 Operator-only SQL rejects ambiguous/nonempty invalid historical values and drift,
 preserves other data/revisions/security, and updates the existing mapper owners.
 See the [release gate](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed).

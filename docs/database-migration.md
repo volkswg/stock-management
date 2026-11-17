@@ -4411,6 +4411,16 @@ to preserve microseconds. Original offset/date-only spelling is intentionally no
 stored in a second timestamp text column. PostgreSQL `timestamptz` preserves the
 instant rather than the original offset spelling; see [date/time types](https://www.postgresql.org/docs/17/datatype-datetime.html).
 
+A pure UTC comparison key pads fractional precision only when comparing creation
+times. This fixes mixed millisecond/microsecond ordering in compensation ties,
+attendance/advance/adjustment lists and the stock-history warning. Otherwise a
+later `.123001Z` would compare before `.123Z` as text. Returned DTO values and
+optimistic update tokens are not padded or replaced. Business-date priorities
+remain, and noncanonical legacy comparison strings retain their existing form.
+Actual native tests reproduced the wrong compensation choice and missing warning
+before this correction and verify both afterward. Any corresponding real-data
+choice change still requires the private semantic review below before deployment.
+
 `tools/migration/final-removal/20261117085310_native_lifecycle_timestamps.sql`
 was created with pinned Supabase CLI2.58.5 and is reproduced by
 `python3 tools/migration/native-timestamps.py`. It stays outside automatic
@@ -4463,7 +4473,8 @@ introduced. Existing revision/ID/soft-delete/idempotency and LINE rules remain.
 5. Verify all original non-time values/revisions/journals, exact timestamp instants,
    remaining schema/security and actual API/LINE guards. All 47 fields must be
    `timestamp with time zone`, with no redundant derived creation column. Reopen
-   only after successful checks under the approved release window.
+   only after successful checks under the approved release window. Browser users
+   must reload before editing so retained text-format optimistic tokens are refreshed.
 
 Before conversion, the current production source can still be retained. After
 conversion, source `934e194` cannot be restored because it needs the removed derived

@@ -3,17 +3,31 @@ import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
 import {restoreNativeTimestampSource,nativeTimestampHistory} from './helpers/native-timestamps-history.mjs';
 const script='tools/migration/final-removal/20261117085310_native_lifecycle_timestamps.sql';
 test('native lifecycle source has one bounded predecessor and stays compatible with retained text timestamps',()=>{
- assert.equal(Object.keys(nativeTimestampHistory.edits).length,1);
+ assert.equal(Object.keys(nativeTimestampHistory.edits).length,7);
+ assert.deepEqual(nativeTimestampHistory.newSourceFiles,['src/shared/lib/utc-timestamp.ts']);
+ assert.deepEqual(Object.keys(nativeTimestampHistory.newSourceHashes),nativeTimestampHistory.newSourceFiles);
  for(const [name,entry] of Object.entries(nativeTimestampHistory.edits)){
   const source=readFileSync(name,'utf8');
   assert.equal(createHash('sha256').update(source).digest('hex'),entry.afterSha256);
   assert.equal(restoreNativeTimestampSource(name),entry.before);
-  assert.doesNotMatch(source,/created_at_instant|row_order/);
-  assert.match(source,/pg_typeof\("createdAt"\)='timestamptz'::regtype/);
+  if(name.endsWith('/records.ts')){
+   assert.doesNotMatch(source,/created_at_instant|row_order/);
+   assert.match(source,/pg_typeof\("createdAt"\)='timestamptz'::regtype/);
+  }
  }
+ for(const [name,hash] of Object.entries(nativeTimestampHistory.newSourceHashes))assert.equal(createHash('sha256').update(readFileSync(name,'utf8')).digest('hex'),hash);
+});
+test('comparison keys preserve microsecond chronology and existing wire representations',()=>{
+ const require=createRequire(import.meta.url);require('./helpers/postgres-runtime.cjs');
+ const {utcTimestampComparisonKey:key}=require('../src/shared/lib/utc-timestamp.ts');
+ assert.equal(key('2026-11-17T00:00:00.123Z'),key('2026-11-17T00:00:00.123000Z'));
+ assert.ok(key('2026-11-17T00:00:00.123001Z')>key('2026-11-17T00:00:00.123Z'));
+ assert.ok(key('2026-11-17T00:00:00.122999Z')<key('2026-11-17T00:00:00.123Z'));
+ assert.equal(key(''), '');assert.equal(key('legacy'), 'legacy');assert.equal(key('2026-11-17T07:00:00+07:00'),'2026-11-17T07:00:00+07:00');
 });
 test('operator SQL is reproducible and absent from automatic migrations',()=>{
  const result=spawnSync('python3',['tools/migration/native-timestamps.py'],{encoding:'utf8'});

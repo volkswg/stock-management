@@ -2,6 +2,7 @@ import type { StockAdjustment, StockCountAccount } from "../contracts";
 import { ADJUSTMENT_REASONS } from "../contracts";
 import { StockAdjustmentError, validDate, validQuantity, text, inputObject, field, photo, payload } from "../domain/adjustment-rules";
 import type { AdjustmentStore, AdjustmentEmployees, AdjustmentRuntime } from "./ports/adjustments";
+import { utcTimestampComparisonKey } from "@/shared/lib/utc-timestamp";
 export async function listStockAdjustments(store: AdjustmentStore): Promise<StockAdjustment[]> {
   const snapshot = await store.read(), unique = new Map<string, StockAdjustment>();
   for (const a of snapshot.records()) {
@@ -23,7 +24,7 @@ export async function listStockAdjustments(store: AdjustmentStore): Promise<Stoc
       replacements.add(a.replacesId);
     }
   }
-  return records.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+  return records.sort((a, b) => b.date.localeCompare(a.date) || utcTimestampComparisonKey(b.createdAt).localeCompare(utcTimestampComparisonKey(a.createdAt)));
 }
 export async function createStockAdjustment(store: AdjustmentStore, accounts: StockCountAccount[], value: unknown, employees: AdjustmentEmployees, runtime: AdjustmentRuntime) {
   inputObject(value);

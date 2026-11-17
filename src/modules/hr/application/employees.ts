@@ -1,6 +1,7 @@
 import type { Employee, EmployeeInput, EmployeeCompensation, EmployeeCompensationType, EmployeeCommissionType } from "../contracts";
 import type { EmployeeStore, WorkforceRuntime } from "./ports/workforce";
 import { currentCompensationsByEmployeeId } from "../domain/compensation";
+import { utcTimestampComparisonKey } from "@/shared/lib/utc-timestamp";
 
 export async function listEmployees({
   store,
@@ -36,7 +37,7 @@ export async function listEmployeeCompensations({
   return rows.list()
     .sort((left, right) =>
       left.effectiveFrom === right.effectiveFrom
-        ? left.createdAt.localeCompare(right.createdAt)
+        ? utcTimestampComparisonKey(left.createdAt).localeCompare(utcTimestampComparisonKey(right.createdAt))
         : left.effectiveFrom.localeCompare(right.effectiveFrom),
     );
 }
