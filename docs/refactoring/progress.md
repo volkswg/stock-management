@@ -1606,3 +1606,19 @@ inverse records only this adapter delta. No hosted access, production pause,
 schema execution, deployment, provider call or new authentication work occurs in
 this implementation. The runbook records private release/recovery gates and
 historical positional-tool limits.
+
+## Native lifecycle timestamp implementation — local preparation
+
+The owner requested the existing `createdAt`, `updatedAt` and `deletedAt` names
+with native PostgreSQL `timestamptz` types. The focused implementation covers 47
+existing fields and retires the redundant creation instant; it adds no missing
+lifecycle fields, timestamp text sidecars, authentication or runtime dependency.
+The compatible record transport supports the retained text and native schemas.
+Operator-only SQL rejects ambiguous/nonempty invalid historical values and drift,
+preserves other data/revisions/security, and updates the existing mapper owners.
+See the [release gate](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed).
+Local synthetic guards, populated conversion/remaining metadata, native edits,
+Bangkok attendance, LINE, operational and browser acceptance pass. Production is
+unchanged by this implementation; no fresh hosted data/credentials were accessed.
+The previous PR74 ordinal release is complete and reopened, with private evidence
+retained on the Mac; it does not authorize this next schema conversion.
