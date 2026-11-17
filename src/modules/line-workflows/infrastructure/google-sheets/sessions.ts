@@ -1,5 +1,5 @@
 import "server-only";
-import { updateRecord, archiveRecord, readSelectionRows } from "@/infrastructure/persistence/google-sheets/record-reference";
+import { updateRecord, archiveRecord, readReversedCreationRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import { lastColumnLetter } from "@/infrastructure/persistence/google-sheets/const";
 import { readAndRepairRows, type RepairRowsTable } from "@/infrastructure/persistence/google-sheets/read-and-repair-rows";
@@ -47,7 +47,7 @@ export function createSessionAdapter(sheets: SessionSheets, inventory: Inventory
         };
     }
     const orders: OrderSessionStore = {
-        async findLatest(userId, flowname) { const rows = await readSelectionRows(sheets.userState); return rows.map(mapUserStateRow).filter((value): value is UserState => Boolean(value)).reverse().find(value => value.userId === userId && value.flowname === flowname); },
+        async findLatest(userId, flowname) { const rows = await readReversedCreationRows(sheets.userState); return rows.map(mapUserStateRow).filter((value): value is UserState => Boolean(value)).reverse().find(value => value.userId === userId && value.flowname === flowname); },
         async nextIdentifier() { if (sheets.userState.nextRecordNumber) return String(await sheets.userState.nextRecordNumber()); const rows = await sheets.userState.readRows('A:A'); return String(rows.length + 1); },
         append: value => sheets.userState.appendRows(`A:${lastColumnLetter(USER_STATE_SHEET_HEADERS.length - 1)}`, [[value.id, value.userId, value.flowname, value.referenceId, value.state, value.createdAt, value.updatedAt]]),
         reference(id) {
@@ -58,8 +58,8 @@ export function createSessionAdapter(sheets: SessionSheets, inventory: Inventory
             }
             const row = parseSheetRowNumber(id, 'user state'); return { update: (state, createdAt, now) => sheets.userState.updateRows(`E${row}:G${row}`, [[state, createdAt, now]]), clear: () => sheets.userState.updateRows(`A${row}:G${row}`, [["", "", "", "", "", "", ""]]) }; }
     };
-    const movements: MovementSessionStore = { async read() { return snapshot(sheets.userState.readSelectionRows ? await readSelectionRows(sheets.userState) : (await readTables(['userState']))[0]); } };
-    return { orders, movements, readTables, snapshot, async photoContext() { const [displayUsers, items] = await readTables(['userState', 'movementDetails']); const users = sheets.userState.readSelectionRows ? await readSelectionRows(sheets.userState) : displayUsers; return { sessions: snapshot(users), items: (readMasterId: () => string | undefined) => inventory.itemsFor(items, readMasterId) }; } };
+    const movements: MovementSessionStore = { async read() { return snapshot(sheets.userState.readReversedCreationRows ? await readReversedCreationRows(sheets.userState) : (await readTables(['userState']))[0]); } };
+    return { orders, movements, readTables, snapshot, async photoContext() { const [displayUsers, items] = await readTables(['userState', 'movementDetails']); const users = sheets.userState.readReversedCreationRows ? await readReversedCreationRows(sheets.userState) : displayUsers; return { sessions: snapshot(users), items: (readMasterId: () => string | undefined) => inventory.itemsFor(items, readMasterId) }; } };
 }
 function parseSheetRowNumber(value: string, label: string): number { const rowNumber = Number(value); if (!Number.isInteger(rowNumber) || rowNumber < 2)
     throw new Error(`Invalid ${label} row number.`); return rowNumber; }

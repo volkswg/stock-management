@@ -1,5 +1,5 @@
 import "server-only";
-import { readSelectionRows } from "@/infrastructure/persistence/google-sheets/record-reference";
+import { readReversedCreationRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetCellValue, GoogleSheetRow, IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { OrderShipment } from "@/modules/orders/contracts";
 import type { OrderDetailShipmentProjectionReader, OrderShipmentLinks, OrderShipmentCandidates } from "@/modules/orders/application/ports/order-detail-shipment-projection";
@@ -10,7 +10,7 @@ export class GoogleSheetsOrderDetailShipmentProjection implements OrderDetailShi
 
   // Start each original operation synchronously; map only when the consumer asks.
   readLinks(): Promise<OrderShipmentLinks> {
-    return Promise.resolve(readSelectionRows(this.sheets.shipmentOrders)).then(rows => ({
+    return Promise.resolve(readReversedCreationRows(this.sheets.shipmentOrders)).then(rows => ({
       findShipmentIdForOrder: orderId => findShipmentIdForOrder(rows, orderId),
     }));
   }

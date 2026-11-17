@@ -585,3 +585,43 @@ schema applies named-column authority first, then the ID/date upgrade; fresh
 installs still apply every migration. The corrected complete operational
 PostgreSQL/browser/reconciliation/backup/restore pipeline and all 73 Python
 migration tests pass locally. Application code and migration SQL are unchanged.
+
+## Ordinal retirement verification (2026-11-17; local)
+
+Full regression sweep: 665/665 pass. Seven focused offline witnesses include
+changed LINE order/movement choices, unknown dates, missing/truncated coverage,
+positional-array preservation and hidden compensation-ID changes even when public
+salary values are identical. Original fixture bytes remain unchanged; the new
+inverse reconstructs the exact PR73 source before older witnesses run. Lint has
+zero errors and the existing unused shipmentRow test warning; typecheck passes.
+
+`verify-row-order.sh` passes on fresh synthetic PostgreSQL 17.11 copies (CI keeps
+its pinned 17.7 fixture). Populated precision values, archive states, journals and
+record/global revisions match across all 27 operational tables after physical
+removal. Remaining columns, constraints, indexes, validator changes, roles,
+permissions, RLS, default privileges and other schema metadata match their exact
+expected forms. Missing/stale attestations and dependent views deny removal and
+roll back function/column changes. Retained defaults allocate safely above the
+old writer's explicit high ordinal.
+
+Independent retained and ordinal-free schemas each pass the existing 32-case
+operational suite, nine stable-ID cases, four added creation/LINE/allocator/
+shipment/compensation cases and actual browser/API committed-response-loss,
+reload and exact idempotent replay acceptance. The read-only export and offline
+review also pass end to end; their visibility check covers only exported business
+tables and respects existing owner/bypass or unfiltered RLS visibility without
+granting privileges. Synthetic SQL diagnostics are retained for corrected fixture
+setup failures; existing constraints and permissions were not weakened.
+
+The isolated credential-free default production build passes against byte-identical
+src/public. The route manifest hash is unchanged and all 113 client chunks exclude
+private database strings. Only the new disposable build copy and test containers
+are removed; active dependencies and private logs/checksums remain on the Mac.
+
+These checks do not certify current hosted legacy selections or authorize a
+release. A private complete semantic review, exact source/target binding, current
+verified recovery point and separately approved maintenance/DDL/deployment remain
+required. Historical pristine-import/capacity oracles retain positional fixtures;
+they are not final-schema load evidence. No new hosted capacity or backup automation
+campaign, real records/credentials/provider use, production mutation or deployment
+is performed. See the guarded retirement procedure in the database runbook.

@@ -1566,7 +1566,7 @@ tested to fail before any column disappears. Compatibility and final-schema
 operational/browser acceptance pass with both guards installed.
 
 
-## Stable-ID compatibility implementation (2026-11-17; review pending)
+## Stable-ID compatibility implementation (2026-11-17; PR73 released)
 
 Implemented ID/revision-bound PostgreSQL references behind the existing feature
 ports, with a narrow adapter bridge for actual Sheets fallback. Creation ordering
@@ -1578,5 +1578,31 @@ representation metadata are preserved, historical unknown dates are not fabricat
 No feature application/domain calculations or HTTP/DTO contracts changed. Explicit
 legacy selection order is retained for LINE sessions, compensation, shipment links
 and financial inputs. Final row_order removal needs those dependencies resolved
-and a separately approved recovery/maintenance release. Current production is
-unchanged. See the database runbook and verification ledger for release boundaries.
+and a separately approved recovery/maintenance release. PR73 was subsequently
+merged and separately deployed as `589c2c9`; production retains all 23 ordinal
+columns. See the database runbook and verification ledger for release boundaries.
+
+## Ordinal retirement implementation (2026-11-17; not deployed)
+
+The next focused change removes every `row_order` reference from application
+source. Shared PostgreSQL reads use normalized creation instants and stable ID
+ties; latest LINE/link readers retain unknowns-last behavior and transaction-scoped
+numeric allocation after reversal. Existing effective-date rules, unique active
+shipment links, financial calculations, HTTP/DTO contracts and real Sheets
+transport calls are preserved. No replacement ordinal column is introduced.
+
+Two CLI-versioned operator SQL files stay outside automatic migration discovery:
+transactional identity-default preparation before deployment, then separately
+approved physical removal after the new source is verified. They preserve IDs,
+archive/revision/representation guards, permissions and RLS; unknown dependencies
+abort atomically. A private read-only export plus existing-application review
+detects changed LINE/movement/hidden-compensation choices and financial results,
+binds the snapshot/global revision, and requires complete month/account coverage.
+It makes no repair and never authorizes production execution.
+
+Local regression, real PostgreSQL/browser acceptance in both schemas, and the
+credential-free build pass. Historical fixtures remain unchanged; a new bounded
+inverse records only this adapter delta. No hosted access, production pause,
+schema execution, deployment, provider call or new authentication work occurs in
+this implementation. The runbook records private release/recovery gates and
+historical positional-tool limits.

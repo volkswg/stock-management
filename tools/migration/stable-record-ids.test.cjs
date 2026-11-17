@@ -14,8 +14,8 @@ const q=(sql,values)=>currentTransaction().query(sql,values);
 const order=(id,time)=>[id,'waiting_for_total_price','Synthetic','12.3400','original',time,'','','synthetic'];
 test.after(closePool);
 
-test('all 23 row_order columns remain; timestamp parsing is explicit, safe and session-independent',async()=>transaction(false,async()=>{
- assert.equal(Number((await q("SELECT count(*) FROM information_schema.columns WHERE table_schema='stock_operational' AND column_name='row_order'")).rows[0].count),23);
+test('the selected physical schema and timestamp parsing are explicit, safe and session-independent',async()=>transaction(false,async()=>{
+ assert.equal(Number((await q("SELECT count(*) FROM information_schema.columns WHERE table_schema='stock_operational' AND column_name='row_order'")).rows[0].count),process.env.STOCK_EXPECT_NO_ROW_ORDER==='true'?0:23);
  await q("SET LOCAL timezone='America/Los_Angeles'; SET LOCAL datestyle='SQL, DMY'");
  const r=(await q(`SELECT stock_operational.created_at_timestamp('2026-11-17 09:00:00')=stock_operational.created_at_timestamp('2026-11-17T02:00:00Z') AS local,
  stock_operational.created_at_timestamp('2026-11-17T09:00:00+07:00')=stock_operational.created_at_timestamp('2026-11-17T02:00:00Z') AS offsets,
@@ -71,7 +71,7 @@ test('hidden compensation IDs persist and append-only permissions are not widene
  const before=await read();assert.equal(before.length,2);assert.notEqual(before[0].migration_id,before[1].migration_id);
  await transaction(false,async()=>{
   const rows=(await service.employeeCompensations.readRows()).filter(r=>r[0]==='SR_EMP');assert.equal(rows[0][1],'200');
-  const old=(await new GoogleSheetsWorkforceStore(service).readCompensations()).list().filter(r=>r.employeeId==='SR_EMP');assert.deepEqual(old.map(r=>r.baseSalary),[100,200]);
+  const old=(await new GoogleSheetsWorkforceStore(service).readCompensations()).list().filter(r=>r.employeeId==='SR_EMP');assert.deepEqual(old.map(r=>r.baseSalary),[200,100]);
  });
  await assert.rejects(transaction(true,async()=>{
   const row=(await service.employeeCompensations.readRows()).find(r=>r[0]==='SR_EMP');await service.employeeCompensations.referenceRow(row).update('B',['250']);

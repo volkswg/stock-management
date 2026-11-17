@@ -51,8 +51,11 @@ const stable=value=>{
  return value;
 };
 const sha=value=>createHash('sha256').update(JSON.stringify(stable(value))).digest('hex');
+// Only the explicit ordinal-retirement review may ignore ordering of record
+// collections. Positional arrays, scalar fields and chosen records stay exact.
+const recordSets=value=>Object.prototype.toString.call(value)==='[object Date]'?value.toISOString():Array.isArray(value)?(()=>{const rows=value.map(recordSets);return rows.every(v=>v&&typeof v==='object'&&!Array.isArray(v))?rows.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))):rows;})():value&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,recordSets(v)])):value;
 
-async function compareApplications(source,operational,config){
+async function compareApplications(source,operational,config,{reviewCreationOrder=false}={}){
  if(source.spreadsheetId!==operational.spreadsheetId)throw new Error('Workbook identity mismatch');
  if(!Array.isArray(config.months)||!config.months.length||config.months.some(m=>!/^\d{4}-(0[1-9]|1[0-2])$/.test(m))||!Array.isArray(config.accounts))throw new Error('Explicit months and credential-free accounts required');
  if(config.accounts.some(a=>Object.keys(a).some(k=>!['id','shopName'].includes(k))||typeof a.id!=='string'||typeof a.shopName!=='string'))throw new Error('Only account metadata is permitted');
@@ -108,12 +111,12 @@ async function compareApplications(source,operational,config){
    return result;
   };
   const left=await read(snapshotService(source,true)),right=await read(snapshotService(operational,false));
-  for(const name of Object.keys(left))sections[name]={match:left[name].ok&&right[name].ok&&sha(left[name].value)===sha(right[name].value),source:left[name],operational:right[name]};
+  for(const name of Object.keys(left))sections[name]={match:left[name].ok&&right[name].ok&&sha(reviewCreationOrder?recordSets(left[name].value):left[name].value)===sha(reviewCreationOrder?recordSets(right[name].value):right[name].value),source:left[name],operational:right[name]};
   return {version:1,scope:'offline-original-application-read-parity',match:!coverage.missingMonths.length&&!coverage.missingAccounts.length&&Object.values(sections).every(s=>s.match),coverage,sections,asOf:config.asOf,months:config.months,cutoverReady:false,hostedRuntimeVerified:false};
  }finally{global.Date=RealDate;global.fetch=realFetch;}
 }
 
-module.exports={compareApplications};
+module.exports={compareApplications,recordSets};
 if(require.main===module)(async()=>{
  try{
   const {values}=parseArgs({options:Object.fromEntries(['source','operational','config','output'].map(k=>[k,{type:'string'}]))});

@@ -54,8 +54,8 @@ test('raw-image retries compare exact bytes and media type through the actual Po
 test('cost-override deletion archives the original identity and payload, is repeatable, and permits a fresh replacement',async()=>{
  const accountId='WT_COST_DELETE_REGRESSION',month='2024-03';
  const override=await command(()=>sales.setSalesProfitCostOverride({googleSheetsService:service,accountId,month,averageItemCost:2.5,note:'WT retained history',createdBy:'synthetic'}));
- const before=await transaction(false,async()=>(await currentTransaction().query('SELECT id,stock_operational.project_sales_profit_cost_overrides(t) AS business_cells,row_order::text,revision::text FROM stock_operational.sales_profit_cost_overrides t WHERE id=$1',[override.id])).rows[0]);
- await assert.rejects(command(()=>service.salesProfitCostOverrides.updateRows(`A${Number(before.row_order)+1}:H${Number(before.row_order)+1}`,[['WT_CHANGED_ID',...before.business_cells.slice(1)]])),PersistenceFailure);
+ const before=await transaction(false,async()=>(await currentTransaction().query('SELECT id,stock_operational.project_sales_profit_cost_overrides(t) AS business_cells,revision::text FROM stock_operational.sales_profit_cost_overrides t WHERE id=$1',[override.id])).rows[0]);
+ await assert.rejects(command(()=>service.salesProfitCostOverrides.updateRows(`A2:H2`,[['WT_CHANGED_ID',...before.business_cells.slice(1)]])),PersistenceFailure);
  assert.equal(await command(()=>sales.removeSalesProfitCostOverride({googleSheetsService:service,accountId,month})),true);
  const archived=await transaction(false,async()=>(await currentTransaction().query('SELECT id,stock_operational.project_sales_profit_cost_overrides(t) AS business_cells,archived_at,revision::text FROM stock_operational.sales_profit_cost_overrides t WHERE id=$1',[override.id])).rows[0]);
  assert.equal(archived.id,before.id);assert.deepEqual(archived.business_cells,before.business_cells);assert.ok(archived.archived_at);assert.equal(Number(archived.revision),Number(before.revision)+1);
@@ -271,7 +271,7 @@ test('actual committed SQL followed by a lost COMMIT acknowledgement replays wit
 test('capacity and primary-key query plan measured on an explicitly synthetic 2000-row workload',async()=>{
  const start=performance.now();
  await command(async()=>{
-  await requireMutation().query(`INSERT INTO stock_operational.orders(id,status,seller,"totalPrice","createdAt","updatedAt","createdBy",row_order) SELECT 'capacity-'||g::text,'complete','Synthetic',0,'2026-11-01','2026-11-01','synthetic',1000+g FROM generate_series(1,2000) g`);
+  await requireMutation().query(`INSERT INTO stock_operational.orders(id,status,seller,"totalPrice","createdAt","updatedAt","createdBy") SELECT 'capacity-'||g::text,'complete','Synthetic',0,'2026-11-01','2026-11-01','synthetic' FROM generate_series(1,2000) g`);
  });
  await transaction(false,async()=>{
   const plan=await currentTransaction().query("EXPLAIN (ANALYZE,FORMAT TEXT) SELECT id FROM stock_operational.orders WHERE id=$1",['capacity-1000']);
@@ -353,7 +353,7 @@ test('late asynchronous branches cannot write in autocommit after their request 
  const gate=new Promise(resolve=>{release=resolve;});
  const handler=withPersistence(async()=>{
   const cached=currentTransaction();
-  late=(async()=>{await gate;return cached.query("INSERT INTO stock_operational.orders(business_cells,row_order) VALUES($1::jsonb,999999)",[JSON.stringify(['late-order','complete','Synthetic',1,'','','','','synthetic'])]);})();
+  late=(async()=>{await gate;return cached.query("INSERT INTO stock_operational.orders(id) VALUES($1)",[JSON.stringify(['late-order','complete','Synthetic',1,'','','','','synthetic'])]);})();
   await orders.createOrder({googleSheetsService:service,id:'early-failed-order',createdBy:'synthetic'});
   return Response.json({error:'synthetic failure'},{status:409});
  });
