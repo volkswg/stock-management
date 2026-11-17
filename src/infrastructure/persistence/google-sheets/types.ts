@@ -35,6 +35,7 @@ export interface IGoogleRowsSheet {
   identifierAfter?(rows: GoogleSheetRow[]): number;
   readSelectionRows?(range?: string): Promise<GoogleSheetRow[]>;
   readCreationRows?(range: string | undefined, direction: "ascending" | "descending"): Promise<GoogleSheetRow[]>;
+  readReversedCreationRows?(range?: string): Promise<GoogleSheetRow[]>;
 }
 
 export interface IGoogleBatchRowsSheet extends IGoogleRowsSheet {

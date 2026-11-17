@@ -30,9 +30,8 @@ export class PostgresRecords {
   }
   async ensureExists() { await currentTransaction().query(`SELECT 1 FROM ${this.table} LIMIT 0`); }
   async checkConnection() { await this.ensureExists(); }
-  private async read(range: string, selection: boolean, descending = false): Promise<GoogleSheetRow[]> {
-    // Explicit compatibility-only business precedence, not display sort/identity.
-    const order = selection ? 'row_order' : `created_at_instant ${descending ? "DESC" : "ASC"} NULLS LAST,"${this.key}" COLLATE "C" ASC`;
+  private async read(range: string, descending = false): Promise<GoogleSheetRow[]> {
+    const order = `created_at_instant ${descending ? "DESC" : "ASC"} NULLS LAST,"${this.key}" COLLATE "C" ASC`;
     const stored = (await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,stock_operational.project_${this.definition.table}(t) AS business_cells,revision FROM ${this.table} t WHERE archived_at IS NULL ORDER BY ${order}`)).rows;
     const rows: GoogleSheetRow[] = [[...this.definition.headers], ...stored.map(r => r.business_cells)];
     const b = bounds(range, rows.length);
@@ -46,9 +45,17 @@ export class PostgresRecords {
   }
   // Explicit creation order; unknowns last and a deterministic ID tie-breaker.
   // Feature use cases keep their existing business-date/name sorts.
-  async readRows(range = "A:ZZ") { return this.read(range, false); }
-  async readSelectionRows(range = "A:ZZ") { return this.read(range, true); }
-  async readCreationRows(range = "A:ZZ", direction: "ascending" | "descending" = "ascending") { return this.read(range, false, direction === "descending"); }
+  async readRows(range = "A:ZZ") { return this.read(range); }
+  async readSelectionRows(range = "A:ZZ") { return this.read(range); }
+  async readCreationRows(range = "A:ZZ", direction: "ascending" | "descending" = "ascending") { return this.read(range, direction === "descending"); }
+  async readReversedCreationRows(range = "A:ZZ") {
+    const rows = await this.read(range, true);
+    // Existing consumers reverse their input. Keep the SAME array, so numeric
+    // reservations and ID/revision handles survive; unknown dates remain last
+    // after the consumer's reverse, including an all-unknown historical group.
+    const header = rows.shift(); rows.reverse(); if (header) rows.unshift(header);
+    return rows;
+  }
   private async numericAllocator(): Promise<NumericAllocator> {
     if (!this.definition.numericIdentifiers) throw new PersistenceFailure(503, "Numeric identifiers are not configured.");
     const client = currentTransaction();
@@ -82,8 +89,9 @@ export class PostgresRecords {
     const id = key === "migration_id" ? undefined : cells[this.definition.headers.indexOf(key)];
     if (key !== "migration_id" && (typeof id !== "string" || !id)) throw new PersistenceFailure(409, "Business identity is required.");
     const columns = await this.columns(), names = columns.map(c => `"${c}"`).join(',');
-    // Populate retained compatibility metadata, never a business identifier.
-    await client.query(`INSERT INTO ${this.table}(${key === "migration_id" ? 'migration_id,' : ''}${names},row_order) SELECT ${key === "migration_id" ? "'COMP-'||gen_random_uuid()::text," : ''}${columns.map(c => `i."${c}"`).join(',')},(SELECT coalesce(max(row_order),0)+1 FROM ${this.table}) FROM stock_operational.input_${this.definition.table}($1::jsonb) i`, [JSON.stringify(cells)]);
+    // The retained schema uses its prepared identity default; the final schema
+    // has no ordinal column. Both insert only named business/representation data.
+    await client.query(`INSERT INTO ${this.table}(${key === "migration_id" ? 'migration_id,' : ''}${names}) SELECT ${key === "migration_id" ? "'COMP-'||gen_random_uuid()::text," : ''}${columns.map(c => `i."${c}"`).join(',')} FROM stock_operational.input_${this.definition.table}($1::jsonb) i`, [JSON.stringify(cells)]);
   }
   async appendRows(_range: string, values: GoogleSheetRow[]) { for (const row of values) await this.insert(row); }
   referenceRow(row: GoogleSheetRow): RecordReference {

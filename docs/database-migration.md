@@ -4185,10 +4185,14 @@ unexecuted; no hosted acceptance, maintenance approval or independent CI pass is
 implied by local synthetic tests.
 
 
-## Stable-ID compatibility stage (2026-11-17; not deployed)
+## Stable-ID compatibility stage (2026-11-17; deployed)
 
 This additive stage keeps every operational `row_order` column and its existing
 immutability/identity constraint. No production action is part of the PR.
+PR73 was subsequently merged and separately released as commit
+`589c2c9c3985c8d4e8c8b60796843631e047708d`; the verified application and LINE were
+reopened. Existing records/revisions/security were preserved. That release did
+not remove `row_order`. Its private maintenance/recovery evidence stays on the Mac.
 PostgreSQL feature references now bind to the existing primary key and expected
 record revision, including the hidden `employee_compensations.migration_id`.
 Updates and archives require exactly one active matching ID/revision. Positional
@@ -4259,3 +4263,122 @@ new session IDs need not equal Sheet row numbers. After new IDs have been create
 rollback must use an ID-capable build or an explicitly rehearsed/approved session
 translation. Never promote a positional writer blindly or overwrite newer writes
 with an older snapshot.
+
+## row_order retirement implementation (not deployed)
+
+The application now identifies records by their existing primary keys and reads
+by the normalized creation instant, with C-collated ID ties. Business priorities
+such as compensation effective dates, payroll months, receipt keys and active
+shipment-link uniqueness remain unchanged. Known dates precede unknown dates.
+Latest-session/link consumers use newest-first creation order and the smallest
+ID on a timestamp tie, with unknowns last, including all-unknown groups. The
+adapter preserves its actual array identity across input reversal so LINE's
+transaction-scoped numeric allocator and revision handles remain valid. Actual
+Google Sheets fallback calls, headers and range behavior are unchanged.
+
+This intentionally removes legacy ordinal tie precedence. A legacy session or
+financial selection must not change unnoticed. Run the new semantic review on an
+approved frozen target or private restored copy before preparing/deploying this
+source. It compares the actual existing read applications, payroll/sales/profit
+results and movement read/write session choices in old versus proposed input
+order. Only record-collection ordering is normalized; positional arrays, scalar
+values, selected identities and amounts remain exact. All historical months and
+credential-free account metadata must be explicitly covered. Any failed reader,
+truncated/missing table variant, missing coverage or changed selection/result is
+NO-GO until reviewed and resolved under separate data-change authorization. No
+timestamp rewrite, selection repair or provider replay happens automatically.
+
+### One release, two explicit operator steps
+
+Both SQL files are under `tools/migration/final-removal`, outside ordinary
+Supabase migration discovery. Merging the PR cannot execute either one.
+
+1. Establish the approved supervised producer/editor/job pause, account for all
+   pending/uncertain work, fence writes and drain. Verify the current recovery
+   checkpoint on a separate local target, including data and security metadata.
+   Logical dumps compact dropped physical attribute positions; preserve the
+   original gap positions during strict recovery verification, as in the prior
+   private recovery rehearsal. No checkpoint may discard later acknowledged work.
+2. Seal the semantic selection review and current global revision. With private
+   PGSERVICE configured read-only, export and review using the commands below.
+   Reports contain business values/identities and stay private on the Mac or an
+   approved private destination. This implementation does not access production.
+3. Before deploying the ID-only writer, explicitly execute
+   `20261117061252_prepare_row_order_removal.sql` under the freeze. It takes the
+   existing writer locks and table locks, verifies exact identity/purpose and
+   aligns retained identity sequences above both existing ordinals and prior
+   sequence allocations. It uses transactional RESTART, never lowers a sequence,
+   and changes no existing values/revisions or permissions. Old explicit inserts
+   do not advance these defaults; omitting this step can cause duplicate-key
+   failures while the columns remain. Drain/retire old writers throughout.
+4. Deploy and verify the reviewed ID-only source while columns remain. Validate
+   reads, mutation guards, LINE configuration and the exact production binding.
+   Recheck review revision/checkpoint freshness before final DDL. Any unexpected
+   write invalidates the seal; do not patch or overwrite live records.
+5. Only with a separately approved physical removal, execute
+   `20261117061253_remove_row_order.sql`. It requires exact identity/purpose,
+   matching reviewed global revision, reviewed source attestation and verified
+   recovery attestation. It checks original validator-body hashes before removing
+   only their ordinal immutability clause; ID/archive/revision/representation
+   guards, roles, grants and RLS remain. All 23 drops use RESTRICT. Unknown function
+   references or dependent views/foreign keys abort the whole transaction.
+6. Verify all original business values, archive states, record/global revisions,
+   journals and remaining security metadata; run read/write/LINE checks, then
+   reopen. Never deploy the old positional LINE writer after new IDs exist.
+
+Example **private review only**, requiring separate approval before a hosted run:
+
+```bash
+python3 tools/migration/row-order-review.py --frozen-review-approved \
+  --target-id "$APPROVED_TARGET_UUID" --target-purpose production \
+  --output "$PRIVATE_REVIEW_DIRECTORY/source.jsonl"
+env -i PATH="$PATH" node tools/migration/row-order-review.cjs \
+  --snapshot "$PRIVATE_REVIEW_DIRECTORY/source.jsonl" \
+  --config "$PRIVATE_REVIEW_DIRECTORY/coverage.json" \
+  --output "$PRIVATE_REVIEW_DIRECTORY/review.json"
+```
+
+`coverage.json` supplies explicit `months`, credential-free `accounts` containing
+only `id`/`shopName`, and offset-aware `asOf`. The exporter is repeatable-read,
+read-only, takes the existing shared writer locks, and checks full RLS visibility
+and exact target before business queries. Its inventory covers every active row
+in every table and every input-order variant. The review binds its private source
+checksum and global revision; it never authorizes a drop. No business Sheets read
+or external provider call is made.
+
+Each operator SQL needs session settings `stock.expected_isolation_id` and
+`stock.expected_purpose` (`production` or `isolated-staging`). Preparation also
+needs `stock.allow_row_order_preparation='reviewed-id-created-order-v1'`.
+Removal additionally needs `stock.allow_final_row_order_removal` with that value,
+`stock.row_order_reviewed_revision` from the current passing review,
+`stock.row_order_reviewed_source` with the exact approved deployed commit, and
+`stock.row_order_restore_verified='51-tables-15-metadata-v1'`. These are operator
+attestations, not automatic proof of Vercel state or recovery; verify their
+referenced private receipts before setting them. Never copy placeholders into a
+production execution. Record exact SQL hashes and the outcome; inspect an
+uncertain result read-only instead of blindly repeating DDL.
+
+### Local acceptance and rollback boundaries
+
+`verify-row-order.sh` uses only new synthetic local databases. It verifies the
+populated precision upgrade and exact original value/revision hashes across all
+27 operational tables, exact remaining schema/security metadata, guard denial
+and atomic rollback on unreviewed dependencies. Independent retained/final copies
+run the existing 32-case operational suite, nine stable-ID cases, four additional
+selection/allocator/business-priority cases and real browser lost-response/reload/
+replay acceptance. The read-only export/review is exercised end to end; offline
+witnesses detect changed LINE winners, unknown dates and missing coverage.
+
+This is application/DDL acceptance, not a new hosted capacity or backup-automation
+campaign. Historical pristine-import/positional load-oracle tools still refer to
+`row_order` in their pinned retained-column fixtures; they are not final-schema
+runtime dependencies or evidence for future final-schema load tests. Immutable
+`stock_migration.source_row` provenance is retained and is not a replacement
+application identity. Backup automation and new user authentication stay deferred.
+
+Before physical removal, an ID-capable compatible build can be retained while
+the ordinal columns/defaults remain. After removal, rollback uses an ID-only
+compatible build or forward repair; a pre-removal snapshot cannot replace newer
+writes. Reconstructing historical ordinal precedence for an older reader is not
+claimed or automatically attempted. A production release/removal is **not
+authorized** by implementation approval or passing synthetic tests.

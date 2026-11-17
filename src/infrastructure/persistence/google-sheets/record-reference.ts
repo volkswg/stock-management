@@ -17,8 +17,8 @@ export function archiveRecord(sheet: IGoogleRowsSheet, row: GoogleSheetRow, shee
   return sheet.deleteRow(sheetRowNumber);
 }
 
-// Business winners retain their reviewed precedence during the compatibility
-// stage. This is deliberately separate from creation-ordered list reads.
+// PostgreSQL input is creation-ordered with stable ID ties. Existing business
+// priorities (effective dates, payroll months, receipt keys) remain feature-owned.
 export function readSelectionRows(sheet: IGoogleRowsSheet, range?: string): Promise<GoogleSheetRow[]> {
   return sheet.readSelectionRows ? (range === undefined ? sheet.readSelectionRows() : sheet.readSelectionRows(range)) : (range === undefined ? sheet.readRows() : sheet.readRows(range));
 }
@@ -26,6 +26,7 @@ export function readSelectionRows(sheet: IGoogleRowsSheet, range?: string): Prom
 // Order/Shipment ports historically supply input to a final reverse(). Construct
 // that input from explicit newest-first order, so nulls and ID ties stay correct.
 export function readReversedCreationRows(sheet: IGoogleRowsSheet, range?: string): Promise<GoogleSheetRow[]> {
+  if (sheet.readReversedCreationRows) return range === undefined ? sheet.readReversedCreationRows() : sheet.readReversedCreationRows(range);
   if (!sheet.readCreationRows) return range === undefined ? sheet.readRows() : sheet.readRows(range);
   return sheet.readCreationRows(range, "descending").then(rows => [rows[0], ...rows.slice(1).reverse()]);
 }
