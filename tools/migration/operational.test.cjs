@@ -416,7 +416,8 @@ test('direct Supabase order remark edits persist in canonical cells and the actu
  assert.equal(after.remark,text);assert.equal(after.business_cells[4],text);
  assert.equal(after.revision,before.revision+1);
  assert.equal(await transaction(false,async()=>(await currentTransaction().query('SELECT value::text FROM stock_operational.revision')).rows[0].value),String(BigInt(revisionBefore)+1n));
- const expected={...before,cell_kinds:after.cell_kinds,remark:text,revision:before.revision+1,business_cells:before.business_cells.map((cell,index)=>index===4?text:cell)};
+ assert.equal(Object.hasOwn(after,'cell_kinds'),Object.hasOwn(before,'cell_kinds'));
+ const expected={...before,...(Object.hasOwn(before,'cell_kinds')?{cell_kinds:after.cell_kinds}:{}),remark:text,revision:before.revision+1,business_cells:before.business_cells.map((cell,index)=>index===4?text:cell)};
  assert.deepEqual(after,expected); // No implicit timestamp, price, identity or ordering changes.
  const route=require('../../src/app/api/orders/[id]/route.ts');
  const context=()=>({params:Promise.resolve({id})});
@@ -433,15 +434,16 @@ test('direct Supabase order remark edits persist in canonical cells and the actu
 });
 
 test('direct Supabase order remark clearing and short historical rows preserve column positions',async()=>{
+ const retained=await transaction(false,async()=>(await currentTransaction().query("SELECT EXISTS(SELECT FROM information_schema.columns WHERE table_schema='stock_operational' AND table_name='orders' AND column_name='cell_kinds') retained")).rows[0].retained);
  for(let length=1;length<=4;length++){
   const id=`direct-remark-short-${length}`,cells=[id,'complete','Synthetic',7].slice(0,length);
   await command(()=>service.orders.appendRows('A:I',[cells]));
   await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=remark WHERE id=$1',[id]));
   const read=()=>transaction(false,async()=>(await currentTransaction().query('SELECT remark,stock_operational.project_orders(t) AS business_cells,revision::text FROM stock_operational.orders t WHERE id=$1',[id])).rows[0]);
-  assert.deepEqual((await read()).business_cells,cells); // A no-op does not pad existing data.
+  assert.deepEqual((await read()).business_cells,retained?cells:[...cells,...Array(9-cells.length).fill('')]); // Retained tokens versus explicit full-width per-column transport.
   await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',['Short row note',id]));
   const padded=[...cells];while(padded.length<4)padded.push('');padded.push('Short row note');
-  assert.deepEqual((await read()).business_cells,padded);
+  assert.deepEqual((await read()).business_cells,retained?padded:[...padded,...Array(9-padded.length).fill('')]);
   for(const value of [null,'Another note','']){
    const before=await read();
    await transaction(true,()=>requireMutation().query('UPDATE stock_operational.orders SET remark=$1 WHERE id=$2',[value,id]));

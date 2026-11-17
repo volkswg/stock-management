@@ -41,7 +41,9 @@ test('blanks and NULL remain unknown; equal instants use stable ID ties',async()
  await service.orders.appendRows('A:I',[order('NT_SORT_B','2026-11-17T09:00:00+07:00'),order('NT_SORT_A','2026-11-17T02:00:00Z'),order('NT_SORT_NULL',null),order('NT_SORT_BLANK','')]);
  const rows=(await service.orders.readRows()).filter(r=>String(r[0]).startsWith('NT_SORT_'));
  assert.deepEqual(rows.map(r=>r[0]),['NT_SORT_A','NT_SORT_B','NT_SORT_BLANK','NT_SORT_NULL']);
- assert.equal(rows[2][5],'');assert.equal(rows[3][5],null);
+ const retained=(await q("SELECT EXISTS(SELECT FROM information_schema.columns WHERE table_schema='stock_operational' AND table_name='orders' AND column_name='cell_kinds') retained")).rows[0].retained;
+ assert.equal(rows[2][5],'');assert.equal(rows[3][5],retained?null:'');
+ assert.equal((await q("SELECT bool_and(\"createdAt\" IS NULL) unknown FROM stock_operational.orders WHERE id IN ('NT_SORT_NULL','NT_SORT_BLANK')")).rows[0].unknown,true);
 }));
 test('ambiguous, invalid and nonfinite inputs fail without inserting a record',async()=>{
  for(const value of ['17/11/2026','2026-02-30','Infinity','not-a-date',' ']){

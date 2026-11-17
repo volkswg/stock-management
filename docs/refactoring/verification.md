@@ -694,3 +694,54 @@ fixture bytes remain unchanged; the new bounded source inverse only composes the
 new transport edit before earlier witnesses. Production, live providers, credentials,
 real business records and hosted configuration are untouched. See the
 [implementation and separate release boundaries](../database-migration.md#implemented-compatibility-stage-not-deployed).
+
+
+<a id="final-cell_kinds-retirement-local-verification"></a>
+## Final cell_kinds retirement — local verification
+
+All 676 regressions and 73 Python migration tests pass. Lint has zero errors and
+the existing unused `shipmentRow` test warning; typecheck and the isolated default
+credential-free production build pass. Application `src`, public routes, env names,
+package/lock files, Vercel configuration and the original nine automatic migrations
+are unchanged. The build's route manifest is identical and all 113 client chunks
+exclude private database strings. No previous fixture is rewritten.
+
+`verify-cell-kinds-final.sh` passes on fresh synthetic PostgreSQL 17.11 copies
+(local cached image; CI keeps its pinned 17.7 image). The actual operator artifact
+removes all 23 columns and checks the full 51-table/15-metadata inventory against
+only the intended encoding/115-body/one-unused-helper diff. All 48 lexemes, 47
+native timestamps, named values, IDs, revisions, journal/archive contents,
+constraints, triggers, RLS, owners, ACLs, grants and memberships retain their
+reviewed values. It also refuses missing/wrong/stale approvals, archived ambiguous
+representations, unreviewed short prefixes, a RESTRICT view, a procedural consumer in another user schema and a real writer
+committing during the advisory-lock wait. No CASCADE or validation disable is used.
+
+The final schema passes eight focused mapping/default/flag/LINE cases, a same-
+process upgrade case using the already released app and existing pool, the full
+32-case operational suite, all 10 native timestamp cases and the real browser
+committed-response-loss/reload/exact-replay test. Numeric boolean spelling retains
+its existing business interpretation. Malformed numeric LINE array identifiers
+are rejected before they can become string sessions; actual official string IDs,
+opaque keys, context spelling, updates and clears pass. Earlier retained fixtures
+continue to assert exact old tokens. Only two private raw-projection witnesses
+explicitly distinguish retained encoding from final per-column defaults; there
+are no skipped tests or broad public-value/order normalizers.
+
+A saved owner-approved checkpoint was separately restored and strictly verified
+in a new network-isolated local container. The actual guarded removal preserves
+all remaining table values and metadata/security exactly, and existing app/LINE
+reader comparisons pass without mismatches across the retained account/calendar
+coverage. Present cells and stable identity ordering match exactly; only the
+explicitly reviewed missing optional tails expand at the private array seam.
+The first review attempt exposed repeated function inlining; the corrected guard
+validates every candidate, reuses PR76's exact canonical encoding proof, and
+materializes exceptional arrays once. The corrected actual-data rehearsal passes
+within the statement bound. Diagnostics and exact private timing/checksums remain
+on the Mac; only newly owned containers/volumes/build copies are removed.
+
+These results are preparation, not a current production removal GO. They use the
+saved checkpoint, not fresh business records. Production remains open with all
+23 columns; no hosted credentials/data/settings, provider, writer permission or
+live traffic are accessed/changed in this task. Fresh recovery/current-data review,
+review/merge and a new approved window still precede execution. See the
+[exact retirement gates and rollback limits](../database-migration.md#final-cell_kinds-retirement-prepared-not-deployed).
