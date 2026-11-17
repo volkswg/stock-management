@@ -2,9 +2,9 @@ import { noDynamicServerBypass } from './orders-boundaries.mjs';
 const h='src/modules/hr/';
 const scopes={
  [h+'application/ports/workforce.ts']:['../../contracts'],
- [h+'application/employees.ts']:['../contracts','./ports/workforce','../domain/compensation'],
- [h+'application/attendance.ts']:['../contracts','../domain/attendance-rules','./ports/workforce','./ports/payroll'],
- [h+'domain/compensation.ts']:['../contracts'],
+ [h+'application/employees.ts']:['../contracts','./ports/workforce','../domain/compensation','@/shared/lib/utc-timestamp'],
+ [h+'application/attendance.ts']:['../contracts','../domain/attendance-rules','./ports/workforce','./ports/payroll','@/shared/lib/utc-timestamp'],
+ [h+'domain/compensation.ts']:['../contracts','@/shared/lib/utc-timestamp'],
  [h+'domain/attendance-rules.ts']:[],
  [h+'infrastructure/google-sheets/workforce-store.ts']:['@/infrastructure/persistence/google-sheets/record-reference','server-only','@/infrastructure/persistence/google-sheets/types','../../contracts','../../application/ports/workforce','./employees/const','./employee-compensations/const','./employee-timesheets/const'],
  [h+'infrastructure/workforce-runtime.ts']:['server-only','node:crypto'],

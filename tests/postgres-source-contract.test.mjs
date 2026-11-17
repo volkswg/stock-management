@@ -1,4 +1,5 @@
 import {restoreStableRecordSource,stableRecordHistory} from "./helpers/stable-record-ids-history.mjs";
+import {nativeTimestampHistory} from './helpers/native-timestamps-history.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync,readdirSync} from 'node:fs';
@@ -24,8 +25,11 @@ test('Phase 2 history keeps every original route handler body byte-identical beh
 
 test('all new PostgreSQL source paths are explicitly inventoried and server-only; all feature applications and rules remain outside the change',()=>{
  const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||stableRecordHistory.newSourceFiles.includes(f)||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),postgresNewFiles.toSorted());
- for(const file of postgresNewFiles){
+ // The later timestamp comparison leaf is pure, not a Phase2 server transport.
+ // Its exact path, hash, current implementation and semantics have independent tests.
+ const persistenceFiles=postgresNewFiles.filter(file=>!nativeTimestampHistory.newSourceFiles.includes(file));
+ assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||stableRecordHistory.newSourceFiles.includes(f)||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),persistenceFiles.toSorted());
+ for(const file of persistenceFiles){
   const physical=readFileSync(file,'utf8');
   if(stableRecordHistory.newSourceFiles.includes(file)){assert.match(physical,/import "server-only";/);assert.doesNotMatch(physical,/from ["']@\/modules\//);continue;}
   const source=restoreUploadOutcomesSource(file,restoreStableRecordSource(file,physical));

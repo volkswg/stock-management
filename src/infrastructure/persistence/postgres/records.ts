@@ -31,7 +31,9 @@ export class PostgresRecords {
   async ensureExists() { await currentTransaction().query(`SELECT 1 FROM ${this.table} LIMIT 0`); }
   async checkConnection() { await this.ensureExists(); }
   private async read(range: string, descending = false): Promise<GoogleSheetRow[]> {
-    const order = `created_at_instant ${descending ? "DESC" : "ASC"} NULLS LAST,"${this.key}" COLLATE "C" ASC`;
+    // The compatible build can precede the operator-approved type conversion.
+    // Native timestamps never round-trip through session-dependent text casts.
+    const order = `CASE WHEN pg_typeof("createdAt")='timestamptz'::regtype THEN "createdAt"::timestamptz ELSE stock_operational.created_at_timestamp("createdAt"::text) END ${descending ? "DESC" : "ASC"} NULLS LAST,"${this.key}" COLLATE "C" ASC`;
     const stored = (await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,stock_operational.project_${this.definition.table}(t) AS business_cells,revision FROM ${this.table} t WHERE archived_at IS NULL ORDER BY ${order}`)).rows;
     const rows: GoogleSheetRow[] = [[...this.definition.headers], ...stored.map(r => r.business_cells)];
     const b = bounds(range, rows.length);

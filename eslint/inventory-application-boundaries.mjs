@@ -30,12 +30,14 @@ const scopes={
     "../contracts"
   ],
   "src/modules/inventory/application/adjustments.ts": [
+    "@/shared/lib/utc-timestamp",
     "../contracts",
     "../contracts",
     "../domain/adjustment-rules",
     "./ports/adjustments"
   ],
   "src/modules/inventory/application/stock-counts.ts": [
+    "@/shared/lib/utc-timestamp",
     "../contracts",
     "./adjustments",
     "./ports/stock-counts"

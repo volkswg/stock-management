@@ -88,3 +88,11 @@ and preserves true Sheets range operations on the Sheets path. Application/domai
 ports and browser DTOs never receive a database key/revision handle or row position.
 This does not permit root infrastructure to import feature code or relax provider,
 browser, dynamic-import or cross-feature restrictions.
+
+The pure `shared/lib/utc-timestamp.ts` comparison key has named HR compensation,
+attendance/advance and Inventory adjustment/count consumers. Their closed import
+scopes permit only this exact leaf. It pads fractional precision for comparisons
+without clocks, provider IO, DTO mutation or changes to business-date priorities;
+this is not a general shared import exception. Current executable source loaders
+read the actual leaf, while bounded timestamp inverses preserve earlier historical
+fixtures and file inventories separately.

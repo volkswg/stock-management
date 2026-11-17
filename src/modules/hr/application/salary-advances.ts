@@ -2,6 +2,7 @@ import type { SalaryAdvance, PayrollSettlement, EmployeePayroll } from "../contr
 import { SalaryAdvanceError, validMoney, validPayrollMonth, validAdvanceDate, money, recoveredAmount, assertOpenMonth, record, field, str } from "../domain/salary-rules";
 import type { SalaryReader, SalaryStore, SalaryRuntime, PayrollEmployeeReader } from "./ports/payroll";
 import type { SalaryAdvanceShops } from "./ports/salary-advance-shops";
+import { utcTimestampComparisonKey } from "@/shared/lib/utc-timestamp";
 
 export async function listSalaryAdvances(store: SalaryReader): Promise<SalaryAdvance[]> {
   const advances = await store.readAdvances();
@@ -14,7 +15,7 @@ export async function listSalaryAdvances(store: SalaryReader): Promise<SalaryAdv
     if (old && JSON.stringify(old) !== JSON.stringify(a)) throw new SalaryAdvanceError("Conflicting advance records. Check storage before continuing.", 503);
     unique.set(a.id, a);
   }
-  return [...unique.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return [...unique.values()].sort((a, b) => utcTimestampComparisonKey(b.createdAt).localeCompare(utcTimestampComparisonKey(a.createdAt)));
 }
 export async function listPayrollSettlements(store: SalaryReader): Promise<PayrollSettlement[]> {
   const rows = await store.readSettlements();

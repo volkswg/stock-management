@@ -2,6 +2,7 @@ import { EmployeeTimesheetStatus, type EmployeeTimesheet, type EmployeeWorkdayTy
 import { EmployeeTimesheetDateConflictError, EmployeeTimesheetValidationError, getBangkokDate } from "../domain/attendance-rules";
 import type { AttendanceStore, WorkforceRuntime } from "./ports/workforce";
 import type { PayrollEmployeeReader } from "./ports/payroll";
+import { utcTimestampComparisonKey } from "@/shared/lib/utc-timestamp";
 
 export async function updateEmployeeTimesheet({
   timesheetId,
@@ -78,7 +79,7 @@ export async function listEmployeeTimesheets({
         getBangkokDate(timesheet.createdAt) === date &&
         (!shopId || timesheet.shopId === shopId),
     )
-    .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+    .sort((left, right) => utcTimestampComparisonKey(right.createdAt).localeCompare(utcTimestampComparisonKey(left.createdAt)));
 }
 
 export async function listEmployeeTimesheetsForMonth({
@@ -97,7 +98,7 @@ export async function listEmployeeTimesheetsForMonth({
         getBangkokDate(timesheet.createdAt).startsWith(`${month}-`) &&
         (!shopId || timesheet.shopId === shopId),
     )
-    .sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+    .sort((left, right) => utcTimestampComparisonKey(left.createdAt).localeCompare(utcTimestampComparisonKey(right.createdAt)));
 }
 
 export async function clockInEmployee({

@@ -625,3 +625,28 @@ required. Historical pristine-import/capacity oracles retain positional fixtures
 they are not final-schema load evidence. No new hosted capacity or backup automation
 campaign, real records/credentials/provider use, production mutation or deployment
 is performed. See the guarded retirement procedure in the database runbook.
+
+## Native lifecycle timestamps — synthetic evidence
+
+`verify-native-timestamps.sh` uses a new bounded local PostgreSQL container and
+separate fresh native/operational/browser databases. It checks all 47 original
+names/types; offset and date-only Bangkok conversion; session-independent rendering;
+microsecond retention; NULL/blank behavior; native direct edits and ID mutations;
+soft deletes; LINE latest/clear/update; attendance day/month boundaries; first-
+observed defaults; and actual operational/browser retry/reload behavior. Invalid
+values on archived rows, missing/wrong/stale approvals, function drift and a
+RESTRICT dependency must roll back atomically. All 51 original table inventories
+match after only the intended timestamp normalization; remaining metadata/function
+owners/ACLs/RLS/grants are checked exactly. Original historical fixtures stay
+frozen, with bounded existing-file inverses and one explicitly inventoried pure
+comparison leaf. Current executable loaders allow only that exact new leaf; real
+PostgreSQL/browser cases exercise the physical source without historical overlays.
+Two new native witnesses reproduce and correct mixed millisecond/microsecond
+compensation tie selection and stock-history warnings without truncating values.
+
+The new workflow reuses the existing retained-column acceptance, then runs native
+acceptance; operator SQL is outside automatic migration discovery, so historical
+promotion fixtures still initialize in their existing order. Local results do not
+profile current hosted date values or prove unchanged real-data selections. The
+[production release gates](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed)
+require separate approval and fresh private recovery/current-data comparisons.

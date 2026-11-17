@@ -4,6 +4,7 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {restoreRowOrderSource,rowOrderHistory} from './helpers/row-order-history.mjs';
+import {restoreNativeTimestampSource} from './helpers/native-timestamps-history.mjs';
 const require=createRequire(import.meta.url);
 const {review}=require('../tools/migration/row-order-review.cjs');
 const {recordSets}=require('../tools/migration/application-parity.cjs');
@@ -21,7 +22,7 @@ const movement=(id,createdAt)=>[id,'WT_REVIEW','MovementCreate','WT_MASTER','wai
 test('ID-only production transport and bounded historical inverse retain every original witness',()=>{
  assert.doesNotMatch(readFileSync('src/infrastructure/persistence/postgres/records.ts','utf8'),/row_order/);
  for(const [file,edit] of Object.entries(rowOrderHistory.edits)){
-  assert.equal(digest(readFileSync(file,'utf8')),edit.afterSha256);
+  assert.equal(digest(restoreNativeTimestampSource(file)),edit.afterSha256);
   assert.equal(digest(restoreRowOrderSource(file)),edit.beforeSha256);
  }
 });

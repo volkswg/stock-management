@@ -1,6 +1,7 @@
 import type { StockCountAccount, StockCountRecord, MonthlyShopStockCount, ProductMovementMasterRecord } from "../contracts";
 import { stockAdjustmentTotals } from "./adjustments";
 import type { StockCountStore, StockCountReaders, StockCountRuntime } from "./ports/stock-counts";
+import { utcTimestampComparisonKey } from "@/shared/lib/utc-timestamp";
 export async function getMonthlyStockCounts({
   accounts,
   store,
@@ -69,7 +70,7 @@ export async function getMonthlyStockCounts({
     if (!previous) warnings.push("No previous physical count: opening stock is assumed to be 0.");
     if (missingSalesDays) warnings.push(`${missingSalesDays} of ${expectedSalesDays} days have no completed sales sync. Calculated stock may be incomplete.`);
     if (calculatedStock < 0) warnings.push("Calculated stock is negative. Review opening counts, deliveries, sales and adjustments.");
-    if (current && adjustments.some(a => a.accountId === account.id && a.date.slice(0, 7) === month && a.createdAt > current.countedAt)) warnings.push("Adjustment history changed after this physical count was saved. Review the variance; the saved physical count is unchanged.");
+    if (current && adjustments.some(a => a.accountId === account.id && a.date.slice(0, 7) === month && utcTimestampComparisonKey(a.createdAt) > utcTimestampComparisonKey(current.countedAt))) warnings.push("Adjustment history changed after this physical count was saved. Review the variance; the saved physical count is unchanged.");
     const physicalCount = current?.physicalCount ?? null;
     const variance =
       physicalCount === null

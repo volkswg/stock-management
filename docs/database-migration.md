@@ -4382,3 +4382,104 @@ compatible build or forward repair; a pre-removal snapshot cannot replace newer
 writes. Reconstructing historical ordinal precedence for an older reader is not
 claimed or automatically attempted. A production release/removal is **not
 authorized** by implementation approval or passing synthetic tests.
+
+## Native lifecycle timestamps (prepared; not deployed)
+
+PR74 subsequently completed the supervised ordinal retirement: production source
+`934e194f3d346e50f9dcbd8367b517c29d4b606f` is live, all 23 operational `row_order`
+columns are absent, and LINE/browser writes reopened after original values,
+revisions, journals, remaining schema/security and four API comparisons matched.
+Exact targets, recovery and execution receipts stay private on the Mac. The
+preceding ordinal section describes that release's procedure, not pending DDL.
+
+The next change converts the **47 existing operational fields** in place:
+23 `createdAt`, 18 `updatedAt`, six `deletedAt`. Names, nullable semantics, IDs,
+revisions, archive state and other business columns stay. Four formerly dateless
+tables retain unknown creation times on legacy rows and first-observed defaults
+only on future inserts. No missing `updatedAt`/`deletedAt` fields are added. Dates
+such as `effectiveFrom`, `hiredDate`, `month`, `countedAt` and business dates are not
+converted. Immutable `stock_migration` archive representations and the historical
+Sheets catalog stay unchanged.
+
+The compatible transport sorts native `createdAt` directly and parses retained
+text through the existing strict Bangkok-aware parser on the old schema. Native
+values never pass through a session-dependent text cast for ordering. Both paths
+retain direction, NULLs last and stable-ID ties; true Sheets transport is unchanged.
+Public DTO/header field names stay; projected native timestamps are UTC ISO strings
+with three fractional digits for millisecond-aligned values or six when required
+to preserve microseconds. Original offset/date-only spelling is intentionally not
+stored in a second timestamp text column. PostgreSQL `timestamptz` preserves the
+instant rather than the original offset spelling; see [date/time types](https://www.postgresql.org/docs/17/datatype-datetime.html).
+
+A pure UTC comparison key pads fractional precision only when comparing creation
+times. This fixes mixed millisecond/microsecond ordering in compensation ties,
+attendance/advance/adjustment lists and the stock-history warning. Otherwise a
+later `.123001Z` would compare before `.123Z` as text. Returned DTO values and
+optimistic update tokens are not padded or replaced. Business-date priorities
+remain, and noncanonical legacy comparison strings retain their existing form.
+Actual native tests reproduced the wrong compensation choice and missing warning
+before this correction and verify both afterward. Any corresponding real-data
+choice change still requires the private semantic review below before deployment.
+
+`tools/migration/final-removal/20261117085310_native_lifecycle_timestamps.sql`
+was created with pinned Supabase CLI2.58.5 and is reproduced by
+`python3 tools/migration/native-timestamps.py`. It stays outside automatic
+migration discovery. In one bounded transaction it verifies exact target/purpose,
+current reviewed revision/source/recovery attestations, predecessor types and 71
+mapper/parser/validator body hashes; locks the existing writer channels, control rows and tables, then rechecks the seal under READ COMMITTED;
+checks every active and archived value; converts each table in one rewrite; updates
+only the corresponding input/projection/validator fragments; and retires the 23
+redundant `created_at_instant` fields, their derivation triggers and helper via
+RESTRICT. Validation and RLS are never disabled. Original function ACLs/owners and
+all existing table permissions remain. New pure scalar helpers inherit only the
+existing relevant mapper callers' EXECUTE capabilities, with no PUBLIC/anon/
+authenticated exposure, role membership or business-write grants.
+
+Empty text/NULL becomes SQL NULL. Unparseable/ambiguous nonempty text, infinity,
+unsupported ISO ranges, stale evidence, function drift and unreviewed dependencies
+abort the whole transaction. Never replace invalid historical dates with NOW or
+silently coerce them to NULL. Input offsets retain their instants; supported dates
+without offsets use Bangkok, independently of session TimeZone/DateStyle. Direct
+native SQL follows ordinary PostgreSQL timestamp input rules; supply explicit
+offsets when editing instants. No automatic updated/deleted timestamp behavior is
+introduced. Existing revision/ID/soft-delete/idempotency and LINE rules remain.
+
+### Separate production release approval
+
+1. Approve a private current-data census and fresh application-schema recovery
+   checkpoint, then verify it on a separate local restore, preserving dropped
+   physical attribute gaps for strict metadata comparison. No fresh Sheets export
+   is needed. Prior snapshots must not replace newer acknowledged work.
+2. Profile all 47 fields, including archived rows. Review NULL/invalid counts,
+   timezone interpretation, existing defaults/callers and external dependencies.
+   Resolve unconvertible nonempty values only under explicit data-change approval.
+   Rehearse on that restore. Compare actual financial results, month/day membership,
+   compensation and LINE winners, soft deletes and stock-count warnings. Normalize
+   only the three intended timestamp string representations for comparison; a
+   changed business choice, amount, warning or calendar grouping is NO-GO pending
+   review/resolution. Lexical historical timestamp comparisons require this gate.
+3. Establish approved supervision, writer/editor/job pause, accounted-for pending
+   work and the reviewed temporary traffic fence. Drain and seal recovery/review
+   freshness. Deploy and verify this compatible source while text fields remain.
+4. Only with explicit schema approval, set `stock.expected_isolation_id`,
+   `stock.expected_purpose`,
+   `stock.allow_native_timestamps='reviewed-lifecycle-timestamptz-v1'`,
+   `stock.timestamp_reviewed_revision`, `stock.timestamp_reviewed_source` (exact
+   deployed commit) and
+   `stock.timestamp_restore_verified='51-tables-15-metadata-v1'`; execute the
+   reviewed SQL. Settings attest to independently verified private evidence; they
+   do not prove the deployment or restore automatically. Record exact SQL hashes
+   and inspect an uncertain result read-only before any retry.
+5. Verify all original non-time values/revisions/journals, exact timestamp instants,
+   remaining schema/security and actual API/LINE guards. All 47 fields must be
+   `timestamp with time zone`, with no redundant derived creation column. Reopen
+   only after successful checks under the approved release window. Browser users
+   must reload before editing so retained text-format optimistic tokens are refreshed.
+
+Before conversion, the current production source can still be retained. After
+conversion, source `934e194` cannot be restored because it needs the removed derived
+column: use this compatible source or a reviewed forward repair. Do not restore
+old data over subsequent writes. Type/format normalization is not a reversible
+reconstruction of original timestamp spelling. New auth, paid resources, provider
+canaries and backup automation are outside this change. Implementation/testing is
+not approval to read fresh hosted records, pause traffic, deploy or run hosted DDL.
