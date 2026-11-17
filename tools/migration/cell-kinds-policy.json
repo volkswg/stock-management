@@ -1,0 +1,375 @@
+{
+  "version": 1,
+  "baseline": "5f04f09308159a5a2b8082abb921a3587cc52c22",
+  "scope": "candidate per-column mappings; retained compatibility preserves nonidentical legacy representations",
+  "normalizationApproved": false,
+  "tables": {
+    "orders": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "status","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "seller","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "totalPrice","position": 3,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "totalPrice__lexeme"},
+        {"name": "remark","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 6,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "deletedAt","position": 7,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 8,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "order_items": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "orderId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "imageUrl","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "quoteQuantity","position": 3,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "quoteQuantity__lexeme"},
+        {"name": "deliveredQuantity","position": 4,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "deliveredQuantity__lexeme"},
+        {"name": "productCode","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 6,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 7,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "deletedAt","position": 8,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 9,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "order_bills": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "orderId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "imageUrl","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 3,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 4,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "deletedAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 6,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "shipments": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "status","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "carrier","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "poNumber","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shippingFee","position": 4,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "shippingFee__lexeme"},
+        {"name": "remark","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shippedAt","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "deliveredAt","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 8,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 9,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "deletedAt","position": 10,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 11,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shippingBillUrl","position": 12,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "shipment_orders": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shipmentId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "orderId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 3,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 4,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "deletedAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 6,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "employees": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "name","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "phone","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "status","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "hiredDate","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "terminatedDate","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 6,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 7,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 8,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "employee_compensations": {
+      "key": "migration_id",
+      "fields": [
+        {"name": "employeeId","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "baseSalary","position": 1,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "baseSalary__lexeme"},
+        {"name": "commission","position": 2,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "commission__lexeme"},
+        {"name": "createdAt","position": 3,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 4,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedBy","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "effectiveFrom","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "compensationType","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "commissionType","position": 8,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "commissionBucketSales","position": 9,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "commissionBucketSales__lexeme"},
+        {"name": "commissionBucketAmount","position": 10,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "commissionBucketAmount__lexeme"},
+        {"name": "commissionRoundupThreshold","position": 11,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "commissionRoundupThreshold__lexeme"}
+      ]
+    },
+    "employee_timesheets": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "employeeId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "status","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 4,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "workdayType","position": 6,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "employee_advances": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "employeeId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "requestedDate","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "payrollMonth","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "requestedAmount","position": 5,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "requestedAmount__lexeme"},
+        {"name": "paidAmount","position": 6,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "paidAmount__lexeme"},
+        {"name": "status","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "paidDate","position": 8,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "reference","position": 9,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "note","position": 10,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 11,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 12,"type": "timestamptz","read": "instant-text-v1","lexeme": null}
+      ]
+    },
+    "payroll_settlements": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "employeeId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "month","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "paidDate","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "reference","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "snapshot","position": 6,"type": "jsonb","read": "json-text-v1","lexeme": "snapshot__lexeme"}
+      ]
+    },
+    "expenses": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "month","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "expenseDate","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopId","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "scope","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "categoryId","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "name","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "amount","position": 7,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "amount__lexeme"},
+        {"name": "note","position": 8,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 9,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 10,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 11,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "deletedAt","position": 12,"type": "timestamptz","read": "instant-text-v1","lexeme": null}
+      ]
+    },
+    "expense_categories": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "name","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "active","position": 2,"type": "boolean","read": "boolean-lexeme-v1","lexeme": "active__lexeme"},
+        {"name": "createdAt","position": 3,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 4,"type": "timestamptz","read": "instant-text-v1","lexeme": null}
+      ]
+    },
+    "shops": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "name","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "active","position": 2,"type": "boolean","read": "boolean-lexeme-v1","lexeme": "active__lexeme"},
+        {"name": "loyverseAccountId","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 4,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null}
+      ]
+    },
+    "sales_receipts": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "salesDate","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "accountId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopName","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "receiptNumber","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "receiptType","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "refundFor","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "order","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "receiptDate","position": 8,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 9,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 10,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "cancelledAt","position": 11,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "source","position": 12,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "storeId","position": 13,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "employeeId","position": 14,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "customerId","position": 15,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "posDeviceId","position": 16,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "diningOption","position": 17,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "totalMoney","position": 18,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "totalMoney__lexeme"},
+        {"name": "totalTax","position": 19,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "totalTax__lexeme"},
+        {"name": "totalDiscount","position": 20,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "totalDiscount__lexeme"},
+        {"name": "tip","position": 21,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "tip__lexeme"},
+        {"name": "surcharge","position": 22,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "surcharge__lexeme"},
+        {"name": "pointsEarned","position": 23,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "pointsEarned__lexeme"},
+        {"name": "pointsDeducted","position": 24,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "pointsDeducted__lexeme"},
+        {"name": "syncedAt","position": 25,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "sales_receipt_items": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "receiptId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "lineItemId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "itemId","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "variantId","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "itemName","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "variantName","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "sku","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "quantity","position": 8,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "quantity__lexeme"},
+        {"name": "price","position": 9,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "price__lexeme"},
+        {"name": "grossTotalMoney","position": 10,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "grossTotalMoney__lexeme"},
+        {"name": "totalDiscount","position": 11,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "totalDiscount__lexeme"},
+        {"name": "totalMoney","position": 12,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "totalMoney__lexeme"},
+        {"name": "cost","position": 13,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "cost__lexeme"},
+        {"name": "costTotal","position": 14,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "costTotal__lexeme"},
+        {"name": "taxes","position": 15,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "taxes__lexeme"},
+        {"name": "lineNote","position": 16,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "lineDiscountsJson","position": 17,"type": "jsonb","read": "json-text-v1","lexeme": "lineDiscountsJson__lexeme"},
+        {"name": "lineTaxesJson","position": 18,"type": "jsonb","read": "json-text-v1","lexeme": "lineTaxesJson__lexeme"},
+        {"name": "lineModifiersJson","position": 19,"type": "jsonb","read": "json-text-v1","lexeme": "lineModifiersJson__lexeme"},
+        {"name": "syncedAt","position": 20,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": null,"type": "timestamptz","read": "internal-first-observed-v1","lexeme": null}
+      ]
+    },
+    "sales_receipt_payments": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "receiptId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "paymentIndex","position": 2,"type": "bigint","read": "integer-lexeme-v1","lexeme": "paymentIndex__lexeme"},
+        {"name": "paymentTypeId","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "paymentName","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "paymentType","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "moneyAmount","position": 6,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "moneyAmount__lexeme"},
+        {"name": "paidAt","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "paymentDetailsJson","position": 8,"type": "jsonb","read": "json-text-v1","lexeme": "paymentDetailsJson__lexeme"},
+        {"name": "syncedAt","position": 9,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": null,"type": "timestamptz","read": "internal-first-observed-v1","lexeme": null}
+      ]
+    },
+    "sales_receipt_syncs": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "salesDate","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "accountId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopName","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "status","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "receiptCount","position": 5,"type": "bigint","read": "integer-lexeme-v1","lexeme": "receiptCount__lexeme"},
+        {"name": "itemCount","position": 6,"type": "bigint","read": "integer-lexeme-v1","lexeme": "itemCount__lexeme"},
+        {"name": "paymentCount","position": 7,"type": "bigint","read": "integer-lexeme-v1","lexeme": "paymentCount__lexeme"},
+        {"name": "syncedAt","position": 8,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": null,"type": "timestamptz","read": "internal-first-observed-v1","lexeme": null}
+      ]
+    },
+    "sales_profit_cost_overrides": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "month","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "accountId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "averageItemCost","position": 3,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "averageItemCost__lexeme"},
+        {"name": "note","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 6,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 7,"type": "text","read": "text-empty-v1","lexeme": null}
+      ]
+    },
+    "stock_counts": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "month","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "accountId","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopName","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "physicalCount","position": 4,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "physicalCount__lexeme"},
+        {"name": "note","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "countedAt","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "updatedAt","position": 7,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedBy","position": 8,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": null,"type": "timestamptz","read": "internal-first-observed-v1","lexeme": null}
+      ]
+    },
+    "stock_adjustments": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "accountId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopName","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "date","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "direction","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "reason","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "employeeId","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "employeeName","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "quantity","position": 8,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "quantity__lexeme"},
+        {"name": "itemDescription","position": 9,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "photoUrl","position": 10,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "note","position": 11,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "reversesId","position": 12,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "replacesId","position": 13,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 14,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "createdBy","position": 15,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "notInLoyverse","position": 16,"type": "boolean","read": "boolean-lexeme-v1","lexeme": "notInLoyverse__lexeme"}
+      ]
+    },
+    "movements": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "userId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "packingDate","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "deliverDateTime","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "status","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "totalQuantity","position": 5,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "totalQuantity__lexeme"},
+        {"name": "createdAt","position": 6,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 7,"type": "timestamptz","read": "instant-text-v1","lexeme": null}
+      ]
+    },
+    "movement_details": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "movementMasterId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "shopName","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "quantity","position": 3,"type": "numeric","read": "decimal-lexeme-v1","lexeme": "quantity__lexeme"},
+        {"name": "remark","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "fromLocation","position": 5,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "toLocation","position": 6,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "productImageUrl","position": 7,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "purchaseDetailId","position": 8,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "status","position": 9,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 10,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 11,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "stockCounted","position": 12,"type": "boolean","read": "boolean-lexeme-v1","lexeme": "stockCounted__lexeme"},
+        {"name": "isNewArrival","position": 13,"type": "boolean","read": "boolean-lexeme-v1","lexeme": "isNewArrival__lexeme"}
+      ]
+    },
+    "user_state": {
+      "key": "id",
+      "fields": [
+        {"name": "id","position": 0,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "userId","position": 1,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "flowname","position": 2,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "referenceId","position": 3,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "state","position": 4,"type": "text","read": "text-empty-v1","lexeme": null},
+        {"name": "createdAt","position": 5,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "updatedAt","position": 6,"type": "timestamptz","read": "instant-text-v1","lexeme": null},
+        {"name": "context","position": 7,"type": "jsonb","read": "json-text-v1","lexeme": "context__lexeme"}
+      ]
+    }
+  }
+}

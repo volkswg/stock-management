@@ -56,8 +56,9 @@ request transaction/auth/idempotency wrapper. The LINE module owns per-event
 workflow execution/reply capture; shared transport only records/sends an effect
 attempt. Operational schemas and offline promotion/profile tools live under
 `supabase/migrations` and `tools/migration`. Immutable staging and mutable business
-state have separate schemas and privileges. Runtime selection is opt-in staging;
-Google Sheets production defaults and Drive image ownership remain.
+state have separate schemas and privileges. Current production selects PostgreSQL
+through the approved release binding; isolated staging guards remain supported.
+Former business Sheets are read-only, and Drive image ownership is unchanged.
 
 `tools/migration` also owns explicit operator-only staging plans, private acceptance
 reports, offline invocation of existing business readers, consistent logical backup

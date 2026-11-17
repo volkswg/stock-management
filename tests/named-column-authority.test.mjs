@@ -1,4 +1,5 @@
 import {restoreStableRecordSource} from "./helpers/stable-record-ids-history.mjs";
+import {restoreCellKindsSource} from './helpers/cell-kinds-history.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
@@ -13,7 +14,7 @@ test('every operational binding has an explicit named input, projection and vali
   for(const name of spec.headers)assert.ok(migration.includes(`r."${name}"`),`${table}.${name}`);
   assert.ok(migration.includes(`Unrepresentable ${table} row; transition aborted`));
  }
- const records=read('src/infrastructure/persistence/postgres/records.ts');
+ const records=restoreCellKindsSource('src/infrastructure/persistence/postgres/records.ts');
  assert.doesNotMatch(records,/SET business_cells=|INSERT INTO[^\n]*\(business_cells/);
  assert.match(records,/input_\$\{this.definition.table\}/);assert.match(records,/project_\$\{this.definition.table\}/);
  assert.ok(read('tools/migration/promote.sql').includes('Legacy promotion is incompatible'));
