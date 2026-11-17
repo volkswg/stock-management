@@ -2,31 +2,39 @@
 
 This page describes the **current plan**, not the full migration diary. See the [current ownership map](../architecture/migration-map.md), [merged PR ledger](progress.md#merged-implementation-ledger) and [verification evidence](verification.md).
 
-## Current milestone: CRITICAL-PATH CUTOVER MODE (2026-11-12)
+## Current milestone: cell_kinds compatibility preparation (2026-11-17)
 
-Finish the Supabase migration in the existing draft [PR65](https://github.com/volkswg/stock-management/pull/65).
-The [single current readiness report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-classifies every blocker and records the exact approvals, minimal security exit,
-hosted acceptance, production target, backup/alerts, final full refresh and
-conditional four-hour Bangkok cutover window. Production is **NO-GO** and stays
-on Sheets. CI43 and completed local correctness/capacity/recovery evidence are
-accepted; do not expand the framework, rerun sufficient synthetic campaigns or
-open additional planning PRs. Recheck relevant changes, drift or failures only.
+Production already uses Supabase. Separately approved releases removed
+`business_cells`, `row_order` and redundant `created_at_instant`; released PR75
+(`5f04f093`) keeps 47 lifecycle fields under their existing names as `timestamptz`.
+Browser and LINE are reopened, and former business Sheets remain read-only.
+See the [completed timestamp release](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed).
 
-Current owner direction: preserve the application as-is and finish the database
-migration. Work on hosted/production target and cost bindings, the guarded
-production release profile, actual hosted browser/API/LINE compatibility,
-capacity/recovery, backup/alerts and final full Sheets synchronization. The
-proposed owner/admin-only interim launch is withdrawn; do not require that choice
-or implement new access restrictions before continuing independent migration work.
+The owner approved the [cell_kinds removal plan](../database-migration.md#cell_kinds-removal-plan-planning-only-production-unchanged)
+and its local compatibility implementation, testing and review PR.
+Replace metadata-dependent conversion with explicit per-column mappings while
+preserving existing app and LINE behavior. All 23 columns and 48 lexemes currently
+remain. The plan covers contract/census gates, retained-column compatibility,
+physical-absence local acceptance and a separately approved maintenance release.
+Irreducible type/null/width distinctions that change observable behavior are
+NO-GO; do not silently normalize them or copy the kind string into another column.
 
-New security controls and the full [authentication milestone](../architecture/user-authentication-roadmap.md)
-are deferred to the next phase. Preserve existing LINE signatures, staging
-restrictions, TLS and database permissions. Existing production access protection
-is not certified adequate: retain the known risk explicitly for the final cutover
-assessment, without claiming it fixed or safe. No paid resources, new Sheets
-access, live production changes, merge or cutover are authorized by this scope
-change. Keep PR65 draft/unmerged and reuse sufficient existing evidence.
+The [prepared compatibility stage](../database-migration.md#implemented-compatibility-stage-not-deployed)
+adds candidate per-column projections/inputs, retained legacy representation
+handling and an opt-in private audit. All columns remain; production is unchanged.
+New code supports the unprepared schema and rejects invalid installed capabilities.
+Fresh private hosted-data/recovery access, compatibility SQL installation,
+maintenance, deployment and final DDL require their own approvals. Reuse sufficient
+tests/evidence and add checks for the changed
+mapping risks; do not expand optional test frameworks. Keep private artifacts off
+GitHub. New authentication remains the next major milestone, and backup automation
+remains deferred. Existing controls must remain intact.
+
+<a id="current-milestone-critical-path-cutover-mode-2026-11-12"></a>
+
+The earlier [critical-path readiness report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
+records the November 12 preparation stage. Its draft-PR65, Sheets-routing and
+pre-cutover approval statements are historical, not current production status.
 
 ## Completed: modular architecture and legacy external cleanup
 
@@ -43,7 +51,9 @@ Merged [PR43](https://github.com/volkswg/stock-management/pull/43) supports acco
 
 Merged PR44 removed the seven obsolete backend forwards and unused singular path alias, migrated test/type consumers to existing owners and preserved every historical witness. Business implementations, production imports, schemas, environment settings and provider behavior remain unchanged. The audit found no known required external consumer. Remaining service/script compatibility is outside that cleanup scope.
 
-## Current bounded change: one Loyverse workbook
+<a id="current-bounded-change-one-loyverse-workbook"></a>
+
+## Retained configuration boundary: one Loyverse workbook
 
 Sheet mode uses the existing operational workbook only; remove the account-specific workbook setting and any workbook-selection fallback. Preserve env rollback, account validation/order, public metadata and credential confidentiality. The owner must restrict/audit workbook readers before storing tokens; hiding a tab does not isolate read access. No production workbook, sharing, Vercel setting or deployment changes are part of implementation.
 
@@ -52,13 +62,20 @@ Sheet mode uses the existing operational workbook only; remove the account-speci
 ## Next phase: security and user authentication
 
 [Issue #38](https://github.com/volkswg/stock-management/issues/38) remains open.
-The owner chooses current application behavior while the database migration
-finishes. Do not implement new access controls or an owner-only launch in this
-phase. Preserve existing safeguards, privately isolate testing and keep the
-existing access-protection gap visible in the final activation risk assessment.
-Deferral is not a security certification or permission to modify live production.
+The owner preserves current application behavior through the metadata cleanup.
+Do not implement new access controls or an owner-only launch in this task. Keep
+the separate architecture roadmap for user login, secure sessions, roles,
+shop-level authorization and administration. Preserve existing safeguards and
+privately isolate testing. Deferral is not a security certification or permission
+to modify live production.
 
-## Supabase migration
+<a id="supabase-migration"></a>
+
+## Supabase migration — historical preparation
+
+The following phase descriptions preserve their original preparation context.
+Current production and the next bounded scope are described above; do not infer
+current Sheets routing or outstanding cutover work from these historical entries.
 
 Phase 1 merged as [PR48](https://github.com/volkswg/stock-management/pull/48),
 commit `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`: private import schema, offline
@@ -105,7 +122,7 @@ credentials and network/TLS rather than assume access from an earlier session.
 
 ## Deferred product decisions — not refactoring leftovers
 
-The aggregate Sheets construction/connection behavior and selected `services/`, backend and standalone-script compatibility remain intentionally supported. Workspace/Next shell ownership, PostgreSQL/Supabase migration, authorization/tenancy, subscriptions/billing, Purchase Order Master, provider replacement, and cross-provider transactions/queues/reconciliation need their own product decisions. Existing race, retry and partial-write behavior was preserved, not repaired.
+The aggregate Sheets construction/connection behavior and selected `services/`, backend and standalone-script compatibility remain intentionally supported. Workspace/Next shell ownership, schema changes beyond the bounded metadata-removal scope, authorization/tenancy, subscriptions/billing, Purchase Order Master, provider replacement, and cross-provider transactions/queues/reconciliation need their own product decisions. Existing race, retry and partial-write behavior was preserved, not repaired.
 
 ## Gates for future changes
 

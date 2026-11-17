@@ -5,13 +5,14 @@ import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {restoreNativeTimestampSource,nativeTimestampHistory} from './helpers/native-timestamps-history.mjs';
+import {restoreCellKindsSource} from './helpers/cell-kinds-history.mjs';
 const script='tools/migration/final-removal/20261117085310_native_lifecycle_timestamps.sql';
 test('native lifecycle source has one bounded predecessor and stays compatible with retained text timestamps',()=>{
  assert.equal(Object.keys(nativeTimestampHistory.edits).length,7);
  assert.deepEqual(nativeTimestampHistory.newSourceFiles,['src/shared/lib/utc-timestamp.ts']);
  assert.deepEqual(Object.keys(nativeTimestampHistory.newSourceHashes),nativeTimestampHistory.newSourceFiles);
  for(const [name,entry] of Object.entries(nativeTimestampHistory.edits)){
-  const source=readFileSync(name,'utf8');
+  const source=restoreCellKindsSource(name);
   assert.equal(createHash('sha256').update(source).digest('hex'),entry.afterSha256);
   assert.equal(restoreNativeTimestampSource(name),entry.before);
   if(name.endsWith('/records.ts')){

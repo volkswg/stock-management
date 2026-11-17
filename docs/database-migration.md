@@ -4383,16 +4383,37 @@ writes. Reconstructing historical ordinal precedence for an older reader is not
 claimed or automatically attempted. A production release/removal is **not
 authorized** by implementation approval or passing synthetic tests.
 
-## Native lifecycle timestamps (prepared; not deployed)
+<a id="native-lifecycle-timestamps-prepared-not-deployed"></a>
 
-PR74 subsequently completed the supervised ordinal retirement: production source
+## Native lifecycle timestamps (released; PR75)
+
+[PR75](https://github.com/volkswg/stock-management/pull/75) was merged and
+released as `5f04f09308159a5a2b8082abb921a3587cc52c22` under separately approved
+maintenance. Its tree matches CI-tested `c60e01c`. All 47 operational lifecycle
+fields retain their camelCase names as `timestamptz`; the 23 redundant
+`created_at_instant` columns and their derivation are absent. Browser writes and
+LINE reopened after verification. Private recovery, strict 51-table/15-metadata
+restore and frozen freshness checks passed; the actual application review found
+no changed business results, selections or calendar groups. Four application GET
+comparisons matched before deployment, on the compatible build and after schema
+conversion. Remaining schema/security and revisions matched the reviewed changes,
+and reopening preserved signature/idempotency guards and original protections.
+The production error scan reported no errors for the new deployment during
+verification. No real provider/business-write canary was performed.
+
+Exact target, deployment, recovery hashes and private execution receipts remain
+on the Mac. The following design and release sequence records this completed
+release; it does not authorize repeating it or making further production changes.
+The preserved anchor above keeps links from the preparation stage valid.
+
+Before PR75, PR74 completed the supervised ordinal retirement: production source
 `934e194f3d346e50f9dcbd8367b517c29d4b606f` is live, all 23 operational `row_order`
 columns are absent, and LINE/browser writes reopened after original values,
 revisions, journals, remaining schema/security and four API comparisons matched.
 Exact targets, recovery and execution receipts stay private on the Mac. The
 preceding ordinal section describes that release's procedure, not pending DDL.
 
-The next change converts the **47 existing operational fields** in place:
+The released change converted the **47 existing operational fields** in place:
 23 `createdAt`, 18 `updatedAt`, six `deletedAt`. Names, nullable semantics, IDs,
 revisions, archive state and other business columns stay. Four formerly dateless
 tables retain unknown creation times on legacy rows and first-observed defaults
@@ -4444,7 +4465,9 @@ native SQL follows ordinary PostgreSQL timestamp input rules; supply explicit
 offsets when editing instants. No automatic updated/deleted timestamp behavior is
 introduced. Existing revision/ID/soft-delete/idempotency and LINE rules remain.
 
-### Separate production release approval
+<a id="separate-production-release-approval"></a>
+
+### Recorded release procedure; fresh approval required for reuse
 
 1. Approve a private current-data census and fresh application-schema recovery
    checkpoint, then verify it on a separate local restore, preserving dropped
@@ -4476,10 +4499,290 @@ introduced. Existing revision/ID/soft-delete/idempotency and LINE rules remain.
    only after successful checks under the approved release window. Browser users
    must reload before editing so retained text-format optimistic tokens are refreshed.
 
-Before conversion, the current production source can still be retained. After
-conversion, source `934e194` cannot be restored because it needs the removed derived
-column: use this compatible source or a reviewed forward repair. Do not restore
+Before this conversion, predecessor source `934e194` could still be retained.
+It is now incompatible with the native schema because it needs the removed derived
+column: retain compatible PR75 source or use a reviewed forward repair. Do not restore
 old data over subsequent writes. Type/format normalization is not a reversible
 reconstruction of original timestamp spelling. New auth, paid resources, provider
 canaries and backup automation are outside this change. Implementation/testing is
 not approval to read fresh hosted records, pause traffic, deploy or run hosted DDL.
+
+<a id="cell_kinds-removal-plan-planning-only-production-unchanged"></a>
+
+## cell_kinds removal (compatibility prepared; production unchanged)
+
+### Objective, baseline and scope
+
+Remove all **23 operational `cell_kinds` columns** by replacing their runtime
+meaning with explicit rules for each named column. Preserve existing browser/API
+and LINE behavior, financial results, stock semantics and native timestamp
+precision. The owner subsequently approved local compatibility implementation,
+tests and a review PR, retaining all columns. Hosted execution/deployment and final
+removal remain unapproved. No production data/credentials are accessed for this
+work; local tests use synthetic data. The initial inventory uses current source
+and retained, verified release metadata.
+
+The baseline is released PR75 (`5f04f093`): stable IDs, no operational
+`business_cells`, `row_order` or `created_at_instant`, and 47 native lifecycle
+fields. There are **248 existing interface/header fields**, plus four operational
+`createdAt` fields that intentionally have no header position. Their type census
+is 157 text, 33 numeric, four bigint, five boolean, six JSONB and 47 timestamptz
+(43 exposed through existing headers, four internal). This 252-field census excludes
+the hidden compensation `migration_id` and operational control/representation
+columns, which have a separate preservation inventory. The historical
+`worksheets.json` catalog still describes the original Sheets representation;
+implementation must apply the reviewed native timestamp overrides rather than
+mistake that catalog for the current physical schema.
+
+Keep all **48 existing `<field>__lexeme` columns** in this scope. They preserve
+decimal/boolean/JSON spelling, including precision and JSON context text. Their
+future removal requires a separate assessment. No replacement kind bitmap,
+positional JSON column, per-row type shadow or permanent compatibility view may
+recreate `cell_kinds`. Immutable migration archives/catalogs, original fixtures and
+recovery evidence remain unchanged. Preserve actual Google Sheets transport and
+headers, current provider behavior, stable-ID mutations, ordering, revision and
+idempotency protocols, TLS, permissions, signature/cutoff controls and existing
+access restrictions. New authentication, schema redesign, unrelated behavior fixes,
+additional timestamp conversions and backup automation remain outside this work.
+
+### What depends on it
+
+| Surface | Current dependency | Required replacement |
+| --- | --- | --- |
+| `PostgresRecords.read` / references | `project_<table>` supplies transient row arrays used by existing feature ports | Explicit per-column output rules, with the same headers, identity/revision handles and established consumer behavior |
+| `PostgresRecords.columns`, insert and update | Includes `cell_kinds` with named fields and lexemes; invokes `input_<table>` | A retained/final-schema-compatible write path that ultimately omits the column and preserves field-level update semantics |
+| 23 `project_<table>` functions | Decode scalar kinds and truncate to encoded row width | Reviewed per-column serialization and an explicit missing/blank/null policy |
+| 23 `input_<table>` functions | Encode incoming array scalar types/width | Reviewed per-column input validation/conversion; temporary rollback encoding only during the retained-column stage |
+| 23 `validate_<table>` functions / `a_validate` triggers | Validate/repair encoding as well as named values, identity, revision and archive state | Remove only representation dependencies; keep every non-encoding validation and mutation guard |
+| `cell_projection` and named-column acceptance | Interpret kind/lexeme/type and verify original cell representation | Retire the helper only after all callers are replaced; use RESTRICT and preserve historical codec evidence |
+| Reconciliation, operational tests and historical inverse fixtures | Some compare original mixed scalar arrays and short-row width | Keep historical assertions intact; add independent current-schema contract tests and documented comparison boundaries |
+
+Root infrastructure remains server-only transport; feature adapters remain the
+owners of semantic mapping. Keep existing application/domain ports and browser
+contracts. SQL mapping and the record transport may change without moving business
+logic into SQL or routes. Use one reviewed, exhaustive **migration policy manifest**
+keyed by `(table, column)` to generate/check explicit SQL; it is an operator-tool
+artifact, not a new runtime feature registry or general serialization framework.
+Retain existing feature-owned headers/bindings and do not widen dependency rules.
+
+### Per-column mapping contract
+
+Implementation must enumerate all 252 interface/time fields, with the 248 current
+header positions and four internal-only fields distinguished. Preserve the hidden
+compensation `migration_id` and existing metadata/control fields separately;
+never add them to public headers. Each mapping entry records physical
+type, read representation and all consumers, accepted input types, omitted/empty/
+null handling, lexeme validation, precision, rejection behavior and owning adapter.
+No policy is approved merely because the PostgreSQL type matches another field.
+
+| Field family | Proposed rule and required checks |
+| --- | --- |
+| IDs, foreign IDs, codes, phone numbers and other text | Preserve opaque strings, leading zeros, casing and current trim rules at their existing owners. Do not turn a previously ignored numeric/boolean token into a visible valid record. Check strict-string consumers separately from coercing consumers. |
+| Optional text such as remarks/notes | Specify `NULL`, empty and omitted behavior per column from the actual port/API contract; do not blanket-convert SQL NULL to empty text, or all blanks to NULL. Save/clear/unchanged operations must retain current outcomes. |
+| All 47 lifecycle timestamps | Preserve native `timestamptz` and the existing UTC ISO formatter, including microseconds and current millisecond token spelling. Preserve unknown times, four internal first-observed defaults and Bangkok membership. No fabricated timestamps or timestamp text sidecars. |
+| 33 numeric and four bigint fields | Preserve exact SQL values, existing lexemes and the API's existing scalar representation. Do not route precision-sensitive values through a new JavaScript Number conversion, add rounding, turn missing quantity into zero or change nullable financial behavior. Preserve current numeric-token limitations without introducing new narrowing. |
+| Five booleans | Specify accepted true/false/string/numeric forms independently for each column. Do not use generic JavaScript truthiness or assume PostgreSQL true always means the existing consumer observes true. Blank/NULL defaults require explicit consumer evidence. |
+| Six JSONB fields | Keep parsed JSON authoritative and existing lexemes validated against it. Preserve expected JSON text, whitespace/key spelling where observable, explicit JSON null conventions and unknown properties. Do not silently change a string context/snapshot into an object or discard upload/session correlation fields. |
+| Row shape and patches | Give each field an explicit omission/default policy and prove the row-width change does not admit previously ignored records or alter defaults. Preserve header order/ranges; omitted patch means unchanged, while explicit clear/null retains its established meaning. Unchanged neighboring values/lexemes must survive a partial edit. |
+
+The non-text/non-timestamp fields requiring individual entries are:
+
+| Table | Numeric / bigint | Boolean / JSONB |
+| --- | --- | --- |
+| orders | `totalPrice` | — |
+| order_items | `quoteQuantity`, `deliveredQuantity` | — |
+| shipments | `shippingFee` | — |
+| employee_compensations | `baseSalary`, `commission`, `commissionBucketSales`, `commissionBucketAmount`, `commissionRoundupThreshold` | — |
+| employee_advances | `requestedAmount`, `paidAmount` | — |
+| payroll_settlements | — | JSONB `snapshot` |
+| expenses | `amount` | — |
+| expense_categories | — | Boolean `active` |
+| shops | — | Boolean `active` |
+| sales_receipts | `totalMoney`, `totalTax`, `totalDiscount`, `tip`, `surcharge`, `pointsEarned`, `pointsDeducted` | — |
+| sales_receipt_items | `quantity`, `price`, `grossTotalMoney`, `totalDiscount`, `totalMoney`, `cost`, `costTotal`, `taxes` | JSONB `lineDiscountsJson`, `lineTaxesJson`, `lineModifiersJson` |
+| sales_receipt_payments | `moneyAmount`; bigint `paymentIndex` | JSONB `paymentDetailsJson` |
+| sales_receipt_syncs | Bigint `receiptCount`, `itemCount`, `paymentCount` | — |
+| sales_profit_cost_overrides | `averageItemCost` | — |
+| stock_counts | `physicalCount` | — |
+| stock_adjustments | `quantity` | Boolean `notInLoyverse` |
+| movements | `totalQuantity` | — |
+| movement_details | `quantity` | Boolean `stockCounted`, `isNewArrival` |
+| user_state | — | JSONB `context` |
+
+`order_bills`, `shipment_orders`, `employees` and `employee_timesheets` have only
+text/header timestamps. The internal-only `createdAt` fields belong to
+`sales_receipt_items`, `sales_receipt_payments`, `sales_receipt_syncs` and
+`stock_counts`; they must not be added to public headers or DTOs.
+
+**Confirmed code-level hazards, not findings about current business records:**
+the movement reader accepts boolean `true` or text `"true"` as true, while numeric
+`1` is false. Existing encoding can distinguish those values even when the named
+PostgreSQL boolean is the same. The adjustment reader has a similar distinction;
+LINE movement entries also expose raw flags/quantities/context. LINE order-state
+mapping rejects non-string IDs/reference/state fields, whereas some HR readers
+coerce values and monetary fields. A generic cast can therefore change visibility,
+inventory behavior or selected sessions. These are mandatory characterization
+cases; no occurrence in production is asserted by this source-only plan.
+
+### Stages and deliverables
+
+1. **Contract audit and local implementation specification.** Enumerate all fields
+   and mapper/validator/helper callers; trace public/API and raw LINE consumers.
+   Characterize scalar types, null/blank/absent values and mutations before changing
+   code. Classify differences as exactly reconstructable from named values/lexemes,
+   equivalent only at a proven consumer boundary, or irreducible/behavior-changing.
+   Freeze the exact current baseline and specify each column's mapping. Prove that
+   no fields, archived paths, defaults or unexpected function dependencies are
+   omitted. A future separately approved private census must cover actual encoding
+   kinds, NULL kinds, row widths and lexeme combinations in active **and archived**
+   records; synthetic evidence alone cannot clear historical data risk.
+2. **Retained-column compatibility stage.** Implement explicit input/output and
+   validation policies while retaining all 23 columns. The new build must operate
+   against both the retained and final schemas, with explicit schema-state guards
+   rather than catching errors and silently falling back. During retention, preserve
+   valid legacy metadata for new writes and unchanged neighboring fields so the
+   approved predecessor remains a usable pre-removal rollback. Do not blanket-null
+   `cell_kinds`. Temporary encoding maintenance may support rollback, but final
+   reads, writes and validations must work with the column physically absent. Test
+   older and new builds against the retained schema after creates/edits/archives;
+   never equate a read-only compatibility check with write compatibility.
+3. **Final removal preparation and disposable acceptance.** Prepare CLI-versioned,
+   operator-only SQL outside automatic migration discovery. In a bounded atomic
+   transaction, verify exact target/purpose, reviewed source/revision/recovery,
+   predecessor function bodies and allowed schema state; own writer locks and table
+   locks, then recheck freshness after waiting. Replace/remove temporary encoding
+   writers and kind-dependent validation fragments before dropping exactly the 23
+   columns with RESTRICT. Keep identity/revision/archive/lexeme/native-time guards,
+   existing owners/ACLs/RLS and all other data/metadata. Unknown dependencies or any
+   disagreement abort. Retire `cell_projection` only after its final callers are
+   gone. Rehearse on independent fresh local copies, including a restored approved
+   checkpoint when separately authorized. Do not execute hosted SQL in this stage.
+4. **Separately approved production release.** After contract/data review and
+   verified fresh recovery, approve a supervised writer/direct-editor/job pause,
+   accounted-for pending work, a reviewed temporary traffic fence and a hard abort
+   time. Drain and bind current data/security/revision to the approved evidence;
+   refresh it if stale. Deploy and verify the compatible build with columns retained.
+   Execute the separately approved guarded SQL only when enough time remains for
+   verification/reopening. Verify and remove only the temporary fence after success.
+   Preserve existing LINE signature/cutoff and other protections; do not invoke real
+   providers or manufacture business canaries without separate approval.
+
+Prefer **one focused implementation PR** for this compatibility stage. Final removal
+still needs its guarded operator artifact and complete acceptance after the private
+contract/data gates; the local candidate fixture below is not that artifact. The
+original plan did not publish a planning PR or execute tests. The subsequent owner
+instruction authorizes local compatibility implementation, tests and a review PR,
+with no production access/change, deployment, paid resources or live settings.
+
+### Mandatory pass/fail evidence
+
+| Check | PASS | FAIL / NO-GO |
+| --- | --- | --- |
+| Coverage and source ownership | All 248 header fields and four internal timestamps have explicit reviewed policies; hidden IDs/control fields preserved; all 69 encoding-dependent functions/helper callers and transport/tool consumers accounted for | Missing/default-by-guess policy, historical text catalog mistaken for native schema, new root feature registry or weakened ownership guard |
+| Historical representations | Original fixtures/codec matrix preserved; active/archived census and consumer tests prove allowed behavior after kind removal | Indistinguishable stored values require different observable results, row visibility changes or unsupported values are silently coerced |
+| Read/write compatibility | Old build/retained schema, new build/retained schema and new build/physically-absent schema preserve the applicable contracts, including after writes | New build only passes when retained kind decoding is still used; old rollback cannot read new writes; partial save changes unrelated values/lexemes |
+| Business semantics | Actual existing readers match financial totals, stock/flags/warnings, date/month membership, compensation IDs and LINE selections/transitions; public JSON field types and errors remain | Any changed amount, selection, message, state, inventory flag, calendar group, error boundary or public scalar type without separate owner-approved scope |
+| LINE/provider safety | Valid/invalid signatures and old-event cutoff, opaque IDs, session context, image uncertainty/reconciliation, idempotent event replay and effect journals preserved with fake providers | Lost context, duplicate receipt/image/provider attempt, changed cutoff or reliance on LINE retries to preserve maintenance events |
+| Native persistence | Direct Supabase edits visible; create/edit/clear/archive, stale revision conflicts, lost-response/reload/retry and typed value/precision guards pass | Reintroduced positional identity, bypassed revisions/idempotency, changed timestamp precision/defaults or disabled validation/RLS |
+| Preservation and rollback | Full 51-table reconciliation ignores only the intended operational `cell_kinds` removal; 48 lexemes, business values, IDs, row/global revisions, archives and journals exact; remaining metadata/security matches the reviewed diff | Blanket normalization, extra columns removed, unexpected grants/triggers or restore over newer acknowledged writes |
+| Execution/release controls | Missing/wrong approvals, stale revision, lock-wait race and unknown dependencies fail atomically; all 23 physical columns absent; compatible source verified before DDL | DDL runs automatically, reuses old recovery without freshness proof, uses CASCADE or retries an uncertain outcome blindly |
+
+Reuse existing regression, named-column/native timestamp, stable-ID, 32 operational,
+real browser retry, reconciliation and strict recovery checks. Add focused cases for
+the new mapping/encoding risks and run the appropriate complete CI once implementation
+changes exist; preserve original fixtures with a bounded inverse if needed. Builds
+must exclude credentials and client bundles must remain free of server secrets.
+Repeat capacity/load campaigns only if changed query plans or measured regressions
+justify them. A bounded new-projection read-cost comparison is included because
+the prepared path changes projection execution; it is not production capacity GO.
+
+Fresh CI/bootstrap ordering must reproduce the released native schema first: keep
+the original nine automatic migrations and existing operator-only business_cells,
+ordinal and timestamp transitions in their reviewed dependency order, then apply
+the new retained/final encoding transitions. Historical pre-transition suites keep
+their original layouts. Do not run cell_kinds retirement against the catalog's
+original text dates or weaken earlier migration witnesses to satisfy a new test.
+
+### Hard decisions and rollback boundaries
+
+Full original cell-token identity is not always reconstructable from named types
+and the retained lexemes. Removal is **NO-GO** wherever two such indistinguishable
+values still require different observable behavior. Do not silently approve
+normalization, redefine old assertions, keep the column secretly under a new name,
+or repair business records. Resolve each conflict with a behavior-preserving
+representation already allowed by scope, or obtain a separate narrow owner
+decision/data-change approval; otherwise retain the affected column. Complete
+retirement requires every table's gate to pass.
+
+The 48 lexemes and native timestamp projection remain supported. Exact historical
+raw-cell equivalence belongs to the retained archive/codec; current DTO/LINE and
+business-value preservation remain release requirements. Tests may distinguish
+those boundaries explicitly, but may not hide public changes by sorting all arrays,
+coercing all scalar types, padding all rows or broadly ignoring null/empty values.
+
+Before removal, rollback requires a specifically verified predecessor/schema pair
+and valid retained encoding after writes. After removal, that predecessor's
+`project_*/input_*/validate_*` functions cannot be used unchanged; retain the new
+compatible source or make a reviewed forward repair. A reverse schema operation
+cannot recreate lost kind/width information from typed fields alone. Snapshot
+restoration would require separate approval, accounted-for later writes and a fresh
+reconciliation plan; never overwrite acknowledged work. Privately retain all
+credentials, snapshots, original evidence and recovery/source artifacts.
+
+### Implemented compatibility stage; not deployed
+
+`tools/migration/cell-kinds-policy.json` explicitly inventories all 248 interface
+fields and four internal native timestamps. Its versioned read policies are
+**candidates**, not permission to normalize historical records. The generator
+`cell-kinds.py` checks coverage/types/positions against immutable predecessors and
+the native timestamp transition. Input conversion follows the existing named
+value/lexeme casts, preserving native timestamps and precise numeric/JSON strings.
+
+The additive, CLI-versioned installer is
+`tools/migration/compatibility/20261117132332_cell_kinds_compatibility.sql`, outside
+automatic discovery. It requires reviewed target/purpose and
+`stock.allow_cell_kinds_compatibility='reviewed-per-column-compatibility-v1'`, takes
+the existing writer channels, pins 73 predecessor bodies and requires the full
+native field, lexeme, identity/control layout (347 attribute/type checks). It creates
+74 invoker functions:
+23 per-column projections, 23 per-column inputs, 23 explicit retained compatibility
+projections, four typed lexeme helpers and one schema-capability function. Existing
+functions/triggers/columns/permissions remain; new EXECUTE rights are limited to
+the corresponding existing mapper callers, with no PUBLIC/anon/authenticated,
+business-table or role grants. There is no data rewrite or final-removal artifact.
+
+`PostgresRecords` pins one capability per unit of work. Absence of preparation
+uses the original contract; an installed but partial/invalid layout fails closed.
+On prepared retained schemas an explicit per-column kind/width discriminator sends
+known matching encodings to the independent projection without decoding twice.
+Other scalar/null/blank/width encodings explicitly preserve the legacy projection;
+the audit independently compares both representations and exposes differences. Errors
+never select another backend or silently fall back. Input mappings maintain valid
+legacy encoding from transient submitted cells only while that column is present,
+so predecessor readers and rollback retain newly written values and representations.
+No existing `cell_kinds` is blanket-cleared. All 23 columns and 48 lexemes remain.
+
+`cell-kinds-audit.py` is an opt-in private read-only report for an approved frozen
+target or disposable restore. It checks identity/purpose and complete read
+visibility, includes archived records, and reports per-field/width mismatch counts
+without exporting record values or IDs. It requires a selected private PGSERVICE,
+`--frozen-or-local-review-approved` and an exclusive private output file. **An exact
+projection match is not production GO or removal approval**; mismatches still need
+the contract/semantic review above. This task runs it only on synthetic local data.
+
+The future kindless transport branch and independent projectors are exercised on
+an empty/canonical disposable schema. `--local-final-fixture` is test setup only:
+it refuses remote TCP, ordinary database names, wrong users, missing synthetic
+approval or a production purpose before doing anything. It replaces only encoding
+parts of test validators and drops columns only in that new local fixture. Original
+legacy witnesses and the full operational/native/browser suites remain on retained
+schemas. This candidate smoke is **not final all-representation application
+acceptance** and does not waive any historical/null/width/boolean conflict.
+
+Review/release boundaries: local compatibility implementation and review are now
+authorized. Fresh hosted-data profiling/recovery, production compatibility install
+and deployment, maintenance and final physical removal retain separate explicit
+approval boundaries. Production remains on PR75 with all encoding columns present.
+
+The [local verification ledger](refactoring/verification.md#cell_kinds-compatibility--local-synthetic-verification-2026-11-17)
+records the actual passing checks and the limits of the canonical kindless fixture.

@@ -1626,3 +1626,78 @@ Bangkok attendance, LINE, operational and browser acceptance pass. Production is
 unchanged by this implementation; no fresh hosted data/credentials were accessed.
 The previous PR74 ordinal release is complete and reopened, with private evidence
 retained on the Mac; it does not authorize this next schema conversion.
+
+## Native lifecycle timestamp release completed (2026-11-17; PR75)
+
+The owner separately approved merge, private production profiling/recovery and
+local rehearsal, then supervised production maintenance/deployment/conversion and
+reopening. PR75 merged/released as `5f04f09308159a5a2b8082abb921a3587cc52c22`,
+whose tree exactly matches CI-tested `c60e01c`. The 669 regressions and CI passed.
+Fresh recovery restored all 51 application tables and 15 metadata sections;
+all 47 fields, including archived records, were convertible. Retained/native
+actual-source comparisons across the approved month coverage found no changed
+business results, inventory warnings, hidden selections or Bangkok groups.
+
+Under a verified temporary traffic fence and drained writers, the checkpoint
+matched current data/security/revision. The compatible deployment was verified
+before the reviewed one-transaction conversion. All 47 existing lifecycle fields
+are native `timestamptz`, retaining exact names; 23 redundant creation-instant
+columns and derivation were removed. All 51 tables reconciled after only intended
+timestamp normalization; revisions, journals and remaining security metadata
+matched. Four API values/revisions matched baseline on the compatible and native
+schemas. Temporary maintenance was removed and browser/LINE reopened with
+signature/idempotency/retired-deployment guards verified. The initial new-deployment
+error scans reported no errors. No live business/provider-write canary was run.
+Private exact targets, credentials, checkpoint hashes and execution evidence stay
+on the Mac. Backup automation and new authentication remain deferred.
+
+## cell_kinds removal planning (2026-11-17; not implemented)
+
+The owner requests removal using explicit per-column mappings while preserving
+current app and LINE behavior. The [single plan](../database-migration.md#cell_kinds-removal-plan-planning-only-production-unchanged)
+inventories 23 encoding columns, 69 dependent functions, 248 header fields plus
+four internal timestamps and 48 retained lexemes. It records field-level contracts,
+actual source-level type hazards, retained/final-schema compatibility, local
+regression/operational/browser/LINE gates, strict recovery/reconciliation and
+separate hosted-access/maintenance/DDL approval boundaries. Source inspection
+confirms that a generic boolean cast can change existing inventory interpretation;
+this plan makes no finding about occurrence in real records and approves no repair.
+
+Only the existing documentation is updated. No runtime/migration implementation,
+new dependency, test campaign, CI rerun, fresh business-record access, provider call,
+production change or GitHub publication is part of this planning task.
+Planning validation checks the documentation-only diff, new relative links and
+preserved historical anchors, plus the 48-field numeric/bigint/boolean/JSON inventory
+against retained release metadata. Runtime acceptance remains unexecuted.
+
+## cell_kinds compatibility implementation (2026-11-17; prepared, not deployed)
+
+The next owner instruction authorizes local implementation/tests and one review PR,
+retaining all encoding columns and leaving production unchanged. The explicit
+252-field candidate manifest drives additive invoker input/projection functions.
+Schema capability is pinned per unit of work: an unprepared database retains the
+original contract, known prepared layouts select the new path, and invalid/partial
+layouts fail closed. Known matching encodings use per-column projections directly;
+other representations use the explicit old projection. There is no catch-and-retry
+backend fallback, blanket metadata clearing or historical normalization.
+
+All existing mapper/validator functions, triggers and permissions remain. New
+input mapping maintains valid retained encoding from transient inputs so old
+readers can consume new writes. The installer adds no columns, table grants, role
+memberships, authentication or dependencies; it stays outside normal discovery.
+The guarded Unix-socket candidate fixture drops columns only on a fresh local
+synthetic database. It is not a production removal artifact or evidence that all
+historical representations can already be retired. The opt-in private audit
+reports field/width differences across active and archived records, without record
+values/IDs or removal authority. No production credential, record, provider or
+configuration is used by this implementation/testing task. See the
+[current boundaries](../database-migration.md#implemented-compatibility-stage-not-deployed).
+
+
+Local verification passes 673 regression and 73 Python tests, lint (one existing
+warning), typecheck and the isolated credential-free default build. Fresh synthetic
+retained-column PostgreSQL acceptance preserves all 51 tables and original security
+metadata, passes the 2,398-case mapping matrix and existing operational/native/real
+browser suites. Independent unprepared-schema acceptance also passes. The kindless
+candidate checks remain limited canonical component evidence. Full details and
+limits are in the [verification ledger](verification.md#cell_kinds-compatibility--local-synthetic-verification-2026-11-17).

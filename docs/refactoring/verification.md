@@ -650,3 +650,47 @@ promotion fixtures still initialize in their existing order. Local results do no
 profile current hosted date values or prove unchanged real-data selections. The
 [production release gates](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed)
 require separate approval and fresh private recovery/current-data comparisons.
+
+
+## cell_kinds compatibility — local synthetic verification (2026-11-17)
+
+All 673 regression tests and 73 Python migration tests pass. Typecheck and the
+credential-free default production build pass; lint reports zero errors and the
+existing unused `shipmentRow` test warning. The byte-identical source build keeps
+the route manifest unchanged; all 113 client chunks exclude private database
+strings. No integration credentials are provided to the build or tests.
+
+`verify-cell-kinds.sh` passes on fresh disposable PostgreSQL 17.11 databases
+(local cached image; CI keeps pinned 17.7). Additive installation preserves all
+51 table fingerprints and all original functions, columns, constraints, owners,
+ACLs, RLS, grants and other metadata; only the 74 reviewed invoker functions are
+added. All 23 `cell_kinds` columns and 48 lexemes remain. Missing approval, wrong
+target, predecessor drift and a partial schema with a decoy encoding column fail
+closed. A table-scoped reader retains its scope and cannot call new input mapping.
+
+The matrix exercises 2,398 old/new input and retained projection cases across all
+248 interface fields, including dense mixed scalar arrays, short rows, NULLs,
+blank strings, native timestamps and precise numeric/JSON lexemes. Another 92
+independent canonical expectations check the candidate projections. Branch
+witnesses prove canonical rows avoid old decoding, exceptional representations
+select the explicit retained path, and candidate errors propagate without fallback.
+The private audit covers all 248 fields even on empty tables and exposes the
+synthetic archived boolean mismatch without granting removal authority.
+
+Actual current-source acceptance passes one partial-schema refusal, nine retained
+cases, seven canonical kindless component cases, the existing 32 operational and
+10 native timestamp cases, and the real browser committed-response-loss/reload/
+exact-replay case. LINE opaque IDs/latest/state clearing, direct SQL edits, soft
+deletes, stable IDs, stale revisions and numeric `1` versus boolean `true` inventory
+behavior are included. The existing native verifier also passes independently
+without installing compatibility functions, exercising the pre-installation path.
+A bounded 1,000-order read comparison completes under the existing statement bound;
+it is local read-cost evidence, not hosted capacity certification.
+
+The guarded kindless fixture is limited to a fresh local Unix-socket synthetic
+database and canonical records. It is not a final production removal artifact or
+full historical-representation acceptance. Original migrations and historical
+fixture bytes remain unchanged; the new bounded source inverse only composes the
+new transport edit before earlier witnesses. Production, live providers, credentials,
+real business records and hosted configuration are untouched. See the
+[implementation and separate release boundaries](../database-migration.md#implemented-compatibility-stage-not-deployed).
