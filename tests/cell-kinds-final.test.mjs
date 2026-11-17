@@ -23,5 +23,5 @@ test('retirement guards exact prefixes including archived rows; no generic coerc
  const sql=readFileSync(file,'utf8');assert.equal((sql.match(/Unreviewed encoding representation in /g)||[]).length,23);
  assert.ok(sql.includes('old->i IS DISTINCT FROM candidate->i'));
  assert.doesNotMatch(sql,/archived_at IS NULL|EXCEPTION WHEN/);
- assert.ok(sql.includes("prosrc LIKE '%cell_kinds%'"));assert.ok(sql.includes('DROP FUNCTION stock_operational.cell_projection(jsonb,text,text,text) RESTRICT'));
+ assert.ok(sql.includes("prosrc LIKE '%cell_kinds%'"));assert.ok(sql.includes("n.nspname NOT IN ('pg_catalog','information_schema')"));assert.ok(sql.includes('DROP FUNCTION stock_operational.cell_projection(jsonb,text,text,text) RESTRICT'));
 });

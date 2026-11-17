@@ -713,7 +713,7 @@ only the intended encoding/115-body/one-unused-helper diff. All 48 lexemes, 47
 native timestamps, named values, IDs, revisions, journal/archive contents,
 constraints, triggers, RLS, owners, ACLs, grants and memberships retain their
 reviewed values. It also refuses missing/wrong/stale approvals, archived ambiguous
-representations, unreviewed short prefixes, a RESTRICT view and a real writer
+representations, unreviewed short prefixes, a RESTRICT view, a procedural consumer in another user schema and a real writer
 committing during the advisory-lock wait. No CASCADE or validation disable is used.
 
 The final schema passes eight focused mapping/default/flag/LINE cases, a same-

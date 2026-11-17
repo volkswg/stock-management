@@ -25,6 +25,11 @@ pg psql -U postgres -d cf_bad -At -c "SELECT 1 / (stock_operational.column_mappi
 pg psql -U postgres -d cf_base -v ON_ERROR_STOP=1 -c 'CREATE VIEW public.cf_encoding_dependency AS SELECT cell_kinds FROM stock_operational.orders;' > "$artifacts/final-view-fixture.log"
 if final_sql cf_base | pg psql -U postgres -d cf_base -v ON_ERROR_STOP=1 > "$artifacts/final-view-refused.log" 2>&1; then exit 1; fi
 pg psql -U postgres -d cf_base -v ON_ERROR_STOP=1 -c 'DROP VIEW public.cf_encoding_dependency;' > "$artifacts/final-view-cleanup.log"
+pg psql -U postgres -d cf_base -v ON_ERROR_STOP=1 > "$artifacts/final-public-consumer-fixture.log" <<'SQL'
+CREATE FUNCTION public.cf_hidden_consumer() RETURNS text LANGUAGE plpgsql AS $$ BEGIN RETURN (SELECT cell_kinds FROM stock_operational.orders LIMIT 1); END $$;
+SQL
+if final_sql cf_base | pg psql -U postgres -d cf_base -v ON_ERROR_STOP=1 > "$artifacts/final-public-consumer-refused.log" 2>&1; then exit 1; fi
+pg psql -U postgres -d cf_base -v ON_ERROR_STOP=1 -c 'DROP FUNCTION public.cf_hidden_consumer();' > "$artifacts/final-public-consumer-cleanup.log"
 # A genuine writer commits during the advisory-lock wait. The post-lock seal
 # must reject atomically even with a repeatable-read caller default.
 mkfifo "$artifacts/final-writer-input"

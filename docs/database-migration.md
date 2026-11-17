@@ -4807,7 +4807,8 @@ The CLI-created operator artifact is
 147 predecessor bodies, rewrites only the 115 dependent input/projection/validator
 bodies using their existing definitions (preserving owners/ACLs/settings), drops
 all 23 physical encodings with RESTRICT, and removes the unused `cell_projection`
-helper with RESTRICT. Existing per-column projectors, all 48 lexemes, 47 native
+helper with RESTRICT. Literal procedural consumers in other user schemas are also
+refused, because PostgreSQL may not track their text references as dependencies. Existing per-column projectors, all 48 lexemes, 47 native
 timestamps, stable IDs, revisions, journals and archive rules remain. No new
 function, column, role, table grant, membership, generic metadata replacement or
 business-row rewrite is introduced.

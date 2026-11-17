@@ -144,9 +144,10 @@ END $witnesses$;
  END LOOP;
 END $replace$;
 -- Refuse unknown procedural consumers too, beyond PostgreSQL's RESTRICT graph.
-SELECT 1 / (NOT EXISTS(SELECT FROM pg_proc WHERE pronamespace='stock_operational'::regnamespace
- AND proname NOT IN ('cell_projection','column_mapping_contract_v1')
- AND (prosrc LIKE '%cell_kinds%' OR prosrc LIKE '%cell_projection%')))::int;
+SELECT 1 / (NOT EXISTS(SELECT FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+ WHERE n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname NOT LIKE 'pg_toast%'
+ AND p.oid NOT IN ('stock_operational.cell_projection(jsonb,text,text,text)'::regprocedure,'stock_operational.column_mapping_contract_v1()'::regprocedure)
+ AND (p.prosrc LIKE '%cell_kinds%' OR p.prosrc LIKE '%cell_projection%')))::int;
 '''
     for table in CATALOG:sql+=f'ALTER TABLE stock_operational.{table} DROP COLUMN cell_kinds RESTRICT;\n'
     sql+='''DROP FUNCTION stock_operational.cell_projection(jsonb,text,text,text) RESTRICT;
