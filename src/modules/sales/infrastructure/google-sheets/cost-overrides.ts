@@ -1,4 +1,5 @@
 import "server-only";
+import { updateRecord } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import { SALES_PROFIT_COST_OVERRIDE_HEADERS } from "./profit-cost-overrides/const";
 import type { SalesProfitCostOverride } from "../../contracts";
@@ -17,7 +18,7 @@ export function createCostOverrideStore(googleSheetsService: IGoogleSheetsServic
                     const rowIndex = rows.findIndex((row, index) => index > 0 && toStringValue(row[1]) === month && toStringValue(row[2]) === accountId);
                     if (rowIndex < 0)
                         return undefined;
-                    return { current: () => mapCostOverrideRow(rows[rowIndex]), replace: override => googleSheetsService.salesProfitCostOverrides.updateRows(`A${rowIndex + 1}:H${rowIndex + 1}`, [costOverrideToRow(override)]), clear: () => googleSheetsService.salesProfitCostOverrides.updateRows(`A${rowIndex + 1}:H${rowIndex + 1}`, [Array.from({ length: SALES_PROFIT_COST_OVERRIDE_HEADERS.length }, () => "")]) };
+                    return { current: () => mapCostOverrideRow(rows[rowIndex]), replace: override => updateRecord(googleSheetsService.salesProfitCostOverrides, rows[rowIndex], `A${rowIndex + 1}:H${rowIndex + 1}`, [costOverrideToRow(override)]), clear: () => updateRecord(googleSheetsService.salesProfitCostOverrides, rows[rowIndex], `A${rowIndex + 1}:H${rowIndex + 1}`, [Array.from({ length: SALES_PROFIT_COST_OVERRIDE_HEADERS.length }, () => "")]) };
                 }
             };
         },

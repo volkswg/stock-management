@@ -7,7 +7,7 @@ const paths={
  [h+'application/salary-advances.ts']:['../contracts','../domain/salary-rules','./ports/payroll','./ports/salary-advance-shops'],
  [h+'application/calculate-payroll.ts']:['../contracts','../domain/payroll-calculation','./salary-advances','./ports/payroll'],
  [h+'application/settle-payroll.ts']:['../domain/salary-rules','./salary-advances','./ports/payroll'],
- [h+'infrastructure/google-sheets/salary-store.ts']:['server-only','@/infrastructure/persistence/google-sheets/types','../../contracts','../../domain/salary-rules','../../application/ports/payroll','./employee-advances/const'],
+ [h+'infrastructure/google-sheets/salary-store.ts']:['@/infrastructure/persistence/google-sheets/record-reference','server-only','@/infrastructure/persistence/google-sheets/types','../../contracts','../../domain/salary-rules','../../application/ports/payroll','./employee-advances/const'],
  [h+'infrastructure/payroll-revision.ts']:['server-only','node:crypto','../contracts'],
  [h+'payroll-server.ts']:['server-only','./application/ports/salary-advance-shops','./application/ports/payroll','./infrastructure/google-sheets/salary-store','./application/salary-advances','./application/calculate-payroll','./application/settle-payroll','./infrastructure/payroll-revision','./domain/salary-rules'],
  'src/services/employees/payroll-composition.ts':['server-only','@/infrastructure/persistence/google-sheets/service-contracts','@/modules/hr/application/ports/salary-advance-shops','@/modules/hr/application/ports/payroll','@/modules/hr/payroll-server','@/modules/hr/server','@/modules/sales/server','./salary-advance-shops'],

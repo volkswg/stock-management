@@ -1,6 +1,8 @@
+import {readStableRecordHistory} from "./stable-record-ids-history.mjs";
 import assert from 'node:assert/strict';
 import {restoreWorkbookSource} from './loyverse-workbook-history.mjs';
-import {readFileSync,existsSync} from 'node:fs';
+import {existsSync} from 'node:fs';
+const readFileSync=readStableRecordHistory;
 import {createHash} from 'node:crypto';
 export const featuresHistory=JSON.parse(readFileSync('tests/fixtures/features-retirement-before.json','utf8'));
 export const featureFiles=featuresHistory.files;

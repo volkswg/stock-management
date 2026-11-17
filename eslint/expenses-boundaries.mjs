@@ -5,7 +5,7 @@ const imports={
  [base+'domain/rules.ts']:[],
  [base+'application/ports/expense-store.ts']:[],
  [base+'application/manage-expenses.ts']:['../contracts','../domain/rules','./ports/expense-store'],
- [base+'infrastructure/google-sheets/expense-store.ts']:['server-only','@/infrastructure/persistence/google-sheets/types','../../application/ports/expense-store','../../domain/rules','./expenses/const'],
+ [base+'infrastructure/google-sheets/expense-store.ts']:['@/infrastructure/persistence/google-sheets/record-reference','server-only','@/infrastructure/persistence/google-sheets/types','../../application/ports/expense-store','../../domain/rules','./expenses/const'],
  [base+'server.ts']:['server-only','node:crypto','./contracts','./application/manage-expenses','./infrastructure/google-sheets/expense-store','./domain/rules'],
  'src/modules/hr/application/ports/salary-advance-shops.ts':['@/modules/expenses/contracts'],
 };

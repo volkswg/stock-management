@@ -58,6 +58,7 @@ function getOrderBillsAppendRange(): string {
     return `A:${lastColumnLetter(ORDER_BILLS_SHEET_HEADERS.length - 1)}`;
 }
 async function getNextOrderBillRowNumber(googleSheetsService: AttachmentSheets): Promise<number> {
+    if (googleSheetsService.orderBills.nextRecordNumber) return googleSheetsService.orderBills.nextRecordNumber();
     const rows = await googleSheetsService.orderBills.readRows("A:A");
     return rows.length + 1;
 }
@@ -65,6 +66,7 @@ function getOrderItemsAppendRange(): string {
     return `A:${lastColumnLetter(ORDER_ITEMS_SHEET_HEADERS.length - 1)}`;
 }
 async function getNextOrderItemRowNumber(googleSheetsService: AttachmentSheets): Promise<number> {
+    if (googleSheetsService.orderItems.nextRecordNumber) return googleSheetsService.orderItems.nextRecordNumber();
     const rows = await googleSheetsService.orderItems.readRows("A:A");
     return rows.length + 1;
 }

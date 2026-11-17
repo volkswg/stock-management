@@ -7,7 +7,7 @@ import { ORDER_BILLS_SHEET_HEADERS } from "@/modules/orders/infrastructure/googl
 export function ordersTables() {
   return {
     orders: new PostgresRecords({ table: "orders", headers: ORDERS_SHEET_HEADERS }),
-    orderItems: new PostgresRecords({ table: "order_items", headers: ORDER_ITEMS_SHEET_HEADERS }),
-    orderBills: new PostgresRecords({ table: "order_bills", headers: ORDER_BILLS_SHEET_HEADERS }),
+    orderItems: new PostgresRecords({ table: "order_items", numericIdentifiers: true, headers: ORDER_ITEMS_SHEET_HEADERS }),
+    orderBills: new PostgresRecords({ table: "order_bills", numericIdentifiers: true, headers: ORDER_BILLS_SHEET_HEADERS }),
   };
 }

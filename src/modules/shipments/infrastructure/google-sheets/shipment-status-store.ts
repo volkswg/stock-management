@@ -1,4 +1,5 @@
 import "server-only";
+import { updateRecord } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
 import type { ShipmentStatusUpdate } from "../../contracts";
 import type { ShipmentStatusStore, ShipmentStatusTarget } from "../../application/ports/shipment-status-store";
@@ -45,7 +46,7 @@ export class GoogleSheetsShipmentStatusStore implements ShipmentStatusStore {
       readShippingBillUrl: () => String(currentShippingBillUrl ?? "").trim(),
       async saveStatusUpdate(update: ShipmentStatusUpdate): Promise<void> {
         const sheetRowNumber = rowIndex + 2;
-        await googleSheetsService.shipments.updateRows(
+        await updateRecord(googleSheetsService.shipments, rows[rowIndex],
           `B${sheetRowNumber}:M${sheetRowNumber}`,
           [
             [

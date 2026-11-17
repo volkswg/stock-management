@@ -6,7 +6,7 @@ const scopes={
  [h+'application/attendance.ts']:['../contracts','../domain/attendance-rules','./ports/workforce','./ports/payroll'],
  [h+'domain/compensation.ts']:['../contracts'],
  [h+'domain/attendance-rules.ts']:[],
- [h+'infrastructure/google-sheets/workforce-store.ts']:['server-only','@/infrastructure/persistence/google-sheets/types','../../contracts','../../application/ports/workforce','./employees/const','./employee-compensations/const','./employee-timesheets/const'],
+ [h+'infrastructure/google-sheets/workforce-store.ts']:['@/infrastructure/persistence/google-sheets/record-reference','server-only','@/infrastructure/persistence/google-sheets/types','../../contracts','../../application/ports/workforce','./employees/const','./employee-compensations/const','./employee-timesheets/const'],
  [h+'infrastructure/workforce-runtime.ts']:['server-only','node:crypto'],
 };
 export const hrWorkforceBoundaries=Object.entries(scopes).map(([file,paths])=>({files:[file],rules:{

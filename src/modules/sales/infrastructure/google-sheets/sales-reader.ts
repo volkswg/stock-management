@@ -1,4 +1,5 @@
 import "server-only";
+import { readSelectionRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import type { SalesReader, SalesRecord as SheetRecord } from "../../application/ports/sales-reader";
 import { SALES_RECEIPT_HEADERS } from "@/modules/sales/infrastructure/google-sheets/receipts/const";
@@ -19,7 +20,7 @@ async function readRecords(
   sheet: IGoogleRowsSheet,
   headers: string[],
 ): Promise<SheetRecord[]> {
-  const rows = await sheet.readRows();
+  const rows = await readSelectionRows(sheet);
   return rows
     .filter((row) => row[0] !== headers[0])
     .map((row) => rowToRecord(row, headers));

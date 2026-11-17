@@ -1,4 +1,5 @@
 import "server-only";
+import { updateRecord } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import type { ExpenseEntry, ExpenseWrite, MasterEntry, MasterWrite, ExpenseWriter, ExpenseMastersWriter } from "../../application/ports/expense-store";
 import { ExpenseError } from "../../domain/rules";
@@ -44,18 +45,18 @@ export class GoogleSheetsExpenseStore implements ExpenseWriter, ExpenseMastersWr
   }
   async writeExpense(previous: ExpenseEntry | undefined, value: ExpenseWrite): Promise<void> {
     const row = [value.id, value.month, value.expenseDate, value.shopId, value.scope, value.categoryId, value.name, value.amount, value.note, value.createdAt, value.updatedAt, value.createdBy, value.deletedAt];
-    if (previous) { const at = this.locations.get(previous)!.number; await this.sheets.expenses.updateRows(`A${at}:M${at}`, [row]); }
+    if (previous) { const at = this.locations.get(previous)!.number; await updateRecord(this.sheets.expenses, this.locations.get(previous)!.row, `A${at}:M${at}`, [row]); }
     else await this.sheets.expenses.appendRows("A:M", [row]);
   }
   async softDeleteExpense(previous: ExpenseEntry, now: () => string): Promise<void> {
     const location = this.locations.get(previous)!, row = [...location.row];
     row[10] = row[12] = now();
-    await this.sheets.expenses.updateRows(`A${location.number}:M${location.number}`, [row]);
+    await updateRecord(this.sheets.expenses, location.row, `A${location.number}:M${location.number}`, [row]);
   }
   async writeMaster(kind: "shops" | "categories", previous: MasterEntry | undefined, value: MasterWrite): Promise<void> {
     const shop = kind === "shops", sheet = this.masterSheets.get(kind)!;
     const row = shop ? [value.id, value.name, value.active, value.loyverseAccountId, value.createdAt, value.updatedAt] : [value.id, value.name, value.active, value.createdAt, value.updatedAt];
-    if (previous) { const at = this.locations.get(previous)!.number; await sheet.updateRows(`A${at}:${shop ? "F" : "E"}${at}`, [row]); }
+    if (previous) { const at = this.locations.get(previous)!.number; await updateRecord(sheet, this.locations.get(previous)!.row, `A${at}:${shop ? "F" : "E"}${at}`, [row]); }
     else await sheet.appendRows(shop ? "A:F" : "A:E", [row]);
   }
 }

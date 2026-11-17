@@ -14,7 +14,7 @@ const scopes={
   "src/modules/inventory/domain/journey-quantities.ts": [
     "../contracts"
   ],
-  "src/modules/inventory/infrastructure/google-sheets/movement-journeys.ts": [
+  "src/modules/inventory/infrastructure/google-sheets/movement-journeys.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "@/infrastructure/persistence/google-sheets/read-and-repair-rows",
@@ -146,7 +146,7 @@ const scopes={
     "@/shared/types/line-protocol",
     "@/shared/lib/is-record"
   ],
-  "src/modules/line-workflows/infrastructure/google-sheets/sessions.ts": [
+  "src/modules/line-workflows/infrastructure/google-sheets/sessions.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "@/infrastructure/persistence/google-sheets/const",
@@ -243,7 +243,7 @@ const scopes={
     "../../contracts",
     "../../application/ports/order-attachments"
   ],
-  "src/modules/orders/infrastructure/google-sheets/order-mutations.ts": [
+  "src/modules/orders/infrastructure/google-sheets/order-mutations.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "../../application/ports/order-mutations"

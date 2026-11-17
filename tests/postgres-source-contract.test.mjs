@@ -1,3 +1,4 @@
+import {restoreStableRecordSource,stableRecordHistory} from "./helpers/stable-record-ids-history.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync,readdirSync} from 'node:fs';
@@ -8,7 +9,7 @@ import {restoreUploadOutcomesSource,uploadOutcomesHistory} from './helpers/uploa
 test('Phase 2 history keeps every original route handler body byte-identical behind the actual wrapper',()=>{
  for(const [file,entry] of Object.entries(postgresHistory.edits)){
   assert.equal(postgresHash(entry.before),entry.beforeHash,file);
-  const rawCurrent=restoreUploadOutcomesSource(file,readFileSync(file,'utf8'));
+  const rawCurrent=restoreUploadOutcomesSource(file,restoreStableRecordSource(file));
   if(uploadCleanupHistory.edits[file])assert.equal(postgresHash(rawCurrent),uploadCleanupHistory.edits[file].afterHash,file);
   const current=restoreUploadCleanupSource(file,rawCurrent);assert.equal(postgresHash(current),entry.afterHash,file);
   if(file.startsWith('src/app/api/')){
@@ -23,9 +24,11 @@ test('Phase 2 history keeps every original route handler body byte-identical beh
 
 test('all new PostgreSQL source paths are explicitly inventoried and server-only; all feature applications and rules remain outside the change',()=>{
  const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(`${dir}/${e.name}`):[`${dir}/${e.name}`]);
- assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),postgresNewFiles.toSorted());
+ assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||stableRecordHistory.newSourceFiles.includes(f)||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),postgresNewFiles.toSorted());
  for(const file of postgresNewFiles){
-  const physical=readFileSync(file,'utf8'),source=restoreUploadOutcomesSource(file,physical);
+  const physical=readFileSync(file,'utf8');
+  if(stableRecordHistory.newSourceFiles.includes(file)){assert.match(physical,/import "server-only";/);assert.doesNotMatch(physical,/from ["']@\/modules\//);continue;}
+  const source=restoreUploadOutcomesSource(file,restoreStableRecordSource(file,physical));
   // Preserve the immutable Phase 2 witness while allowing only this reviewed
   // audit-removal delta. Actual revision behavior is tested against PostgreSQL.
   let historical=source;

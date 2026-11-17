@@ -4183,3 +4183,79 @@ reconciliation of all subsequent commands, uploads and external effects. Do not
 replay providers or replace records from an old export. Production removal remains
 unexecuted; no hosted acceptance, maintenance approval or independent CI pass is
 implied by local synthetic tests.
+
+
+## Stable-ID compatibility stage (2026-11-17; not deployed)
+
+This additive stage keeps every operational `row_order` column and its existing
+immutability/identity constraint. No production action is part of the PR.
+PostgreSQL feature references now bind to the existing primary key and expected
+record revision, including the hidden `employee_compensations.migration_id`.
+Updates and archives require exactly one active matching ID/revision. Positional
+PostgreSQL update/delete calls fail closed; real Sheets adapters retain their
+existing ranges, headers, argument shapes and provider behavior.
+
+Creation sorting uses a derived `created_at_instant`, parsed explicitly from the
+original `createdAt` text. Offset timestamps represent absolute instants; supported
+local dates/times use Bangkok. Invalid/ambiguous/blank dates remain unchanged and
+sort last; equal instants use the primary key with deterministic C collation.
+Existing list direction and explicit business-date/name sorts remain. Orders and
+Shipments keep their newest-first behavior without reversing null/ID precedence.
+No runtime timestamp or newly allocated ordinal is used as record identity.
+
+The additive migration is
+`20261117024806_stable_record_ids_created_at.sql`. Its metadata backfill preserves
+original business values, archive state, record/global revisions and journals.
+All 23 tables gain the derived timestamp. Four tables without a source createdAt
+(sales_receipt_items, sales_receipt_payments, sales_receipt_syncs, stock_counts)
+gain an operational-only creation field: existing rows stay unknown/NULL, and only
+future inserts receive first-observed creation time. Updates/re-sync do not reset
+it. No timestamps are invented for historical rows and legacy public/Sheet headers
+are not extended. No new index is claimed to improve capacity for full-table reads.
+
+LINE references treat existing numeric session IDs as opaque IDs. Numeric new-ID
+allocation considers all existing IDs, including archived ones, and shares a
+reservation counter across service instances inside the current transaction. It
+never uses row count or row_order, and parallel attachments cannot reserve the
+same ID. Existing command/upload/effect identity, request hashing, retry/uncertainty
+handling, LINE signature/cutoff rules and revision policy remain unchanged.
+
+Explicit selection readers preserve legacy business precedence for active LINE
+sessions, compensation history, shipment-link selection, salary/receipt/payment
+inputs and adjustment reversal history. These are compatibility dependencies on row_order, not mutation
+predicates or a replacement ordinal column. Existing unique active month/account
+indexes for stock counts/cost overrides remain unchanged. Do not silently change
+payroll/session choices in order to remove the remaining selection dependency.
+
+Final physical row_order removal is NOT ready merely because this PR is merged.
+It still needs a reviewed resolution/audit of the explicit selection readers,
+replacement of compatibility-only insert population/trigger dependencies, and
+separate exact recovery/maintenance approval. Historical source_row provenance
+remains outside that future removal.
+
+### Validation and later deployment requirements
+
+Use the existing regression suite and `verify-named-columns.sh`; the latter now
+runs the new ID/date tests on independent empty copies before and after the
+existing business_cells removal. Each copy rechecks its own isolation UUID.
+Tests cover reordered writes, stale/foreign/archived references, original creation
+text, timezone/invalid-date/tie handling, hidden compensation IDs, retained
+append-only permissions, parallel numeric allocation, LINE numeric session resume,
+movement quantity/remark/image targeting and first-observed timestamp stability.
+
+Local validation and exact limitations are recorded in the verification ledger.
+Only synthetic fixtures/fake providers are used; no fresh production records,
+hosted writes, provider uploads, secrets or private snapshots belong in Git/CI.
+
+For a later separately approved release: establish a current recovery checkpoint
+and supervised writer/drain window, verify exact target/source/ledger, apply the
+additive migration first, compare original values/revisions/security, then deploy
+and bind the approved new source. Verify reads/writes/LINE and reopen under the
+reviewed traffic controls. No row_order drop, auth change, paid infrastructure or
+production Vercel configuration change is authorized by this PR.
+
+Retaining row_order is not enough to make an older positional LINE writer safe:
+new session IDs need not equal Sheet row numbers. After new IDs have been created,
+rollback must use an ID-capable build or an explicitly rehearsed/approved session
+translation. Never promote a positional writer blindly or overwrite newer writes
+with an older snapshot.

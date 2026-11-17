@@ -1,4 +1,5 @@
 import "server-only";
+import { readSelectionRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import type { StockAdjustment } from "../../contracts";
 import { ADJUSTMENT_HEADERS } from "./stock-adjustments/const";
@@ -21,7 +22,7 @@ export function createAdjustmentStore(service: AdjustmentSheets): AdjustmentStor
 
 async function readRows(service: AdjustmentSheets): Promise<GoogleSheetRow[]> {
   let rows: GoogleSheetRow[];
-  try { rows = await service.stockAdjustments.readRows("A:Q"); } catch (error) {
+  try { rows = await readSelectionRows(service.stockAdjustments, "A:Q"); } catch (error) {
     if (error instanceof Error && /Google Sheets API request failed: 400/.test(error.message) && /Unable to parse range/.test(error.message)) return [];
     throw error;
   }

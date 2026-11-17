@@ -1,4 +1,5 @@
 import "server-only";
+import { updateRecord, readSelectionRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import type { SalaryAdvance, PayrollSettlement } from "../../contracts";
 import { SalaryAdvanceError, str } from "../../domain/salary-rules";
@@ -8,7 +9,7 @@ export type SalarySheets = { readonly employeeAdvances: IGoogleRowsSheet; readon
 
 export async function readSalaryTable(sheet: IGoogleRowsSheet, headers: string[]): Promise<GoogleSheetRow[]> {
   let rows: GoogleSheetRow[];
-  try { rows = await sheet.readRows(); } catch (error) {
+  try { rows = await readSelectionRows(sheet); } catch (error) {
     // A missing, new worksheet is empty. Auth, quota and other errors must fail closed.
     if (error instanceof Error && /Google Sheets API request failed: 400/.test(error.message) && /Unable to parse range/.test(error.message)) return [];
     throw error;
@@ -51,7 +52,7 @@ export class GoogleSheetsSalaryStore implements SalaryStore {
   async updateAdvanceCopies(id: string, next: SalaryAdvance): Promise<void> {
   const rows = await readSalaryTable(this.sheets.employeeAdvances, ADVANCE_HEADERS);
   const indexes = rows.flatMap((row, index) => str(row[0]) === id ? [index] : []);
-  for (const index of indexes) await this.sheets.employeeAdvances.updateRows(`A${index + 1}:M${index + 1}`, [advanceRow(next)]);
+  for (const index of indexes) await updateRecord(this.sheets.employeeAdvances, rows[index], `A${index + 1}:M${index + 1}`, [advanceRow(next)]);
   }
   async appendSettlement(readSettlement: () => PayrollSettlement, snapshotJson: string): Promise<void> {
     // Preserve sheet/method lookup before evaluating the original payment fields.

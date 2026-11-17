@@ -4,6 +4,6 @@ import { USER_STATE_SHEET_HEADERS } from "@/modules/line-workflows/infrastructur
 
 export function line_workflowsTables() {
   return {
-    userState: new PostgresRecords({ table: "user_state", headers: USER_STATE_SHEET_HEADERS, clearAsArchive: true }),
+    userState: new PostgresRecords({ table: "user_state", numericIdentifiers: true, headers: USER_STATE_SHEET_HEADERS, clearAsArchive: true }),
   };
 }

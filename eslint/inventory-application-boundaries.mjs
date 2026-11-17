@@ -55,7 +55,7 @@ const scopes={
   "src/modules/inventory/application/ports/movements.ts": [
     "../../contracts"
   ],
-  "src/modules/inventory/infrastructure/google-sheets/adjustments.ts": [
+  "src/modules/inventory/infrastructure/google-sheets/adjustments.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "../../contracts",
@@ -63,14 +63,14 @@ const scopes={
     "../../domain/adjustment-rules",
     "../../application/ports/adjustments"
   ],
-  "src/modules/inventory/infrastructure/google-sheets/stock-counts.ts": [
+  "src/modules/inventory/infrastructure/google-sheets/stock-counts.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "./stock-counts/const",
     "../../contracts",
     "../../application/ports/stock-counts"
   ],
-  "src/modules/inventory/infrastructure/google-sheets/movements.ts": [
+  "src/modules/inventory/infrastructure/google-sheets/movements.ts": ['@/infrastructure/persistence/google-sheets/record-reference',
     "server-only",
     "@/infrastructure/persistence/google-sheets/types",
     "../../contracts",

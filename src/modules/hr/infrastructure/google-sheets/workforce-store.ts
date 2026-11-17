@@ -1,4 +1,5 @@
 import "server-only";
+import { updateRecord, readSelectionRows } from "@/infrastructure/persistence/google-sheets/record-reference";
 import type { GoogleSheetRow, IGoogleRowsSheet } from "@/infrastructure/persistence/google-sheets/types";
 import { EmployeeTimesheetStatus, type Employee, type EmployeeCompensation, type EmployeeTimesheet } from "../../contracts";
 import type { EmployeeStore, AttendanceStore, EmployeeSnapshot, CompensationSnapshot, EmployeeReference, TimesheetSnapshot, TimesheetReference } from "../../application/ports/workforce";
@@ -10,7 +11,7 @@ export type WorkforceSheets = { readonly employees: IGoogleRowsSheet; readonly e
 // Snapshots defer parsing and retain original short-circuit phases. Only this
 // adapter owns row locations; use cases receive semantic references and DTOs.
 export class GoogleSheetsWorkforceStore implements EmployeeStore, AttendanceStore {
-  private readonly locations = new WeakMap<object, number>();
+  private readonly locations = new WeakMap<object, { row: GoogleSheetRow; number: number }>();
   constructor(private readonly sheets: WorkforceSheets) {}
   async prepareEmployees(): Promise<void> { await ensureEmployeeHeaders(this.sheets); }
   async prepareCompensations(): Promise<void> { await ensureEmployeeCompensationHeaders(this.sheets); }
@@ -22,18 +23,18 @@ export class GoogleSheetsWorkforceStore implements EmployeeStore, AttendanceStor
         const index = rows.findIndex((row, i) => i > 0 && toStringValue(row[0]) === id);
         if (index < 0) return undefined;
         const reference = { read: () => mapEmployeeRow(rows[index]) };
-        this.locations.set(reference, index + 1); return reference;
+        this.locations.set(reference, { row: rows[index], number: index + 1 }); return reference;
       },
     }));
   }
   readCompensations(): Promise<CompensationSnapshot> {
-    return Promise.resolve(this.sheets.employeeCompensations.readRows()).then(rows => ({
+    return Promise.resolve(readSelectionRows(this.sheets.employeeCompensations)).then(rows => ({
       list: () => rows.map(mapEmployeeCompensationRow).filter((value): value is EmployeeCompensation => Boolean(value)),
       entries: function* () { for (const row of rows) yield mapEmployeeCompensationRow(row); },
     }));
   }
   async appendEmployee(employee: Employee): Promise<void> { await this.sheets.employees.appendRows("A:I", [employeeToRow(employee)]); }
-  async updateEmployee(reference: EmployeeReference, employee: Employee): Promise<void> { const at = this.locations.get(reference)!; await this.sheets.employees.updateRows(`A${at}:I${at}`, [employeeToRow(employee)]); }
+  async updateEmployee(reference: EmployeeReference, employee: Employee): Promise<void> { const location = this.locations.get(reference)!, at = location.number; await updateRecord(this.sheets.employees, location.row, `A${at}:I${at}`, [employeeToRow(employee)]); }
   async appendCompensation(compensation: EmployeeCompensation): Promise<void> { await this.sheets.employeeCompensations.appendRows("A:L", [compensationToRow(compensation)]); }
   readTimesheets(): Promise<TimesheetSnapshot> {
     return Promise.resolve(this.sheets.employeeTimesheets.readRows()).then(rows => ({
@@ -42,13 +43,13 @@ export class GoogleSheetsWorkforceStore implements EmployeeStore, AttendanceStor
         const index = rows.findIndex((row, i) => i > 0 && toStringValue(row[0]) === id);
         if (index < 0) return undefined;
         const reference = { read: () => mapTimesheetRow(rows[index]) };
-        this.locations.set(reference, index + 1); return reference;
+        this.locations.set(reference, { row: rows[index], number: index + 1 }); return reference;
       },
-      some: (predicate, except) => rows.some((row, index) => except && this.locations.get(except) === index + 1 ? false : predicate(mapTimesheetRow(row))),
+      some: (predicate, except) => rows.some((row, index) => except && this.locations.get(except)?.number === index + 1 ? false : predicate(mapTimesheetRow(row))),
     }));
   }
   async appendTimesheet(timesheet: EmployeeTimesheet): Promise<void> { await this.sheets.employeeTimesheets.appendRows("A:G", [timesheetToRow(timesheet)]); }
-  async updateTimesheet(reference: TimesheetReference, timesheet: EmployeeTimesheet): Promise<void> { const at = this.locations.get(reference)!; await this.sheets.employeeTimesheets.updateRows(`A${at}:G${at}`, [timesheetToRow(timesheet)]); }
+  async updateTimesheet(reference: TimesheetReference, timesheet: EmployeeTimesheet): Promise<void> { const location = this.locations.get(reference)!, at = location.number; await updateRecord(this.sheets.employeeTimesheets, location.row, `A${at}:G${at}`, [timesheetToRow(timesheet)]); }
 }
 async function ensureEmployeeHeaders(
   googleSheetsService: WorkforceSheets,
