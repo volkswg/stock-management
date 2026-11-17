@@ -2,33 +2,25 @@
 
 This page describes the **current plan**, not the full migration diary. See the [current ownership map](../architecture/migration-map.md), [merged PR ledger](progress.md#merged-implementation-ledger) and [verification evidence](verification.md).
 
-## Current milestone: cell_kinds compatibility preparation (2026-11-17)
+<a id="current-milestone-cell_kinds-compatibility-preparation-2026-11-17"></a>
+## Current milestone: final cell_kinds retirement (2026-11-18)
 
-Production already uses Supabase. Separately approved releases removed
-`business_cells`, `row_order` and redundant `created_at_instant`; released PR75
-(`5f04f093`) keeps 47 lifecycle fields under their existing names as `timestamptz`.
-Browser and LINE are reopened, and former business Sheets remain read-only.
-See the [completed timestamp release](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed).
+Production uses Supabase with stable IDs and 47 native lifecycle timestamps;
+`business_cells`, `row_order` and redundant creation-instant columns are retired.
+PR76 (`8493df0`) released explicit per-column compatibility with all 23 encodings
+and 48 lexemes retained. Browser and LINE are open; old business Sheets remain
+read-only. The owner now authorizes resolving the final-removal blockers locally.
 
-The owner approved the [cell_kinds removal plan](../database-migration.md#cell_kinds-removal-plan-planning-only-production-unchanged)
-and its local compatibility implementation, testing and review PR.
-Replace metadata-dependent conversion with explicit per-column mappings while
-preserving existing app and LINE behavior. All 23 columns and 48 lexemes currently
-remain. The plan covers contract/census gates, retained-column compatibility,
-physical-absence local acceptance and a separately approved maintenance release.
-Irreducible type/null/width distinctions that change observable behavior are
-NO-GO; do not silently normalize them or copy the kind string into another column.
-
-The [prepared compatibility stage](../database-migration.md#implemented-compatibility-stage-not-deployed)
-adds candidate per-column projections/inputs, retained legacy representation
-handling and an opt-in private audit. All columns remain; production is unchanged.
-New code supports the unprepared schema and rejects invalid installed capabilities.
-Fresh private hosted-data/recovery access, compatibility SQL installation,
-maintenance, deployment and final DDL require their own approvals. Reuse sufficient
-tests/evidence and add checks for the changed
-mapping risks; do not expand optional test frameworks. Keep private artifacts off
-GitHub. New authentication remains the next major milestone, and backup automation
-remains deferred. Existing controls must remain intact.
+The [final retirement implementation](../database-migration.md#final-cell_kinds-retirement-prepared-not-deployed)
+rewires dependent input/projection/validator bodies and permits only explicitly
+reviewed missing optional tails. Existing business/LINE behavior must match on a
+verified restore. No generic replacement metadata, automatic business-data repair,
+new authentication or unrelated refactoring belongs to this milestone. Prepare one
+review PR; production final DDL still needs fresh recovery/current-data review and
+a separately confirmed supervised window. Reuse passing evidence and keep private
+records/artifacts on the Mac. The current compatible deployment can remain live;
+prove its same-process transition instead of rebuilding unchanged app code.
+Backup automation and new authentication remain deferred; existing controls stay.
 
 <a id="current-milestone-critical-path-cutover-mode-2026-11-12"></a>
 

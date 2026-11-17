@@ -53,6 +53,7 @@ jobs:
           bash tools/migration/verify-row-order.sh 2>&1 | tee evidence/row-order-postgres.log
           bash tools/migration/verify-native-timestamps.sh 2>&1 | tee evidence/native-timestamps-postgres.log
           bash tools/migration/verify-cell-kinds.sh 2>&1 | tee evidence/cell-kinds-postgres.log
+          bash tools/migration/verify-cell-kinds-final.sh 2>&1 | tee evidence/cell-kinds-final-postgres.log
           bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee evidence/recovery-fingerprints.log
           bash tools/migration/verify-restricted-backup.sh 2>&1 | tee evidence/restricted-backup.log
           STOCK_HA_EVIDENCE_DIR="$PWD/evidence" bash tools/migration/verify-hosted-tooling.sh 2>&1 | tee evidence/hosted-tooling-integration.log

@@ -1701,3 +1701,22 @@ metadata, passes the 2,398-case mapping matrix and existing operational/native/r
 browser suites. Independent unprepared-schema acceptance also passes. The kindless
 candidate checks remain limited canonical component evidence. Full details and
 limits are in the [verification ledger](verification.md#cell_kinds-compatibility--local-synthetic-verification-2026-11-17).
+
+
+## PR76 compatibility release completed; final retirement prepared (2026-11-18)
+
+The owner separately approved merge, fresh recovery preparation and supervised
+maintenance. PR76 was released as `8493df0` with all 23 encodings retained. The
+verified checkpoint matched all 51 tables/15 metadata sections under the fence;
+the additive installation preserved business data and original permissions. Four
+live API values/order/revisions and reopening controls passed, and browser/LINE
+reopened. Exact private execution/recovery evidence stays on the Mac.
+
+The next instruction authorizes resolving final-removal blockers. The operator-
+only final artifact replaces the dependent validator/input/projection bodies,
+retains existing explicit mappings/lexemes, and refuses unreviewed representations
+rather than repairing records. Focused private-array tail decisions preserve the
+current public readers. No runtime TypeScript or production changes are part of
+this implementation. Current checks and limits are in the
+[final retirement verification](verification.md#final-cell_kinds-retirement-local-verification).
+Production still retains all 23 columns pending separately approved execution.
