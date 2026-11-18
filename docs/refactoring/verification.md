@@ -59,9 +59,13 @@ shared-guard artifact on independent synthetic copies. Its constraints phase is
 **sourced by the parent**, not a standalone production command. It checks exact
 51-table/15-metadata preservation, guarded refusals/atomic rollback, 23-table write
 parity, all 47 timestamp fields, permissions, real application/LINE owners, native
-times and browser lost-response/reload/replay. Providers are forbidden.
+times and browser lost-response/reload/replay. The same parent also creates a
+fresh final-schema copy for `concurrent-edits.test.cjs`: actual Order/Movement
+HTTP handlers, simultaneous isolated browser sessions, stale-record rejection,
+child/direct-write invalidation and upload replay. Providers are forbidden.
 
-Historical verifiers intentionally use the matching older adapter in a disposable
+Historical verifiers intentionally use the matching older adapter and hash-bound
+pre-scoped-token route/client in a disposable
 credential-free tracked-source copy. `--hosted-tooling` selects the inherited
 synthetic hosted-tooling campaign through that same wrapper; it is not hosted
 production acceptance. Keep the pinned adapter hash, original SQL and every old

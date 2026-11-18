@@ -19,6 +19,13 @@ for name,edit in fixture['edits'].items():
  assert hashlib.sha256(edit['before'].encode()).hexdigest()==edit['beforeSha256']
  assert hashlib.sha256((root/name).read_bytes()).hexdigest()==edit['afterSha256']
  (target/name).write_text(edit['before'])
+# Scoped edit tokens target the final typed schema. Keep archived-schema proof
+# on its hash-bound predecessor route/client as well as the PR79 adapter.
+concurrent=json.loads((root/'tests/fixtures/concurrent-edits-before.json').read_text())
+for name,edit in concurrent['edits'].items():
+ assert hashlib.sha256(edit['before'].encode()).hexdigest()==edit['beforeHash']
+ assert hashlib.sha256((root/name).read_bytes()).hexdigest()==edit['afterHash']
+ (target/name).write_text(edit['before'])
 if sys.argv[2]=='--hosted-tooling':
  # Next's private build requires a real dependency root. Preserve the original
  # shared install; remove only this owned source copy at exit.

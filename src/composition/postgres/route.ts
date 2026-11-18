@@ -17,6 +17,50 @@ function restore(value: StoredResponse): Response { return new Response([204,205
 class RejectedResponse extends PersistenceFailure {
   constructor(readonly response: Response) { super(response.status); }
 }
+class EditRevisionConflict extends PersistenceFailure {
+  constructor() { super(409,"This record changed. Refresh and review your edit before saving again."); }
+}
+type EditScope = { family: "orders" | "movements"; id?: string; key: string };
+function editScope(request: Request): EditScope | undefined {
+  const parts = new URL(request.url).pathname.split("/");
+  const family = parts[2];
+  if (parts[1] !== "api" || (family !== "orders" && family !== "movements")) return;
+  let id: string | undefined;
+  try { id = parts[3] ? decodeURIComponent(parts[3]).trim() : undefined; } catch { return; }
+  if (family === "orders" && id === "with-images" && parts.length === 4) id = undefined;
+  if (family === "movements" && id) id = id.toUpperCase();
+  return { family, id, key: `/api/${family}${id ? `/${encodeURIComponent(id)}` : ""}` };
+}
+async function readEditRevision(scope: EditScope): Promise<string> {
+  // Explicit composition-owned relationship scopes. Preserve existing writer
+  // locks, row revisions and feature calculations; add no database objects.
+  // Every typed-table update advances its trigger-owned row revision, including
+  // direct edits. Hash identities/revisions only; never read business payloads
+  // a second time merely to produce an edit token.
+  const select = (table: string, parent: string, where = "") =>
+    `SELECT '${table}' AS source,t.id,${parent} AS parent,t.revision::text AS version FROM stock_operational.${table} t ${where}`;
+  const query = scope.family === "orders" ? [
+    select("orders", "NULL::text", 'WHERE $1::text IS NULL OR t.id=$1'),
+    select("order_items", 't."orderId"', 'WHERE $1::text IS NULL OR t."orderId"=$1'),
+    select("order_bills", 't."orderId"', 'WHERE $1::text IS NULL OR t."orderId"=$1'),
+    select("shipment_orders", 't."orderId"', 'WHERE $1::text IS NULL OR t."orderId"=$1'),
+    select("shipments", "NULL::text", 'WHERE t.id IN (SELECT "shipmentId" FROM stock_operational.shipment_orders WHERE $1::text IS NULL OR "orderId"=$1)'),
+  ].join(" UNION ALL ") : [select("movements", "NULL::text"), select("movement_details", 't."movementMasterId"')].join(" UNION ALL ");
+  const result = await currentTransaction().query<{source: string; id: string; parent: string | null; version: string}>(query, scope.family === "orders" ? [scope.id ?? null] : []);
+  const rows = result.rows.filter(row => scope.family !== "movements" || !scope.id ||
+    (row.source === "movements" ? row.id : row.parent)?.toUpperCase() === scope.id);
+  const values = rows.map(row => [row.source,row.id,row.version]).sort((a,b) => {
+    const left=JSON.stringify(a),right=JSON.stringify(b);return left<right?-1:left>right?1:0;
+  });
+  return `"stock-edit-v1-${createHash("sha256").update(JSON.stringify([scope.key,values])).digest("hex")}"`;
+}
+async function setEditRevision(request: Request, response: Response): Promise<void> {
+  const scope = editScope(request);
+  if (scope && response.ok) {
+    response.headers.set("x-stock-edit-scope",scope.key);
+    response.headers.set("x-stock-edit-revision",await readEditRevision(scope));
+  }
+}
 async function requestIntent(request: Request) {
   if (request.headers.get("content-type")?.includes("multipart/form-data")) {
     const form = await request.clone().formData(), entries: unknown[] = [];
@@ -49,6 +93,7 @@ export function withPersistence<Args extends unknown[], Result extends Response>
       if (method === "GET" || method === "HEAD") return await transaction(false,async()=>{
         const response=await handler(...args);
         response.headers.set("x-stock-revision",await readRevision());
+        await setEditRevision(request,response);
         return response;
       });
       const kind=method+":"+new URL(request.url).pathname;
@@ -56,15 +101,24 @@ export function withPersistence<Args extends unknown[], Result extends Response>
       const execute=contentType.startsWith("image/") || contentType.includes("multipart/form-data") ? executeUploadCommand : executeCommand;
       const stored = await execute<StoredResponse>(kind,request.headers.get("Idempotency-Key") || "",hashIntent({query:new URL(request.url).search,body:await requestIntent(request)}),async () => {
         const expected=request.headers.get("If-Match");
-        if(expected && expected !== await readRevision()) throw new PersistenceFailure(409,"Storage revision changed. Refresh before retrying.");
+        const suppliedScope=request.headers.get("x-stock-edit-scope");
+        if (suppliedScope) {
+          const resource=editScope(request);
+          if (!resource || !expected || !/^"stock-edit-v1-[a-f0-9]{64}"$/.test(expected) ||
+            (suppliedScope !== resource.key && suppliedScope !== `/api/${resource.family}`)) throw new EditRevisionConflict();
+          const scope=suppliedScope === resource.key ? resource : {family:resource.family,key:suppliedScope};
+          if (expected !== await readEditRevision(scope)) throw new EditRevisionConflict();
+        } else if(expected && expected !== await readRevision()) throw new PersistenceFailure(409,"Storage revision changed. Refresh before retrying.");
         const response = await handler(...args);
         if (response.status >= 400) throw new RejectedResponse(response);
         response.headers.set("x-stock-revision",await readRevision());
+        await setEditRevision(request,response);
         return { status:response.status,body:Buffer.from(await response.clone().arrayBuffer()).toString("base64"),headers:[...response.headers.entries()] };
       });
       return restore(stored) as Result;
     } catch (error) {
       if (error instanceof RejectedResponse) return error.response as Result;
+      if (error instanceof EditRevisionConflict) return Response.json({error:error.message,code:"stock_revision_conflict"},{status:error.status}) as Result;
       const safe=error instanceof PersistenceFailure ? error : new PersistenceFailure();
       return Response.json({error:safe.message},{status:safe.status}) as Result;
     }

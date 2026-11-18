@@ -33,6 +33,49 @@ before resolving that metadata-only precondition. Private records, credentials,
 checkpoints, inverse SQL and full receipts remain on the Mac/approved private storage.
 The checkpoint predates later legitimate writes and is not permission to overwrite them.
 
+## Concurrent browser edits (2026-11-18)
+
+Local implementation from `d00f94b`; not merged or deployed. Production remains
+at the checkpoint above. A single browser-wide `stock-v2` token was checked
+against the database-wide counter, so an Order save incorrectly invalidated a
+Movement edit. This is application precondition scope, not a PostgreSQL inability
+to handle multiple users.
+
+The composition wrapper adds opaque `stock-edit-v1` headers for Orders and
+Movements using their trigger-owned record revisions and explicit child/link
+relationships. Browser callers send the token for the record they viewed. Exact
+detail scopes allow independent records to save; collection-only views retain a
+conservative family scope. Same-record/related-child changes still return 409;
+there is no automatic retry, refresh/rebase or silent merge. Other features and
+older clients retain the strict legacy global precondition.
+
+Pending browser operations retain their original key **and** view precondition
+through lost responses and reloads. Confirmed pre-handler revision conflicts can
+end that rejected intent; uncertain uploads/commits keep their identity. Old
+key-only pending edits require operator reconciliation, not a new guessed token.
+Order creation prefers the Orders collection header while preserving its existing
+explicit key and Sheets-compatible fallback. Server idempotency, writer locks,
+row CAS, signatures, permissions and response DTOs remain unchanged.
+
+Local evidence: 29 focused client cases and eight fresh-final-schema concurrency
+cases pass, including two real isolated Chrome sessions, both save orders and
+simultaneous saves, same-record rejection, child/direct-edit invalidation, scoped
+upload rejection before effect work and completed-command replay after later
+writes. All 695 regressions, lint and typecheck pass; only the inherited unused
+`shipmentRow` lint warning remains. The credential-free build matches the route
+manifest and checks all 113 client chunks without database strings. The full
+current-schema verifier also passes operational, native timestamp, LINE and
+browser acceptance on independent synthetic copies. The archived-schema source
+copy passes its exact hash/credential exclusions; independent CI runs the full
+historical schema suite.
+
+Release needs normal app deployment after merge approval; no database migration,
+configuration change or business-data import. Existing tabs need a reload to use
+scoped tokens; legacy tabs remain conservative. Preserve uncertain operation
+references and reconcile old pending edits before retrying. Live providers and
+concurrent direct-owner edits during an application transaction are not certified
+by these synthetic tests. Broader feature scopes/conflict UX remain separate work.
+
 ## Documentation consolidation (2026-11-18)
 
 From base `2471ac1106a9501f2a084b2d0825572b1b6fb1fe`, the docs directory goes

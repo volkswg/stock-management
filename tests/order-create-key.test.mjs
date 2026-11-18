@@ -51,6 +51,17 @@ function browser(post, { sessionStorage = storage(), postgres = true, source, cr
 const saved = () => Response.json({ order: { id: 'SYNTHETIC_ORDER_1' } }, { status: 201 });
 const pending = b => JSON.parse(b.sessionStorage.getItem(storageKey));
 
+test('multipart creation prefers the Orders collection precondition when the server supplies one',async()=>{
+ const token='"stock-edit-v1-'+ 'a'.repeat(64)+'"',requests=[];
+ const api=currentSource(apiPath,{globals:{sessionStorage:storage(),fetch:async(url,options)=>{
+  requests.push({url,...options});
+  return options.method==='HEAD'?new Response(null,{headers:{'x-stock-revision':'"stock-v2-23"','x-stock-edit-scope':'/api/orders','x-stock-edit-revision':token}}):saved();
+ }}});
+ await api.createOrder(input());
+ const post=requests.find(r=>r.method==='POST');assert.ok(post.headers['Idempotency-Key']);
+ assert.equal(post.headers['If-Match'],token);assert.equal(post.headers['x-stock-edit-scope'],'/api/orders');
+});
+
 // Execute both unchanged PostgreSQL guards against an in-memory transactional
 // adapter. No real credentials, SQL connection, files or provider calls are used.
 function server({ uploadUncertain = false } = {}) {

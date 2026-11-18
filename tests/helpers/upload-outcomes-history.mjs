@@ -12,7 +12,19 @@ const lineCutoffHistory = JSON.parse(readFileSync('tests/fixtures/line-cutoff-be
 export const orderCreateKeyHistory = JSON.parse(readFileSync('tests/fixtures/order-create-key-before.json', 'utf8'));
 const lineUploadFeedbackHistory = JSON.parse(readFileSync('tests/fixtures/line-upload-feedback-before.json', 'utf8'));
 const namedColumnsHistory = JSON.parse(readFileSync('tests/fixtures/named-columns-before.json', 'utf8'));
+const concurrentEditsHistory = JSON.parse(readFileSync('tests/fixtures/concurrent-edits-before.json', 'utf8'));
+export function restoreConcurrentEditsSource(file, source) {
+  const entry = concurrentEditsHistory.edits[file];
+  if (!entry) return source;
+  assert.equal(hash(entry.before), entry.beforeHash, file);
+  const physical = readFileSync(file, 'utf8');
+  assert.ok([entry.beforeHash, entry.afterHash].includes(hash(physical)), file);
+  // Older immutable versions can pass through a later inverse more than once.
+  // Still pin the physical source; only undo our exact reviewed current bytes.
+  return hash(source) === entry.afterHash ? entry.before : source;
+}
 export function restoreOrderCreateKeySource(file, source) {
+  source = restoreConcurrentEditsSource(file, source);
   const named = namedColumnsHistory.edits[file];
   if (named && source !== named.before) {
     assert.equal(hash(named.before), named.beforeHash, file);

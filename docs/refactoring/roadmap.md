@@ -28,8 +28,10 @@ retains the historical security tracking context.
 
 - Backup automation/failure-alert activation remains deferred. Verified one-off
   recovery checkpoints remain required for approved destructive maintenance.
-- Movement quantity/remark revision-conflict UX is deferred; preserve conflict
-  detection rather than silently overwriting another edit.
+- The cross-table Order/Movement revision-conflict fix is implemented locally for
+  review, not released. It uses record-scoped tokens and preserves same-record
+  conflicts. See [evidence and release requirements](progress.md#concurrent-browser-edits-2026-11-18).
+  Broader conflict-merging UI and other feature scopes remain deferred.
 - Further removal of typed mapping functions needs an explicit adapter/consumer
   migration. Their current count alone is not a removal approval.
 - Broader provider replacement, cross-provider transactions/queues, tenant/billing
