@@ -8,10 +8,12 @@ composition wires feature-owned ports. `src/externals/` and `src/features/` are
 retired. Supported service/script compatibility remains explicit.
 
 Production uses Supabase with stable IDs, named-column authority and 47 native
-lifecycle timestamps. The operational cell/ordinal/kind/lexeme sidecars are gone.
+business lifecycle timestamps. The operational cell/ordinal/kind/lexeme sidecars are gone.
 PR81's database-only release consolidated validators and added timestamp CHECKs;
-there are 52 operational functions and 46 operational triggers. Browser writes and
-LINE reopened after reconciliation. PR83's app release (`097b310`) added scoped Order/Movement edit tokens.
+PR84 subsequently added the eleven-column media catalog and five references; there
+are 57 operational functions and 52 operational triggers. Browser writes and
+LINE reopened after reconciliation. PR83 added scoped Order/Movement edit tokens; current production is PR84 `44bb1d6`.
+The prepared media URL retirement is local/PR work, not a live schema change.
 Old business Sheets are read-only; Drive and private integration-account ownership
 are unchanged. See [production operations](../database-migration.md) and the
 [latest release evidence](../refactoring/progress.md#latest-production-release).

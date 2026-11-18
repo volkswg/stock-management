@@ -1,3 +1,4 @@
+import {restoreMediaUrlSource} from './helpers/media-url-history.mjs';
 import {restoreStableRecordSource,stableRecordHistory} from "./helpers/stable-record-ids-history.mjs";
 import {nativeTimestampHistory} from './helpers/native-timestamps-history.mjs';
 import test from 'node:test';
@@ -31,7 +32,7 @@ test('all new PostgreSQL source paths are explicitly inventoried and server-only
  assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||stableRecordHistory.newSourceFiles.includes(f)||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),persistenceFiles.toSorted());
  for(const file of persistenceFiles){
   const physical=readFileSync(file,'utf8');
-  if(mediaCatalogHistory.newSourceFiles.includes(file)){assert.equal(postgresHash(physical),mediaCatalogHistory.newFiles[file]);assert.match(physical,/import "server-only";/);assert.doesNotMatch(physical,/from ["']@\/modules\//);continue;}
+  if(mediaCatalogHistory.newSourceFiles.includes(file)){assert.equal(postgresHash(restoreMediaUrlSource(file)),mediaCatalogHistory.newFiles[file]);assert.match(physical,/import "server-only";/);assert.doesNotMatch(physical,/from ["']@\/modules\//);continue;}
   if(stableRecordHistory.newSourceFiles.includes(file)){assert.match(physical,/import "server-only";/);assert.doesNotMatch(physical,/from ["']@\/modules\//);continue;}
   const source=restoreUploadOutcomesSource(file,restoreStableRecordSource(file,physical));
   // Preserve the immutable Phase 2 witness while allowing only this reviewed

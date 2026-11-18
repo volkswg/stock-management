@@ -1,3 +1,4 @@
+import {restoreMediaUrlSource,mediaUrlFiles} from './media-url-history.mjs';
 import {readStableRecordHistory,restoreStableRecordSource,stableRecordHistory} from "./stable-record-ids-history.mjs";
 import {nativeTimestampHistory} from './native-timestamps-history.mjs';
 import assert from 'node:assert/strict';
@@ -14,6 +15,7 @@ export const postgresNewFiles=Object.freeze([...mediaCatalogHistory.newSourceFil
 export const postgresHash=value=>createHash('sha256').update(value).digest('hex');
 export function restorePostgresSource(file,source) {
  const name=typeof file==='string'?file: file instanceof URL?relative(process.cwd(),fileURLToPath(file)):undefined;
+ if(mediaUrlFiles.has(name))source=restoreMediaUrlSource(file,source);
  if(stableRecordHistory.edits[name]||nativeTimestampHistory.edits[name])source=restoreStableRecordSource(file,source);
  if(name==='src/infrastructure/external/loyverse/LoyverseService.ts')return restoreReceiptOverlapSource(name,source??readFileSync(file,'utf8'));
  const edit=postgresHistory.edits[name];

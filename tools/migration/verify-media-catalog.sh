@@ -54,3 +54,5 @@ pg psql -U postgres -d mc_rollback -XqAt -v ON_ERROR_STOP=1 < "$artifacts/media-
 python3 tools/migration/media-catalog-proof.py rollback "$artifacts"
 run_tc mc_rollback tools/migration/media-rollback.test.cjs
 echo 'PASS: private media catalog, 5 ID/URL reference paths, confirmed browser/LINE uploads, preserved 51-table values/guards, guarded install and schema-only rollback'
+
+source tools/migration/verify-media-url-retirement.sh

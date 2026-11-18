@@ -70,6 +70,14 @@ paths, eleven catalog columns, restricted reader permissions, browser/LINE uploa
 retry/uncertainty behavior, 52-table recovery coverage and current-app operation
 after rollback. It uses synthetic URLs/bytes and fake providers only.
 
+The media phase also sources `verify-media-url-retirement.sh`. It uses new synthetic
+copies for the retained URL, ID-only and column-restored layouts. Actual feature
+ports, browser retry/reload, both LINE image workflows and the prior released app
+exercise ID persistence, canonical URL DTOs, clearing/revision conflicts, metadata,
+uncertainty/replay and rollback. Guard tests refuse missing approval, stale/wrong
+target, limited readers and external dependencies; a full52-table proof excludes
+only the five retired operational fields and retains import-schema evidence.
+
 Historical verifiers intentionally use the matching older adapter and hash-bound
 pre-scoped-token route/client in a disposable
 credential-free tracked-source copy. `--hosted-tooling` selects the inherited

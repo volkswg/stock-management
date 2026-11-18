@@ -14,16 +14,17 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: media compatibility
+## Current scoped work: media URL retirement
 
-Implement the eleven-column private media catalog without checksum/status columns,
-plus references for Orders, Movements, Shipments and stock adjustments. Keep the
-revision table, existing URL fields, Drive storage, public API/LINE behavior and
-upload journals. This is local/PR work only; no production schema or app release is
-authorized. The [operations guide](../database-migration.md#media-compatibility-stage-local-implementation-not-released)
-records the guarded forward/inverse and explicit recovery layout. Evidence lives in
-[progress](progress.md#media-catalog-compatibility-2026-11-18). URL retirement is a
-later approval, not part of this compatibility implementation.
+PR84's eleven-column media catalog and five references were released on 2026-11-18.
+The owner now approved normalizing Drive URL aliases to `media.sourceUrl`, keeping
+the images, public API fields, LINE behavior and Sheets compatibility. Implement
+ID-based projections/writes and prepare guarded removal of the five duplicate
+operational URL columns in one review PR. Test retained, final and inverse schemas
+on fresh synthetic local copies. [Operations and release/rollback gates](../database-migration.md#media-url-retirement-prepared-production-unchanged)
+are authoritative. Production remains unchanged until a separate maintenance/schema/
+app approval; old apps must not run against the final layout without the inverse.
+No new auth, backup automation or optional framework expansion belongs to this task.
 
 ## Next major milestone: user authentication
 

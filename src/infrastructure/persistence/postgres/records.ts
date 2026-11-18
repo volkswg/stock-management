@@ -2,7 +2,7 @@ import "server-only";
 import { currentTransaction, requireMutation, PersistenceFailure } from "./database";
 import type { GoogleSheetRow, GoogleSheetRangeUpdate, RecordReference } from "../google-sheets/types";
 
-export type TableDefinition = { table: string; headers: readonly string[]; key?: string; clearAsArchive?: boolean; numericIdentifiers?: boolean };
+export type TableDefinition = { table: string; headers: readonly string[]; key?: string; clearAsArchive?: boolean; numericIdentifiers?: boolean; media?: { url: string; reference: string } };
 type NumericAllocator = { next: number; client: ReturnType<typeof currentTransaction> };
 // A fresh safe client proxy identifies each unit of work. Share reservations
 // across service instances and concurrent attachment operations within it.
@@ -10,6 +10,7 @@ const numericAllocators = new WeakMap<ReturnType<typeof currentTransaction>, Map
 type StoredRecord = { record_id: string; cells: GoogleSheetRow; revision: string };
 // Validate the final typed schema once per unit of work; never fall back to an
 // older layout or cache capability decisions across transactions.
+const mediaSchemas = new WeakMap<ReturnType<typeof currentTransaction>, Promise<boolean>>();
 const typedSchemas = new WeakMap<ReturnType<typeof currentTransaction>, Promise<void>>();
 function requireTypedSchema(): Promise<void> {
   const client = currentTransaction();
@@ -40,14 +41,32 @@ export class PostgresRecords {
   private readonly identifiers = new WeakMap<GoogleSheetRow[], NumericAllocator>();
   constructor(readonly definition: TableDefinition) {
     this.key = definition.key || "id";
-    if (!/^[a-z_]+$/.test(definition.table) || !/^[a-z_]+$/.test(this.key) || definition.headers.some(h => !/^[a-zA-Z_]+$/.test(h))) throw new PersistenceFailure();
+    if (!/^[a-z_]+$/.test(definition.table) || !/^[a-z_]+$/.test(this.key) || definition.headers.some(h => !/^[a-zA-Z_]+$/.test(h)) || (definition.media && (!definition.headers.includes(definition.media.url) || !/^[a-zA-Z_]+$/.test(definition.media.reference)))) throw new PersistenceFailure();
     this.table = `stock_operational.${definition.table}`;
   }
   async ensureExists() { await requireTypedSchema(); await currentTransaction().query(`SELECT 1 FROM ${this.table} LIMIT 0`); }
   async checkConnection() { await this.ensureExists(); }
   private async mapping() {
     await requireTypedSchema();
-    return { project: `stock_operational.typed_project_${this.definition.table}`,
+    const client = currentTransaction();
+    let media = false;
+    if (this.definition.media) {
+      let pending = mediaSchemas.get(client);
+      if (!pending) {
+        pending = (async () => {
+          const presence = await client.query<{ present: boolean }>("SELECT to_regprocedure('stock_operational.media_record_contract_v1()') IS NOT NULL AS present");
+          if (presence.rows.length !== 1) throw new PersistenceFailure();
+          if (!presence.rows[0].present) return false;
+          const result = await client.query<{ mode: string }>("SELECT stock_operational.media_record_contract_v1() AS mode");
+          if (!["retained", "id-only"].includes(result.rows[0]?.mode)) throw new PersistenceFailure(503, "Unsupported media record schema.");
+          return true;
+        })();
+        mediaSchemas.set(client, pending);
+      }
+      media = await pending;
+    }
+    const columns = this.definition.headers.map(c => media && c === this.definition.media?.url ? this.definition.media.reference : c);
+    return { columns, project: `stock_operational.typed_project_${this.definition.table}`,
       input: `stock_operational.typed_input_${this.definition.table}` };
   }
   private async read(range: string, descending = false): Promise<GoogleSheetRow[]> {
@@ -105,8 +124,8 @@ export class PostgresRecords {
     if (cells.length > this.definition.headers.length || !cells.length) throw new PersistenceFailure(409, "Invalid record width.");
     const id = key === "migration_id" ? undefined : cells[this.definition.headers.indexOf(key)];
     if (key !== "migration_id" && (typeof id !== "string" || !id)) throw new PersistenceFailure(409, "Business identity is required.");
-    const { input } = await this.mapping();
-    const columns = this.definition.headers, names = columns.map(c => `"${c}"`).join(',');
+    const { input, columns } = await this.mapping();
+    const names = columns.map(c => `"${c}"`).join(',');
     // Synthetic compensation identities remain independent of header positions.
     await client.query(`INSERT INTO ${this.table}(${key === "migration_id" ? 'migration_id,' : ''}${names}) SELECT ${key === "migration_id" ? "'COMP-'||gen_random_uuid()::text," : ''}${columns.map(c => `i."${c}"`).join(',')} FROM ${input}($1::jsonb) i`, [JSON.stringify(cells)]);
   }
@@ -142,8 +161,7 @@ export class PostgresRecords {
       if (this.definition.clearAsArchive && next[keyIndex] === "" && patch.every(c=>c==="")) return archive();
       throw new PersistenceFailure(409, "Business identity cannot change.");
     }
-    const { input, project } = await this.mapping();
-    const columns = this.definition.headers;
+    const { input, project, columns } = await this.mapping();
     const result = await requireMutation().query<StoredRecord>(`UPDATE ${this.table} t SET ${columns.map(c => `"${c}"=i."${c}"`).join(',')} FROM ${input}($1::jsonb) i WHERE t."${this.key}"=$2 AND t.revision=$3 AND t.archived_at IS NULL RETURNING t."${this.key}" AS record_id,${project}(t) AS cells,t.revision`, [JSON.stringify(next), stored.record_id, stored.revision]);
     if (result.rowCount !== 1) throw new PersistenceFailure(409, "Stale record revision.");
     Object.assign(stored, result.rows[0]);
