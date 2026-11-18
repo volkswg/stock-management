@@ -8,11 +8,13 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
+The current application is PR83 `097b310`; see its [release receipt](#pr83-production-release-2026-11-18). The latest database schema release remains PR81, recorded below. The media catalog is local-only and has not been applied.
+
 PR81 merged as `2471ac1106a9501f2a084b2d0825572b1b6fb1fe`; its schema-only release
 completed on 2026-11-18 in the separately approved supervised window. Production
-continues on the unchanged PR80 application source
-`31af820cbe47a543805c0904ca3db6ad3b2ec085`. No app deployment or environment change
-was needed. The exact forward SQL is
+remained on PR80 application source `31af820cbe47a543805c0904ca3db6ad3b2ec085`
+at that schema-only checkpoint. No app deployment or environment change was
+needed for PR81; PR83 was separately released later. The exact forward SQL is
 [`20261118100705_constraint_record_validation.sql`](../../tools/migration/final-removal/20261118100705_constraint_record_validation.sql).
 
 | Evidence | Recorded result and scope |
@@ -35,8 +37,8 @@ The checkpoint predates later legitimate writes and is not permission to overwri
 
 ## Concurrent browser edits (2026-11-18)
 
-Local implementation from `d00f94b`; not merged or deployed. Production remains
-at the checkpoint above. A single browser-wide `stock-v2` token was checked
+Implementation from `d00f94b`, subsequently merged and deployed as PR83; see the
+[production release receipt](#pr83-production-release-2026-11-18). A single browser-wide `stock-v2` token was checked
 against the database-wide counter, so an Order save incorrectly invalidated a
 Movement edit. This is application precondition scope, not a PostgreSQL inability
 to handle multiple users.
@@ -75,6 +77,49 @@ scoped tokens; legacy tabs remain conservative. Preserve uncertain operation
 references and reconcile old pending edits before retrying. Live providers and
 concurrent direct-owner edits during an application transaction are not certified
 by these synthetic tests. Broader feature scopes/conflict UX remain separate work.
+
+## Media catalog compatibility (2026-11-18)
+
+Local implementation from PR83 merge `097b310`; not merged, deployed or applied to
+production. The revision table and all old URL fields remain. The new catalog has
+exactly eleven approved fields, five nullable indexed restrictive foreign keys and
+no checksum/status columns. Browser and LINE provider results enrich confirmed
+metadata inside the existing command transaction; uncertainty remains journal-owned.
+
+Fresh synthetic final-schema acceptance passes thirteen focused media cases,
+32 existing operational cases, actual Chrome response-loss/reload/replay and an
+actual post-inverse upload/save. These cover all five reference paths, Drive alias
+reuse, long/external URLs, ID/URL edits and conflicts, hard/soft deletion refusal,
+archived references, browser metadata, both LINE order and movement photos,
+redelivery, known rollback cleanup, upload uncertainty, partial-schema refusal and
+full-versus-limited reader access. All provider adapters are fake; no hosted writes
+or real provider events are evidence from this run.
+
+The forward/inverse proof compares all 51 predecessor tables: existing business
+values, row revisions and timestamps match; the global counter advances exactly
+five statements. Old schema/security/guard entries survive verbatim and the
+schema-only inverse restores original metadata. Recovery explicitly includes the
+52nd table; the old profile refuses the new layout. All 697 regressions, 75 Python
+checks, lint and typecheck pass; the only lint warning is the inherited unused
+`shipmentRow`. The credential-free build passes with an unchanged route manifest
+and all 113 client chunks checked for private database strings. Independent CI
+will run the complete historical/current schema pipeline on the review PR. A real production release still needs its own fresh
+checkpoint/restore, frozen-target rehearsal and explicit schema/deployment approval.
+
+## PR83 production release (2026-11-18)
+
+The owner approved merge and then deployment separately. PR83 merged as
+`097b310d9f70628d04101f17e43297ad4cac0478` after
+[CI run 44308930535](https://github.com/volkswg/stock-management/actions/runs/44308930535)
+passed on `3646e8f1a25a5869c04e2e4d758fc4fc4b047a4d`; merged/runtime trees matched.
+Protected production build `dpl_7vaNUZd1fh8tfhG2vaM7MSfSQDpA` was promoted to the
+existing live domain. Seven live read/guard checks passed: Orders/Movements pages,
+API HEAD scoped/legacy headers, exact browser helper, missing-key rejection and
+invalid LINE signature rejection. Initial deployment-scoped error/fatal scan was
+clear. Only the exact source-commit binding changed; other environment/protection,
+LINE cutoff and database settings stayed exact. No schema/business write/provider
+canary, share link, bypass, new auth or paid resource was introduced. Private receipts
+remain on the Mac. The earlier PR81 schema checkpoint above is retained as history.
 
 ## Documentation consolidation (2026-11-18)
 

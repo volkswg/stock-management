@@ -4,13 +4,14 @@ import { randomUUID } from "node:crypto";
 import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
 import { executeCommand, hashIntent } from "./commands";
 import { currentTransaction, requireMutation, transaction, PersistenceFailure } from "./database";
+import { registerUploadedMedia, type UploadedMediaMetadata } from "./media";
 
 type FileAttempt = { remove: () => Promise<void>; attempted: boolean; deleted: boolean };
 type UploadScope = { unresolved: number; files: Map<string, FileAttempt> };
 const activeUploads = new AsyncLocalStorage<UploadScope>();
 const reconcile = () => new PersistenceFailure(503, "Upload outcome requires reconciliation. Do not start another upload for this operation.");
 
-export async function observeUpload<T extends { id: string }>(upload: () => Promise<T>, remove: (id: string) => Promise<void>): Promise<T> {
+export async function observeUpload<T extends { id: string }>(upload: () => Promise<T>, remove: (id: string) => Promise<void>, metadata?: () => UploadedMediaMetadata): Promise<T> {
   const scope = activeUploads.getStore();
   if (!scope) return upload();
   scope.unresolved++;
@@ -18,6 +19,7 @@ export async function observeUpload<T extends { id: string }>(upload: () => Prom
   if (!file.id?.trim()) throw reconcile();
   scope.unresolved--;
   scope.files.set(file.id, { remove: () => remove(file.id), attempted: false, deleted: false });
+  await registerUploadedMedia(file, metadata);
   return file;
 }
 
@@ -28,7 +30,9 @@ export function observeStagingDrive(drive: IGoogleDriveService): IGoogleDriveSer
   if (!scope) return drive;
   return {
     async uploadImage(input) {
-      return observeUpload(() => drive.uploadImage(input), id => drive.deleteFile(id));
+      return observeUpload(() => drive.uploadImage(input), id => drive.deleteFile(id), () => ({
+        fileName: input.fileName, mimeType: input.contentType, sizeBytes: input.bytes?.byteLength, createdBy: "web",
+      }));
     },
     async deleteFile(id) {
       const file = scope.files.get(id);

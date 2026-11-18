@@ -47,7 +47,9 @@ export async function processPostgresWebhook<Bytes>(input: Parameters<typeof pro
             const cleanup=drive as typeof drive & { deleteFile?: (id:string)=>Promise<void> };
             if (!cleanup.deleteFile) throw new PersistenceFailure(503,"Upload cleanup requires reconciliation.");
             await cleanup.deleteFile(id);
-          }) };
+          },()=>({fileName:upload.fileName,mimeType:upload.contentType,
+            sizeBytes:Buffer.isBuffer(upload.bytes)?upload.bytes.byteLength:undefined,
+            createdBy:event.source?.userId})) };
         },
         lineBotService: { downloadMessageContent:id=>input.lineBotService.downloadMessageContent(id),sendReply:async (token,messages)=>{replies.push({token,messages});} },
         runtime:{ ...input.runtime,error:(label,details)=>{failed=true;input.runtime.error(label,details);} },

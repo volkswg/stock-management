@@ -30,3 +30,5 @@ run_tc cv_native tools/migration/native-timestamps.test.cjs
 run_tc cv_browser tools/migration/browser-acceptance.test.cjs
 run_tc cc_app tools/migration/concurrent-edits.test.cjs
 echo 'PASS: row constraints and shared write guard; exact predecessor parity on23tables/47timestamps; actual app/LINE, idempotency and browser retry acceptance'
+
+source tools/migration/verify-media-catalog.sh

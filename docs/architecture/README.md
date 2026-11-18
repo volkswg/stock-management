@@ -11,7 +11,7 @@ Production uses Supabase with stable IDs, named-column authority and 47 native
 lifecycle timestamps. The operational cell/ordinal/kind/lexeme sidecars are gone.
 PR81's database-only release consolidated validators and added timestamp CHECKs;
 there are 52 operational functions and 46 operational triggers. Browser writes and
-LINE reopened after reconciliation. The runtime app remains PR80 source `31af820`.
+LINE reopened after reconciliation. PR83's app release (`097b310`) added scoped Order/Movement edit tokens.
 Old business Sheets are read-only; Drive and private integration-account ownership
 are unchanged. See [production operations](../database-migration.md) and the
 [latest release evidence](../refactoring/progress.md#latest-production-release).

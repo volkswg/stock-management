@@ -12,6 +12,14 @@ const lineCutoffHistory = JSON.parse(readFileSync('tests/fixtures/line-cutoff-be
 export const orderCreateKeyHistory = JSON.parse(readFileSync('tests/fixtures/order-create-key-before.json', 'utf8'));
 const lineUploadFeedbackHistory = JSON.parse(readFileSync('tests/fixtures/line-upload-feedback-before.json', 'utf8'));
 const namedColumnsHistory = JSON.parse(readFileSync('tests/fixtures/named-columns-before.json', 'utf8'));
+export const mediaCatalogHistory = JSON.parse(readFileSync('tests/fixtures/media-catalog-before.json', 'utf8'));
+export function restoreMediaCatalogSource(file, source) {
+  const entry = mediaCatalogHistory.edits[file];
+  if (!entry) return source;
+  assert.equal(hash(entry.before), entry.beforeHash, file);
+  assert.equal(hash(readFileSync(file, 'utf8')), entry.afterHash, file);
+  return hash(source) === entry.afterHash ? entry.before : source;
+}
 const concurrentEditsHistory = JSON.parse(readFileSync('tests/fixtures/concurrent-edits-before.json', 'utf8'));
 export function restoreConcurrentEditsSource(file, source) {
   const entry = concurrentEditsHistory.edits[file];
@@ -24,6 +32,7 @@ export function restoreConcurrentEditsSource(file, source) {
   return hash(source) === entry.afterHash ? entry.before : source;
 }
 export function restoreOrderCreateKeySource(file, source) {
+  source = restoreMediaCatalogSource(file, source);
   source = restoreConcurrentEditsSource(file, source);
   const named = namedColumnsHistory.edits[file];
   if (named && source !== named.before) {

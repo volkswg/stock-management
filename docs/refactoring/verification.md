@@ -64,6 +64,12 @@ fresh final-schema copy for `concurrent-edits.test.cjs`: actual Order/Movement
 HTTP handlers, simultaneous isolated browser sessions, stale-record rejection,
 child/direct-write invalidation and upload replay. Providers are forbidden.
 
+The final parent phase also sources `verify-media-catalog.sh` on fresh final-schema
+copies. It checks the guarded operator artifact and inverse, all five reference
+paths, eleven catalog columns, restricted reader permissions, browser/LINE uploads,
+retry/uncertainty behavior, 52-table recovery coverage and current-app operation
+after rollback. It uses synthetic URLs/bytes and fake providers only.
+
 Historical verifiers intentionally use the matching older adapter and hash-bound
 pre-scoped-token route/client in a disposable
 credential-free tracked-source copy. `--hosted-tooling` selects the inherited
