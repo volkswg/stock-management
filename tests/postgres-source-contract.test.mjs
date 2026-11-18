@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync,readdirSync} from 'node:fs';
 import {postgresHistory,postgresNewFiles,postgresHash,stagingSourceHashes} from './helpers/postgres-history.mjs';
 import {restoreUploadCleanupSource,uploadCleanupHistory} from './helpers/upload-cleanup-history.mjs';
-import {restoreUploadOutcomesSource,uploadOutcomesHistory} from './helpers/upload-outcomes-history.mjs';
+import {restoreUploadOutcomesSource,uploadOutcomesHistory,mediaCatalogHistory} from './helpers/upload-outcomes-history.mjs';
 
 test('Phase 2 history keeps every original route handler body byte-identical behind the actual wrapper',()=>{
  for(const [file,entry] of Object.entries(postgresHistory.edits)){
@@ -31,6 +31,7 @@ test('all new PostgreSQL source paths are explicitly inventoried and server-only
  assert.deepEqual(walk('src').filter(f=>(f.includes('/postgres/')||stableRecordHistory.newSourceFiles.includes(f)||Object.hasOwn(stagingSourceHashes,f)||Object.hasOwn(uploadCleanupHistory.newFiles,f))&&f.endsWith('.ts')).sort(),persistenceFiles.toSorted());
  for(const file of persistenceFiles){
   const physical=readFileSync(file,'utf8');
+  if(mediaCatalogHistory.newSourceFiles.includes(file)){assert.equal(postgresHash(physical),mediaCatalogHistory.newFiles[file]);assert.match(physical,/import "server-only";/);assert.doesNotMatch(physical,/from ["']@\/modules\//);continue;}
   if(stableRecordHistory.newSourceFiles.includes(file)){assert.match(physical,/import "server-only";/);assert.doesNotMatch(physical,/from ["']@\/modules\//);continue;}
   const source=restoreUploadOutcomesSource(file,restoreStableRecordSource(file,physical));
   // Preserve the immutable Phase 2 witness while allowing only this reviewed

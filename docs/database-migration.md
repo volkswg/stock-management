@@ -7,7 +7,9 @@ and LINE are open. The old business Sheets remain read-only; Google Drive images
 and the separate private integration-account configuration keep their existing
 provider ownership. No new user authentication system was introduced.
 
-The app remains on PR80 source `31af820cbe47a543805c0904ca3db6ad3b2ec085`.
+The app runs PR83 source `097b310d9f70628d04101f17e43297ad4cac0478`, deployed
+on 2026-11-18 with scoped Order/Movement edit tokens. Its seven live read/guard
+checks and initial error scan passed; LINE and browser traffic stayed open.
 PR81's schema-only change, merged as `2471ac1106a9501f2a084b2d0825572b1b6fb1fe`,
 was separately applied on 2026-11-18 after recovery, a supervised freeze and exact
 reconciliation. It required no app deployment or environment change. The
@@ -86,6 +88,63 @@ as fixed. Preserve API restrictions, raw-body LINE signature verification, the
 cutoff, idempotency and database controls. The
 [authentication roadmap](architecture/user-authentication-roadmap.md) is planning
 for the next milestone; this guide grants no security or live-setting changes.
+
+## Media compatibility stage (local implementation; not released)
+
+The proposed `stock_operational.media` catalog has exactly eleven columns: `id`
+(UUID), `provider`, `providerFileId`, `sourceUrl`, `fileName`, `mimeType`, `sizeBytes`,
+`createdBy`, `createdAt`, `updatedAt`, `deletedAt`. It has no `sha256` or `status`.
+The three lifecycle fields use `timestamptz`; creation records catalog registration,
+not an inferred historical upload time. Unknown imported metadata remains NULL.
+
+| Business table | New nullable FK | Retained URL |
+| --- | --- | --- |
+| order_items | imageMediaId | imageUrl |
+| order_bills | imageMediaId | imageUrl |
+| movement_details | productImageMediaId | productImageUrl |
+| shipments | shippingBillMediaId | shippingBillUrl |
+| stock_adjustments | photoMediaId | photoUrl |
+
+The [operator artifact](../tools/migration/operator/20261118135558_media_catalog_compatibility.sql)
+is outside automatic migration discovery. It requires separately approved frozen
+maintenance, an exact target/purpose/revision/source and verified full recovery.
+It is reproduced by [media-catalog.py](../tools/migration/media-catalog.py).
+All original migrations stay unchanged. Do not run this as part of an app build.
+
+Five triggers share one function to bind the URL/FK pairs. Existing URL writers keep
+their exact URL; ID-only edits resolve the corresponding catalog URL. Conflicting
+pairs are rejected. Real FK constraints prevent dangling/hard-deleted references.
+A shared media guard prevents changing file identity and deleting referenced media,
+including archived references; metadata edits stamp `updatedAt`. No remote file is
+automatically deleted. Existing Drive permissions and storage ownership stay intact.
+
+The locked, atomic backfill populates only the five new columns, including archived
+rows. It temporarily suspends only each exact reviewed row validator under exclusive
+table locks, then reenables it before commit. Existing values, revisions and timestamps
+stay exact; the existing global statement counter advances five statements. No files
+are downloaded or inspected; registering a legacy URL does not prove file availability.
+A hashed URL index permits long legacy URLs; digest collisions fail rather than merge
+distinct references. Known Drive IDs have a separate unique provider/file constraint.
+
+Confirmed uploads register available metadata in the same command transaction as
+business references. Only missing metadata is enriched. Upload retry/uncertainty
+remains in existing journals. App code supports the preceding schema when both media
+objects are absent and refuses partial installations; Sheets behavior and API URL
+fields stay unchanged. No new media endpoint, authentication or staff role is added.
+Catalog RLS denies public/API roles. Existing readers gain catalog SELECT only when
+they already have unconditional read access to all five attachment tables; limited
+readers gain no catalog access. Existing table policies/grants remain untouched.
+
+After installation, private recovery must use **`--include-media`**: 52 tables and
+15 metadata sections. The old default refuses an installed catalog; media receipts
+cannot be verified under the older layout. Recreate later release/recovery packets
+for this layout instead of reusing the old private 51-table scripts blindly.
+
+The [schema-only inverse](../tools/migration/operator/rollback_media_catalog.sql)
+requires separate approval and fresh recovery/revision checks. It removes only the
+catalog and new reference objects, retains all current URL fields and never deletes
+Drive files. Do not overwrite newer business writes from an older checkpoint.
+Local/CI evidence and release scope are recorded in [progress](refactoring/progress.md#media-catalog-compatibility-2026-11-18).
 
 ## Recovery checkpoint
 

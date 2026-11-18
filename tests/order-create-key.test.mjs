@@ -89,7 +89,7 @@ function server({ uploadUncertain = false } = {}) {
     },
   };
   const command = currentSource('src/infrastructure/persistence/postgres/commands.ts', { imports: { 'server-only': {}, 'node:crypto': crypto, './database': database } });
-  const upload = currentSource('src/infrastructure/persistence/postgres/uploads.ts', { imports: { 'server-only': {}, 'node:crypto': crypto, 'node:async_hooks': { AsyncLocalStorage }, './database': database, './commands': command } });
+  const upload = currentSource('src/infrastructure/persistence/postgres/uploads.ts', { imports: { 'server-only': {}, 'node:crypto': crypto, 'node:async_hooks': { AsyncLocalStorage }, './database': database, './commands': command, './media': { registerUploadedMedia: async () => {} } } });
   return { upload, count: () => ({ uploads, creations }), effects: () => [...effects.values()], async post(options) {
     const entries = [];
     for (const [name, value] of options.body.entries()) entries.push(typeof value === 'string' ? [name, value] : [name, value.name, value.type, crypto.createHash('sha256').update(Buffer.from(await value.arrayBuffer())).digest('hex')]);

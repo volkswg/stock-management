@@ -34,6 +34,7 @@ function fixture() {
     if (spec === 'node:async_hooks') return { AsyncLocalStorage };
     if (spec === 'node:crypto') return crypto;
     if (spec === './database') return database;
+    if (spec === './media') return { registerUploadedMedia: async () => {} }; // Catalog transport is exercised on actual PostgreSQL.
     assert.equal(spec, './commands'); return commandTransport;
   } });
   const drive = { async uploadImage() { const id = 'WT_FILE_' + (files.length + 1); files.push(id); return { id, name: id, webViewLink: 'http://WT/' + id }; }, async deleteFile(id) { deletions.push(id); }, async checkConnection() {}, async makeFileReadableByLink() {} };

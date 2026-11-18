@@ -14,6 +14,17 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
+## Current scoped work: media compatibility
+
+Implement the eleven-column private media catalog without checksum/status columns,
+plus references for Orders, Movements, Shipments and stock adjustments. Keep the
+revision table, existing URL fields, Drive storage, public API/LINE behavior and
+upload journals. This is local/PR work only; no production schema or app release is
+authorized. The [operations guide](../database-migration.md#media-compatibility-stage-local-implementation-not-released)
+records the guarded forward/inverse and explicit recovery layout. Evidence lives in
+[progress](progress.md#media-catalog-compatibility-2026-11-18). URL retirement is a
+later approval, not part of this compatibility implementation.
+
 ## Next major milestone: user authentication
 
 The [authentication roadmap](../architecture/user-authentication-roadmap.md)
@@ -28,9 +39,8 @@ retains the historical security tracking context.
 
 - Backup automation/failure-alert activation remains deferred. Verified one-off
   recovery checkpoints remain required for approved destructive maintenance.
-- The cross-table Order/Movement revision-conflict fix is implemented locally for
-  review, not released. It uses record-scoped tokens and preserves same-record
-  conflicts. See [evidence and release requirements](progress.md#concurrent-browser-edits-2026-11-18).
+- The cross-table Order/Movement revision-conflict fix was released in PR83.
+  It uses record-scoped tokens and preserves same-record conflicts. See [evidence and release requirements](progress.md#concurrent-browser-edits-2026-11-18).
   Broader conflict-merging UI and other feature scopes remain deferred.
 - Further removal of typed mapping functions needs an explicit adapter/consumer
   migration. Their current count alone is not a removal approval.
