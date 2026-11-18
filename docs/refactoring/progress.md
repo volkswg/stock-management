@@ -1720,3 +1720,23 @@ current public readers. No runtime TypeScript or production changes are part of
 this implementation. Current checks and limits are in the
 [final retirement verification](verification.md#final-cell_kinds-retirement-local-verification).
 Production still retains all 23 columns pending separately approved execution.
+
+
+## PR77 final retirement completed; lexeme compatibility preparation (2026-11-18)
+
+The owner separately approved PR77 merge, fresh recovery and a confirmed30minute
+window. All23 `cell_kinds` columns are now removed. Complete frozen51table/15 metadata
+freshness, remaining-data/security proof and four exact live HTTP comparisons
+passed. The existing PR76 app remained deployed; browser/LINE reopened with the
+original firewall rules, signature/cutoff and idempotency guards. Recovery and
+business evidence remain private. No live business/provider canary was submitted.
+
+The next bounded instruction authorizes lexeme compatibility implementation,
+local tests and one review PR, retaining all 48 columns and leaving production
+unchanged. The adapter preserves the exact released path on retained schemas and
+adds an explicit typed-only candidate capability. The additive operator installer
+preserves all old data/functions/ACLs and adds only invoker functions using existing
+caller rights. Exact decimal text, JSON text/null distinctions and explicit boolean
+rules are candidate contracts requiring later current-data/business review.
+No final hosted removal, replacement metadata column or automatic repair is part
+of this implementation. See the [single operational description](../database-migration.md#lexeme-compatibility-prepared-not-deployed).

@@ -8,7 +8,7 @@ type NumericAllocator = { next: number; client: ReturnType<typeof currentTransac
 // across service instances and concurrent attachment operations within it.
 const numericAllocators = new WeakMap<ReturnType<typeof currentTransaction>, Map<string, Promise<NumericAllocator>>>();
 type StoredRecord = { record_id: string; business_cells: GoogleSheetRow; revision: string };
-type Mapping = "legacy" | "retained" | "final";
+type Mapping = "legacy" | "retained" | "final" | "typed";
 // A unit of work pins one explicit schema capability. Missing preparation uses
 // the existing contract; an installed but invalid/partial contract fails closed.
 const mappingModes = new WeakMap<ReturnType<typeof currentTransaction>, Promise<Mapping>>();
@@ -17,6 +17,16 @@ function mappingMode(): Promise<Mapping> {
   let pending = mappingModes.get(client);
   if (!pending) {
     pending = (async () => {
+      const typedProbe = await client.query<{ installed: boolean }>("SELECT to_regprocedure('stock_operational.lexeme_mapping_contract_v1()') IS NOT NULL AS installed");
+      if (typedProbe.rows[0]?.installed === true) {
+        const contract = await client.query<{ mode: string }>("SELECT stock_operational.lexeme_mapping_contract_v1() AS mode");
+        // Retained columns keep the released spelling-aware readers/writers.
+        // Only a complete, separately approved removal enables typed mapping.
+        if (contract.rows[0]?.mode === "retained") return "final";
+        if (contract.rows[0]?.mode === "typed") return "typed";
+        throw new PersistenceFailure(503, "Unsupported lexeme mapping schema.");
+      }
+      if (typedProbe.rows[0]?.installed !== false) throw new PersistenceFailure();
       const probe = await client.query<{ installed: boolean }>("SELECT to_regprocedure('stock_operational.column_mapping_contract_v1()') IS NOT NULL AS installed");
       if (probe.rows[0]?.installed === false) return "legacy";
       if (probe.rows[0]?.installed !== true) throw new PersistenceFailure();
@@ -54,8 +64,8 @@ export class PostgresRecords {
   private async mapping() {
     const mode = await mappingMode();
     return { mode,
-      project: `stock_operational.${mode === "legacy" ? "project_" : mode === "retained" ? "column_compatible_" : "column_project_"}${this.definition.table}`,
-      input: `stock_operational.${mode === "legacy" ? "input_" : "column_input_"}${this.definition.table}` };
+      project: `stock_operational.${mode === "typed" ? "typed_project_" : mode === "legacy" ? "project_" : mode === "retained" ? "column_compatible_" : "column_project_"}${this.definition.table}`,
+      input: `stock_operational.${mode === "typed" ? "typed_input_" : mode === "legacy" ? "input_" : "column_input_"}${this.definition.table}` };
   }
   private async read(range: string, descending = false): Promise<GoogleSheetRow[]> {
     // The compatible build can precede the operator-approved type conversion.
@@ -111,7 +121,7 @@ export class PostgresRecords {
   }
   private async columns(mode: Mapping): Promise<string[]> {
     const result = await currentTransaction().query<{column_name: string}>(`SELECT column_name FROM information_schema.columns WHERE table_schema='stock_operational' AND table_name=$1 ORDER BY ordinal_position`, [this.definition.table]);
-    return result.rows.map(r => r.column_name).filter(c => this.definition.headers.includes(c) || (mode !== "final" && c === 'cell_kinds') || (c.endsWith('__lexeme') && this.definition.headers.includes(c.slice(0,-8))));
+    return result.rows.map(r => r.column_name).filter(c => this.definition.headers.includes(c) || ((mode === "legacy" || mode === "retained") && c === 'cell_kinds') || (mode !== "typed" && c.endsWith('__lexeme') && this.definition.headers.includes(c.slice(0,-8))));
   }
   private async insert(cells: GoogleSheetRow) {
     const client = requireMutation(), key = this.key;

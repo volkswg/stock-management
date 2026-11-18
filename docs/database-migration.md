@@ -4793,6 +4793,16 @@ records the actual passing checks and the limits of the canonical kindless fixtu
 
 ## Final cell_kinds retirement (prepared, not deployed)
 
+**Subsequent release status, 2026-11-18:** PR77 (`8e11fa7`) completed the separately
+approved production retirement. A fresh strictly restored recovery checkpoint
+matched all51 tables/15metadata sections under the verified write fence. Remaining
+values and security matched after removal; all48 lexemes and47 timestamps stayed.
+Four live API values/order/revisions and reopening guards passed. Browser/LINE
+reopened on the unchanged compatible PR76 app. Detailed recovery, target and
+execution evidence stays private on the Mac. The preparation/gate description
+below is historical evidence, not authorization to repeat the retirement.
+
+
 The owner authorizes resolving the remaining blockers and preparing full removal.
 This implementation changes operator tools, tests and documentation; application
 TypeScript, public API/LINE handlers, automatic migrations, dependencies and Vercel
@@ -4897,3 +4907,71 @@ forward repair. Typed fields cannot reconstruct the old kinds/widths. Do not
 recreate guessed encodings, reverse schema blindly, or restore a checkpoint over
 newly acknowledged writes. Any recovery restoration needs separate reconciliation
 and approval. Backup automation and new user authentication remain deferred.
+
+
+<a id="lexeme-compatibility-prepared-not-deployed"></a>
+## Lexeme compatibility (prepared, not deployed)
+
+Scope: local implementation/tests and one review PR. Keep all 48 `__lexeme`
+columns across 19 tables (33 numeric,4 bigint,5 boolean,6 jsonb). No hosted access,
+record repair, provider operation, deployment or production DDL belongs here.
+
+The additive operator artifact is
+`tools/migration/compatibility/20261118022702_lexeme_compatibility.sql`, generated
+by `tools/migration/lexemes.py` and created with the pinned CLI. It is outside the
+nine ordinary automatic migrations. Exact isolation/purpose and explicit
+`stock.allow_lexeme_compatibility='reviewed-typed-columns-v1'` settings are required.
+It pins 146 released predecessor bodies and adds 47 invoker functions only:23 typed
+input mappings,23 typed projections and one catalog-based schema capability. All
+existing functions/triggers, table data, constraints, roles, memberships, table
+privileges and policies stay unchanged. New function execution copies only the
+corresponding existing mapper callers; PUBLIC/anon/authenticated receive none.
+
+The request-wide adapter detects capabilities once per unit of work. An
+unprepared database retains its existing path; an installed retained-lexeme schema
+uses the unchanged released `column_input_`/`column_project_` family, including exact
+spelling and legacy input acceptance. A complete future typed schema selects the
+new family. Partial, misplaced or wrongly typed columns fail closed, as do zero-column
+layouts with retained function references; no exception
+fallback, inferred representation metadata or new environment setting is added.
+
+### Explicit typed-candidate transport contracts
+
+| Database type | Candidate private-array transport | Required review |
+| --- | --- | --- |
+| numeric / bigint | Exact PostgreSQL decimal/integer text; SQL NULL becomes empty text | Original lexical formatting/native-number distinction may disappear. Public DTOs/calculations must match; no JavaScript double conversion is used to preserve storage precision. |
+| boolean | Native boolean, SQL NULL becomes empty text | Native booleans and explicit true/false text only; master fields use their existing trim rule. PostgreSQL aliases such as numeric1/t/yes require review and are rejected by candidate input, never silently made true. Existing retained behavior is unchanged. |
+| jsonb | JSON text, SQL NULL becomes empty text; new explicit JSON null stays JSON null and projects as `null` text | JSON whitespace/key order/duplicate-key spelling cannot be reconstructed. Existing SQLNULL+lexeme`null` is a known review hazard; no automatic SQLNULL/JSONnull rewrite is included. LINE and payroll readers still receive text, not raw objects. |
+| text / timestamptz | Existing per-column serialization | IDs, ordering, lifecycle names/precision, null defaults and business dates retain their existing rules. |
+
+This stage does not approve historical normalization or claim full byte-identical
+raw projections after eventual removal. JSON key order can affect existing
+string-based duplicate checks even when parsed content is equal; LINE empty/null
+context can affect state transitions. Exact public/LINE behavior must be reviewed
+on a fresh restore, and any difference stops final removal for an explicit decision.
+Do not mask differences with broad normalizers, new sidecar columns or record repair.
+
+`verify-lexemes.sh` builds fresh synthetic PostgreSQL copies of the released
+kindless predecessor, proves all 51 tables/15 metadata sections and old functions/ACLs
+unchanged after installation, and checks scoped readers, refusal guards, partial
+schemas, decimal precision, JSON text/null handling, LINE sessions, direct edits,
+stale references and a same-service/pool transition. The original regression,
+operational, timestamp and browser acceptance remains enabled. A Unix-socket-only,
+explicitly named synthetic `lx_` fixture exercises the absent-column component;
+it cannot run on a hosted target and is not final operator DDL.
+
+### Separate release gates
+
+First review/merge and separately authorize compatibility deployment/additive
+installation, with recovery and supervised maintenance as appropriate. Confirm
+retained-schema behavior before reopening. Final retirement is a later approval:
+fresh checkpoint restore, full active/archive representation audit, exact app/LINE
+comparisons and approved spelling/input differences, guarded operator SQL, drained
+writers/LINE, complete frozen freshness and post-change data/security proof.
+No final-removal operator artifact is provided by this compatibility PR.
+
+Before physical retirement, rollback can select the prior app because existing
+columns/functions and writes are preserved. After retirement, use a compatible
+app/forward repair; typed values cannot reconstruct every original spelling. Never
+restore an old checkpoint over newer acknowledged writes. Backup automation and
+new user authentication remain deferred; existing protections remain intact.

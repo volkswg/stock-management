@@ -3,24 +3,26 @@
 This page describes the **current plan**, not the full migration diary. See the [current ownership map](../architecture/migration-map.md), [merged PR ledger](progress.md#merged-implementation-ledger) and [verification evidence](verification.md).
 
 <a id="current-milestone-cell_kinds-compatibility-preparation-2026-11-17"></a>
-## Current milestone: final cell_kinds retirement (2026-11-18)
+## Current milestone: lexeme compatibility preparation (2026-11-18)
 
-Production uses Supabase with stable IDs and 47 native lifecycle timestamps;
-`business_cells`, `row_order` and redundant creation-instant columns are retired.
-PR76 (`8493df0`) released explicit per-column compatibility with all 23 encodings
-and 48 lexemes retained. Browser and LINE are open; old business Sheets remain
-read-only. The owner now authorizes resolving the final-removal blockers locally.
+Production uses Supabase with stable IDs and 47 native lifecycle timestamps.
+PR77's separately approved retirement completed: operational `business_cells`,
+`row_order`, redundant creation-instant fields and all 23 `cell_kinds` are absent.
+The compatible PR76 application remains deployed; browser/LINE are open and old
+business Sheets remain read-only. All48 `__lexeme` columns remain.
 
-The [final retirement implementation](../database-migration.md#final-cell_kinds-retirement-prepared-not-deployed)
-rewires dependent input/projection/validator bodies and permits only explicitly
-reviewed missing optional tails. Existing business/LINE behavior must match on a
-verified restore. No generic replacement metadata, automatic business-data repair,
-new authentication or unrelated refactoring belongs to this milestone. Prepare one
-review PR; production final DDL still needs fresh recovery/current-data review and
-a separately confirmed supervised window. Reuse passing evidence and keep private
-records/artifacts on the Mac. The current compatible deployment can remain live;
-prove its same-process transition instead of rebuilding unchanged app code.
-Backup automation and new authentication remain deferred; existing controls stay.
+The owner authorizes local implementation, tests and one review PR for
+[lexeme compatibility](../database-migration.md#lexeme-compatibility-prepared-not-deployed).
+Retained schemas must use the unchanged released readers/writers. Typed-only
+mapping is a separately tested candidate; its formatting/type/null/boolean
+tradeoffs require explicit current-data/application review before final removal.
+Keep all columns and production untouched. No shadow representation storage,
+business repair, financial formula change or unrelated persistence refactor.
+
+Deployment/additive hosted installation and later physical removal remain
+separately approved releases with fresh recovery, exact target verification and
+supervised maintenance. The synthetic local fixture is not an operator removal
+artifact. Backup automation and new authentication remain deferred.
 
 <a id="current-milestone-critical-path-cutover-mode-2026-11-12"></a>
 
