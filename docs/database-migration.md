@@ -5169,3 +5169,8 @@ intact. It is historical tooling evidence, not hosted acceptance of the current
 final schema. The actual current typed adapter remains independently exercised by
 `verify-typed-postgres.sh` and the credential-free current-source production build.
 No production fallback or schema guard is weakened and no hosted tool is invoked.
+
+The historical private-build mode creates a new synthetic Git snapshot solely for
+its existing source attestation and materializes a temporary dependency copy for
+Next.js. No original Git configuration, credentials, hooks or remotes are copied;
+shared dependencies are preserved and only the owned temporary root is removed.
