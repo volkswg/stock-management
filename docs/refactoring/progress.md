@@ -1740,3 +1740,30 @@ caller rights. Exact decimal text, JSON text/null distinctions and explicit bool
 rules are candidate contracts requiring later current-data/business review.
 No final hosted removal, replacement metadata column or automatic repair is part
 of this implementation. See the [single operational description](../database-migration.md#lexeme-compatibility-prepared-not-deployed).
+
+
+## PR78 compatibility released; final lexeme retirement preparation (2026-11-18)
+
+PR78 was separately merged and deployed as `b0ea779`. Fresh recovery, frozen
+51-table/15-section proof, 69 saved-data application/LINE comparisons and four live
+read-only HTTP comparisons passed. All 48 lexemes stayed intact; browser/LINE
+reopened and the old business Sheets stayed read-only. Recovery evidence is private.
+
+The new continuation implements only final operator SQL and its local proofs.
+It pins all 193 predecessors, replaces 97 bodies and retires 48 attributes/four
+unused helpers without changing business rows, runtime source, existing grants,
+original migrations or deployment configuration. The released app selects the
+typed path without a new deployment. The earlier receipt SQL-NULL spelling hazard
+is handled by an explicit projector default matching its existing official writer;
+other blank/JSON-null distinctions remain strict. Actual LINE consumer outcomes
+replace a raw JSON-string comparison in the offline proof, without changing public
+application output or business logic.
+
+The previously verified checkpoint was strictly restored into another owned,
+network-isolated local database. The exact final SQL passed all remaining stored
+values/security checks and all 69 app/LINE comparisons, plus local create/edit/
+archive. Fresh synthetic copies test the real operator, refusal guards, retained
+service/pool transition and existing operational/timestamp/browser acceptance.
+No fresh hosted records, live credentials, providers, production DDL, deployment,
+writer permissions or traffic controls were accessed/changed by this preparation.
+The saved checkpoint is not a fresh production GO. See the [exact approval packet](../database-migration.md#final-lexeme-retirement-prepared-not-executed).

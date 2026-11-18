@@ -4910,9 +4910,9 @@ and approval. Backup automation and new user authentication remain deferred.
 
 
 <a id="lexeme-compatibility-prepared-not-deployed"></a>
-## Lexeme compatibility (prepared, not deployed)
+## Lexeme compatibility (PR78 released)
 
-Scope: local implementation/tests and one review PR. Keep all 48 `__lexeme`
+Historical implementation scope: local implementation/tests and one review PR. Keep all 48 `__lexeme`
 columns across 19 tables (33 numeric,4 bigint,5 boolean,6 jsonb). No hosted access,
 record repair, provider operation, deployment or production DDL belongs here.
 
@@ -4975,3 +4975,102 @@ columns/functions and writes are preserved. After retirement, use a compatible
 app/forward repair; typed values cannot reconstruct every original spelling. Never
 restore an old checkpoint over newer acknowledged writes. Backup automation and
 new user authentication remain deferred; existing protections remain intact.
+
+
+### PR78 compatibility release record
+
+The owner separately approved merge, fresh private recovery and a supervised
+30-minute release. PR78 source `b0ea779` was deployed on 2026-11-18 and its additive
+47-function installer completed. All 48 columns, all 51 table values and existing
+permissions were preserved. Saved-checkpoint app/LINE comparisons, frozen data/
+metadata verification and four live read-only HTTP comparisons passed. Browser
+writes and LINE reopened with the original firewall rules and cutoff. No real
+provider/business write canary was submitted. Detailed records, identities and
+recovery artifacts remain private on the Mac.
+
+<a id="final-lexeme-retirement-prepared-not-executed"></a>
+## Final lexeme retirement (prepared, not executed)
+
+The final operator artifact is
+`tools/migration/final-removal/20261118040625_remove_lexemes.sql`, reproducible from
+`tools/migration/lexemes-final.py` and outside automatic migration discovery.
+It removes exactly 48 columns across 19 tables with RESTRICT, replaces 97 pinned
+function bodies and removes four unused scalar helpers. No business-row UPDATE,
+repair, new function/role/grant, replacement sidecar or schema exposure is added.
+The nine original migrations, production TypeScript, environment and deployment
+configuration remain unchanged. The deployed PR78 app detects the typed capability
+per transaction, including through the same service/pool across retirement.
+
+### Required semantics and refusal conditions
+
+Exact numeric/integer text transport preserves stored precision; original lexical
+spelling/native-number distinctions disappear. JSON whitespace/key order is no
+longer stored. The existing receipt writer serializes missing payment details as
+`null` text; the final payment-details projector explicitly preserves that output
+for SQL NULL. Other JSON fields keep SQL NULL distinct from JSON null. LINE session
+comparison invokes the actual parser, replay and cleanup decision; it preserves
+selected IDs/state/order, parsed values/types/arrays, and blank/null distinctions.
+It never rewrites raw context into public application results.
+
+Current official app/LINE writers remain compatible. The previously reviewed
+internal typed-array boolean contract accepts native booleans and true/false text;
+PostgreSQL aliases such as 1/t/yes are rejected rather than silently changing their
+business interpretation. Direct SQL edits still use native boolean columns. Fresh
+active AND archived data must pass the exact per-column audit: any unsafe boolean,
+LINE context/null or other semantic mismatch aborts, without normalizing records.
+The saved-checkpoint proof is evidence, not permission to assume current data.
+
+The operator uses one READ COMMITTED transaction, a five-second lock timeout,
+120-second statement timeout, both existing advisory gates, and ACCESS EXCLUSIVE
+locks on all 51 private application tables. It checks exact target/purpose and
+reviewed revision before and after waiting, refuses prepared transactions, pins
+193 predecessor bodies, checks all active/archived projections, and refuses
+column-specific grants, any catalog attribute dependency (including an index that
+PostgreSQL could otherwise delete automatically), and unreviewed procedural
+consumers in user schemas. Partial/unreviewed schemas fail closed. RESTRICT never
+becomes CASCADE.
+
+### Final approval and execution packet
+
+This preparation leaves production open and every lexeme retained. Obtain review/
+merge approval after CI. Final hosted execution separately needs owner approval
+for a supervised 30-minute window, traffic controls, fresh private checkpoint/data
+reads and physical removal. Verify the exact project `hzynvirpedqnvtbifobx`, its
+privately recorded isolation ID, production purpose, current approved source and
+immutable deployment before any write. No testing target may substitute for it.
+
+1. Prepare and strictly restore-verify a fresh private checkpoint (51 tables and
+   15 metadata sections). Record dump/SQL/source hashes and actual app/LINE parity.
+   If the source changes afterward, capture or reconcile the frozen delta and
+   prove full freshness before continuing. A revision number alone is insufficient.
+2. Get the owner's current confirmation that all users, LINE senders, direct SQL
+   editors, jobs and scripts are stopped and pending outcomes accounted for. Agree
+   a latest reopening/abort time. Publish the reviewed temporary unsafe-method
+   fence, preserve existing rules, drain in-flight work and fence runtime writes;
+   direct editors remain stopped. Do not rely on LINE retries as event storage.
+3. Under the fence, repeat full frozen data/metadata and application/LINE checks.
+   Compare four canonical GETs with their exact frozen baseline. Stop on unknown
+   writers, configuration drift, representation mismatches or unavailable recovery.
+4. Bind these session settings to independently verified evidence (not placeholders):
+   `stock.expected_isolation_id`, `stock.expected_purpose=production`,
+   `stock.allow_final_lexeme_removal=reviewed-typed-retirement-v1`,
+   `stock.lexeme_reviewed_revision`, `stock.lexeme_reviewed_source` (40 hex),
+   `stock.lexeme_reviewed_fingerprint` (64 hex),
+   `stock.lexeme_restore_verified=51-tables-15-metadata-v1`, and
+   `stock.lexeme_semantics_verified=exact-app-line-consumers-v1`.
+   Execute only the reviewed/hash-bound operator SQL, with ON_ERROR_STOP.
+5. Verify zero lexemes, 47 unchanged native timestamps, exact remaining table values/
+   revisions/journals/archives and metadata/security (only the reviewed column and
+   function diff), typed capability and the same four HTTP results. Check signature,
+   cutoff, idempotency, target credentials and configuration remain unchanged.
+6. Reopen only after these checks pass: restore runtime traffic/permissions and the
+   original firewall rule set, verify access, and obtain owner supervision of the
+   first genuine app/LINE operation. No real provider canary without authorization.
+
+Any pre-commit failure rolls back the SQL. Keep traffic fenced after a failed
+post-commit check. Before any new acknowledged writes, a verified recovery can be
+restored only with an explicit reviewed recovery action. After writes reopen,
+prefer a typed-compatible forward fix; never overwrite newer acknowledged work
+with an old checkpoint. Old apps/functions requiring lexemes are not a rollback.
+Backup automation and new authentication remain deferred; checkpoint recovery for
+this irreversible spelling loss is part of the separately approved removal packet.

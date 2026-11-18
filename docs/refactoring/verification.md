@@ -797,3 +797,46 @@ writer permissions were accessed/changed. The typed-only real-data audit,
 spelling/null/boolean decisions, final operator artifact, fresh recovery and a
 separately approved maintenance release remain future gates. See the
 [operational contract](../database-migration.md#lexeme-compatibility-prepared-not-deployed).
+
+
+## Final lexeme retirement — local verification (2026-11-18)
+
+All 686 regressions and 73 Python tests pass. Lint has zero errors and the inherited
+unused `shipmentRow` warning; typecheck and a credential-free isolated build pass.
+The standard shell build helper cannot resolve this Mac checkout’s external
+`node_modules` symlink (`next: command not found`); the existing private build
+recipe copies its resolved locked dependencies into a disposable root instead.
+Its byte-identical source, unchanged route manifest and all 113 browser chunks
+pass the same bundle-boundary checks. Shared dependencies are retained.
+
+The operator artifact is reproducible, outside automatic migration discovery and
+contains exactly 48 RESTRICT column drops and four helper drops. All 193 preceding
+function bodies are pinned; 97 change without changing owners, ACLs or execution
+settings. Six new offline regressions cover artifact/review invariants and actual
+LINE parse/replay identity, chronology, context types, arrays and blank/null handling.
+
+`verify-lexemes-final.sh` executes the actual final operator on fresh disposable
+synthetic databases. Missing approval, wrong identity, stale revision, predecessor
+drift, explicit attribute grants, expression-index/view/procedural dependencies,
+archived ambiguous booleans and archived blank/null context mismatches all refuse
+atomically. An actual writer commits while DDL waits for its advisory lock, under a
+repeatable-read session default; the explicit READ COMMITTED transaction rechecks
+the seal after locking and refuses the stale revision. No assertion is weakened.
+
+Before/after fingerprints cover all 51 table values, excluding only the 48 retired
+attributes from their known operational tables. All 15 metadata sections are exact
+except the intended column/function diff. Remaining named values, immutable imports,
+archives, revisions, journals, 47 timestamps, permissions and security match. The
+same released service/pool crosses the actual drop, preserving exact large-decimal
+storage, public order output, payment-details `null` text and actual LINE outcomes,
+then saves a partial edit. All 32 existing operational cases, 10 native-timestamp
+cases and the real browser committed-response-loss/reload/replay case pass on the
+actual final schema. CI runs this verifier after compatibility acceptance.
+
+A separate strict restore of the existing private checkpoint ran the same exact
+operator SQL in a network-isolated local container. All remaining stored values/
+metadata/security and 69 existing app/LINE comparisons passed, with actual LINE
+parser/replay/cleanup invocation and no provider calls. Local create/edit/archive
+also passed. Only the newly owned container/volume was removed; original snapshots
+and recovery evidence remain private. This saved-checkpoint proof does not establish
+current production freshness or authorize hosted execution. See the [maintenance gates](../database-migration.md#final-lexeme-retirement-prepared-not-executed).
