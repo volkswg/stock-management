@@ -1,5 +1,7 @@
 # Movement migration
 
+Production business records now use Supabase; the workflow remains unchanged. Sheets setup/row-verification instructions below apply to the optional Google Sheets backend. Use the [production runbook](database-migration.md) for current storage and approved maintenance.
+
 Movement creation and management are handled by `stock-management`. LINE
 creation uses `POST /api/line/webhook`; the movement summary and detail pages
 are available at `/movements`, backed by the native `/api/movements` routes.

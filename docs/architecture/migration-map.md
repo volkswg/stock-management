@@ -1,6 +1,6 @@
 # Current ownership and retained compatibility
 
-This map describes the **current source after merged [PR #40](https://github.com/volkswg/stock-management/pull/40)**. The prior Sales/Inventory, Orders/LINE, external transport and composition work is complete; all 65 files from `src/externals/` are retired. For the dated merge ledger and original evidence, see [progress](../refactoring/progress.md); for outstanding work, see the [roadmap](../refactoring/roadmap.md).
+This map describes current source ownership; the external namespace retirement was merged in [PR40](https://github.com/volkswg/stock-management/pull/40). The prior Sales/Inventory, Orders/LINE, external transport and composition work is complete; all 65 files from `src/externals/` are retired. For the dated merge ledger and original evidence, see [progress](../refactoring/progress.md); for outstanding work, see the [roadmap](../refactoring/roadmap.md).
 
 | Slice | Actual owner | Retained boundaries |
 | --- | --- | --- |
@@ -97,62 +97,21 @@ The audit covers runtime/erased/dynamic imports, mocks/loaders, scripts, aliases
 
 `features-retirement-before.json` preserves all seven sources, 18 symbol destinations, pre-removal runtime identity keys, audited references and exact non-production inverses. Existing fixtures stay immutable. Current loaders use physical owners and reject removed paths; explicit historical readers alone resolve archived sources. No production compatibility directory or replacement barrel is introduced.
 
-## Database migration preparation
 
-The explicit database task adds a private, unwired `stock_migration` schema and
-operator tooling under `tools/migration`; no module owner, application port or
-runtime composition changes. The [migration runbook](../database-migration.md)
-links the complete source worksheet/type/relationship/caller catalog, SQL,
-reconciliation and recovery procedures. Hosted writes, live profiling and runtime
-cutover remain pending separate approval/acceptance.
+## PostgreSQL ownership
 
+All seven modules have feature-owned PostgreSQL bindings using their canonical
+headers and persistence ports. Root PostgreSQL transport owns sessions, stable-ID
+mutations, typed row projections, command replay and effect attempts. Composition
+owns request transaction/storage selection and exact production identity checks;
+LINE owns per-event workflow/reply execution. Business calculations stay with the
+existing feature owners above.
 
-## Phase 2 operational PostgreSQL
-
-All seven modules now have feature-owned PostgreSQL table bindings. Their existing
-persistence-port mappers and application/domain code remain unchanged. Shared
-server-only PostgreSQL transport owns pooling, explicit transactions, range
-compatibility, command replay and effect attempts. Explicit composition owns the
-aggregate and request authorization/transaction selection; LINE owns per-event
-journaled execution. The operational migration creates 23 business tables plus
-commands/audit/side_effects/environment, separate from the immutable 23-table
-business archive plus import_batches. `tools/migration` owns exact promotion,
-offline profiling and disposable PostgreSQL acceptance. See the
-[operational runbook](../database-migration.md#phase-2-operational-storage-opt-in-isolated-testing).
-Production storage is still Google Sheets; hosted promotion/cutover are not done.
-Phase 3 owns the proposed approved-export/hosted-validation/freeze/cutover sequence
-in the same canonical runbook. Offline delta review, readonly operational extraction
-and structural capacity capture live in tools/migration; they do not implement CDC,
-reverse sync or a production activation path. The secret-free GitHub acceptance
-workflow and disposable browser/API fixture own synthetic review evidence.
-
-Phase 3 tools now preserve arbitrary-precision JSONB numbers, verify complete
-frozen archive batches before extraction, generate private 23-table acceptance
-and original-reader comparison reports, and capture consistent exported-snapshot
-backups with complete recovery/security fingerprints. Hosted metadata shows an
-empty Tokyo staging candidate; no real export/import/schema deployment occurred.
-The machine-readable status keeps actual record counts unknown until authorized.
-
-## Named-column authority ownership (prepared release)
-
-Shared PostgresRecords retains only the feature row/range interface; values are
-stored in named typed columns through table-specific SQL input/projection codecs.
-The explicit 23-table mapping remains tools/migration/worksheets.json. Named-column
-validation, scalar spelling evidence and compatibility synchronization live in the
-new versioned migration. The [current runbook](../database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized)
-owns maintenance, old-writer fencing, reversible compatibility rollback and the
-separate final-removal approval gate. Historical Sheets/staging plans above do not
-describe current production selection. Feature calculations and UI owners do not change.
-
-## Current typed storage and constraint simplification
-
-PR80's released `31af820` adapter uses the active typed input/output functions;
-all physical migration sidecars and 116 obsolete function aliases are retired.
-The shared transport, feature bindings and application owners above are unchanged.
-The local constraint simplification is owned by `tools/migration`: 47 lifecycle
-range checks become 23 table CHECK constraints, with one shared trigger function
-for explicit text normalization, stable identity/archive guards and row revisions.
-Statement revision tracking, typed mappings, existing keys/FKs, policies and
-immutable import protection remain. The operator artifact is outside automatic
-migration discovery; production still has the 23 original validator functions
-until separate release approval. See the [runbook](../database-migration.md#row-constraints-and-shared-write-guard-prepared-not-deployed).
+`tools/migration` owns the 23-table catalog, explicit field policy, historical
+migrations, operator-only artifacts, reconciliation and recovery/synthetic tools.
+Production uses the final typed Supabase schema; old business Sheets are read-only.
+Operational sidecars and 116 aliases are retired. PR81 adds 23 timestamp CHECKs and
+one shared row guard in place of 23 validators; statement revisions, journals,
+typed mappings, private schemas and immutable import protection remain.
+Current operations and approval gates are in the [runbook](../database-migration.md).
+Historical stages are in the [evidence ledger](../refactoring/progress.md#historical-document-index).

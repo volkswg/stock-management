@@ -1,39 +1,25 @@
 # User authentication architecture and implementation roadmap
 
-Planning only, following the owner's scope update on 2026-11-12. The Supabase
-migration remains priority 1. User authentication is the next major milestone;
-this roadmap authorizes no login implementation, schema deployment, identity
-provider activation, invitations or production configuration change.
-
-The latest owner clarification preserves the application/access behavior as-is
-and defers new security implementation until after the database milestone.
-Preserve existing API restrictions, LINE signature verification, TLS and database
-privileges; no interim owner-only launch is selected. Keep existing access gaps
-explicit in the final activation risk assessment rather than marking them fixed
-or security-certified. Live changes and final cutover still require explicit
-approval. See the separate [migration runbook](../database-migration.md).
+Planning only. The Supabase migration and PR81 storage cleanup are complete; staff
+authentication is the next major milestone. This roadmap authorizes no login
+implementation, identity-provider activation, schema deployment, invitations or
+production setting changes. See the [current project roadmap](../refactoring/roadmap.md).
 
 ## Existing boundary
 
-The PostgreSQL adapter currently requires an isolated staging identity and shared
-server-side bearer token; `stagingSettings()` refuses `VERCEL_ENV=production`.
-A separate explicit production identity profile is now prepared locally but remains
-disabled/unbound; it preserves legacy app access rather than adding user login.
-The token identifies an allowed staging caller, not an individual staff member,
-role or shop. In PostgreSQL staging the ordinary API wrapper authenticates requests, while only the
-explicit LINE entrypoint may use the raw-body HMAC signature path. The database
-uses a nonprivileged login, a restricted runtime role and private schemas.
+Production uses the explicit identity profile in `productionSettings()`, binding
+the deployed app commit, Vercel project, Supabase project/isolation, verified TLS
+connection and restricted runtime login. Isolated staging retains its separate
+bearer-token/target guard and refuses production selection. That token identifies
+a staging caller, not a staff user, role or shop.
 
-These controls must remain intact during migration. There is no existing
-application user/session/role/shop authorization system to certify as complete.
-The Sheets branch retains its legacy handlers; this staging wrapper does not add
-application authentication to that branch.
-Deployment protection and browser-to-API access need their own verified inventory;
-an authenticated page alone does not establish that every API is protected.
-The migration's metadata inspection found Standard Protection excluding the
-production domain, with password protection disabled. Production access-control
-adequacy is therefore a current NO-GO, not a completed prerequisite; see the
-[separate assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12).
+The owner retained `legacy-as-is` application access and deferred new user security.
+Existing API restrictions, raw-body LINE HMAC verification, event cutoff, database
+grants/RLS and transaction/idempotency controls remain. Database connectivity is
+not user authorization. No staff login/session/RBAC/shop-permission system is
+implemented or certified by the storage migration. Track existing gaps explicitly
+and preserve every current control during the next milestone.
+
 
 ## Proposed architecture
 

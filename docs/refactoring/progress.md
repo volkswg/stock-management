@@ -1,1045 +1,81 @@
-# Refactoring progress and evidence
-
-## Maintenance preparation resumed; read-only guard cause proved (2026-11-16)
-
-Owner supervises until **16 November 22:00 Bangkok** and attests all producers
-paused with pending LINE/upload outcomes accounted for. These are operator
-attestations; no new technical writer fence, fresh full23 read/import or activation
-is authorized. Actual production remains Sheets, app Editor and LINE webhook open.
-Source metadata has advanced to revision6811; the retained full23/70,842 candidate
-is historical. Candidate revision23, zero commands/effects, roles and permissions
-remain unchanged. Main is still merged78c6884; application source is unchanged.
-
-The approved refreshed staged reader still returns stock/sales500. A separately
-approved protected temporary diagnostic passes Google authorization, fixed
-configuration headers and actual account validation without returning secrets or
-account/business values. A synthetic-only reproduction using the actual current
-composition proves the cause: production read-only instrumentation replaces all
-outbound fetches with denial, including the required account-configuration read.
-No network is reached in the failing reproduction. This is a read-only application
-guard defect, not evidence of failed Supabase connectivity or bad Google keys.
-
-The diagnostic link is revoked, only that temporary diagnostic is deleted and its
-issued cookie now receives404; global settings/protection and live routing match.
-The CLI's first deletion attempt required its own noninteractive confirmation;
-owner-approved exact deletion then completed. Keep the initial attempt receipt.
-The focused local correction now allows only the configured account range and
-readonly OAuth identity/scope; all other provider/mutation denials and isolated
-staging behavior remain.626 regressions, six actual-owner guard checks, lint,
-typecheck and the isolated credential-free build pass; route manifest unchanged.
-The earlier development iteration exposed a source-inventory/lint issue; keeping
-the policy in the existing guard and using server configuration resolves it.
-No inherited fixture is rewritten. Consolidate the fix into one review with CI, then seek
-approval for its exact changed-code staged check. Fresh freeze, full23 access/
-replacement and browser activation remain separate approvals. Reuse
-passing evidence; backups/new authentication remain deferred. No private artifact upload.
-
-## Full23 resync verified; original Sheets/LINE reopened (2026-11-15)
-
-Explicitly approved guarded replacement reused the existing candidate: 70,842
-records per projection, 24 added/five changed/no removed versus the old capture.
-Stable full23 double capture, exact SQL full-row comparison, independent322-page
-archive/operational typed/order reconciliation and66 original-application
-comparisons pass. Whole-table extraction deadlines were resolved for this check
-with bounded indexed pages, preserving strict TLS/read-only/identity controls.
-Six migrations/51RLS tables, restricted roles/limits and zero application journals
-remain unchanged. Original candidate purpose restored after explicit approval.
-Original Sheets Editor and other permissions verified restored, only own LINE
-rule removed (firewall6), HMAC401 and unchanged live Sheets routing verified.
-Owner requested maintenance end and a later cutover window: no SQL activation,
-new auth, paid resources, backup work or GitHub publication. Fresh sync required
-for later cutover; retain the stock/sales reader and existing-protection gates.
-
-## Existing-candidate refresh proposed; no freeze executed (2026-11-15)
-
-Owner requests a freeze/resync and reuse of the created project. Prepared the exact
-private replacement scope for the prior imported records on the same target,
-preserving schema, roles, permissions and retained evidence. This avoids new paid
-resources but needs explicit approval superseding the earlier no-overwrite rule.
-A current complete stop acknowledgment, named supervisor and dated window remain
-missing. Prior event-hold, full reconciliation and hosted reader-fix gates remain.
-No live fence, fresh business read, candidate replacement or cutover occurred.
-
-## Read-only migration checkpoint resumed; execution gates unproved (2026-11-15)
-
-GitHub main `78c6884` (merged PR #65) and application code are unchanged. Local
-base `a028c7b` adds documentation only. Live aliases still serve Sheets; the
-read-only LINE settings check confirms the active expected endpoint. Firewall
-version 4 has no maintenance rule, and the app retains Editor access (source
-metadata revision 6789). No fresh business records or message bodies were read,
-and no live settings changed.
-
-Production `hzynvirpedqnvtbifobx` remains populated: 70,818 rows per projection,
-revision 23, zero commands/side effects, six migrations and 51 RLS tables.
-Native verify-full TLS, role and count metadata match. No empty project or branch
-is authorized. The 23-tab mapping and 211 retained manifest files verify;
-historical encrypted copies match their independent downloads and prior
-independent decryption receipts pass. No new backup, restore or test campaign ran.
-Historical evidence remains: 66 application comparisons, 9/9 private preview
-checks and 7/9 staged production checks. The stock/sales reader failure remains
-unresolved. The old snapshot is no longer current after the source reopened.
-
-The existing private freeze packet gains a blocked continuation assessment:
-qualify an empty target and capacity, prove loss-safe event handling and the
-ability to stop all writers, and name supervising operators for a dated window
-before any pause. The current route has no durable inbox; WAF denial and retries
-provide no storage. Earlier sender-pause consent does not prove current complete
-acknowledgments or resolved in-flight outcomes. The owner must authorize the next
-exact permission, webhook, fresh-record and import scope; final cutover is separate.
-No populated target reset, protected staging change, paid creation, GitHub publish
-or new authentication implementation occurred. Backup work stays deferred; no new
-planning PR was opened.
-
-## Normal Sheets/LINE operation restored (2026-11-15)
-
-Owner requested app use and explicitly approved restoring the original app Editor.
-Removed only the temporary LINE maintenance deny (active firewallv4); other
-protections and LINE signatures remain. Invalid-signature probe returns401;
-same-principal Sheet metadata confirms canEdit=true, revision6761. All three live
-aliases remain on the existing Sheets deployment. No test business transaction,
-provider message, Supabase mutation, activation or backup work.
-
-The source freeze has ended. Prior revision6755 synchronization/70,818-record
-acceptance is retained historical evidence, not a current cutover dataset; metadata
-was already6760 before restoration. A fresh controlled full synchronization is
-required for any future cutover. Existing staged stock/sales config-reader failure
-remains unresolved. The initial permission restoration review was resolved by the
-owner's explicit exact-account Editor approval. Private receipts are retained.
-
-## Production reader checks complete: real report blocker, LINE blocked (2026-11-15)
-
-Actual production reader dpl_7Z7y64RPJvy7sEQpBN3Xwhy7QLVZ is READY/STAGED on
-server-verified 78c6884 / hnd1, with restricted reader, strict TLS and read-only
-guard. Seven of nine HTTP checks pass: protection, two source-matching orders
-reads, write denial, LINE denial, HTML and source-matching employees. Stock and
-sales return 500 because the existing private Sheets account-configuration reader
-cannot read its settings. Local unchanged-client six-header diagnostic passes;
-hosted credential/runtime root cause is not proven. No dummy-account substitution
-or new app-code fix. Resolve this reader and rerun the two failed reports.
-
-Owner-approved LINE deny is active project-wide (rule
-rule_migration_line_pause_2026_11_15_UP76hT / v3), with canonical/trailing public and
-authenticated staged 403 evidence; protected aliases retain their 401 gate. Other
-protections and HMAC code are preserved. After explicit additional owner consent,
-only candidate purpose changed to production and a ten-minute staged test link
-was used, then revoked with saved-cookie rejection verified. Initial automatic
-review boundaries and the blocked preview proof remain recorded, not bypassed.
-
-All live aliases and production target remain on Sheets dpl_7ArXt5jbje4jGTykK9rgjsnYvsZq;
-project-wide environment/protection metadata unchanged. Source remains Viewer and
-frozen; candidate revision23/counts/roles unchanged, commands/effects0, 51 RLS tables.
-No app writers, provider business operations, backup work, paid resources, staging
-mutation, production cutover or new auth implementation. Existing M1 remains.
-CI49 is reused; consolidated local runbook/status updated, no new planning PR.
-
-## Final browser-only synchronization and acceptance complete (2026-11-14 UTC)
-
-Latest metadata/count readback on **2026-11-15 Bangkok** confirms the same frozen
-source, loaded SQL baseline and unchanged Sheets production release.
-
-Owner approved the final refresh, confirmed all people/jobs paused and set the
-source app account to Viewer. Same-principal metadata proves canEdit=false;
-revision 6755 and modification time remain stable. Double capture of 70,818
-records across 23 tabs preserves raw/formatted/formula/serial/legacy fields.
-Guarded import/promotion populate only the dedicated candidate; complete archived
-snapshot verification, zero source/archive/operational differences and 66/66
-all-history original-application comparisons pass. Candidate remains isolated-
-staging purpose: revision 23, commands/effects 0, one batch, 51 RLS tables,
-restricted roles/TLS unchanged; 160,986,803 bytes (32.20%) and 43 spare connections.
-
-Private Tokyo preview dpl_GfWrBngvDwWn7tB6G8otM5bRuMPU passes 9/9 read-only
-checks against the reconciled source, including orders, stock and sales. Initial
-stock mismatch was an empty-account preview fixture; its failure is preserved,
-then only the private preview gets the two approved metadata entries/dummy
-provider tokens and an identical-code rebuild. All 853 original source blobs
-verify; no product-code change or real provider call. CI49 is retained evidence.
-
-Production is still Sheets/78c6884, unchanged aliases/settings; exact production
-reader profile is local only. Next scoped approval covers LINE deny, purpose and
-unaliased production reader checks, then separate browser activation. Keep LINE
-and source writers paused. Cutoff implementation moves to before LINE reopening,
-not the browser-only synchronization. Existing protection M1 remains unresolved;
-new user auth and backups stay deferred. No production switch, protected staging
-mutation, backup work or additional planning PR. Private records/secrets stay
-outside Git. The preparation-only entry below is historical.
-
-## Final source write-freeze and LINE producer-pause procedure (2026-11-14)
-
-Owner confirms every LINE sender/group can pause. The canonical runbook selects
-coordinated producer pause with private exception/re-entry receipts, no queue or
-new datastore. The source composition uses a service account; the procedure fences
-all current/legacy Sheet writers by effective Reader permission on the exact
-workbook, retains configuration reads and keeps that fence after SQL activation.
-It defines LINE maintenance-deny publication by the owner, acknowledgments,
-bounded drain/outcome verification, full-source approval, read-only validation,
-separate app/LINE reopening and pre/post-SQL-write rollback boundaries.
-
-Source review finds a real reopening gap: SQL event-ID dedupe has no Sheets-era
-history, and the current LINE entrypoint has no migration timestamp cutoff. The
-procedure requires a signature-preserving, fail-closed future reopening boundary
-before automatic LINE reopening; implementation/six focused cases remain pending,
-not silently declared passed. No application/authentication change in this task.
-
-PR65 is merged as `78c6884` with CI49/current-tree artifact verification; existing
-Vercel/SQL evidence is reused. Prepared source-bound operator packet/blank receipts
-stay private. No fresh Sheets/LINE data, credential access, permission change,
-firewall staging/publication, message, export/import, backup, deployment or cutover.
-Backups stay deferred. Changes are local on `plan/final-sheets-freeze`; no additional
-planning PR is opened. Execution still needs named operators, dated scope, real
-fence/drain evidence and the cutoff fix; existing M1 is not waived.
-
-
-## Actual private Vercel-to-Supabase read-only smoke passes (2026-11-14)
-
-Seven bounded checks pass on READY Tokyo Preview
-`dpl_4QoQD5Qbh3Q1DrBu7WM1w2hmKn12`, new protected Hobby project
-`prj_ZuMOG7faVjIakAQDd3zmDbMSNxq9`: Vercel SSO redirect, missing app bearer 401,
-two actual orders reads 200/empty/revision zero, order and LINE POST denial 405,
-and application page 200. Exact source `6b89d86` has no final application changes;
-852 uploaded files exclude secrets and the old Vercel link. The test project has
-only Preview reader/staging settings, no real provider credentials or Git link.
-
-Resolved CLI/environment execution defects: bundled Node.js sign-in works; a
-large CA input was truncated to 16 KB, causing the actual certificate-chain error.
-A complete 1,367-character Supabase root already trusted by the original bundle
-fixes it with strict TLS preserved. A private redacted diagnostic proves the cause
-and is removed from the final app source; earlier failures remain private evidence.
-Only the new test project gets a credential-free, unaliased static first-deployment
-bootstrap. CLI automation access is scoped to that protected test project only.
-
-All 46 archive/operational business-table counts sum to zero before and after;
-commands/effects/revision/import batches and UUID/purpose are unchanged. Live Sheets
-production remains latest/READY on `405c474` with the same aliases. The
-[single runbook](../database-migration.md#executable-production-cutover-runbook)
-records exact IDs, certificate/proof digests and remaining release/freeze/data
-approvals. No paid resource, fresh Sheets read, SQL write, backup, protected-staging
-change, merge or production switch. Backups stay deferred; PR65 stays draft. Reuse
-CI48 for unchanged app code; this is new actual private-host proof, not final
-production-purpose/release or fresh-data acceptance.
-
-
-## Private Vercel test prepared; email verification blocks CLI sign-in (2026-11-13)
-
-Pinned official CLI 65.15.0 is installed within the task directory; global software
-and repository dependencies are unchanged. A clean Git archive of `6b89d86`,
-preview-only restricted reader config and seven bounded test cases are prepared
-privately, with secrets outside the upload directory and no real provider keys.
-The selected team reports Hobby; no paid resource or new project is created.
-Vercel's device login reaches email verification; the owner reports Outlook is
-unavailable. `whoami` confirms logged out and even deployment dry-run stops for
-missing credentials. Cancel the pending device flow and restart with a fresh code
-when email works. **Actual private Vercel-to-Supabase smoke remains NOT RUN.**
-No anonymous temporary deployment, security bypass, old-project reconfiguration,
-new source reads, SQL writes, backup, merge or production change. The canonical
-runbook and private execution packet preserve the prepared source/target and
-current blocker. Reuse passing connection/27 guard/CI48 evidence without reruns.
-
-
-## Final candidate connection resolved; deployment guards verified (2026-11-13)
-
-The exact project Connect panel, inspected through native Chrome, assigns
-`aws-1-ap-northeast-1.pooler.supabase.com:5432`; the previous `aws-0` test endpoint
-caused the tenant-not-found failure. Correct the private, undeployed session profile
-and its host/mode release binding; passwords, permissions and application source
-are unchanged. Actual read-only application checks pass 401/200/405 with verified
-client TLS and no provider calls. Reader and runtime logins separately pass exact
-UUID/purpose/nonprivileged-role checks in read-only transactions; no writes or
-backup operations. Database controls remain pristine; health advisors have no findings.
-
-All 27 focused production-release/read-only/provider-guard checks pass. Live Vercel
-metadata still pins READY main `405c474`, the same immutable Sheets deployment and
-production aliases; no business endpoint was called. These are local/Mac and
-control-plane checks, **not Vercel-to-Supabase runtime proof**. The current connector
-lacks isolated per-deployment env/no-alias controls, and no local Vercel CLI was found in the checked paths. A separately scoped private read-only deployment remains the
-hosting execution step; no preview/protected-staging reconfiguration, production
-purpose change, deployment, live setting, merge or cutover is performed.
-The [single runbook](../database-migration.md#executable-production-cutover-runbook)
-and current private packet retain exact progress and limits. CI48 is reused for
-unchanged application code; backup work stays owner-deferred and no fresh Sheets
-records are read. PR65 stays draft/unmerged.
-
-
-## Final synchronization and deployment checks prepared (2026-11-13)
-
-The private packet binds the retained workbook and all 23 tab mappings; export
-preview passes without token access, HTTP or fresh records. Historical parity
-metadata (two accounts/ten months) is explicitly a seed. Current target control
-checks confirm exact UUID, isolated-staging purpose, revision/commands/effects/
-import batches zero, 51 RLS tables and six migrations. No source import or SQL
-business write occurred. Live Vercel metadata pins READY Sheets deployment
-`dpl_7YdPW3SSSnRJgBcNedq3MviazqwW`/main `405c474` and its aliases; actual region
-is Virginia, so Tokyo hosting is a proposal rather than an observed setting.
-
-Historical preparation snapshot, superseded by the connection-resolution entry above:
-the reused test session endpoint rejects the new tenant (`XX000`) before any
-business transaction. Its assigned project endpoint and final Vercel connectivity
-remain open; no guessed alternative/TLS bypass or paid IPv4 change. The connection
-panel could not be inspected because Chrome browser control was unavailable.
-The [canonical runbook](../database-migration.md#executable-production-cutover-runbook)
-now records exact staging/release checks, a source-writer permission freeze proposal,
-LINE hold requirements and rollback boundaries. All live changes/fresh source
-reads/merge/activation remain unapproved. Backups stay deferred; CI48 is reused
-for unchanged application code. PR65 remains draft/unmerged.
-
-
-## Database backup work deferred by owner (2026-11-13)
-
-Owner moves database backups, further checkpoints, automation, encrypted off-site
-delivery, backup alerts and RPO/RTO certification to the next phase. M5 and its
-operating decisions no longer block the current cutover scope; the runbook skips
-the backup step and removes new SQL checkpoint/backup-alert requirements from
-launch and its window. Preserve verified artifacts, tools and accounts. This is a
-scope deferral, not a recovery PASS or guarantee for new post-cutover records.
-Source-copy/export integrity, full reconciliation, loss-safe writer/event hold,
-existing security and exact release/activation approval remain unchanged. Only
-canonical documentation/disabled metadata changes; no backup is run, schedule or
-alert activated, existing artifact deleted, source record read, merge or live
-production setting changed. Earlier backup requirements below are historical;
-this entry and the current assessment supersede them for this milestone.
-
-
-## Final empty production database prepared and verified (2026-11-13)
-
-Free Tokyo target `hzynvirpedqnvtbifobx`, UUID
-`349b9289-f684-4ec5-ac22-924b2be1946b`, now has six exact source-version migrations,
-51 RLS tables/no audit and the three explicitly approved restricted persistent
-service logins (6/6/2). Initial account auto-review rejection executes nothing;
-owner's explicit production-role approval resolves it. Private native continuation
-preserves source hashes and original connector receipt. All native TLS/logins and
-eight role denials pass; exact-decimal rollback preserves every row count, revision
-and order sequence. Current actual read-only app owners return 401/200/405 over
-verified TLS with zero provider calls. The restricted empty capture restores in a
-fresh network-isolated local container: all 51 tables/15 metadata match, as does
-the subsequent hosted check. Fourteen pinned package files exclude passwords and
-service files. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-records digests and scope; no source records loaded, hosted Vercel proof, off-site
-recovery/automation claim or activation. New UUID joins the disabled test denylist.
-Application source stays unchanged from CI48; no repeated synthetic campaign or
-new authentication features. Earlier handoff-pending snapshot below is historical.
-
-
-## Final Free production candidate created; native handoff pending (2026-11-13)
-
-Owner selected releasing the disposable test slot. Paused, did not delete,
-`dcwyiayubrqdrloergax`; verified both retained 14-file packages. Created new Tokyo
-Free project `hzynvirpedqnvtbifobx` at quoted $0/month. Protected staging and live
-Vercel/Sheets remain untouched. Archive migration creates 24 empty tables; the
-operational migration connector confirmation expires twice with no partial schema.
-Native continuation requires the owner-only password/helper handoff; Mac is locked.
-Fresh local empty-role and native migration-record rehearsals pass. Private sources,
-credentials/helper and receipts stay outside Git. Add the new final target to the
-existing disposable campaign's denylist; that campaign remains disabled. The
-[single current assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-records exact progress and the remaining handoff, not a ready/activated database.
-Application code is unchanged; CI48 is reused, not rerun for operational metadata.
-All 85 existing offline controls pass with the new target denylist. Initial local
-loopback-permission and container-readiness diagnostics are retained; the scoped
-rehearsals pass after correcting their local launch conditions.
-
-
-## Migration-only essential hosted smoke and executable cutover sequence (2026-11-13)
-
-PR65 remains draft/unmerged. Actual application routes against the already approved
-managed test DB pass read/write, atomic rollback, overlapping retry/replay/conflict,
-LINE raw-body signatures, verified TLS, target/read-only guards and runtime role
-denial. All 70,777 original business rows and 47 archive/business table digests are
-unchanged; one synthetic order/command remains on the disposable target. No provider
-calls, production changes, new Sheets reads or paid resources. The canonical
-[current assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-records the composite receipt, retained harness diagnostics and exact limitations.
-Reuse passing checks rather than repeat writes after the final diagnostic alias
-fix. Extra monitoring, coordinator/tunnel, new hosted app and full campaign are
-deferred. The existing document now contains the current operator runbook: explicit
-unassigned production bindings, itemized cost baselines, backup automation/alerts
-prerequisites, full source/freeze/import commands and rollback boundaries. New
-access-protection/auth/RBAC implementation stays deferred; unproved effective
-existing protection is activation NO-GO. No schedule, alert or cutover is activated.
-Local verification: 625 regressions, typecheck, lint (one inherited warning),
-credential-free build/routes/113 client chunks, operator-entrypoint syntax and
-private-input redaction/protected-target rejection pass. [CI48](https://github.com/volkswg/stock-management/actions/runs/43342345150) passes
-on `8ba836b9fdfd6f1affaf7f912128600dcd5ffc3b`, including report upload. All 20
-downloaded files/source SHA/archive digest verify; the report-only follow-up does
-not repeat or relabel that executable evidence.
-
-
-## Hosted original restore / roles verified; restricted-backup fix (2026-11-13)
-
-The new disposable target restores the pinned post-audit dump atomically. All 51
-original table fingerprints match; the only original metadata differences are
-exactly the three approved accounts and their managed-owner links in two sections.
-No original role was removed/changed. Reviewed those deltas before assigning the
-new isolated test UUID and reader/writer permissions. Native TLS, exact numeric
-rollback, role/write/DELETE denial and unchanged before/after order/revision counts
-pass. The separately approved temporary `pg_monitor` resolves managed-owner limits;
-no administrator login or existing-target changes. The [single current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-records evidence and its limits.
-
-A real restricted-reader export exposed the owner-style pg_dump/RLS incompatibility.
-The explicit full-visibility-guarded reader option and one-reader checkpoint fix
-pass fresh local 51-table/15-metadata restore plus incomplete-access refusal tests.
-625 regressions, 73 Python checks, 85 hosted controls, lint/typecheck and isolated
-build pass; source-matched CI47 and its 20 reports are verified below. The restricted hosted capture
-passes in 367.47 seconds; its fresh local restore matches all 51 tables/15 metadata
-sections after matching the hosted ICU en-US sorting provider. Retain both the
-initial ordering diagnostic and final exact match. The outer capture limit is now
-600 seconds; individual fingerprint deadlines stay 150 seconds.
-Full hosted application/capacity/off-site recovery remain pending;
-production is Sheets and NO-GO. Keep PR65 draft; no new authentication features.
-
-
-## Concurrent hosted evidence reads serialized after CI46 failure (2026-11-13)
-
-CI46 passes the new restricted-backup regression but stops at the existing private
-app WT03 smoke. A deterministic regression reproduces duplicate journal events
-when parallel HTTP callbacks refresh the same cursor. The driver now serializes
-whole drains and fails queued reads closed after a failure. Two red/green cases,
-all 85 hosted controls, lint, and fresh actual private-app/browser/crash/recovery
-checks pass locally. [CI47](https://github.com/volkswg/stock-management/actions/runs/43302788584)
-passes on executable commit `e4e7498ec3c7d1aba3b6f28ee8301aeab7f396a0`,
-including report upload; all 20 files, source SHA and ZIP digest verify. The current
-report records the exact evidence and the complete private checkpoint package.
-No application or hosted data/permission change. The native restore/checkpoint proof above is
-retained rather than repeated.
-
-
-## Production identity profile implemented locally (2026-11-12)
-
-Draft PR65 adds the separate disabled production database profile while preserving
-current Sheets and user access behavior. Exact new target/UUID, project/commit,
-restricted role and purpose checks, strict TLS, read-only default and unchanged
-staging bearer/LINE checks are implemented; no new authentication system.
-Backup/recovery now has explicit production-purpose selection and receipt binding,
-while staging remains the default; full native capture/restore is verified locally.
-A new purpose-constraint migration changes no row, UUID, grant or staging default
-and has not been applied hosted. The [current report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-records configuration, focused evidence and the remaining real target/activation
-gates. 25 focused checks and fresh native PostgreSQL/TLS/reader/LINE tests pass;
-[CI45](https://github.com/volkswg/stock-management/actions/runs/43259664708)
-passes on `739011c64b81b4ff54f34de43c915aa27e19186f`, including report upload;
-all 19 artifact files and the archive digest were verified. No existing data, hosted resource, production configuration, merge
-or cutover changed. Existing access risks remain explicitly deferred, not fixed.
-
-
-## Scope clarification: application as-is; security next (2026-11-12)
-
-Owner requests unchanged application/access behavior and database migration first.
-New protection/authentication implementation is deferred; the proposed interim
-owner/admin-only launch is withdrawn. Update the same draft PR65 and current
-readiness report. Preserve existing LINE/staging/TLS/database safeguards. The
-known production access gap remains open as a final activation risk decision;
-no security PASS, live change or cutover is implied. Hosted acceptance, production
-identity readiness, backup/alerts and final full Sheets synchronization remain
-the migration work. Documentation/disabled metadata only; no repeated campaigns.
-
-
-## Critical-path cutover mode (2026-11-12)
-
-Owner reprioritized the existing draft PR65 toward database completion. The
-[one current readiness report](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-now separates MUST FIX, SAFE TO DEFER and owner approvals, reuses CI43/local
-acceptance evidence, and defines minimum production security, actual hosted
-proof, production target/backup/alerts, final full Sheets refresh and a conditional
-02:00–06:00 Bangkok window. No new framework or repeated synthetic campaign.
-Historical priority snapshot: superseded by the latest scope clarification above.
-New user authentication stays the next planning-only milestone.
-
-Fresh control-plane metadata still shows only protected staging, a $0/month
-new-Free-project quote (not complete costs), and no established protection across all production URLs; firewall configuration
-could not be verified (404). No SQL,
-new Sheets/business access, resource creation, hosted writes, live settings,
-notifications, merge or cutover. Production NO-GO. Documentation/disabled-metadata
-changes receive focused consistency checks; code acceptance remains CI43 on
-`06eafe921e92842ecc3b87739238396e191dd47d`, not a claim of tests on later prose.
-
-
-## Hosted tooling completed locally — execution disabled (2026-11-12)
-
-Owner authorized completing local tooling and proposals while keeping draft
-[PR65](https://github.com/volkswg/stock-management/pull/65) unmerged. The private
-build/runtime, HTTPS coordinator, transaction leases/drain, browser adapter,
-45-case bridge, fixed scheduler, independent oracle transport, code/fixture seals
-and checkpoint/recovery integration are implemented. The [canonical packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12)
-records operation and exact boundaries. Production source and every existing
-local-harness byte are unchanged; no hosted permission/schema/configuration or
-business-data access occurred.
-
-Fresh synthetic verification exercises the actual private production build,
-desktop/mobile form submissions, exact fake bytes, real SQL rollback/retry,
-committed-response replay and all six actual process-exit boundaries, including uncertain fake LINE acceptance.
-The external journal survives and restart does not resend. A generated checkpoint
-restores all 51 tables/15 metadata. Its actual read-only app uses a SELECT-only
-login, cannot write or assume the writer role, invokes no provider, and matches
-complete fingerprints before/after. Fixture reader grants/policies are confined
-to the new synthetic databases before capture; original/hosted grants are untouched.
-No off-site encryption/key recovery or hosted timing claim follows from this run.
-
-Local checks: 600 regressions, 39 existing controls, 83 new controls, lint/typecheck,
-original credential-free build and attested private build pass. Original routes
-and all 113 client boundary checks match; only inherited shipmentRow lint warning.
-CI adds actual private-app/TLS/browser/crash/restore integration and sanitized
-reports. Exact new-head CI and artifact verification are tracked on PR65.
-
-The [concrete proposals](../../tools/migration/hosted-write/proposals.json) retain
-strict capacity BLOCKED with minute-only metrics, require an explicitly approved
-50 MB pilot / measured complete forecast / protected source reserve, and retain
-full Vercel upload compatibility NO-GO while preserving existing limits. They
-recommend a separately reviewed telemetry scope and upload delivery/hosting
-decision; no alternative or spend is activated. Coordinator hosting/network,
-actual identities/allowances and all hosted tests remain unapproved/NOT RUN.
-Production remains Sheets and NO-GO; security remediation is deferred and user
-authentication remains its separate planning-only milestone.
-
-## Hosted adapter foundation — synthetic components only (2026-11-12)
-
-Historical foundation-only checkpoint, superseded by the completion entry above.
-
-Local continuation in draft [PR #65](https://github.com/volkswg/stock-management/pull/65)
-adds exact target/approval gates, a keyed HTTP driver, a private durable
-fake-provider coordinator model and conservative capacity/traffic/payload checks.
-The checked-in packet still refuses hosted execution. All existing local harness
-and application files remain byte-identical. No Supabase resource, hosted test
-app, real provider call, business-data access, production setting or database
-switch is performed by this work.
-
-The new 51 offline checks cover protected identities, exact preview/session-pooler
-binding, credential/redirect confinement, actual loopback HTTP, live-profile stop
-behavior, reserved app HTTP traffic, immutable fake catalogs, exact fake bytes,
-restart replay, unfinished/uncertain outcomes, concurrent callers, exclusive
-writer ownership and corrupt/incomplete evidence refusal. Initial local-listener
-restrictions and the new macOS temporary-path fixture alias are retained as
-diagnostics; the canonical-path fixture and permitted loopback run pass without
-weakening the original harness. The sanitized offline packet report is included
-in CI's synthetic artifact.
-
-These checks do not establish hosted TLS, serverless behavior, full WT00–WT15
-execution or checkpoint recovery. Private-build/browser/SQL-fault/campaign and
-durable coordinator transport integration remain pending. Managed metric cadence,
-actual quotas, complete organization egress/zero-cost allowances and oversized
-advertised uploads remain blocked. See the [canonical packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12).
-Production remains **NO-GO**; security remediation stays deferred and the separate
-user authentication roadmap remains planning only.
-
-Local validation: 600 application regressions, 39 unchanged local-harness checks
-and 51 new offline checks pass. Lint has zero errors and the one inherited
-`shipmentRow` warning; typecheck and the isolated credential-free build pass.
-The original route manifest and all 113 client bundle boundaries match. New-head
-independent CI and artifact publication are tracked on the draft PR; local
-component success does not certify hosted execution.
-
-## Hosted Supabase test target — packet prepared only (2026-11-12)
-
-Owner authorized target/cost/test planning and deferred production security
-remediation. The [canonical execution packet](../database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12)
-and [disabled manifest](../../tools/migration/hosted-acceptance-plan.json) propose a
-separate Tokyo PostgreSQL 17 target family, one supported hosted functional
-campaign, fresh one/five-client profiles and new-target recovery after each.
-The protected populated source and production app are never write/reset/pause
-targets. No security feature or runtime behavior is implemented.
-
-Read-only metadata confirms the selected `volkswg's Org` uses Free and has one
-visible active project. Its new-project quote is **$0/month**; this is not a
-whole-campaign cost guarantee or creation approval. The packet records Free
-disk/traffic/memory gates, an explicit $0 spending authorization, a conditional
-single-active-test-project sequence, paid comparison only, and unquoted hosting /
-off-site allowances. It does not presume paid projects can be paused or that a
-spend cap covers compute. No organization/plan was changed.
-
-Preparation locally rehashed all 14 retained post-audit backup-manifest entries
-and checked the prior independent download/decryption/51-table/15-metadata restore
-receipt. No new business-source or hosted SQL query ran. The snapshot remains a
-rehearsal source, not proof of current Sheets freshness. Existing runtime guards
-refuse hosted targets; a separate reviewed hosted fake-provider adapter is still
-needed. Minute-scale managed metrics and platform payload limits do not establish
-the original local resource/large-upload contract. These remain explicit gates,
-not silently weakened pass criteria.
-
-PR64 merged under separate owner approval as `405c474578cec0b2fe84327687b90faf3f5b02f9`;
-[fresh CI](https://github.com/volkswg/stock-management/actions/runs/43140502107)
-and report upload passed. The automatic deployment was verified READY, domain
-assigned, same 14 production configuration metadata entries and no STOCK override.
-That verification is a retained merge receipt, not a new live-data check during
-this preparation. Hosted tests, acceptance-project/deployment creation, restores, writes,
-pauses/deletions, real-provider actions, new Sheets exports, paid resources and
-the production switch remain NOT RUN / unauthorized. Final cutover is NO-GO.
-Offline plan/scope/link validation, 600 regressions, lint/typecheck and the isolated
-credential-free build pass; only the inherited shipmentRow warning remains.
-Routes are unchanged and all 113 client chunks retain private-data boundaries.
-
-## Migration-first scope and bounded capacity continuation (2026-11-12)
-
-The owner prioritizes Supabase completion and makes new user authentication a
-separate planning-only milestone. The [current migration assessment](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12)
-is **production NO-GO**: existing hosting protection excludes production domains,
-legacy Sheets handlers receive no staging-wrapper authentication, and adequate
-production-wide API access control is not certified. No protection was weakened
-or new authentication feature implemented. The separate [authentication roadmap](../architecture/user-authentication-roadmap.md)
-covers login/sessions, roles/shop membership, administration and API/DB enforcement.
-
-The [bounded continuation](../database-migration.md#bounded-local-capacity-continuation-2026-11-12)
-records fresh one/five-client timing, exact-data and recovery PASS with the original
-limits. It preserves the earlier five-client default-heap RSS failure and the
-zero-traffic cached-database preflight block. A fixed 384 MiB local app heap and a
-new task-owned local cluster exclude retained rehearsal history without increasing
-budgets, changing the metric or deleting/resetting existing copies. All original
-70,777 rows remain exact; both restores match 51 tables/15 metadata and read-only
-readiness. No hosted/production performance claim follows from this local profile.
-
-Fresh validation: 600 regressions, 39 harness controls, 71 Python checks,
-lint/typecheck and isolated credential-free build pass; inherited warning only,
-unchanged routes and 113 clean client chunks. Existing API/LINE/role/TLS controls
-pass again. Protected hosted state rechecks exact over read-only TLS; production
-metadata retains the Sheets PR63 release. Disabled backup automation, production
-target specification, final Sheets synchronization and controlled cutover/rollback
-remain prepared gates. Hosted writes, paid infrastructure and cutover were not run.
-Continue in the single draft/unmerged [PR #64](https://github.com/volkswg/stock-management/pull/64).
-Combined private receipt SHA-256: `3ee617c4d155e9239fe86cceb020899e34a5b04b34425ff474c2f3bc59f9dcc5`.
-
-## Local acceptance milestone results (2026-11-12)
-
-Historical disk-blocked snapshot; superseded for current capacity by the continuation above.
-
-[PR #64](https://github.com/volkswg/stock-management/pull/64) fixes raw-image
-byte/MIME identity in server and browser, old-replay revision downgrade, upload
-rollback cleanup/uncertain resend and failed LINE command/counter retry handling.
-No original business calculation or route was changed; there is no new SQL
-migration, hosted grant write, production setting, audit table or dependency.
-Application source `0d142f7263e2daea3a968824465a5ec5fed6f14f` and harness
-`9f72ed3dbbe8ebbddf05d8f5ca13681881df263b` are pinned in private packets; original fixtures remain immutable.
-
-The [canonical combined WT00–WT15 matrix](../database-migration.md#local-acceptance-milestone-results)
-records two independent 45-entry campaigns, 7037 / 7037 journaled driver requests,
-38 PASS / 7 retained narrow BLOCKED labels / zero FAIL each. Supplemental local
-proofs resolve the local gaps; absent business writes are verified N/A and hosted
-protection remains deferred. Each campaign includes 32-scenario concurrency/intent
-proofs, 100 form and 20 raw-image browser trials, 60 crashes, 80 compound rollbacks,
-40 signed image and 10 shipping-file rollbacks, and 20 restarted uncertainty trials.
-All original 70,777 rows, 24 archive tables and 15 security sections remain exact.
-
-Both checkpoints restore with all 51 tables/15 metadata matching before and after
-read-only app readiness, with no provider replay. Timing: 401.657 s / 12.655 s; campaign one's
-conservative bound includes preserved initial auth-header probe failures. All
-injected fake unknowns/orphans are explicitly accounted for; no unexpected ones.
-600 regressions, 33 controls, 71 Python and 29 PG checks, lint/typecheck and an exact
-credential-free local build pass. CI run 43049889302 independently passes; the
-route manifest and 113 client chunks retain their boundaries.
-
-**Overall pre-production acceptance is NO-GO:** one/five-client capacity remains
-BLOCKED by 5.88% host disk free versus 20% required. No load percentiles or
-headroom pass is claimed. Limits/requirements are unchanged. Source hosted 51/15
-fingerprints and production's 14 metadata entries/Sheets main release are unchanged.
-The next-stage plan is prepared only; no hosted write, production change, provider
-mutation, new Sheets export, merge, provisioning or cutover occurred.
-Receipt SHA-256: `2433fbe33df2efc97db1bc14a0e530a0f17925dae8b9385436ede032ba91a949`.
-
-## Image retry fixed — two fresh implemented reruns pass (2026-11-11)
-
-The owner authorized the scoped image fix. The shared staging wrapper now hashes
-raw image bytes and media type without decoding them. Six focused regressions
-pass (three failed before); a separate real-PostgreSQL journal regression passes.
-JSON/text/multipart and Sheets behavior remain unchanged; older lossy-format
-image keys safely conflict without rewriting their history or auto-retrying.
-
-The [image-fix evidence](../database-migration.md#image-retry-fix-and-two-fresh-implemented-reruns-2026-11-11)
-records two fresh 461-request campaigns (922 total), each with 17 entries,
-10 implemented PASS / 7 broader BLOCKED and no FAIL. Changed image bytes/type
-return 409; a fresh intentional key uploads the different bytes; older successful
-keys replay without overwriting the newer image. All original 70,777 rows,
-24 archive tables and 15 security metadata remain unchanged. Both generated
-checkpoints restore with all 51 tables/15 metadata matching (3.819 / 4.626 s),
-with no provider replay or recovery app start. A prior 218-request harness-field
-failure is preserved; its copied original rows also match unchanged.
-
-Protected hosted staging before/after hashes are exact. Production environment
-metadata is unchanged and storage remains Sheets. All 577 regular tests,
-18 synthetic controls and one separate real-PG image regression pass; lint retains
-only the inherited warning, and typecheck plus isolated production/private builds
-pass. Source fix: `125543b26b485f7fa5a04c3ae0ab57a6b493be5f`.
-Full coverage/capacity/recovery-app acceptance remains incomplete.
-Receipt: `bf98821afdad1bf869e818503854442a7f54bd7f346ef3a812386d57ae982aef`.
-
-## Local completion started — raw-image correctness failure (2026-11-11)
-
-PR #63 execution was authorized on fresh disposable copies. Added a real-app
-raw-binary intent gate plus deterministic, independently validated PNG collision
-fixtures; added the bounded capacity engine and synthetic controls to CI.
-The [run evidence](../database-migration.md#local-completion-started-raw-image-intent-failure-2026-11-11)
-records an actual failure: different valid raw PNG bytes reused the same operation
-key and received 200/replayed the old response instead of 409, because the route
-wrapper hashes decoded text. No production behavior fix is included.
-
-Two fresh local databases were prepared in a new limited container/volume. The
-first stopped after 83 HTTP requests; its app was shut down and evidence retained.
-The second was not exercised; application capacity was NOT RUN. All original
-70,777 rows, each copy's 24 archive tables/15 security metadata and the hosted
-51-table/15-metadata before/after state remain exact. Failed-checkpoint restore
-matches all 51 tables/15 metadata in 3.256 seconds; a recovery app probe remains
-pending. Production metadata is unchanged and storage remains Google Sheets.
-
-All 571 existing regressions and 18 synthetic harness controls pass; typecheck
-and credential-free isolated build pass. Lint has only the inherited warning.
-**Full implementation remains incomplete**: other variant/fake-outcome/LINE/UI/
-fault work, the actual capacity workload/observer/oracle integration, two complete
-correctness runs and full recovery checks await the scoped binary-intent fix.
-Receipt hash: `76ade0b3dd8850a7d274d7fa2b2e950f3461b35e7448b7ee15d560963b2be130`.
-
-## Remaining local coverage/capacity — plan prepared only (2026-11-11)
-
-Baseline is merged PR #62, `40cc91cd2711559a249d43163ec38008385854d0`.
-Source-matched CI run 42996521762 passed; the automatic production deployment
-was subsequently verified READY on that commit with unchanged Sheets storage.
-Those are prior merge receipts, not fresh live-data inspection during planning.
-
-The [completion plan](../database-migration.md#remaining-local-coverage-and-capacity-completion-plan-prepared-only)
-adds a per-variant audit across all 16 families, not just the seven BLOCKED labels.
-It proposes excluding hosted-only API/protection from the local denominator and
-marking nonexistent Orders cancel/delete and Shipment unlink/cancel writes N/A
-only after explicit scope review. Current unsupported-action rejection and
-synthetic legacy history still require tests; no new feature is implied by a
-status enum. Original copied rows remain immutable; all editable legacy fixtures
-must be newly synthetic.
-
-Proposed work covers upload size/uncertainty/cleanup, full signed LINE/photo
-journeys, per-method intent/rollback/concurrency, ten trials per browser/crash
-boundary, two clean campaigns, immutable concurrent provider fixtures and paired
-attempt/outcome ledgers. Local capacity uses one then five clients, 2-minute
-warmups and ten measured minutes each, a sealed 60/25/15 read/simple/compound mix,
-2/3/5-second warm p95 limits, 10-second maximum, explicit pacing/sample counts and
-20% resource headroom. No limit/pool tuning is hidden in a passing result.
-Generated checkpoints need full 51-table/15-metadata restore plus a read-only
-provider-denied app probe and protected-state comparison. LOCAL PASS is separate
-from deferred hosted/full-platform/production acceptance.
-
-This update changes documentation/status only. No harness implementation,
-fixture/write/fault/load/restore run, resource or database change, production
-setting, live provider request or fresh live-data inspection occurred. All new
-execution results remain NOT RUN. A later owner instruction and a sealed local
-execution packet are needed before implementation/execution; merging the plan
-alone starts no private campaign. Production remains Google Sheets.
-
-Verification of this documentation-only update: all 571 existing regression
-tests, typecheck and an isolated credential-free production build pass. Lint
-has no errors and retains the existing unused `shipmentRow` warning. The diff
-changes only this ledger, the canonical migration plan and phase-3 status;
-application/build inputs, fixtures, schema, grants, environment and dependencies
-are unchanged. These checks do not execute the planned private write/load tests.
-
-## Cost-override deletion fix — two implemented local runs pass (2026-11-11)
-
-The owner authorized fixing the WT12 binding defect and rerunning local writes.
-Commit `4aac657b705720a386336d655aa47da731207aea` opts only cost overrides into
-the existing archive-on-clear behavior. Deletion preserves the SQL identity and
-business cells while hiding the archived row; common identity protections,
-schema, privileges and normal Sheets behavior remain unchanged. A dedicated
-real-SQL regression fails before and passes after the fix, including nonblank-ID
-refusal, repeated deletion and a distinct replacement identity. The immutable
-source fixture is retained with one exact bounded witness adjustment.
-
-Both clean-copy runs completed all 16 implemented families without a new failure:
-**455 HTTP requests each**, all **31** ordinary mutation proofs, 20 same-key pairs,
-20 stale-edit pairs, ten multi-table rollbacks, ten lost-commit-acknowledgement
-trials, one mobile response-loss/reload/replay and one post-effect-claim crash per
-copy. Actual HTTP cost deletion retains ID/cells, increments the row once and
-makes a fresh-key repeat a no-op. Receipt overlap/conflict checks still pass.
-The [canonical results](../database-migration.md#cost-override-deletion-fix-and-two-local-reruns-2026-11-11)
-distinguish implemented-case success from full mandatory acceptance: nine families
-pass implemented checks, seven have outstanding variants, and capacity/hosted
-write acceptance are NOT RUN. No full acceptance or production readiness claim.
-
-Every original copied business record (70,777 per copy), all 24 archive tables
-and 15 metadata sections remain unchanged. Both generated checkpoints restore
-with all 51 table hashes/15 metadata sections equal (3.717 / 3.127 seconds),
-with zero checkpoint loss and no provider replay. The previous failed copy and
-both completed runs are preserved; the test app is stopped. Protected hosted
-staging's full before/after snapshot and production environment metadata match;
-Google Sheets remains production's store. No hosted write, real provider call,
-production-data request, original recovery-resource change, merge or cutover.
-
-571 regression tests, nine harness checks and the new real-SQL regression pass;
-lint/typecheck and credential-free production build pass with only the inherited
-shipmentRow warning. Routes, schema, grants, dependencies and historical fixtures
-are unchanged. Draft PR #62 contains the scoped fixes/results. Harness `943f870`
-and private receipt
-`b114a943afd42221ef464410128626013b90097fac1aacbbec4fae2b9261f77a`
-pin the operational evidence; raw records, credentials and backups are not published.
-Complete remaining coverage/repetitions/capacity before considering separately
-approved hosted acceptance or production activation.
-
-## Receipt-overlap fix — local rerun stopped at WT12 (2026-11-11)
-
-The owner authorized fixing the overlap blocker and rerunning disposable local
-writes. Commit `ff7c997ed6452a20b068762103c589ddd4f0b502` normalizes identical
-receipt-number payloads after pagination/date filtering, preserving first-seen
-order and values. Conflicting payloads or missing identities reject before any
-receipt reaches the writer. The normal Sheets and SQL paths share this client;
-no existing rows, constraints, roles, schema or storage settings are changed.
-Six focused regression cases and an actual-client/Sheets-compatible write oracle
-prove exact unique-receipt totals and conflict atomicity. Historical fixtures are
-unchanged, with a hash-pinned inverse for original-source witnesses only.
-
-Both task-owned copies matched all 51 clean table hashes and 15 metadata sections
-before writes. The new private app passed real SQL/HTTP overlap, sale/refund/stock
-totals, provider-page failure rollback, conflict rejection and same-key corrected
-retry. The receipt issue is resolved. Thirteen families / 281 HTTP requests were
-attempted, including 69 entry checks and 25 mutation replay/concurrency proofs.
-The broader campaign then stopped at **WT12 cost-override deletion**: its SQL
-binding does not support the adapter's blank-row removal, so the business-identity
-guard refuses it (HTTP 500). No command or revision delta commits. This separate
-defect remains unfixed; later cases, second clean run and capacity are BLOCKED.
-See the [canonical rerun evidence](../database-migration.md#receipt-overlap-fix-and-local-rerun-2026-11-11).
-
-All 70,777 original copied business rows, 24 archive tables and 15 metadata sections
-remain unchanged. Generated-state recovery matched all 51 tables/15 metadata
-sections in 4.38 seconds without provider replay. The second copy is pristine and
-the app stopped. Protected hosted staging's 51 tables/15 metadata sections match
-before/after; production environment metadata is unchanged and Google Sheets
-remains active. Existing recovery containers and prior evidence are preserved.
-No hosted write, real provider/production-data request, merge or production switch.
-
-571 regression tests and nine harness checks pass; lint/typecheck and credential-free
-production build pass with only the inherited shipmentRow warning. Routes, schema,
-immutable fixtures, dependencies and lockfile are unchanged. Draft PR #62 now covers
-the receipt fix and stopped rerun, not full write acceptance. Operational harness
-`141bc9c` and private receipt
-`3984fae4a052a04e9f6f71d8c95f7006705b502f681c7b6d52af8889ebc59298`
-pin the results. Fix the cost-override binding and complete both clean campaigns
-before considering any separately approved hosted test or production cutover.
-
-## Disposable local write rehearsal — stopped at WT06 (2026-11-11)
-
-The owner authorized a separate local copy and write harness after merged
-[PR #61](https://github.com/volkswg/stock-management/pull/61), baseline
-`dff802bfddf5c522c013262ba8e56ba9532a8221`. A new bounded PostgreSQL 17 cluster,
-volume, TLS identity, UUID and restricted runtime login were prepared without
-reusing the two existing recovery containers. The independently recovered
-post-audit backup matched all 51 tables/15 metadata sections and 70,777 business
-records. Only the copy identity and enumerated login metadata changed in setup.
-Two clean databases were created. The real Next app uses test-only provider
-composition plus independent outbound denial; production source is unchanged.
-
-**Acceptance failed at WT06 and further writes stopped.** Overlapping fake pages
-repeat one receipt: SQL rejects the duplicate identity (`sales_receipts_pkey`,
-HTTP 502) and rolls back all business rows, command/effect state and revision.
-The unchanged in-memory Sheets-compatible path instead stores three receipt rows
-for two identities and reports synthetic net sales 180 instead of 80. This is an
-existing overlap-handling defect and a migration compatibility blocker, not a
-successful write rehearsal. No business-rule fix or weakened constraint was included in the initial
-harness commit `c7288b3`; the subsequent authorized fix is above. The [canonical result](../database-migration.md#local-execution-result-2026-11-11)
-records the scope and follow-up.
-
-Local role/TLS/production refusal gates and 69 HTTP entry checks pass. Earlier
-exploratory copies exercised orders/images, shipments, expenses, HR/payroll,
-movements/stock and nonoverlapping sync/replay. Five fixture-development attempts
-are preserved and are not counted as clean passing campaigns. The stopped run
-has zero complete passing campaigns; full concurrency, fault/restart/browser
-repetitions, capacity and remaining mandatory variants are BLOCKED. The second
-clean copy is pristine; the task app is stopped and evidence/resources retained.
-
-A preserved generated checkpoint was backed up and independently restored into
-a fresh local database: all 51 tables/15 metadata sections match (3.2 seconds),
-including command/effect state, with no provider replay. Hosted staging's full
-51-table/15-metadata before/after comparison is exact. Production environment
-metadata is unchanged with no `STOCK_*` overrides; Google Sheets remains active.
-No hosted write, existing recovery-resource mutation, real provider request,
-production data request or cutover occurred. Hosted write acceptance is NOT RUN.
-
-565 regression tests and eight harness self-tests pass; lint/typecheck and
-credential-free production build pass, with only the inherited shipmentRow
-warning. Existing routes, fixtures, schema, application rules and lockfile remain
-unchanged. The secret-free CI job now also runs the harness self-tests, not the
-private real-data rehearsal. Operational harness commit `1eb8769` and private
-receipt `8a70527cd5fe0b49a6bcdf8b5853c2963937cb4df149e1692061efada304983a`
-pin the evidence; subsequent formatting has a retained syntax-equivalence proof.
-Raw data, credentials, manifest, backup, provider logs and screenshots are not
-published. Receipt-policy remediation, two clean reruns and all outstanding
-acceptance gates precede any separately approved hosted test or production switch.
-
-## Private Supabase app — read-only acceptance (2026-11-11)
-
-PR #60 adds an explicit read-only staging flag, mutation-route/transaction blocks
-and a server-only outbound provider guard. A separate protected Vercel preview
-uses a dedicated SELECT-only database login through the dashboard-confirmed IPv4
-session pooler with TLS verification. The first direct-endpoint preview failed
-its reads and was superseded; protection was retained throughout. The production
-domain still resolves to `dpl_Gzd8hJXHywXx3ntTHA8dW7TpU1Zb` at merged PR #59,
-and production remains on Google Sheets. No production setting was changed.
-
-The final hosted run passed 166 API checks (130 reads, 32 mutation refusals and
-four authorization/validation/not-found responses), 20 browser pages and five
-mobile views. Saved source application outputs match historical order details,
-inventory, attendance/payroll, sales/profit, expenses, adjustments, advances and
-sync history. All successful reads report revision 70,778. Missing/wrong bearer,
-Vercel protection and runtime provider refusal also pass. Browser tests attempted
-no mutations and blocked foreign requests. Private screenshots/bodies and complete
-receipts remain outside Git; no business values or credentials are published.
-
-All 51 table fingerprints remain identical to the pre-test snapshot and the
-verified post-audit backup. The only metadata changes are the dedicated login,
-25 SELECT policies/grants, 26 ACL entries and PostgreSQL's creator-admin grant
-(without SET/INHERIT). The previous 15 metadata sections match after precisely
-removing those additions. The login can mutate zero private tables, assume no
-other role, create no schema and execute no privileged private-schema function.
-
-All 565 regression tests, two targeted safety tests, lint/typecheck and both
-isolated credential-free and read-only staging builds pass; 113 client chunks
-contain no staging secrets. Lint retains the inherited unused `shipmentRow`
-warning. Three initial local/direct report failures under overlapping reads are
-retained as evidence; isolated pooler-backed stock/profit checks match. Final
-hosted read latencies were p50 227 ms, p95 1,648 ms and maximum 1,839 ms, with no
-peak-load claim. The canonical migration runbook records access boundaries and
-the exact acceptance scope. Write/provider tests, realistic capacity, source
-refresh/freeze and production authorization/activation remain pending. No
-business row, command, side effect, revision value or production source changed.
-
-## Hosted audit removal — applied and verified (2026-11-11)
-
-The owner explicitly authorized applying only the audit-removal migration to
-isolated hosted staging. Backup checksums, independent-restore receipts and the
-current 51-table/15-metadata fingerprints were rechecked first and matched.
-The migration dry run listed only `20261111034402_remove_operational_audit.sql`.
-It was applied through the migration system; the ledger now contains exactly the
-four prior versions plus `20261111034402`. A result-log filename collision occurred
-after the command completed; no migration retry occurred. Read-only schema/ledger
-inspection and complete verification established the committed outcome.
-
-Hosted staging now matches the successful local rehearsal in every table hash
-and all 15 metadata sections. The audit table, identity sequence, logging function
-and 23 audit triggers are gone. One revision row starts at 70,778, with 23 statement
-triggers and the reviewed RLS/column grants. All 50 unaffected tables, all 70,777
-business records, unrelated permissions and roles remain unchanged; 66 offline
-application comparisons passed against the hash-identical verified projection.
-Live application/provider acceptance and production cutover are not certified.
-
-The fresh post-change two-schema backup was encrypted, privately uploaded,
-independently downloaded and decrypted using freshly recovered owner-held key
-material, then restored to a fresh isolated local database. All 51 table hashes
-and 15 metadata sections match. Both pre-change and post-change backup generations
-and local evidence are retained. Security/health checks show no new problems;
-known informational archive-RLS/unused-index notices remain without remediation.
-Production was not switched and remains on Google Sheets. No application setting,
-LINE/Loyverse action, business-data write, paid resource or cleanup was performed.
-
-## Hosted pre-change recovery — bounded verification fix
-
-The original 150-second fingerprint preflight stopped before capture. Read-only
-investigation measured connection/guard setup around 1.45 seconds per connection
-and approximately 82 MB of audit-row JSON. Two readers alone still timed out.
-The explicit version 2 full-row SHA256 stream plus two bounded readers completed
-all 51 tables and 15 metadata sections in 90.91 seconds under the unchanged limit.
-All 23 business-table reconciliation proofs and the original schema/security
-metadata matched. No hosted migration or business write was performed.
-
-The fix retains legacy fingerprints and one-reader defaults, adds explicit audit
-versus revision layout selection, and records/rejects fingerprint format mismatches.
-Independent Python/full-row PostgreSQL oracles, 71 migration unit tests, synthetic
-capture/restore and tamper detection pass. The hosted pre-change capture and
-independent restore/rehearsal evidence are retained privately outside Git.
-
-On 2026-11-11, authorized pre-change capture completed at 11:27 Bangkok. The
-encrypted off-site backup was independently downloaded, checksum-checked and
-decrypted with freshly retrieved owner-held key material. Both pre-change local
-restores matched all 51 table hashes and 15 metadata sections. A separate local
-copy passed the exact merged audit-removal migration: 50 unaffected table hashes
-and unrelated security metadata remained identical; revision/runtime-write probes
-rolled back cleanly. Its new-schema backup and fresh restore also matched. All
-23 business tables reconcile and all 66 offline application comparisons passed.
-The final hosted comparison at 11:31 Bangkok matched the backup in all 66
-sections, roles and the four-version ledger; audit remains hosted and revision
-is absent. Three fresh local databases were retained in existing infrastructure,
-with no new container/role/password or OOM event. No hosted DDL/write or cutover.
-
-Backup scope is the two private schemas plus supplemental password-free role
-and migration-ledger evidence, not full Supabase Auth/Storage/platform recovery
-or Drive images. Reconfirm writer freeze, source/backup freshness and exact
-target approval before any future hosted audit removal.
-
-
-## Audit removal — merged implementation and local proof (historical)
-
-The owner requested removal of operational audit history. The proposed migration
-replaces the audit table and 23 logging triggers with one transactional revision
-counter and statement triggers. HTTP conflict checks, command replay, business
-versions/archives and side-effect journals remain. Recovery and promotion tools
-expect the replacement revision table. Historical migrations/fixtures are retained.
-PR #57 verification used disposable synthetic PostgreSQL databases only. The
-separately authorized real-data backup/local rehearsal is recorded above; hosted
-audit removal, application activation and production cutover remain unexecuted.
-See the [removal procedure](../database-migration.md#audit-history-removal-applied-to-hosted-staging)
-for coordinated deployment, destructive-history semantics and old-backup tooling.
-
-Validation: 565 application regression tests, 65 migration unit tests, 27 actual
-PostgreSQL application/transaction tests, one real-browser/API test and five
-offline application-parity tests passed. Populated synthetic upgrade preserves
-all business/archive/journal records, removes audit objects and retains revision
-rollback/conflict behavior. Complete two-schema capture/restore matches; altered
-records, table grants and revision-column grants are detected. Lint and typecheck
-pass (one inherited unused-variable lint warning); the isolated credential-free
-production build preserves routes and browser bundle privacy. Earlier migration
-files and historical fixtures remain unchanged. PR #57 used no real business data.
-
-## Database migration — current operational status (2026-11-11)
-
-Hosted import baseline: merged [PR #55](https://github.com/volkswg/stock-management/pull/55),
-`65ed6f65256e59f7f6fce44bcd4fb88a819ae95c`. The latest saved hosted
-reconciliation completed on **2026-11-11 at 08:46 Bangkok / 01:46 UTC**.
-The separately authorized pre-change backup/final hosted comparison is current
-to 11:31 Bangkok, with local migration/recovery rehearsal completed at 11:33.
-Production still uses Sheets; no new live Sheet export was performed.
-
-| Workstream | Latest verified state |
+# Progress and evidence ledger
+
+This is the single index for dated implementation, CI and production release
+evidence. Current operations belong in the [runbook](../database-migration.md),
+next scope in the [roadmap](roadmap.md), and commands in [verification](verification.md).
+Historical counts/claims retain their original scope; this docs cleanup does not
+independently rerun or recertify every old release.
+
+## Latest production release
+
+PR81 merged as `2471ac1106a9501f2a084b2d0825572b1b6fb1fe`; its schema-only release
+completed on 2026-11-18 in the separately approved supervised window. Production
+continues on the unchanged PR80 application source
+`31af820cbe47a543805c0904ca3db6ad3b2ec085`. No app deployment or environment change
+was needed. The exact forward SQL is
+[`20261118100705_constraint_record_validation.sql`](../../tools/migration/final-removal/20261118100705_constraint_record_validation.sql).
+
+| Evidence | Recorded result and scope |
 | --- | --- |
-| Hosted schema | Audit-removal migration applied and ledger verified; one private revision counter replaces audit history. Business schema/security invariants retained. |
-| Latest source and import | Latest approved original-Sheet export generated 23 business-table CSVs; owner manually imported **70,777 records** into `stock_operational`. This path bypassed the hosted archive/import-batch step. |
-| Record reconciliation | All 23 operational business tables reconcile against that saved source after one approved product-name encoding correction; one row updated and one audit row added. Private row IDs and values remain outside Git. |
-| Application calculations | **66 offline application comparisons passed** against saved source/target artifacts. This does not certify live hosted API/browser/provider behavior. |
-| Sequences | No alignment required; no explicit sequence writes performed. |
-| Recovery | **Pre-change two-schema backup and independent recovery verified.** Encrypted private off-site download, fresh key recovery, two exact old-schema restores and local new-schema capture/restore passed. Earlier backups remain retained; broader platform recovery is not certified. |
-| Application activation | **Not ready; no cutover performed.** Production still uses Google Sheets. No production storage setting was switched by these operations. |
-| Cleanup | Superseded export/build/import artifacts retired; latest source/CSVs, verification/audit evidence, credentials/TLS and recovery dependencies retained. Only the explicitly approved failed Docker rehearsal and its dedicated volume were deleted; two recovery containers and shared TLS remain. |
+| Local implementation | 689 regressions, 73 Python tests, lint/typecheck and credential-free build passed; inherited `shipmentRow` lint warning remained |
+| Current-schema synthetic acceptance | Five focused cases across 23 tables/47 timestamp fields, 32 operational cases, 10 native timestamp cases and actual browser lost-response/reload/replay passed; no real providers |
+| Independent CI | [Migration acceptance run 44284111971](https://github.com/volkswg/stock-management/actions/runs/44284111971) passed on tested head `4db4799c284e5bc5a15c0484b6ec041ea584b6cf`; merged tree matched |
+| Recovery | Fresh private checkpoint strictly restored: all 51 tables and 15 metadata sections matched; exact schema-only inverse restored the original state locally |
+| App/LINE checkpoint rehearsal | 69 actual-consumer comparison groups matched; local create/edit/archive passed without hosted/provider access |
+| Frozen production | Complete checkpoint matched before DDL; after DDL all 51 table values and surviving metadata/permissions matched except the reviewed schema delta |
+| Schema result | 23 validated CHECKs cover 47 lifecycle fields; 23 validators became one shared guard; operational functions 74→52; operational triggers remain 46 |
+| Hosted read/security checks | Four GET values/types/order/revisions matched; idempotency guards and LINE signature rejection passed; no real business/provider write canary |
+| Reopening | Only the temporary rule was removed; original protections, LINE cutoff, deployment/env and old Sheets permissions were preserved; initial runtime error scan was clear |
 
-Hosted audit removal and its post-change recovery verification are complete.
-Before application activation, resolve hosted runtime,
-security/performance and business acceptance, and review changes since the
-saved export. Later Sheet activity is not covered by this reconciliation; any
-refresh or delta handling requires a reviewed procedure and approval. Do not
-replay schema migrations or regenerate/retry retired import SQL as a next step.
+Vercel's publication version/timestamp changed with the approved maintenance rule;
+the gate verified them against that exact active configuration. No schema SQL ran
+before resolving that metadata-only precondition. Private records, credentials,
+checkpoints, inverse SQL and full receipts remain on the Mac/approved private storage.
+The checkpoint predates later legitimate writes and is not permission to overwrite them.
 
-The [machine-readable status](../../tools/migration/phase3-status.json) records
-these aggregate outcomes and the private result receipt's SHA-256. The owner
-retains detailed records, workbook identity, mappings and artifacts privately;
-none are published here. Credentials in a previous Mac or Cloud session are not
-assumed available to a future operator. The
-[execution runbook](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
-remains the source of acceptance and separately approved operational steps.
+## Documentation consolidation (2026-11-18)
 
-## Historical architecture snapshot and single-workbook account configuration
+From base `2471ac1106a9501f2a084b2d0825572b1b6fb1fe`, the docs directory goes
+14→13 files and becomes about 80% shorter. Current operations, next work, commands
+and dated evidence have one canonical owner each. All original folder/dependency
+rules, the earlier merge-SHA ledger and immutable witnesses remain; feature-guide
+bodies retain their established paths with a production-backend clarification.
+The history index records both renamed paths and historical URL tradeoffs.
 
-At this architecture milestone, verified main was `689d02c93326a1831c38c583c464524644c72e66` (merged PR44), with the external/features retirements and PR43 account source complete. The tree matches the previously verified PR44 head with 550 passing tests and successful lint/typecheck/isolated build.
+Local verification: all 928 non-Markdown tracked files are byte-identical; local
+links/fragments and pinned historical files/anchors pass. All 689 regressions,
+lint/typecheck and an isolated credential-free build pass; only the inherited
+`shipmentRow` warning remains. Route manifest and 113 browser bundle boundaries
+are unchanged. No database/provider tests were added for prose edits, and no live
+resource, credential, snapshot or recovery artifact was changed. These are local
+docs-review results, not a new CI or production verification claim.
 
-Branch `fix/loyverse-single-workbook` makes sheet mode read `loyverse_accounts` only from the existing GOOGLE_SHEETS_SPREADSHEET_ID. The dedicated account-workbook variable/AppConfig field and separate-workbook restriction are removed. No workbook/JSON fallback is added; env-mode rollback, six-column validation, ordering and server-only credential handling remain. Historical source inverses preserve old fixture bytes and assertions. See [verification](verification.md#loyverse-single-workbook-support) and [owner instructions](../../README.md#loyverse-configuration), including workbook-wide token visibility. No production migration, ACL/Vercel change or deployment is performed.
+## Database milestone index
 
-## Migration assertion performance correction (merged PR #55)
+| PRs | Delivered scope | Detailed recorded evidence |
+| --- | --- | --- |
+| 48–56 | Import/operational foundation, representation/reference corrections, profiling and reconciliation | [Original migration record](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#source-audit-and-schema) |
+| 57–60 | Audit removal, recovery and private read-only staging | [Original execution ledger](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#hosted-audit-removal--applied-and-verified-2026-11-11) |
+| 61–65 | Disposable writes/capacity, retry fixes, hosted acceptance and cutover preparation | [Original acceptance ledger](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#local-acceptance-milestone-results-2026-11-12) |
+| 66–70 | Production reader correction/cutover follow-through, direct remark edits, LINE cutoff, order idempotency and upload failure feedback | [Original production follow-through](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#order-remark-table-editor-fix--2026-11-16) |
+| 71–72 | Named-column compatibility and final `business_cells` removal | [Original authority contract](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized) |
+| 73–74 | Stable-ID/createdAt compatibility and ordinal retirement | [Original stable-ID evidence](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#stable-id-compatibility-implementation-2026-11-17-pr73-released) |
+| 75 | Native lifecycle timestamps | [Completed timestamp release](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#native-lifecycle-timestamp-release-completed-2026-11-17-pr75) |
+| 76–77 | Explicit per-column compatibility and final `cell_kinds` retirement | [Completed kind retirement](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr77-final-retirement-completed-lexeme-compatibility-preparation-2026-11-18) |
+| 78–79 | Typed compatibility and final lexeme retirement | [Completed lexeme retirement](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#pr79-final-lexeme-retirement-completed) |
+| 80 | Typed-only app; 116 legacy functions retired in the later approved release | [PR80 contract and release record](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#typed-postgresql-cleanup-prepared-not-deployed) |
+| 81 | CHECK constraints/shared guard; separate production SQL completed | [Latest release above](#latest-production-release), [review PR81](https://github.com/volkswg/stock-management/pull/81) |
 
-Merged [PR #55](https://github.com/volkswg/stock-management/pull/55), based on
-merged PR54, changes only import-plan row lookup:
-an equality predicate on the validated non-null primary key precedes all existing
-null-safe field comparisons. It reuses existing indexes; source values, snapshot
-encoding, database schemas, roles, permissions, recovery fingerprints and timeout
-guards stay unchanged. Synthetic PostgreSQL coverage checks index planning,
-identical replay and rejection of changed values; see the
-[migration guide](../database-migration.md#export-dry-run-and-import). This code
-change does not authorize a hosted retry or replace its full constrained rehearsal.
-
-## Historical HR completion evidence (PR #33)
-
-At the start of PR #33, verified main was merged PR32, `f90e7bdeb3d7c9815148c3011d217e07b1a80b19`. The requested PR31 SHA was stale: GitHub confirmed PR32 merged, its tree matched the reviewed financial implementation exactly and no conflicting implementation PR was open. Work therefore starts from that audited main on `refactor/hr-application-completion`, preserving the merged work.
-
-This completion owns employee/compensation list/create/update/history/effective dates and all attendance list/clock/leave/update operations in HR applications/rules, with semantic ports and one feature-owned workforce adapter. Public server composition supplies the payroll workforce readers; the legacy bridge no longer imports legacy HR business services. Original full-service callable types, argument getter order, runtime export keys and enum/error/function identities remain through typed aliases. All prior financial behavior, schemas/providers/UI and the closed cycle/browser safeguards remain intact. Necessary compatibility stays for PR36.
-
-The limited hr-application-before witness captures the two original implementations, old public composition and eight route sources. Every inherited fixture is unchanged. Existing guards reconcile exact aliases/imports before older history and validate the precise added HR closure without changing historical counts/expectations. Seven operation/HTTP tests and three boundary tests compare actual original/current applications/adapters, real Sales refund-driven payroll, partial failures, pending writes, all eight HTTP routes and compile-time callable signatures. See [verification](verification.md#hr-application-completion) for exact results and limits.
+The full historical record retains intermediate failures, owner deferrals and
+unexecuted plans. A heading saying “prepared” or “Sheets production” describes that
+earlier stage, not the current state. Backup automation and new auth remain deferred.
 
 ## Merged implementation ledger
 
-Counts below are the original Codex-local final reports, traced to the original verification record and linked PRs; this documentation task did not independently rerun every historical checkout or certify external CI. Each row retains the exact merge SHA, not an unmerged implementation head. Current execution is recorded separately in [verification](verification.md#external-namespace-retirement-issue-39).
+The original architecture ledger below retains exact merge SHAs and original
+Codex-local test counts, including inherited tests. It is not a fresh independent
+CI/production claim. Later milestone detail is in the immutable index below.
+
 
 | PR / merged SHA | Delivered slice | Original test count (inherited + added) |
 | --- | --- | --- |
@@ -1082,8 +118,6 @@ Counts below are the original Codex-local final reports, traced to the original 
 | [#37](https://github.com/volkswg/stock-management/pull/37) · `5867348d86d57cc98322362fa175140626c7f5d7` | Final composition and compatibility cleanup | 531 = 526 + 5 |
 | [#40](https://github.com/volkswg/stock-management/pull/40) · `3c870ef122c640c6ed8958dadb83ae714094dfb5` | Remove entire external compatibility namespace; migrate canonical consumers | 534 = 531 + 3 |
 
-Historical reports record successful baseline/final lint/typecheck and isolated builds with unchanged 23-page/35-API contracts and app-paths manifests. Later reports retain one unused shipmentRow import warning in `tests/shipments-read-seam.test.mjs:6`. Details, intermediate corrected failures, original limitations and precise baseline/head provenance remain in the immutable [original verification record](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/verification.md). Do not treat those past reports as substitutes for executing checks at a new base.
-
 ## Historical evidence
 
 Historical test fixtures remain in [tests/fixtures](../../tests/fixtures) unchanged. They contain complete original sources, raw SHA-256 values, printed TypeScript AST declarations, JSON samples, consumer inventories and event traces. Existing `tests/helpers/*-history.mjs` helpers retain exact, named inverse-source reconciliation; no fixture regeneration, broad inventory exclusion or skipped inherited test is authorized.
@@ -1110,6 +144,7 @@ Historical test fixtures remain in [tests/fixtures](../../tests/fixtures) unchan
 
 The fixtures still embed `docs/architecture/shipments-contracts.md` inside two captured original-source strings (enum/DTO history). They remain immutable; that original document is preserved by the pinned link in the index below. No executable source/test reads the removed Markdown paths. Old fixture references describe historical source and must not be rewritten to the new guide.
 
+
 ## Document consolidation index
 
 Before: 35 tracked Markdown files, 29 in architecture. After: 14 total, five in architecture and three in refactoring; four operational guides stay at their original paths byte-for-byte. Twenty-five old architecture documents are consolidated/removed; four new canonical documents are added (decisions, roadmap, progress, verification), and existing authoritative ownership paths are reused.
@@ -1121,10 +156,10 @@ Published PR bodies were audited across #1–23. They contain old document path 
 | Original document at immutable base | Canonical destination / disposition |
 | --- | --- |
 | [README.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/README.md) | [Architecture guide](../architecture/README.md) |
-| [audit.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/audit.md) | [Current map](../architecture/migration-map.md), [dependency rules](../architecture/dependency-rules.md) and [roadmap](roadmap.md); original snapshot only in history |
-| [dependency-rules.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/dependency-rules.md) | [Dependency rules](../architecture/dependency-rules.md) |
-| [eslint-boundaries.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/eslint-boundaries.md) | [Scoped enforcement](../architecture/dependency-rules.md#scoped-enforcement) |
-| [folder-rules.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/folder-rules.md) | [Folder rules](../architecture/folder-rules.md) |
+| [audit.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/audit.md) | [Current map](../architecture/migration-map.md), [dependency rules](../architecture/rules.md#dependency-rules) and [roadmap](roadmap.md); original snapshot only in history |
+| [dependency-rules.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/dependency-rules.md) | [Dependency rules](../architecture/rules.md#dependency-rules) |
+| [eslint-boundaries.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/eslint-boundaries.md) | [Scoped enforcement](../architecture/rules.md#scoped-enforcement) |
+| [folder-rules.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/folder-rules.md) | [Folder rules](../architecture/rules.md#folder-ownership) |
 | [google-shared-infrastructure.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/google-shared-infrastructure.md) | [Shared transport](../architecture/decisions.md#shared-google-transport-and-feature-worksheets), [map](../architecture/migration-map.md) |
 | [inventory-employee-directory.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/inventory-employee-directory.md) | [Directory prerequisite](../architecture/decisions.md#inventory-employee-directory-prerequisite), [completed HR ownership](../architecture/migration-map.md) |
 | [migration-map.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/migration-map.md) | [Current ownership map](../architecture/migration-map.md); original whole-repository proposed paths in history |
@@ -1133,7 +168,7 @@ Published PR bodies were audited across #1–23. They contain old document path 
 | [orders-sheet-type-imports.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-sheet-type-imports.md) | [Shared transport/worksheet boundary](../architecture/decisions.md#shared-google-transport-and-feature-worksheets) |
 | [orders-shipment-picker.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-shipment-picker.md) | [Browser picker](../architecture/decisions.md#orders-browser-picker-and-ui) |
 | [orders-shipments-worksheet-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-shipments-worksheet-ownership.md) | [Actual worksheet owners](../architecture/migration-map.md#physical-worksheet-owners) |
-| [orders-ui-migration.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-ui-migration.md) | [Folders](../architecture/folder-rules.md) and [UI/picker](../architecture/decisions.md#orders-browser-picker-and-ui) |
+| [orders-ui-migration.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-ui-migration.md) | [Folders](../architecture/rules.md#folder-ownership) and [UI/picker](../architecture/decisions.md#orders-browser-picker-and-ui) |
 | [orders-use-case-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/orders-use-case-seam.md) | [Orders list/creation](../architecture/decisions.md#orders-list-and-simple-creation) |
 | [refactoring-plan.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/refactoring-plan.md) | [Single roadmap](roadmap.md) and merged ledger above |
 | [sales-worksheet-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/sales-worksheet-ownership.md) | [Actual worksheet owners](../architecture/migration-map.md#physical-worksheet-owners), [pending Sales work](roadmap.md) |
@@ -1142,719 +177,267 @@ Published PR bodies were audited across #1–23. They contain old document path 
 | [shipments-drive-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-drive-seam.md) | [Bill upload/cleanup](../architecture/decisions.md#shipping-bill-upload-and-cleanup) |
 | [shipments-dto-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-dto-ownership.md) | [Contracts/DTO ownership](../architecture/decisions.md#public-contracts-and-single-enum-identity) |
 | [shipments-enum-ownership.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-enum-ownership.md) | [Contracts/enum identity](../architecture/decisions.md#public-contracts-and-single-enum-identity) |
-| [shipments-http-boundary.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-http-boundary.md) | [Public server surfaces](../architecture/dependency-rules.md#actual-public-surfaces-and-directions), historical import restoration above |
+| [shipments-http-boundary.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-http-boundary.md) | [Public server surfaces](../architecture/rules.md#actual-public-surfaces-and-directions), historical import restoration above |
 | [shipments-link-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-link-seam.md) | [Linking](../architecture/decisions.md#shipment-order-linking) |
 | [shipments-read-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-read-seam.md) | [Shipment reads/costs](../architecture/decisions.md#shipment-list-and-detail-reads) |
 | [shipments-status-seam.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-status-seam.md) | [Status update](../architecture/decisions.md#shipment-status-update) |
 | [shipments-ui-relocation.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-ui-relocation.md) | [UI/picker](../architecture/decisions.md#orders-browser-picker-and-ui), [actual map](../architecture/migration-map.md) |
-| [shipments-validation-import.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-validation-import.md) | [Public surfaces](../architecture/dependency-rules.md#actual-public-surfaces-and-directions), historical witness above |
+| [shipments-validation-import.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/shipments-validation-import.md) | [Public surfaces](../architecture/rules.md#actual-public-surfaces-and-directions), historical witness above |
 | [verification.md](https://github.com/volkswg/stock-management/blob/71dcfe145a4ae835dbd693b2ba6dce00d4e3edcb/docs/architecture/verification.md) | [Safe procedure/current results](verification.md) and original ledger evidence above |
 
 Retained operational/user guides: [expenses](../expenses.md), [movement migration](../movement-migration.md), [LINE rich-menu links](../rich-menu-links.md), [shop stock adjustments](../shop-stock-adjustments.md). Root README retains the existing movement-mode and salary-advance/settlement guidance. These are instructions for separately authorized operations, **not** verification commands.
 
-## Documentation debt and tradeoffs
 
-The original 244-TS-file preparation audit and huge proposed destination inventory are historical snapshots, not a live repository-wide graph/status report. Current canonical docs cover verified owners and known debt without pretending every unmigrated file has been reclassified. Preserve the immutable full map for future file-level planning and refresh only the slice being migrated.
-
-Historical branch-relative URLs are a compatibility tradeoff of removing obsolete documents; this index gives immutable replacements. External operational URLs were not contacted. No new CI/browser/integration/concurrency evidence is inferred from documentation cleanup. Future changes must update current canonical ownership/roadmap and append evidence here rather than reintroducing one note per small PR.
-
-
-## PR25 — HR core worksheet ownership
-
-Verified base: `02506658dd79a6432824df7c15b0292be4d15886`, merged PR24, clean initial tree; branch `refactor/hr-core-worksheet-ownership`. Three original classes and three mutable header arrays move from `externals/google/sheet/sheets/{employees,employee-compensations,employee-timesheets}` to `modules/hr/infrastructure/google-sheets/<same directory>`. All six old leaves become explicit named forwards. Only class import paths change to root BaseGoogleSheet/generic erased types/range helper and local headers; class bodies/header declarations reconstruct exactly.
-
-One table-driven characterization passed on the untouched worksheets before moving. Six added tests cover original default/explicit ranges, identity/mutability/pending/sync-async failures, full source/declaration/previous-fixture preservation, physical/legacy/both-index/registry identity, actual original/current GoogleSheetsClient fake-fetch traces, the real worksheet through unchanged directory/stock-adjustment HTTP, and exact lint/consumer/browser audits. Compile-time fixtures preserve nominal class/constructor/instance/header types. The existing PR23 runtime/type graph tests now traverse actual moved files/forwards and retain negative direct/legacy/mixed-barrel Inventory→HR cases.
-
-The 84-edge source/test consumer audit resolves alias/relative/type/re-export/dynamic/import-type syntax and records all three operational scripts without executing them. Module graphs remain acyclic with only Shipments→Orders; root transport is feature-agnostic. The four inherited client erased paths remain exactly salary advances, payroll, expense master and expenses; no runtime provider reachability or new erased debt. The unchanged directory import follows its same-feature legacy header forward. HR never imports Inventory's private error class.
-
-Prior PR15–23 source inventories recognize only these six named changes through inverse-source reconstruction and six exact additions. Closed loaders admit only the six reviewed paths; all earlier fixtures/hashes and negative checks stay authoritative. No aggregate registry/factory/index, production consumer, directory application/reader/error/async behavior, payroll/attendance/financial/status/Drive/HTTP/UI/provider/env/package/schema changes. PayrollRecordsSheet, RecordsSheet, other worksheets, broader HR/Inventory use cases, four browser type-only debts, compatibility retirement, SaaS and concurrency remain deferred. Final Codex-local results: 435 tests = 429 inherited + 6 new, zero failures/skips; lint exits zero with only the inherited unused shipmentRow warning, typecheck and isolated credential-free build pass. Routes remain 23/35 and app-paths manifest is byte-identical. [Full execution record](verification.md#pr25-hr-core-worksheet-ownership).
-
-
-## PR26 — Inventory core worksheet ownership
-
-Verified base `2e9fe4a6cb734a1d796d91f8e0805febf7273b70`, merged PR25, exact remote main and clean initial tree; branch `refactor/inventory-core-worksheet-ownership`. Exactly StockCountsSheet.ts and its const.ts plus MovementSheet.ts move from legacy worksheet directories to Inventory infrastructure. Three named forwards retain callers. Only necessary root import paths change; all unrelated production and prior fixture bytes remain exact. No Movement const.ts, aggregate registry/factory/index change or consumer migration.
-
-Three added characterizations pass on untouched production before the move: worksheet arguments/defaults/mutability/await/failure behavior, actual stock-count/movement/adjustment/HTTP outcomes, and original partial failures. Four further tests cover exact source/AST/fixture inventory, physical/legacy/available-index/real registry identities and batch mapping, actual old/current client transport including deletion, and lint/runtime/type/browser/consumer graphs. Compile-time assertions preserve class/header/method/row-number signatures.
-
-The 79 affected resolved import/export edges and three operational-script paths are recorded without executing scripts. Both module graph modes retain only Shipments→Orders, no Inventory→LINE/private dependency or cycle. Mixed-barrel negative tests catch an actual file cycle rather than treating the intermediate registry as a firewall; direct private HR/LINE and erased legacy-service imports also reject. All client graphs retain exactly the four inherited erased debts and no provider runtime path. Existing HR/directory and earlier ownership guards stay active.
-
-Inventory's legacy business service still references LINE quantity helpers; this PR does not move that dependency into modules. StockAdjustmentsSheet, RecordsSheet, PayrollRecordsSheet, UserStateSheet, business-use-case extraction, compatibility/registry retirement and SaaS/provider/concurrency work remain deferred. Final Codex-local checks: 442 tests = 435 inherited + 7 new with zero failures/skips, lint exit zero with the one inherited warning, typecheck and isolated credential-free build pass. Routes remain 23/35 and app-paths manifest is byte-identical. [Execution evidence](verification.md#pr26-inventory-core-worksheet-ownership).
-
-
-## PR27 — Movement worksheet-schema prerequisite
-
-Base `4952644f06fcfc216c9351c347dcc806d887bb09`, merged PR26; branch `refactor/movement-worksheet-schema-prerequisite`. This supersedes the blocked two-file user-state relocation scope for this PR. Only state.ts and manageMovements.ts change, plus new legacy-local worksheet-schema.ts. Original header arrays/function move verbatim; state keeps shared aliases/export identity and business operations consume the leaf directly. No UserStateSheet or header relocation.
-
-`tests/fixtures/movement-schema-before.json` retains both original complete sources/raw hashes/declarations, three moved AST hashes, pre-edit public export keys, real service/event golden, production inventory and all prior fixture hashes. The new history helper reconstructs exact source and composes the earlier PR23 type-import change only where required; old hashes/fixtures remain authoritative. Closed test imports are explicit. Tests retain identities, descriptor/export order, pending/failing ensure/read/write behavior and actual delivery/deletion/count outputs.
-
-Actual and virtual future user-state graphs show the direct Inventory movement path and two movement client erased paths removed, with protected runtime/type module direction still Shipments→Orders. Four mixed-registry browser debts remain. Stock counts still reaches the aggregate registry through unchanged legacy Sales queries; that path is explicitly asserted, not treated as a firewall or silently migrated. Worksheet relocation, RecordsSheet hierarchy, wider services/DTOs/quantity helper/registry retirement remain deferred. Final checks: 447 tests = 442 inherited + 5 new, zero failures/skips; lint exits zero with the inherited warning, typecheck/build pass, routes remain 23/35 and manifest is byte-identical. [Verification](verification.md#movement-worksheet-schema-prerequisite).
-
-
-## PR28 — Inventory Sales-query dependency prerequisite
-
-Verified exact main `72204e095d4b1e9425eb4f573bbe23c620bc99a7`, merged PR27, clean initial tree; branch `refactor/inventory-sales-query-dependency`. Mandatory virtual relocation preflight confirms the recorded runtime and erased stock-counts→Sales→registry→LINE private edge. Scope therefore switches only to the permitted prerequisite; UserStateSheet and its header remain physically legacy and relocation is deferred to PR29.
-
-Only three existing production files change: stock-counts' one Sales import; the existing read query's explicit header/pure type imports; and the override service's erased type compatibility forward. New modules/sales/contracts.ts owns the exact original SalesProfitCostOverride alias with zero runtime exports. No function body, Sales barrel, registry/factory/index, worksheet/provider, HTTP/UI, PR27 helper or other business algorithm changes.
-
-`inventory-sales-query-before.json` captures the original three sources/hashes/declarations, single DTO AST/hash, production/older-fixture inventories, 86 affected resolved edges, three script paths, blocked runtime/type traces, original runtime export keys and actual daily/dashboard/profit/read-event golden. One original query characterization passes before edits. New tests execute real queries/Stock Counts HTTP with synthetic Sheets, preserving read order, nullable/financial/refund results, pending/errors and legacy callable/header identity. Exact inverse witnesses compose the earlier PR23 stock-count change only where necessary; all previous fixture bytes remain authoritative.
-
-Runtime/type current and virtual-next-move graphs remove the registry path from stock counts. Restoring the Sales barrel, query mixed import or either erased implementation/barrel import reintroduces it and fails a targeted regression. Protected module direction stays Shipments→Orders, root infrastructure remains feature-neutral, and four inherited browser erased debts stay exact. Existing PR27 trace assertions are reconciled against the saved original source, not skipped. Final Codex-local checks: 452 tests = 447 inherited + 5 new with zero failures/skips, lint exits zero with the inherited warning, typecheck and isolated build pass. Routes remain 23/35 and manifest is byte-identical. [Execution evidence](verification.md#pr28-inventory-sales-query-dependency-prerequisite).
-
-
-## PR29 — LINE user-state worksheet ownership
-
-Verified base `48cf8d6d011544206cafa7ac35eeeafde5f22be9`, exact GitHub main after merged PR28; clean initial tree, branch `refactor/line-user-state-worksheet-ownership`. Git transport could not reach the configured proxy; GitHub's connector independently confirmed the signed merge commit/tree and the local commit was reconstructed and hash-verified. PR27/28 production prerequisites are unchanged.
-
-UserStateSheet.ts and const.ts move to `modules/line-workflows/infrastructure/google-sheets/user-state/`; the two old leaves become exact one-line named forwards. Only three external class import paths change. Original method/header declarations reconstruct exactly; constructor/prototype/header identities remain strict across owners/leaves/available index exports/real service instances. No aggregate registry/factory/index or business consumer changes.
-
-The original-source witness records both complete files, declaration text/hashes, header contents, synthetic worksheet/session events, all production hashes/prior fixture hashes, resolved import/export forms and scripts without execution. Six targeted tests cover original/current worksheet arguments/mutability/pending/errors, actual session/header recovery, real SheetsClient/fake-fetch deletion/transport, exact source/history, identities and actual runtime/type/browser/lint graphs. Previous virtual-move regressions now also assert their reviewed future source equals the actual physical move, retaining restored-import and forbidden reverse-edge negatives.
-
-The fresh full-source graph audit found no runtime cycle. It records one inherited erased cycle between calculateEmployeePayroll and manageSalaryAdvances; before/after paths are identical. Migrated module closures are acyclic with only Shipments→Orders; Inventory/Sales do not reach LINE-private persistence and all client reachable sets/four erased debts remain exact after the two-path canonicalization. No blanket allowlist or earlier fixture update.
-
-Final Codex-local results are recorded in [verification](verification.md#pr29-line-user-state-worksheet-ownership). RecordsSheet/payroll/stock-adjustment ownership, LINE business-use-case/quantity-rule extraction, compatibility/registry retirement, inherited payroll type cycle and erased browser debts remain deferred. No whole LINE or repository milestone is marked complete.
-
-## Sales + Inventory business ownership — completion stack, milestone 1
-
-Base: merged PR33, main `9ab9f2095342c66f30acf9612d79ed92063b8597`; GitHub merge/no-conflict checks repeated before publication. Branch: `refactor/sales-inventory-application`. Sales reports, receipt sync/status/projections/IDs and cost overrides now have owned applications/ports/adapters and public server composition. Inventory owns counts/reconciliation, adjustments/reversals/replacements, movements and public quantity rules. HR payroll receives the public Sales dashboard reader through its unchanged consumer port. Relevant HTTP imports and three movement browser imports use the new public surfaces; route/UI logic is unchanged. Legacy callable/schema/helper paths remain identity forwards for the final audit.
-
-Original implementation witnesses and exact import-reversal hashes are scoped to the affected source; route/UI bodies are hash-verified without duplicate large snapshots. All inherited fixture bytes remain untouched. Six new financial/stock behavior comparisons execute actual original/current applications and adapters with fake providers, including pending sync writes/live counts, partial failures, stock accounting/retries and error propagation. Four new architecture/identity/lint tests cover complete current runtime/type graphs, public composition and browser isolation. Existing payroll, HTTP, historical witnesses and restored forbidden-path negatives remain enabled. Historical graph/count checks use precisely verified overlays of subsequent owners; independent current graph checks forbid private edges even within an otherwise allowed module direction.
-
-Final Codex-local results: **510 = 500 inherited + 10 new**, no failures/skips; lint exits zero with only the inherited shipmentRow warning; typecheck passes with callable compatibility fixtures. Pristine baseline and final isolated credential-free builds pass. Source contracts remain 23 pages/35 APIs; app-paths manifests are byte-identical with SHA-256 `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`. All 422 production source files match the final build copy (generated TypeScript caches excluded). No provider/schema/env/package/lockfile/auth changes, live integrations, production data, operational scripts, merge or deployment. Existing partial-write/concurrency limits are preserved; independent CI/provider permissions/browser visuals are not claimed verified.
-
-Next authorized work in the same assignment: Orders + LINE journeys, then external protocol ownership and final compatibility/aggregate audit, each on a stacked branch with separate verification and review.
-
-## Orders + LINE workflows — completion stack, milestone 2
-
-Parent: PR34 head `4bafdb693d5ff39684ceaba58fae452d5a432802`; branch `refactor/orders-line-workflows`, targeting its parent branch. Orders now owns remaining mutations, attachments/images and filename rules. LINE owns commands, sessions/context validation, order coordination, movement journeys/replies and webhook orchestration. Inventory owns reusable journey quantity/master/item decisions. Pure shared protocol/message prerequisites and neutral batch/header repair preserve the same persistence path. Legacy mixed helpers forward their actual owner; no Orders→LINE or private cross-feature import.
-
-Six executable original/current comparisons cover both LINE modes, retries, HTTP/auth/JSON/status/counters, exact reply payloads, all order edits/transitions, image cleanup and partial writes; four current ownership/history/identity/lint/header-retry guards supplement inherited tests. The original descriptor guard caught a forwarding difference, corrected with identity bindings. The filesystem inventory guard now sorts both complete inventories, avoiding platform ordering of a same-stem file/directory; it retains every expected entry. Older fixtures are byte-identical.
-
-Final Codex-local gates: **520 = 510 inherited + 10 new**, zero failures/skips. Lint passes with only the inherited shipmentRow warning; typecheck and corrected isolated credential-free build pass. All 463 production source files match the build copy; the 23-page/35-API contract and manifest remain unchanged. Full runtime/type graphs and browsers pass. Existing concurrency/partial-write limits remain; live delivery/permissions, browser visuals and independent CI are unverified. [Verification](verification.md#orders--line-workflow-completion). Continue external clients, then final compatibility/composition cleanup without merging or deploying.
-
-## External infrastructure — completion stack, milestone 3
-
-Parent: PR35 head `3f62dee11ed3a174eb8c99246926d4710e4cba7f`; branch `refactor/external-infrastructure`. Seven LINE/Loyverse client/protocol/constant/factory files move byte-for-byte to `infrastructure/external`, with named legacy forwards and canonical named indexes. Module/HTTP import changes are exact string inverses. Constructor/prototype/factory identities and original provider-native report projections remain unchanged. The operational rich-menu script/client was audited, not executed.
-
-Four original-source/provider characterizations pass before movement; two additional current ownership/identity/lint guards supplement all inherited tests. Final **526 = 520 inherited + 6 new**, no failures/skips. Lint passes with only the inherited warning; typecheck and isolated credential-free build pass. All 472 source files match the build copy; route contracts/manifests remain identical. Tests cover every LINE HTTP operation using fake fetch (including 404-only alias fallback), HMAC, empty-token no-ops, Loyverse pagination/date projections/refunds/cost rounding/repeated cursor/error behavior and deferred network failures. No live calls, operational setup, production data, schema/config/dependency changes, merge or deployment. [Verification](verification.md#external-infrastructure-completion). Continue the final composition/compatibility audit in this assignment.
-
-## Final architecture cleanup — completion stack, milestone 4
-
-Parent: PR36 head `4d786cedab11842940346e009684539a114820b3`; branch `refactor/final-architecture-cleanup`. Main and all three published parent heads were rechecked unchanged/open. Nine remaining physical implementations relocate: aggregate Sheets construction/factory, HR payroll/shop wiring, Inventory directory compatibility, Orders detail/Shipment projection wiring, sortable IDs, Shipment HTTP validation and the standalone operational LINE client. Services/backend paths now contain named compatibility bindings only. Active API runtime graphs reach no legacy services/externals/backend implementations; adapters use canonical header/transport leaves.
-
-The aggregate remains one unchanged composition object because existing callers require its service shape/construction/check behavior. Pure full-service type declarations, old indexes and supported callable/enum/error/header/client forwards remain intentionally. No retirement is justified merely by a production import switch. Standalone RichMenuRequest was proven identical and now shares the canonical protocol type; native Node imports confirm both client paths share one constructor without executing client operations/setup.
-
-Three pre-move characterizations and two final ownership/lint guards supplement inherited coverage. Actual original/current ID rollover/clock rollback, aggregate configuration/real worksheet health/batch traces and standalone fake LINE HTTP errors remain identical. Current full runtime/type file cycles are empty; public module directions and provider-free browser graphs pass. New independent lint rules supplement inherited scopes; exact positive import/owner assertions follow canonical paths, including the one new public Shipment HTTP leaf. Historical fixtures remain byte-identical, with exact inverse source/body/hash checks and original negative guards retained.
-
-Final Codex-local results: **531 = 526 inherited + 5 new**, zero failures/skips; lint exit 0 with only inherited shipmentRow warning; typecheck and isolated credential-free build pass. All 482 production source files match final build copy; 23 pages/35 APIs and manifest remain identical. Canonical current-state docs are consolidated and local links verified. No product/schema/provider/config-key/env/package/lockfile/auth/UI change, production access/live provider calls, setup scripts, merge or deployment. Existing concurrency/partial-write limitations remain. [Final verification](verification.md#final-architecture-cleanup). All four authorized milestones are prepared for independent System Architect review in dependency order; no further implementation PR is automatically authorized.
-
-## Database migration preparation (2026-11-08)
-
-Separately authorized migration implementation; no architectural refactoring or
-runtime persistence change. Source audit: 23 business worksheets plus the excluded
-credential configuration worksheet. Private SQL schema, offline/export planning,
-append-only transactional import SQL, exact reconciliation, synthetic integrity
-and PostgreSQL backup/restore verification are in the
-[database migration runbook](../database-migration.md). All existing application
-ports/composition and prior fixtures remain unchanged. Hosted inspection is
-read-only; no production/live record import or Supabase DDL was performed.
-
-Local acceptance evidence: `npm test` 553/553 pass; migration suite 11/11 pass;
-real PostgreSQL 17.7 extraction/reconciliation reports `match: true` with no
-differences; repeated imports, conflicting identity rollback, FK/unique checks,
-RLS/grant checks and 24-table logical backup/restore fingerprints pass.
-`npm run typecheck` passes; lint has only the inherited unused `shipmentRow`
-warning. Credential-free isolated Next build passes using a copied dependency
-folder (initial isolation attempts rejected an external symlink/cross-filesystem
-hardlinks; corrected by copying). An unnecessary package script briefly caused
-two historical hash tests to fail; package.json was restored unchanged and the
-full suite then passed. Existing Supabase project inspected read-only; security
-advisor returns no findings. Live source inventory, hosted DDL/import/restore and
-production recovery time remain unverified. Network policy blocked direct
-changelog retrieval; current import/backup documentation was read via Supabase MCP.
-
-## Phase 2 operational PostgreSQL (2026-11-09, Bangkok)
-
-Baseline: merged PR48 / `57882d2989d5d8d1156c7dc7bdeb5a694050e7ad`.
-Branch `migration/postgres-operational`. The owner approved Supabase-only stable
-operation keys, retained across retries/reload, saved-response replay and
-missing-key rejection; original Sheets behavior remains the default.
-
-Implemented 23 private operational business tables plus commands, audit,
-side-effect attempts and target-isolation metadata; immutable staging protection;
-transactional exact promotion into an empty target; feature-owned PostgreSQL
-bindings reusing existing port mappers; request-wide transactions/replay/stale
-checks; bounded server-only pooling, nonprivileged role/TLS/target guard and
-staging authorization. LINE journals individual events, archives cleared sessions,
-and records reply attempts. Drive remains the image provider. The browser key
-script is loaded only for an explicitly built Supabase staging deployment.
-No feature application/domain body, business calculation or prior fixture changes.
-
-Export now preserves formatted text identities (including leading zeros), exact
-unformatted numerical tokens and both original renderings/types/formulas. Two
-three-rendering batch captures plus metadata use seven read requests rather than
-per-tab quota exhaustion. Mocked HTTP verifies this without Google access. The
-offline profiler flags duplicate IDs, invalid dates/numbers, orphans, formulas
-and incompatible numeric display formats without repairing records.
-
-Evidence is Codex-local: full suite 564/564 passes, Python migration/profile/export
-checks 18/18 pass, and isolated PostgreSQL acceptance has 23 passing cases covering all seven modules,
-concurrent retries, actual lost-COMMIT acknowledgement, handled-error rollback and closed-context protection against late asynchronous writes,
-LINE regrouping/failure counters, Loyverse history, payroll snapshots, stale
-revisions and access denial. Exact archive promotion and two-database backup/
-restore compare complete data, grants, policies and constraints. Typecheck and
-credential-free isolated build pass. Lint retains only the inherited unused
-shipmentRow warning. The app-paths manifest is unchanged:
-`32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
-All 113 built client JS chunks exclude private SQL/configuration strings; actual
-build source/public bytes match the implementation.
-
-Prior immutable fixtures remain byte-identical. An additive transition witness
-and exact wrapper/composition proofs retain old source/hash assertions. Closed
-Sheets harnesses explicitly choose their original engine; separate current-source
-and actual-PG tests cover the new branch. Temporary failures exposed missing void
-response journaling, positional single-cell/session handling, stale source
-inventories and test-volume cleanup. They were fixed without changing business
-calculations. Test cleanup now removes anonymous volumes; leftover task-created
-volumes were explicitly identified and removed after an ENOSPC restore failure.
-
-No live export, Google/LINE/Loyverse request, hosted Supabase schema/data write,
-production environment edit, cutover, merge or manual deployment occurred. Live
-profiling, hosted capacity/reconciliation and recovery/security acceptance remain
-owner-approved gates. Full-table projections/global serialization and uncertain
-Drive/reply effects are explicit limitations, not production-readiness claims.
-
-### PR49 acceptance review and Phase 3 preparation
-
-All corrections remain in [PR49](https://github.com/volkswg/stock-management/pull/49)
-on `migration/postgres-operational`, based on verified main/PR48. Review identified
-and corrected three boundaries: SQL read requests now use READ ONLY and reject
-nested mutation upgrades; the signature-only exception requires explicit LINE
-entrypoint registration; browser command identity includes query parameters and
-foreign responses cannot change local revision state. No-content responses also
-replay correctly. No original application/domain algorithm or prior immutable
-fixture changed; the Phase 2 witness updates only exact current-source hashes.
-
-Fresh local acceptance: **565 regression tests, 22 Python checks, 25 real-PG
-cases plus one real Chromium/API acceptance case**, zero failures/skips;
-lint exits 0 with the same inherited shipmentRow warning, typecheck and isolated
-credential-free production build pass. Routes/manifest remain identical and all
-113 client JS chunks pass private-database-string checks. The browser fixture
-executes the actual Orders route and real SQL: denied requests, Node-scoped bearer,
-post-commit response loss, same-key reload replay, new intentional create and
-foreign-origin denial. It does not establish full hosted/UI/provider acceptance.
-
-Archive and operational CLI snapshots reconcile exactly with synthetic input;
-import/promotion/idempotency and backup/restore pass. Restore comparisons now also
-include indexes, triggers, functions and sequence definitions/values. Local
-Chromium transparently retried an initial dropped socket, so deterministic
-post-commit delivery failure is injected at the browser network boundary. The
-final test passes without weakening the duplicate-record assertion.
-
-A secret-free GitHub `Migration acceptance` workflow runs current-source regression,
-Python, PostgreSQL/Chromium, recovery and isolated build checks with pinned actions
-and isolated browser tooling. Independent evidence is the source-matched run and
-artifact linked from PR49, not the Vercel preview or this local report.
-
-The canonical [Phase 3 checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
-now covers source/target approvals, secure artifacts, profiling, hosted access,
-full record/business reconciliation, quotas/region/performance, recovery,
-module/security acceptance, final write freeze/full-load and rollback/monitoring.
-New offline delta review and readonly operational extraction support those gates;
-no automatic changed-row CDC, production switch or reverse sync is claimed.
-
-Hosted metadata-only READ ONLY inspection found no stock_migration/stock_operational
-schemas, zero public tables, an empty migration ledger and no security advisories.
-No hosted schema/data write, live Google export/read/mutation, provider action,
-production environment change, merge or manual deployment was performed. These
-checks establish our actions and current schema state, not a global audit of
-unrelated operators. Real-data/hosted acceptance and production authentication,
-monitoring, capacity and recovery sign-off remain separate owner-approved gates.
-
-## Phase 3 real-data migration preparation (2026-11-09)
-
-Verified main `e97a1c9ad9ca9402de33a9796933fece38a92eeb`, with PR48 and PR49
-merged. Branch `migration/phase3-validation`. This milestone completes independent
-operator preparation and synthetic validation; **no real-data migration occurred**.
-The [historical preparation status](https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json)
-listed all 23 real source/archive/operational counts as unknown, with explicit
-blocked actions. See the current operational status above for subsequent execution.
-
-Audit fixed a migration blocker: parsing historical JSONB numbers via binary
-float could round payroll snapshots. Decimal-aware canonical JSON now preserves
-number types/precision in plans and extraction, including values beyond 2^53;
-PostgreSQL import/promotion/restore proves exact preservation. No source cells,
-application/domain code, runtime selector, production guard or merged SQL migration
-changed. Prior immutable fixtures and dependency lockfiles remain byte-identical.
-
-Export verifies headers before reading business rows, rejects credential mappings
-and redirects, retains locale/timezone, and detects formula/rendering drift. Archive
-extraction requires/verifies the complete original batch, including formulas and
-empty-workbook identity. Operational target and TCP TLS checks precede business
-reads. Explicit PGSERVICE is required; plugin identity is never assumed in Cloud.
-Reconciliation writes private exclusive 0600 reports with status-only stdout.
-
-New tools provide an exact-Tokyo deployment manifest, metadata-only inspection,
-private full 23-table acceptance, original-application snapshot comparison with
-frozen clocks/account/month coverage, and consistent exported-snapshot backups.
-Recovery compares 51 complete tables plus schema/columns/indexes/constraints,
-functions/triggers/sequences, effective privileges, RLS and runtime roles/grants.
-Actual altered records/grants on expendable restored databases are rejected.
-Equivalent NULL/default ACL representation differences are normalized without
-relaxing effective permission checks. An initial container-path dump inspection
-and ACL-representation mismatch were diagnosed before recovery acceptance passed.
-
-Local evidence: **565 application tests, 44 Python checks, 26 real-PostgreSQL
-application/concurrency cases, 4 offline application-parity cases and 1 Chromium/
-actual-API case pass**. Both archive and operational reconciliation and recovery
-runners pass. Lint/typecheck pass (only the inherited shipmentRow warning); isolated
-credential-free production build retains 23 pages/35 APIs, the original manifest
-and 113 clean client JS chunks. The first build copy hit local disk limits; an
-obsolete task-created build copy was removed and the final build passed. Synthetic
-capacity accounting now counts each table and its indexes once; no real workload
-or hosted capacity claim follows from this small sample. Source-matched independent
-CI and its synthetic artifact are recorded on the Phase 3 PR.
-
-Read-only hosted metadata: exact stock-management project, Tokyo/ap-northeast-1,
-PostgreSQL 17.11, 10,917,555 bytes, max_connections=60, no migration schemas/public
-tables/runtime role, empty migration ledger and no security advisories. The plugin
-role bypasses RLS and is unsuitable for app use. No hosted DDL, business row read,
-export/import/restore, provider mutation, production environment change, cutover
-or merge was performed. Cloud has Google application config but no approved
-PostgreSQL/CLI connection or readonly export token; Supabase network access and
-owner isolation/backup/billing checks remain pending.
-
-The canonical runbook now pins locally help-verified CLI 3.0.0 commands: explicit
---remote target and --skip-vault, replacing old --linked assumptions and preventing
-unrelated Vault updates. Only help/version ran. Separate approval is still needed
-for exact frozen source reads and hosted DDL/import/restore, private credentials,
-real profiling/application parity/reconciliation, hosted role/pooler performance,
-capacity and recovery. Production auth/authorization/monitoring, final fresh target,
-write freeze/provider hold and preservation/recovery of post-cutover writes remain
-cutover blockers. Existing production Supabase guard stays enabled.
-
-
-## Order remark Table Editor fix — 2026-11-16
-
-A focused `map_orders` migration enables direct changes to
-`stock_operational.orders.remark` while retaining canonical app-write precedence.
-The regression reproduced the lost remark before the fix. The disposable PostgreSQL
-application suite passes 32/32, including real order GET/PATCH and replay, Thai text,
-clearing, short rows, rollback and immutable/archive protections. A populated local
-upgrade and function-only rollback/reapply preserve rows, revisions, function
-identity/privileges, RLS and trigger bindings. Lint/typecheck and the isolated build
-pass; the existing unused `shipmentRow` lint warning remains. No app source, route,
-environment, dependency or business record changes are part of this fix. LINE stays
-paused; production routing and the existing deployment remain unchanged.
-
-Hosted verification: the tested function body is installed, with unchanged function
-OID/owner/ACL, search path, table RLS/grants, policies and trigger bindings. Security
-and health advisors report no notices. No production business records were written
-by the migration. Offline acceptance passes 626/626; LINE remains paused.
-
-
-## LINE migration cutoff release — 2026-11-16
-
-Implemented a production-Supabase-only, signature-preserving admission boundary
-before all business/SQL/provider processing. Six actual-owner focused cases pass;
-old/mixed batches and malformed raw entries cannot partially execute. Missing or
-invalid UTC configuration returns 503; signed empty verification remains available.
-Browser behavior and fresh command/reply deduplication are unchanged. The first
-broad regression run caught five historical environment-template hash mismatches;
-the new bounded inverse records this authorized delta without changing any inherited
-fixture. Focused account/source-contract checks then passed. Lint/typecheck and
-credential-free build pass, with the existing shipmentRow warning only.
-
-Scheduling metadata shows no Vercel/GitHub/pg_cron jobs; the owner confirms no
-external scheduler. Existing manual sales sync selects Supabase through the shared
-storage factory. Original Sheets service-account edit capability remains false.
-LINE stays edge-blocked and the reopening floor stays unset/blank until separate
-owner approval; no scheduled jobs, source writes or provider actions are enabled.
-
-Final local regression: 632/632 pass, zero failures/skips. The route manifest is
-unchanged and all 113 client chunks contain no private database strings.
-
-## Order creation idempotency correction — 2026-11-16
-
-The feature-owned multipart client now supplies a stable per-intent key without
-relying on the ambient Supabase fetch helper. Exact byte fingerprints, session
-identity, an immediate form lock and shared in-flight requests protect retries,
-reloads and double-clicks. Unknown outcomes keep the same reference; the existing
-server ledger replays completed work or refuses uncertain uploads before a provider
-call. Sheets and older unproven helper operations are held for operator review.
-
-Sixteen current-source regressions reproduce the original 428 and cover successful
-creation, new intentional operations, concurrency, lost commit acknowledgement,
-changed input, provider uncertainty, revision checks, malformed success, reload,
-legacy-helper interoperability and unavailable storage/crypto. They execute the
-actual client, form callbacks and unchanged command/upload guards with synthetic
-transaction/provider adapters. Callback tests do not simulate React DOM or Ant
-Design validation. New bounded before/after witnesses preserve every inherited
-fixture; no server/persistence/schema/dependency changes are included. Production
-remains untouched; deployment and its source binding require separate approval.
-
-Final local validation: 648/648 regressions pass, including all 16 focused cases.
-Lint has zero errors and the existing unused `shipmentRow` warning; typecheck and
-the credential-free build pass. The route manifest is unchanged and all 113 client
-chunks contain no private database strings. No production request was used to
-create an order or exercise a real upload provider.
-
-## LINE movement image failure feedback — 2026-11-17
-
-Fixed the missing post-rollback image failure notice and added bounded upload-stage
-diagnostics. Failure notices use a separate durable effect key, preserve unknown
-upload outcomes and cannot emit rolled-back success messages. No persistence
-adapter, trigger, authentication, schema or configuration changes are included.
-
-Local verification: 655/655 regressions pass, including seven current-source cases
-for sanitized diagnostics, the actual OAuth adapter expired/revoked-token path,
-non-OAuth failure classification, post-rollback feedback, uncertain retry refusal,
-notice deduplication, recovered success and missing reply tokens. Lint has zero errors
-and the inherited unused shipmentRow warning. Typecheck and the credential-free
-build pass; route manifest and all 113 client-chunk privacy checks remain intact.
-The real PostgreSQL suite passes 32/32 on a fresh disposable local instance with
-fake providers. Failed-batch assertions verify exactly one separate failure-reply
-effect, no completed business command and no duplicate failure notice. New bounded
-inverses retain inherited fixtures unchanged. No real provider upload,
-production write, event replay or deployment was used to verify this source fix.
-
-## Named-column authority implementation (prepared for review)
-
-Based on refreshed main `6bd55519f83b59b34b66285b010eeb8ffa880642`; inspected open
-PR47 is unrelated Product Master work and supplies no removal implementation.
-Retains completed PR69 order request identity and PR70 LINE uncertain-upload feedback.
-Supabase production/LINE-open context supersedes historical Sheets/staging plans.
-
-The new versioned migration explicitly maps all 23 tables, preserves per-field
-numeric/boolean/JSON spelling and null/short-row shape, validates named authority,
-replaces mapper triggers and synchronizes compatibility cells for verification and
-rollback. The existing record interface now persists named fields; feature workflows,
-HTTP/UI, business rules, journals, locks and connection safeguards are unchanged.
-Reconciliation, synthetic oracles, private fixture queries and backup checks read
-named projections; incompatible legacy promotion fails before writing. Historical
-SQL and prior fixtures are preserved. See [verification evidence](verification.md#named-column-authority--synthetic-acceptance-2026-11-16)
-and the [explicit mapping/release contract](../database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized).
-
-Review/execution order: named authority and reversible compatibility release first;
-a dependent PR carries operator-only final removal outside normal migration discovery
-and physical-absence acceptance. A mandatory drained write freeze fences old writers.
-The implementation PRs originally withheld merge and release approval. The owner
-subsequently approved merging only. Independent CI now passes, including the 500MB
-recovery check that the local host could not run; private production reconciliation,
-verified recovery evidence and separate owner maintenance/DDL/release approvals
-remain gates. No private Mac evidence is assumed available.
-
-The dependent final-removal branch adds the separately guarded, CLI-versioned SQL
-under tools/migration/final-removal, leaving normal Supabase discovery unchanged.
-Acceptance refuses accidental execution without the operator setting, verifies all
-23 physical columns are absent and runs the same 32 operational cases and actual
-Chromium/API retry check in each schema. The actual adapter also preserves explicit
-nulls, named direct edits and archive behavior after removal. This is prepared and
-synthetically verified code, not evidence that production removal has occurred.
-
-Review PRs: [named authority #71](https://github.com/volkswg/stock-management/pull/71),
-then [guarded final removal #72](https://github.com/volkswg/stock-management/pull/72).
-Owner approval now authorizes merging in that order; production deployment and
-schema execution remain separately gated. The dependent PR enables the same credential-free
-Migration acceptance workflow for its named-authority base branch so physical
-removal tests can receive independent CI before any retarget/merge.
-
-Final review adds an UPDATE OF business_cells guard: even an explicit unchanged
-array supplied beside a changed named value must agree with the named projection.
-The separate final-removal SQL also requires the independently verified target
-UUID in stock.expected_isolation_id; unset approval and incorrect identity are
-tested to fail before any column disappears. Compatibility and final-schema
-operational/browser acceptance pass with both guards installed.
-
-
-## Stable-ID compatibility implementation (2026-11-17; PR73 released)
-
-Implemented ID/revision-bound PostgreSQL references behind the existing feature
-ports, with a narrow adapter bridge for actual Sheets fallback. Creation ordering
-uses parsed timestamps and deterministic ID ties; numeric LINE/attachment IDs are
-allocated independently of row positions, including parallel operations.
-The schema change is additive: 23 row_order columns remain, source timestamps and
-representation metadata are preserved, historical unknown dates are not fabricated.
-
-No feature application/domain calculations or HTTP/DTO contracts changed. Explicit
-legacy selection order is retained for LINE sessions, compensation, shipment links
-and financial inputs. Final row_order removal needs those dependencies resolved
-and a separately approved recovery/maintenance release. PR73 was subsequently
-merged and separately deployed as `589c2c9`; production retains all 23 ordinal
-columns. See the database runbook and verification ledger for release boundaries.
-
-## Ordinal retirement implementation (2026-11-17; not deployed)
-
-The next focused change removes every `row_order` reference from application
-source. Shared PostgreSQL reads use normalized creation instants and stable ID
-ties; latest LINE/link readers retain unknowns-last behavior and transaction-scoped
-numeric allocation after reversal. Existing effective-date rules, unique active
-shipment links, financial calculations, HTTP/DTO contracts and real Sheets
-transport calls are preserved. No replacement ordinal column is introduced.
-
-Two CLI-versioned operator SQL files stay outside automatic migration discovery:
-transactional identity-default preparation before deployment, then separately
-approved physical removal after the new source is verified. They preserve IDs,
-archive/revision/representation guards, permissions and RLS; unknown dependencies
-abort atomically. A private read-only export plus existing-application review
-detects changed LINE/movement/hidden-compensation choices and financial results,
-binds the snapshot/global revision, and requires complete month/account coverage.
-It makes no repair and never authorizes production execution.
-
-Local regression, real PostgreSQL/browser acceptance in both schemas, and the
-credential-free build pass. Historical fixtures remain unchanged; a new bounded
-inverse records only this adapter delta. No hosted access, production pause,
-schema execution, deployment, provider call or new authentication work occurs in
-this implementation. The runbook records private release/recovery gates and
-historical positional-tool limits.
-
-## Native lifecycle timestamp implementation — local preparation
-
-The owner requested the existing `createdAt`, `updatedAt` and `deletedAt` names
-with native PostgreSQL `timestamptz` types. The focused implementation covers 47
-existing fields and retires the redundant creation instant; it adds no missing
-lifecycle fields, timestamp text sidecars, authentication or runtime dependency.
-The compatible record transport supports the retained text and native schemas.
-One pure shared comparison key preserves microsecond chronology for existing HR
-and Inventory creation-time comparisons without changing DTO/update-token spelling;
-actual native tests reproduce the prior wrong compensation tie and missing stock
-warning and verify both corrections. Other business-date priorities remain.
-Operator-only SQL rejects ambiguous/nonempty invalid historical values and drift,
-preserves other data/revisions/security, and updates the existing mapper owners.
-See the [release gate](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed).
-Local synthetic guards, populated conversion/remaining metadata, native edits,
-Bangkok attendance, LINE, operational and browser acceptance pass. Production is
-unchanged by this implementation; no fresh hosted data/credentials were accessed.
-The previous PR74 ordinal release is complete and reopened, with private evidence
-retained on the Mac; it does not authorize this next schema conversion.
-
-## Native lifecycle timestamp release completed (2026-11-17; PR75)
-
-The owner separately approved merge, private production profiling/recovery and
-local rehearsal, then supervised production maintenance/deployment/conversion and
-reopening. PR75 merged/released as `5f04f09308159a5a2b8082abb921a3587cc52c22`,
-whose tree exactly matches CI-tested `c60e01c`. The 669 regressions and CI passed.
-Fresh recovery restored all 51 application tables and 15 metadata sections;
-all 47 fields, including archived records, were convertible. Retained/native
-actual-source comparisons across the approved month coverage found no changed
-business results, inventory warnings, hidden selections or Bangkok groups.
-
-Under a verified temporary traffic fence and drained writers, the checkpoint
-matched current data/security/revision. The compatible deployment was verified
-before the reviewed one-transaction conversion. All 47 existing lifecycle fields
-are native `timestamptz`, retaining exact names; 23 redundant creation-instant
-columns and derivation were removed. All 51 tables reconciled after only intended
-timestamp normalization; revisions, journals and remaining security metadata
-matched. Four API values/revisions matched baseline on the compatible and native
-schemas. Temporary maintenance was removed and browser/LINE reopened with
-signature/idempotency/retired-deployment guards verified. The initial new-deployment
-error scans reported no errors. No live business/provider-write canary was run.
-Private exact targets, credentials, checkpoint hashes and execution evidence stay
-on the Mac. Backup automation and new authentication remain deferred.
-
-## cell_kinds removal planning (2026-11-17; not implemented)
-
-The owner requests removal using explicit per-column mappings while preserving
-current app and LINE behavior. The [single plan](../database-migration.md#cell_kinds-removal-plan-planning-only-production-unchanged)
-inventories 23 encoding columns, 69 dependent functions, 248 header fields plus
-four internal timestamps and 48 retained lexemes. It records field-level contracts,
-actual source-level type hazards, retained/final-schema compatibility, local
-regression/operational/browser/LINE gates, strict recovery/reconciliation and
-separate hosted-access/maintenance/DDL approval boundaries. Source inspection
-confirms that a generic boolean cast can change existing inventory interpretation;
-this plan makes no finding about occurrence in real records and approves no repair.
-
-Only the existing documentation is updated. No runtime/migration implementation,
-new dependency, test campaign, CI rerun, fresh business-record access, provider call,
-production change or GitHub publication is part of this planning task.
-Planning validation checks the documentation-only diff, new relative links and
-preserved historical anchors, plus the 48-field numeric/bigint/boolean/JSON inventory
-against retained release metadata. Runtime acceptance remains unexecuted.
-
-## cell_kinds compatibility implementation (2026-11-17; prepared, not deployed)
-
-The next owner instruction authorizes local implementation/tests and one review PR,
-retaining all encoding columns and leaving production unchanged. The explicit
-252-field candidate manifest drives additive invoker input/projection functions.
-Schema capability is pinned per unit of work: an unprepared database retains the
-original contract, known prepared layouts select the new path, and invalid/partial
-layouts fail closed. Known matching encodings use per-column projections directly;
-other representations use the explicit old projection. There is no catch-and-retry
-backend fallback, blanket metadata clearing or historical normalization.
-
-All existing mapper/validator functions, triggers and permissions remain. New
-input mapping maintains valid retained encoding from transient inputs so old
-readers can consume new writes. The installer adds no columns, table grants, role
-memberships, authentication or dependencies; it stays outside normal discovery.
-The guarded Unix-socket candidate fixture drops columns only on a fresh local
-synthetic database. It is not a production removal artifact or evidence that all
-historical representations can already be retired. The opt-in private audit
-reports field/width differences across active and archived records, without record
-values/IDs or removal authority. No production credential, record, provider or
-configuration is used by this implementation/testing task. See the
-[current boundaries](../database-migration.md#implemented-compatibility-stage-not-deployed).
-
-
-Local verification passes 673 regression and 73 Python tests, lint (one existing
-warning), typecheck and the isolated credential-free default build. Fresh synthetic
-retained-column PostgreSQL acceptance preserves all 51 tables and original security
-metadata, passes the 2,398-case mapping matrix and existing operational/native/real
-browser suites. Independent unprepared-schema acceptance also passes. The kindless
-candidate checks remain limited canonical component evidence. Full details and
-limits are in the [verification ledger](verification.md#cell_kinds-compatibility--local-synthetic-verification-2026-11-17).
-
-
-## PR76 compatibility release completed; final retirement prepared (2026-11-18)
-
-The owner separately approved merge, fresh recovery preparation and supervised
-maintenance. PR76 was released as `8493df0` with all 23 encodings retained. The
-verified checkpoint matched all 51 tables/15 metadata sections under the fence;
-the additive installation preserved business data and original permissions. Four
-live API values/order/revisions and reopening controls passed, and browser/LINE
-reopened. Exact private execution/recovery evidence stays on the Mac.
-
-The next instruction authorizes resolving final-removal blockers. The operator-
-only final artifact replaces the dependent validator/input/projection bodies,
-retains existing explicit mappings/lexemes, and refuses unreviewed representations
-rather than repairing records. Focused private-array tail decisions preserve the
-current public readers. No runtime TypeScript or production changes are part of
-this implementation. Current checks and limits are in the
-[final retirement verification](verification.md#final-cell_kinds-retirement-local-verification).
-Production still retains all 23 columns pending separately approved execution.
-
-
-## PR77 final retirement completed; lexeme compatibility preparation (2026-11-18)
-
-The owner separately approved PR77 merge, fresh recovery and a confirmed30minute
-window. All23 `cell_kinds` columns are now removed. Complete frozen51table/15 metadata
-freshness, remaining-data/security proof and four exact live HTTP comparisons
-passed. The existing PR76 app remained deployed; browser/LINE reopened with the
-original firewall rules, signature/cutoff and idempotency guards. Recovery and
-business evidence remain private. No live business/provider canary was submitted.
-
-The next bounded instruction authorizes lexeme compatibility implementation,
-local tests and one review PR, retaining all 48 columns and leaving production
-unchanged. The adapter preserves the exact released path on retained schemas and
-adds an explicit typed-only candidate capability. The additive operator installer
-preserves all old data/functions/ACLs and adds only invoker functions using existing
-caller rights. Exact decimal text, JSON text/null distinctions and explicit boolean
-rules are candidate contracts requiring later current-data/business review.
-No final hosted removal, replacement metadata column or automatic repair is part
-of this implementation. See the [single operational description](../database-migration.md#lexeme-compatibility-prepared-not-deployed).
-
-
-## PR78 compatibility released; final lexeme retirement preparation (2026-11-18)
-
-PR78 was separately merged and deployed as `b0ea779`. Fresh recovery, frozen
-51-table/15-section proof, 69 saved-data application/LINE comparisons and four live
-read-only HTTP comparisons passed. All 48 lexemes stayed intact; browser/LINE
-reopened and the old business Sheets stayed read-only. Recovery evidence is private.
-
-The new continuation implements only final operator SQL and its local proofs.
-It pins all 193 predecessors, replaces 97 bodies and retires 48 attributes/four
-unused helpers without changing business rows, runtime source, existing grants,
-original migrations or deployment configuration. The released app selects the
-typed path without a new deployment. The earlier receipt SQL-NULL spelling hazard
-is handled by an explicit projector default matching its existing official writer;
-other blank/JSON-null distinctions remain strict. Actual LINE consumer outcomes
-replace a raw JSON-string comparison in the offline proof, without changing public
-application output or business logic.
-
-The previously verified checkpoint was strictly restored into another owned,
-network-isolated local database. The exact final SQL passed all remaining stored
-values/security checks and all 69 app/LINE comparisons, plus local create/edit/
-archive. Fresh synthetic copies test the real operator, refusal guards, retained
-service/pool transition and existing operational/timestamp/browser acceptance.
-No fresh hosted records, live credentials, providers, production DDL, deployment,
-writer permissions or traffic controls were accessed/changed by this preparation.
-The saved checkpoint is not a fresh production GO. See the [exact approval packet](../database-migration.md#final-lexeme-retirement-prepared-not-executed).
-
-
-## PR79 removal completed; typed PostgreSQL cleanup prepared (2026-11-18)
-
-PR79's separately approved maintenance completed after fresh recovery/strict
-restore, 69 app/LINE comparisons, full frozen freshness and four exact live GET
-pairs. All 48 lexemes were retired, remaining values/permissions preserved and
-browser/LINE reopened on the compatible PR78 deployment. The detailed completion
-receipt is private. No new deployment/env setting or real provider canary was used.
-
-The current bounded cleanup changes only the PostgreSQL record adapter in runtime
-source: final typed capability is required, mapper selection is direct, canonical
-headers replace per-write catalog discovery, native creation sorting replaces
-pre-conversion branching and the internal projection alias is `cells`. Stable IDs,
-allocation/handles, revisions/archives, retry/upload behavior and Sheets remain.
-
-Dependency audit found 23 live validator-to-legacy-projector calls. The guarded
-operator artifact retargets only those equivalent calls, pins all 190 operational
-bodies and retires 115 aliases plus one obsolete contract with RESTRICT. No table,
-column, record, role, grant or original migration is removed/changed. Surviving
-owners, ACLs, execution settings, all 51 table values and 15 metadata sections are
-proved exact except the reviewed function diff. Existing scoped readers retain
-only their prior typed read privileges. Unknown procedural/catalog consumers stop
-cleanup and roll back the validator changes.
-
-Historical schema tests now run with one exact hash-pinned PR79 adapter in a
-credential-free disposable source copy; current-source tests independently require
-the final schema with all retired functions absent. Existing fixtures and assertions
-are preserved. All eight archived PostgreSQL verifier stages pass. Current tests
-pass retained-schema rejection, exact storage/public order/LINE behavior,
-per-unit capability caching and next-unit revalidation for missing/partial schemas,
-32 operational, 10 native timestamp and actual browser response-loss/reload/replay.
-All 688 regressions, 73 Python tests, lint (one inherited warning), typecheck and
-isolated production build pass. Routes and 113 browser chunks remain unchanged.
-
-This implementation accesses no hosted credentials/records/providers and changes
-no production deployment, configuration, permissions or data. Hosted cleanup,
-fresh recovery and any maintenance remain separately authorized. Retained import
-tables, journals, original checkpoints and recovery evidence stay intact.
-
-A separate saved-checkpoint strict restore/rehearsal also passed: exact released/
-current private values, IDs/order and all 69 app/LINE comparisons, the reviewed
-SQL/data/security diff, and local create/edit/archive. Its owned network-isolated
-container/volume was removed and all original private evidence retained. This
-saved-data evidence is not current hosted freshness or execution approval.
-
-
-PR80 CI follow-up: the inherited hosted-tooling campaign also assumes the older
-`row_order` schema and its matching record adapter. It now runs explicitly through
-`verify-persistence-history.sh --hosted-tooling`, with the pinned PR79 adapter in
-the same credential-free disposable source copy. Its full private-build/browser,
-fake-provider fault, TLS/role and generated-checkpoint restore assertions remain
-intact. It is historical tooling evidence, not hosted acceptance of the current
-final schema. The actual current typed adapter remains independently exercised by
-`verify-typed-postgres.sh` and the credential-free current-source production build.
-No production fallback or schema guard is weakened and no hosted tool is invoked.
-
-The historical private-build mode creates a new synthetic Git snapshot solely for
-its existing source attestation and materializes a temporary dependency copy for
-Next.js. No original Git configuration, credentials, hooks or remotes are copied;
-shared dependencies are preserved and only the owned temporary root is removed.
-
-## Row constraints and shared validator implementation (2026-11-18)
-
-PR80 was separately released as `31af820`; 116 legacy functions were retired,
-all 51 table values and surviving security metadata matched, and browser/LINE
-reopened. The next local change has no runtime TypeScript edit: one operator-only,
-reproducible transaction replaces 23 validators with one explicit shared guard
-and 23 CHECK constraints covering 47 timestamp fields. Operational functions
-decrease 74→52, while the 46 operational triggers, 46 typed mapping functions,
-existing table constraints and migration protection remain. No new business rule,
-normalization of stored records, permission grant or production execution occurs.
-
-`verify-typed-postgres.sh` reuses its fresh synthetic base for the new acceptance
-phase rather than adding another environment or framework. Full fingerprints
-prove all 51 stored tables and remaining metadata exact except the reviewed
-constraints/functions/trigger targets. Missing/wrong/stale approval, mixed ACLs,
-unknown procedural/trigger dependencies and late DDL failure refuse atomically.
-Five focused cases compare predecessor writes across all 23 tables, every lifecycle
-field's boundaries in three timezones, exact decimal/JSON storage, normalization,
-identity/archive/revision rules and caller privileges. All 32 existing operational
-cases, 10 native timestamp cases and the actual browser retry scenario pass again
-on the simplified schema, including the actual app and LINE owners. No provider,
-private checkpoint or production database is accessed for these tests.
-
-All 689 regressions and 73 Python tests pass, with zero lint errors and the inherited
-`shipmentRow` warning. Typecheck and a credential-free isolated build pass; the
-route manifest is unchanged and all 113 browser chunks exclude database strings.
-The Mac build dereferenced the existing dependency symlink into its owned temporary
-copy; shared dependencies were preserved. Review/merge and hosted schema execution
-remain separate gates. See the [execution contract](../database-migration.md#row-constraints-and-shared-write-guard-prepared-not-deployed).
+## Historical document index
+
+All full versions below are pinned to pre-cleanup commit
+`2471ac1106a9501f2a084b2d0825572b1b6fb1fe`. No historical fixture, SQL, report content
+or private evidence was rewritten. These links replace repeated narrative, and
+retain earlier stopped attempts and safeguards alongside passing results.
+
+| Previous document | Current destination | Immutable complete version |
+| --- | --- | --- |
+| `database-migration.md` | Current [production runbook](../database-migration.md); dated history here | [Full migration record](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md) |
+| `refactoring/progress.md` | This single evidence ledger | [Full prior ledger](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md) |
+| `refactoring/verification.md` | [Commands/limits](verification.md); dated result index below | [Full prior verification results](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md) |
+| `architecture/folder-rules.md` | [Combined rules](../architecture/rules.md#folder-ownership), all original rule text retained | [Original ownership guide](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/architecture/folder-rules.md) |
+| `architecture/dependency-rules.md` | [Combined rules](../architecture/rules.md#dependency-rules), all original rule text retained | [Original dependency guide](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/architecture/dependency-rules.md) |
+
+Branch-relative historical URLs in already-published PRs cannot be redirected by
+Markdown alone. The immutable links here preserve their exact content; in-repo
+links are updated to current sections or these pinned sources. Keep historical
+fixture strings and existing PR discussions intact.
+
+The old November 12 go/no-go fragment was inside a malformed historical code fence.
+Its [exact source-view location](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md?plain=1#L920)
+replaces that inherited broken anchor without rewriting the archived record.
+
+### Migration history
+
+| Original section | Immutable evidence |
+| --- | --- |
+| Google Sheets → PostgreSQL migration | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#google-sheets--postgresql-migration) |
+| Source audit and schema | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#source-audit-and-schema) |
+| Export, dry run and import | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#export-dry-run-and-import) |
+| Backup, restore and rollback | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#backup-restore-and-rollback) |
+| Hosting, limits and remaining acceptance gates | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#hosting-limits-and-remaining-acceptance-gates) |
+| Implementation acceptance evidence (local, 2026-11-08) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#implementation-acceptance-evidence-local-2026-11-08) |
+| Audit-history removal (applied to hosted staging) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#audit-history-removal-applied-to-hosted-staging) |
+| Phase 2 operational storage (opt-in isolated testing) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#phase-2-operational-storage-opt-in-isolated-testing) |
+| Isolated server configuration | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#isolated-server-configuration) |
+| Command identity and concurrent writes | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#command-identity-and-concurrent-writes) |
+| Offline profiling and promotion | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#offline-profiling-and-promotion) |
+| Verification and capacity | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#verification-and-capacity) |
+| Production cutover and rollback prerequisites | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#production-cutover-and-rollback-prerequisites) |
+| Phase 3: real data validation and controlled cutover | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#phase-3-real-data-validation-and-controlled-cutover) |
+| Current execution record and reproducible preparation | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#current-execution-record-and-reproducible-preparation) |
+| Gate 0 — authority, isolation and release prerequisites | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-0--authority-isolation-and-release-prerequisites) |
+| Gate 1 — secure artifact handling and read-only export | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-1--secure-artifact-handling-and-read-only-export) |
+| Gate 2 — offline profiling and source compatibility | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-2--offline-profiling-and-source-compatibility) |
+| Gate 3 — isolated hosted deployment, import and reconciliation | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-3--isolated-hosted-deployment-import-and-reconciliation) |
+| Gate 4 — capacity, region and query performance | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-4--capacity-region-and-query-performance) |
+| Gate 5 — authorization, browser/API and business acceptance | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-5--authorization-browserapi-and-business-acceptance) |
+| Private read-only preview evidence before PR #60 merge (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#private-read-only-preview-evidence-before-pr-60-merge-2026-11-11) |
+| Disposable staging write-testing plan | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#disposable-staging-write-testing-plan) |
+| Current migration go/no-go assessment (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#current-migration-gono-go-assessment-2026-11-12) |
+| Executable production cutover runbook | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#executable-production-cutover-runbook) |
+| Final write-freeze and LINE producer-pause procedure (2026-11-14) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#final-write-freeze-and-line-producer-pause-procedure-2026-11-14) |
+| Maintenance preparation and exact reader blocker (2026-11-16) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#maintenance-preparation-and-exact-reader-blocker-2026-11-16) |
+| Full resync verified; Sheets and LINE reopened (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#full-resync-verified-sheets-and-line-reopened-2026-11-15) |
+| Fastest refresh path: requested reuse of existing candidate (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#fastest-refresh-path-requested-reuse-of-existing-candidate-2026-11-15) |
+| Read-only continuation checkpoint (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#read-only-continuation-checkpoint-2026-11-15) |
+| Normal Sheets/LINE operation restored (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#normal-sheetsline-operation-restored-2026-11-15) |
+| Production deployment checks and LINE block (2026-11-15 Bangkok) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#production-deployment-checks-and-line-block-2026-11-15-bangkok) |
+| Completed browser-only synchronization and checks (2026-11-14 UTC) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#completed-browser-only-synchronization-and-checks-2026-11-14-utc) |
+| Bounded local capacity continuation (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#bounded-local-capacity-continuation-2026-11-12) |
+| Local acceptance milestone results | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#local-acceptance-milestone-results) |
+| Next hosted and production stage plan | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#next-hosted-and-production-stage-plan) |
+| Hosted Supabase test target and execution packet (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#hosted-supabase-test-target-and-execution-packet-2026-11-12) |
+| Image retry fix and two fresh implemented reruns (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#image-retry-fix-and-two-fresh-implemented-reruns-2026-11-11) |
+| Local completion started: raw-image intent failure (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#local-completion-started-raw-image-intent-failure-2026-11-11) |
+| Remaining local coverage and capacity completion plan (prepared only) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#remaining-local-coverage-and-capacity-completion-plan-prepared-only) |
+| Cost-override deletion fix and two local reruns (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#cost-override-deletion-fix-and-two-local-reruns-2026-11-11) |
+| Receipt-overlap fix and local rerun (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#receipt-overlap-fix-and-local-rerun-2026-11-11) |
+| Local execution result (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#local-execution-result-2026-11-11) |
+| Scope and target selection | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#scope-and-target-selection) |
+| Entry gates — all required before the first test write | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#entry-gates--all-required-before-the-first-test-write) |
+| Test data, runner and comparison rules | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#test-data-runner-and-comparison-rules) |
+| Mandatory acceptance matrix | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#mandatory-acceptance-matrix) |
+| Performance and recovery acceptance limits | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#performance-and-recovery-acceptance-limits) |
+| Evidence, stop rules and completion | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#evidence-stop-rules-and-completion) |
+| Gate 6 — backup/restore and recovery sign-off | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-6--backuprestore-and-recovery-sign-off) |
+| Gate 7 — final freeze and delta review (separate cutover approval) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-7--final-freeze-and-delta-review-separate-cutover-approval) |
+| Gate 8 — controlled activation, monitoring and rollback | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#gate-8--controlled-activation-monitoring-and-rollback) |
+| Automation and acceptance evidence handoff | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#automation-and-acceptance-evidence-handoff) |
+| Direct order remark editing (2026-11-16) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#direct-order-remark-editing-2026-11-16) |
+| LINE cutoff release and scheduler audit (2026-11-16) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#line-cutoff-release-and-scheduler-audit-2026-11-16) |
+| Order creation request identity repair (2026-11-16) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#order-creation-request-identity-repair-2026-11-16) |
+| LINE movement image failure feedback (2026-11-17) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#line-movement-image-failure-feedback-2026-11-17) |
+| Named-column authority release (prepared; production execution not authorized) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#named-column-authority-release-prepared-production-execution-not-authorized) |
+| Mapping and representation | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#mapping-and-representation) |
+| Dependency inventory and current tooling | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#dependency-inventory-and-current-tooling) |
+| Maintenance sequence and writer contract | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#maintenance-sequence-and-writer-contract) |
+| Final removal approval gate | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#final-removal-approval-gate) |
+| Stable-ID compatibility stage (2026-11-17; deployed) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#stable-id-compatibility-stage-2026-11-17-deployed) |
+| Validation and later deployment requirements | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#validation-and-later-deployment-requirements) |
+| row_order retirement implementation (not deployed) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#row_order-retirement-implementation-not-deployed) |
+| One release, two explicit operator steps | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#one-release-two-explicit-operator-steps) |
+| Local acceptance and rollback boundaries | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#local-acceptance-and-rollback-boundaries) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#native-lifecycle-timestamps-prepared-not-deployed) |
+| Native lifecycle timestamps (released; PR75) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#native-lifecycle-timestamps-released-pr75) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#separate-production-release-approval) |
+| Recorded release procedure; fresh approval required for reuse | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#recorded-release-procedure-fresh-approval-required-for-reuse) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#cell_kinds-removal-plan-planning-only-production-unchanged) |
+| cell_kinds removal (compatibility prepared; production unchanged) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#cell_kinds-removal-compatibility-prepared-production-unchanged) |
+| Objective, baseline and scope | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#objective-baseline-and-scope) |
+| What depends on it | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#what-depends-on-it) |
+| Per-column mapping contract | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#per-column-mapping-contract) |
+| Stages and deliverables | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#stages-and-deliverables) |
+| Mandatory pass/fail evidence | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#mandatory-passfail-evidence) |
+| Hard decisions and rollback boundaries | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#hard-decisions-and-rollback-boundaries) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#implemented-compatibility-stage-not-deployed) |
+| Compatibility stage — released in PR76 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#compatibility-stage--released-in-pr76) |
+| Final cell_kinds retirement (prepared, not deployed) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#final-cell_kinds-retirement-prepared-not-deployed) |
+| Explicit optional-tail decisions | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#explicit-optional-tail-decisions) |
+| Acceptance and execution gates | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#acceptance-and-execution-gates) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#lexeme-compatibility-prepared-not-deployed) |
+| Lexeme compatibility (PR78 released) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#lexeme-compatibility-pr78-released) |
+| Explicit typed-candidate transport contracts | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#explicit-typed-candidate-transport-contracts) |
+| Separate release gates | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#separate-release-gates) |
+| PR78 compatibility release record | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#pr78-compatibility-release-record) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#final-lexeme-retirement-prepared-not-executed) |
+| Required semantics and refusal conditions | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#required-semantics-and-refusal-conditions) |
+| Final approval and execution packet | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#final-approval-and-execution-packet) |
+| PR79 final lexeme retirement completed | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#pr79-final-lexeme-retirement-completed) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#typed-postgresql-cleanup-prepared-not-deployed) |
+| Typed PostgreSQL cleanup (released as PR80) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#typed-postgresql-cleanup-released-as-pr80) |
+| Release and rollback gates | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#release-and-rollback-gates) |
+| Row constraints and shared write guard (prepared, not deployed) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#row-constraints-and-shared-write-guard-prepared-not-deployed) |
+
+### Earlier progress
+
+| Original section | Immutable evidence |
+| --- | --- |
+| Refactoring progress and evidence | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#refactoring-progress-and-evidence) |
+| Maintenance preparation resumed; read-only guard cause proved (2026-11-16) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#maintenance-preparation-resumed-read-only-guard-cause-proved-2026-11-16) |
+| Full23 resync verified; original Sheets/LINE reopened (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#full23-resync-verified-original-sheetsline-reopened-2026-11-15) |
+| Existing-candidate refresh proposed; no freeze executed (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#existing-candidate-refresh-proposed-no-freeze-executed-2026-11-15) |
+| Read-only migration checkpoint resumed; execution gates unproved (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#read-only-migration-checkpoint-resumed-execution-gates-unproved-2026-11-15) |
+| Normal Sheets/LINE operation restored (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#normal-sheetsline-operation-restored-2026-11-15) |
+| Production reader checks complete: real report blocker, LINE blocked (2026-11-15) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#production-reader-checks-complete-real-report-blocker-line-blocked-2026-11-15) |
+| Final browser-only synchronization and acceptance complete (2026-11-14 UTC) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#final-browser-only-synchronization-and-acceptance-complete-2026-11-14-utc) |
+| Final source write-freeze and LINE producer-pause procedure (2026-11-14) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#final-source-write-freeze-and-line-producer-pause-procedure-2026-11-14) |
+| Actual private Vercel-to-Supabase read-only smoke passes (2026-11-14) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#actual-private-vercel-to-supabase-read-only-smoke-passes-2026-11-14) |
+| Private Vercel test prepared; email verification blocks CLI sign-in (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#private-vercel-test-prepared-email-verification-blocks-cli-sign-in-2026-11-13) |
+| Final candidate connection resolved; deployment guards verified (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#final-candidate-connection-resolved-deployment-guards-verified-2026-11-13) |
+| Final synchronization and deployment checks prepared (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#final-synchronization-and-deployment-checks-prepared-2026-11-13) |
+| Database backup work deferred by owner (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#database-backup-work-deferred-by-owner-2026-11-13) |
+| Final empty production database prepared and verified (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#final-empty-production-database-prepared-and-verified-2026-11-13) |
+| Final Free production candidate created; native handoff pending (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#final-free-production-candidate-created-native-handoff-pending-2026-11-13) |
+| Migration-only essential hosted smoke and executable cutover sequence (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#migration-only-essential-hosted-smoke-and-executable-cutover-sequence-2026-11-13) |
+| Hosted original restore / roles verified; restricted-backup fix (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#hosted-original-restore--roles-verified-restricted-backup-fix-2026-11-13) |
+| Concurrent hosted evidence reads serialized after CI46 failure (2026-11-13) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#concurrent-hosted-evidence-reads-serialized-after-ci46-failure-2026-11-13) |
+| Production identity profile implemented locally (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#production-identity-profile-implemented-locally-2026-11-12) |
+| Scope clarification: application as-is; security next (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#scope-clarification-application-as-is-security-next-2026-11-12) |
+| Critical-path cutover mode (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#critical-path-cutover-mode-2026-11-12) |
+| Hosted tooling completed locally — execution disabled (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#hosted-tooling-completed-locally--execution-disabled-2026-11-12) |
+| Hosted adapter foundation — synthetic components only (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#hosted-adapter-foundation--synthetic-components-only-2026-11-12) |
+| Hosted Supabase test target — packet prepared only (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#hosted-supabase-test-target--packet-prepared-only-2026-11-12) |
+| Migration-first scope and bounded capacity continuation (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#migration-first-scope-and-bounded-capacity-continuation-2026-11-12) |
+| Local acceptance milestone results (2026-11-12) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#local-acceptance-milestone-results-2026-11-12) |
+| Image retry fixed — two fresh implemented reruns pass (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#image-retry-fixed--two-fresh-implemented-reruns-pass-2026-11-11) |
+| Local completion started — raw-image correctness failure (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#local-completion-started--raw-image-correctness-failure-2026-11-11) |
+| Remaining local coverage/capacity — plan prepared only (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#remaining-local-coveragecapacity--plan-prepared-only-2026-11-11) |
+| Cost-override deletion fix — two implemented local runs pass (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#cost-override-deletion-fix--two-implemented-local-runs-pass-2026-11-11) |
+| Receipt-overlap fix — local rerun stopped at WT12 (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#receipt-overlap-fix--local-rerun-stopped-at-wt12-2026-11-11) |
+| Disposable local write rehearsal — stopped at WT06 (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#disposable-local-write-rehearsal--stopped-at-wt06-2026-11-11) |
+| Private Supabase app — read-only acceptance (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#private-supabase-app--read-only-acceptance-2026-11-11) |
+| Hosted audit removal — applied and verified (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#hosted-audit-removal--applied-and-verified-2026-11-11) |
+| Hosted pre-change recovery — bounded verification fix | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#hosted-pre-change-recovery--bounded-verification-fix) |
+| Audit removal — merged implementation and local proof (historical) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#audit-removal--merged-implementation-and-local-proof-historical) |
+| Database migration — current operational status (2026-11-11) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#database-migration--current-operational-status-2026-11-11) |
+| Historical architecture snapshot and single-workbook account configuration | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#historical-architecture-snapshot-and-single-workbook-account-configuration) |
+| Migration assertion performance correction (merged PR #55) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#migration-assertion-performance-correction-merged-pr-55) |
+| Historical HR completion evidence (PR #33) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#historical-hr-completion-evidence-pr-33) |
+| Merged implementation ledger | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#merged-implementation-ledger) |
+| Historical evidence | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#historical-evidence) |
+| Document consolidation index | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#document-consolidation-index) |
+| Documentation debt and tradeoffs | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#documentation-debt-and-tradeoffs) |
+| PR25 — HR core worksheet ownership | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr25--hr-core-worksheet-ownership) |
+| PR26 — Inventory core worksheet ownership | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr26--inventory-core-worksheet-ownership) |
+| PR27 — Movement worksheet-schema prerequisite | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr27--movement-worksheet-schema-prerequisite) |
+| PR28 — Inventory Sales-query dependency prerequisite | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr28--inventory-sales-query-dependency-prerequisite) |
+| PR29 — LINE user-state worksheet ownership | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr29--line-user-state-worksheet-ownership) |
+| Sales + Inventory business ownership — completion stack, milestone 1 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#sales--inventory-business-ownership--completion-stack-milestone-1) |
+| Orders + LINE workflows — completion stack, milestone 2 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#orders--line-workflows--completion-stack-milestone-2) |
+| External infrastructure — completion stack, milestone 3 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#external-infrastructure--completion-stack-milestone-3) |
+| Final architecture cleanup — completion stack, milestone 4 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#final-architecture-cleanup--completion-stack-milestone-4) |
+| Database migration preparation (2026-11-08) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#database-migration-preparation-2026-11-08) |
+| Phase 2 operational PostgreSQL (2026-11-09, Bangkok) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#phase-2-operational-postgresql-2026-11-09-bangkok) |
+| PR49 acceptance review and Phase 3 preparation | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr49-acceptance-review-and-phase-3-preparation) |
+| Phase 3 real-data migration preparation (2026-11-09) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#phase-3-real-data-migration-preparation-2026-11-09) |
+| Order remark Table Editor fix — 2026-11-16 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#order-remark-table-editor-fix--2026-11-16) |
+| LINE migration cutoff release — 2026-11-16 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#line-migration-cutoff-release--2026-11-16) |
+| Order creation idempotency correction — 2026-11-16 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#order-creation-idempotency-correction--2026-11-16) |
+| LINE movement image failure feedback — 2026-11-17 | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#line-movement-image-failure-feedback--2026-11-17) |
+| Named-column authority implementation (prepared for review) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#named-column-authority-implementation-prepared-for-review) |
+| Stable-ID compatibility implementation (2026-11-17; PR73 released) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#stable-id-compatibility-implementation-2026-11-17-pr73-released) |
+| Ordinal retirement implementation (2026-11-17; not deployed) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#ordinal-retirement-implementation-2026-11-17-not-deployed) |
+| Native lifecycle timestamp implementation — local preparation | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#native-lifecycle-timestamp-implementation--local-preparation) |
+| Native lifecycle timestamp release completed (2026-11-17; PR75) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#native-lifecycle-timestamp-release-completed-2026-11-17-pr75) |
+| cell_kinds removal planning (2026-11-17; not implemented) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#cell_kinds-removal-planning-2026-11-17-not-implemented) |
+| cell_kinds compatibility implementation (2026-11-17; prepared, not deployed) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#cell_kinds-compatibility-implementation-2026-11-17-prepared-not-deployed) |
+| PR76 compatibility release completed; final retirement prepared (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr76-compatibility-release-completed-final-retirement-prepared-2026-11-18) |
+| PR77 final retirement completed; lexeme compatibility preparation (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr77-final-retirement-completed-lexeme-compatibility-preparation-2026-11-18) |
+| PR78 compatibility released; final lexeme retirement preparation (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr78-compatibility-released-final-lexeme-retirement-preparation-2026-11-18) |
+| PR79 removal completed; typed PostgreSQL cleanup prepared (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#pr79-removal-completed-typed-postgresql-cleanup-prepared-2026-11-18) |
+| Row constraints and shared validator implementation (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md#row-constraints-and-shared-validator-implementation-2026-11-18) |
+
+### Earlier verification results
+
+| Original section | Immutable evidence |
+| --- | --- |
+| Verification procedure and historical results | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#verification-procedure-and-historical-results) |
+| Offline checks | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#offline-checks) |
+| Isolated credential-free production build | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#isolated-credential-free-production-build) |
+| Compatibility and history gates | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#compatibility-and-history-gates) |
+| Documentation consolidation results | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#documentation-consolidation-results) |
+| Limits of evidence | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#limits-of-evidence) |
+| PR25 HR core worksheet ownership | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#pr25-hr-core-worksheet-ownership) |
+| PR26 Inventory core worksheet ownership | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#pr26-inventory-core-worksheet-ownership) |
+| Movement worksheet-schema prerequisite | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#movement-worksheet-schema-prerequisite) |
+| PR28 Inventory Sales-query dependency prerequisite | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#pr28-inventory-sales-query-dependency-prerequisite) |
+| PR29 LINE user-state worksheet ownership | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#pr29-line-user-state-worksheet-ownership) |
+| Remaining worksheet milestone | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#remaining-worksheet-milestone) |
+| Expenses business milestone | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#expenses-business-milestone) |
+| HR financial milestone | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#hr-financial-milestone) |
+| HR application completion | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#hr-application-completion) |
+| Sales + Inventory business completion | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#sales--inventory-business-completion) |
+| Orders + LINE workflow completion | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#orders--line-workflow-completion) |
+| External infrastructure completion | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#external-infrastructure-completion) |
+| Final architecture cleanup | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#final-architecture-cleanup) |
+| External namespace retirement (issue #39) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#external-namespace-retirement-issue-39) |
+| Private Loyverse account source | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#private-loyverse-account-source) |
+| Feature compatibility retirement | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#feature-compatibility-retirement) |
+| Loyverse single-workbook support | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#loyverse-single-workbook-support) |
+| Phase 2 operational storage — isolated verification | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#phase-2-operational-storage--isolated-verification) |
+| PR49 review acceptance — updated current-source evidence | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#pr49-review-acceptance--updated-current-source-evidence) |
+| Phase 3 tooling and readiness verification | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#phase-3-tooling-and-readiness-verification) |
+| Named-column authority — synthetic acceptance (2026-11-16) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#named-column-authority--synthetic-acceptance-2026-11-16) |
+| Independent merge acceptance (2026-11-17 Asia/Bangkok) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#independent-merge-acceptance-2026-11-17-asiabangkok) |
+| Stable-ID compatibility verification (2026-11-17; local only) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#stable-id-compatibility-verification-2026-11-17-local-only) |
+| Ordinal retirement verification (2026-11-17; local) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#ordinal-retirement-verification-2026-11-17-local) |
+| Native lifecycle timestamps — synthetic evidence | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#native-lifecycle-timestamps--synthetic-evidence) |
+| cell_kinds compatibility — local synthetic verification (2026-11-17) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#cell_kinds-compatibility--local-synthetic-verification-2026-11-17) |
+| Explicit historical anchor | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#final-cell_kinds-retirement-local-verification) |
+| Final cell_kinds retirement — local verification | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#final-cell_kinds-retirement--local-verification) |
+| Lexeme compatibility — local verification (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#lexeme-compatibility--local-verification-2026-11-18) |
+| Final lexeme retirement — local verification (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#final-lexeme-retirement--local-verification-2026-11-18) |
+| Typed PostgreSQL cleanup — local verification (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#typed-postgresql-cleanup--local-verification-2026-11-18) |
+| Row constraints and shared guard — local verification (2026-11-18) | [Recorded section](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/verification.md#row-constraints-and-shared-guard--local-verification-2026-11-18) |
+
+## Additional pinned source witnesses
+
+These original source/status witnesses retain the recorded revision, not current production state. Their full context is in the [prior ledger](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md).
+
+- [tools/migration/phase3-status.json at 65ed6f65](https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json)

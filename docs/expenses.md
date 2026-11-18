@@ -1,5 +1,7 @@
 # Independent expense module
 
+Production business records now use Supabase; the workflow remains unchanged. Sheets setup/row-verification instructions below apply to the optional Google Sheets backend. Use the [production runbook](database-migration.md) for current storage and approved maintenance.
+
 ## Menu and ownership
 
 - `/expenses?month=YYYY-MM`: individual expense entries, scope/shop and category filters, totals, add/edit/delete.

@@ -1,6 +1,6 @@
 # Engineering rules
 
-Read [the architecture guide](docs/architecture/README.md), [folder ownership](docs/architecture/folder-rules.md), and [dependency rules](docs/architecture/dependency-rules.md) before structural work. The [migration map](docs/architecture/migration-map.md) records actual ownership and remaining legacy; the [roadmap](docs/refactoring/roadmap.md) describes proposed work, not authorization to perform it all at once.
+Read [the architecture guide](docs/architecture/README.md), [folder ownership](docs/architecture/rules.md#folder-ownership), and [dependency rules](docs/architecture/rules.md#dependency-rules) before structural work. The [migration map](docs/architecture/migration-map.md) records actual ownership and remaining legacy; the [roadmap](docs/refactoring/roadmap.md) describes proposed work, not authorization to perform it all at once.
 
 ## Preserve observable behavior
 
