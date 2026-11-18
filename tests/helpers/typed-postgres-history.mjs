@@ -1,3 +1,4 @@
+import {restoreMediaUrlSource} from './media-url-history.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -8,7 +9,8 @@ const hash=s=>createHash('sha256').update(s).digest('hex');
 export function restoreTypedPostgresSource(file,source){
  const name=typeof file==='string'?file:file instanceof URL?relative(process.cwd(),fileURLToPath(file)):undefined;
  const physical=readFileSync(file,'utf8'),current=source??physical,edit=typedPostgresHistory.edits[name];
- if(!edit)return current;
- assert.equal(hash(physical),edit.afterSha256,name);assert.equal(hash(edit.before),edit.beforeSha256,name);
- return current===physical?edit.before:current;
+ if(!edit)return current===physical?restoreMediaUrlSource(file):current;
+ const predecessor=restoreMediaUrlSource(file);
+ assert.equal(hash(predecessor),edit.afterSha256,name);assert.equal(hash(edit.before),edit.beforeSha256,name);
+ return current===physical||current===predecessor?edit.before:current;
 }

@@ -161,7 +161,8 @@ export function OrderImageGallery({
 }
 
 function getGoogleDrivePreviewUrl(imageUrl: string): string {
-  const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
+  const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/) ||
+    imageUrl.match(/^https?:\/\/drive\.google\.com\/(?:open|uc|thumbnail)\?(?:[^&#]*&)*?id=([A-Za-z0-9_-]+)(?:[&#]|$)/);
   if (fileIdMatch?.[1]) {
     return `https://lh3.googleusercontent.com/d/${encodeURIComponent(
       fileIdMatch[1],

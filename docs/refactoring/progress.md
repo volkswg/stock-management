@@ -8,7 +8,23 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-The current application is PR83 `097b310`; see its [release receipt](#pr83-production-release-2026-11-18). The latest database schema release remains PR81, recorded below. The media catalog is local-only and has not been applied.
+Current production is [PR84](https://github.com/volkswg/stock-management/pull/84)
+`44bb1d65116f0ee370a50fd514922c47ea6f6efb`, including its media schema. In a
+separately approved supervised window, fresh private recovery strictly restored
+all51 tables/15 metadata sections, the backfill/inverse and69 app/LINE groups
+passed locally, and the full frozen checkpoint matched before DDL. All51 predecessor
+tables retained their business values/row revisions/timestamps and existing security;
+only the global counter advanced five statements. All five mappings and the52-table
+layout verified. The exact staged build was promoted, four API payload/order/scoped
+header comparisons and two pages passed, and missing-key/invalid-signature/old-host
+guards were preserved. Only that window's traffic rule was removed; browser writes
+and LINE reopened. Initial/final deployment-scoped error/fatal counts were zero.
+No real provider/business write canary was submitted. Private checkpoints/full
+receipts remain on the Mac; they predate subsequent legitimate writes. Independent
+[CI run44323943626](https://github.com/volkswg/stock-management/actions/runs/44323943626)
+passed on head `1acefc0`; merged and tested trees matched.
+
+PR81 below remains the earlier schema-only checkpoint, not the current schema.
 
 PR81 merged as `2471ac1106a9501f2a084b2d0825572b1b6fb1fe`; its schema-only release
 completed on 2026-11-18 in the separately approved supervised window. Production
@@ -34,6 +50,41 @@ the gate verified them against that exact active configuration. No schema SQL ra
 before resolving that metadata-only precondition. Private records, credentials,
 checkpoints, inverse SQL and full receipts remain on the Mac/approved private storage.
 The checkpoint predates later legitimate writes and is not permission to overwrite them.
+
+## Media URL retirement (2026-11-19; local implementation)
+
+From PR84 merge `44bb1d6`, the owner approved using `media.sourceUrl` for all five
+references, including normalization of different Drive URL formats for one file.
+API field names, files, Drive permissions, Sheets headers and feature workflows
+remain. PostgreSQL feature bindings explicitly write media IDs; private mappers
+resolve canonical URL DTOs. The Order thumbnail/preview formatters now recognize
+the catalog's open/uc/thumbnail Drive aliases as well as file/d links, so choosing
+a catalog URL does not replace an image with a Drive HTML page. External URLs keep
+their existing handling. No new React state/effects or provider dependencies were added.
+
+The one review scope includes guarded compatibility, five-column retirement and a
+column-restoring inverse outside automatic migration discovery. All52 tables match
+across retirement after excluding only the five operational URL fields; retained
+import columns remain part of the proof. Records/IDs/media/row revisions/timestamps,
+commands/global counter, grants/policies and other schema stay exact. The inverse
+retains all prior non-URL values and metadata permissions; its five backfill statements
+advance only the global counter by five. It reconstructs canonical URLs rather than
+historical aliases and may leave different physical column slots. Neither phase
+deletes files or restores a stale snapshot. Missing approval, wrong/stale target,
+limited-reader grants, unknown dependencies and late interrupted DDL are refused
+with exact prior fingerprints. Missing helpers/FKs and partial schemas fail closed.
+
+Local results:700 regressions,75 Python checks, lint/typecheck and a credential-free
+build pass; only the inherited `shipmentRow` warning remains. The route manifest
+and113 client bundle boundaries match. Fresh synthetic PostgreSQL copies pass six
+focused cases in each of retained/final/inverse layouts, two prior-PR84 runtime
+upload/replay checks, both actual LINE image workflows,32 operational cases and
+actual Chrome lost-response/reload/replay. Gallery formatter and existing interaction
+checks pass. All provider adapters are fake; no hosted data, credentials, production
+settings/traffic, real providers or business snapshots were used by these checks.
+Original historical fixtures remain unchanged behind a separate hash-bound inverse.
+CI results belong to the review PR; these are local results. Production remains at
+the separately verified PR84 checkpoint until a later explicit release approval.
 
 ## Concurrent browser edits (2026-11-18)
 
@@ -80,8 +131,8 @@ by these synthetic tests. Broader feature scopes/conflict UX remain separate wor
 
 ## Media catalog compatibility (2026-11-18)
 
-Local implementation from PR83 merge `097b310`; not merged, deployed or applied to
-production. The revision table and all old URL fields remain. The new catalog has
+Local implementation from PR83 merge `097b310`, subsequently merged and released
+as PR84; see the current production receipt above. The revision table and all old URL fields remain. The new catalog has
 exactly eleven approved fields, five nullable indexed restrictive foreign keys and
 no checksum/status columns. Browser and LINE provider results enrich confirmed
 metadata inside the existing command transaction; uncertainty remains journal-owned.
@@ -102,9 +153,8 @@ schema-only inverse restores original metadata. Recovery explicitly includes the
 52nd table; the old profile refuses the new layout. All 697 regressions, 75 Python
 checks, lint and typecheck pass; the only lint warning is the inherited unused
 `shipmentRow`. The credential-free build passes with an unchanged route manifest
-and all 113 client chunks checked for private database strings. Independent CI
-will run the complete historical/current schema pipeline on the review PR. A real production release still needs its own fresh
-checkpoint/restore, frozen-target rehearsal and explicit schema/deployment approval.
+and all 113 client chunks checked for private database strings. Independent CI and the separately approved production release subsequently passed;
+the receipt above records their actual scope and limits.
 
 ## PR83 production release (2026-11-18)
 

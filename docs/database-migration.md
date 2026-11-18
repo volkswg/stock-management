@@ -89,9 +89,9 @@ cutoff, idempotency and database controls. The
 [authentication roadmap](architecture/user-authentication-roadmap.md) is planning
 for the next milestone; this guide grants no security or live-setting changes.
 
-## Media compatibility stage (local implementation; not released)
+## Media catalog (released PR84)
 
-The proposed `stock_operational.media` catalog has exactly eleven columns: `id`
+The released `stock_operational.media` catalog has exactly eleven columns: `id`
 (UUID), `provider`, `providerFileId`, `sourceUrl`, `fileName`, `mimeType`, `sizeBytes`,
 `createdBy`, `createdAt`, `updatedAt`, `deletedAt`. It has no `sha256` or `status`.
 The three lifecycle fields use `timestamptz`; creation records catalog registration,
@@ -144,7 +144,67 @@ The [schema-only inverse](../tools/migration/operator/rollback_media_catalog.sql
 requires separate approval and fresh recovery/revision checks. It removes only the
 catalog and new reference objects, retains all current URL fields and never deletes
 Drive files. Do not overwrite newer business writes from an older checkpoint.
-Local/CI evidence and release scope are recorded in [progress](refactoring/progress.md#media-catalog-compatibility-2026-11-18).
+Local/CI evidence and the separately authorized PR84 release are recorded in [progress](refactoring/progress.md#media-catalog-compatibility-2026-11-18).
+
+## Media URL retirement (prepared; production unchanged)
+
+The owner approved using `media.sourceUrl` for all references. Different Google
+Drive URL formats for the same file may become one catalog URL; the file, public
+API field names and image workflows remain. External/long URLs stay exact.
+Immutable journal results, session JSON and retained import snapshots are not
+rewritten. This scope removes only the five operational URL columns above.
+
+One review PR contains the compatible app and three operator-only artifacts:
+
+1. [Compatibility](../tools/migration/operator/20261118180920_media_url_id_compatibility.sql)
+   retains all columns and records, resolves the five projections through media IDs,
+   and teaches their inputs to resolve existing URL payloads to IDs. Feature bindings
+   explicitly select ID writes; no feature rules, HTTP DTOs or Sheets headers change.
+   Mappers become STABLE readers or VOLATILE writers as required. Existing function
+   owners/ACLs/search paths stay intact; new helpers inherit only existing callers.
+2. [Retirement](../tools/migration/operator/20261118180924_retire_media_url_columns.sql)
+   drops only five URL columns and changes the five pair triggers to ID validation.
+   It performs no business updates: all other values, IDs, media, row revisions,
+   timestamps, commands and global revision remain exact. It refuses incomplete
+   references, function drift, custom dependencies/column grants and attachment
+   readers lacking their existing catalog access. It grants no additional table
+   access and never uses CASCADE or a definer function.
+3. [Inverse](../tools/migration/operator/rollback_media_url_columns.sql) restores the
+   five columns from their current media IDs, including archived records. It restores
+   canonical URLs, not discarded historical aliases. Only the five newly restored
+   fields are populated under exclusive locks with exact row guards temporarily
+   suspended; prior values/revisions/timestamps survive and the global counter
+   advances five statements. Physical column positions may differ; adapters use
+   names. It never restores an old snapshot over newer writes or deletes files.
+
+Production execution is **not approved by this implementation**. After review/merge,
+prepare an exact commit/build and a fresh private recovery using `--include-media`
+(52 tables/15 metadata sections), strictly restore it locally and rehearse against
+that checkpoint. Obtain separate approval for schema/app release and traffic controls,
+then a fresh supervised pause with all senders, direct editors, jobs and pending work
+accounted for. Freeze unsafe methods/LINE, drain transactions and compare the full
+checkpoint again. Stop on drift; do not guess or normalize unrelated records.
+
+Run compatibility with the exact target/purpose/frozen revision, reviewed source/
+fingerprint, `stock.media_url_alias_policy='use-media-sourceUrl'`,
+`stock.media_url_restore_verified='52-tables-15-metadata-v1'` and
+`stock.allow_media_url_compatibility='reviewed-media-ids-v1'`. Stage/promote the exact
+reviewed compatible app and verify canonical API values/order/types, scoped/global
+revision behavior, browser pages and preserved signature/idempotency/security guards.
+Only then may a separately approved retirement set
+`stock.allow_media_url_retirement='reviewed-media-ids-v1'` on the still-frozen target.
+Recheck media-v2/typed contracts, all52 tables and permissions, APIs and errors before
+removing only this release's block and reopening. No real provider canary is implied.
+
+Before column retirement, the preceding PR84 app remains compatible and is the app
+rollback option. **After retirement, do not roll back directly to PR84**: its writers
+still require URL columns and its upload adapter accepts media-v1. Keep traffic held,
+obtain approval for the tested column-restoring inverse, recheck fresh recovery and
+revision, run it with `stock.allow_media_url_rollback='reviewed-media-ids-v1'`, verify,
+and only then restore the preceding app if necessary. After reopening, new writes
+must be preserved; recovery/inverse needs a new current review. No automatic or paid
+backup service, new authentication, permissions expansion or Vercel setting change
+is authorized by these scripts.
 
 ## Recovery checkpoint
 

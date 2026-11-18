@@ -27,7 +27,7 @@ test('catalog registration preserves the absent-schema branch and rejects partia
   const code=ts.transpileModule(readFileSync('src/infrastructure/persistence/postgres/media.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   new vm.Script(code).runInNewContext({exports,WeakMap,Number,require(spec){if(spec==='server-only')return {};assert.equal(spec,'./database');return {currentTransaction:()=>client,requireMutation:()=>client,PersistenceFailure};}});
   const register=()=>exports.registerUploadedMedia({id:'FILE',webViewLink:'https://example.invalid/file'},()=>{metadataReads++;return {sizeBytes:12};});
-  if(present!==contract||version!=='media-v1')await assert.rejects(register());else{await register();await register();}
+  if(present!==contract||!['media-v1','media-v2'].includes(version))await assert.rejects(register());else{await register();await register();}
   return {reads,writes,metadataReads};
  }
  assert.deepEqual(await run(),{reads:1,writes:0,metadataReads:0});
@@ -35,4 +35,5 @@ test('catalog registration preserves the absent-schema branch and rejects partia
  assert.equal((await run({contract:true})).writes,0);
  assert.equal((await run({present:true,contract:true,version:'unsupported'})).writes,0);
  assert.deepEqual(await run({present:true,contract:true}),{reads:6,writes:4,metadataReads:2});
+ assert.deepEqual(await run({present:true,contract:true,version:'media-v2'}),{reads:6,writes:4,metadataReads:2});
 });

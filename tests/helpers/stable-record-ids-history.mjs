@@ -1,3 +1,4 @@
+import {restoreMediaUrlSource} from './media-url-history.mjs';
 import assert from 'node:assert/strict';
 import {restoreRowOrderSource} from './row-order-history.mjs';
 import {nativeTimestampHistory} from './native-timestamps-history.mjs';
@@ -18,7 +19,11 @@ export function restoreStableRecordSource(file,source) {
 }
 export function readStableRecordHistory(file,options) {
  const name=typeof file==='string'?file:file instanceof URL?relative(process.cwd(),fileURLToPath(file)):undefined;
- if(!stableRecordHistory.edits[name]&&!nativeTimestampHistory.edits[name])return readFileSync(file,options);
+ if(!stableRecordHistory.edits[name]&&!nativeTimestampHistory.edits[name]){
+  if(!name?.startsWith('src/'))return readFileSync(file,options);
+  const value=restoreMediaUrlSource(file);
+  return typeof options==='string'||options?.encoding?value:Buffer.from(value);
+ }
  const value=restoreStableRecordSource(file);
  return typeof options==='string'||options?.encoding?value:Buffer.from(value);
 }

@@ -5,7 +5,7 @@ import { SHIPMENT_ORDERS_SHEET_HEADERS } from "@/modules/shipments/infrastructur
 
 export function shipmentsTables() {
   return {
-    shipments: new PostgresRecords({ table: "shipments", headers: SHIPMENTS_SHEET_HEADERS }),
+    shipments: new PostgresRecords({ table: "shipments", media: { url: "shippingBillUrl", reference: "shippingBillMediaId" }, headers: SHIPMENTS_SHEET_HEADERS }),
     shipmentOrders: new PostgresRecords({ table: "shipment_orders", headers: SHIPMENT_ORDERS_SHEET_HEADERS }),
   };
 }

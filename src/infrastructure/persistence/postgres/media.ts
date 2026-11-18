@@ -23,7 +23,7 @@ async function enabled(): Promise<boolean> {
       if (!found.table_present && !found.contract_present) return false;
       if (!found.table_present || !found.contract_present) throw new PersistenceFailure(503,"Incomplete media catalog schema.");
       const version = await client.query<{ version: string }>("SELECT stock_operational.media_catalog_v1() AS version");
-      if (version.rows[0]?.version !== "media-v1") throw new PersistenceFailure(503,"Unsupported media catalog schema.");
+      if (!["media-v1", "media-v2"].includes(version.rows[0]?.version)) throw new PersistenceFailure(503,"Unsupported media catalog schema.");
       return true;
     })();
     capabilities.set(client,pending);

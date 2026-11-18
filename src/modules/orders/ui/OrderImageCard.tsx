@@ -70,7 +70,8 @@ export function OrderImageCard({
 }
 
 function getGoogleDriveThumbnailUrl(imageUrl: string, size = "w1600"): string {
-  const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/);
+  const fileIdMatch = imageUrl.match(/\/file\/d\/([^/]+)/) ||
+    imageUrl.match(/^https?:\/\/drive\.google\.com\/(?:open|uc|thumbnail)\?(?:[^&#]*&)*?id=([A-Za-z0-9_-]+)(?:[&#]|$)/);
   if (fileIdMatch?.[1]) {
     return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileIdMatch[1])}&sz=${size}`;
   }
