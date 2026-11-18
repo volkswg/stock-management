@@ -1,10 +1,10 @@
 # Stock Management
 
-Next.js application for Orders, Shipments, inventory/movements, Sales, expenses and HR, using Google Sheets/Drive, LINE and Loyverse. The scoped modular refactor is complete through [PR #40](https://github.com/volkswg/stock-management/pull/40): active code uses canonical feature, infrastructure and composition owners; `src/externals/` is removed. Some other compatibility paths remain intentionally supported.
+Next.js application for Orders, Shipments, inventory/movements, Sales, expenses and HR, using Supabase, Google Sheets/Drive, LINE and Loyverse. The scoped modular refactor is complete through [PR #40](https://github.com/volkswg/stock-management/pull/40): active code uses canonical feature, infrastructure and composition owners; `src/externals/` is removed. Some other compatibility paths remain intentionally supported.
 
 **Production safety:** completion of the refactor does not certify authentication, authorization, live provider behavior or concurrent writes. [Issue #38](https://github.com/volkswg/stock-management/issues/38) tracks access-control verification, CI and isolated smoke tests. Check access restrictions before exposing employee/payroll or write-capable APIs; do not run mutating smoke tests against production.
 
-Production uses Supabase. PR79 physical retirement is complete: `business_cells`, `row_order`, `cell_kinds` and all 48 `__lexeme` columns are removed. [Typed PostgreSQL cleanup](docs/database-migration.md#typed-postgresql-cleanup-prepared-not-deployed) is prepared separately; it has not changed production.
+Production uses Supabase. Storage cleanup is complete through PR81: operational sidecars are removed, 47 lifecycle fields are native timestamps, and validation uses 23 CHECK constraints plus one shared guard (52 operational functions). Browser writes and LINE are open. The app remains on PR80 source `31af820`; PR81 was database-only. See [production operations](docs/database-migration.md#current-production) and [release evidence](docs/refactoring/progress.md#latest-production-release).
 
 ## Start here
 

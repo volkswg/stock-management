@@ -1,5 +1,7 @@
 # Architecture decisions and compatibility invariants
 
+Current ownership is in the [map](migration-map.md), implementation rules in [rules](rules.md), and production storage in the [runbook](../database-migration.md). The dated phase descriptions below retain their decision context; their preparation/default-storage statements are historical. Observable compatibility invariants remain applicable.
+
 These decisions record implemented boundaries. They are constraints on structural refactors, not authorization for behavior changes. Historical source, exact hashes and test provenance live in [progress](../refactoring/progress.md#historical-evidence); current code and fixtures remain authoritative for full declarations/error text.
 
 ## Consumer ownership and composition
@@ -294,7 +296,7 @@ locally: it requires explicit server-only new-target/project/UUID/release/purpos
 binding, defaults to read-only and preserves the owner-selected legacy app access
 without distributing a staging bearer to the browser. It is disabled/unassigned;
 no live production selection, grant or database was changed. See the
-[current release preparation](../database-migration.md#current-migration-go-no-go-assessment-2026-11-12).
+[recorded release preparation](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md?plain=1#L920).
 Regular staging APIs require an operator bearer token; only the explicitly
 registered LINE entrypoint uses its own signature boundary. A caller-controlled
 URL cannot exempt an ordinary handler. The runtime role has no archive access, DDL or DELETE, and
@@ -312,7 +314,7 @@ There is no new login UI, production environment change
 or automatic backend fallback. [Runbook and cutover gates](../database-migration.md)
 are mandatory before approving live staging or a later production cutover.
 
-The [Phase 3 execution checklist](../database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
+The [Phase 3 execution checklist](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/database-migration.md#phase-3-real-data-validation-and-controlled-cutover)
 requires separate source/target permissions, exact record and business-total parity,
 hosted recovery/capacity/security sign-off and a global write freeze. The append-only
 archive is not CDC: final changes/deletions/reordering require a fresh full import

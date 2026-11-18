@@ -1,5 +1,7 @@
 # Shop-level unit adjustments
 
+Production business records now use Supabase; the workflow remains unchanged. Sheets setup/row-verification instructions below apply to the optional Google Sheets backend. Use the [production runbook](database-migration.md) for current storage and approved maintenance.
+
 Use **Monthly stock count → Stock adjustments → Record adjustment**. The feature
 tracks total units for each configured stock-count/Loyverse shop, not SKU balances.
 It is a direct owner entry form; there is no employee request or approval stage.
