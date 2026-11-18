@@ -5074,3 +5074,103 @@ prefer a typed-compatible forward fix; never overwrite newer acknowledged work
 with an old checkpoint. Old apps/functions requiring lexemes are not a rollback.
 Backup automation and new authentication remain deferred; checkpoint recovery for
 this irreversible spelling loss is part of the separately approved removal packet.
+
+
+### PR79 final lexeme retirement completed
+
+The owner separately approved merge and maintenance, confirmed paused users/direct
+editors/jobs/scripts and accounted pending work. CI passed; PR79 merged as
+`dfe521c`. A fresh checkpoint was captured, strictly restored and rehearsed with
+69 app/LINE comparisons. Under the temporary write/LINE fence, all 51 tables and
+15 metadata sections matched the checkpoint and four repeated live GETs matched.
+The exact reviewed SQL retired all 48 lexemes/four helpers; remaining values,
+47 timestamps, security and the intended 97-body function diff were verified.
+Four post-change GETs matched exactly. The original firewall was restored and
+browser/LINE reopened after guard probes; the initial runtime error scan was clear.
+No new deployment/env change, real business/provider canary, Sheets permission
+change, paid resource or backup automation was introduced. Detailed recovery,
+identities, records, hashes and receipts remain private on the Mac.
+
+<a id="typed-postgresql-cleanup-prepared-not-deployed"></a>
+## Typed PostgreSQL cleanup (prepared, not deployed)
+
+The PostgreSQL adapter now requires the existing schema capability to return
+`typed`, once per unit of work. Missing, retained or partial schemas fail closed.
+It invokes `typed_input_*`/`typed_project_*` directly, writes canonical header
+columns without per-write catalog discovery, and sorts the native `createdAt`
+with the existing NULL placement and stable-ID tie rule. Stable handles,
+compensation IDs, archives, allocation, revision/idempotency/upload behavior,
+feature ports and the separate Google Sheets backend are unchanged. The internal
+projection alias is `cells`; it is not a physical replacement metadata column.
+
+The operator artifact
+`tools/migration/final-removal/20261118082624_retire_legacy_mappers.sql` is generated
+by `typed-cleanup.py` outside automatic migration discovery. Dependency review
+found all 23 validators still call legacy projectors. The artifact pins all 190
+operational bodies, changes only those 23 calls to equivalent typed projectors
+with owners/ACLs/settings preserved, then drops 115 mapper aliases and the obsolete
+`column_mapping_contract_v1` using RESTRICT. Typed functions, the active schema
+guard, timestamp helpers (including their indirect parser dependency), validators,
+revision triggers, all 51 tables, 47 timestamps, keys, roles and policies remain.
+No table/column/record rewrite or privilege addition is included.
+
+One READ COMMITTED transaction checks exact isolation/purpose/revision before and
+after both advisory gates/all 51 table locks. It requires explicit
+`stock.allow_legacy_mapper_cleanup=reviewed-typed-only-v1`, reviewed source and
+fingerprint hashes, and restore/semantic attestations. Unknown procedural consumers
+in user schemas (including mixed-case calls) refuse; catalog dependencies refuse
+through RESTRICT and roll back the validator changes atomically. Tags do not
+substitute for independent evidence or owner approval.
+
+Original migration SQL and historical fixtures are preserved. Historical database
+acceptance uses the exact PR79 record adapter in a disposable source copy containing
+tracked files and resolved dependencies, without real env files, Git credentials
+or `.vercel` state. Its pinned source hash is verified. Current acceptance runs the
+actual new adapter separately against the final schema with every retired function
+absent. No production loader, environment flag, fallback or private fixture is added.
+
+### Release and rollback gates
+
+Review/merge does not deploy or run this artifact. Production must remain on the
+verified typed schema; older staging/development layouts are unsupported by the
+new adapter and must be upgraded separately before using it. Never touch protected
+staging as an incidental cleanup. Deploy the approved source to the exact verified
+production target only after separate authorization, with existing configuration,
+security and behavior intact. Alias removal is a separately approved operator step
+with fresh private recovery/local rehearsal, current dependency review, a supervised
+write/LINE pause, frozen all-table/metadata freshness and four HTTP baseline pairs.
+Use `stock.expected_isolation_id`, `stock.expected_purpose`, and the
+`stock.mapper_reviewed_revision`, `stock.mapper_reviewed_source`,
+`stock.mapper_reviewed_fingerprint`, `stock.mapper_restore_verified` and
+`stock.mapper_semantics_verified` settings bound to that evidence.
+
+After cleanup, require all 51 table fingerprints and all 15 metadata sections exact
+except the 116 removed functions and 23 reviewed validator calls; confirm surviving
+owners/ACLs/settings, typed capability, 47 timestamps and four HTTP values/types/
+ordering/revisions before reopening. Preserve LINE cutoff/signatures, access rules,
+all env values and the original firewall. Do not create provider/business writes as
+an unapproved canary. A pre-commit failure rolls back. For a post-commit failure keep
+traffic fenced and inspect; never restore an old checkpoint over newer acknowledged
+writes. The released PR78 app already selects typed mappings on this schema and is
+a compatible app rollback even after alias retirement; retain its exact verified
+source/deployment/configuration binding.
+
+Keep the 24 `stock_migration` tables and their recovery/reconciliation contract,
+`commands`, `side_effects`, revision/archive columns and stable keys. Removing them
+is outside this cleanup. Backup automation and new authentication remain deferred.
+
+
+PR80 CI follow-up: the inherited hosted-tooling campaign also assumes the older
+`row_order` schema and its matching record adapter. It now runs explicitly through
+`verify-persistence-history.sh --hosted-tooling`, with the pinned PR79 adapter in
+the same credential-free disposable source copy. Its full private-build/browser,
+fake-provider fault, TLS/role and generated-checkpoint restore assertions remain
+intact. It is historical tooling evidence, not hosted acceptance of the current
+final schema. The actual current typed adapter remains independently exercised by
+`verify-typed-postgres.sh` and the credential-free current-source production build.
+No production fallback or schema guard is weakened and no hosted tool is invoked.
+
+The historical private-build mode creates a new synthetic Git snapshot solely for
+its existing source attestation and materializes a temporary dependency copy for
+Next.js. No original Git configuration, credentials, hooks or remotes are copied;
+shared dependencies are preserved and only the owned temporary root is removed.

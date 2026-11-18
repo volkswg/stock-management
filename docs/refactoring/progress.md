@@ -1767,3 +1767,64 @@ service/pool transition and existing operational/timestamp/browser acceptance.
 No fresh hosted records, live credentials, providers, production DDL, deployment,
 writer permissions or traffic controls were accessed/changed by this preparation.
 The saved checkpoint is not a fresh production GO. See the [exact approval packet](../database-migration.md#final-lexeme-retirement-prepared-not-executed).
+
+
+## PR79 removal completed; typed PostgreSQL cleanup prepared (2026-11-18)
+
+PR79's separately approved maintenance completed after fresh recovery/strict
+restore, 69 app/LINE comparisons, full frozen freshness and four exact live GET
+pairs. All 48 lexemes were retired, remaining values/permissions preserved and
+browser/LINE reopened on the compatible PR78 deployment. The detailed completion
+receipt is private. No new deployment/env setting or real provider canary was used.
+
+The current bounded cleanup changes only the PostgreSQL record adapter in runtime
+source: final typed capability is required, mapper selection is direct, canonical
+headers replace per-write catalog discovery, native creation sorting replaces
+pre-conversion branching and the internal projection alias is `cells`. Stable IDs,
+allocation/handles, revisions/archives, retry/upload behavior and Sheets remain.
+
+Dependency audit found 23 live validator-to-legacy-projector calls. The guarded
+operator artifact retargets only those equivalent calls, pins all 190 operational
+bodies and retires 115 aliases plus one obsolete contract with RESTRICT. No table,
+column, record, role, grant or original migration is removed/changed. Surviving
+owners, ACLs, execution settings, all 51 table values and 15 metadata sections are
+proved exact except the reviewed function diff. Existing scoped readers retain
+only their prior typed read privileges. Unknown procedural/catalog consumers stop
+cleanup and roll back the validator changes.
+
+Historical schema tests now run with one exact hash-pinned PR79 adapter in a
+credential-free disposable source copy; current-source tests independently require
+the final schema with all retired functions absent. Existing fixtures and assertions
+are preserved. All eight archived PostgreSQL verifier stages pass. Current tests
+pass retained-schema rejection, exact storage/public order/LINE behavior,
+per-unit capability caching and next-unit revalidation for missing/partial schemas,
+32 operational, 10 native timestamp and actual browser response-loss/reload/replay.
+All 688 regressions, 73 Python tests, lint (one inherited warning), typecheck and
+isolated production build pass. Routes and 113 browser chunks remain unchanged.
+
+This implementation accesses no hosted credentials/records/providers and changes
+no production deployment, configuration, permissions or data. Hosted cleanup,
+fresh recovery and any maintenance remain separately authorized. Retained import
+tables, journals, original checkpoints and recovery evidence stay intact.
+
+A separate saved-checkpoint strict restore/rehearsal also passed: exact released/
+current private values, IDs/order and all 69 app/LINE comparisons, the reviewed
+SQL/data/security diff, and local create/edit/archive. Its owned network-isolated
+container/volume was removed and all original private evidence retained. This
+saved-data evidence is not current hosted freshness or execution approval.
+
+
+PR80 CI follow-up: the inherited hosted-tooling campaign also assumes the older
+`row_order` schema and its matching record adapter. It now runs explicitly through
+`verify-persistence-history.sh --hosted-tooling`, with the pinned PR79 adapter in
+the same credential-free disposable source copy. Its full private-build/browser,
+fake-provider fault, TLS/role and generated-checkpoint restore assertions remain
+intact. It is historical tooling evidence, not hosted acceptance of the current
+final schema. The actual current typed adapter remains independently exercised by
+`verify-typed-postgres.sh` and the credential-free current-source production build.
+No production fallback or schema guard is weakened and no hosted tool is invoked.
+
+The historical private-build mode creates a new synthetic Git snapshot solely for
+its existing source attestation and materializes a temporary dependency copy for
+Next.js. No original Git configuration, credentials, hooks or remotes are copied;
+shared dependencies are preserved and only the owned temporary root is removed.

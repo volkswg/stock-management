@@ -4,23 +4,27 @@ This page describes the **current plan**, not the full migration diary. See the 
 
 <a id="current-milestone-cell_kinds-compatibility-preparation-2026-11-17"></a>
 <a id="current-milestone-lexeme-compatibility-preparation-2026-11-18"></a>
-## Current milestone: final lexeme retirement preparation (2026-11-18)
+<a id="current-milestone-final-lexeme-retirement-preparation-2026-11-18"></a>
+## Current milestone: typed PostgreSQL compatibility cleanup (2026-11-18)
 
-Production runs PR78's compatible source `b0ea779`. Operational `business_cells`,
-`row_order`, redundant creation-instant fields and all 23 `cell_kinds` are absent.
-All 48 `__lexeme` columns and 47 native lifecycle timestamps remain; browser/LINE
-are open and old business Sheets are read-only.
+The Supabase cutover and physical metadata retirement are complete. PR79 is merged
+as `dfe521c`; all 48 lexemes are removed. Production continues to run the compatible
+PR78 app (`b0ea779`), with browser/LINE reopened, 47 native lifecycle timestamps and
+old business Sheets read-only.
 
-The current instruction authorizes the [final operator artifact and local proof](../database-migration.md#final-lexeme-retirement-prepared-not-executed),
-using existing private recovery evidence. No production pause, DDL, deployment or
-fresh business-data access is performed. Existing released code already supports
-the typed capability; no additional app deployment is proposed.
+The approved bounded cleanup simplifies the adapter to the final typed schema,
+uses canonical headers directly and native `createdAt` sorting, and prepares
+operator-only removal of 115 old mapper entrypoints plus the obsolete column
+mapping contract. All 23 validators retain their rules while calling equivalent
+typed projectors directly. No table, column, ID, journal, record or permission
+cleanup is authorized by this implementation.
 
-Next gates: CI/review and merge approval, fresh recovery/current-data and exact
-app/LINE review, then separate approval for traffic controls and all 48 column
-removals in a supervised window. Preserve typed values, IDs, revisions, archives,
-journals, permissions and lifecycle timestamps. No shadow representation storage
-or automatic data repair. Backup automation and new authentication remain deferred.
+Local current-source acceptance is separate from historical migration acceptance,
+which keeps a hash-pinned PR79 adapter in a disposable credential-free copy.
+Original migration fixtures and SQL remain immutable. Review/merge and subsequent
+production deployment/SQL need separate approval; fresh recovery and dependency
+checks remain release gates. See the [consolidated execution contract](../database-migration.md#typed-postgresql-cleanup-prepared-not-deployed).
+Backup automation and new authentication remain deferred.
 
 <a id="current-milestone-critical-path-cutover-mode-2026-11-12"></a>
 
@@ -53,7 +57,7 @@ Sheet mode uses the existing operational workbook only; remove the account-speci
 
 ## Next phase: security and user authentication
 
-[Issue #38](https://github.com/volkswg/stock-management/issues/38) remains open.
+The historical [security tracking record](https://github.com/volkswg/stock-management/issues/38) and separate authentication roadmap describe the next milestone.
 The owner preserves current application behavior through the metadata cleanup.
 Do not implement new access controls or an owner-only launch in this task. Keep
 the separate architecture roadmap for user login, secure sessions, roles,

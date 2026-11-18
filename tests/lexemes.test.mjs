@@ -4,11 +4,12 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {lexemeHistory,restoreLexemeSource} from './helpers/lexeme-history.mjs';
+import {restoreTypedPostgresSource} from './helpers/typed-postgres-history.mjs';
 const file='tools/migration/compatibility/20261118022702_lexeme_compatibility.sql';
 test('lexeme compatibility has one exact source inverse and actual fail-closed capability handling',()=>{
  assert.deepEqual(Object.keys(lexemeHistory.edits),['src/infrastructure/persistence/postgres/records.ts']);
  for(const [name,e] of Object.entries(lexemeHistory.edits)){
-  const current=readFileSync(name,'utf8');assert.equal(createHash('sha256').update(current).digest('hex'),e.afterSha256);
+  const current=restoreTypedPostgresSource(name);assert.equal(createHash('sha256').update(current).digest('hex'),e.afterSha256);
   assert.equal(restoreLexemeSource(name),e.before);assert.match(current,/lexeme_mapping_contract_v1/);
   assert.match(current,/mode !== "typed" && c.endsWith/);assert.doesNotMatch(current,/catch\s*\(/);
  }

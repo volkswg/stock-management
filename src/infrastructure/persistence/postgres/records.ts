@@ -7,35 +7,19 @@ type NumericAllocator = { next: number; client: ReturnType<typeof currentTransac
 // A fresh safe client proxy identifies each unit of work. Share reservations
 // across service instances and concurrent attachment operations within it.
 const numericAllocators = new WeakMap<ReturnType<typeof currentTransaction>, Map<string, Promise<NumericAllocator>>>();
-type StoredRecord = { record_id: string; business_cells: GoogleSheetRow; revision: string };
-type Mapping = "legacy" | "retained" | "final" | "typed";
-// A unit of work pins one explicit schema capability. Missing preparation uses
-// the existing contract; an installed but invalid/partial contract fails closed.
-const mappingModes = new WeakMap<ReturnType<typeof currentTransaction>, Promise<Mapping>>();
-function mappingMode(): Promise<Mapping> {
+type StoredRecord = { record_id: string; cells: GoogleSheetRow; revision: string };
+// Validate the final typed schema once per unit of work; never fall back to an
+// older layout or cache capability decisions across transactions.
+const typedSchemas = new WeakMap<ReturnType<typeof currentTransaction>, Promise<void>>();
+function requireTypedSchema(): Promise<void> {
   const client = currentTransaction();
-  let pending = mappingModes.get(client);
+  let pending = typedSchemas.get(client);
   if (!pending) {
     pending = (async () => {
-      const typedProbe = await client.query<{ installed: boolean }>("SELECT to_regprocedure('stock_operational.lexeme_mapping_contract_v1()') IS NOT NULL AS installed");
-      if (typedProbe.rows[0]?.installed === true) {
-        const contract = await client.query<{ mode: string }>("SELECT stock_operational.lexeme_mapping_contract_v1() AS mode");
-        // Retained columns keep the released spelling-aware readers/writers.
-        // Only a complete, separately approved removal enables typed mapping.
-        if (contract.rows[0]?.mode === "retained") return "final";
-        if (contract.rows[0]?.mode === "typed") return "typed";
-        throw new PersistenceFailure(503, "Unsupported lexeme mapping schema.");
-      }
-      if (typedProbe.rows[0]?.installed !== false) throw new PersistenceFailure();
-      const probe = await client.query<{ installed: boolean }>("SELECT to_regprocedure('stock_operational.column_mapping_contract_v1()') IS NOT NULL AS installed");
-      if (probe.rows[0]?.installed === false) return "legacy";
-      if (probe.rows[0]?.installed !== true) throw new PersistenceFailure();
-      const contract = await client.query<{ mode: string }>("SELECT stock_operational.column_mapping_contract_v1() AS mode");
-      const mode = contract.rows[0]?.mode;
-      if (mode !== "retained" && mode !== "final") throw new PersistenceFailure(503, "Unsupported record mapping schema.");
-      return mode;
+      const contract = await client.query<{ mode: string }>("SELECT stock_operational.lexeme_mapping_contract_v1() AS mode");
+      if (contract.rows.length !== 1 || contract.rows[0].mode !== "typed") throw new PersistenceFailure(503, "Unsupported typed record schema.");
     })();
-    mappingModes.set(client, pending);
+    typedSchemas.set(client, pending);
   }
   return pending;
 }
@@ -59,21 +43,18 @@ export class PostgresRecords {
     if (!/^[a-z_]+$/.test(definition.table) || !/^[a-z_]+$/.test(this.key) || definition.headers.some(h => !/^[a-zA-Z_]+$/.test(h))) throw new PersistenceFailure();
     this.table = `stock_operational.${definition.table}`;
   }
-  async ensureExists() { await currentTransaction().query(`SELECT 1 FROM ${this.table} LIMIT 0`); }
+  async ensureExists() { await requireTypedSchema(); await currentTransaction().query(`SELECT 1 FROM ${this.table} LIMIT 0`); }
   async checkConnection() { await this.ensureExists(); }
   private async mapping() {
-    const mode = await mappingMode();
-    return { mode,
-      project: `stock_operational.${mode === "typed" ? "typed_project_" : mode === "legacy" ? "project_" : mode === "retained" ? "column_compatible_" : "column_project_"}${this.definition.table}`,
-      input: `stock_operational.${mode === "typed" ? "typed_input_" : mode === "legacy" ? "input_" : "column_input_"}${this.definition.table}` };
+    await requireTypedSchema();
+    return { project: `stock_operational.typed_project_${this.definition.table}`,
+      input: `stock_operational.typed_input_${this.definition.table}` };
   }
   private async read(range: string, descending = false): Promise<GoogleSheetRow[]> {
-    // The compatible build can precede the operator-approved type conversion.
-    // Native timestamps never round-trip through session-dependent text casts.
-    const order = `CASE WHEN pg_typeof("createdAt")='timestamptz'::regtype THEN "createdAt"::timestamptz ELSE stock_operational.created_at_timestamp("createdAt"::text) END ${descending ? "DESC" : "ASC"} NULLS LAST,"${this.key}" COLLATE "C" ASC`;
+    const order = `"createdAt" ${descending ? "DESC" : "ASC"} NULLS LAST,"${this.key}" COLLATE "C" ASC`;
     const { project } = await this.mapping();
-    const stored = (await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS business_cells,revision FROM ${this.table} t WHERE archived_at IS NULL ORDER BY ${order}`)).rows;
-    const rows: GoogleSheetRow[] = [[...this.definition.headers], ...stored.map(r => r.business_cells)];
+    const stored = (await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS cells,revision FROM ${this.table} t WHERE archived_at IS NULL ORDER BY ${order}`)).rows;
+    const rows: GoogleSheetRow[] = [[...this.definition.headers], ...stored.map(r => r.cells)];
     const b = bounds(range, rows.length);
     const result = rows.slice(b.start, b.end).map((row, i) => {
       const projected = row.slice(b.x, b.y), record = stored[b.start+i-1];
@@ -119,19 +100,14 @@ export class PostgresRecords {
     if (!allocator) throw new PersistenceFailure(503, "Identifier snapshot is unavailable.");
     return this.takeNumber(allocator);
   }
-  private async columns(mode: Mapping): Promise<string[]> {
-    const result = await currentTransaction().query<{column_name: string}>(`SELECT column_name FROM information_schema.columns WHERE table_schema='stock_operational' AND table_name=$1 ORDER BY ordinal_position`, [this.definition.table]);
-    return result.rows.map(r => r.column_name).filter(c => this.definition.headers.includes(c) || ((mode === "legacy" || mode === "retained") && c === 'cell_kinds') || (mode !== "typed" && c.endsWith('__lexeme') && this.definition.headers.includes(c.slice(0,-8))));
-  }
   private async insert(cells: GoogleSheetRow) {
     const client = requireMutation(), key = this.key;
     if (cells.length > this.definition.headers.length || !cells.length) throw new PersistenceFailure(409, "Invalid record width.");
     const id = key === "migration_id" ? undefined : cells[this.definition.headers.indexOf(key)];
     if (key !== "migration_id" && (typeof id !== "string" || !id)) throw new PersistenceFailure(409, "Business identity is required.");
-    const { mode, input } = await this.mapping();
-    const columns = await this.columns(mode), names = columns.map(c => `"${c}"`).join(',');
-    // The retained schema uses its prepared identity default; the final schema
-    // has no ordinal column. Both insert only named business/representation data.
+    const { input } = await this.mapping();
+    const columns = this.definition.headers, names = columns.map(c => `"${c}"`).join(',');
+    // Synthetic compensation identities remain independent of header positions.
     await client.query(`INSERT INTO ${this.table}(${key === "migration_id" ? 'migration_id,' : ''}${names}) SELECT ${key === "migration_id" ? "'COMP-'||gen_random_uuid()::text," : ''}${columns.map(c => `i."${c}"`).join(',')} FROM ${input}($1::jsonb) i`, [JSON.stringify(cells)]);
   }
   async appendRows(_range: string, values: GoogleSheetRow[]) { for (const row of values) await this.insert(row); }
@@ -142,7 +118,7 @@ export class PostgresRecords {
   }
   async referenceId(id: string): Promise<RecordReference | undefined> {
     const { project } = await this.mapping();
-    const result = await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS business_cells,revision FROM ${this.table} t WHERE "${this.key}"=$1 AND archived_at IS NULL`, [id]);
+    const result = await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS cells,revision FROM ${this.table} t WHERE "${this.key}"=$1 AND archived_at IS NULL`, [id]);
     return result.rows[0] ? this.reference(result.rows[0]) : undefined;
   }
   private reference(stored: StoredRecord): RecordReference {
@@ -158,17 +134,17 @@ export class PostgresRecords {
     if (!parts) throw new PersistenceFailure(409, "Invalid record columns.");
     const b = bounds(parts[1]+'1:'+ (parts[2] || parts[1])+'1', 1);
     if (b.x+patch.length > b.y || b.y > this.definition.headers.length) throw new PersistenceFailure(409, "Invalid record projection.");
-    const next = [...stored.business_cells];
+    const next = [...stored.cells];
     while (next.length < this.definition.headers.length) next.push("");
     for (const [i,cell] of patch.entries()) next[b.x+i] = cell;
     const keyIndex = this.definition.headers.indexOf(this.key);
-    if (keyIndex >= 0 && next[keyIndex] !== stored.business_cells[keyIndex]) {
+    if (keyIndex >= 0 && next[keyIndex] !== stored.cells[keyIndex]) {
       if (this.definition.clearAsArchive && next[keyIndex] === "" && patch.every(c=>c==="")) return archive();
       throw new PersistenceFailure(409, "Business identity cannot change.");
     }
-    const { mode, input, project } = await this.mapping();
-    const columns = await this.columns(mode);
-    const result = await requireMutation().query<StoredRecord>(`UPDATE ${this.table} t SET ${columns.map(c => `"${c}"=i."${c}"`).join(',')} FROM ${input}($1::jsonb) i WHERE t."${this.key}"=$2 AND t.revision=$3 AND t.archived_at IS NULL RETURNING t."${this.key}" AS record_id,${project}(t) AS business_cells,t.revision`, [JSON.stringify(next), stored.record_id, stored.revision]);
+    const { input, project } = await this.mapping();
+    const columns = this.definition.headers;
+    const result = await requireMutation().query<StoredRecord>(`UPDATE ${this.table} t SET ${columns.map(c => `"${c}"=i."${c}"`).join(',')} FROM ${input}($1::jsonb) i WHERE t."${this.key}"=$2 AND t.revision=$3 AND t.archived_at IS NULL RETURNING t."${this.key}" AS record_id,${project}(t) AS cells,t.revision`, [JSON.stringify(next), stored.record_id, stored.revision]);
     if (result.rowCount !== 1) throw new PersistenceFailure(409, "Stale record revision.");
     Object.assign(stored, result.rows[0]);
   }
