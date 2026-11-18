@@ -745,3 +745,54 @@ saved checkpoint, not fresh business records. Production remains open with all
 live traffic are accessed/changed in this task. Fresh recovery/current-data review,
 review/merge and a new approved window still precede execution. See the
 [exact retirement gates and rollback limits](../database-migration.md#final-cell_kinds-retirement-prepared-not-deployed).
+
+
+## Lexeme compatibility — local verification (2026-11-18)
+
+All 680 regressions and 73 Python migration tests pass. Lint has zero errors and
+the inherited unused `shipmentRow` warning; typecheck and the isolated default
+credential-free production build pass. The route manifest is unchanged, and all
+113 browser chunks exclude private database strings. No package, lockfile, env,
+Vercel setting or original automatic migration changes. Only the shared PostgreSQL
+record adapter changes in production TypeScript; feature algorithms stay intact.
+The bounded lexeme history inverse preserves the preceding immutable fixtures,
+while independent actual-source integration tests exercise the new runtime.
+
+`verify-lexemes.sh` passes on fresh synthetic local PostgreSQL copies. Missing
+approval, wrong target and predecessor drift refuse atomically. Additive
+installation preserves all 51 table values and all 15 metadata sections except
+47 explicitly added invoker functions with the exact previous mapper callers.
+All original functions/ACLs and 48 lexeme columns remain. A table-scoped reader can
+use only its new corresponding projector and capability, without input/write
+privileges or broader table access.
+
+Seven retained-schema cases and seven typed-candidate cases cover exact retained
+spelling, large decimal/integer precision, blank/null handling, real LINE context
+parsing, boolean aliases, direct edits, stable references and atomic failures.
+A partial-schema case deliberately keeps the old mapper valid while adding an
+unexpected lexeme: the new capability rejects it without falling back. A separate
+same-service/pool case crosses the Unix-socket-only synthetic drop fixture and
+verifies subsequent reads and writes without restarting the app. That fixture
+also rejects a TCP admin invocation independently.
+
+The typed synthetic schema passes all 32 existing operational cases, 10 native
+timestamp cases and the real browser committed-response-loss/reload/replay case.
+Only the existing private raw order-price assertion explicitly recognizes typed
+candidate decimal text. Public values/types, ordering, security/idempotency and
+all original assertions for other layouts remain enabled; no broad normalizer or
+skipped test is introduced.
+
+The existing owner-approved private checkpoint was separately restored into a new
+network-isolated local container and strictly verified. The already released
+kindless predecessor was reproduced locally before the additive installer.
+Retained data/identity/order, original metadata/security and actual application/
+LINE results match exactly, and local create/edit/archive passes. All private
+records, role metadata, hashes and detailed results remain on the Mac. Only the
+newly owned restore container/volume and isolated build copy were removed.
+
+These are compatibility results, not final removal GO. No fresh hosted business
+records, live credentials, provider operations, production schema/settings or
+writer permissions were accessed/changed. The typed-only real-data audit,
+spelling/null/boolean decisions, final operator artifact, fresh recovery and a
+separately approved maintenance release remain future gates. See the
+[operational contract](../database-migration.md#lexeme-compatibility-prepared-not-deployed).

@@ -4,6 +4,7 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {cellKindsHistory,restoreCellKindsSource} from './helpers/cell-kinds-history.mjs';
+import {restoreLexemeSource} from './helpers/lexeme-history.mjs';
 const policy=JSON.parse(readFileSync('tools/migration/cell-kinds-policy.json','utf8'));
 const file='tools/migration/compatibility/20261117132332_cell_kinds_compatibility.sql';
 test('all252 field policies are explicit; no data normalization or lexeme retirement is approved',()=>{
@@ -18,7 +19,7 @@ test('all252 field policies are explicit; no data normalization or lexeme retire
 test('bounded predecessor preserves native/ordinal historical witnesses; actual adapter detects explicit capabilities',()=>{
  assert.deepEqual(Object.keys(cellKindsHistory.edits),['src/infrastructure/persistence/postgres/records.ts']);
  for(const [path,edit] of Object.entries(cellKindsHistory.edits)){
-  const current=readFileSync(path,'utf8');assert.equal(createHash('sha256').update(current).digest('hex'),edit.afterSha256);
+  const current=restoreLexemeSource(path);assert.equal(createHash('sha256').update(current).digest('hex'),edit.afterSha256);
   assert.equal(restoreCellKindsSource(path),edit.before);
   assert.match(current,/mappingModes = new WeakMap/);assert.match(current,/column_mapping_contract_v1/);
   assert.match(current,/mode !== "retained" && mode !== "final"/);
