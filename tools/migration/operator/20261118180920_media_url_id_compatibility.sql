@@ -68,6 +68,8 @@ BEGIN
  IF refs<>5 OR triggers<>5
  OR (SELECT count(*)<>11 FROM pg_attribute WHERE attrelid=to_regclass('stock_operational.media') AND attnum>0 AND NOT attisdropped)
  OR (SELECT count(*)<>5 FROM pg_constraint WHERE confrelid=to_regclass('stock_operational.media') AND contype='f' AND convalidated AND confdeltype='r')
+ OR (SELECT count(*)<>10 FROM (VALUES ('typed_input_order_items(jsonb)','v'),('typed_project_order_items(stock_operational.order_items)','s'),('typed_input_order_bills(jsonb)','v'),('typed_project_order_bills(stock_operational.order_bills)','s'),('typed_input_movement_details(jsonb)','v'),('typed_project_movement_details(stock_operational.movement_details)','s'),('typed_input_shipments(jsonb)','v'),('typed_project_shipments(stock_operational.shipments)','s'),('typed_input_stock_adjustments(jsonb)','v'),('typed_project_stock_adjustments(stock_operational.stock_adjustments)','s')) e(sig,vol)
+     JOIN pg_proc p ON p.oid=to_regprocedure('stock_operational.'||e.sig) AND p.provolatile::text=e.vol AND NOT p.prosecdef)
  OR to_regclass('stock_operational.media') IS NULL OR to_regprocedure('stock_operational.media_url_v1(uuid)') IS NULL OR to_regprocedure('stock_operational.media_ref_for_url_v1(text)') IS NULL THEN RAISE EXCEPTION 'Incomplete media record schema'; END IF;
  IF urls=5 THEN RETURN 'retained'; END IF;
  IF urls=0 THEN RETURN 'id-only'; END IF;

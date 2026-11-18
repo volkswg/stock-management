@@ -70,6 +70,8 @@ test('record schema is revalidated on each transaction; missing capabilities fai
  await admin.query('ALTER FUNCTION stock_operational.media_ref_for_url_v1(text) RENAME TO mu_missing');
  try{await assert.rejects(read(()=>service.orders.readRows()),e=>e.status===503);}finally{await admin.query('ALTER FUNCTION stock_operational.mu_missing(text) RENAME TO media_ref_for_url_v1');}
  await read(()=>service.orders.readRows());
+ await admin.query('ALTER FUNCTION stock_operational.typed_project_order_items(stock_operational.order_items) IMMUTABLE');
+ try{await assert.rejects(read(()=>service.orderItems.readRows()),e=>e.status===503);}finally{await admin.query('ALTER FUNCTION stock_operational.typed_project_order_items(stock_operational.order_items) STABLE');}
  const fk='order_items_imageMediaId_fkey';
  const definition=(await admin.query("SELECT pg_get_constraintdef(oid) definition FROM pg_constraint WHERE conrelid='stock_operational.order_items'::regclass AND conname=$1",[fk])).rows[0].definition;
  await admin.query('ALTER TABLE stock_operational.order_items DROP CONSTRAINT "'+fk+'"');

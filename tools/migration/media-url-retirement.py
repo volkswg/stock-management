@@ -75,6 +75,8 @@ BEGIN
  IF refs<>5 OR triggers<>5
  OR (SELECT count(*)<>11 FROM pg_attribute WHERE attrelid=to_regclass('stock_operational.media') AND attnum>0 AND NOT attisdropped)
  OR (SELECT count(*)<>5 FROM pg_constraint WHERE confrelid=to_regclass('stock_operational.media') AND contype='f' AND convalidated AND confdeltype='r')
+ OR (SELECT count(*)<>10 FROM (VALUES {','.join('('+literal(f'typed_{kind}_{t}('+('jsonb' if kind=='input' else 'stock_operational.'+t)+')')+','+literal('v' if kind=='input' else 's')+')' for t,_,_ in REFS for kind in ['input','project'])}) e(sig,vol)
+     JOIN pg_proc p ON p.oid=to_regprocedure('stock_operational.'||e.sig) AND p.provolatile::text=e.vol AND NOT p.prosecdef)
  OR to_regclass('stock_operational.media') IS NULL OR to_regprocedure('stock_operational.media_url_v1(uuid)') IS NULL OR to_regprocedure('stock_operational.media_ref_for_url_v1(text)') IS NULL THEN RAISE EXCEPTION 'Incomplete media record schema'; END IF;
  IF urls=5 THEN RETURN 'retained'; END IF;
  IF urls=0 THEN RETURN 'id-only'; END IF;
