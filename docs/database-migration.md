@@ -5092,7 +5092,19 @@ change, paid resource or backup automation was introduced. Detailed recovery,
 identities, records, hashes and receipts remain private on the Mac.
 
 <a id="typed-postgresql-cleanup-prepared-not-deployed"></a>
-## Typed PostgreSQL cleanup (prepared, not deployed)
+<a id="typed-postgresql-cleanup-prepared-not-deployed"></a>
+## Typed PostgreSQL cleanup (released as PR80)
+
+PR80 was separately deployed as `31af820` on 2026-11-18. Fresh private recovery
+was strictly restored and rehearsed, then rechecked under the approved supervised
+write/LINE freeze. The exact app was promoted and four GET responses matched the
+frozen baseline before and after retiring 116 functions and retargeting 23 validator
+calls. All 51 table values and remaining security metadata matched; all 47 native
+timestamps remain. The temporary traffic rule was removed and browser/LINE reopened.
+Existing protection, LINE cutoff and old read-only Sheets were preserved. The
+initial runtime scan was clear; no real provider/business canary was performed.
+Private receipts and recovery remain on the Mac. The preparation contract below
+records what was authorized and verified; it does not authorize repeating it.
 
 The PostgreSQL adapter now requires the existing schema capability to return
 `typed`, once per unit of work. Missing, retained or partial schemas fail closed.
@@ -5174,3 +5186,63 @@ The historical private-build mode creates a new synthetic Git snapshot solely fo
 its existing source attestation and materializes a temporary dependency copy for
 Next.js. No original Git configuration, credentials, hooks or remotes are copied;
 shared dependencies are preserved and only the owned temporary root is removed.
+
+## Row constraints and shared write guard (prepared, not deployed)
+
+This owner-approved local simplification builds on the released PR80 schema. It
+does not change production, application source, API/LINE flows, existing records,
+permissions, providers, environment variables or Vercel configuration. Merge does
+not execute the operator artifact.
+
+| Rule | Implementation |
+| --- | --- |
+| Unique/nonempty IDs, required fields, positive revisions, existing relationships and reversal uniqueness | Existing primary keys, NOT NULL, CHECK, foreign keys and indexes remain unchanged |
+| Finite lifecycle timestamps in UTC years 1–9999, with existing NULL allowance | 23 validated table CHECK constraints covering all 47 fields; no custom function in the predicates |
+| Immutable IDs and rejection of updates to archived records | One shared `prepare_record_write` BEFORE ROW trigger function comparing OLD/NEW |
+| Empty text becomes SQL NULL, without trimming whitespace | Same shared guard, with explicit per-table text-column arguments; it only repopulates the empty-text patch |
+| Automatic row revision increment | Same shared guard; `OLD.revision+1`, preserving no-op and explicit-revision edit behavior |
+| Global revision on INSERT/UPDATE/DELETE, including zero-row statements | Existing statement triggers and shared `advance_revision` remain unchanged |
+| App/LINE input/output conversion | Existing 46 typed mapping functions and timestamp helpers remain active |
+| Retained migration snapshot immutability | Existing 48 triggers and `reject_mutation` remain unchanged |
+
+The operational function count decreases from 74 to 52 (23 validators replaced by
+one); the operational trigger count stays 46. Each table still needs row preparation
+and statement revision tracking. Combining them would alter zero-row/multi-row
+revision semantics. Constraints cannot normalize values or increment revisions,
+and cannot compare an old record with a new record. See the
+[PostgreSQL constraint reference](https://www.postgresql.org/docs/current/ddl-constraints.html).
+No additional business-domain restrictions, enum rules or foreign keys are added.
+
+The artifact is
+`tools/migration/final-removal/20261118100705_constraint_record_validation.sql`,
+generated reproducibly by `tools/migration/constraint-validation.py`. It was
+allocated with the pinned Supabase CLI and moved outside automatic discovery;
+the original nine migrations are unchanged. One READ COMMITTED transaction checks
+identity/purpose/revision before and after both writer gates and all 51 table locks,
+pins the 74 predecessor bodies and the timestamp formatter's UTC setting, checks
+the 23 trigger definitions, and requires common invoker ownership/ACL/settings.
+The replacement receives that exact common ACL, including grant options; there
+is no public grant, SECURITY DEFINER or table capability addition. Unknown body
+references and trigger/catalog dependencies refuse retirement through RESTRICT.
+Existing rows must pass every new CHECK; no rewrite, normalization or repair runs.
+
+Production execution needs separate explicit approval, an exact target/source/SQL
+binding, fresh verified private recovery/local rehearsal, supervised writer/LINE
+pause and frozen reconciliation. Required settings are `stock.expected_isolation_id`,
+`stock.expected_purpose`, `stock.allow_constraint_validation=reviewed-row-constraints-v1`,
+`stock.constraint_reviewed_revision`, `stock.constraint_reviewed_source`,
+`stock.constraint_reviewed_fingerprint`,
+`stock.constraint_restore_verified=51-tables-15-metadata-v1` and
+`stock.constraint_semantics_verified=exact-app-line-consumers-v1`. These are
+attestations bound to independently verified evidence, not substitutes for it.
+
+After execution, compare all 51 table fingerprints and all metadata. Only 23 CHECK
+additions, 23 trigger target/argument changes and 23-to-1 validator replacement
+may differ; unchanged functions, all owners/ACLs, policies, roles, indexes, defaults,
+timestamps and revisions must match. Compare the same four production GET responses
+under the fence before reopening. App deployment is unnecessary: the currently
+released typed adapter supports both schemas. Failed DDL rolls back atomically;
+after an uncertain outcome inspect before retrying. If a post-commit check fails,
+keep traffic fenced and use the verified checkpoint's prior validator/trigger
+definitions for a separately reviewed schema-only rollback. Never restore stale
+business rows over acknowledged writes. Backup automation and new auth remain deferred.

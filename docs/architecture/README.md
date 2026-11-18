@@ -8,13 +8,16 @@ PR79's separately approved retirement completed on 2026-11-18: all 48 `__lexeme`
 columns are removed, in addition to the previously retired `business_cells`,
 `row_order`, redundant creation-instant and `cell_kinds` fields. All remaining
 values, permissions and 47 native lifecycle timestamps were verified; browser/LINE
-reopened. The compatible PR78 application remains deployed as `b0ea779`.
+reopened. PR80 was subsequently released as `31af820`: 116 obsolete functions
+were retired, 23 validators now call typed projectors, and all 51 tables,
+permissions and 47 lifecycle timestamps were verified before reopening.
 
-The current [typed PostgreSQL cleanup](../database-migration.md#typed-postgresql-cleanup-prepared-not-deployed)
-removes obsolete adapter branches and prepares retirement of legacy SQL aliases.
-It preserves current typed mappings, validation, stable IDs, retry/revision rules
-and Google Sheets backend behavior. Production deployment and operator SQL require
-separate approval. Retained import tables, journals and recovery evidence stay intact.
+The next [constraint simplification](../database-migration.md#row-constraints-and-shared-write-guard-prepared-not-deployed)
+moves lifecycle range checks into table constraints and replaces 23 duplicated
+validator functions with one shared write guard. The typed input/output mappings
+and per-statement revision triggers remain active. This is local preparation;
+production schema execution requires separate approval. Retained import tables,
+journals and recovery evidence stay intact.
 
 The external compatibility directory `src/externals/` was retired in [PR #40](https://github.com/volkswg/stock-management/pull/40); the pure aggregate Sheets service contract is at `src/infrastructure/persistence/google-sheets/service-contracts.ts`. The seven `src/features/` forwards and unused `@/feature/*` alias are also retired; their canonical owners are unchanged. Reviewed `services/` and standalone script compatibility surfaces remain. This is a structural milestone, **not** a database replacement or production-security certification.
 

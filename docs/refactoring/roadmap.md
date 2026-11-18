@@ -5,25 +5,28 @@ This page describes the **current plan**, not the full migration diary. See the 
 <a id="current-milestone-cell_kinds-compatibility-preparation-2026-11-17"></a>
 <a id="current-milestone-lexeme-compatibility-preparation-2026-11-18"></a>
 <a id="current-milestone-final-lexeme-retirement-preparation-2026-11-18"></a>
-## Current milestone: typed PostgreSQL compatibility cleanup (2026-11-18)
+<a id="current-milestone-typed-postgresql-compatibility-cleanup-2026-11-18"></a>
+## Current milestone: row constraints and shared write guard (2026-11-18)
 
-The Supabase cutover and physical metadata retirement are complete. PR79 is merged
-as `dfe521c`; all 48 lexemes are removed. Production continues to run the compatible
-PR78 app (`b0ea779`), with browser/LINE reopened, 47 native lifecycle timestamps and
-old business Sheets read-only.
+The Supabase cutover, physical metadata retirement and PR80 typed-adapter cleanup
+are complete. Production runs `31af820`, with browser/LINE reopened, 47 native
+lifecycle timestamps and old business Sheets read-only. PR80 retired 116 functions
+and preserved all 51 table values, permissions and remaining metadata.
 
-The approved bounded cleanup simplifies the adapter to the final typed schema,
-uses canonical headers directly and native `createdAt` sorting, and prepares
-operator-only removal of 115 old mapper entrypoints plus the obsolete column
-mapping contract. All 23 validators retain their rules while calling equivalent
-typed projectors directly. No table, column, ID, journal, record or permission
-cleanup is authorized by this implementation.
+The approved local implementation replaces duplicated validation with 23 validated
+CHECK constraints covering the same 47 timestamp ranges and one shared write
+guard. Existing ID/NOT NULL/positive-revision constraints remain. OLD/NEW identity
+and archive rules, empty-text normalization and automatic row revisions cannot be
+CHECK constraints and stay in the guard. The 23 statement revision triggers and
+46 typed input/output functions remain; no new business restrictions or foreign
+keys are introduced. Operational functions decrease from 74 to 52 only after a
+separately approved operator execution. No production changes are authorized here.
 
 Local current-source acceptance is separate from historical migration acceptance,
 which keeps a hash-pinned PR79 adapter in a disposable credential-free copy.
 Original migration fixtures and SQL remain immutable. Review/merge and subsequent
 production deployment/SQL need separate approval; fresh recovery and dependency
-checks remain release gates. See the [consolidated execution contract](../database-migration.md#typed-postgresql-cleanup-prepared-not-deployed).
+checks remain release gates. See the [consolidated execution contract](../database-migration.md#row-constraints-and-shared-write-guard-prepared-not-deployed).
 Backup automation and new authentication remain deferred.
 
 <a id="current-milestone-critical-path-cutover-mode-2026-11-12"></a>

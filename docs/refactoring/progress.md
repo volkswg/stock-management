@@ -1828,3 +1828,33 @@ The historical private-build mode creates a new synthetic Git snapshot solely fo
 its existing source attestation and materializes a temporary dependency copy for
 Next.js. No original Git configuration, credentials, hooks or remotes are copied;
 shared dependencies are preserved and only the owned temporary root is removed.
+
+## Row constraints and shared validator implementation (2026-11-18)
+
+PR80 was separately released as `31af820`; 116 legacy functions were retired,
+all 51 table values and surviving security metadata matched, and browser/LINE
+reopened. The next local change has no runtime TypeScript edit: one operator-only,
+reproducible transaction replaces 23 validators with one explicit shared guard
+and 23 CHECK constraints covering 47 timestamp fields. Operational functions
+decrease 74→52, while the 46 operational triggers, 46 typed mapping functions,
+existing table constraints and migration protection remain. No new business rule,
+normalization of stored records, permission grant or production execution occurs.
+
+`verify-typed-postgres.sh` reuses its fresh synthetic base for the new acceptance
+phase rather than adding another environment or framework. Full fingerprints
+prove all 51 stored tables and remaining metadata exact except the reviewed
+constraints/functions/trigger targets. Missing/wrong/stale approval, mixed ACLs,
+unknown procedural/trigger dependencies and late DDL failure refuse atomically.
+Five focused cases compare predecessor writes across all 23 tables, every lifecycle
+field's boundaries in three timezones, exact decimal/JSON storage, normalization,
+identity/archive/revision rules and caller privileges. All 32 existing operational
+cases, 10 native timestamp cases and the actual browser retry scenario pass again
+on the simplified schema, including the actual app and LINE owners. No provider,
+private checkpoint or production database is accessed for these tests.
+
+All 689 regressions and 73 Python tests pass, with zero lint errors and the inherited
+`shipmentRow` warning. Typecheck and a credential-free isolated build pass; the
+route manifest is unchanged and all 113 browser chunks exclude database strings.
+The Mac build dereferenced the existing dependency symlink into its owned temporary
+copy; shared dependencies were preserved. Review/merge and hosted schema execution
+remain separate gates. See the [execution contract](../database-migration.md#row-constraints-and-shared-write-guard-prepared-not-deployed).

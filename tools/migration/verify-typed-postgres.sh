@@ -40,3 +40,4 @@ run_tc tc_operational tools/migration/operational.test.cjs
 run_tc tc_native tools/migration/native-timestamps.test.cjs
 run_tc tc_browser tools/migration/browser-acceptance.test.cjs
 echo 'PASS: current typed-only adapter;116 legacy functions retired;51tables/15metadata exact;operational,timestamp and actual browser acceptance'
+source tools/migration/verify-constraint-validation.sh
