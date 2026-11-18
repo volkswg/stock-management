@@ -228,14 +228,18 @@ async function fingerprintOrderCreation(form: FormData): Promise<string> {
     "POST", "/api/orders/with-images", "", entries,
   ])));
 }
-async function orderCreationRevision(): Promise<string | undefined> {
+async function orderCreationRevision(): Promise<{ value: string; scope?: string } | undefined> {
   try {
     // HEAD is read-only and carries the existing PostgreSQL revision header.
     // Pin support before the first POST: a Sheets-era uncertainty must not be
     // retried just because the application later switches storage backends.
     const response = await fetch("/api/orders", { method: "HEAD", cache: "no-store" });
+    const edit = response.headers.get("x-stock-edit-revision");
+    if (response.ok && response.headers.get("x-stock-edit-scope") === "/api/orders" && edit && /^"stock-edit-v1-[a-f0-9]{64}"$/.test(edit)) {
+      return { value: edit, scope: "/api/orders" };
+    }
     const revision = response.headers.get("x-stock-revision");
-    return response.ok && revision && /^"stock-v2-\d+"$/.test(revision) ? revision : undefined;
+    return response.ok && revision && /^"stock-v2-\d+"$/.test(revision) ? { value: revision } : undefined;
   } catch { return undefined; }
 }
 async function sendOrderCreation(formData: FormData, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
@@ -269,7 +273,7 @@ async function sendOrderCreation(formData: FormData, fingerprint: Promise<string
       headers: {
         Accept: "application/json",
         "Idempotency-Key": pending.key,
-        ...(revision ? { "If-Match": revision } : {}),
+        ...(revision ? { "If-Match": revision.value, ...(revision.scope ? { "x-stock-edit-scope": revision.scope } : {}) } : {}),
       },
       body: formData,
     });

@@ -80,3 +80,67 @@ test('replaying an old completed response cannot move the browser revision behin
  await (await run.fetch('/api/orders',{...input,body:JSON.stringify({seller:'Another synthetic intent',totalPrice:20})})).json();
  assert.deepEqual(revisions,['"stock-v2-90071992547409930"','"stock-v2-90071992547409930"']);
 });
+
+const token = n => `"stock-edit-v1-${String(n).padStart(64,'0')}"`;
+const scoped = (scope,n,global=n) => Response.json({ok:true},{headers:{'x-stock-edit-scope':scope,'x-stock-edit-revision':token(n),'x-stock-revision':`"stock-v2-${global}"`}});
+const patch = remark => ({method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({remark})});
+test('browser selects the viewed entity rather than an unrelated order/movement or collection revision',async()=>{
+ const writes=[];
+ const run=client(async request=>{
+  if(typeof request==='string')return scoped(request,request.endsWith('WT')?1:2);
+  writes.push([request.headers.get('x-stock-edit-scope'),request.headers.get('If-Match')]);
+  return Response.json({ok:true});
+ });
+ await run.fetch('/api/movements/WT');await run.fetch('/api/orders/O1');await run.fetch('/api/movements');
+ await (await run.fetch('/api/movements/wt/items/I1',patch('movement'))).json();
+ await (await run.fetch('/api/orders/O1',patch('order'))).json();
+ assert.deepEqual(writes,[['/api/movements/WT',token(1)],['/api/orders/O1',token(2)]]);
+});
+test('uncertain edits preserve both identity and original view through reload and a newer GET',async()=>{
+ const writes=[];let version=1;
+ const transport=async request=>{
+  if(typeof request==='string')return scoped('/api/movements/WT',version);
+  writes.push([request.headers.get('Idempotency-Key'),request.headers.get('If-Match'),request.headers.get('x-stock-edit-scope')]);
+  throw Error('lost acknowledgement');
+ };
+ const first=client(transport);await first.fetch('/api/movements/WT');
+ await assert.rejects(first.fetch('/api/movements/WT/items/I1',patch('draft')));
+ const next=client(transport,first.store);version=2;await next.fetch('/api/movements/WT');
+ await assert.rejects(next.fetch('/api/movements/WT/items/I1',patch('draft')));
+ assert.deepEqual(writes[1],writes[0]);assert.equal(writes[0][1],token(1));assert.equal(first.store.size,1);
+});
+test('only a confirmed pre-handler conflict clears an edit, with no automatic retry or draft rewrite',async()=>{
+ let status=503;const writes=[];
+ const run=client(async request=>{
+  if(typeof request==='string')return scoped('/api/orders/O1',1);
+  writes.push([request.headers.get('Idempotency-Key'),await request.clone().text()]);
+  return Response.json({error:'review',...(status===409?{code:'stock_revision_conflict'}:{})},{status});
+ });
+ await run.fetch('/api/orders/O1');
+ await (await run.fetch('/api/orders/O1',patch('retained draft'))).json();assert.equal(run.store.size,1);
+ status=409;await (await run.fetch('/api/orders/O1',patch('retained draft'))).json();
+ assert.equal(run.store.size,0);assert.equal(writes.length,2);assert.deepEqual(writes[0],writes[1]);
+ await (await run.fetch('/api/orders/O1',patch('retained draft'))).json();assert.notEqual(writes[2][0],writes[1][0]);
+ assert.equal(writes[2][1],writes[1][1]);
+});
+test('older replay, wrong scope, error and foreign responses cannot replace a newer scoped view',async()=>{
+ const writes=[];let response;
+ const run=client(async request=>{
+  if(typeof request==='string')return response;
+  writes.push(request.headers.get('If-Match'));return Response.json({ok:true});
+ });
+ response=scoped('/api/orders/O1',5,90071992547409930n);await run.fetch('/api/orders/O1');
+ response=scoped('/api/orders/O1',1,4);await run.fetch('/api/orders/O1');
+ response=scoped('/api/orders/O1',9,90071992547409931n);await run.fetch('https://foreign.test/api/orders/O1');
+ response=scoped('/api/orders/O2',9,90071992547409931n);await run.fetch('/api/orders/O1');
+ response=new Response('{}',{status:500,headers:{'x-stock-edit-scope':'/api/orders/O1','x-stock-edit-revision':token(9),'x-stock-revision':'"stock-v2-90071992547409932"'}});await run.fetch('/api/orders/O1');
+ await (await run.fetch('/api/orders/O1',patch('a'))).json();assert.deepEqual(writes,[token(5)]);
+});
+test('legacy key-only scoped edits require reconciliation instead of inventing a new view',async()=>{
+ let sends=0;const run=client(async()=>{sends++;throw Error('lost');});
+ await assert.rejects(run.fetch('/api/orders/O1',patch('draft')));
+ const key=[...run.store.keys()][0];run.store.set(key,'legacy-pending-key');
+ const reload=client(async()=>{sends++;return Response.json({});},run.store);
+ await assert.rejects(reload.fetch('/api/orders/O1',patch('draft')),/older page needs review/);
+ assert.equal(sends,1);assert.equal(run.store.get(key),'legacy-pending-key');
+});
