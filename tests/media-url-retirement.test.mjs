@@ -44,3 +44,17 @@ test('both actual Order gallery formatters display media sourceUrl Drive aliases
   for(const external of ['https://example.invalid/image.jpg','https://drive.google.com.attacker.invalid/open?id=FILE_123','https://example.invalid/?id=FILE_123'])assert.equal(exports[fn](external),external);
  }
 });
+test('actual historical CI preparation layers the new source inverse before the immutable PR79 adapter',async()=>{
+ const {mkdtempSync,rmSync,existsSync}=await import('node:fs');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const target=mkdtempSync(join(tmpdir(),'stock-media-history-regression-'));
+ try{
+  const shell=readFileSync('tools/migration/verify-persistence-history.sh','utf8');
+  const python=shell.split("<<'PY'\n")[1].split('\nPY\n')[0];assert.ok(python);
+  execFileSync('python3',['-',target,'schema'],{input:python,env:{PATH:process.env.PATH},encoding:'utf8'});
+  const typed=JSON.parse(readFileSync('tests/fixtures/typed-postgres-before.json','utf8'));
+  assert.equal(readFileSync(join(target,'src/infrastructure/persistence/postgres/records.ts'),'utf8'),typed.edits['src/infrastructure/persistence/postgres/records.ts'].before);
+  const media=JSON.parse(readFileSync('tests/fixtures/media-url-before.json','utf8'));
+  for(const [file,edit] of Object.entries(media.edits))if(!typed.edits[file])assert.equal(readFileSync(join(target,file),'utf8'),edit.before,file);
+  assert.equal(existsSync(join(target,'.vercel')),false);
+ }finally{rmSync(target,{recursive:true,force:true});}
+});
