@@ -1812,3 +1812,14 @@ current private values, IDs/order and all 69 app/LINE comparisons, the reviewed
 SQL/data/security diff, and local create/edit/archive. Its owned network-isolated
 container/volume was removed and all original private evidence retained. This
 saved-data evidence is not current hosted freshness or execution approval.
+
+
+PR80 CI follow-up: the inherited hosted-tooling campaign also assumes the older
+`row_order` schema and its matching record adapter. It now runs explicitly through
+`verify-persistence-history.sh --hosted-tooling`, with the pinned PR79 adapter in
+the same credential-free disposable source copy. Its full private-build/browser,
+fake-provider fault, TLS/role and generated-checkpoint restore assertions remain
+intact. It is historical tooling evidence, not hosted acceptance of the current
+final schema. The actual current typed adapter remains independently exercised by
+`verify-typed-postgres.sh` and the credential-free current-source production build.
+No production fallback or schema guard is weakened and no hosted tool is invoked.

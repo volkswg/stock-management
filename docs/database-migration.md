@@ -5158,3 +5158,14 @@ source/deployment/configuration binding.
 Keep the 24 `stock_migration` tables and their recovery/reconciliation contract,
 `commands`, `side_effects`, revision/archive columns and stable keys. Removing them
 is outside this cleanup. Backup automation and new authentication remain deferred.
+
+
+PR80 CI follow-up: the inherited hosted-tooling campaign also assumes the older
+`row_order` schema and its matching record adapter. It now runs explicitly through
+`verify-persistence-history.sh --hosted-tooling`, with the pinned PR79 adapter in
+the same credential-free disposable source copy. Its full private-build/browser,
+fake-provider fault, TLS/role and generated-checkpoint restore assertions remain
+intact. It is historical tooling evidence, not hosted acceptance of the current
+final schema. The actual current typed adapter remains independently exercised by
+`verify-typed-postgres.sh` and the credential-free current-source production build.
+No production fallback or schema guard is weakened and no hosted tool is invoked.

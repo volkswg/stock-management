@@ -21,7 +21,12 @@ for name,edit in fixture['edits'].items():
 os.symlink((root/'node_modules').resolve(),target/'node_modules',target_is_directory=True)
 assert {p.name for p in target.glob('.env*')} <= {'.env.example'} and not(target/'.vercel').exists()
 PY
-for stage in operational named-columns row-order native-timestamps cell-kinds cell-kinds-final lexemes lexemes-final; do
+case "${1:-schema}" in
+ schema) stages=(operational named-columns row-order native-timestamps cell-kinds cell-kinds-final lexemes lexemes-final);;
+ --hosted-tooling) stages=(hosted-tooling);;
+ *) echo 'Unsupported historical verification scope' >&2; exit 1;;
+esac
+for stage in "${stages[@]}"; do
  echo "Historical schema acceptance: $stage (pinned PR79 record adapter)"
  bash "$history_root/tools/migration/verify-$stage.sh"
 done

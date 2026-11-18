@@ -52,7 +52,7 @@ jobs:
           bash tools/migration/verify-typed-postgres.sh 2>&1 | tee evidence/typed-postgres.log
           bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee evidence/recovery-fingerprints.log
           bash tools/migration/verify-restricted-backup.sh 2>&1 | tee evidence/restricted-backup.log
-          STOCK_HA_EVIDENCE_DIR="$PWD/evidence" bash tools/migration/verify-hosted-tooling.sh 2>&1 | tee evidence/hosted-tooling-integration.log
+          STOCK_HA_EVIDENCE_DIR="$PWD/evidence" bash tools/migration/verify-persistence-history.sh --hosted-tooling 2>&1 | tee evidence/hosted-tooling-integration.log
       - name: Credential-free production build and bundle boundaries
         run: |
           set -euo pipefail
