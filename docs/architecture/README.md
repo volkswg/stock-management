@@ -4,13 +4,17 @@
 
 Business workflows belong to the Orders, Shipments, Inventory, Sales, Expenses, HR and LINE modules. Production uses Supabase with named-column authority and stable-ID mutations. Operational `business_cells`, all 23 `row_order` and all 23 redundant `created_at_instant` columns have been removed. PR75 was separately released as `5f04f093`: 47 existing `createdAt`, `updatedAt` and `deletedAt` fields retain their names as `timestamptz`. Browser writes and LINE reopened after recovery, reconciliation, application and security checks; former business Sheets remain read-only. See the [timestamp release record](../database-migration.md#native-lifecycle-timestamps-prepared-not-deployed). Shared provider transports remain in `src/infrastructure/`; composition wires the existing feature interfaces.
 
-PR78's lexeme compatibility was separately released as `b0ea779` on 2026-11-18.
-All 23 `cell_kinds` columns were previously removed; all 48 field lexemes and 47
-native lifecycle timestamps remain. Browser/LINE are open and former business
-Sheets remain read-only. The [final lexeme retirement preparation](../database-migration.md#final-lexeme-retirement-prepared-not-executed)
-adds guarded operator SQL and local proof only. It changes no production source,
-permissions or records. Physical removal requires a new approved maintenance
-window and fresh recovery/current-data verification.
+PR79's separately approved retirement completed on 2026-11-18: all 48 `__lexeme`
+columns are removed, in addition to the previously retired `business_cells`,
+`row_order`, redundant creation-instant and `cell_kinds` fields. All remaining
+values, permissions and 47 native lifecycle timestamps were verified; browser/LINE
+reopened. The compatible PR78 application remains deployed as `b0ea779`.
+
+The current [typed PostgreSQL cleanup](../database-migration.md#typed-postgresql-cleanup-prepared-not-deployed)
+removes obsolete adapter branches and prepares retirement of legacy SQL aliases.
+It preserves current typed mappings, validation, stable IDs, retry/revision rules
+and Google Sheets backend behavior. Production deployment and operator SQL require
+separate approval. Retained import tables, journals and recovery evidence stay intact.
 
 The external compatibility directory `src/externals/` was retired in [PR #40](https://github.com/volkswg/stock-management/pull/40); the pure aggregate Sheets service contract is at `src/infrastructure/persistence/google-sheets/service-contracts.ts`. The seven `src/features/` forwards and unused `@/feature/*` alias are also retired; their canonical owners are unchanged. Reviewed `services/` and standalone script compatibility surfaces remain. This is a structural milestone, **not** a database replacement or production-security certification.
 

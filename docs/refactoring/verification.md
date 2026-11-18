@@ -840,3 +840,50 @@ parser/replay/cleanup invocation and no provider calls. Local create/edit/archiv
 also passed. Only the newly owned container/volume was removed; original snapshots
 and recovery evidence remain private. This saved-checkpoint proof does not establish
 current production freshness or authorize hosted execution. See the [maintenance gates](../database-migration.md#final-lexeme-retirement-prepared-not-executed).
+
+
+## Typed PostgreSQL cleanup — local verification (2026-11-18)
+
+All 688 regressions and 73 Python tests pass. Lint has zero errors and the inherited
+unused `shipmentRow` warning. Typecheck and the isolated credential-free default
+build pass; the route manifest is unchanged and all 113 browser chunks exclude
+private database strings. Only the PostgreSQL record adapter changes in runtime
+TypeScript. No dependency, env, Vercel configuration or original SQL migration changes.
+The one bounded source inverse preserves all earlier immutable historical fixtures.
+
+`verify-persistence-history.sh` passes all eight original PostgreSQL verifier stages
+in a disposable tracked-source copy with the exact hash-pinned PR79 record adapter.
+It contains no real env file, Git credentials or `.vercel` directory; resolved
+shared dependencies are retained. Every old assertion remains enabled. This is
+explicit historical evidence, not a test of the current typed adapter.
+
+`verify-typed-postgres.sh` tests the actual current source on fresh synthetic final
+schemas, with every retired function absent. The actual operator rejects missing
+approval and stale review, and blocks mixed-case procedural consumers. A catalog
+view dependency fails through RESTRICT and atomically restores the previous
+validator bodies. A scoped read role retains typed projection/capability execution
+without input privileges. Full 51-table/15-metadata fingerprints match except the
+116 retired functions and 23 retargeted validator calls, with surviving ACLs/owners/
+settings exact. No data normalization or shadow representation is involved.
+
+Five focused current-source cases verify rejection of the old retained schema before
+reads/writes, zero obsolete entrypoints/47 native timestamps, exact decimal storage/
+public orders/actual LINE parsing, one capability check per unit across services,
+and same-pool revalidation of missing/partial schemas on later transactions. All
+32 existing operational cases, 10 native timestamp cases and actual browser
+committed-response-loss/reload/replay also pass on the cleaned final schema.
+Raw storage witnesses select the original projector when present and its equivalent
+typed projector after retirement; their value/order/revision assertions are unchanged.
+
+An existing private checkpoint was strictly restored into a new network-isolated
+local container. The already released final schema was reconstructed locally;
+the pinned PR79 adapter and actual new adapter produced identical private values,
+record identities and ordering before/after the exact cleanup. All 69 existing
+app/LINE comparisons, remaining data/security proof and create/edit/archive passed.
+No provider was invoked. The owned container/volume was removed; original recovery
+and private evidence were retained. This is saved-checkpoint evidence, not fresh
+production verification.
+
+These local results do not authorize deployment, hosted SQL or production GO.
+Production remains on its separately verified released source. See the
+[execution/rollback contract](../database-migration.md#typed-postgresql-cleanup-prepared-not-deployed).

@@ -48,14 +48,8 @@ jobs:
           bash tools/migration/verify-postgres.sh 2>&1 | tee evidence/archive-postgres.log
           env -i PATH="$PATH" node --test --test-isolation=none tools/migration/application-parity.test.cjs 2>&1 | tee evidence/application-parity.log
           env -i PATH="$PATH" node --test tools/migration/readonly-staging.test.cjs 2>&1 | tee evidence/readonly-staging.log
-          bash tools/migration/verify-operational.sh 2>&1 | tee evidence/operational-postgres.log
-          bash tools/migration/verify-named-columns.sh 2>&1 | tee evidence/named-columns-postgres.log
-          bash tools/migration/verify-row-order.sh 2>&1 | tee evidence/row-order-postgres.log
-          bash tools/migration/verify-native-timestamps.sh 2>&1 | tee evidence/native-timestamps-postgres.log
-          bash tools/migration/verify-cell-kinds.sh 2>&1 | tee evidence/cell-kinds-postgres.log
-          bash tools/migration/verify-cell-kinds-final.sh 2>&1 | tee evidence/cell-kinds-final-postgres.log
-          bash tools/migration/verify-lexemes.sh 2>&1 | tee evidence/lexeme-postgres.log
-          bash tools/migration/verify-lexemes-final.sh 2>&1 | tee evidence/lexeme-final-postgres.log
+          bash tools/migration/verify-persistence-history.sh 2>&1 | tee evidence/persistence-history.log
+          bash tools/migration/verify-typed-postgres.sh 2>&1 | tee evidence/typed-postgres.log
           bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee evidence/recovery-fingerprints.log
           bash tools/migration/verify-restricted-backup.sh 2>&1 | tee evidence/restricted-backup.log
           STOCK_HA_EVIDENCE_DIR="$PWD/evidence" bash tools/migration/verify-hosted-tooling.sh 2>&1 | tee evidence/hosted-tooling-integration.log
