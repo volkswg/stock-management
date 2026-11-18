@@ -3,26 +3,24 @@
 This page describes the **current plan**, not the full migration diary. See the [current ownership map](../architecture/migration-map.md), [merged PR ledger](progress.md#merged-implementation-ledger) and [verification evidence](verification.md).
 
 <a id="current-milestone-cell_kinds-compatibility-preparation-2026-11-17"></a>
-## Current milestone: lexeme compatibility preparation (2026-11-18)
+<a id="current-milestone-lexeme-compatibility-preparation-2026-11-18"></a>
+## Current milestone: final lexeme retirement preparation (2026-11-18)
 
-Production uses Supabase with stable IDs and 47 native lifecycle timestamps.
-PR77's separately approved retirement completed: operational `business_cells`,
+Production runs PR78's compatible source `b0ea779`. Operational `business_cells`,
 `row_order`, redundant creation-instant fields and all 23 `cell_kinds` are absent.
-The compatible PR76 application remains deployed; browser/LINE are open and old
-business Sheets remain read-only. All48 `__lexeme` columns remain.
+All 48 `__lexeme` columns and 47 native lifecycle timestamps remain; browser/LINE
+are open and old business Sheets are read-only.
 
-The owner authorizes local implementation, tests and one review PR for
-[lexeme compatibility](../database-migration.md#lexeme-compatibility-prepared-not-deployed).
-Retained schemas must use the unchanged released readers/writers. Typed-only
-mapping is a separately tested candidate; its formatting/type/null/boolean
-tradeoffs require explicit current-data/application review before final removal.
-Keep all columns and production untouched. No shadow representation storage,
-business repair, financial formula change or unrelated persistence refactor.
+The current instruction authorizes the [final operator artifact and local proof](../database-migration.md#final-lexeme-retirement-prepared-not-executed),
+using existing private recovery evidence. No production pause, DDL, deployment or
+fresh business-data access is performed. Existing released code already supports
+the typed capability; no additional app deployment is proposed.
 
-Deployment/additive hosted installation and later physical removal remain
-separately approved releases with fresh recovery, exact target verification and
-supervised maintenance. The synthetic local fixture is not an operator removal
-artifact. Backup automation and new authentication remain deferred.
+Next gates: CI/review and merge approval, fresh recovery/current-data and exact
+app/LINE review, then separate approval for traffic controls and all 48 column
+removals in a supervised window. Preserve typed values, IDs, revisions, archives,
+journals, permissions and lifecycle timestamps. No shadow representation storage
+or automatic data repair. Backup automation and new authentication remain deferred.
 
 <a id="current-milestone-critical-path-cutover-mode-2026-11-12"></a>
 

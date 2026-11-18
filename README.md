@@ -4,6 +4,8 @@ Next.js application for Orders, Shipments, inventory/movements, Sales, expenses 
 
 **Production safety:** completion of the refactor does not certify authentication, authorization, live provider behavior or concurrent writes. [Issue #38](https://github.com/volkswg/stock-management/issues/38) tracks access-control verification, CI and isolated smoke tests. Check access restrictions before exposing employee/payroll or write-capable APIs; do not run mutating smoke tests against production.
 
+Production uses Supabase. PR78 compatibility is released; all 48 `__lexeme` columns remain. [Final retirement preparation](docs/database-migration.md#final-lexeme-retirement-prepared-not-executed) is a separate reviewed maintenance operation.
+
 ## Start here
 
 - [Architecture guide](docs/architecture/README.md) for current ownership and documentation navigation; [engineering rules](AGENTS.md) for safe development.
