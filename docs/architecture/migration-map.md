@@ -143,3 +143,16 @@ new versioned migration. The [current runbook](../database-migration.md#named-co
 owns maintenance, old-writer fencing, reversible compatibility rollback and the
 separate final-removal approval gate. Historical Sheets/staging plans above do not
 describe current production selection. Feature calculations and UI owners do not change.
+
+## Current typed storage and constraint simplification
+
+PR80's released `31af820` adapter uses the active typed input/output functions;
+all physical migration sidecars and 116 obsolete function aliases are retired.
+The shared transport, feature bindings and application owners above are unchanged.
+The local constraint simplification is owned by `tools/migration`: 47 lifecycle
+range checks become 23 table CHECK constraints, with one shared trigger function
+for explicit text normalization, stable identity/archive guards and row revisions.
+Statement revision tracking, typed mappings, existing keys/FKs, policies and
+immutable import protection remain. The operator artifact is outside automatic
+migration discovery; production still has the 23 original validator functions
+until separate release approval. See the [runbook](../database-migration.md#row-constraints-and-shared-write-guard-prepared-not-deployed).

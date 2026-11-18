@@ -903,3 +903,36 @@ The historical private-build mode creates a new synthetic Git snapshot solely fo
 its existing source attestation and materializes a temporary dependency copy for
 Next.js. No original Git configuration, credentials, hooks or remotes are copied;
 shared dependencies are preserved and only the owned temporary root is removed.
+
+## Row constraints and shared guard — local verification (2026-11-18)
+
+All 689 regressions and 73 Python tests pass. Lint has zero errors and the inherited
+unused `shipmentRow` warning; typecheck and the credential-free isolated default
+build pass. The route manifest and all 113 browser bundle boundaries are unchanged.
+No runtime TypeScript, dependency, environment or original migration is changed.
+The Mac build copied the resolved shared dependency directory into its owned
+temporary root; it did not alter the shared install or copy integration env files.
+
+The current `verify-typed-postgres.sh` now also applies the exact guarded constraint
+artifact to fresh disposable synthetic copies of the released PR80 schema. Its
+existing typed acceptance remains intact. The added phase proves all 51 table
+fingerprints and 15 metadata sections unchanged except 23 CHECK additions, 23
+trigger retargets and the 23-to-1 validator replacement. The replacement's definition,
+invoker owner/ACL/settings and every unchanged function/permission are compared.
+No blanket metadata exclusions or baseline fixture updates are used.
+
+Five focused real-PostgreSQL cases cover all 23 tables and all 47 lifecycle fields:
+exact decimal/JSON text, empty/NULL/whitespace handling, immutable identities,
+archive protection, explicit/no-op/multi-row/zero-row/delete revision behavior,
+valid/null/BC/out-of-range/infinite instants in UTC, Bangkok and Los Angeles,
+common ACL preservation and table-scoped reader isolation. Valid fixtures honor
+existing required fields, foreign keys and unique reversal constraints. Missing
+approval, wrong identity, stale revision, procedural/trigger consumers, differing
+validator ACLs and a late constraint collision all refuse with atomic rollback.
+
+All 32 unchanged operational tests, 10 timestamp tests and actual browser
+lost-response/reload/replay pass on separate fresh simplified-schema copies. Those
+tests execute actual application/LINE owners with provider calls forbidden. No
+production record, hosted write, new protection bypass or real provider canary is
+part of this evidence. Production continues using its released PR80 schema until
+separate maintenance/recovery/execution authorization.
