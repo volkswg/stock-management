@@ -770,7 +770,8 @@ Seven retained-schema cases and seven typed-candidate cases cover exact retained
 spelling, large decimal/integer precision, blank/null handling, real LINE context
 parsing, boolean aliases, direct edits, stable references and atomic failures.
 A partial-schema case deliberately keeps the old mapper valid while adding an
-unexpected lexeme: the new capability rejects it without falling back. A separate
+unexpected lexeme: the new capability rejects it without falling back. Another case removes every lexeme but leaves old validators and proves that
+this incomplete retirement still fails closed. A separate
 same-service/pool case crosses the Unix-socket-only synthetic drop fixture and
 verifies subsequent reads and writes without restarting the app. That fixture
 also rejects a TCP admin invocation independently.

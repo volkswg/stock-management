@@ -20,6 +20,14 @@ if(mode==='lx_partial'){
   await transaction(false,async()=>assert.equal((await q('SELECT stock_operational.column_mapping_contract_v1() mode')).rows[0].mode,'final'));
   await assert.rejects(transaction(false,()=>service.orders.readRows()),e=>e.status===503);
  });
+}else if(mode==='lx_incomplete'){
+ test('zero columns with retained validators fail before typed mapping is enabled',async()=>{
+  const url=new URL(process.env.STOCK_DATABASE_URL);assert.equal(url.pathname,'/lx_incomplete');url.username='postgres';
+  const admin=new Client({connectionString:url.toString()});await admin.connect();
+  try{await assert.rejects(admin.query('SELECT stock_operational.lexeme_mapping_contract_v1()'),/Incomplete lexeme function retirement/);}finally{await admin.end();}
+  await assert.rejects(transaction(false,()=>q('SELECT stock_operational.lexeme_mapping_contract_v1()')),e=>e.status===503&&!e.message.includes('Incomplete lexeme'));
+  await assert.rejects(transaction(false,()=>service.orders.readRows()),e=>e.status===503);
+ });
 }else if(mode==='lx_hot'){
  test('same service and pool cross the synthetic retained-to-typed transition',async()=>{
   const url=new URL(process.env.STOCK_DATABASE_URL);url.username='postgres';const admin=new Client({connectionString:url.toString()});await admin.connect();

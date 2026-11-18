@@ -20,7 +20,7 @@ test('additive artifact is reproducible and cannot drop columns or rewrite exist
  assert.equal(readdirSync('supabase/migrations').filter(n=>n.endsWith('.sql')).length,9);
  assert.doesNotMatch(sql,/DROP (?:COLUMN|TABLE|FUNCTION)|ALTER TABLE|CREATE OR REPLACE|UPDATE stock_|DISABLE|CASCADE|SECURITY DEFINER|CREATE ROLE/);
  for(const name of ['stock.expected_isolation_id','stock.expected_purpose','stock.allow_lexeme_compatibility'])assert.ok(sql.includes(name));
- assert.match(sql,/Unreviewed lexeme predecessor drift/);assert.match(sql,/Partial lexeme schema/);
+ assert.match(sql,/Unreviewed lexeme predecessor drift/);assert.match(sql,/Partial lexeme schema/);assert.match(sql,/Incomplete lexeme function retirement/);assert.ok(sql.includes("strpos(p.prosrc,'__lexeme')>0"));
 });
 test('typed candidates use exact decimal text and JSON text, preserve blanks and never access sidecar values',()=>{
  const r=spawnSync('python3',['-c',"import runpy,json;m=runpy.run_path('tools/migration/lexemes.py');print(json.dumps({'projects':[m['project'](t) for t in m['CATALOG']],'inputs':[m['input_body'](t) for t in m['CATALOG']]}))"],{encoding:'utf8'});

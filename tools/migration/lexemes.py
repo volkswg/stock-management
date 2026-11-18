@@ -109,7 +109,12 @@ BEGIN
  SELECT ('''+count(lexemes)+''') INTO lexemes;
  SELECT count(*) INTO total FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid WHERE c.relnamespace='stock_operational'::regnamespace AND NOT a.attisdropped AND right(a.attname,8)='__lexeme';
  IF lexemes=48 AND total=48 THEN RETURN 'retained'; END IF;
- IF lexemes=0 AND total=0 THEN RETURN 'typed'; END IF;
+ IF lexemes=0 AND total=0 THEN
+  IF EXISTS(SELECT FROM pg_proc p WHERE p.pronamespace='stock_operational'::regnamespace
+   AND p.oid<>'stock_operational.lexeme_mapping_contract_v1()'::regprocedure
+   AND strpos(p.prosrc,'__lexeme')>0) THEN RAISE EXCEPTION 'Incomplete lexeme function retirement'; END IF;
+  RETURN 'typed';
+ END IF;
  RAISE EXCEPTION 'Partial lexeme schema';
 END $$;
 '''

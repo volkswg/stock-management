@@ -27,8 +27,18 @@ install_lexemes lx_retained | pg psql -U postgres -d lx_retained -v ON_ERROR_STO
 pg psql -U postgres -d lx_retained -XqAt -v ON_ERROR_STOP=1 < "$artifacts/fingerprint.sql" > "$artifacts/lexemes-after.jsonl"
 python3 tools/migration/lexemes-proof.py "$artifacts"
 pg psql -U postgres -d lx_retained -v ON_ERROR_STOP=1 -c "SET ROLE lexeme_reader; SELECT stock_operational.lexeme_mapping_contract_v1(); SELECT stock_operational.typed_project_orders(t) FROM stock_operational.orders t LIMIT 1; SELECT 1 / (NOT has_function_privilege('lexeme_reader','stock_operational.typed_input_orders(jsonb)','EXECUTE'))::int;" > "$artifacts/lexeme-reader-after.log"
-for database in lx_typed lx_hot lx_partial lx_operational lx_native lx_browser; do pg createdb -U postgres -T lx_retained "$database"; done
+for database in lx_typed lx_hot lx_partial lx_incomplete lx_operational lx_native lx_browser; do pg createdb -U postgres -T lx_retained "$database"; done
 pg psql -U postgres -d lx_partial -v ON_ERROR_STOP=1 -c 'ALTER TABLE stock_operational.revision ADD COLUMN synthetic__lexeme text;' > "$artifacts/lexeme-partial.log"
+# Removing columns alone is not a complete candidate migration: retained
+# validators still require them. The old v1 mapper would also reject this state.
+python3 - <<'PY_INCOMPLETE' > "$artifacts/incomplete-columns.sql"
+import runpy
+m=runpy.run_path('tools/migration/lexemes.py')
+for table,spec in m['POLICY']['tables'].items():
+ for f in spec['fields']:
+  if f['lexeme']:print(f'ALTER TABLE stock_operational.{table} DROP COLUMN "{f["lexeme"]}" RESTRICT;')
+PY_INCOMPLETE
+pg psql -U postgres -d lx_incomplete -v ON_ERROR_STOP=1 < "$artifacts/incomplete-columns.sql" > "$artifacts/incomplete-columns.log"
 python3 tools/migration/lexemes.py --local-typed-fixture > "$artifacts/local-typed-fixture.sql"
 for database in lx_typed lx_operational lx_native lx_browser; do
  { echo "SET stock.local_lexeme_fixture='synthetic-only';"; cat "$artifacts/local-typed-fixture.sql"; } | pg psql -U postgres -d "$database" -v ON_ERROR_STOP=1 > "$artifacts/lexeme-local-$database.log"
@@ -37,6 +47,7 @@ port=$(docker port "$name" 5432/tcp | cut -d: -f2)
 run_lx(){ local database=$1; shift; env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_LX_CASE="$database" STOCK_LX_CONTAINER="$name" STOCK_LX_FIXTURE="$artifacts/local-typed-fixture.sql" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-/usr/bin/chromium}" STOCK_TARGET_ISOLATION_ID="$(identity "$database")" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/$database" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test "$@"; }
 run_lx lx_retained tools/migration/lexemes.test.cjs
 run_lx lx_partial tools/migration/lexemes.test.cjs
+run_lx lx_incomplete tools/migration/lexemes.test.cjs
 run_lx lx_typed tools/migration/lexemes.test.cjs
 run_lx lx_hot tools/migration/lexemes.test.cjs
 run_lx lx_operational tools/migration/operational.test.cjs

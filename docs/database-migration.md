@@ -4931,7 +4931,8 @@ The request-wide adapter detects capabilities once per unit of work. An
 unprepared database retains its existing path; an installed retained-lexeme schema
 uses the unchanged released `column_input_`/`column_project_` family, including exact
 spelling and legacy input acceptance. A complete future typed schema selects the
-new family. Partial, misplaced or wrongly typed columns fail closed; no exception
+new family. Partial, misplaced or wrongly typed columns fail closed, as do zero-column
+layouts with retained function references; no exception
 fallback, inferred representation metadata or new environment setting is added.
 
 ### Explicit typed-candidate transport contracts
