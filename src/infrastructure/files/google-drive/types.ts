@@ -1,4 +1,4 @@
-import type { IGoogleAccessTokenProvider } from "../../persistence/google-sheets/google-auth/types";
+import type { IGoogleAccessTokenProvider } from "../../external/google-auth/types";
 
 export interface IGoogleDriveService {
   uploadImage(input: GoogleDriveUploadImageRequest): Promise<GoogleDriveFile>;

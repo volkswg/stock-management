@@ -16,10 +16,10 @@ Apply these rules to new and migrated code. `services` and standalone script lea
 | `modules/<feature>/server.ts` | Guarded, explicit named server composition | Browser exports or broad all-layer barrels |
 | `modules/<feature>/ui` | Components/hooks, co-located CSS, formatters/PDFs and same-origin HTTP clients | Config, credentials, SDK/provider IO, server/application implementation imports |
 | `infrastructure/persistence/postgres` | Server-only pooled transactions, durable command/effect transport and compatibility record projections supplied by feature bindings | Feature registries, business calculations, browser access or runtime fallback |
-| `infrastructure/persistence/google-sheets` | Shared Sheets client/base/row delegates/constants/types and Google auth/JWT plumbing | Feature rules, worksheet schema or aggregate feature registry |
+| `infrastructure/external/google-auth` | Shared Google OAuth/service-account token and JWT plumbing retained for Drive | Feature rules, worksheet schema or aggregate feature registry |
 | `infrastructure/files/google-drive` | Drive provider/factory/protocol types, using shared Google auth | Order/movement policy |
 | `infrastructure/external/{line,loyverse}` | Existing provider HTTP/signature/protocol/factory clients, including standalone operational LINE client | Feature journeys, worksheet reports and new providers |
-| `infrastructure/configuration/google-sheets` | Read-only private integration-account row validation | Operational registry, public credential APIs, business rules or credential writes |
+| `infrastructure/configuration/postgres` | Read-only private integration-account metadata/credential SQL | Operational registry, public credential APIs, business rules or credential writes |
 | `infrastructure/runtime` | Existing stateful sortable identifier implementation | Feature rules or duplicated sequence state |
 | `composition` | Concrete aggregate construction and compatibility consumer wiring outside feature cores | Business algorithms, browser contracts, generic DI frameworks |
 | `shared/{ui,lib,types}` | Proven generic reuse, small explicit utilities/value contracts | Feature dumping ground, config/infrastructure/module/legacy dependencies |

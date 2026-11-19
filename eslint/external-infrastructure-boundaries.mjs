@@ -52,7 +52,7 @@ const scopes={
     "./application/webhook"
   ]
 };
-export const externalInfrastructureBoundaries=[...Object.entries(scopes).map(([file,paths])=>({files:[file],rules:{'no-restricted-imports':['error',{patterns:[{regex:`^(?!(?:${paths.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$).+`,message:'Keep composition dependencies explicit; use canonical external transport.'}]}]}})),{files:['src/infrastructure/external/**/*.ts'],rules:{
+export const externalInfrastructureBoundaries=[...Object.entries(scopes).map(([file,paths])=>({files:[file],rules:{'no-restricted-imports':['error',{patterns:[{regex:`^(?!(?:${paths.map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})$).+`,message:'Keep composition dependencies explicit; use canonical external transport.'}]}]}})),{files:['src/infrastructure/external/**/*.ts'],ignores:['src/infrastructure/external/google-auth/**/*.ts'],rules:{
 'no-restricted-imports':['error',{patterns:[{regex:'^(?!\\./(?:const|types|LineBotService|LoyverseService|createLoyverseServiceFromConfig)$|@/shared/(?:types/line-protocol|lib/line-messages)$|node:crypto$|@/config$).+',message:'Provider infrastructure depends only on its protocol, pure helpers and supplied configuration.'}]}],
 'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Keep client exports named.'},{selector:"ImportDeclaration[source.value='@/config']:not([importKind='type'])",message:'Configuration is injected; import only its type.'}],
 'no-restricted-globals':['error','process']}}];

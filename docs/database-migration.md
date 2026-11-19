@@ -7,18 +7,19 @@ and LINE are open. The old business Sheets remain read-only; Google Drive images
 and the separate private integration-account configuration keep their existing
 provider ownership. No new user authentication system was introduced.
 
-The last independently verified release is PR86 `a1a27af` on 2026-11-19.
+The last independently verified application release is PR87/88 `296529d` on 2026-11-19,
+using the existing PR86 schema.
 All23 archive fields are consolidated into native `deletedAt`; the media catalog
 and five references are active. [The evidence ledger](refactoring/progress.md#latest-production-release)
 records the deployment/reconciliation/reopening checkpoint. This is not a new live
-inspection. Current native-adapter source work is not yet deployed.
+inspection. The private account configuration migration in this branch is not yet deployed.
 
 | Component | Current contract |
 | --- | --- |
 | `stock_operational` | 23 business tables plus media, commands, revision, side effects and environment: 28 tables |
 | `stock_migration` | 23 retained source tables plus import batches: 24 immutable tables |
 | Record identity and ordering | Stable record IDs; native `createdAt`, unknown times last, deterministic ID tie-breaks; feature-specific business sorts remain |
-| Authoritative values | Named typed columns; PR86 uses a row bridge, the native source change uses explicit named adapters |
+| Authoritative values | Named typed columns and explicit native PostgreSQL adapters |
 | Retired operational fields | `business_cells`, `row_order`, `created_at_instant`, `cell_kinds` and all 48 `__lexeme` columns and all23 operational `archived_at` fields are absent |
 | Lifecycle timestamps | 64 business lifecycle fields plus3 media fields are `timestamptz` |
 | Operational functions | 61 retained operational functions; native source does not execute the46 row mappings |
@@ -43,6 +44,120 @@ OAuth ownership and all database grants. No fresh Sheets export/import is needed
 Rollback to the exact PR86 application remains schema-compatible because no live
 DDL is part of this source change. Never run that app against earlier retired
 schemas without the separately reviewed inverse.
+
+## Private account configuration release
+
+Status: implementation/local acceptance only. Production still uses the private
+`loyverse_accounts` Sheets tab. This packet requires separate owner approval for
+DDL/grants, fresh token-bearing source capture/import, Vercel configuration and
+deployment. Real Loyverse calls require their own explicit authorization.
+
+Target: existing `stock-management-production` project `hzynvirpedqnvtbifobx`,
+PostgreSQL `postgres`, isolation UUID `349b9289-f684-4ec5-ac22-924b2be1946b`, purpose
+`production`. App project: `prj_XH4nEje5cicuBuucGumuHgr73l1E`.
+Never select a target from the project name alone. Keep original Sheets read-only,
+LINE cutoff/signature, app identity binding, TLS, existing role memberships and
+business grants unchanged. The new schema is additive; no business reimport,
+user-login change, paid resource or routine full-system pause is needed. If a
+release check proves a broader pause necessary, obtain that approval separately.
+
+1. **Review and freeze configuration edits only.** Record the exact reviewed merge
+   SHA and currently live deployment/release binding for rollback. Confirm nobody
+   edits the account tab or the new table until verification. Existing business
+   users/LINE may continue; metadata IDs/order must stay identical. Verify a fresh
+   recovery checkpoint under the existing owner-approved process. Before DDL,
+   verify exact project host/TLS, isolation/purpose, baseline permissions, and that
+   `stock_configuration` does not already exist. Stop on any unexpected existing
+   object; never drop or overwrite it to make this migration pass.
+2. **Apply only the additive schema after approval.** Use the approved owner
+   PGSERVICE, not the app login or an inferred plugin identity. In a single psql
+   session with `ON_ERROR_STOP=1`, first execute the exact isolation/purpose guard,
+   then `supabase/migrations/20261119082351_private_loyverse_accounts.sql`.
+   Do not push other historical migrations. Check schema is unexposed; no grants
+   to PUBLIC/anon/authenticated; runtime SELECT only; existing reader metadata-only;
+   backup reader SELECT. RLS and the CHECK/UNIQUE constraints must be present.
+   No new login or membership is required. From the repository root, after the
+   service/host/TLS preflight above, the exact approved target guard and DDL are:
+
+   ```sh
+   psql -Xw -v ON_ERROR_STOP=1 <<'SQL'
+   SELECT 1 / ((SELECT count(*)=1 AND bool_and(
+     isolation_id='349b9289-f684-4ec5-ac22-924b2be1946b'::uuid
+     AND purpose='production') FROM stock_operational.environment))::int;
+   \i supabase/migrations/20261119082351_private_loyverse_accounts.sql
+   SQL
+   ```
+
+3. **Capture only the approved configuration.** On the Mac, read the fixed
+   `loyverse_accounts!A:F` range using the existing approved workbook mapping.
+   Write an owner-only file `{ "headers": [...six existing headers...], "rows": [...] }`.
+   Preserve every row/ID, including disabled accounts. This is not a 23-tab business
+   export. Do not place the file in the repository, CI, chat, screenshot or logs.
+   Validate offline; do not include a path containing credentials in shell history:
+
+   ```sh
+   umask 077
+   python3 tools/migration/loyverse-accounts.py --input "$PRIVATE_ACCOUNT_SNAPSHOT"
+   ```
+
+4. **Import into the empty configuration table after approval.** Set PGSERVICEFILE
+   to the existing private owner service file and PGSERVICE to its exact approved
+   profile. The tool verifies direct project host, verify-full TLS, owner service,
+   database, isolation UUID and purpose. It takes only a configuration-table lock,
+   refuses populated targets, imports in one transaction and compares every returned
+   field before COMMIT. It normalizes strings as the former reader did, preserves
+   active/disabled rows and sort order, and prints counts only:
+
+   ```sh
+   python3 tools/migration/loyverse-accounts.py --input "$PRIVATE_ACCOUNT_SNAPSHOT" \
+     --apply-empty --approved --project-ref hzynvirpedqnvtbifobx \
+     --isolation-id 349b9289-f684-4ec5-ac22-924b2be1946b --purpose production
+   ```
+
+   An uncertain outcome is a STOP: inspect read-only and compare privately before
+   retrying. A populated target is not authorization to truncate/upsert/reimport.
+   Recheck source configuration stayed frozen and matches; do not compare tokens
+   via public hashes or logs. SQL NULL for blank optional store/token cells is
+   intentional; active account token bytes after trim must match exactly.
+5. **Stage, compare and promote the reviewed application after approval.** Set only
+   `LOYVERSE_ACCOUNT_SOURCE=postgres` and the existing release binding's source SHA
+   for the approved build. Never change the running source to env as an automatic
+   fallback. Existing immutable deployment stays live while building. Stage with
+   no domain assignment and existing protection. Obtain separately scoped protected
+   access if required. Verify `/api/loyverse/accounts`, affected sales reports,
+   inventory/attendance shop lists and expense mappings retain values/IDs/order;
+   provider reads/sync use fake providers in local acceptance. Read-only staged
+   metadata must work without token-column access or external Google requests.
+   Check browser/LINE guards and logs, revoke temporary access, then promote the
+   exact tested build. No production sync writes are used as smoke tests.
+6. **Recovery and rollback.** Freeze configuration edits until acceptance finishes.
+   Before any later configuration edits, privately dump `stock_configuration` and
+   restore it into an isolated local database with the required existing role names;
+   compare records/tokens/timestamps, policies, grants and constraints. The existing
+   52-table business checkpoint does **not** include this new schema: retain a
+   separate configuration recovery artifact alongside it; never label the business
+   dump alone a complete recovery after this release. Both contain sensitive data;
+   keep owner-only on the Mac or approved private storage. Local synthetic dump/
+   restore is covered by `tools/native-postgres/verify-accounts.sh`.
+
+   If acceptance fails, restore the previous Vercel source setting/release binding
+   and promote the recorded previous immutable deployment. Leave the new table and
+   all business writes intact. Verify original Sheets account access still works;
+   never restore a business database snapshot or delete rows for application rollback.
+   If configuration edits resumed, reconcile them privately before any rollback to
+   Sheets; a stale original account list is not an acceptable fallback.
+7. **Close the rollback window only after owner verification.** Current source has
+   no Sheets runtime reader/client/worksheet settings. Old Vercel variables and the
+   original account tab remain for the retained deployment's rollback. Their
+   deletion/revocation needs separate approval and a private recovery decision.
+   Google Drive OAuth and service-account fallback settings remain in use; never
+   remove them as Sheets cleanup. Historical migration tools/fixtures are evidence
+   and intentionally remain. Backup automation stays deferred.
+
+The table stores tokens as private readable credentials, not hashes. Only the
+approved backend role, recovery reader and database administrators can retrieve
+them. No public metadata response, new credential editor, Realtime publication,
+SECURITY DEFINER function or Supabase browser key is introduced.
 
 ## Ownership and source mapping
 

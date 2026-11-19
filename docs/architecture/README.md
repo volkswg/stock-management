@@ -7,15 +7,16 @@ workflows. Shared infrastructure owns provider transports and PostgreSQL session
 composition wires feature-owned ports. `src/externals/` and `src/features/` are
 retired. Supported service/script compatibility remains explicit.
 
-Production's last verified release is PR86 `a1a27af`: all 23 business tables use
+Production's last verified application release is PR87/88 `296529d`: all 23 business tables use
 native `deletedAt`, with 67 lifecycle timestamps including media, 61 operational
-functions and 52 triggers. Browser/LINE reopened after that approved release.
+functions and 52 triggers. LINE remained open during that application-only release.
 Operational cell/ordinal/kind/lexeme sidecars and duplicate media URLs are gone.
 Old business Sheets remain read-only; Drive and private integration accounts keep
 their existing ownership. This records the last checkpoint, not a fresh live read.
 
-The current branch converts business storage to PostgreSQL-only named-record
-adapters. Each feature owns its explicit column maps and semantic port adapters;
+Business storage uses PostgreSQL-only named-record adapters. This branch retires
+the remaining Sheets configuration reader in favor of private PostgreSQL accounts.
+Each feature owns its explicit column maps and semantic port adapters;
 root transport owns SQL, transactions and private ID/revision handles. Worksheet
 classes, range/header repair, the aggregate Sheets business service and its runtime
 fallback are retired. Google Drive uploads and the fixed read-only account

@@ -21,7 +21,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       return NextResponse.json(
         {
           ok: false,
-          error: config.loyverse.accountSource === "sheet"
+          error: config.loyverse.accountSource === "postgres"
             ? "No active Loyverse accounts are configured."
             : "Loyverse is not configured. Set LOYVERSE_ACCOUNTS_JSON.",
         },

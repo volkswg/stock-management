@@ -70,9 +70,19 @@ Financial/stock formulas, quantities/coercion quirks, Bangkok dates, IDs, sortin
 
 ## Private Loyverse account configuration
 
-`infrastructure/configuration/google-sheets/loyverse-accounts.ts` owns the read-only `loyverse_accounts` schema/validation, outside the aggregate registry and `shops` schema. The tab resides in the existing GOOGLE_SHEETS_SPREADSHEET_ID workbook; there is no account-specific ID or alternate-workbook fallback. `composition/loyverse-accounts.ts` selects env/sheet sources and the effective workbook, reuses root Google service-account auth/client and supplies either pure `{id, shopName}` metadata or credential-free bound provider capabilities. `shared/types/loyverse-account.ts` is the erased public metadata DTO; credentials remain in server configuration/storage only. Sales sync accepts its existing structural ReceiptSource port, including existing concrete clients. Financial applications, worksheets and all historical account IDs remain unchanged.
+`infrastructure/configuration/postgres/loyverse-accounts.ts` owns the read-only
+private configuration reader, outside the business aggregate and `shops` schema.
+`composition/loyverse-accounts.ts` selects explicit postgres/env sources and returns
+only metadata or bound provider capabilities. The metadata SQL does not select
+tokens. The credential query uses the existing guarded transaction/connection.
+All account IDs and consumer contracts remain unchanged. There is no automatic
+fallback, credential endpoint or editor. Existing read-only deployments need only
+metadata column grants. The synchronous legacy factory supports env and rejects
+PostgreSQL, which requires the asynchronous server reader.
 
-All fourteen affected HTTP sources (Loyverse, Sales, Expenses masters, Inventory counts/adjustments and HR attendance) use the seam. The old synchronous transport factory remains compatible in env mode and explicitly rejects sheet mode, preventing silent misconfiguration. No root infrastructure→feature, feature→composition or private cross-feature edge is added. There is no credential endpoint/editor or second persistence path. [Owner migration and rollback instructions](../../README.md#loyverse-configuration) are canonical.
+`infrastructure/external/google-auth` retains the exact shared Google auth classes
+for Drive; the Sheets HTTP client and account row reader are retired. No active
+runtime source reads a workbook. [Owner release/rollback procedure](../database-migration.md#private-account-configuration-release).
 
 ## Retired feature compatibility directory
 

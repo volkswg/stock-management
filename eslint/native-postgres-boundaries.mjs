@@ -19,10 +19,8 @@ const scopes = {
   ],
   "src/composition/loyverse-accounts.ts": [
     "@/config",
-    "@/infrastructure/configuration/google-sheets/loyverse-accounts",
+    "@/infrastructure/configuration/postgres/loyverse-accounts",
     "@/infrastructure/external/loyverse",
-    "@/infrastructure/persistence/google-sheets/client/GoogleSheetsClient",
-    "@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth",
     "@/shared/types/loyverse-account",
     "server-only"
   ],
