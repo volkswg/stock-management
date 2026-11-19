@@ -63,7 +63,7 @@ export function salesTables() {
       paymentType: { column: "paymentType", kind: "text" },
       moneyAmount: { column: "moneyAmount", kind: "numeric" },
       paidAt: { column: "paidAt", kind: "text" },
-      paymentDetailsJson: { column: "paymentDetailsJson", kind: "jsonb" },
+      paymentDetailsJson: { column: "paymentDetailsJson", kind: "jsonb", nullText: "null" },
       syncedAt: { column: "syncedAt", kind: "text" },
     } as const),
     salesReceiptSyncs: new NativeRecords("sales_receipt_syncs", {

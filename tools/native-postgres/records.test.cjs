@@ -84,3 +84,17 @@ test('current runtime cannot execute any legacy mapper and explicit Sheets selec
  const old=process.env.STOCK_STORAGE;
  try{process.env.STOCK_STORAGE='google-sheets';await assert.rejects(transaction(false,()=>storage.orders.all()),e=>e.status===503);}finally{process.env.STOCK_STORAGE=old;}
 });
+
+test('all23 native projections preserve predecessor NULL defaults, including historical payment JSON',async()=>{
+ const parents={orderId:'NP_PARENT_ORDER',shipmentId:'NP_PARENT_SHIPMENT',employeeId:'NP_PARENT_EMPLOYEE',receiptId:'NP_PARENT_RECEIPT',movementMasterId:'NP_PARENT_MOVEMENT',shopId:'NP_PARENT_SHOP',categoryId:'NP_PARENT_CATEGORY'};
+ for(const table of Object.values(storage)){
+  const value=Object.fromEntries(Object.keys(table.columns).map(name=>[name,name==='id'?'NP_NULL_'+table.table:parents[name]||'']));
+  await command(()=>table.insert(value));
+  const key=table.key,condition=key==='migration_id'?'"employeeId"=$1':'id=$1';
+  const row=(await owner.query(`SELECT "${key}" id,stock_operational.typed_project_${table.table}(t) expected FROM stock_operational.${table.table} t WHERE ${condition} AND "deletedAt" IS NULL`,[key==='migration_id'?parents.employeeId:value.id])).rows[0];assert.ok(row,table.table);
+  await transaction(false,async()=>{
+   const record=await table.find(row.id);assert.ok(record,table.table);assert.deepEqual(Object.values(record),row.expected,table.table);
+   if(table.table==='sales_receipt_payments')assert.equal(record.paymentDetailsJson,'null');
+  });
+ }
+});

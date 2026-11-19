@@ -2,7 +2,7 @@ import "server-only";
 import { currentTransaction, requireMutation, PersistenceFailure } from "./database";
 
 export type RecordValue = string | number | boolean | null;
-export type Column = { readonly column: string; readonly kind: "text" | "numeric" | "bigint" | "boolean" | "timestamp" | "jsonb" | "media"; readonly trimBoolean?: boolean; readonly textOnly?: boolean };
+export type Column = { readonly column: string; readonly kind: "text" | "numeric" | "bigint" | "boolean" | "timestamp" | "jsonb" | "media"; readonly trimBoolean?: boolean; readonly textOnly?: boolean; readonly nullText?: "null" };
 export type NativeRecord = Readonly<Record<string, RecordValue>>;
 export type Columns = Readonly<Record<string, Column>>;
 export type NamedRecord<C extends Columns> = { readonly [K in keyof C]: RecordValue };
@@ -53,7 +53,7 @@ export class NativeRecords<C extends Columns> {
       const expression = field.kind === "timestamp" ? `coalesce(stock_operational.native_timestamp_text(${value}),'')`
         : field.kind === "media" ? `stock_operational.media_url_v1(${value})`
         : field.kind === "boolean" ? `coalesce(to_jsonb(${value}),'""'::jsonb)`
-        : `coalesce(${value}::text,'')`;
+        : `coalesce(${value}::text,${field.nullText === "null" ? "'null'" : "''"})`;
       return expression + " AS " + quote(name);
     }).join(",");
   }
