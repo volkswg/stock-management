@@ -12,6 +12,25 @@ type StoredRecord = { record_id: string; cells: GoogleSheetRow; revision: string
 // older layout or cache capability decisions across transactions.
 const mediaSchemas = new WeakMap<ReturnType<typeof currentTransaction>, Promise<boolean>>();
 const typedSchemas = new WeakMap<ReturnType<typeof currentTransaction>, Promise<void>>();
+const deletionColumns = new WeakMap<ReturnType<typeof currentTransaction>, Promise<string>>();
+// The reviewed app can be deployed before the separately approved schema change.
+// Capability is checked per transaction; a partial new layout must fail closed.
+function deletionColumn(): Promise<string> {
+  const client = currentTransaction();
+  let pending = deletionColumns.get(client);
+  if (!pending) {
+    pending = (async () => {
+      const presence = await client.query<{ present: boolean }>("SELECT to_regprocedure('stock_operational.soft_delete_contract_v1()') IS NOT NULL AS present");
+      if (presence.rows.length !== 1) throw new PersistenceFailure();
+      if (!presence.rows[0].present) return "archived_at";
+      const result = await client.query<{ mode: string }>("SELECT stock_operational.soft_delete_contract_v1() AS mode");
+      if (result.rows.length !== 1 || result.rows[0].mode !== "deletedAt") throw new PersistenceFailure(503, "Unsupported soft-delete schema.");
+      return '"deletedAt"';
+    })();
+    deletionColumns.set(client, pending);
+  }
+  return pending;
+}
 function requireTypedSchema(): Promise<void> {
   const client = currentTransaction();
   let pending = typedSchemas.get(client);
@@ -72,7 +91,8 @@ export class PostgresRecords {
   private async read(range: string, descending = false): Promise<GoogleSheetRow[]> {
     const order = `"createdAt" ${descending ? "DESC" : "ASC"} NULLS LAST,"${this.key}" COLLATE "C" ASC`;
     const { project } = await this.mapping();
-    const stored = (await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS cells,revision FROM ${this.table} t WHERE archived_at IS NULL ORDER BY ${order}`)).rows;
+    const deleted = await deletionColumn();
+    const stored = (await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS cells,revision FROM ${this.table} t WHERE ${deleted} IS NULL ORDER BY ${order}`)).rows;
     const rows: GoogleSheetRow[] = [[...this.definition.headers], ...stored.map(r => r.cells)];
     const b = bounds(range, rows.length);
     const result = rows.slice(b.start, b.end).map((row, i) => {
@@ -137,12 +157,14 @@ export class PostgresRecords {
   }
   async referenceId(id: string): Promise<RecordReference | undefined> {
     const { project } = await this.mapping();
-    const result = await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS cells,revision FROM ${this.table} t WHERE "${this.key}"=$1 AND archived_at IS NULL`, [id]);
+    const deleted = await deletionColumn();
+    const result = await currentTransaction().query<StoredRecord>(`SELECT "${this.key}" AS record_id,${project}(t) AS cells,revision FROM ${this.table} t WHERE "${this.key}"=$1 AND ${deleted} IS NULL`, [id]);
     return result.rows[0] ? this.reference(result.rows[0]) : undefined;
   }
   private reference(stored: StoredRecord): RecordReference {
     const archive = async () => {
-      const result = await requireMutation().query<{revision: string}>(`UPDATE ${this.table} SET archived_at=now(),revision=revision+1 WHERE "${this.key}"=$1 AND revision=$2 AND archived_at IS NULL RETURNING revision`, [stored.record_id, stored.revision]);
+      const deleted = await deletionColumn();
+      const result = await requireMutation().query<{revision: string}>(`UPDATE ${this.table} SET ${deleted}=now(),revision=revision+1 WHERE "${this.key}"=$1 AND revision=$2 AND ${deleted} IS NULL RETURNING revision`, [stored.record_id, stored.revision]);
       if (result.rowCount !== 1) throw new PersistenceFailure(409, "Stale record revision.");
       stored.revision = result.rows[0].revision;
     };
@@ -162,7 +184,8 @@ export class PostgresRecords {
       throw new PersistenceFailure(409, "Business identity cannot change.");
     }
     const { input, project, columns } = await this.mapping();
-    const result = await requireMutation().query<StoredRecord>(`UPDATE ${this.table} t SET ${columns.map(c => `"${c}"=i."${c}"`).join(',')} FROM ${input}($1::jsonb) i WHERE t."${this.key}"=$2 AND t.revision=$3 AND t.archived_at IS NULL RETURNING t."${this.key}" AS record_id,${project}(t) AS cells,t.revision`, [JSON.stringify(next), stored.record_id, stored.revision]);
+    const deleted = await deletionColumn();
+    const result = await requireMutation().query<StoredRecord>(`UPDATE ${this.table} t SET ${columns.map(c => `"${c}"=i."${c}"`).join(',')} FROM ${input}($1::jsonb) i WHERE t."${this.key}"=$2 AND t.revision=$3 AND t.${deleted} IS NULL RETURNING t."${this.key}" AS record_id,${project}(t) AS cells,t.revision`, [JSON.stringify(next), stored.record_id, stored.revision]);
     if (result.rowCount !== 1) throw new PersistenceFailure(409, "Stale record revision.");
     Object.assign(stored, result.rows[0]);
   }

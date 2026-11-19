@@ -146,7 +146,83 @@ catalog and new reference objects, retains all current URL fields and never dele
 Drive files. Do not overwrite newer business writes from an older checkpoint.
 Local/CI evidence and the separately authorized PR84 release are recorded in [progress](refactoring/progress.md#media-catalog-compatibility-2026-11-18).
 
+## deletedAt soft-delete consolidation (prepared; production unchanged)
+
+The prepared app uses a per-transaction capability check: the current layout keeps
+its `archived_at` behavior; the final validated layout reads/writes `deletedAt`.
+A partial final layout fails closed. Google Sheets headers, API fields, route
+methods, LINE journeys, numeric allocation, idempotency and media ownership stay
+unchanged. Soft deletion hides records and rejects edits/resurrection while keeping
+their IDs, payloads and media references. It does not cascade to child rows or
+delete Drive files. Cancellation/status fields retain their business meanings.
+
+The [operator SQL](../tools/migration/operator/20261119013852_retire_archived_at.sql)
+renames `archived_at` on17 tables. On6 tables already containing `deletedAt`, it
+copies an archive instant only when `deletedAt` is NULL, then drops `archived_at`.
+Different non-NULL instants are a hard stop requiring an explicit resolution;
+neither is silently discarded. Existing soft-deleted rows remain hidden, including
+direct Supabase edits. The shared OLD/NEW guard now protects `deletedAt` and keeps
+row revisions. Seventeen validated UTC-range CHECKs cover the renamed timestamps.
+Active unique-index predicates follow the rename; the shipment-order predicate
+becomes the equivalent single deletion check. Public permissions do not expand.
+The seven existing append-only runtime tables remain append-only; this change
+does not grant the app deletion/edit access to compensation, settlement, adjustment
+or receipt-history tables. Authorized direct editors retain their existing rights.
+
+Release requires a separate approval for the exact commit, schema and traffic
+controls. Before any live DDL:
+
+1. Verify a fresh private recovery using `--include-media` (all52 tables/15 metadata),
+   restore/rehearse locally, then obtain a supervised pause of browser/LINE users,
+   direct editors, jobs and scripts with pending work accounted for. Block writes
+   and LINE, drain transactions and recheck the complete frozen checkpoint.
+2. Capture the **private** pre-change deletion state using
+   `python3 tools/migration/soft-delete.py checkpoint-sql` and approved private
+   `psql -XqAt` with exact `stock.expected_isolation_id`/`stock.expected_purpose`.
+   Save mode0600; never publish its rows. Generate the private inverse with
+   `python3 tools/migration/soft-delete.py rollback /private/path/state.jsonl`.
+   Rehearse that exact inverse locally before proceeding.
+3. Stage and verify the reviewed compatible app, then promote it while traffic is
+   blocked. The old schema remains supported. Set exact target/purpose/frozen
+   revision, reviewed sourceSHA40 and fingerprintSHA256 in
+   `stock.expected_isolation_id`, `stock.expected_purpose`,
+   `stock.soft_delete_revision`, `stock.soft_delete_source` and
+   `stock.soft_delete_fingerprint`; set
+   `stock.soft_delete_restore_verified='52-tables-15-metadata-v1'` and
+   `stock.allow_soft_delete_retirement='reviewed-deleted-at-v1'` only after the
+   independent restore/freshness checks. These are operator attestations, not a
+   substitute for doing the checks. Run the operator file with ON_ERROR_STOP.
+4. Verify both schema contracts, all52 normalized table fingerprints, all surviving
+   metadata/permissions, exact deletion-state mapping, API reads and LINE signature/
+   cutoff/idempotency guards. Verify revisions and original payloads are unchanged.
+   Old immutable apps cannot run on the final layout. Remove only this release's
+   traffic block and reopen after successful checks; clients should refresh.
+
+DDL/backfill is atomic, under exclusive locks, with short lock/statement timeouts.
+Only the six guarded backfills temporarily suspend their row/global-revision
+triggers inside that transaction; no business timestamp or revision is stamped.
+Unknown dependencies, column grants, function drift, stale revision, conflicting
+timestamps, prepared transactions or out-of-range archive instants abort.
+
+Before reopening, the generated inverse requires the original target/purpose/global
+revision and exact six-table identities, row revisions and expected deletion instants.
+It restores the original distinction between the two fields from the private state;
+the other17 columns are renamed back. All values/security/global revision remain
+exact; the six re-added archive columns may occupy different physical slots.
+Set `stock.allow_soft_delete_rollback='reviewed-deleted-at-v1'` with the same reviewed
+checkpoint attestations. Verify full reconciliation before promoting an old app.
+After any later write the inverse refuses. Stop for a new recovery/forward-repair
+plan; never overwrite newer writes with a stale checkpoint.
+
+This implementation does not authorize a production schema change or pause.
+
 ## Media URL retirement (prepared; production unchanged)
+
+Historical implementation/release procedure: PR85 was subsequently merged as
+`80db4aeb515fcedb7c9f394b819b96626ca87455` and released on 2026-11-19. All five
+duplicate operational URL columns are now retired; media IDs resolve the same
+public URL fields. Do not rerun this procedure. Private release/recovery receipts
+remain on the Mac; see [the evidence ledger](refactoring/progress.md#media-url-retirement-2026-11-19-local-implementation).
 
 The owner approved using `media.sourceUrl` for all references. Different Google
 Drive URL formats for the same file may become one catalog URL; the file, public
@@ -177,7 +253,8 @@ One review PR contains the compatible app and three operator-only artifacts:
    advances five statements. Physical column positions may differ; adapters use
    names. It never restores an old snapshot over newer writes or deletes files.
 
-Production execution is **not approved by this implementation**. After review/merge,
+The original implementation did not approve production execution. Its separately
+approved release is complete. For historical context, after review/merge,
 prepare an exact commit/build and a fresh private recovery using `--include-media`
 (52 tables/15 metadata sections), strictly restore it locally and rehearse against
 that checkpoint. Obtain separate approval for schema/app release and traffic controls,

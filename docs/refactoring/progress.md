@@ -8,7 +8,19 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-Current production is [PR84](https://github.com/volkswg/stock-management/pull/84)
+Current production is [PR85](https://github.com/volkswg/stock-management/pull/85)
+`80db4aeb515fcedb7c9f394b819b96626ca87455`, released on 2026-11-19. The five
+duplicate operational URL columns are gone; media IDs resolve the same API fields.
+Fresh private52-table/15-metadata recovery, local forward/inverse and69 app/LINE
+comparison groups were verified. Frozen production retained all rows, IDs, row/global
+revisions, timestamps, media and permissions across retirement. The exact staged
+build was promoted, read-only HTTP/security checks passed, the temporary block was
+removed and browser/LINE reopened; deployment-scoped error scans were clear.
+[CI run44371786156](https://github.com/volkswg/stock-management/actions/runs/44371786156)
+passed on head `5208879`; merge and tested trees matched. Checkpoints and full
+receipts remain private on the Mac. They are not permission to overwrite later writes.
+
+The preceding media catalog release was [PR84](https://github.com/volkswg/stock-management/pull/84)
 `44bb1d65116f0ee370a50fd514922c47ea6f6efb`, including its media schema. In a
 separately approved supervised window, fresh private recovery strictly restored
 all51 tables/15 metadata sections, the backfill/inverse and69 app/LINE groups
@@ -50,6 +62,41 @@ the gate verified them against that exact active configuration. No schema SQL ra
 before resolving that metadata-only precondition. Private records, credentials,
 checkpoints, inverse SQL and full receipts remain on the Mac/approved private storage.
 The checkpoint predates later legitimate writes and is not permission to overwrite them.
+
+## deletedAt consolidation (2026-11-19; local implementation)
+
+From PR85 `80db4ae`, prepared one scoped app/operator release replacing the23
+operational `archived_at` fields with native `deletedAt`. Seventeen columns are
+renamed; six overlapping fields merge only non-conflicting instants. Different
+non-NULL timestamps, unknown dependencies, stale/wrong targets and function drift
+abort atomically. Records/media/IDs/payloads, row/global revisions, original business
+timestamps and existing permissions survive. The seven append-only runtime tables
+remain append-only. Soft-deleted rows are hidden from reads and protected from
+edits/resurrection; cancellation/status rules and external Sheets/API contracts stay
+unchanged. No file or child-row cascade is introduced.
+
+The compatible adapter validates capability per transaction and supports the
+existing layout before approved DDL. The operator file stays outside automatic
+migration discovery. A private deletion-state export permits exact inverse before
+reopening; it refuses after any later write. Recovery must retain the original
+six-table timestamps, not infer which legacy field held them. Re-added archive
+columns may have different physical slots. The [runbook](../database-migration.md#deletedat-soft-delete-consolidation-prepared-production-unchanged)
+defines the separate production release approval and fresh checkpoint gates.
+
+Local evidence:703 Node regressions,75 Python checks, lint/typecheck and the
+credential-free production build pass (unchanged route manifest and113 client
+chunks; only the inherited `shipmentRow` lint warning). Fresh synthetic PostgreSQL
+copies pass all52-table normalized-value/global/row-revision preservation and the
+exact inverse/security comparison. Six focused cases cover all23 deletion paths,
+unchanged append-only restrictions, direct-editor deletion, Expense save/delete,
+cost-override replacement, numeric LINE session IDs and partial-schema refusal.
+The final layout also passes six media/upload uncertainty/replay cases, both actual
+LINE image workflows and real Chrome lost-response/reload/replay acceptance.
+Earlier typed/shared-guard/media acceptance passed and was reused while correcting
+synthetic fixture setup. Every provider was fake. No production records, fresh
+Sheets data, credentials, traffic, Vercel settings or hosted schema were accessed or
+changed for this implementation. Full local logs stay private on the Mac; CI belongs
+to the review PR. Merge, deployment and live schema execution are not yet approved.
 
 ## Media URL retirement (2026-11-19; local implementation)
 

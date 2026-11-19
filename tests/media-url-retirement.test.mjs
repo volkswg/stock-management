@@ -21,6 +21,7 @@ test('actual adapter preserves predecessor SQL, switches to media ID writes only
  class PersistenceFailure extends Error{}
  const makeClient=()=>({async query(sql,values){queries.push(sql);
   if(sql.includes('lexeme_mapping_contract_v1()'))return {rows:[{mode:'typed'}]};
+  if(sql.includes("to_regprocedure('stock_operational.soft_delete_contract_v1()')"))return {rows:[{present:false}]};
   if(sql.includes('to_regprocedure'))return {rows:[{present:mode!=='legacy'}]};
   if(sql.includes('media_record_contract_v1()'))return {rows:[{mode}]};
   writes.push({sql,values});return {rows:[],rowCount:1};}});

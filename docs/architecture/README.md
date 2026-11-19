@@ -11,9 +11,12 @@ Production uses Supabase with stable IDs, named-column authority and 47 native
 business lifecycle timestamps. The operational cell/ordinal/kind/lexeme sidecars are gone.
 PR81's database-only release consolidated validators and added timestamp CHECKs;
 PR84 subsequently added the eleven-column media catalog and five references; there
-are 57 operational functions and 52 operational triggers. Browser writes and
-LINE reopened after reconciliation. PR83 added scoped Order/Movement edit tokens; current production is PR84 `44bb1d6`.
-The prepared media URL retirement is local/PR work, not a live schema change.
+are 60 operational functions and 52 operational triggers after PR85's five duplicate
+media URL columns were retired. Browser writes and LINE reopened after reconciliation.
+PR83 added scoped Order/Movement edit tokens; current production is PR85 `80db4ae`.
+Consolidating `archived_at` into `deletedAt` is prepared local/PR work and has not
+changed production. [The release gate](../database-migration.md#deletedat-soft-delete-consolidation-prepared-production-unchanged)
+keeps old and new layouts compatible until separately approved maintenance.
 Old business Sheets are read-only; Drive and private integration-account ownership
 are unchanged. See [production operations](../database-migration.md) and the
 [latest release evidence](../refactoring/progress.md#latest-production-release).
