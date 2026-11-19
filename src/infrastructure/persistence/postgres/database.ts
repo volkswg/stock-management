@@ -9,9 +9,9 @@ type Context = { client: PoolClient; safe: PoolClient; mutation: boolean; open: 
 const active = new AsyncLocalStorage<Context>();
 let pool: Pool | undefined;
 let poolIdentity: string | undefined;
-export function storageMode(): "google-sheets" | "supabase" {
-  const mode = process.env.STOCK_STORAGE || "google-sheets";
-  if (mode !== "google-sheets" && mode !== "supabase") throw new PersistenceFailure(503, "Invalid STOCK_STORAGE.");
+export function storageMode(): "supabase" {
+  const mode = process.env.STOCK_STORAGE || "supabase";
+  if (mode !== "supabase") throw new PersistenceFailure(503, "Business storage requires PostgreSQL.");
   return mode;
 }
 export function stagingSettings() {

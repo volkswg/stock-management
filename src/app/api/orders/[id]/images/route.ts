@@ -3,7 +3,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   createOrderBill,
   createOrderItem,
@@ -40,8 +40,8 @@ async function POSTOperation(
     }
 
     const config = getConfig();
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
-    const hasOrder = await orderExists({ googleSheetsService, orderId });
+    const storage = createBusinessDatabase();
+    const hasOrder = await orderExists({ storage, orderId });
     if (!hasOrder) {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
     }
@@ -63,13 +63,13 @@ async function POSTOperation(
       const record =
         upload.imageType === "bill"
           ? await createOrderBill({
-              googleSheetsService,
+              storage,
               orderId,
               imageUrl: driveFile.webViewLink,
               createdBy: "web",
             })
           : await createOrderItem({
-              googleSheetsService,
+              storage,
               orderId,
               imageUrl: driveFile.webViewLink,
               createdBy: "web",

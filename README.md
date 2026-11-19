@@ -16,7 +16,15 @@ Production uses Supabase. Storage cleanup is complete through PR81: operational 
 
 Use Node 24 (verified 24.22.1) and the repository's existing dependencies and yarn.lock. Run `npm run dev`, then open [localhost:3000](http://localhost:3000). Source is under `src/`; Next routes are in `src/app`. Use approved development configuration. Architecture verification uses isolated copies without application credentials; do not start live integrations or run operational setup as a check.
 
-## Google Sheets worksheet names
+## Business storage
+
+Current source uses PostgreSQL-only business storage. Keep the existing
+`STOCK_STORAGE=supabase` production setting and strict private connection/release
+binding. Worksheet classes/ranges and the former Sheets business fallback are
+retired; Google Drive uploads and the private read-only integration-account
+configuration remain. This source conversion is not a production deployment.
+
+## Historical Google Sheets worksheet names
 
 `GOOGLE_SHEETS_SPREADSHEET_ID` is required for the workbook. The 23 `GOOGLE_SHEETS_*_WORKSHEET_NAME` settings are **optional**: `src/config/index.ts` supplies the existing worksheet-tab defaults, including `orders`, `shipments`, `movements` and `movement_details`. The `.env.example` template omits these redundant overrides.
 

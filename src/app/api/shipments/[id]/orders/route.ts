@@ -1,7 +1,6 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   linkOrderToShipment,
   LinkOrderToShipmentError,
@@ -24,9 +23,9 @@ async function POSTOperation(
   }
 
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const result = await linkOrderToShipment({
-      googleSheetsService,
+      storage,
       shipmentId,
       orderId: body.orderId.trim(),
       createdBy: "web",

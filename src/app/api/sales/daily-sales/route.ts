@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   getGoogleSheetsDailySales,
   isValidBangkokSalesDate,
@@ -36,16 +36,16 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       );
     }
 
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     const [report, syncStatus] = await Promise.all([
       getGoogleSheetsDailySales({
         accountId,
-        googleSheetsService,
+        storage,
         salesDate: date,
       }),
       listSalesSyncStatus({
         accountId,
-        googleSheetsService,
+        storage,
         month: date.slice(0, 7),
       }),
     ]);

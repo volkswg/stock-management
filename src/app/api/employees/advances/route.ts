@@ -2,18 +2,17 @@ import { withPersistence } from "@/composition/postgres/route";
 import { createPayrollReaders } from "@/composition/hr-payroll";
 import { createSalaryAdvanceShops } from "@/composition/salary-advance-shops";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { listEmployees } from "@/modules/hr/server";
 import { listExpenseShops } from "@/modules/expenses/server";
 import { createSalaryAdvance, readSalaryLedger, recoveredAmount, SalaryAdvanceError, transitionSalaryAdvance, money } from "@/modules/hr/payroll-server";
 export const runtime = "nodejs";
-function service() { return createGoogleSheetsServiceFromConfig(getConfig()); }
+function service() { return createBusinessDatabase(); }
 function fail(error: unknown) { return NextResponse.json({ ok: false, error: error instanceof SalaryAdvanceError ? error.message : "Salary advance operation failed. Please retry." }, { status: error instanceof SalaryAdvanceError ? error.status : 500 }); }
 async function GETOperation() {
   try {
     const sheets = service();
-    const [{ advances, settlements }, employees, shops] = await Promise.all([readSalaryLedger(sheets), listEmployees({ googleSheetsService: sheets }), listExpenseShops(sheets)]);
+    const [{ advances, settlements }, employees, shops] = await Promise.all([readSalaryLedger(sheets), listEmployees({ storage: sheets }), listExpenseShops(sheets)]);
     return NextResponse.json({ ok: true, advances: advances.map(a => ({ ...a, recoveredAmount: recoveredAmount(a.id, settlements), outstandingAmount: a.status === "paid" ? money(Math.max(0, a.paidAmount - recoveredAmount(a.id, settlements))) : 0 })), employees: employees.map(({ id, name, status }) => ({ id, name, status })), shops: shops.map(({ id, name, active }) => ({ id, name, active })), settledMonths: settlements.map(({ employeeId, month }) => ({ employeeId, month })) });
   } catch (error) { return fail(error); }
 }

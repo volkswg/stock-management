@@ -2,8 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { payrollRevision, calculateEmployeePayroll } from "@/modules/hr/payroll-server";
 import { createPayrollReaders } from "@/composition/hr-payroll";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 
 export const runtime = "nodejs";
 
@@ -17,10 +16,10 @@ async function GETOperation(request: Request): Promise<NextResponse> {
   }
 
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const payroll = await calculateEmployeePayroll({
-      googleSheetsService,
-      readers: createPayrollReaders(googleSheetsService),
+      storage,
+      readers: createPayrollReaders(storage),
       month,
     });
     return NextResponse.json({ ok: true, month, payroll: payroll.map(record => ({ ...record, revision: payrollRevision(record) })) });

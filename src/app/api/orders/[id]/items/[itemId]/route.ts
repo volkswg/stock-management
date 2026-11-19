@@ -1,8 +1,7 @@
 import { withPersistence } from "@/composition/postgres/route";
 import {OrderItemQuantityType}from "@/modules/orders/contracts";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   updateOrderItemProductCode,
   updateOrderItemQuantity,
@@ -34,12 +33,10 @@ async function PATCHOperation(
     }
 
     try {
-      const googleSheetsService = createGoogleSheetsServiceFromConfig(
-        getConfig(),
-      );
+      const storage = createBusinessDatabase();
       const productCode = body.productCode.trim();
       const result = await updateOrderItemProductCode({
-        googleSheetsService,
+        storage,
         orderId,
         orderItemId,
         productCode,
@@ -83,9 +80,9 @@ async function PATCHOperation(
   }
 
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const result = await updateOrderItemQuantity({
-      googleSheetsService,
+      storage,
       orderId,
       orderItemId,
       quantity: body.quantity,

@@ -1,76 +1,76 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { Storage } from "./infrastructure/postgres/storage";
 import type { StockCountAccount, AdjustmentEmployee } from "./contracts";
 import { readEmployeeDirectory } from "@/modules/hr/server";
 import { listAdjustmentEmployees as executeListAdjustmentEmployees } from "./application/list-adjustment-employees";
-import { createAdjustmentStore } from "./infrastructure/google-sheets/adjustments";
+import { createAdjustmentStore } from "./infrastructure/postgres/adjustments";
 import * as adjustments from "./application/adjustments";
 import { StockAdjustmentError } from "./domain/adjustment-rules";
 export { StockAdjustmentError, validStockMonth } from "./domain/adjustment-rules";
 export { stockAdjustmentTotals } from "./application/adjustments";
 export const stockToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 const runtime = { now: () => new Date().toISOString(), today: stockToday };
-export function listAdjustmentEmployees(service: IGoogleSheetsService): Promise<AdjustmentEmployee[]> {
-    return executeListAdjustmentEmployees({ listEmployees: () => readEmployeeDirectory({ googleSheetsService: service, unavailableError: () => new StockAdjustmentError("Employee storage headers do not match.", 503) }) });
+export function listAdjustmentEmployees(service: Storage): Promise<AdjustmentEmployee[]> {
+    return executeListAdjustmentEmployees({ listEmployees: () => readEmployeeDirectory({ storage: service, unavailableError: () => new StockAdjustmentError("Employee storage headers do not match.", 503) }) });
 }
-export async function listStockAdjustments(service: IGoogleSheetsService) { return adjustments.listStockAdjustments(createAdjustmentStore(service)); }
-export async function createStockAdjustment(service: IGoogleSheetsService, accounts: StockCountAccount[], value: unknown) {
+export async function listStockAdjustments(service: Storage) { return adjustments.listStockAdjustments(createAdjustmentStore(service)); }
+export async function createStockAdjustment(service: Storage, accounts: StockCountAccount[], value: unknown) {
     return adjustments.createStockAdjustment(createAdjustmentStore(service), accounts, value, { listEmployees: () => listAdjustmentEmployees(service) }, runtime);
 }
-export async function reverseStockAdjustment(service: IGoogleSheetsService, value: unknown) { return adjustments.reverseStockAdjustment(createAdjustmentStore(service), value, runtime); }
+export async function reverseStockAdjustment(service: Storage, value: unknown) { return adjustments.reverseStockAdjustment(createAdjustmentStore(service), value, runtime); }
 import { randomUUID } from "node:crypto";
 import { createSalesDashboardReader } from "@/modules/sales/server";
 import * as counts from "./application/stock-counts";
-import { createStockCountStore } from "./infrastructure/google-sheets/stock-counts";
+import { createStockCountStore } from "./infrastructure/postgres/stock-counts";
 import type { StockCountRecord, MonthlyShopStockCount } from "./contracts";
-export async function getMonthlyStockCounts({ accounts, googleSheetsService, month, }: {
+export async function getMonthlyStockCounts({ accounts, storage, month, }: {
     accounts: StockCountAccount[];
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     month: string;
 }): Promise<MonthlyShopStockCount[]> {
-    return counts.getMonthlyStockCounts({ accounts, store: createStockCountStore(googleSheetsService), month, runtime: { ...runtime, uuid: randomUUID }, readers: { movements: () => listMovements({ filter: {}, googleSheetsService }), adjustments: () => listStockAdjustments(googleSheetsService), sales: createSalesDashboardReader(googleSheetsService).readSales } });
+    return counts.getMonthlyStockCounts({ accounts, store: createStockCountStore(storage), month, runtime: { ...runtime, uuid: randomUUID }, readers: { movements: () => listMovements({ filter: {}, storage }), adjustments: () => listStockAdjustments(storage), sales: createSalesDashboardReader(storage).readSales } });
 }
-export async function saveMonthlyStockCount({ account, googleSheetsService, month, note, physicalCount, updatedBy, }: {
+export async function saveMonthlyStockCount({ account, storage, month, note, physicalCount, updatedBy, }: {
     account: StockCountAccount;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     month: string;
     note: string;
     physicalCount: number;
     updatedBy: string;
 }): Promise<StockCountRecord> {
-    return counts.saveMonthlyStockCount({ account, store: createStockCountStore(googleSheetsService), month, note, physicalCount, updatedBy, runtime: { ...runtime, uuid: randomUUID } });
+    return counts.saveMonthlyStockCount({ account, store: createStockCountStore(storage), month, note, physicalCount, updatedBy, runtime: { ...runtime, uuid: randomUUID } });
 }
 import type { MovementDateFilter, ProductMovementRecord, ProductMovementMasterRecord } from "./contracts";
 import * as movements from "./application/movements";
-import { createMovementStore } from "./infrastructure/google-sheets/movements";
+import { createMovementStore } from "./infrastructure/postgres/movements";
 export { MovementQuantityRequiredError } from "./quantity";
-export async function listMovements({ filter, googleSheetsService, }: {
+export async function listMovements({ filter, storage, }: {
     filter: MovementDateFilter;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
 }): Promise<ProductMovementMasterRecord[]> {
-    return movements.listMovements({ filter, store: createMovementStore(googleSheetsService) });
+    return movements.listMovements({ filter, store: createMovementStore(storage) });
 }
-export async function getMovementItems({ googleSheetsService, movementMasterId, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function getMovementItems({ storage, movementMasterId, }: {
+    storage: Storage;
     movementMasterId: string;
 }): Promise<ProductMovementRecord[]> {
-    return movements.getMovementItems({ store: createMovementStore(googleSheetsService), movementMasterId });
+    return movements.getMovementItems({ store: createMovementStore(storage), movementMasterId });
 }
-export async function movementExists({ googleSheetsService, movementMasterId, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function movementExists({ storage, movementMasterId, }: {
+    storage: Storage;
     movementMasterId: string;
 }): Promise<boolean> {
-    return movements.movementExists({ store: createMovementStore(googleSheetsService), movementMasterId });
+    return movements.movementExists({ store: createMovementStore(storage), movementMasterId });
 }
-export async function deleteMovementItem({ googleSheetsService, movementId, movementMasterId, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function deleteMovementItem({ storage, movementId, movementMasterId, }: {
+    storage: Storage;
     movementId: string;
     movementMasterId: string;
 }): Promise<ProductMovementRecord[]> {
-    return movements.deleteMovementItem({ store: createMovementStore(googleSheetsService), movementId, movementMasterId, runtime });
+    return movements.deleteMovementItem({ store: createMovementStore(storage), movementId, movementMasterId, runtime });
 }
-export async function updateMovementItem({ googleSheetsService, movementId, movementMasterId, quantity, remark, stockCounted, isNewArrival, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function updateMovementItem({ storage, movementId, movementMasterId, quantity, remark, stockCounted, isNewArrival, }: {
+    storage: Storage;
     movementId: string;
     movementMasterId: string;
     quantity?: string;
@@ -78,33 +78,32 @@ export async function updateMovementItem({ googleSheetsService, movementId, move
     stockCounted?: boolean;
     isNewArrival?: boolean;
 }): Promise<ProductMovementRecord[] | null> {
-    return movements.updateMovementItem({ store: createMovementStore(googleSheetsService), movementId, movementMasterId, quantity, remark, stockCounted, isNewArrival, runtime });
+    return movements.updateMovementItem({ store: createMovementStore(storage), movementId, movementMasterId, quantity, remark, stockCounted, isNewArrival, runtime });
 }
-export async function updateMovementImage({ googleSheetsService, imageUrl, movementId, movementMasterId, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function updateMovementImage({ storage, imageUrl, movementId, movementMasterId, }: {
+    storage: Storage;
     imageUrl: string;
     movementId: string;
     movementMasterId: string;
 }): Promise<ProductMovementRecord[] | null> {
-    return movements.updateMovementImage({ store: createMovementStore(googleSheetsService), imageUrl, movementId, movementMasterId, runtime });
+    return movements.updateMovementImage({ store: createMovementStore(storage), imageUrl, movementId, movementMasterId, runtime });
 }
-export async function markMovementDelivered({ googleSheetsService, movementMasterId, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function markMovementDelivered({ storage, movementMasterId, }: {
+    storage: Storage;
     movementMasterId: string;
 }): Promise<{
     movementMaster: ProductMovementMasterRecord;
     records: ProductMovementRecord[];
 } | null> {
-    return movements.markMovementDelivered({ store: createMovementStore(googleSheetsService), movementMasterId, runtime });
+    return movements.markMovementDelivered({ store: createMovementStore(storage), movementMasterId, runtime });
 }
 export type { MovementDateFilter } from "./contracts";
-import { createMovementJourneyAdapter } from "./infrastructure/google-sheets/movement-journeys";
+import { createMovementJourneyAdapter } from "./infrastructure/postgres/movement-journeys";
 import * as movementJourneys from "./application/movement-journeys";
 import type { MovementJourneyIdentity, MovementJourneyItem } from "./contracts";
 // Server-only batch participants/projection for the existing LINE + Inventory snapshot read.
-export { createMovementJourneyAdapter } from "./infrastructure/google-sheets/movement-journeys";
-export { MASTER_HEADERS, DETAIL_HEADERS, ensureHeader } from "./infrastructure/google-sheets/movement-schema";
-export async function movementJourneyItems(sheets: IGoogleSheetsService, masterId: string) { return movementJourneys.movementJourneyItems(createMovementJourneyAdapter(sheets).store, masterId); }
-export async function synchronizeMovementJourney(sheets: IGoogleSheetsService, state: MovementJourneyIdentity, complete = false) { return movementJourneys.synchronizeMovementJourney(createMovementJourneyAdapter(sheets).store, state, complete, () => new Date().toISOString()); }
-export async function findResumableMovementJourney(sheets: IGoogleSheetsService, userId: string) { return movementJourneys.findResumableMovementJourney(createMovementJourneyAdapter(sheets).store, userId); }
-export async function appendMovementJourneyItem(sheets: IGoogleSheetsService, readItem: () => MovementJourneyItem) { return movementJourneys.appendMovementJourneyItem(createMovementJourneyAdapter(sheets).store, readItem); }
+export { createMovementJourneyAdapter } from "./infrastructure/postgres/movement-journeys";
+export async function movementJourneyItems(sheets: Pick<Storage, "movementMasters" | "movementDetails">, masterId: string) { return movementJourneys.movementJourneyItems(createMovementJourneyAdapter(sheets).store, masterId); }
+export async function synchronizeMovementJourney(sheets: Pick<Storage, "movementMasters" | "movementDetails">, state: MovementJourneyIdentity, complete = false) { return movementJourneys.synchronizeMovementJourney(createMovementJourneyAdapter(sheets).store, state, complete, () => new Date().toISOString()); }
+export async function findResumableMovementJourney(sheets: Pick<Storage, "movementMasters" | "movementDetails">, userId: string) { return movementJourneys.findResumableMovementJourney(createMovementJourneyAdapter(sheets).store, userId); }
+export async function appendMovementJourneyItem(sheets: Pick<Storage, "movementMasters" | "movementDetails">, readItem: () => MovementJourneyItem) { return movementJourneys.appendMovementJourneyItem(createMovementJourneyAdapter(sheets).store, readItem); }

@@ -1,15 +1,63 @@
 import "server-only";
-import { PostgresRecords } from "@/infrastructure/persistence/postgres/records";
-import { STOCK_COUNT_HEADERS } from "@/modules/inventory/infrastructure/google-sheets/stock-counts/const";
-import { ADJUSTMENT_HEADERS } from "@/modules/inventory/infrastructure/google-sheets/stock-adjustments/const";
-import { MASTER_HEADERS } from "@/modules/inventory/infrastructure/google-sheets/movement-schema";
-import { DETAIL_HEADERS } from "@/modules/inventory/infrastructure/google-sheets/movement-schema";
+import { NativeRecords } from "@/infrastructure/persistence/postgres/native-records";
 
 export function inventoryTables() {
   return {
-    stockCounts: new PostgresRecords({ table: "stock_counts", headers: STOCK_COUNT_HEADERS }),
-    stockAdjustments: new PostgresRecords({ table: "stock_adjustments", media: { url: "photoUrl", reference: "photoMediaId" }, headers: ADJUSTMENT_HEADERS }),
-    movementMasters: new PostgresRecords({ table: "movements", headers: MASTER_HEADERS }),
-    movementDetails: new PostgresRecords({ table: "movement_details", media: { url: "productImageUrl", reference: "productImageMediaId" }, headers: DETAIL_HEADERS }),
+    stockCounts: new NativeRecords("stock_counts", {
+      id: { column: "id", kind: "text" },
+      month: { column: "month", kind: "text" },
+      accountId: { column: "accountId", kind: "text" },
+      shopName: { column: "shopName", kind: "text" },
+      physicalCount: { column: "physicalCount", kind: "numeric" },
+      note: { column: "note", kind: "text" },
+      countedAt: { column: "countedAt", kind: "text" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      updatedBy: { column: "updatedBy", kind: "text" },
+    } as const),
+    stockAdjustments: new NativeRecords("stock_adjustments", {
+      id: { column: "id", kind: "text" },
+      accountId: { column: "accountId", kind: "text" },
+      shopName: { column: "shopName", kind: "text" },
+      date: { column: "date", kind: "text" },
+      direction: { column: "direction", kind: "text" },
+      reason: { column: "reason", kind: "text" },
+      employeeId: { column: "employeeId", kind: "text" },
+      employeeName: { column: "employeeName", kind: "text" },
+      quantity: { column: "quantity", kind: "numeric" },
+      itemDescription: { column: "itemDescription", kind: "text" },
+      photoUrl: { column: "photoMediaId", kind: "media" },
+      note: { column: "note", kind: "text" },
+      reversesId: { column: "reversesId", kind: "text" },
+      replacesId: { column: "replacesId", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      createdBy: { column: "createdBy", kind: "text" },
+      notInLoyverse: { column: "notInLoyverse", kind: "boolean", trimBoolean: true },
+    } as const),
+    movementMasters: new NativeRecords("movements", {
+      id: { column: "id", kind: "text" },
+      userId: { column: "userId", kind: "text" },
+      packingDate: { column: "packingDate", kind: "text" },
+      deliverDateTime: { column: "deliverDateTime", kind: "text" },
+      status: { column: "status", kind: "text" },
+      totalQuantity: { column: "totalQuantity", kind: "numeric" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+    } as const),
+    movementDetails: new NativeRecords("movement_details", {
+      id: { column: "id", kind: "text" },
+      movementMasterId: { column: "movementMasterId", kind: "text" },
+      shopName: { column: "shopName", kind: "text" },
+      quantity: { column: "quantity", kind: "numeric" },
+      remark: { column: "remark", kind: "text" },
+      fromLocation: { column: "fromLocation", kind: "text" },
+      toLocation: { column: "toLocation", kind: "text" },
+      productImageUrl: { column: "productImageMediaId", kind: "media" },
+      purchaseDetailId: { column: "purchaseDetailId", kind: "text" },
+      status: { column: "status", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      stockCounted: { column: "stockCounted", kind: "boolean" },
+      isNewArrival: { column: "isNewArrival", kind: "boolean" },
+    } as const),
   };
 }

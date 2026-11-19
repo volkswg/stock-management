@@ -8,8 +8,23 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-Current production is [PR85](https://github.com/volkswg/stock-management/pull/85)
-`80db4aeb515fcedb7c9f394b819b96626ca87455`, released on 2026-11-19. The five
+Current production is [PR86](https://github.com/volkswg/stock-management/pull/86)
+`a1a27af691ebf67d9575476c43a4d9cc30b36470`, deployment
+`dpl_8kpVmSzrPBbLRRGzVzwibNwnKxUk`. The separately approved 2026-11-19 window
+completed archive/deletion consolidation on all23 business tables. Full52-table/
+15-metadata recovery, exact inverse and69 semantic groups were verified; records,
+revisions, media and permissions reconciled. Four API comparisons/two pages and
+missing-key/invalid-signature/protected-host guards passed. Only that window's
+traffic rule was removed; browser/LINE reopened, error scans clear. Six managed
+Storage versioning functions retain Storage's own archived_at; their exact platform
+identity/body witness corrected only an overbroad read-only DDL precondition.
+No Storage function or DDL/data action was changed. Private execution/correction
+receipts remain on the Mac. [CI44440332245](https://github.com/volkswg/stock-management/actions/runs/44440332245)
+passed; tested/merged trees matched. This is the retained independently verified
+checkpoint, not new live inspection or permission to restore over later writes.
+
+The preceding [PR85](https://github.com/volkswg/stock-management/pull/85) release used
+`80db4aeb515fcedb7c9f394b819b96626ca87455` on 2026-11-19. The five
 duplicate operational URL columns are gone; media IDs resolve the same API fields.
 Fresh private52-table/15-metadata recovery, local forward/inverse and69 app/LINE
 comparison groups were verified. Frozen production retained all rows, IDs, row/global
@@ -62,6 +77,28 @@ the gate verified them against that exact active configuration. No schema SQL ra
 before resolving that metadata-only precondition. Private records, credentials,
 checkpoints, inverse SQL and full receipts remain on the Mac/approved private storage.
 The checkpoint predates later legitimate writes and is not permission to overwrite them.
+
+## Native PostgreSQL business adapters (2026-11-19; current source work)
+
+Owner selected PostgreSQL-only business storage, retaining Google Drive uploads
+and the private integration-account configuration. Seven features/23 tables now
+use explicit named column maps and semantic port adapters. The active business
+Sheets registry, classes/headers, positional/raw-row facades and range-based PG
+bridge are removed. No schema/operator SQL is added or executed. Existing strict
+PG identity/TLS/role checks, journals, scoped revisions, LINE signatures/cutoff,
+upload reconciliation and public route/DTO behavior remain.
+
+Historical source/type tests run unchanged in an independently hash-pinned
+pre-native source copy. Current physical graphs, typed owners, build and real
+PostgreSQL acceptance run separately; historical success is not current acceptance.
+Current PG fixtures revoke legacy input/project execution and exercise all23 named
+projections, seven modules, precision/order, retries, rollback, both LINE image
+flows and browser response-loss/reload/replay. Local verification passed:703 immutable predecessor regressions/type witnesses,
+5 current physical/behavior/graph checks,37 current PostgreSQL cases across four
+fresh final-schema copies, lint (only the inherited unused shipmentRow warning),
+current typecheck and a credential-free build. The unchanged route manifest and
+113 client chunks were checked; no private database strings were bundled.
+The inherited typed/operator/schema/inverse suite also passed independently. Production remains PR86; merge/deploy need owner approval.
 
 ## deletedAt consolidation (2026-11-19; local implementation)
 

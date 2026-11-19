@@ -7,26 +7,23 @@ and LINE are open. The old business Sheets remain read-only; Google Drive images
 and the separate private integration-account configuration keep their existing
 provider ownership. No new user authentication system was introduced.
 
-The app runs PR83 source `097b310d9f70628d04101f17e43297ad4cac0478`, deployed
-on 2026-11-18 with scoped Order/Movement edit tokens. Its seven live read/guard
-checks and initial error scan passed; LINE and browser traffic stayed open.
-PR81's schema-only change, merged as `2471ac1106a9501f2a084b2d0825572b1b6fb1fe`,
-was separately applied on 2026-11-18 after recovery, a supervised freeze and exact
-reconciliation. It required no app deployment or environment change. The
-[evidence ledger](refactoring/progress.md#latest-production-release) records the result.
-This status is the last verified release checkpoint, not a new live inspection.
+The last independently verified release is PR86 `a1a27af` on 2026-11-19.
+All23 archive fields are consolidated into native `deletedAt`; the media catalog
+and five references are active. [The evidence ledger](refactoring/progress.md#latest-production-release)
+records the deployment/reconciliation/reopening checkpoint. This is not a new live
+inspection. Current native-adapter source work is not yet deployed.
 
 | Component | Current contract |
 | --- | --- |
-| `stock_operational` | 23 business tables plus commands, revision, side effects and environment: 27 tables |
+| `stock_operational` | 23 business tables plus media, commands, revision, side effects and environment: 28 tables |
 | `stock_migration` | 23 retained source tables plus import batches: 24 immutable tables |
 | Record identity and ordering | Stable record IDs; native `createdAt`, unknown times last, deterministic ID tie-breaks; feature-specific business sorts remain |
-| Authoritative values | Named typed columns; transient row projections preserve existing feature interfaces |
-| Retired operational fields | `business_cells`, `row_order`, `created_at_instant`, `cell_kinds` and all 48 `__lexeme` columns are absent |
-| Lifecycle timestamps | 47 fields retain their existing `createdAt`, `updatedAt`, `deletedAt` names as `timestamptz` |
-| Operational functions | 52: 46 typed mappings, one shared write guard, one statement revision function, three timestamp helpers and one schema contract |
-| Operational triggers | 23 row guards and 23 statement revision triggers |
-| Timestamp constraints | 23 validated CHECK constraints cover all 47 lifecycle fields, with the existing NULL allowance and UTC years 1–9999 |
+| Authoritative values | Named typed columns; PR86 uses a row bridge, the native source change uses explicit named adapters |
+| Retired operational fields | `business_cells`, `row_order`, `created_at_instant`, `cell_kinds` and all 48 `__lexeme` columns and all23 operational `archived_at` fields are absent |
+| Lifecycle timestamps | 64 business lifecycle fields plus3 media fields are `timestamptz` |
+| Operational functions | 61 retained operational functions; native source does not execute the46 row mappings |
+| Operational triggers | 23 row guards,23 statement revision triggers and6 media triggers |
+| Timestamp constraints | 23 validated CHECK constraints cover the64 business lifecycle fields, with the existing NULL allowance and UTC years 1–9999 |
 | Retained import protection | 48 triggers share `stock_migration.reject_mutation`; source evidence is not operational cleanup material |
 
 Do not modify the hidden compensation identity, primary keys, archive/revision
@@ -34,6 +31,18 @@ fields, command/effect journals, policies or retained import evidence casually.
 The shared guard preserves empty-text normalization, immutable identity, archived
 record protection and automatic row revision increments. It does not automatically
 stamp every `updatedAt`. Keep existing date, rounding, null and retry behavior.
+
+## Native adapter release requirements
+
+The PostgreSQL-only source conversion is application-only and uses the existing
+PR86 schema. It does not drop historical SQL functions. Review/CI and explicit
+release approval are required before any Vercel deployment or environment binding
+change. Stage the exact reviewed build, compare read-only API values/types/order,
+and preserve the existing target/source binding, LINE signature/cutoff, Drive
+OAuth ownership and all database grants. No fresh Sheets export/import is needed.
+Rollback to the exact PR86 application remains schema-compatible because no live
+DDL is part of this source change. Never run that app against earlier retired
+schemas without the separately reviewed inverse.
 
 ## Ownership and source mapping
 
@@ -148,13 +157,12 @@ Local/CI evidence and the separately authorized PR84 release are recorded in [pr
 
 ## deletedAt soft-delete consolidation (prepared; production unchanged)
 
-The prepared app uses a per-transaction capability check: the current layout keeps
-its `archived_at` behavior; the final validated layout reads/writes `deletedAt`.
-A partial final layout fails closed. Google Sheets headers, API fields, route
-methods, LINE journeys, numeric allocation, idempotency and media ownership stay
-unchanged. Soft deletion hides records and rejects edits/resurrection while keeping
-their IDs, payloads and media references. It does not cascade to child rows or
-delete Drive files. Cancellation/status fields retain their business meanings.
+This original anchor is retained for old links; **PR86 was subsequently executed
+and production reopened**. Do not rerun its operator SQL. The following procedure
+is the historical release/inverse contract. The native adapter source change now
+requires the final validated `deletedAt`/media-ID schema and refuses older layouts.
+Soft deletion retains IDs, payload and media, hides reads and refuses resurrection;
+it does not cascade children or delete Drive files.
 
 The [operator SQL](../tools/migration/operator/20261119013852_retire_archived_at.sql)
 renames `archived_at` on17 tables. On6 tables already containing `deletedAt`, it

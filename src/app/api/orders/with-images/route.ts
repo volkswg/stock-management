@@ -3,7 +3,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   createOrderWithImages,
   type OrderImageUpload,
@@ -37,11 +37,11 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
       );
     }
 
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     return await withStagingUploadCleanup(googleDriveService, async (googleDriveService) => {
       const order = await createOrderWithImages({
         googleDriveService,
-        googleSheetsService,
+        storage,
         images: input.images,
         seller: input.seller,
         totalPrice: input.totalPrice,

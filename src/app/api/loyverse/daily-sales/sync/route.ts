@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { createLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import { syncLoyverseDailySales } from "@/modules/sales/server";
 
@@ -53,7 +53,7 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
 
     const result = await syncLoyverseDailySales({
       account,
-      googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+      storage: createBusinessDatabase(),
       salesDate: date,
     });
     if (result.outcome === "already_synced") {

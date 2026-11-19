@@ -1,0 +1,80 @@
+import type { NativeRecord } from "@/infrastructure/persistence/postgres/native-records";
+import type { Storage } from "./storage";
+import "server-only";
+import type { ReceiptSyncStore, ReceiptSyncSource, ReceiptSyncBatch } from "../../application/ports/receipt-sync";
+import type { ReceiptSource } from "../../application/ports/receipt-source";
+import { createSalesReceiptId, createSalesReceiptItemId, createSalesReceiptPaymentId, } from "../../domain/receipt-ids";
+import { salesReceiptItemToRecord, salesReceiptPaymentToRecord, salesReceiptToRecord, } from "./receipt-record-mapping";
+import { getLoyverseReceiptsForSalesDate } from "../../application/receipts-for-date";
+export function createReceiptSync(storage: Storage, account: {
+    id: string;
+    shopName: string;
+    storeId?: string;
+    service: ReceiptSource;
+}): {
+    store: ReceiptSyncStore;
+    source: ReceiptSyncSource;
+} {
+    const batches = new WeakMap<ReceiptSyncBatch, {
+        receiptRows: NativeRecord[];
+        itemRows: NativeRecord[];
+        paymentRows: NativeRecord[];
+    }>();
+    return {
+        source: { async load(salesDate) {
+                const receipts = await getLoyverseReceiptsForSalesDate({ loyverseService: account.service, salesDate, storeId: account.storeId });
+                return { project(syncedAt) {
+                        const receiptRows: NativeRecord[] = [];
+                        const itemRows: NativeRecord[] = [];
+                        const paymentRows: NativeRecord[] = [];
+                        for (const receipt of receipts) {
+                            const receiptId = createSalesReceiptId(account.id, receipt.receipt_number);
+                            receiptRows.push(salesReceiptToRecord({
+                                accountId: account.id,
+                                id: receiptId,
+                                receipt,
+                                salesDate,
+                                shopName: account.shopName,
+                                syncedAt,
+                            }));
+                            for (const [index, item] of (receipt.line_items || []).entries()) {
+                                itemRows.push(salesReceiptItemToRecord({
+                                    id: createSalesReceiptItemId(receiptId, item.id, index),
+                                    item,
+                                    receiptId,
+                                    syncedAt,
+                                }));
+                            }
+                            for (const [index, payment] of (receipt.payments || []).entries()) {
+                                paymentRows.push(salesReceiptPaymentToRecord({
+                                    id: createSalesReceiptPaymentId(receiptId, index),
+                                    payment,
+                                    paymentIndex: index,
+                                    receiptId,
+                                    syncedAt,
+                                }));
+                            }
+                        }
+                        const batch = { get receiptCount() { return receipts.length; }, get itemCount() { return itemRows.length; }, get paymentCount() { return paymentRows.length; } };
+                        batches.set(batch, { receiptRows, itemRows, paymentRows });
+                        return batch;
+                    } };
+            } },
+        store: {
+            async isComplete(syncId) {
+                const syncRows = await storage.salesReceiptSyncs.all();
+                return Boolean(syncRows.find(record => record.id === syncId && record.status === "complete"));
+            },
+            prepare: async () => { await Promise.all([storage.salesReceipts.prepare(), storage.salesReceiptItems.prepare(), storage.salesReceiptPayments.prepare(), storage.salesReceiptSyncs.prepare()]); },
+            async append(batch) {
+                const { receiptRows, itemRows, paymentRows } = batches.get(batch)!;
+                for (const record of receiptRows) await storage.salesReceipts.insert(record);
+                for (const record of itemRows) await storage.salesReceiptItems.insert(record);
+                for (const record of paymentRows) await storage.salesReceiptPayments.insert(record);
+            },
+            async complete(syncId, salesDate, batch, syncedAt) {
+                await storage.salesReceiptSyncs.insert({ id: syncId, salesDate, accountId: account.id, shopName: account.shopName, status: "complete", receiptCount: String(batch.receiptCount), itemCount: String(batch.itemCount), paymentCount: String(batch.paymentCount), syncedAt });
+            }
+        }
+    };
+}

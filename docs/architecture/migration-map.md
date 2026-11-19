@@ -4,64 +4,59 @@ This map describes current source ownership; the external namespace retirement w
 
 | Slice | Actual owner | Retained boundaries |
 | --- | --- | --- |
-| Orders | Public contracts/rules/UI; list/create/detail, mutations, attachments/images and filename rules in own application/domain; Sheets/Drive adapters; named server | Detail receives its own Shipment projection port. LINE owns draft/session coordination. No Orders→Shipments/LINE module import |
-| Shipments | Public status/contracts/UI, creation/read/link/status/bill applications/ports and own Sheets/Drive adapters; server and HTTP validation helpers | Shipment→Orders uses public contracts and specifically registered gallery/projection port |
+| Orders | Public contracts/rules/UI; list/create/detail, mutations, attachments/images and filename rules in own application/domain; PostgreSQL/Drive adapters; named server | Detail receives its own Shipment projection port. LINE owns draft/session coordination. No Orders→Shipments/LINE module import |
+| Shipments | Public status/contracts/UI, creation/read/link/status/bill applications/ports and own PostgreSQL/Drive adapters; server and HTTP validation helpers | Shipment→Orders uses public contracts and specifically registered gallery/projection port |
 | Inventory | Contracts/quantity rules; counts/balances/reconciliation, adjustments/reversals/replacements and movements/journey primitives; own semantic adapters/server | Public HR directory and Sales dashboard readers are composed only at its server; LINE never imports Inventory persistence |
-| Sales | Public report contracts, daily/dashboard/profit, sync/status/cost applications/ports, receipt IDs and Sheets projections/adapters/server | HR payroll and Inventory use the public dashboard reader; provider-native Loyverse projections stay with transport |
-| Expenses | Pure Expense/Shop/Category/Input contracts, ledger/master application/ports/rules, Sheets adapter/server | HR shop reader and Sales expense projection use public contracts/entrypoints |
+| Sales | Public report contracts, daily/dashboard/profit, sync/status/cost applications/ports, receipt IDs and named PostgreSQL projections/adapters/server | HR payroll and Inventory use the public dashboard reader; provider-native Loyverse projections stay with transport |
+| Expenses | Pure Expense/Shop/Category/Input contracts, ledger/master application/ports/rules, PostgreSQL adapter/server | HR shop reader and Sales expense projection use public contracts/entrypoints |
 | HR | Pure employee/compensation/attendance/payroll/advance/settlement contracts; financial/date rules, all workforce/financial applications/ports and own persistence/runtime/hash adapters | Named workforce/payroll servers receive explicit reader ports; no legacy implementation in core, no Payroll↔Advance cycle |
 | LINE workflows | Public workflow contracts/commands, sessions/context validation, order/movement journeys/replies, sequential webhook orchestration; own session adapter/runtime/server | HTTP keeps raw parsing/auth/factories/status translation; application uses semantic Orders/Inventory operations and pure shared protocol/message helpers |
-| Shared Google | Root Sheets auth/JWT/client/base/row delegates/types/constants/header repair and Drive provider/factory | No feature implementation import; one persistence path |
+| Shared Google | Root OAuth/service-account auth, fixed integration-configuration reader and Drive upload factory | No business worksheet adapter or business storage fallback |
 | Shared external | Root LINE/Loyverse client/protocol/factory files; original standalone LineRichMenuClient under root LINE transport | Old constructor names/signatures/error/retry behavior remain; scripts are opt-in and never run during verification |
-| Composition | `composition/google-sheets/` owns aggregate construction/factory; `hr-payroll`, `salary-advance-shops`, `employee-directory`, `orders` own compatibility wiring | May wire concrete feature adapters; feature cores never depend on composition. No DI container or alternative registry |
+| Composition | `composition/postgres/service.ts` wires the 23 explicit native tables; `hr-payroll`, `salary-advance-shops`, `employee-directory`, `orders` own compatibility wiring | May wire concrete feature adapters; feature cores never depend on composition. No DI container or alternative registry |
 | Shared/runtime | Pure LINE DTO/enum/message builders and isRecord in shared; original stateful sortable ID generator in root infrastructure/runtime | No feature dependency; old helper names alias one implementation |
 | Workspace/Next shell | Existing app-owned home/navigation/layout and routes | No Workspace redesign, auth/product work or unrelated UI migration |
 
-## Physical worksheet owners
+## Native business storage owners
 
-Paths below are relative to `src/modules/<owner>/infrastructure/google-sheets/`. Each class and existing header leaf have exactly one physical owner; MovementSheet has no local const.ts. The corresponding old `externals/google/sheet/sheets/` paths are retired; active imports use these physical owners. Headers retain their original mutable array identity, names and order.
+Each module owns `infrastructure/postgres/tables.ts`, an explicit named column/type
+map, and the adapters implementing its existing semantic application ports.
 
-| Owner / subdirectory | Class | Header export | Original default range |
-| --- | --- | --- | --- |
-| orders / orders | OrdersSheet | ORDERS_SHEET_HEADERS | A:Z |
-| orders / order-items | OrderItemsSheet | ORDER_ITEMS_SHEET_HEADERS | A:J |
-| orders / order-bills | OrderBillsSheet | ORDER_BILLS_SHEET_HEADERS | A:G |
-| shipments / shipments | ShipmentsSheet | SHIPMENTS_SHEET_HEADERS | A:M |
-| shipments / shipment-orders | ShipmentOrdersSheet | SHIPMENT_ORDERS_SHEET_HEADERS | A:G |
-| inventory / stock-counts | StockCountsSheet | STOCK_COUNT_HEADERS | A:I (dynamic) |
-| line-workflows / user-state | UserStateSheet | USER_STATE_SHEET_HEADERS | A:H (dynamic) |
-| inventory / stock-adjustments | StockAdjustmentsSheet | ADJUSTMENT_HEADERS | A:Z |
-| expenses / expenses | RecordsSheet (shared constructor alias) | EXPENSE_HEADERS, CATEGORY_HEADERS, SHOP_HEADERS | A:Z |
-| hr / employee-advances | PayrollRecordsSheet | ADVANCE_HEADERS, SETTLEMENT_HEADERS | A:Z |
-| inventory / movements | MovementSheet | None; legacy master/detail schemas unchanged | A:N (literal) |
-| hr / employees | EmployeesSheet | EMPLOYEE_HEADERS | A:I |
-| hr / employee-compensations | EmployeeCompensationsSheet | EMPLOYEE_COMPENSATION_HEADERS | A:L |
-| hr / employee-timesheets | EmployeeTimesheetsSheet | EMPLOYEE_TIMESHEET_HEADERS | A:G |
-| sales / receipts | SalesReceiptsSheet | SALES_RECEIPT_HEADERS | A:Z |
-| sales / receipt-items | SalesReceiptItemsSheet | SALES_RECEIPT_ITEM_HEADERS | A:U |
-| sales / receipt-payments | SalesReceiptPaymentsSheet | SALES_RECEIPT_PAYMENT_HEADERS | A:J |
-| sales / receipt-syncs | SalesReceiptSyncsSheet | SALES_RECEIPT_SYNC_HEADERS | A:I |
-| sales / profit-cost-overrides | SalesProfitCostOverridesSheet | SALES_PROFIT_COST_OVERRIDE_HEADERS | A:H |
-
-Orders A:Z is deliberately preserved rather than reduced to its current header count. Other original header-derived `lastColumnLetter(headers.length - 1)` expressions remain. Registry-created instances and canonical imports share exact class/prototype/header identity; there is no parallel registry or copied implementation. Historical test-only export projections verify the former mixed barrels against these same owners.
-
-The six generic root Sheets declarations are GoogleSheetCellValue, GoogleSheetRow, GoogleSheetRangeUpdate, IGoogleSheet, IGoogleRowsSheet and IGoogleBatchRowsSheet. The root `service-contracts.ts` leaf retains the aggregate GoogleSheetsConfig, IGoogleSheetsService, MovementWorksheet and MovementRange plus explicit generic forwards, byte-for-byte from the retired types file. Feature classes use pure root generic types, never erased imports through the mixed aggregate index.
-
-## Aggregate and public composition
-
-The aggregate GoogleSheetsService still constructs the same worksheets in the same order, validates the same configuration and checks connections/batches exactly as before. All current APIs need that service shape. Its implementation/factory now live in explicit composition, outside root infrastructure; active routes use its narrow named index. It is not safe to remove or lazily split construction/health checks during this behavior-preserving refactor. There is no second registry or persistence path.
-
-Active routes use named module servers, canonical Google/external infrastructure, composition and pure shared helpers. Their runtime graphs reach no `services`, `externals` or backend compatibility implementation. Full-service interface imports use the pure root service-contracts leaf; applications/domain never import it. Adapters still own every row/range/header/schema decision.
-
-## Compatibility retirement gates
-
-| Retained path | Reason / single owner |
+| Feature | Physical tables |
 | --- | --- |
-| `services/{orders,shipments,employees,expenses,sales,movements,stock-counts,stock-adjustments,user-states,line}` and barrels | Supported callable/type/enum/error/header surfaces remain covered by runtime and compile-time consumers. They contain named forwards or identity bindings; actual wiring is in composition |
-| `services/utils/createSortableId.ts` | Aliases the single stateful root ID module; no reset or duplicated sequence state |
-| `scripts/line-rich-menu-client.ts` | Relative `.ts` compatibility forward to the original standalone client. Its RichMenuRequest declaration matches the app transport contract exactly and now shares that definition |
+| Orders | orders, order_items, order_bills |
+| Shipments | shipments, shipment_orders |
+| Inventory | movements, movement_details, stock_counts, stock_adjustments |
+| Sales | sales_receipts, sales_receipt_items, sales_receipt_payments, sales_receipt_syncs, sales_profit_cost_overrides |
+| Expenses | expenses, expense_categories, shops |
+| HR | employees, employee_compensations, employee_timesheets, employee_advances, payroll_settlements |
+| LINE | user_state |
 
-The consumer audit includes production static/erased/dynamic imports, barrels, script paths and inherited runtime/type tests. Issue #39 explicitly authorizes retirement of the external source paths. The package is private, has no package export map or publish workflow, and the audited repository/scripts/types/tests have no remaining live import. No known external compatibility blocker was found; undisclosed deep-import consumers would need to migrate. Other legacy paths remain supported. All legacy business function/class bodies have left service compatibility paths; the backend feature forwards are removed. Necessary typed aliases retain callable and enum namespaces, and movement identity bindings retain original CommonJS descriptors. No forwarding cycle or duplicate implementation is introduced.
+Root `native-records.ts` provides shared SQL transport for these real 23 mappings.
+It selects named fields and uses parameterized named writes, opaque ID/revision
+handles, native timestamp helpers and media IDs. It has no feature registry,
+worksheet headers, range parser, positional identity or older-schema fallback.
+Compensation's private synthetic identity and seven append-only histories remain.
+Application/domain ports retain their business DTOs and no SQL handles.
+Composition alone aggregates tables; modules accept their own structural subsets.
+Inventory/Orders public servers supply LINE's semantic workflow collaborators.
+
+## Retired business compatibility and retained interfaces
+
+The business Sheets aggregate, worksheet classes/headers, row/range helpers,
+PostgresRecords bridge, positional order lookup and raw-row LINE facades are
+retired from current source. Their old imports are audited with the pinned
+pre-native [source witness](../../tests/fixtures/native-postgres-before.json),
+not recreated as runtime forwards. Current HTTP routes and public DTO fields stay
+the same. Existing service aliases to semantic module servers, rich-menu entrypoint
+and sortable-ID identity remain where still meaningful. Undisclosed external
+imports of the removed private deep paths need to migrate; this private package
+has no public export map. The old [PR86 tree](https://github.com/volkswg/stock-management/tree/a1a27af691ebf67d9575476c43a4d9cc30b36470)
+is the historical worksheet/header ownership index.
+
+The three generic Google value/range types are retained only for the fixed private
+configuration client. The integration reader can read its approved configuration
+range; business APIs and LINE cannot select business Sheets storage.
 
 ## Retired external paths
 
@@ -100,18 +95,13 @@ The audit covers runtime/erased/dynamic imports, mocks/loaders, scripts, aliases
 
 ## PostgreSQL ownership
 
-All seven modules have feature-owned PostgreSQL bindings using their canonical
-headers and persistence ports. Root PostgreSQL transport owns sessions, stable-ID
-mutations, typed row projections, command replay and effect attempts. Composition
-owns request transaction/storage selection and exact production identity checks;
-LINE owns per-event workflow/reply execution. Business calculations stay with the
-existing feature owners above.
-
-`tools/migration` owns the 23-table catalog, explicit field policy, historical
-migrations, operator-only artifacts, reconciliation and recovery/synthetic tools.
-Production uses the final typed Supabase schema; old business Sheets are read-only.
-Operational sidecars and 116 aliases are retired. PR81 adds 23 timestamp CHECKs and
-one shared row guard in place of 23 validators; statement revisions, journals,
-typed mappings, private schemas and immutable import protection remain.
-Current operations and approval gates are in the [runbook](../database-migration.md).
-Historical stages are in the [evidence ledger](../refactoring/progress.md#historical-document-index).
+Business storage is PostgreSQL-only in current source. Feature adapters retain
+existing calculations/coercions, microsecond timestamp text, numeric scale,
+creation ordering, media URL DTOs, session IDs and lazy business projections.
+Root transport retains target/TLS/role checks, transactional revision handling,
+command/effect journals, upload reconciliation and per-event LINE idempotency.
+No database function or schema is dropped by this application change. The retained
+`typed_input_*`/`typed_project_*` functions remain historical/recovery dependencies;
+current acceptance revokes runtime EXECUTE on them to prove they are unused.
+`tools/migration` remains the historical import/operator/recovery owner. Do not
+remove its protected evidence or rerun old imports on production.

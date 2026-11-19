@@ -1,7 +1,6 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { listMovements, type MovementDateFilter } from "@/modules/inventory/server";
 
 export const runtime = "nodejs";
@@ -18,7 +17,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
   try {
     const records = await listMovements({
       filter,
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      storage: createBusinessDatabase(),
     });
     return NextResponse.json({ records });
   } catch (error) {

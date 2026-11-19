@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import {
   addEmployeeLeave,
@@ -38,10 +38,10 @@ async function GETOperation(request: Request): Promise<NextResponse> {
         { status: 400 },
       );
     }
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     const [employees, timesheets] = await Promise.all([
-      listEmployees({ googleSheetsService }),
-      listEmployeeTimesheets({ date, googleSheetsService, shopId }),
+      listEmployees({ storage }),
+      listEmployeeTimesheets({ date, storage, shopId }),
     ]);
     return NextResponse.json({
       ok: true,
@@ -103,8 +103,8 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
         { status: 400 },
       );
     }
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
-    const employees = await listEmployees({ googleSheetsService });
+    const storage = createBusinessDatabase();
+    const employees = await listEmployees({ storage });
     const employee = employees.find((candidate) => candidate.id === employeeId);
     if (!employee) {
       return NextResponse.json(
@@ -123,13 +123,13 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
         ? await addEmployeeLeave({
             date,
             employeeId,
-            googleSheetsService,
+            storage,
             shopId,
           })
         : await clockInEmployee({
             date,
             employeeId,
-            googleSheetsService,
+            storage,
             shopId,
             workdayType: normalizedWorkdayType,
           });

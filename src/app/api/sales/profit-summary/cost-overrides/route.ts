@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import {
   removeSalesProfitCostOverride,
@@ -44,7 +44,7 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
       accountId,
       averageItemCost,
       createdBy: "web",
-      googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+      storage: createBusinessDatabase(),
       month,
       note,
     });
@@ -83,7 +83,7 @@ async function DELETEOperation(request: Request): Promise<NextResponse> {
     }
     const removed = await removeSalesProfitCostOverride({
       accountId,
-      googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+      storage: createBusinessDatabase(),
       month,
     });
     return NextResponse.json({ ok: true, removed });

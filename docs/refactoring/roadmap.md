@@ -3,7 +3,7 @@
 ## Completed database milestone
 
 The Supabase production cutover and storage cleanup are complete through
-[PR81](https://github.com/volkswg/stock-management/pull/81): stable IDs, native
+[PR86](https://github.com/volkswg/stock-management/pull/86): stable IDs, native
 timestamps, operational sidecar retirement, typed mappings and shared validation.
 Browser writes and LINE are open. Old business Sheets remain read-only. Current
 storage contracts and release gates live in the [runbook](../database-migration.md);
@@ -14,18 +14,19 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: one soft-delete timestamp
+## Current scoped work: native PostgreSQL business storage
 
-PR85's media URL retirement is released. Replace `archived_at` with native
-`deletedAt` across the 23 operational record tables. Keep feature/API/Sheets
-contracts, IDs, data, media links, revisions and LINE session behavior. Six tables
-already have `deletedAt`; merge only non-conflicting deletion instants. Rename the
-column on the other 17 tables. No cascading or physical record/file deletion.
-Prepare and test the app, operator-only migration and private-state inverse in one
-PR. [Operations and release/rollback gates](../database-migration.md#deletedat-soft-delete-consolidation-prepared-production-unchanged)
-are authoritative. Production remains unchanged until separate maintenance/schema/
-app approval. Old apps must not run against the final layout without the inverse.
-No new auth, backup automation or optional framework expansion belongs to this task.
+Convert all seven modules' 23 business tables from the Sheets-shaped bridge to
+named PostgreSQL adapters using the existing schema. Preserve app/LINE behavior,
+financial math, Bangkok dates, IDs/order, revisions, transaction boundaries,
+idempotency and uncertain-upload reconciliation. Keep Google Drive uploads and
+private integration configuration. Business storage has no selectable Sheets
+backend after this change. Historical SQL/functions and import/recovery evidence
+remain; dropping functions is a separate schema-maintenance decision.
+
+Prepare one review PR, test current owners on fresh synthetic final-schema copies,
+and distinguish historical witnesses from current acceptance. No deployment,
+production data/schema/security/environment change is authorized here.
 
 ## Next major milestone: user authentication
 
@@ -48,8 +49,8 @@ retains the historical security tracking context.
   migration. Their current count alone is not a removal approval.
 - Broader provider replacement, cross-provider transactions/queues, tenant/billing
   features and Workspace redesign need separate product decisions.
-- Supported legacy service/script interfaces and the Google Sheets backend remain
-  compatibility contracts until their own consumer audit and removal approval.
+- Retained semantic service/script interfaces remain; business Sheets and positional
+  adapter retirement are part of the currently approved native-storage conversion.
 
 ## Gates for future changes
 

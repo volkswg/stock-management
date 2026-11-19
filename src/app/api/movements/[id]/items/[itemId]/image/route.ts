@@ -3,7 +3,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { updateMovementImage } from "@/modules/inventory/server";
 
 export const runtime = "nodejs";
@@ -67,7 +67,7 @@ async function PATCHOperation(
         fileName: movementImageName(movementMasterId, movementId, contentType),
       });
       const records = await updateMovementImage({
-        googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+        storage: createBusinessDatabase(),
         imageUrl: uploaded.webViewLink,
         movementId,
         movementMasterId,

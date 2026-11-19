@@ -1,83 +1,82 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { Storage } from "./infrastructure/postgres/storage";
 import { createSortableId } from "@/infrastructure/runtime/create-sortable-id";
 import type { CreatedOrder, OrderListItem, OrderDetail } from "./contracts";
 import { createOrder as executeCreateOrder, type CreateOrderInput } from "./application/create-order";
 import { listOrders as executeListOrders } from "./application/list-orders";
-import { GoogleSheetsOrderListReader } from "./infrastructure/google-sheets/order-list-reader";
-import { GoogleSheetsOrderWriter } from "./infrastructure/google-sheets/order-writer";
+import { PostgresOrderListReader } from "./infrastructure/postgres/order-list-reader";
+import { PostgresOrderWriter } from "./infrastructure/postgres/order-writer";
 
 import { getOrderDetail as executeGetOrderDetail } from "./application/get-order-detail";
 import type { OrderDetailShipmentProjectionReader } from "./application/ports/order-detail-shipment-projection";
-import { GoogleSheetsOrderDetailReader } from "./infrastructure/google-sheets/order-detail-reader";
+import { PostgresOrderDetailReader } from "./infrastructure/postgres/order-detail-reader";
 
-// Existing server callers keep passing the existing service. Only this
-// composition boundary knows the concrete adapter, clock and ID generator.
+// Feature composition owns the native adapter, clock and ID generator.
 export async function listOrders({
-  googleSheetsService,
-}: { googleSheetsService: IGoogleSheetsService }): Promise<OrderListItem[]> {
-  return executeListOrders(new GoogleSheetsOrderListReader(googleSheetsService));
+  storage,
+}: { storage: Storage }): Promise<OrderListItem[]> {
+  return executeListOrders(new PostgresOrderListReader(storage));
 }
 
 export async function createOrder({
-  googleSheetsService, id, seller, totalPrice, remark, createdBy,
-}: CreateOrderInput & { googleSheetsService: IGoogleSheetsService }): Promise<CreatedOrder> {
+  storage, id, seller, totalPrice, remark, createdBy,
+}: CreateOrderInput & { storage: Storage }): Promise<CreatedOrder> {
   return executeCreateOrder({ id, seller, totalPrice, remark, createdBy }, {
-    writer: new GoogleSheetsOrderWriter(googleSheetsService),
+    writer: new PostgresOrderWriter(storage),
     now: () => new Date().toISOString(),
     createId: createSortableId,
   });
 }
 
 export async function getOrderDetail({
-  googleSheetsService,
+  storage,
   orderId,
   shipmentProjection,
 }: {
-  googleSheetsService: IGoogleSheetsService;
+  storage: Storage;
   orderId: string;
   shipmentProjection: OrderDetailShipmentProjectionReader;
 }): Promise<OrderDetail | undefined> {
-  return await executeGetOrderDetail(new GoogleSheetsOrderDetailReader(googleSheetsService), shipmentProjection, orderId);
+  return await executeGetOrderDetail(new PostgresOrderDetailReader(storage), shipmentProjection, orderId);
 }
 import * as mutations from "./application/order-mutations";
-import { createOrderMutationStore } from "./infrastructure/google-sheets/order-mutations";
+import { createOrderMutationStore } from "./infrastructure/postgres/order-mutations";
 import type { OrderItemQuantityType, UpdateOrderItemQuantityResult, UpdateOrderItemProductCodeResult, UpdateOrderDetailsResult, CompleteWebOrderPriceResult, OrderProductUpdate, UpdatedOrderProduct } from "./contracts";
 const mutationRuntime = { now: () => new Date().toISOString() };
-export async function updateOrderItemQuantity({ googleSheetsService, orderId, orderItemId, quantity, quantityType, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function updateOrderItemQuantity({ storage, orderId, orderItemId, quantity, quantityType, }: {
+    storage: Storage;
     orderId: string;
     orderItemId: string;
     quantity: number;
     quantityType: OrderItemQuantityType;
 }): Promise<UpdateOrderItemQuantityResult> {
-    return mutations.updateOrderItemQuantity({ store: createOrderMutationStore(googleSheetsService), orderId, orderItemId, quantity, quantityType, runtime: mutationRuntime });
+    return mutations.updateOrderItemQuantity({ store: createOrderMutationStore(storage), orderId, orderItemId, quantity, quantityType, runtime: mutationRuntime });
 }
-export async function updateOrderItemProductCode({ googleSheetsService, orderId, orderItemId, productCode, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function updateOrderItemProductCode({ storage, orderId, orderItemId, productCode, }: {
+    storage: Storage;
     orderId: string;
     orderItemId: string;
     productCode: string;
 }): Promise<UpdateOrderItemProductCodeResult> {
-    return mutations.updateOrderItemProductCode({ store: createOrderMutationStore(googleSheetsService), orderId, orderItemId, productCode, runtime: mutationRuntime });
+    return mutations.updateOrderItemProductCode({ store: createOrderMutationStore(storage), orderId, orderItemId, productCode, runtime: mutationRuntime });
 }
-export async function updateOrderDetails({ googleSheetsService, orderId, remark, totalPrice, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function updateOrderDetails({ storage, orderId, remark, totalPrice, }: {
+    storage: Storage;
     orderId: string;
     remark?: string;
     totalPrice?: number;
 }): Promise<UpdateOrderDetailsResult> {
-    return mutations.updateOrderDetails({ store: createOrderMutationStore(googleSheetsService), orderId, remark, totalPrice, runtime: mutationRuntime });
+    return mutations.updateOrderDetails({ store: createOrderMutationStore(storage), orderId, remark, totalPrice, runtime: mutationRuntime });
 }
-export async function completeWebOrderPrice({ googleSheetsService, orderId, totalPrice, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function completeWebOrderPrice({ storage, orderId, totalPrice, }: {
+    storage: Storage;
     orderId: string;
     totalPrice: number;
 }): Promise<CompleteWebOrderPriceResult> {
-    return mutations.completeWebOrderPrice({ store: createOrderMutationStore(googleSheetsService), orderId, totalPrice, runtime: mutationRuntime });
+    return mutations.completeWebOrderPrice({ store: createOrderMutationStore(storage), orderId, totalPrice, runtime: mutationRuntime });
 }
-export async function updateOrderProducts({ googleSheetsService, orderId, items, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function updateOrderProducts({ storage, orderId, items, }: {
+    storage: Storage;
     orderId: string;
     items: OrderProductUpdate[];
 }): Promise<{
@@ -87,34 +86,30 @@ export async function updateOrderProducts({ googleSheetsService, orderId, items,
     outcome: "not_found";
     itemId: string;
 }> {
-    return mutations.updateOrderProducts({ store: createOrderMutationStore(googleSheetsService), orderId, items, runtime: mutationRuntime });
+    return mutations.updateOrderProducts({ store: createOrderMutationStore(storage), orderId, items, runtime: mutationRuntime });
 }
-export async function orderExists({ googleSheetsService, orderId }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function orderExists({ storage, orderId }: {
+    storage: Storage;
     orderId: string;
-}): Promise<boolean> { return mutations.orderExists(createOrderMutationStore(googleSheetsService), orderId); }
-export async function findOrderRowNumber({ googleSheetsService, orderId }: {
-    googleSheetsService: IGoogleSheetsService;
+}): Promise<boolean> { return mutations.orderExists(createOrderMutationStore(storage), orderId); }
+export async function prepareOrderTransition({ storage, orderId }: {
+    storage: Storage;
     orderId: string;
-}): Promise<number> { return createOrderMutationStore(googleSheetsService).findOrderRowNumber(orderId); }
-export async function prepareOrderTransition({ googleSheetsService, orderId }: {
-    googleSheetsService: IGoogleSheetsService;
-    orderId: string;
-}) { return mutations.prepareOrderTransition(createOrderMutationStore(googleSheetsService), orderId); }
+}) { return mutations.prepareOrderTransition(createOrderMutationStore(storage), orderId); }
 import * as attachments from "./application/order-attachments";
-import { createOrderAttachmentStore } from "./infrastructure/google-sheets/order-attachments";
+import { createOrderAttachmentStore } from "./infrastructure/postgres/order-attachments";
 import type { Order, OrderBill, OrderItem } from "./contracts";
 const attachmentRuntime = { now: () => new Date().toISOString(), createId: createSortableId };
-export async function createOrderBill({ googleSheetsService, orderId, imageUrl, createdBy, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function createOrderBill({ storage, orderId, imageUrl, createdBy, }: {
+    storage: Storage;
     orderId: string;
     imageUrl: string;
     createdBy: string;
 }): Promise<OrderBill> {
-    return attachments.createOrderBill({ store: createOrderAttachmentStore(googleSheetsService), orderId, imageUrl, createdBy, runtime: attachmentRuntime });
+    return attachments.createOrderBill({ store: createOrderAttachmentStore(storage), orderId, imageUrl, createdBy, runtime: attachmentRuntime });
 }
-export async function createOrderItem({ googleSheetsService, orderId, imageUrl, quoteQuantity = "", deliveredQuantity = "", productCode = "", createdBy, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function createOrderItem({ storage, orderId, imageUrl, quoteQuantity = "", deliveredQuantity = "", productCode = "", createdBy, }: {
+    storage: Storage;
     orderId: string;
     imageUrl: string;
     quoteQuantity?: string;
@@ -122,12 +117,12 @@ export async function createOrderItem({ googleSheetsService, orderId, imageUrl, 
     productCode?: string;
     createdBy: string;
 }): Promise<OrderItem> {
-    return attachments.createOrderItem({ store: createOrderAttachmentStore(googleSheetsService), orderId, imageUrl, quoteQuantity, deliveredQuantity, productCode, createdBy, runtime: attachmentRuntime });
+    return attachments.createOrderItem({ store: createOrderAttachmentStore(storage), orderId, imageUrl, quoteQuantity, deliveredQuantity, productCode, createdBy, runtime: attachmentRuntime });
 }
-export async function createDraftRecord({ googleSheetsService, createdBy }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function createDraftRecord({ storage, createdBy }: {
+    storage: Storage;
     createdBy: string;
-}): Promise<Order> { return attachments.createDraftRecord({ store: createOrderAttachmentStore(googleSheetsService), createdBy, runtime: attachmentRuntime }); }
+}): Promise<Order> { return attachments.createDraftRecord({ store: createOrderAttachmentStore(storage), createdBy, runtime: attachmentRuntime }); }
 import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
 import type { OrderImageUpload as ImageUpload } from "./application/ports/order-images";
 import type { ReplacedOrderProductImage } from "./contracts";
@@ -136,23 +131,23 @@ import { replaceOrderProductImage as executeReplaceImage } from "./application/r
 import { createOrderImageStorage, createProductImageStorage } from "./infrastructure/google-drive/order-images";
 export type { OrderImageType } from "./contracts";
 export type OrderImageUpload = ImageUpload<Buffer>;
-export async function createOrderWithImages({ googleDriveService, googleSheetsService, images, seller, totalPrice, remark, createdBy, }: {
+export async function createOrderWithImages({ googleDriveService, storage, images, seller, totalPrice, remark, createdBy, }: {
     googleDriveService: IGoogleDriveService;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     images: OrderImageUpload[];
     seller?: string;
     totalPrice?: number | null;
     remark?: string;
     createdBy: string;
 }): Promise<CreatedOrder> {
-    return executeCreateImages({ storage: createOrderImageStorage(googleDriveService), records: { create: input => createOrder({ ...input, googleSheetsService }), bill: input => createOrderBill({ ...input, googleSheetsService }), item: input => createOrderItem({ ...input, googleSheetsService }) }, images, seller, totalPrice, remark, createdBy, runtime: { createId: createSortableId, uploadTimestamp: () => Date.now() } });
+    return executeCreateImages({ storage: createOrderImageStorage(googleDriveService), records: { create: input => createOrder({ ...input, storage }), bill: input => createOrderBill({ ...input, storage }), item: input => createOrderItem({ ...input, storage }) }, images, seller, totalPrice, remark, createdBy, runtime: { createId: createSortableId, uploadTimestamp: () => Date.now() } });
 }
-export async function replaceOrderProductImage({ googleSheetsService, googleDriveService, orderId, itemId, image, }: {
-    googleSheetsService: IGoogleSheetsService;
+export async function replaceOrderProductImage({ storage, googleDriveService, orderId, itemId, image, }: {
+    storage: Storage;
     googleDriveService: IGoogleDriveService;
     orderId: string;
     itemId: string;
     image: File;
 }): Promise<ReplacedOrderProductImage | undefined> {
-    return executeReplaceImage({ store: createOrderMutationStore(googleSheetsService), storage: createProductImageStorage(googleDriveService, createSortableId), orderId, itemId, image, runtime: mutationRuntime });
+    return executeReplaceImage({ store: createOrderMutationStore(storage), storage: createProductImageStorage(googleDriveService, createSortableId), orderId, itemId, image, runtime: mutationRuntime });
 }

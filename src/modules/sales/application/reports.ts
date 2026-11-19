@@ -6,14 +6,14 @@ import type { SalesReader, SalesRecord as SheetRecord, SalesValue } from "./port
 export function createSalesReports<Context>(createReader: (context: Context) => SalesReader) {
 async function getGoogleSheetsDailySales({
   accountId,
-  googleSheetsService,
+  storage,
   salesDate,
 }: {
   accountId: string;
-  googleSheetsService: Context;
+  storage: Context;
   salesDate: string;
 }): Promise<GoogleSheetsDailySalesReport> {
-  const reader = createReader(googleSheetsService);
+  const reader = createReader(storage);
   const [receiptRecords, itemRecords, paymentRecords] = await Promise.all([
     reader.receipts(),
     reader.items(),
@@ -32,15 +32,15 @@ async function getGoogleSheetsDailySales({
 async function getGoogleSheetsSalesDashboard({
   accountIds,
   fromDate,
-  googleSheetsService,
+  storage,
   toDate,
 }: {
   accountIds?: string[];
   fromDate: string;
-  googleSheetsService: Context;
+  storage: Context;
   toDate: string;
 }): Promise<GoogleSheetsSalesDashboardReport> {
-  const reader = createReader(googleSheetsService);
+  const reader = createReader(storage);
   const [receiptRecords, itemRecords, paymentRecords, syncRecords] =
     await Promise.all([
       reader.receipts(),
@@ -112,16 +112,16 @@ async function getGoogleSheetsProfitSummary({
   accounts,
   costOverrides,
   expenses,
-  googleSheetsService,
+  storage,
   year,
 }: {
   accounts: Array<{ id: string; shopName: string }>;
   costOverrides: SalesProfitCostOverride[];
   expenses: Expense[];
-  googleSheetsService: Context;
+  storage: Context;
   year: string;
 }): Promise<GoogleSheetsProfitSummary> {
-  const reader = createReader(googleSheetsService);
+  const reader = createReader(storage);
   const [receiptRecords, itemRecords, syncRecords] = await Promise.all([
     reader.receipts(),
     reader.items(),
