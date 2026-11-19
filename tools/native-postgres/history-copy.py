@@ -11,14 +11,21 @@ def copy_history(target):
     target=Path(target)
     if target.exists() and any(target.iterdir()):raise ValueError('Historical destination must be empty')
     fixture=json.loads((ROOT/'tests/fixtures/native-postgres-before.json').read_text())
+    followup=json.loads((ROOT/'tests/fixtures/native-null-json-before.json').read_text())
     for name,expected in fixture['files'].items():
         edit=fixture['edits'].get(name)
         source=ROOT/name
+        current=source.read_bytes() if source.exists() else None
+        delta=followup['edits'].get(name)
+        if delta:
+            assert current is not None and digest(current)==delta['afterSha256'],name
+            current=delta['before'].encode()
+            assert digest(current)==delta['beforeSha256'],name
         if edit:
             if edit['afterSha256'] is None:assert not source.exists(),name
-            else:assert digest(source.read_bytes())==edit['afterSha256'],name
+            else:assert current is not None and digest(current)==edit['afterSha256'],name
             data=edit['before'].encode()
-        else:data=source.read_bytes()
+        else:data=current
         assert digest(data)==expected,name
         dest=target/name;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data)
     os.symlink((ROOT/'node_modules').resolve(),target/'node_modules',target_is_directory=True)
