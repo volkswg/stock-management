@@ -14,16 +14,17 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: media URL retirement
+## Current scoped work: one soft-delete timestamp
 
-PR84's eleven-column media catalog and five references were released on 2026-11-18.
-The owner now approved normalizing Drive URL aliases to `media.sourceUrl`, keeping
-the images, public API fields, LINE behavior and Sheets compatibility. Implement
-ID-based projections/writes and prepare guarded removal of the five duplicate
-operational URL columns in one review PR. Test retained, final and inverse schemas
-on fresh synthetic local copies. [Operations and release/rollback gates](../database-migration.md#media-url-retirement-prepared-production-unchanged)
-are authoritative. Production remains unchanged until a separate maintenance/schema/
-app approval; old apps must not run against the final layout without the inverse.
+PR85's media URL retirement is released. Replace `archived_at` with native
+`deletedAt` across the 23 operational record tables. Keep feature/API/Sheets
+contracts, IDs, data, media links, revisions and LINE session behavior. Six tables
+already have `deletedAt`; merge only non-conflicting deletion instants. Rename the
+column on the other 17 tables. No cascading or physical record/file deletion.
+Prepare and test the app, operator-only migration and private-state inverse in one
+PR. [Operations and release/rollback gates](../database-migration.md#deletedat-soft-delete-consolidation-prepared-production-unchanged)
+are authoritative. Production remains unchanged until separate maintenance/schema/
+app approval. Old apps must not run against the final layout without the inverse.
 No new auth, backup automation or optional framework expansion belongs to this task.
 
 ## Next major milestone: user authentication

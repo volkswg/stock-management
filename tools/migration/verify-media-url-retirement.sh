@@ -48,3 +48,4 @@ python3 tools/migration/media-url-proof.py inverse "$artifacts"
 run_tc mu_rollback tools/migration/media-url-retirement.test.cjs
 run_tc mu_rollback tools/migration/media-url-predecessor.test.cjs
 echo 'PASS: media-ID reads/writes before/after URL retirement, normalized aliases, unchanged APIs/LINE, uncertainty/replay, scoped permissions and inverse'
+source tools/migration/verify-soft-delete.sh

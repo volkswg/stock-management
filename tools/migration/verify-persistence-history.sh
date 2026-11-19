@@ -15,11 +15,17 @@ for name in names:
  source=root/name
  if source.is_file():
   dest=target/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,dest)
+# Undo the independently hash-pinned deletion delta before the media-ID delta.
+soft=json.loads((root/'tests/fixtures/soft-delete-before.json').read_text())
+for name,edit in soft['edits'].items():
+ assert hashlib.sha256((target/name).read_bytes()).hexdigest()==edit['afterSha256'],name
+ assert hashlib.sha256(edit['before'].encode()).hexdigest()==edit['beforeSha256'],name
+ (target/name).write_text(edit['before'])
 # Undo only the separately hash-pinned media-ID delta before the immutable
 # PR79 fixture. Validate current bytes and predecessor bytes independently.
 media=json.loads((root/'tests/fixtures/media-url-before.json').read_text())
 for name,edit in media['edits'].items():
- assert hashlib.sha256((root/name).read_bytes()).hexdigest()==edit['afterSha256'],name
+ assert hashlib.sha256((target/name).read_bytes()).hexdigest()==edit['afterSha256'],name
  assert hashlib.sha256(edit['before'].encode()).hexdigest()==edit['beforeSha256'],name
  (target/name).write_text(edit['before'])
 for name,edit in fixture['edits'].items():
