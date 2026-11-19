@@ -7,19 +7,22 @@ workflows. Shared infrastructure owns provider transports and PostgreSQL session
 composition wires feature-owned ports. `src/externals/` and `src/features/` are
 retired. Supported service/script compatibility remains explicit.
 
-Production uses Supabase with stable IDs, named-column authority and 47 native
-business lifecycle timestamps. The operational cell/ordinal/kind/lexeme sidecars are gone.
-PR81's database-only release consolidated validators and added timestamp CHECKs;
-PR84 subsequently added the eleven-column media catalog and five references; there
-are 60 operational functions and 52 operational triggers after PR85's five duplicate
-media URL columns were retired. Browser writes and LINE reopened after reconciliation.
-PR83 added scoped Order/Movement edit tokens; current production is PR85 `80db4ae`.
-Consolidating `archived_at` into `deletedAt` is prepared local/PR work and has not
-changed production. [The release gate](../database-migration.md#deletedat-soft-delete-consolidation-prepared-production-unchanged)
-keeps old and new layouts compatible until separately approved maintenance.
-Old business Sheets are read-only; Drive and private integration-account ownership
-are unchanged. See [production operations](../database-migration.md) and the
-[latest release evidence](../refactoring/progress.md#latest-production-release).
+Production's last verified release is PR86 `a1a27af`: all 23 business tables use
+native `deletedAt`, with 67 lifecycle timestamps including media, 61 operational
+functions and 52 triggers. Browser/LINE reopened after that approved release.
+Operational cell/ordinal/kind/lexeme sidecars and duplicate media URLs are gone.
+Old business Sheets remain read-only; Drive and private integration accounts keep
+their existing ownership. This records the last checkpoint, not a fresh live read.
+
+The current branch converts business storage to PostgreSQL-only named-record
+adapters. Each feature owns its explicit column maps and semantic port adapters;
+root transport owns SQL, transactions and private ID/revision handles. Worksheet
+classes, range/header repair, the aggregate Sheets business service and its runtime
+fallback are retired. Google Drive uploads and the fixed read-only account
+configuration remain. Existing public report type names are retained API contracts.
+This source work does not deploy, alter the schema or authorize a live change.
+See [verification](../refactoring/verification.md), [operations](../database-migration.md)
+and the [evidence ledger](../refactoring/progress.md#latest-production-release).
 
 New staff authentication/RBAC/shop permissions and backup automation remain deferred.
 Existing access controls are preserved; migration completion is not an access-
@@ -44,7 +47,7 @@ control certification. Future live changes require their own approval.
 [Expenses](../expenses.md), [movements](../movement-migration.md),
 [stock adjustments](../shop-stock-adjustments.md) and
 [LINE menu links](../rich-menu-links.md) keep their established paths. Their feature
-workflows and optional Sheets-backend instructions are separate from current
+workflows and historical Sheets-backend instructions are separate from current
 production storage and do not authorize provider or production mutations.
 
 ## Documentation ownership

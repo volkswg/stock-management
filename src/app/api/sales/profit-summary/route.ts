@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   getGoogleSheetsProfitSummary,
   listSalesProfitCostOverrides,
@@ -28,11 +28,11 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       id,
       shopName,
     }));
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     const [expenses, costOverrides, shops] = await Promise.all([
-      listExpenses({ googleSheetsService, year }),
-      listSalesProfitCostOverrides({ googleSheetsService, year }),
-      listExpenseShops(googleSheetsService),
+      listExpenses({ storage, year }),
+      listSalesProfitCostOverrides({ storage, year }),
+      listExpenseShops(storage),
     ]);
     const accountMap = new Map(configuredAccounts.map(account => [account.id, account]));
     for (const shop of shops) {
@@ -44,7 +44,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       accounts,
       costOverrides,
       expenses,
-      googleSheetsService,
+      storage,
       year,
     });
     return NextResponse.json({

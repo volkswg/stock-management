@@ -7,7 +7,7 @@ build_dir=$(mktemp -d)
 trap 'rm -rf "$build_dir"' EXIT
 cp -R src public package.json yarn.lock tsconfig.json next.config.ts "$build_dir/"
 # Turbopack rejects dependency symlinks outside the isolated root.
-cp -a node_modules "$build_dir/node_modules"
+cp -a "$(cd node_modules && pwd -P)" "$build_dir/node_modules"
 cd "$build_dir"
 env -i PATH="$PATH" CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build
 python3 - "$root" <<'PY'

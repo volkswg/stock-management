@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import {
   clockOutEmployee,
@@ -28,7 +28,7 @@ async function PATCHOperation(
 
   try {
     const timesheet = await clockOutEmployee({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      storage: createBusinessDatabase(),
       timesheetId,
     });
     if (!timesheet) {
@@ -88,7 +88,7 @@ async function PUTOperation(
       shopId: shopId.trim(),
       status,
       workdayType: status === EmployeeTimesheetStatus.Work && workdayType === "half" ? "half" : status === EmployeeTimesheetStatus.Work ? "full" : null,
-      googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+      storage: createBusinessDatabase(),
     });
     if (!timesheet) {
       return NextResponse.json({ ok: false, error: "Timesheet not found." }, { status: 404 });

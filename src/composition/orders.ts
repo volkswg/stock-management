@@ -1,22 +1,22 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { BusinessDatabase as Storage } from "@/composition/postgres/service";
 import type { OrderDetail } from "@/modules/orders/contracts";
 import { getOrderDetail as executeGetOrderDetail } from "@/modules/orders/server";
-import { GoogleSheetsOrderDetailShipmentProjection } from "@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection";
+import { PostgresOrderDetailShipmentProjection } from "@/modules/shipments/infrastructure/postgres/order-detail-shipment-projection";
 export { type OrderListItem, type OrderProductImage, type OrderBillImage, type OrderDetail } from "@/modules/orders/contracts";
 export { listOrders } from "@/modules/orders/server";
 
-// Temporary legacy-only composition; Orders module never imports Shipments.
+// Orders consumes its own Shipment projection port through composition.
 export async function getOrderDetail({
-  googleSheetsService,
+  storage,
   orderId,
 }: {
-  googleSheetsService: IGoogleSheetsService;
+  storage: Storage;
   orderId: string;
 }): Promise<OrderDetail | undefined> {
   return await executeGetOrderDetail({
-    googleSheetsService,
+    storage,
     orderId,
-    shipmentProjection: new GoogleSheetsOrderDetailShipmentProjection(googleSheetsService),
+    shipmentProjection: new PostgresOrderDetailShipmentProjection(storage),
   });
 }

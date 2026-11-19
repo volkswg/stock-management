@@ -10,9 +10,9 @@ import {
   type IGoogleDriveService,
 } from "@/infrastructure/files/google-drive";
 import {
-  createGoogleSheetsServiceFromConfig,
-  type IGoogleSheetsService,
-} from "@/composition/google-sheets";
+  createBusinessDatabase,
+  type BusinessDatabase as Storage,
+} from "@/composition/postgres/service";
 import {parseLineWebhookPayload,processLineWebhook}from "@/modules/line-workflows/server";
 
 export const runtime = "nodejs";
@@ -23,7 +23,7 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
     config.line.channelAccessToken,
     config.line.channelSecret,
   );
-  const getGoogleSheetsService = createGoogleSheetsServiceGetter(config);
+  const getStorage = createStorageGetter();
   const getGoogleDriveService = createGoogleDriveServiceGetter(config);
   const rawBody = Buffer.from(await request.arrayBuffer());
   const signature = request.headers.get("x-line-signature") || undefined;
@@ -46,7 +46,7 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
   }
 
   assertProductionLineCutoff(rawBody);
-  const result=await processLineWebhook({events:payload.events,lineBotService,getGoogleSheetsService,getGoogleDriveService,getCreateMode:()=>config.movementCreateMode,getPublicBaseUrl:()=>config.movementPublicBaseUrl||config.publicBaseUrl});
+  const result=await processLineWebhook({events:payload.events,lineBotService,getStorage,getGoogleDriveService,getCreateMode:()=>config.movementCreateMode,getPublicBaseUrl:()=>config.movementPublicBaseUrl||config.publicBaseUrl});
   if (result.movementFailed) {
     return NextResponse.json(
       { ok: false, error: "Movement processing failed. Please retry.", images: result.imageCounts(), imageResults: result.imageUploads },
@@ -67,14 +67,12 @@ function createGoogleDriveServiceGetter(
   };
 }
 
-function createGoogleSheetsServiceGetter(
-  config: ReturnType<typeof getConfig>,
-): () => IGoogleSheetsService {
-  let googleSheetsService: IGoogleSheetsService | undefined;
+function createStorageGetter(): () => Storage {
+  let storage: Storage | undefined;
 
   return () => {
-    googleSheetsService ||= createGoogleSheetsServiceFromConfig(config);
-    return googleSheetsService;
+    storage ||= createBusinessDatabase();
+    return storage;
   };
 }
 

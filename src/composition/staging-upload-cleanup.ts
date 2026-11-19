@@ -1,13 +1,12 @@
 import "server-only";
 import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
-import { requireMutation, storageMode } from "@/infrastructure/persistence/postgres/database";
+import { requireMutation } from "@/infrastructure/persistence/postgres/database";
 import { observeStagingDrive } from "@/infrastructure/persistence/postgres/uploads";
 
 // Compensate only files whose IDs this request received. This boundary runs
 // inside the staging business transaction; an unsuccessful response rolls back
 // that transaction. It does not catch COMMIT acknowledgement loss afterward.
 export async function withStagingUploadCleanup<T>(drive: IGoogleDriveService, operation: (tracked: IGoogleDriveService) => Promise<T>): Promise<T> {
-  if (storageMode() !== "supabase") return operation(drive);
   requireMutation();
   drive = observeStagingDrive(drive);
   const uploaded = new Set<string>(), attemptedDeletion = new Set<string>();

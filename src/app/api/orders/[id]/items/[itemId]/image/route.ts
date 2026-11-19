@@ -3,7 +3,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { replaceOrderProductImage } from "@/modules/orders/server";
 
 export const runtime = "nodejs";
@@ -47,7 +47,7 @@ async function PATCHOperation(
     }
     return await withStagingUploadCleanup(googleDriveService, async (googleDriveService) => {
       const item = await replaceOrderProductImage({
-        googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+        storage: createBusinessDatabase(),
         googleDriveService,
         orderId,
         itemId,

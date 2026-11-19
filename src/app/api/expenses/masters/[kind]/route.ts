@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import { ExpenseError, listExpenseCategories, listExpenseShops, saveExpenseMaster } from "@/modules/expenses/server";
 export const runtime = "nodejs";
@@ -10,7 +10,7 @@ type Context = { params: Promise<{ kind: string }> };
 function fail(error: unknown) { return NextResponse.json({ ok: false, error: error instanceof ExpenseError ? error.message : "Master data operation failed. Please retry." }, { status: error instanceof ExpenseError ? error.status : 500 }); }
 function validKind(kind: string): asserts kind is "shops" | "categories" { if (!["shops", "categories"].includes(kind)) throw new ExpenseError("Master not found.", 404); }
 async function GETOperation(_request: Request, context: Context) {
-  try { const { kind } = await context.params; validKind(kind); const config = getConfig(), service = createGoogleSheetsServiceFromConfig(config);
+  try { const { kind } = await context.params; validKind(kind); const config = getConfig(), service = createBusinessDatabase();
     const records = kind === "shops" ? await listExpenseShops(service) : await listExpenseCategories(service);
     return NextResponse.json({ ok: true, records, accounts: kind === "shops" ? (await listLoyverseAccounts(config)).map(({ id, shopName }) => ({ id, shopName })) : [] });
   } catch (error) { return fail(error); }
@@ -21,7 +21,7 @@ async function POSTOperation(request: Request, context: Context) {
     const config = getConfig(); const mapping = typeof body.loyverseAccountId === "string" ? body.loyverseAccountId.trim() : "";
     const accounts = kind === "shops" ? await listLoyverseAccounts(config) : [];
     // Existing mappings remain editable even if their account has since left configuration.
-    const service = createGoogleSheetsServiceFromConfig(config);
+    const service = createBusinessDatabase();
     if (kind === "shops" && mapping && !accounts.some(account => account.id === mapping)) {
       const existing = (await listExpenseShops(service)).find(shop => shop.id === body.id);
       if (existing?.loyverseAccountId !== mapping) throw new ExpenseError("Select a configured Loyverse account or leave the mapping empty.");

@@ -1,15 +1,14 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { createOrder, listOrders } from "@/modules/orders/server";
 
 export const runtime = "nodejs";
 
 async function GETOperation(): Promise<NextResponse> {
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
-    const orders = await listOrders({ googleSheetsService });
+    const storage = createBusinessDatabase();
+    const orders = await listOrders({ storage });
 
     return NextResponse.json({ orders, total: orders.length });
   } catch (error) {
@@ -35,9 +34,9 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
   }
 
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const order = await createOrder({
-      googleSheetsService,
+      storage,
       seller: input.seller,
       totalPrice: input.totalPrice,
       remark: input.remark,

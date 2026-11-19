@@ -1,35 +1,35 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { Storage } from "./infrastructure/postgres/storage";
 import type { EmployeeDirectoryEntry } from "./contracts";
-import { GoogleSheetsEmployeeDirectoryReader } from "./infrastructure/google-sheets/employee-directory-reader";
+import { PostgresEmployeeDirectoryReader } from "./infrastructure/postgres/employee-directory-reader";
 
-export function readEmployeeDirectory({ googleSheetsService, unavailableError }: {
-  googleSheetsService: IGoogleSheetsService;
+export function readEmployeeDirectory({ storage, unavailableError }: {
+  storage: Pick<Storage, "employees">;
   unavailableError: () => Error;
 }): Promise<EmployeeDirectoryEntry[]> {
-  return new GoogleSheetsEmployeeDirectoryReader(googleSheetsService, unavailableError).listEmployees();
+  return new PostgresEmployeeDirectoryReader(storage, unavailableError).listEmployees();
 }
 
 import type { EmployeeInput, EmployeeTimesheetStatus as TimesheetStatus, EmployeeWorkdayType } from "./contracts";
 import type { PayrollReaders, PayrollSalesReader } from "./application/ports/payroll";
 import { listEmployees as executeListEmployees, listEmployeeCompensations as executeListCompensations, createEmployee as executeCreateEmployee, updateEmployee as executeUpdateEmployee } from "./application/employees";
 import { listEmployeeTimesheets as executeListTimesheets, listEmployeeTimesheetsForMonth as executeMonthTimesheets, clockInEmployee as executeClockIn, clockOutEmployee as executeClockOut, addEmployeeLeave as executeLeave, updateEmployeeTimesheet as executeUpdateTimesheet } from "./application/attendance";
-import { GoogleSheetsWorkforceStore, type WorkforceSheets } from "./infrastructure/google-sheets/workforce-store";
+import { PostgresWorkforceStore, type WorkforceStorage } from "./infrastructure/postgres/workforce-store";
 import { workforceRuntime } from "./infrastructure/workforce-runtime";
 import { EmployeeTimesheetDateConflictError, EmployeeTimesheetValidationError } from "./domain/attendance-rules";
 import { EmployeeTimesheetStatus } from "./contracts";
 export { EmployeeTimesheetDateConflictError, EmployeeTimesheetValidationError, EmployeeTimesheetStatus };
 
-export async function listEmployees({googleSheetsService}: {googleSheetsService: WorkforceSheets}) { return executeListEmployees({store:new GoogleSheetsWorkforceStore(googleSheetsService)},workforceRuntime); }
-export async function listEmployeeCompensations({googleSheetsService}: {googleSheetsService: WorkforceSheets}) { return executeListCompensations({store:new GoogleSheetsWorkforceStore(googleSheetsService)}); }
-export async function createEmployee({createdBy,googleSheetsService,input}: {googleSheetsService: WorkforceSheets;createdBy:string;input:EmployeeInput}) { return executeCreateEmployee({store:new GoogleSheetsWorkforceStore(googleSheetsService),createdBy,input},workforceRuntime); }
-export async function updateEmployee({employeeId,googleSheetsService,input}: {googleSheetsService: WorkforceSheets;employeeId:string;input:Partial<EmployeeInput>}) { return executeUpdateEmployee({store:new GoogleSheetsWorkforceStore(googleSheetsService),employeeId,input},workforceRuntime); }
-export async function listEmployeeTimesheets({date,googleSheetsService,shopId}: {googleSheetsService:WorkforceSheets;date:string;shopId?:string}) { return executeListTimesheets({store:new GoogleSheetsWorkforceStore(googleSheetsService),date,shopId}); }
-export async function listEmployeeTimesheetsForMonth({googleSheetsService,month,shopId}: {googleSheetsService:WorkforceSheets;month:string;shopId?:string}) { return executeMonthTimesheets({store:new GoogleSheetsWorkforceStore(googleSheetsService),month,shopId}); }
-export async function clockInEmployee({date,employeeId,googleSheetsService,shopId,workdayType}: {googleSheetsService:WorkforceSheets;date:string;employeeId:string;shopId:string;workdayType:EmployeeWorkdayType}) { return executeClockIn({store:new GoogleSheetsWorkforceStore(googleSheetsService),date,employeeId,shopId,workdayType},workforceRuntime); }
-export async function clockOutEmployee({googleSheetsService,timesheetId}: {googleSheetsService:WorkforceSheets;timesheetId:string}) { return executeClockOut({store:new GoogleSheetsWorkforceStore(googleSheetsService),timesheetId},workforceRuntime); }
-export async function addEmployeeLeave({date,employeeId,googleSheetsService,shopId}: {googleSheetsService:WorkforceSheets;date:string;employeeId:string;shopId:string}) { return executeLeave({store:new GoogleSheetsWorkforceStore(googleSheetsService),date,employeeId,shopId},workforceRuntime); }
-export async function updateEmployeeTimesheet({timesheetId,date,employeeId,shopId,status,workdayType,googleSheetsService}: {googleSheetsService:WorkforceSheets;timesheetId:string;date:string;employeeId:string;shopId:string;status:TimesheetStatus;workdayType:EmployeeWorkdayType|null}) { return executeUpdateTimesheet({store:new GoogleSheetsWorkforceStore(googleSheetsService),timesheetId,date,employeeId,shopId,status,workdayType},{listEmployees:()=>listEmployees({googleSheetsService})},workforceRuntime); }
-export function createHRPayrollReaders(googleSheetsService: WorkforceSheets, sales: PayrollSalesReader): PayrollReaders {
-  return { employees:{listEmployees:()=>listEmployees({googleSheetsService})}, compensations:{listCompensations:()=>listEmployeeCompensations({googleSheetsService})}, attendance:{listAttendance:month=>listEmployeeTimesheetsForMonth({googleSheetsService,month})}, sales };
+export async function listEmployees({storage}: {storage: WorkforceStorage}) { return executeListEmployees({store:new PostgresWorkforceStore(storage)},workforceRuntime); }
+export async function listEmployeeCompensations({storage}: {storage: WorkforceStorage}) { return executeListCompensations({store:new PostgresWorkforceStore(storage)}); }
+export async function createEmployee({createdBy,storage,input}: {storage: WorkforceStorage;createdBy:string;input:EmployeeInput}) { return executeCreateEmployee({store:new PostgresWorkforceStore(storage),createdBy,input},workforceRuntime); }
+export async function updateEmployee({employeeId,storage,input}: {storage: WorkforceStorage;employeeId:string;input:Partial<EmployeeInput>}) { return executeUpdateEmployee({store:new PostgresWorkforceStore(storage),employeeId,input},workforceRuntime); }
+export async function listEmployeeTimesheets({date,storage,shopId}: {storage:WorkforceStorage;date:string;shopId?:string}) { return executeListTimesheets({store:new PostgresWorkforceStore(storage),date,shopId}); }
+export async function listEmployeeTimesheetsForMonth({storage,month,shopId}: {storage:WorkforceStorage;month:string;shopId?:string}) { return executeMonthTimesheets({store:new PostgresWorkforceStore(storage),month,shopId}); }
+export async function clockInEmployee({date,employeeId,storage,shopId,workdayType}: {storage:WorkforceStorage;date:string;employeeId:string;shopId:string;workdayType:EmployeeWorkdayType}) { return executeClockIn({store:new PostgresWorkforceStore(storage),date,employeeId,shopId,workdayType},workforceRuntime); }
+export async function clockOutEmployee({storage,timesheetId}: {storage:WorkforceStorage;timesheetId:string}) { return executeClockOut({store:new PostgresWorkforceStore(storage),timesheetId},workforceRuntime); }
+export async function addEmployeeLeave({date,employeeId,storage,shopId}: {storage:WorkforceStorage;date:string;employeeId:string;shopId:string}) { return executeLeave({store:new PostgresWorkforceStore(storage),date,employeeId,shopId},workforceRuntime); }
+export async function updateEmployeeTimesheet({timesheetId,date,employeeId,shopId,status,workdayType,storage}: {storage:WorkforceStorage;timesheetId:string;date:string;employeeId:string;shopId:string;status:TimesheetStatus;workdayType:EmployeeWorkdayType|null}) { return executeUpdateTimesheet({store:new PostgresWorkforceStore(storage),timesheetId,date,employeeId,shopId,status,workdayType},{listEmployees:()=>listEmployees({storage})},workforceRuntime); }
+export function createHRPayrollReaders(storage: WorkforceStorage, sales: PayrollSalesReader): PayrollReaders {
+  return { employees:{listEmployees:()=>listEmployees({storage})}, compensations:{listCompensations:()=>listEmployeeCompensations({storage})}, attendance:{listAttendance:month=>listEmployeeTimesheetsForMonth({storage,month})}, sales };
 }

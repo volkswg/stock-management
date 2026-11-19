@@ -1,19 +1,19 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { Storage } from "./infrastructure/postgres/storage";
 import type { Expense } from "@/modules/expenses/contracts";
 import type { GoogleSheetsDailySalesReport, GoogleSheetsSalesDashboardReport, GoogleSheetsProfitSummary, SalesProfitCostOverride } from "./contracts";
 import { createSalesReports } from "./application/reports";
-import { createSalesReader } from "./infrastructure/google-sheets/sales-reader";
+import { createSalesReader } from "./infrastructure/postgres/sales-reader";
 const reports = createSalesReports(createSalesReader);
 export const getGoogleSheetsDailySales: (input: {
     accountId: string;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     salesDate: string;
 }) => Promise<GoogleSheetsDailySalesReport> = reports.getGoogleSheetsDailySales;
 export const getGoogleSheetsSalesDashboard: (input: {
     accountIds?: string[];
     fromDate: string;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     toDate: string;
 }) => Promise<GoogleSheetsSalesDashboardReport> = reports.getGoogleSheetsSalesDashboard;
 export const getGoogleSheetsProfitSummary: (input: {
@@ -23,61 +23,61 @@ export const getGoogleSheetsProfitSummary: (input: {
     }>;
     costOverrides: SalesProfitCostOverride[];
     expenses: Expense[];
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     year: string;
 }) => Promise<GoogleSheetsProfitSummary> = reports.getGoogleSheetsProfitSummary;
 import type { ReceiptSource } from "./application/ports/receipt-source";
 import { syncReceipts } from "./application/sync-receipts";
-import { createReceiptSync } from "./infrastructure/google-sheets/receipt-sync";
+import { createReceiptSync } from "./infrastructure/postgres/receipt-sync";
 import type { SyncLoyverseDailySalesResult } from "./application/ports/receipt-sync";
-export async function syncLoyverseDailySales({ account, googleSheetsService, salesDate, }: {
+export async function syncLoyverseDailySales({ account, storage, salesDate, }: {
     account: { id: string; shopName: string; storeId?: string; service: ReceiptSource };
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     salesDate: string;
 }): Promise<SyncLoyverseDailySalesResult> {
-    const { store, source } = createReceiptSync(googleSheetsService, account);
+    const { store, source } = createReceiptSync(storage, account);
     return syncReceipts(account.id, salesDate, store, source, { now: () => new Date().toISOString() });
 }
 import { randomUUID } from "node:crypto";
 import * as costs from "./application/cost-overrides";
-import { createCostOverrideStore } from "./infrastructure/google-sheets/cost-overrides";
-export async function listSalesProfitCostOverrides({ googleSheetsService, year, }: {
-    googleSheetsService: IGoogleSheetsService;
+import { createCostOverrideStore } from "./infrastructure/postgres/cost-overrides";
+export async function listSalesProfitCostOverrides({ storage, year, }: {
+    storage: Storage;
     year: string;
 }): Promise<SalesProfitCostOverride[]> {
-    return costs.listSalesProfitCostOverrides({ store: createCostOverrideStore(googleSheetsService), year });
+    return costs.listSalesProfitCostOverrides({ store: createCostOverrideStore(storage), year });
 }
-export async function setSalesProfitCostOverride({ accountId, averageItemCost, createdBy, googleSheetsService, month, note, }: {
+export async function setSalesProfitCostOverride({ accountId, averageItemCost, createdBy, storage, month, note, }: {
     accountId: string;
     averageItemCost: number;
     createdBy: string;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     month: string;
     note: string;
 }): Promise<SalesProfitCostOverride> {
-    return costs.setSalesProfitCostOverride({ accountId, averageItemCost, createdBy, store: createCostOverrideStore(googleSheetsService), month, note, runtime: { now: () => new Date().toISOString(), uuid: randomUUID } });
+    return costs.setSalesProfitCostOverride({ accountId, averageItemCost, createdBy, store: createCostOverrideStore(storage), month, note, runtime: { now: () => new Date().toISOString(), uuid: randomUUID } });
 }
-export async function removeSalesProfitCostOverride({ accountId, googleSheetsService, month, }: {
+export async function removeSalesProfitCostOverride({ accountId, storage, month, }: {
     accountId: string;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     month: string;
 }): Promise<boolean> {
-    return costs.removeSalesProfitCostOverride({ accountId, store: createCostOverrideStore(googleSheetsService), month });
+    return costs.removeSalesProfitCostOverride({ accountId, store: createCostOverrideStore(storage), month });
 }
 import type { SalesSyncStatusRow, SalesSyncStatusSummary } from "./contracts";
 import { listSalesSyncStatus as executeSyncStatus } from "./application/sync-status";
-import { createSyncStatusReader } from "./infrastructure/google-sheets/sync-status";
-export async function listSalesSyncStatus({ accountId, googleSheetsService, month, }: {
+import { createSyncStatusReader } from "./infrastructure/postgres/sync-status";
+export async function listSalesSyncStatus({ accountId, storage, month, }: {
     accountId?: string;
-    googleSheetsService: IGoogleSheetsService;
+    storage: Storage;
     month: string;
 }): Promise<{
     rows: SalesSyncStatusRow[];
     summary: SalesSyncStatusSummary;
 }> {
-    return executeSyncStatus({ accountId, reader: createSyncStatusReader(googleSheetsService), month });
+    return executeSyncStatus({ accountId, reader: createSyncStatusReader(storage), month });
 }
-import type { SalesSheets } from "./infrastructure/google-sheets/sales-reader";
+import type { SalesStorage } from "./infrastructure/postgres/sales-reader";
 import type { ILoyverseService, LoyverseReceipt } from "@/infrastructure/external/loyverse";
 import { getLoyverseReceiptsForSalesDate as readReceiptsForDate } from "./application/receipts-for-date";
 export { isValidBangkokSalesDate } from "./application/receipts-for-date";
@@ -89,10 +89,10 @@ export async function getLoyverseReceiptsForSalesDate({ loyverseService, salesDa
     return readReceiptsForDate({ loyverseService, salesDate, storeId });
 }
 // Public consumer seam: HR/Inventory supply their own consumer-owned interface.
-export function createSalesDashboardReader(service: SalesSheets) {
+export function createSalesDashboardReader(service: SalesStorage) {
     return { readSales: (input: {
             accountIds: string[];
             fromDate: string;
             toDate: string;
-        }) => reports.getGoogleSheetsSalesDashboard({ ...input, googleSheetsService: service }) };
+        }) => reports.getGoogleSheetsSalesDashboard({ ...input, storage: service }) };
 }

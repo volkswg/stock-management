@@ -1,7 +1,6 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { updateEmployee } from "@/modules/hr/server";
 import { parseEmployeeInput } from "../route";
 
@@ -23,7 +22,7 @@ async function PATCHOperation(
   try {
     const employee = await updateEmployee({
       employeeId,
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      storage: createBusinessDatabase(),
       input,
     });
     if (!employee) {

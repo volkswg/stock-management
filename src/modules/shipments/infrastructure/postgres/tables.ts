@@ -1,11 +1,31 @@
 import "server-only";
-import { PostgresRecords } from "@/infrastructure/persistence/postgres/records";
-import { SHIPMENTS_SHEET_HEADERS } from "@/modules/shipments/infrastructure/google-sheets/shipments/const";
-import { SHIPMENT_ORDERS_SHEET_HEADERS } from "@/modules/shipments/infrastructure/google-sheets/shipment-orders/const";
+import { NativeRecords } from "@/infrastructure/persistence/postgres/native-records";
 
 export function shipmentsTables() {
   return {
-    shipments: new PostgresRecords({ table: "shipments", media: { url: "shippingBillUrl", reference: "shippingBillMediaId" }, headers: SHIPMENTS_SHEET_HEADERS }),
-    shipmentOrders: new PostgresRecords({ table: "shipment_orders", headers: SHIPMENT_ORDERS_SHEET_HEADERS }),
+    shipments: new NativeRecords("shipments", {
+      id: { column: "id", kind: "text" },
+      status: { column: "status", kind: "text" },
+      carrier: { column: "carrier", kind: "text" },
+      poNumber: { column: "poNumber", kind: "text" },
+      shippingFee: { column: "shippingFee", kind: "numeric" },
+      remark: { column: "remark", kind: "text" },
+      shippedAt: { column: "shippedAt", kind: "text" },
+      deliveredAt: { column: "deliveredAt", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      deletedAt: { column: "deletedAt", kind: "timestamp" },
+      createdBy: { column: "createdBy", kind: "text" },
+      shippingBillUrl: { column: "shippingBillMediaId", kind: "media" },
+    } as const),
+    shipmentOrders: new NativeRecords("shipment_orders", {
+      id: { column: "id", kind: "text" },
+      shipmentId: { column: "shipmentId", kind: "text" },
+      orderId: { column: "orderId", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      deletedAt: { column: "deletedAt", kind: "timestamp" },
+      createdBy: { column: "createdBy", kind: "text" },
+    } as const),
   };
 }

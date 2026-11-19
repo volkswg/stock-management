@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { listSalesSyncStatus } from "@/modules/sales/server";
 
 export const runtime = "nodejs";
@@ -31,10 +31,10 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       );
     }
 
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     const { rows, summary } = await listSalesSyncStatus({
       accountId: accountId || undefined,
-      googleSheetsService,
+      storage,
       month,
     });
 

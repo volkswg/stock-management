@@ -28,35 +28,38 @@ jobs:
           test -x /usr/bin/google-chrome
           mkdir evidence
           git rev-parse HEAD > evidence/source-sha.txt
+          python3 tools/native-postgres/history-copy.py "$RUNNER_TEMP/stock-pre-native-ci"
       - name: Regression, boundaries and type safety
         run: |
           set -euo pipefail
-          npm test 2>&1 | tee evidence/regression.log
-          npm run lint 2>&1 | tee evidence/lint.log
-          npm run typecheck 2>&1 | tee evidence/typecheck.log
-          env -i PATH="$PATH" node --test tools/migration/local-write/guard.test.cjs tools/migration/local-write/oracle.test.cjs tools/migration/local-write/binary-fixtures.test.cjs tools/migration/local-write/capacity.test.cjs tools/migration/local-write/capacity-workload.test.cjs tools/migration/local-write/capacity-context.test.cjs tools/migration/local-write/provider-outcomes.test.cjs tools/migration/local-write/legacy-fixtures.test.cjs tools/migration/local-write/browser-interception.test.cjs tools/migration/local-write/recovery-readonly.test.cjs 2>&1 | tee evidence/local-write-harness.log
-          env -i PATH="$PATH" node --test tools/migration/hosted-write/adapter.test.cjs tools/migration/hosted-write/integration.test.cjs tools/migration/hosted-write/protocol.test.cjs 2>&1 | tee evidence/hosted-adapter-offline.log
-          env -i PATH="$PATH" node tools/migration/hosted-write/inspect-packet.cjs > evidence/hosted-packet-offline.json
+          npm test 2>&1 | tee "$GITHUB_WORKSPACE/evidence/regression.log"
+          npm run lint 2>&1 | tee "$GITHUB_WORKSPACE/evidence/lint.log"
+          npm run typecheck 2>&1 | tee "$GITHUB_WORKSPACE/evidence/typecheck.log"
+          cd "$RUNNER_TEMP/stock-pre-native-ci"
+          env -i PATH="$PATH" node --test tools/migration/local-write/guard.test.cjs tools/migration/local-write/oracle.test.cjs tools/migration/local-write/binary-fixtures.test.cjs tools/migration/local-write/capacity.test.cjs tools/migration/local-write/capacity-workload.test.cjs tools/migration/local-write/capacity-context.test.cjs tools/migration/local-write/provider-outcomes.test.cjs tools/migration/local-write/legacy-fixtures.test.cjs tools/migration/local-write/browser-interception.test.cjs tools/migration/local-write/recovery-readonly.test.cjs 2>&1 | tee "$GITHUB_WORKSPACE/evidence/local-write-harness.log"
+          env -i PATH="$PATH" node --test tools/migration/hosted-write/adapter.test.cjs tools/migration/hosted-write/integration.test.cjs tools/migration/hosted-write/protocol.test.cjs 2>&1 | tee "$GITHUB_WORKSPACE/evidence/hosted-adapter-offline.log"
+          env -i PATH="$PATH" node tools/migration/hosted-write/inspect-packet.cjs > "$GITHUB_WORKSPACE/evidence/hosted-packet-offline.json"
           python3 -m py_compile tools/migration/local-write/capacity-observer.py tools/migration/local-write/capacity-recovery.py tools/migration/local-write/capacity-start-app.py
-          python3 -m unittest discover -s tools/migration -p 'test_*.py' -v 2>&1 | tee evidence/python.log
-      - name: Real PostgreSQL, scoped browser authorization, reconciliation and recovery
+          python3 -m unittest discover -s tools/migration -p 'test_*.py' -v 2>&1 | tee "$GITHUB_WORKSPACE/evidence/python.log"
+      - name: Historical schema proofs and current native PostgreSQL acceptance
+        working-directory: ${{ runner.temp }}/stock-pre-native-ci
         env:
           NODE_PATH: ${{ runner.temp }}/stock-browser-tools/node_modules
           STOCK_CHROMIUM_EXECUTABLE: /usr/bin/google-chrome
         run: |
           set -euo pipefail
-          bash tools/migration/verify-postgres.sh 2>&1 | tee evidence/archive-postgres.log
-          env -i PATH="$PATH" node --test --test-isolation=none tools/migration/application-parity.test.cjs 2>&1 | tee evidence/application-parity.log
-          env -i PATH="$PATH" node --test tools/migration/readonly-staging.test.cjs 2>&1 | tee evidence/readonly-staging.log
-          bash tools/migration/verify-persistence-history.sh 2>&1 | tee evidence/persistence-history.log
-          bash tools/migration/verify-typed-postgres.sh 2>&1 | tee evidence/typed-postgres.log
-          bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee evidence/recovery-fingerprints.log
-          bash tools/migration/verify-restricted-backup.sh 2>&1 | tee evidence/restricted-backup.log
-          STOCK_HA_EVIDENCE_DIR="$PWD/evidence" bash tools/migration/verify-persistence-history.sh --hosted-tooling 2>&1 | tee evidence/hosted-tooling-integration.log
+          bash tools/migration/verify-postgres.sh 2>&1 | tee "$GITHUB_WORKSPACE/evidence/archive-postgres.log"
+          env -i PATH="$PATH" node --test --test-isolation=none tools/migration/application-parity.test.cjs 2>&1 | tee "$GITHUB_WORKSPACE/evidence/application-parity.log"
+          env -i PATH="$PATH" node --test tools/migration/readonly-staging.test.cjs 2>&1 | tee "$GITHUB_WORKSPACE/evidence/readonly-staging.log"
+          bash tools/migration/verify-persistence-history.sh 2>&1 | tee "$GITHUB_WORKSPACE/evidence/persistence-history.log"
+          bash "$GITHUB_WORKSPACE/tools/native-postgres/verify-postgres.sh" 2>&1 | tee "$GITHUB_WORKSPACE/evidence/typed-postgres.log"
+          bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee "$GITHUB_WORKSPACE/evidence/recovery-fingerprints.log"
+          bash tools/migration/verify-restricted-backup.sh 2>&1 | tee "$GITHUB_WORKSPACE/evidence/restricted-backup.log"
+          STOCK_HA_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence" bash tools/migration/verify-persistence-history.sh --hosted-tooling 2>&1 | tee "$GITHUB_WORKSPACE/evidence/hosted-tooling-integration.log"
       - name: Credential-free production build and bundle boundaries
         run: |
           set -euo pipefail
-          bash tools/migration/verify-build.sh 2>&1 | tee evidence/build.log
+          bash tools/migration/verify-build.sh 2>&1 | tee "$GITHUB_WORKSPACE/evidence/build.log"
       - name: Preserve synthetic evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -1,10 +1,9 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { updateOrderDetails } from "@/modules/orders/server";
 import { getOrderDetail } from "@/modules/orders/server";
-import { GoogleSheetsOrderDetailShipmentProjection } from "@/modules/shipments/infrastructure/google-sheets/order-detail-shipment-projection";
+import { PostgresOrderDetailShipmentProjection } from "@/modules/shipments/infrastructure/postgres/order-detail-shipment-projection";
 
 export const runtime = "nodejs";
 
@@ -22,11 +21,11 @@ async function GETOperation(
       );
     }
 
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const order = await getOrderDetail({
-      googleSheetsService,
+      storage,
       orderId,
-      shipmentProjection: new GoogleSheetsOrderDetailShipmentProjection(googleSheetsService),
+      shipmentProjection: new PostgresOrderDetailShipmentProjection(storage),
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
@@ -68,9 +67,9 @@ async function PATCHOperation(
   }
 
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const result = await updateOrderDetails({
-      googleSheetsService,
+      storage,
       orderId,
       remark: input.remark,
       totalPrice: input.totalPrice,

@@ -1,7 +1,6 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import { updateOrderProducts } from "@/modules/orders/server";
 import type {OrderProductUpdate}from "@/modules/orders/contracts";
@@ -25,7 +24,7 @@ async function PATCHOperation(
 
   try {
     const result = await updateOrderProducts({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      storage: createBusinessDatabase(),
       orderId,
       items,
     });

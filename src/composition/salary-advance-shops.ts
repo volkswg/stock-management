@@ -1,9 +1,9 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { BusinessDatabase as Storage } from "@/composition/postgres/service";
 import type { SalaryAdvanceShops } from "@/modules/hr/application/ports/salary-advance-shops";
 import { listExpenseShops } from "@/modules/expenses/server";
 
-// Legacy compatibility composition stays outside both feature cores.
-export function createSalaryAdvanceShops(service: IGoogleSheetsService): SalaryAdvanceShops {
+// Cross-feature reader composition stays outside both feature cores.
+export function createSalaryAdvanceShops(service: Storage): SalaryAdvanceShops {
   return { listShops: () => listExpenseShops(service) };
 }

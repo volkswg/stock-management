@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/google-drive";
 import { advanceShipmentStatusWithBill } from "@/modules/shipments/server";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import {
   isUpdatableStatus,
@@ -42,11 +42,9 @@ async function GETOperation(
   }
 
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(
-      getConfig(),
-    );
+    const storage = createBusinessDatabase();
     const shipment = await getShipmentDetail({
-      googleSheetsService,
+      storage,
       shipmentId,
     });
 
@@ -119,14 +117,14 @@ async function PATCHOperation(
   let workflow: Awaited<ReturnType<typeof advanceShipmentStatusWithBill>> | undefined;
   try {
     const config = getConfig();
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     workflow = await advanceShipmentStatusWithBill({
       shipmentId,
       shippingBill,
       createDriveService: () => { const drive = createGoogleDriveServiceFromConfig(config); return drive && observeStagingDrive(drive); },
       updateStatus: (shippingBillUrl) => updateShipmentStatus({
         deliveryFee,
-        googleSheetsService,
+        storage,
         poNumber,
         shippingBillUrl,
         shipmentId,

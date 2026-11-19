@@ -1,13 +1,37 @@
 import "server-only";
-import { PostgresRecords } from "@/infrastructure/persistence/postgres/records";
-import { EXPENSE_HEADERS } from "@/modules/expenses/infrastructure/google-sheets/expenses/const";
-import { CATEGORY_HEADERS } from "@/modules/expenses/infrastructure/google-sheets/expenses/const";
-import { SHOP_HEADERS } from "@/modules/expenses/infrastructure/google-sheets/expenses/const";
+import { NativeRecords } from "@/infrastructure/persistence/postgres/native-records";
 
 export function expensesTables() {
   return {
-    expenses: new PostgresRecords({ table: "expenses", headers: EXPENSE_HEADERS }),
-    expenseCategories: new PostgresRecords({ table: "expense_categories", headers: CATEGORY_HEADERS }),
-    shops: new PostgresRecords({ table: "shops", headers: SHOP_HEADERS }),
+    expenses: new NativeRecords("expenses", {
+      id: { column: "id", kind: "text" },
+      month: { column: "month", kind: "text" },
+      expenseDate: { column: "expenseDate", kind: "text" },
+      shopId: { column: "shopId", kind: "text" },
+      scope: { column: "scope", kind: "text" },
+      categoryId: { column: "categoryId", kind: "text" },
+      name: { column: "name", kind: "text" },
+      amount: { column: "amount", kind: "numeric" },
+      note: { column: "note", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      createdBy: { column: "createdBy", kind: "text" },
+      deletedAt: { column: "deletedAt", kind: "timestamp" },
+    } as const),
+    expenseCategories: new NativeRecords("expense_categories", {
+      id: { column: "id", kind: "text" },
+      name: { column: "name", kind: "text" },
+      active: { column: "active", kind: "boolean", trimBoolean: true },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+    } as const),
+    shops: new NativeRecords("shops", {
+      id: { column: "id", kind: "text" },
+      name: { column: "name", kind: "text" },
+      active: { column: "active", kind: "boolean", trimBoolean: true },
+      loyverseAccountId: { column: "loyverseAccountId", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+    } as const),
   };
 }

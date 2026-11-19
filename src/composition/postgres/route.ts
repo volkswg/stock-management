@@ -77,7 +77,7 @@ async function requestIntent(request: Request) {
 export function withPersistence<Args extends unknown[], Result extends Response>(handler: (...args: Args) => Promise<Result>, options: { lineWebhook?: true } = {}): (...args: Args) => Promise<Result> {
   return async (...args) => {
     try {
-      if (storageMode() === "google-sheets") return handler(...args);
+      storageMode();
       const request = args[0] as Request;
       if (!(request instanceof Request)) throw new PersistenceFailure(503,"A staging request context is required.");
       if (stagingReadOnly() && !["GET","HEAD"].includes(request.method.toUpperCase())) {

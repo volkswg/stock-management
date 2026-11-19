@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { isRecord } from "@/shared/lib/is-record";
 import {
   getMonthlyStockCounts,
@@ -27,7 +27,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
     }));
     const stockCounts = await getMonthlyStockCounts({
       accounts,
-      googleSheetsService: createGoogleSheetsServiceFromConfig(config),
+      storage: createBusinessDatabase(),
       month,
     });
     return NextResponse.json({ ok: true, month, stockCounts });
@@ -78,10 +78,10 @@ async function PUTOperation(request: Request): Promise<NextResponse> {
         { status: 404 },
       );
     }
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     await saveMonthlyStockCount({
       account,
-      googleSheetsService,
+      storage,
       month,
       note,
       physicalCount,
@@ -92,7 +92,7 @@ async function PUTOperation(request: Request): Promise<NextResponse> {
         id,
         shopName,
       })),
-      googleSheetsService,
+      storage,
       month,
     });
     return NextResponse.json({ ok: true, month, stockCounts });

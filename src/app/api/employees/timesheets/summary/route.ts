@@ -2,7 +2,7 @@ import { withPersistence } from "@/composition/postgres/route";
 import { listLoyverseAccounts } from "@/composition/loyverse-accounts";
 import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   listEmployees,
   listEmployeeTimesheetsForMonth,
@@ -34,11 +34,11 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       );
     }
 
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(config);
+    const storage = createBusinessDatabase();
     const [employees, timesheets] = await Promise.all([
-      listEmployees({ googleSheetsService }),
+      listEmployees({ storage }),
       listEmployeeTimesheetsForMonth({
-        googleSheetsService,
+        storage,
         month,
         shopId,
       }),

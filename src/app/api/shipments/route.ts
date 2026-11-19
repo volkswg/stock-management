@@ -1,7 +1,6 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   createShipment,
   listShipments,
@@ -22,9 +21,9 @@ async function GETOperation(request: Request): Promise<NextResponse> {
 
   try {
     const includeOrders = searchParams.get("includeOrders") !== "false";
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const shipments = await listShipments({
-      googleSheetsService,
+      storage,
       includeOrders,
       excludeStatuses,
     });
@@ -81,9 +80,9 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
   }
 
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const shipment = await createShipment({
-      googleSheetsService,
+      storage,
       poNumber: input.poNumber,
       carrier: input.carrier,
       createdBy: "web",

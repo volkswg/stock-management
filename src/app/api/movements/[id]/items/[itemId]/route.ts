@@ -1,7 +1,6 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { deleteMovementItem, updateMovementItem } from "@/modules/inventory/server";
 
 export const runtime = "nodejs";
@@ -44,7 +43,7 @@ async function PATCHOperation(
 
   try {
     const records = await updateMovementItem({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      storage: createBusinessDatabase(),
       movementId,
       movementMasterId,
       quantity,
@@ -87,7 +86,7 @@ async function DELETEOperation(
   if (!movementMasterId || !movementId) return badRequest("Movement and item IDs are required.");
   try {
     const records = await deleteMovementItem({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      storage: createBusinessDatabase(),
       movementMasterId,
       movementId,
     });

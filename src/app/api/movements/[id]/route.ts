@@ -1,7 +1,6 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
-import { getConfig } from "@/config";
-import { createGoogleSheetsServiceFromConfig } from "@/composition/google-sheets";
+import { createBusinessDatabase } from "@/composition/postgres/service";
 import { getMovementItems, movementExists, markMovementDelivered, MovementQuantityRequiredError } from "@/modules/inventory/server";
 
 export const runtime = "nodejs";
@@ -18,12 +17,12 @@ async function GETOperation(
     );
   }
   try {
-    const googleSheetsService = createGoogleSheetsServiceFromConfig(getConfig());
+    const storage = createBusinessDatabase();
     const records = await getMovementItems({
-      googleSheetsService,
+      storage,
       movementMasterId,
     });
-    if (records.length === 0 && !await movementExists({ googleSheetsService, movementMasterId })) {
+    if (records.length === 0 && !await movementExists({ storage, movementMasterId })) {
       return NextResponse.json(
         { error: "Movement was not found." },
         { status: 404 },
@@ -49,7 +48,7 @@ async function PATCHOperation(
   }
   try {
     const result = await markMovementDelivered({
-      googleSheetsService: createGoogleSheetsServiceFromConfig(getConfig()),
+      storage: createBusinessDatabase(),
       movementMasterId,
     });
     if (!result) {

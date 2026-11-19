@@ -1,39 +1,39 @@
 import "server-only";
-import type { IGoogleSheetsService } from "@/infrastructure/persistence/google-sheets/service-contracts";
+import type { Storage } from "./infrastructure/postgres/storage";
 import { createSortableId } from "@/infrastructure/runtime/create-sortable-id";
 import type { Shipment, ShipmentListItem, ShipmentStatus } from "./contracts";
 import { createShipment as executeCreateShipment } from "./application/create-shipment";
-import { GoogleSheetsShipmentWriter } from "./infrastructure/google-sheets/shipment-writer";
+import { PostgresShipmentWriter } from "./infrastructure/postgres/shipment-writer";
 import {
   listShipments as executeListShipments,
   getShipmentDetail as executeGetShipmentDetail,
 } from "./application/list-shipments";
-import { GoogleSheetsShipmentListReader } from "./infrastructure/google-sheets/shipment-list-reader";
+import { PostgresShipmentListReader } from "./infrastructure/postgres/shipment-list-reader";
 
 import { linkOrderToShipment as executeLinkOrderToShipment, LinkOrderToShipmentError, type LinkOrderToShipmentResult } from "./application/link-order-to-shipment";
 export { LinkOrderToShipmentError };
-import { GoogleSheetsShipmentOrderLinkStore } from "./infrastructure/google-sheets/shipment-order-link-store";
+import { PostgresShipmentOrderLinkStore } from "./infrastructure/postgres/shipment-order-link-store";
 
 import { updateShipmentStatus as executeUpdateShipmentStatus, type UpdateShipmentStatusResult } from "./application/update-shipment-status";
-import { GoogleSheetsShipmentStatusStore } from "./infrastructure/google-sheets/shipment-status-store";
+import { PostgresShipmentStatusStore } from "./infrastructure/postgres/shipment-status-store";
 
 import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/types";
 import { advanceShipmentStatusWithBill as executeAdvanceShipmentStatusWithBill, type ShipmentStatusUpdater, type AdvanceShipmentStatusWithBillResult } from "./application/advance-shipment-status-with-bill";
 import { GoogleDriveShipmentBillStorage } from "./infrastructure/google-drive/shipment-bill-storage";
 
 export async function createShipment({
-  googleSheetsService,
+  storage,
   poNumber,
   carrier,
   createdBy,
 }: {
-  googleSheetsService: IGoogleSheetsService;
+  storage: Storage;
   poNumber: string;
   carrier?: string;
   createdBy: string;
 }): Promise<Shipment> {
   return await executeCreateShipment({ poNumber, carrier, createdBy }, {
-    writer: new GoogleSheetsShipmentWriter(googleSheetsService),
+    writer: new PostgresShipmentWriter(storage),
     now: () => new Date().toISOString(),
     createId: createSortableId,
   });
@@ -41,41 +41,41 @@ export async function createShipment({
 
 export async function listShipments({
   excludeStatuses = [],
-  googleSheetsService,
+  storage,
   includeOrders = true,
 }: {
   excludeStatuses?: readonly ShipmentStatus[];
-  googleSheetsService: IGoogleSheetsService;
+  storage: Storage;
   includeOrders?: boolean;
 }): Promise<ShipmentListItem[]> {
-  return await executeListShipments(new GoogleSheetsShipmentListReader(googleSheetsService), {
+  return await executeListShipments(new PostgresShipmentListReader(storage), {
     excludeStatuses, includeOrders,
   });
 }
 
 export async function getShipmentDetail({
-  googleSheetsService,
+  storage,
   shipmentId,
 }: {
-  googleSheetsService: IGoogleSheetsService;
+  storage: Storage;
   shipmentId: string;
 }): Promise<ShipmentListItem | undefined> {
-  return await executeGetShipmentDetail(new GoogleSheetsShipmentListReader(googleSheetsService), shipmentId);
+  return await executeGetShipmentDetail(new PostgresShipmentListReader(storage), shipmentId);
 }
 
 export async function linkOrderToShipment({
-  googleSheetsService,
+  storage,
   shipmentId,
   orderId,
   createdBy,
 }: {
-  googleSheetsService: IGoogleSheetsService;
+  storage: Storage;
   shipmentId: string;
   orderId: string;
   createdBy: string;
 }): Promise<LinkOrderToShipmentResult> {
   return await executeLinkOrderToShipment({ shipmentId, orderId, createdBy }, {
-    store: new GoogleSheetsShipmentOrderLinkStore(googleSheetsService),
+    store: new PostgresShipmentOrderLinkStore(storage),
     now: () => new Date().toISOString(),
     createId: createSortableId,
   });
@@ -83,21 +83,21 @@ export async function linkOrderToShipment({
 
 export async function updateShipmentStatus({
   deliveryFee,
-  googleSheetsService,
+  storage,
   poNumber,
   shippingBillUrl,
   shipmentId,
   status,
 }: {
   deliveryFee?: number;
-  googleSheetsService: IGoogleSheetsService;
+  storage: Storage;
   poNumber?: string;
   shippingBillUrl?: string;
   shipmentId: string;
   status: ShipmentStatus;
 }): Promise<UpdateShipmentStatusResult> {
   return await executeUpdateShipmentStatus({ deliveryFee, poNumber, shippingBillUrl, shipmentId, status }, {
-    store: new GoogleSheetsShipmentStatusStore(googleSheetsService),
+    store: new PostgresShipmentStatusStore(storage),
     now: () => new Date().toISOString(),
   });
 }

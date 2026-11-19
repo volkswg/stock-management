@@ -1,17 +1,65 @@
 import "server-only";
-import { PostgresRecords } from "@/infrastructure/persistence/postgres/records";
-import { EMPLOYEE_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employees/const";
-import { EMPLOYEE_COMPENSATION_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employee-compensations/const";
-import { EMPLOYEE_TIMESHEET_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employee-timesheets/const";
-import { ADVANCE_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employee-advances/const";
-import { SETTLEMENT_HEADERS } from "@/modules/hr/infrastructure/google-sheets/employee-advances/const";
+import { NativeRecords } from "@/infrastructure/persistence/postgres/native-records";
 
 export function hrTables() {
   return {
-    employees: new PostgresRecords({ table: "employees", headers: EMPLOYEE_HEADERS }),
-    employeeCompensations: new PostgresRecords({ table: "employee_compensations", headers: EMPLOYEE_COMPENSATION_HEADERS, key: "migration_id" }),
-    employeeTimesheets: new PostgresRecords({ table: "employee_timesheets", headers: EMPLOYEE_TIMESHEET_HEADERS }),
-    employeeAdvances: new PostgresRecords({ table: "employee_advances", headers: ADVANCE_HEADERS }),
-    payrollSettlements: new PostgresRecords({ table: "payroll_settlements", headers: SETTLEMENT_HEADERS }),
+    employees: new NativeRecords("employees", {
+      id: { column: "id", kind: "text" },
+      name: { column: "name", kind: "text" },
+      phone: { column: "phone", kind: "text" },
+      status: { column: "status", kind: "text" },
+      hiredDate: { column: "hiredDate", kind: "text" },
+      terminatedDate: { column: "terminatedDate", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      createdBy: { column: "createdBy", kind: "text" },
+    } as const),
+    employeeCompensations: new NativeRecords("employee_compensations", {
+      employeeId: { column: "employeeId", kind: "text" },
+      baseSalary: { column: "baseSalary", kind: "numeric" },
+      commission: { column: "commission", kind: "numeric" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      updatedBy: { column: "updatedBy", kind: "text" },
+      effectiveFrom: { column: "effectiveFrom", kind: "text" },
+      compensationType: { column: "compensationType", kind: "text" },
+      commissionType: { column: "commissionType", kind: "text" },
+      commissionBucketSales: { column: "commissionBucketSales", kind: "numeric" },
+      commissionBucketAmount: { column: "commissionBucketAmount", kind: "numeric" },
+      commissionRoundupThreshold: { column: "commissionRoundupThreshold", kind: "numeric" },
+    } as const, "migration_id"),
+    employeeTimesheets: new NativeRecords("employee_timesheets", {
+      id: { column: "id", kind: "text" },
+      employeeId: { column: "employeeId", kind: "text" },
+      shopId: { column: "shopId", kind: "text" },
+      status: { column: "status", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+      workdayType: { column: "workdayType", kind: "text" },
+    } as const),
+    employeeAdvances: new NativeRecords("employee_advances", {
+      id: { column: "id", kind: "text" },
+      employeeId: { column: "employeeId", kind: "text" },
+      shopId: { column: "shopId", kind: "text" },
+      requestedDate: { column: "requestedDate", kind: "text" },
+      payrollMonth: { column: "payrollMonth", kind: "text" },
+      requestedAmount: { column: "requestedAmount", kind: "numeric" },
+      paidAmount: { column: "paidAmount", kind: "numeric" },
+      status: { column: "status", kind: "text" },
+      paidDate: { column: "paidDate", kind: "text" },
+      reference: { column: "reference", kind: "text" },
+      note: { column: "note", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      updatedAt: { column: "updatedAt", kind: "timestamp" },
+    } as const),
+    payrollSettlements: new NativeRecords("payroll_settlements", {
+      id: { column: "id", kind: "text" },
+      employeeId: { column: "employeeId", kind: "text" },
+      month: { column: "month", kind: "text" },
+      paidDate: { column: "paidDate", kind: "text" },
+      reference: { column: "reference", kind: "text" },
+      createdAt: { column: "createdAt", kind: "timestamp" },
+      snapshot: { column: "snapshot", kind: "jsonb" },
+    } as const),
   };
 }

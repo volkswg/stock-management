@@ -47,13 +47,27 @@ Do not run rich-menu setup, production startup, imports or real providers as che
 
 ```sh
 # Fresh disposable synthetic PostgreSQL only; Docker and existing browser tools.
-bash tools/migration/verify-typed-postgres.sh
+bash tools/native-postgres/verify-postgres.sh
 
 # Explicit older-schema evidence with the hash-pinned PR79 record adapter.
 bash tools/migration/verify-persistence-history.sh
 ```
 
-The current typed verifier tests the released final schema, then the PR81 CHECK/
+`npm test` runs the immutable pre-native regression/type witnesses in an owned,
+credential-free, fully hash-pinned source copy, then current native source checks.
+The root TypeScript config excludes only the old `tests/*.types.ts` signatures;
+those signatures still compile against their pinned predecessor during `npm test`.
+New native type checks live under `tests/native-postgres/` and compile with current
+source. Historical copy Git identity is synthetic and has no user hooks/credentials.
+
+The native PostgreSQL verifier independently proves the predecessor schema history,
+then runs **current physical source**, with no source overlay, against separate
+fresh final-schema copies. Runtime EXECUTE on all46 `typed_input_*`/`typed_project_*`
+functions is revoked. Owner-only projections are independent comparison oracles,
+never runtime dependencies. It checks all23 named projections and existing feature,
+media, LINE and browser flows. No hosted resources or real providers are used.
+
+The pinned predecessor's typed verifier tests the released final schema, then the PR81 CHECK/
 shared-guard artifact on independent synthetic copies. Its constraints phase is
 [`verify-constraint-validation.sh`](../../tools/migration/verify-constraint-validation.sh),
 **sourced by the parent**, not a standalone production command. It checks exact
