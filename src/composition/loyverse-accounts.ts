@@ -1,14 +1,13 @@
 import "server-only";
 import type { AppConfig, LoyverseAccountConfig } from "@/config";
 import type { LoyverseAccountMetadata } from "@/shared/types/loyverse-account";
-import { GoogleServiceAccountAuth } from "@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth";
-import { GoogleSheetsClient } from "@/infrastructure/persistence/google-sheets/client/GoogleSheetsClient";
-import { GoogleSheetsLoyverseAccounts } from "@/infrastructure/configuration/google-sheets/loyverse-accounts";
+import { PostgresLoyverseAccounts } from "@/infrastructure/configuration/postgres/loyverse-accounts";
 import { LoyverseService, type ILoyverseService } from "@/infrastructure/external/loyverse";
 
 // The metadata seam used by Sales, Expenses, Inventory and attendance HTTP composition.
 // No caller of this function receives credentials or provider clients.
 export async function listLoyverseAccounts(config: AppConfig): Promise<LoyverseAccountMetadata[]> {
+  if (config.loyverse.accountSource === "postgres") return new PostgresLoyverseAccounts().listMetadata();
   return (await readAccounts(config)).map(({ id, shopName }) => ({ id, shopName }));
 }
 
@@ -55,21 +54,6 @@ function safeError(error: unknown, secrets: string[]): Error {
 
 async function readAccounts(config: AppConfig): Promise<LoyverseAccountConfig[]> {
   if (!config.loyverse.accountSource || config.loyverse.accountSource === "env") return config.loyverse.accounts;
-  if (config.loyverse.accountSource !== "sheet") throw new Error("LOYVERSE_ACCOUNT_SOURCE must be env or sheet.");
-  const spreadsheetId = config.googleSheets.spreadsheetId.trim();
-  if (!spreadsheetId || !/^[\w-]+$/.test(spreadsheetId)) {
-    throw new Error("GOOGLE_SHEETS_SPREADSHEET_ID must identify the Loyverse account spreadsheet.");
-  }
-  let reader;
-  try {
-    const auth = new GoogleServiceAccountAuth({
-      serviceAccountEmail: config.googleService.accountEmail,
-      serviceAccountPrivateKey: config.googleService.accountPrivateKey,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
-    });
-    reader = new GoogleSheetsLoyverseAccounts(new GoogleSheetsClient(auth, spreadsheetId));
-  } catch {
-    throw new Error("Private Loyverse account storage authentication is not configured.");
-  }
-  return reader.readAccounts();
+  if (config.loyverse.accountSource !== "postgres") throw new Error("LOYVERSE_ACCOUNT_SOURCE must be env or postgres.");
+  return new PostgresLoyverseAccounts().readAccounts();
 }

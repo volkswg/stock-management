@@ -2,7 +2,7 @@ import {dirname, relative, resolve} from 'node:path';
 import {noDynamicServerBypass} from './orders-boundaries.mjs';
 
 const composition='src/composition/loyverse-accounts.ts';
-const reader='src/infrastructure/configuration/google-sheets/loyverse-accounts.ts';
+const reader='src/infrastructure/configuration/postgres/loyverse-accounts.ts';
 const config='src/config/index.ts';
 const legacy='src/infrastructure/external/loyverse/createLoyverseServiceFromConfig.ts';
 const metadata='src/shared/types/loyverse-account.ts';
@@ -39,7 +39,7 @@ const only=paths=>['error',{patterns:[{regex:`^(?!(?:${paths.map(p=>p.replace(/[
 export const loyverseAccountsBoundaries=[
   {plugins:{'loyverse-accounts':{rules:{boundary:rule}}}},
   {files:['src/**/*.{ts,tsx,mts}'],rules:{'loyverse-accounts/boundary':'error'}},
-  {files:[composition],rules:{'no-restricted-imports':only(['server-only','@/config','@/shared/types/loyverse-account','@/infrastructure/persistence/google-sheets/google-auth/GoogleServiceAccountAuth','@/infrastructure/persistence/google-sheets/client/GoogleSheetsClient','@/infrastructure/configuration/google-sheets/loyverse-accounts','@/infrastructure/external/loyverse']),'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Expose only named account operations.'}],'no-restricted-globals':['error','process','console','fetch']}},
-  {files:[reader],rules:{'no-restricted-imports':only(['server-only','@/config','@/infrastructure/persistence/google-sheets/client/GoogleSheetsClient']),'no-restricted-syntax':[...noDynamicServerBypass,{selector:"ImportDeclaration[source.value!='server-only']:not([importKind='type'])",message:'The reader receives its read-only Sheets client.'}],'no-restricted-globals':['error','process','console','fetch']}},
+  {files:[composition],rules:{'no-restricted-imports':only(['server-only','@/config','@/shared/types/loyverse-account','@/infrastructure/configuration/postgres/loyverse-accounts','@/infrastructure/external/loyverse']),'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Expose only named account operations.'}],'no-restricted-globals':['error','process','console','fetch']}},
+  {files:[reader],rules:{'no-restricted-imports':only(['server-only','@/config','@/shared/types/loyverse-account','@/infrastructure/persistence/postgres/database']),'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Expose only named private account readers.'}],'no-restricted-globals':['error','process','console','fetch']}},
   {files:[metadata],rules:{'no-restricted-imports':only([]),'no-restricted-syntax':[...noDynamicServerBypass,{selector:'ExportAllDeclaration',message:'Account metadata is an erased DTO only.'},{selector:'ExportNamedDeclaration[declaration.type!="TSTypeAliasDeclaration"]',message:'Account metadata contains no runtime credentials or values.'}] }},
 ];

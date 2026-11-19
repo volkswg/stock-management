@@ -14,19 +14,19 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: native PostgreSQL business storage
+## Current scoped work: retire the remaining Sheets configuration source
 
-Convert all seven modules' 23 business tables from the Sheets-shaped bridge to
-named PostgreSQL adapters using the existing schema. Preserve app/LINE behavior,
-financial math, Bangkok dates, IDs/order, revisions, transaction boundaries,
-idempotency and uncertain-upload reconciliation. Keep Google Drive uploads and
-private integration configuration. Business storage has no selectable Sheets
-backend after this change. Historical SQL/functions and import/recovery evidence
-remain; dropping functions is a separate schema-maintenance decision.
+Native PostgreSQL business storage shipped in PR87/88 (`296529d`). The current
+branch moves the private Loyverse account configuration to an unexposed PostgreSQL
+table with read-only runtime grants and token-free metadata reads. Preserve IDs,
+order, provider behavior, account mappings, browser/LINE behavior and Drive uploads.
+One focused PR contains the additive schema, reader, guarded private import tool,
+synthetic acceptance and existing runbook updates. The old business tables need no
+resynchronization. Historical fixtures/tools remain evidence, not runtime paths.
 
-Prepare one review PR, test current owners on fresh synthetic final-schema copies,
-and distinguish historical witnesses from current acceptance. No deployment,
-production data/schema/security/environment change is authorized here.
+Production schema/grants, fresh private configuration capture/import, Vercel source
+setting/deployment and real provider checks require separate approval. Original
+workbook credentials remain available for rollback; no live retirement is automatic.
 
 ## Next major milestone: user authentication
 

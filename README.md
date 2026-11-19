@@ -1,10 +1,15 @@
 # Stock Management
 
-Next.js application for Orders, Shipments, inventory/movements, Sales, expenses and HR, using Supabase, Google Sheets/Drive, LINE and Loyverse. The scoped modular refactor is complete through [PR #40](https://github.com/volkswg/stock-management/pull/40): active code uses canonical feature, infrastructure and composition owners; `src/externals/` is removed. Some other compatibility paths remain intentionally supported.
+Next.js application for Orders, Shipments, inventory/movements, Sales, expenses and HR, using Supabase, Google Drive, LINE and Loyverse. The scoped modular refactor is complete through [PR #40](https://github.com/volkswg/stock-management/pull/40): active code uses canonical feature, infrastructure and composition owners; `src/externals/` is removed. Some other compatibility paths remain intentionally supported.
 
 **Production safety:** completion of the refactor does not certify authentication, authorization, live provider behavior or concurrent writes. [Issue #38](https://github.com/volkswg/stock-management/issues/38) tracks access-control verification, CI and isolated smoke tests. Check access restrictions before exposing employee/payroll or write-capable APIs; do not run mutating smoke tests against production.
 
-Production uses Supabase. Storage cleanup is complete through PR81: operational sidecars are removed, 47 lifecycle fields are native timestamps, and validation uses 23 CHECK constraints plus one shared guard (52 operational functions). Browser writes and LINE are open. The app remains on PR80 source `31af820`; PR81 was database-only. See [production operations](docs/database-migration.md#current-production) and [release evidence](docs/refactoring/progress.md#latest-production-release).
+Production uses native PostgreSQL business storage (PR87/88, source `296529d`).
+Browser writes and LINE are open. The remaining private Sheets account source is
+being retired by the configuration migration in this branch; that change is not
+live until the schema/import/deployment steps receive separate approval. See
+[production operations](docs/database-migration.md#current-production) and
+[release evidence](docs/refactoring/progress.md#latest-production-release).
 
 ## Start here
 
@@ -21,69 +26,41 @@ Use Node 24 (verified 24.22.1) and the repository's existing dependencies and ya
 Current source uses PostgreSQL-only business storage. Keep the existing
 `STOCK_STORAGE=supabase` production setting and strict private connection/release
 binding. Worksheet classes/ranges and the former Sheets business fallback are
-retired; Google Drive uploads and the private read-only integration-account
-configuration remain. This source conversion is not a production deployment.
-
-## Historical Google Sheets worksheet names
-
-`GOOGLE_SHEETS_SPREADSHEET_ID` is required for the workbook. The 23 `GOOGLE_SHEETS_*_WORKSHEET_NAME` settings are **optional**: `src/config/index.ts` supplies the existing worksheet-tab defaults, including `orders`, `shipments`, `movements` and `movement_details`. The `.env.example` template omits these redundant overrides.
-
-Keep or add a worksheet-name environment variable **only if** its actual workbook tab differs from the default. For example, to use a tab named `shop_orders` instead of `orders`, set `GOOGLE_SHEETS_ORDERS_WORKSHEET_NAME=shop_orders`. Before deleting overrides from an existing environment (local or deployment settings), verify every actual tab matches the corresponding default. Changing the template does not change deployed environment variables or rename any Google Sheets tabs.
+retired. Google Drive uploads remain. The private integration-account reader in
+this branch uses PostgreSQL; see the separately approved release procedure below.
 
 ## Loyverse Configuration
 
-`LOYVERSE_ACCOUNT_SOURCE=env|sheet` selects the server-only account source. Unset or blank defaults to **env**; unknown values fail validation. Existing JSON configuration remains supported, with the same array order, IDs and optional store filter:
+`LOYVERSE_ACCOUNT_SOURCE=postgres` reads the private
+`stock_configuration.loyverse_accounts` table using the existing verified
+PostgreSQL connection. `env` (also the unset/blank default) retains the existing
+`LOYVERSE_ACCOUNTS_JSON` alternative. There is no automatic fallback; `sheet` is
+no longer accepted by this source. The synchronous legacy factory supports only
+env; active routes use the server composition.
 
-```dotenv
-LOYVERSE_ACCOUNT_SOURCE=env
-LOYVERSE_ACCOUNTS_JSON=[{"id":"main-shop","shopName":"Main Shop","accessToken":"...","storeId":"optional-store-id"}]
-```
+Account IDs, active flags, explicit sort order, default account and optional store
+filters retain their existing meaning. All-disabled configuration returns no
+active accounts; missing/empty storage fails closed. Existing disabled-account
+shop mappings and financial history remain editable through their existing rules.
+Account/shop APIs return only their existing public metadata. Tokens are
+server-only and remain inside provider closures; there is no credential editor or
+new management API.
 
-Keep credentials in approved private configuration, never source control, screenshots, chat, logs or `NEXT_PUBLIC_*` variables. There is no credential editing page or management endpoint. Existing account/shop APIs return only their existing public metadata.
+The table is in an unexposed private schema with RLS. The app can read but cannot
+edit its configuration. The existing production reader can select metadata columns
+but not accessToken. Owner-approved SQL/administration handles future account edits.
+Keep tokens out of GitHub, browser bundles, ordinary logs and `NEXT_PUBLIC_*`.
 
-### Prepare the account worksheet in the existing workbook
+The [configuration release procedure](docs/database-migration.md#private-account-configuration-release)
+covers private export, empty-target import, exact reconciliation, deployment,
+rollback and configuration recovery. Merging this source does not authorize any
+of those live actions. Original workbook/configuration credentials remain private
+and untouched until the owner separately approves retirement.
 
-These are **owner actions after review**, not steps performed by this PR:
-
-1. Use the existing `GOOGLE_SHEETS_SPREADSHEET_ID` workbook. Sheet mode always reads that workbook; there is no account-specific spreadsheet ID or workbook fallback. Use a dedicated `loyverse_accounts` tab, never the existing `shops` tab.
-2. **Every workbook reader can see the access-token cells. Hiding or protecting a worksheet does not provide separate read access.** Restrict and audit sharing before adding tokens. Keep access limited to the owner, required service account and only people explicitly trusted with credentials; remove broad/inherited/link sharing. If access cannot be restricted appropriately, keep env mode until it can. Keep the service account's existing operational permissions needed for business writes; do not downgrade them. The account reader still requests the read-only Sheets scope and never creates tabs, repairs headers or writes credentials.
-3. In that existing workbook, create one worksheet named exactly `loyverse_accounts`. Put these six case-sensitive headers in A1:F1, in this order:
-
-   ```text
-   id,shopName,storeId,accessToken,active,sortOrder
-   ```
-
-   | Column | Value |
-   | --- | --- |
-   | id | Original `LOYVERSE_ACCOUNTS_JSON` account `id`, unchanged and unique across all rows |
-   | shopName | Original display name |
-   | storeId | Original store ID, or blank if absent; blank retains the existing unrestricted store behavior |
-   | accessToken | Original private token; required for active accounts, may be blank for disabled accounts |
-   | active | TRUE/FALSE (checkboxes or those case-insensitive text values) |
-   | sortOrder | Unique nonnegative safe integer, including disabled rows; no ties, fractions or thousands separators |
-
-4. Format A:D as **plain text** before manual copying, so IDs, store IDs and tokens retain leading zeros and exact text. Use ungrouped integer formatting for F. Privately copy each existing JSON account to a row, set active to TRUE and assign sortOrder in the **original JSON array order**, for example 10, 20, 30. Never generate replacement IDs or substitute `shops.id` or `storeId` for the existing account ID. Do not modify the operational shops, receipt, payroll or stock worksheets.
-5. Compare the copied IDs, names, optional store IDs, token values and ordering privately with the existing configuration. Do not export that comparison into issue/PR attachments or logs. Existing values are trimmed as in env mode. Duplicate IDs/order values, malformed flags, missing enabled tokens, bad headers and a header-only/empty worksheet fail closed; fully empty rows are ignored. An all-disabled valid worksheet returns an empty active list.
-
-The application sorts enabled accounts by sortOrder and uses the first as the existing default. Disabled accounts cannot be selected for provider reads/sync or new account mappings. Their stored financial history is preserved: combined reports and existing Shop Master mappings may still include historical records. Existing mappings remain editable even when an account is disabled or removed. Disabling does not revoke a provider token or cancel a request already in flight.
-
-### Enable, verify and roll back on Vercel
-
-1. Keep `LOYVERSE_ACCOUNTS_JSON` unchanged for rollback. In the project's **Settings → Environment Variables**, choose only the intended environment/branch. Set the source to sheet using the already configured operational workbook:
-
-   ```dotenv
-   LOYVERSE_ACCOUNT_SOURCE=sheet
-   # Existing setting; this is also the account workbook.
-   GOOGLE_SHEETS_SPREADSHEET_ID=<existing workbook ID>
-   ```
-
-   `GOOGLE_SHEETS_SPREADSHEET_ID` is the only workbook setting. The former `LOYVERSE_ACCOUNTS_SPREADSHEET_ID` setting is no longer read, even if an old deployment setting remains. If upgrading from a separate account workbook, manually copy the six-column tab into the existing workbook and verify IDs/order privately before switching to this code. No copying or Vercel setting changes are performed by this PR. Keep the existing service-account settings. Scope staging/preview to its own restricted test workbook and credentials, not production data. Never use `NEXT_PUBLIC_` prefixes.
-2. After owner-approved deployment of the reviewed code, verify in an isolated staging environment first. Env changes apply to new deployments; changing the dashboard setting alone does not switch a running deployment. Sheet mode never evaluates the JSON account source. A missing/invalid `GOOGLE_SHEETS_SPREADSHEET_ID`, bad rows, a missing tab, denied access or provider failure produces a safe error. There is no alternate workbook or env/JSON fallback.
-3. Check `/api/loyverse/accounts` returns only the expected active `id`/`shopName` pairs in the original order. Verify the default and explicitly selected account, optional store filtering, daily/dashboard/profit totals, sync-status lists, Inventory and attendance shop lists, and Expenses Shop Master account mappings. Inspect response keys and logs for confidentiality without copying tokens into them. Metadata requests must not return tokens, store credentials or raw Google errors.
-4. Using staging fixtures, check a disabled account is absent and cannot be newly selected, an existing disabled-account Shop Master mapping can still be edited, and missing workbook access produces a safe failure. Verify Sales sync on an approved unsynced past date and its repeat/idempotency behavior; do not run test sync writes against production. Private accounts are read once per lookup without a cross-request cache or new retry policy; workbook outages therefore block affected lookups.
-5. Roll back by setting `LOYVERSE_ACCOUNT_SOURCE=env` and deploying a new owner-approved deployment with the retained, valid `LOYVERSE_ACCOUNTS_JSON`. Verify IDs/order and normal operation again. There are no business-data migrations to undo; the account worksheet is simply unused in env mode.
-
-Delete the deployed `LOYVERSE_ACCOUNTS_JSON` value **only after** successful owner verification, completion of the agreed rollback window, confirmation that every environment/deployment that needs it has migrated, and an approved secure recovery plan. Older deployments or an env-mode rollback still need it. Removing the variable is a separate owner operation; this PR retains JSON support and does not delete credentials, migrate production records or deploy anything. Live sharing, access and account correctness remain owner verification steps.
+Historical worksheet-name settings are no longer read by current app code.
+Historical import/recovery tools and fixtures remain retained evidence. Google
+Drive's OAuth/service-account settings remain supported and must not be deleted
+as Sheets cleanup.
 
 ## Movement creation mode
 

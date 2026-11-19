@@ -140,3 +140,28 @@ staff authorization or recovery RTO/RPO. Distinguish local, CI, private-checkpoi
 and hosted evidence in the ledger. Production read checks are not a real business
 write canary. Follow the separately approved
 [maintenance and recovery procedure](../database-migration.md) for live work.
+
+## Private PostgreSQL account configuration — local verification
+
+Current acceptance uses actual PostgreSQL configuration/metadata composition and
+the existing provider transport with synthetic credentials only. `npm test` retains
+all703 pinned historical regressions/type witnesses and runs current graph/account
+checks separately. `tests/fixtures/postgres-accounts-before.json` is a bounded,
+hash-checked source inverse; it contains source text, never private account rows.
+
+`bash tools/native-postgres/verify-accounts.sh` creates a fresh localhost-only
+PostgreSQL container and removes only that owned container afterward. It checks
+the actual migration/importer, wrong-identity rejection, populated-target refusal,
+exact metadata HTTP output, provider-bound token/store filters, runtime write
+denial, reader token denial, CHECK/UNIQUE behavior, timestamp updates and a
+configuration-only dump/restore with matching records/RLS/column permissions.
+Unit checks cover malformed/empty/all-disabled configuration, source selection,
+no fallback and secret redaction. Google auth files retain exact predecessor bytes
+at their shared path; Drive factory changes are import-only. No production token,
+source record, provider call, rich-menu operation or live database is used.
+
+Type checking, lint (one pre-existing unused `shipmentRow` warning) and the isolated
+credential-free build pass. The build retains the route manifest and113 browser
+chunks, with no private database strings. Local acceptance does not certify real
+Loyverse connectivity, browser visuals or the future production transfer; follow
+the [separate release packet](../database-migration.md#private-account-configuration-release).

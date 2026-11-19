@@ -1,7 +1,7 @@
 import type { AppConfig } from "../../../config";
-import { GoogleOAuthRefreshTokenAuth } from "../../persistence/google-sheets/google-auth/GoogleOAuthRefreshTokenAuth";
-import { GoogleServiceAccountAuth } from "../../persistence/google-sheets/google-auth/GoogleServiceAccountAuth";
-import type { IGoogleAccessTokenProvider } from "../../persistence/google-sheets/google-auth/types";
+import { GoogleOAuthRefreshTokenAuth } from "../../external/google-auth/GoogleOAuthRefreshTokenAuth";
+import { GoogleServiceAccountAuth } from "../../external/google-auth/GoogleServiceAccountAuth";
+import type { IGoogleAccessTokenProvider } from "../../external/google-auth/types";
 import { GOOGLE_DRIVE_SCOPE } from "./const";
 import { GoogleDriveService } from "./GoogleDriveService";
 

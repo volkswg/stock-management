@@ -8,7 +8,23 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-Current production is [PR86](https://github.com/volkswg/stock-management/pull/86)
+Current production is [PR87](https://github.com/volkswg/stock-management/pull/87)
+plus [PR88](https://github.com/volkswg/stock-management/pull/88), merged source
+`296529dd5424ede99ba23ef3a6f5c176b5f6d99d`, deployment
+`dpl_8b1Us6UzjHNfbKguXUPY1NN5BY9z` (2026-11-19). This application-only release
+uses native named PostgreSQL adapters. All23-table private local parity and strict
+52-table/15-metadata restore evidence were reused and checked. Four staged API
+responses matched the previous production build exactly at matching revisions;
+four live API reads, two pages, client helper and missing-key/LINE-signature guards
+passed after promotion. Temporary access and its cookie were denied after revocation.
+All15 schema/permission sections remained unchanged. LINE stayed open with the same
+cutoff; scoped runtime error counts were empty. No schema or record changes were
+part of deployment. Full receipts and recovery remain private on the Mac.
+
+The current configuration migration is local/source work only: the live account
+source remains the original private Sheets tab until separate release approval.
+
+The preceding production schema release was [PR86](https://github.com/volkswg/stock-management/pull/86)
 `a1a27af691ebf67d9575476c43a4d9cc30b36470`, deployment
 `dpl_8kpVmSzrPBbLRRGzVzwibNwnKxUk`. The separately approved 2026-11-19 window
 completed archive/deletion consolidation on all23 business tables. Full52-table/

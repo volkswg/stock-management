@@ -34,8 +34,9 @@ test('actual imports resolve; domain/application/UI cannot reach retired busines
  }
 });
 test('configuration remains a fixed read-only integration seam; Drive and LINE controls remain',()=>{
- const configuration=read('src/composition/loyverse-accounts.ts');assert.match(configuration,/GoogleSheetsLoyverseAccounts/);
- assert.match(read('src/infrastructure/configuration/google-sheets/loyverse-accounts.ts'),/getValues/);
+ const configuration=read('src/composition/loyverse-accounts.ts');assert.match(configuration,/PostgresLoyverseAccounts/);
+ assert.match(read('src/infrastructure/configuration/postgres/loyverse-accounts.ts'),/stock_configuration.loyverse_accounts/);
+ assert.equal(existsSync('src/infrastructure/persistence/google-sheets'),false);
  assert.match(read('src/infrastructure/files/google-drive/createGoogleDriveServiceFromConfig.ts'),/GoogleOAuthRefreshTokenAuth/);
  assert.match(read('src/app/api/line/webhook/route.ts'),/verifyLineSignature/);
  const source=read('src/modules/line-workflows/server.ts');assert.match(source,/processPostgresWebhook/);assert.doesNotMatch(source,/storageMode|GoogleSheetRow/);

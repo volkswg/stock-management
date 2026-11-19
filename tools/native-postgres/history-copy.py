@@ -12,17 +12,23 @@ def copy_history(target):
     if target.exists() and any(target.iterdir()):raise ValueError('Historical destination must be empty')
     fixture=json.loads((ROOT/'tests/fixtures/native-postgres-before.json').read_text())
     followup=json.loads((ROOT/'tests/fixtures/native-null-json-before.json').read_text())
+    accounts=json.loads((ROOT/'tests/fixtures/postgres-accounts-before.json').read_text())
     for name,expected in fixture['files'].items():
         edit=fixture['edits'].get(name)
         source=ROOT/name
         current=source.read_bytes() if source.exists() else None
+        account_edit=accounts['edits'].get(name)
+        if account_edit:
+            assert (digest(current) if current is not None else None)==account_edit['afterSha256'],name
+            current=account_edit['before'].encode()
+            assert digest(current)==account_edit['beforeSha256'],name
         delta=followup['edits'].get(name)
         if delta:
             assert current is not None and digest(current)==delta['afterSha256'],name
             current=delta['before'].encode()
             assert digest(current)==delta['beforeSha256'],name
         if edit:
-            if edit['afterSha256'] is None:assert not source.exists(),name
+            if edit['afterSha256'] is None:assert current is None,name
             else:assert current is not None and digest(current)==edit['afterSha256'],name
             data=edit['before'].encode()
         else:data=current
