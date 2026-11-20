@@ -289,6 +289,12 @@ const scopes = {
     "@/infrastructure/persistence/postgres/native-records",
     "server-only"
   ],
+  "src/modules/orders/infrastructure/postgres/order-image-uploads.ts": [
+    "../../contracts",
+    "@/infrastructure/persistence/postgres/commands",
+    "@/infrastructure/persistence/postgres/database",
+    "server-only"
+  ],
   "src/modules/orders/server.ts": [
     "./application/create-order",
     "./application/get-order-detail",
@@ -302,6 +308,7 @@ const scopes = {
     "./contracts",
     "./infrastructure/google-drive/order-images",
     "./infrastructure/postgres/order-attachments",
+    "./infrastructure/postgres/order-image-uploads",
     "./infrastructure/postgres/order-detail-reader",
     "./infrastructure/postgres/order-list-reader",
     "./infrastructure/postgres/order-mutations",

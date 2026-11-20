@@ -8,30 +8,62 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-[PR93](https://github.com/volkswg/stock-management/pull/93), source `4708552`,
-deployment `dpl_M9XGUAVFNQFUcC8DsvW4g43Qwe3L`, is live. Its approved supervised
-maintenance completed on20 November2026 at16:38 Bangkok. Fresh private53-table
-recovery restored all15 metadata sections, configuration and both prior sequence
-states. The corrected isolated rehearsal verified the coupled item/reference
-forward and exact inverse, all23 adapters and all three sequence restore states.
-The first local post-conversion dump command omitted its database; evidence was
-retained, the command corrected, and a new isolated restore/rehearsal passed.
+[PR94](https://github.com/volkswg/stock-management/pull/94), source `7f96b20`,
+deployment `dpl_8RLU1FfbBv6CfQT7yVXv8yd1Xeqh`, is live. Its approved supervised
+maintenance completed on20 November2026 at19:02 Bangkok, within the30-minute
+window. Fresh private recovery restored all53 tables,15 metadata sections,
+configuration and all three sequence states. On that new checkpoint, actual old/
+new23-adapter and movement HTTP reads matched; removal, late-failure rollback,
+logical inverse and independent post-removal restore all passed locally.
 
-The complete frozen source matched verified recovery before live SQL. Only the
-approved item/reference type changes, new item sequence/narrow grants and typed
-contract changed. All53 table values/revisions/configuration and prior sequence
-states matched the independently rehearsed result. Six live API comparisons and
-both pages passed, original protections were restored, browser/LINE reopened and
-idempotency/signature/old-deployment denial checks passed. Error/fatal function
-counts were empty in the checked window. No real-provider/business-write canary
-ran. Private checkpoints and execution receipts remain on the Mac.
+The frozen production database matched that checkpoint before SQL. Only the
+unused NULL movement purchase reference, its FK/index and three reviewed function
+bodies changed. All retained records/revisions/configuration, permissions and
+three sequence states exactly matched the locally rehearsed result. Six live API
+comparisons and both pages passed before and after removal. Original protections
+were restored; browser writes and LINE reopened; idempotency, LINE signature and
+old-deployment denial probes passed. No real-provider/business-write canary or
+temporary deployment access link was used. Recovery and execution evidence stay
+private on the Mac. Backup automation remains deferred.
 
-Bill, session and item IDs are now bigint identities; movement purchase references
-are nullable bigint. The current scoped implementation retires only that unused
-operational relationship, preserving the API's blank field. A read-only scan of the
-retained release archive found only NULL references; this is dated checkpoint
-evidence, not a fresh live scan. It does not authorize dropping a later non-NULL
-relationship or changing production. Existing import evidence remains protected.
+Bill, session and item IDs remain bigint identities. The unused operational
+`movement_details.purchaseDetailId` field is gone; public movement responses keep
+their blank field. Historical import evidence is unchanged. The previous PR93
+release evidence remains in the [PR94 predecessor ledger](https://github.com/volkswg/stock-management/blob/7f96b20d2bab4b4f2e57d71d6561b5ee8faa233a/docs/refactoring/progress.md#latest-production-release).
+
+### Order image selection uploads — current implementation
+
+The browser uploads one selected image per request, at most4MB each, before order
+submission. Selection/retry keys and acknowledged media receipts survive reload
+in session storage; an identical selection recovers its receipt. The final order
+request contains only image IDs, canonical URLs and completed upload keys. The
+server checks the committed receipt and live media identity before creating the
+order and all references in one command transaction. Lost acknowledgements keep
+the same operation identity; uncertain provider outcomes remain held. Completed
+unattached images are retained for reconciliation/reuse, including when a user
+removes a selection or leaves the page. This release does not add automatic
+provider deletion or background orphan cleanup.
+
+The existing multipart API remains available for old pages and pending requests;
+an older uncertain order cannot be silently replaced by the new flow. This is an
+application-only change: no schema, provider credentials, access protection, LINE
+behavior or production settings are changed by this implementation. Local `npm test` passed747 Node checks (703 pinned historical,44 current) and
+three Python checks. All11 new client/component checks and nine actual PostgreSQL/
+Chromium checks passed; a fresh localhost clone used only the prior synthetic
+fixture, fake providers and current physical source. They cover per-selection
+uploads, size rejection, duplicate suppression, reload/retry, receipt validation,
+soft-deleted media, lost COMMIT acknowledgements, provider uncertainty, atomic
+rollback, repeated selections and the retained multipart path. Type checking,
+lint (one existing unused `shipmentRow` warning) and the credential-free build
+passed. The route manifest and113 browser chunks retain their boundaries. A new
+bounded source inverse preserves every prior witness; it is used only for
+historical verification, never runtime fallback.
+
+This uploader is not deployed. Its application-only release needs the merged
+source binding, protected build, approved promotion and HTTP guard checks; no
+SQL, environment redesign, LINE pause or real-provider test is required by the
+code change. Existing uncertain legacy requests remain protected until their
+saved outcomes are reconciled; do not blindly clear their browser references.
 
 ### Movement purchase reference retirement: local acceptance
 

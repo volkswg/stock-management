@@ -1,5 +1,6 @@
 import type {
   CreatedOrder,
+  UploadedOrderCreationImage,
   OrderDetail,
   OrderItemQuantityType,
   OrderListItem,
@@ -139,7 +140,20 @@ export async function createOrder(
     formData.append("productImages", image);
   }
 
-  const fingerprint = fingerprintOrderCreation(formData);
+  return submitOrderCreation(formData, fingerprintOrderCreation(formData));
+}
+
+export async function createOrderFromUploadedImages(input: {
+  seller?: string; totalPrice?: number | null; remark?: string; images: UploadedOrderCreationImage[];
+}): Promise<CreateOrderResponse> {
+  const body = JSON.stringify({ seller: input.seller, totalPrice: input.totalPrice, remark: input.remark,
+    images: input.images.map(({ id, url, imageType, uploadKey }) => ({ id, url, imageType, uploadKey })) });
+  const identity = new FormData();
+  identity.set("completedImageReferences", body);
+  return submitOrderCreation(body, fingerprintOrderCreation(identity));
+}
+
+async function submitOrderCreation(body: FormData | string, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
   const active = orderCreationInFlight;
   if (active) {
     if ((await fingerprint) !== (await active.fingerprint)) {
@@ -149,7 +163,7 @@ export async function createOrder(
   }
   const operation = {
     fingerprint,
-    response: sendOrderCreation(formData, fingerprint),
+    response: sendOrderCreation(body, fingerprint),
   };
   orderCreationInFlight = operation;
   try {
@@ -242,7 +256,7 @@ async function orderCreationRevision(): Promise<{ value: string; scope?: string 
     return response.ok && revision && /^"stock-v2-\d+"$/.test(revision) ? { value: revision } : undefined;
   } catch { return undefined; }
 }
-async function sendOrderCreation(formData: FormData, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
+async function sendOrderCreation(bodyData: FormData | string, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
   const intent = await fingerprint;
   let pending = readPendingOrder();
   if (pending && pending.fingerprint !== intent && pending.phase !== "rejected") throw pendingOrderError(pending.key);
@@ -272,13 +286,23 @@ async function sendOrderCreation(formData: FormData, fingerprint: Promise<string
       method: "POST",
       headers: {
         Accept: "application/json",
+        ...(typeof bodyData === "string" ? { "Content-Type": "application/json" } : {}),
         "Idempotency-Key": pending.key,
         ...(revision ? { "If-Match": revision.value, ...(revision.scope ? { "x-stock-edit-scope": revision.scope } : {}) } : {}),
       },
-      body: formData,
+      body: bodyData,
     });
+    if (response.status === 413) {
+      // A later rejection says nothing about an earlier unacknowledged attempt.
+      pending.phase = retry ? "review" : "rejected";
+      savePendingOrder(pending);
+      throw new Error("order-request-too-large");
+    }
     body = await response.json();
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === "order-request-too-large") {
+      throw new Error(`The upload request is too large. Upload images individually, each under 4 MB.${retry ? ` The earlier attempt still needs review. Reference: ${pending.key}.` : " No order was created by this rejected request."}`);
+    }
     throw pendingOrderError(pending.key); // Lost HTTP/JSON acknowledgement is not proof of rollback.
   }
   if (!response.ok) {
@@ -292,6 +316,90 @@ async function sendOrderCreation(formData: FormData, fingerprint: Promise<string
   if (!isCreateOrderResponse(body)) throw pendingOrderError(pending.key);
   sessionStorage.removeItem(pendingOrderStorageKey); // Only a validated successful acknowledgement ends the intent.
   return body;
+}
+
+export const MAX_ORDER_IMAGE_BYTES = 4_000_000;
+type ImageUploadState = {
+  version: 1; key: string; phase: "pending" | "review" | "rejected" | "complete";
+  retrySafe: boolean; image?: UploadedOrderCreationImage;
+};
+const imageUploadPrefix = "stock-order-image-upload:v1:";
+const imageUploadsInFlight = new Map<string, Promise<UploadedOrderCreationImage>>();
+// Bound concurrency to one provider request per tab; a large multi-selection
+// must not consume every application/backup connection at once.
+let imageUploadQueue: Promise<unknown> = Promise.resolve();
+function isUploadedOrderImage(value: unknown): value is UploadedOrderCreationImage {
+  return isRecord(value) && typeof value.id === "string" && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value.id) &&
+    typeof value.url === "string" && value.url.length > 0 && value.url.length <= 4096 &&
+    (value.imageType === "bill" || value.imageType === "product") && typeof value.uploadKey === "string" && /^order-image:[a-f0-9-]{36}$/.test(value.uploadKey);
+}
+function readImageUpload(storageKey: string): ImageUploadState | undefined {
+  try {
+    const raw = sessionStorage.getItem(storageKey);
+    if (raw === null) return undefined;
+    const value: unknown = JSON.parse(raw);
+    if (!isRecord(value) || value.version !== 1 || typeof value.key !== "string" || !/^order-image:[a-f0-9-]{36}$/.test(value.key) ||
+        typeof value.retrySafe !== "boolean" || !["pending", "review", "rejected", "complete"].includes(String(value.phase)) ||
+        (value.phase === "complete" && (!isUploadedOrderImage(value.image) || value.image.uploadKey !== value.key))) throw new Error();
+    return value as ImageUploadState;
+  } catch { throw new Error("This image's previous upload needs review. Keep its saved reference; do not start another upload."); }
+}
+function saveImageUpload(storageKey: string, value: ImageUploadState): void {
+  try {
+    const raw = JSON.stringify(value);
+    sessionStorage.setItem(storageKey, raw);
+    if (sessionStorage.getItem(storageKey) !== raw) throw new Error();
+  } catch { throw new Error("This browser cannot preserve an image upload reference. Enable session storage before uploading."); }
+}
+export async function uploadOrderCreationImage(image: File, imageType: OrderImageType): Promise<UploadedOrderCreationImage> {
+  if (!["image/jpeg", "image/png", "image/webp"].includes(image.type) || image.size === 0) throw new Error("Select one JPEG, PNG, or WebP image.");
+  if (image.size > MAX_ORDER_IMAGE_BYTES) throw new Error(`${image.name} exceeds 4 MB. Reduce this image before selecting it again.`);
+  const form = new FormData();
+  form.set("operation", "upload"); form.set("imageType", imageType); form.set("image", image);
+  const fingerprint = await fingerprintOrderCreation(form);
+  const existing = imageUploadsInFlight.get(fingerprint);
+  if (existing) return existing;
+  const run = imageUploadQueue.then(() => sendSelectedImage(form, imageType, imageUploadPrefix + fingerprint));
+  imageUploadsInFlight.set(fingerprint, run);
+  imageUploadQueue = run.then(() => undefined, () => undefined);
+  try { return await run; } finally { if (imageUploadsInFlight.get(fingerprint) === run) imageUploadsInFlight.delete(fingerprint); }
+}
+async function sendSelectedImage(form: FormData, imageType: OrderImageType, storageKey: string): Promise<UploadedOrderCreationImage> {
+  let pending = readImageUpload(storageKey);
+  if (pending?.phase === "complete" && pending.image?.imageType === imageType) return pending.image;
+  const order = readPendingOrder();
+  if (order && order.phase !== "rejected") throw pendingOrderError(order.key);
+  const retry = pending !== undefined && pending.phase !== "rejected";
+  const revision = await orderCreationRevision();
+  if (retry && (!pending?.retrySafe || !revision)) throw new Error(`Cannot safely retry this image. Review its saved outcome. Reference: ${pending?.key}.`);
+  pending = { version: 1, key: pending?.key || `order-image:${crypto.randomUUID()}`, phase: "pending", retrySafe: revision !== undefined };
+  saveImageUpload(storageKey, pending); // Before any provider request can leave.
+  let response: Response;
+  try {
+    response = await fetch("/api/orders/with-images", { method: "POST", headers: { Accept: "application/json", "Idempotency-Key": pending.key }, body: form });
+  } catch {
+    throw new Error(`Image upload outcome is unconfirmed. Reselect or retry only this same image. Reference: ${pending.key}.`);
+  }
+  if (response.status === 413) {
+    pending.phase = retry ? "review" : "rejected"; saveImageUpload(storageKey, pending);
+    throw new Error(`This image is too large; use an image under 4 MB.${retry ? ` The earlier upload still needs review. Reference: ${pending.key}.` : ""}`);
+  }
+  let body: unknown;
+  try { body = await response.json(); } catch {
+    pending.phase = "review"; saveImageUpload(storageKey, pending);
+    throw new Error(`The image acknowledgement was lost. Keep this same image and reference: ${pending.key}.`);
+  }
+  if (!response.ok) {
+    pending.phase = response.status === 400 ? "rejected" : "review"; saveImageUpload(storageKey, pending);
+    const reason = isRecord(body) && typeof body.error === "string" ? body.error : "Image upload failed.";
+    throw new Error(`${reason} Reference: ${pending.key}.`);
+  }
+  if (!isRecord(body) || !isUploadedOrderImage(body.image) || body.image.imageType !== imageType || body.image.uploadKey !== pending.key) {
+    pending.phase = "review"; saveImageUpload(storageKey, pending);
+    throw new Error(`The image response needs review. Keep this reference: ${pending.key}.`);
+  }
+  pending.phase = "complete"; pending.image = body.image; saveImageUpload(storageKey, pending);
+  return body.image;
 }
 
 export async function uploadOrderImage(

@@ -169,3 +169,10 @@ export type CompleteWebOrderPriceResult =
   | { outcome: "invalid_status" };
 
 export type OrderImageType = "bill" | "product";
+// A completed single-image upload, not an arbitrary client-supplied URL.
+export type UploadedOrderCreationImage = {
+  id: string;
+  url: string;
+  imageType: "bill" | "product";
+  uploadKey: string;
+};
