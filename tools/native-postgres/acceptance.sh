@@ -10,7 +10,7 @@ done
 native_run(){
  local database=$1; shift
  local target; target=$(identity "$database")
- (cd "$STOCK_NATIVE_ROOT" && env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-/usr/bin/google-chrome}" STOCK_TARGET_ISOLATION_ID="$target" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/$database" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test "$@")
+ (cd "${STOCK_NATIVE_SOURCE_OVERRIDE:-$STOCK_NATIVE_ROOT}" && env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-/usr/bin/google-chrome}" STOCK_TARGET_ISOLATION_ID="$target" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/$database" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test "$@")
 }
 native_run np_records tools/native-postgres/records.test.cjs
 native_run np_application tools/native-postgres/application.test.cjs
@@ -65,7 +65,11 @@ echo 'PASS: user-state identity, actual LINE order/movement image redelivery and
 # Coupled item/reference conversion, after both earlier identity releases.
 pg createdb -U postgres -T sd_base np_items
 sd_sql np_items retirement | pg psql -U postgres -d np_items -v ON_ERROR_STOP=1 > "$artifacts/native-install-np_items.log"
-native_run np_items tools/native-postgres/item-identity.test.cjs
+# Preserve PR93's unchanged relationship tests on its hash-pinned source only.
+pr93_source=$(mktemp -d "$PWD/pr93-identity-source.XXXXXX")
+python3 "$STOCK_NATIVE_ROOT/tools/native-postgres/reference-history-copy.py" "$pr93_source"
+STOCK_NATIVE_SOURCE_OVERRIDE="$pr93_source" native_run np_items tools/native-postgres/item-identity.test.cjs
+rm -rf "$pr93_source"
 native_run np_items tools/native-postgres/media-line.test.cjs
 pg psql -U postgres -d np_items -v ON_ERROR_STOP=1 -c "SELECT nextval('stock_operational.order_items_id_seq');" > "$artifacts/item-identity-unused-reservation.log"
 pg pg_dump -U postgres -d np_items --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/item-identity-recovery.sql"
@@ -85,3 +89,26 @@ SQL
 done
 cmp "$artifacts/item-identity-np_items.txt" "$artifacts/item-identity-np_items_restore.txt"
 echo 'PASS: coupled item/reference identity, unchanged app/LINE flows, FK and all three sequence states restored'
+
+# Actual current source on a separate fresh copy; no historical source overlay.
+pg createdb -U postgres -T sd_base np_reference
+sd_sql np_reference retirement | pg psql -U postgres -d np_reference -v ON_ERROR_STOP=1 > "$artifacts/native-install-np_reference.log"
+native_run np_reference tools/native-postgres/movement-reference-retirement.test.cjs
+native_run np_reference tools/native-postgres/media-line.test.cjs
+pg psql -U postgres -d np_reference -v ON_ERROR_STOP=1 -c "SELECT nextval('stock_operational.order_items_id_seq');" > "$artifacts/retired-reference-unused-reservation.log"
+pg pg_dump -U postgres -d np_reference --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/retired-reference-recovery.sql"
+pg createdb -U postgres np_reference_restore
+pg psql -U postgres -d np_reference_restore -v ON_ERROR_STOP=1 < "$artifacts/retired-reference-recovery.sql" > "$artifacts/retired-reference-restore.log"
+for database in np_reference np_reference_restore; do
+ pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 > "$artifacts/retired-reference-$database.txt" <<'SQL'
+SELECT to_jsonb(t)::text FROM stock_operational.movement_details t ORDER BY id;
+SELECT last_value,is_called FROM stock_operational.order_items_id_seq;
+SELECT last_value,is_called FROM stock_operational.order_bills_id_seq;
+SELECT last_value,is_called FROM stock_operational.user_state_id_seq;
+SELECT relname,relacl::text FROM pg_class WHERE relnamespace='stock_operational'::regnamespace AND relkind='S' ORDER BY relname;
+SELECT stock_operational.lexeme_mapping_contract_v1();
+SELECT count(*) FROM pg_attribute WHERE attrelid='stock_operational.movement_details'::regclass AND attname='purchaseDetailId' AND NOT attisdropped;
+SQL
+done
+cmp "$artifacts/retired-reference-np_reference.txt" "$artifacts/retired-reference-np_reference_restore.txt"
+echo 'PASS: unused reference removed, unchanged actual app/LINE owners, logical inverse and all three sequence states restored'

@@ -17,5 +17,6 @@ try {
  run('node',['--test','tests/bill-identity.test.cjs']);
  run('node',['--test','tests/user-state-identity.test.cjs']);
  run('node',['--test','tests/item-identity.test.cjs']);
+ run('node',['--test','tests/movement-reference-retirement.test.cjs']);
  run('python3',['-m','unittest','discover','-s','tools/migration','-p','test_loyverse_accounts.py']);
 } finally {rmSync(owned,{recursive:true,force:true});}

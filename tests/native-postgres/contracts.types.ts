@@ -25,3 +25,6 @@ export function nativeStorageTypes(database: BusinessDatabase) {
   // @ts-expect-error Feature-owned SQL column maps do not accept unknown fields.
   database.orders.insert({ id: "synthetic", arbitraryColumn: "no" });
 }
+
+type RetiredMovementReference = Assert<Equal<Extract<keyof MovementJourneyItem, "purchaseDetailId">, never>>;
+export type { RetiredMovementReference };

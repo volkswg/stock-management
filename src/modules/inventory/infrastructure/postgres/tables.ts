@@ -52,7 +52,6 @@ export function inventoryTables() {
       fromLocation: { column: "fromLocation", kind: "text" },
       toLocation: { column: "toLocation", kind: "text" },
       productImageUrl: { column: "productImageMediaId", kind: "media" },
-      purchaseDetailId: { column: "purchaseDetailId", kind: "identity-reference" },
       status: { column: "status", kind: "text" },
       createdAt: { column: "createdAt", kind: "timestamp" },
       updatedAt: { column: "updatedAt", kind: "timestamp" },

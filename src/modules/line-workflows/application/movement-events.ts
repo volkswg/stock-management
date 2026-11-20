@@ -229,7 +229,7 @@ async function saveImage<Bytes>({ state, event, eventId, context, drive, line, c
         const now = runtime.eventTime(() => event.timestamp);
         if (imageUpload)
             imageUpload.saveUncertain = true;
-        await context.inventory.append(() => ({ id: state.itemId, masterId: state.masterId, shop: state.shop, quantity: state.quantity, remark: state.remark, fromLocation: "Home", toLocation: state.shop, imageUrl, purchaseDetailId: "", status: "created", createdAt: now, updatedAt: now, stockCounted: false, isNewArrival: false }));
+        await context.inventory.append(() => ({ id: state.itemId, masterId: state.masterId, shop: state.shop, quantity: state.quantity, remark: state.remark, fromLocation: "Home", toLocation: state.shop, imageUrl, status: "created", createdAt: now, updatedAt: now, stockCounted: false, isNewArrival: false }));
         if (imageUpload)
             Object.assign(imageUpload, { saved: true, saveUncertain: false });
     }
