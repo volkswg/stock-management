@@ -370,7 +370,7 @@ export function SalesDashboardPage() {
               <Text className={styles.eyebrow}>Sales</Text>
               <Title level={1}>Dashboard</Title>
               <Text type="secondary">
-                Range analysis using completed Google Sheets syncs only.
+                Range analysis using completed sales syncs only.
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>

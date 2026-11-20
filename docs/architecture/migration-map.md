@@ -35,7 +35,9 @@ map, and the adapters implementing its existing semantic application ports.
 Root `native-records.ts` provides shared SQL transport for these real 23 mappings.
 It selects named fields and uses parameterized named writes, opaque ID/revision
 handles, native timestamp helpers and media IDs. It has no feature registry,
-worksheet headers, range parser, positional identity or older-schema fallback.
+worksheet headers, range parser, positional identity or Sheets storage fallback.
+Converted-identity rollback support remains; the unused movement reference
+layout probing has been removed.
 Compensation's private synthetic identity and seven append-only histories remain.
 Application/domain ports retain their business DTOs and no SQL handles.
 Composition alone aggregates tables; modules accept their own structural subsets.
@@ -48,15 +50,33 @@ PostgresRecords bridge, positional order lookup and raw-row LINE facades are
 retired from current source. Their old imports are audited with the pinned
 pre-native [source witness](../../tests/fixtures/native-postgres-before.json),
 not recreated as runtime forwards. Current HTTP routes and public DTO fields stay
-the same. Existing service aliases to semantic module servers, rich-menu entrypoint
-and sortable-ID identity remain where still meaningful. Undisclosed external
+the same. The67 service aliases are retired after confirming no current source or script
+consumer; callers use semantic module servers and the canonical ID generator.
+The standalone rich-menu entrypoint remains. Undisclosed external
 imports of the removed private deep paths need to migrate; this private package
 has no public export map. The old [PR86 tree](https://github.com/volkswg/stock-management/tree/a1a27af691ebf67d9575476c43a4d9cc30b36470)
 is the historical worksheet/header ownership index.
 
-The three generic Google value/range types are retained only for the fixed private
-configuration client. The integration reader can read its approved configuration
-range; business APIs and LINE cannot select business Sheets storage.
+The Sheets HTTP/configuration clients and their generic value/range types are
+retired. `GoogleSheets*` report names and `source: "google_sheets"` API values
+remain compatibility contracts; they do not read a workbook. Business APIs and
+LINE cannot select Sheets storage.
+
+## Retired service forwards and inactive reference layout
+
+All67 `src/services/` files were import/export forwards or aliases, with no
+consumer in current application source or scripts. They are removed without
+moving or renaming canonical implementations. The package is private and has no
+public export map; undisclosed external deep-path consumers must use canonical
+module entrypoints. [The bounded source inverse](../../tests/fixtures/safe-compatibility-cleanup-before.json)
+retains the exact predecessor bytes for historical verification only.
+
+No current feature map uses `identity-reference` after purchase-reference
+retirement. Its schema probes, cache and conditional casts are removed. Four
+older coupled-reference unit witnesses explicitly load the hash-checked prior
+transport; current application, record, browser and LINE checks still load
+physical current owners. Identity reservation, numeric/timestamp/media mappings,
+revision checks and retained schema rollback support remain unchanged.
 
 ## Retired external paths
 
@@ -98,7 +118,8 @@ The seven `src/features/backend/` forwards are removed. No business body moves: 
 | shared/utils.ts | shared/lib/is-record: isRecord |
 | shipments/utils.ts | shipments/http: readJsonBody, isUpdatableStatus, isValidDeliveryFee, isValidPoNumber |
 
-The audit covers runtime/erased/dynamic imports, mocks/loaders, scripts, aliases, docs and historical guards. There is no production importer or known external supported consumer of the removed leaves. The package is private with no export map/publish workflow; undisclosed external deep imports must migrate. Services and standalone script forwards remain supported and untouched.
+The audit covers runtime/erased/dynamic imports, mocks/loaders, scripts, aliases, docs and historical guards. There is no production importer or known external supported consumer of the removed leaves. The package is private with no export map/publish workflow; undisclosed external deep imports must migrate. At that earlier checkpoint, services and standalone scripts were untouched.
+The subsequent [67-file service retirement](#retired-service-forwards-and-inactive-reference-layout) preserves standalone script entrypoints.
 
 `features-retirement-before.json` preserves all seven sources, 18 symbol destinations, pre-removal runtime identity keys, audited references and exact non-production inverses. Existing fixtures stay immutable. Current loaders use physical owners and reject removed paths; explicit historical readers alone resolve archived sources. No production compatibility directory or replacement barrel is introduced.
 

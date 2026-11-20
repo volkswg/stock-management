@@ -3,7 +3,7 @@ import { SalesDailySalesPage } from "./SalesDailySalesPage";
 
 export const metadata: Metadata = {
   title: "Daily Sales | Stock Management",
-  description: "Review synced daily sales from Google Sheets.",
+  description: "Review synced daily sales.",
 };
 
 export default function Page() {

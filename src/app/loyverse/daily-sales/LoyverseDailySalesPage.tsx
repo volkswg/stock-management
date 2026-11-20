@@ -263,7 +263,7 @@ export function LoyverseDailySalesPage() {
         account: selectedAccountId,
         date,
       });
-      setNotice("Sales synced to Google Sheets.");
+      setNotice("Sales synced.");
       setSyncStatusRequestId((value) => value + 1);
     } catch (requestError) {
       setError(getErrorMessage(requestError));

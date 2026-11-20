@@ -2,7 +2,7 @@
 
 ## Folder ownership
 
-Apply these rules to new and migrated code. `services` and standalone script leaves retain reviewed compatibility surfaces. `src/externals/` and `src/features/` are retired and must not be recreated. Do not scaffold empty layers or blindly move mixed files.
+Apply these rules to new and migrated code. `src/services/`, `src/externals/` and `src/features/` are retired and must not be recreated. Standalone script entrypoints retain their reviewed interfaces. Do not scaffold empty layers or blindly move mixed files.
 
 | Location under `src/` | Owns | Excludes |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ Apply these rules to new and migrated code. `services` and standalone script lea
 | `modules/<feature>/infrastructure` | Port implementations, feature worksheets/headers and row/response mapping | Duplicated generic transports or other features' private adapters |
 | `modules/<feature>/server.ts` | Guarded, explicit named server composition | Browser exports or broad all-layer barrels |
 | `modules/<feature>/ui` | Components/hooks, co-located CSS, formatters/PDFs and same-origin HTTP clients | Config, credentials, SDK/provider IO, server/application implementation imports |
-| `infrastructure/persistence/postgres` | Server-only pooled transactions, durable command/effect transport and compatibility record projections supplied by feature bindings | Feature registries, business calculations, browser access or runtime fallback |
+| `infrastructure/persistence/postgres` | Server-only pooled transactions, durable command/effect transport and named record projections supplied by feature bindings | Feature registries, business calculations, browser access or runtime fallback |
 | `infrastructure/external/google-auth` | Shared Google OAuth/service-account token and JWT plumbing retained for Drive | Feature rules, worksheet schema or aggregate feature registry |
 | `infrastructure/files/google-drive` | Drive provider/factory/protocol types, using shared Google auth | Order/movement policy |
 | `infrastructure/external/{line,loyverse}` | Existing provider HTTP/signature/protocol/factory clients, including standalone operational LINE client | Feature journeys, worksheet reports and new providers |
@@ -42,18 +42,22 @@ Root configuration/dependency files, `public` assets and existing operational gu
 | LINE workflows | Commands/replies/session/journeys; calls business use cases, never exports tokens or persistence details |
 | Workspace | Home/breadcrumb/navigation; Sales owns its menu shell; global Next layout remains app-owned |
 
-[Migration map](migration-map.md) records actual completed ownership and intentionally retained compatibility. Workspace/Next shell remains app-owned. Legacy business paths contain named forwards or identity bindings; concrete bridge functions now live in composition. Inventory owns movement schemas/quantity decisions, LINE owns sessions/journeys and external transport has root owners. All canonical adapters keep row/range mapping out of application ports.
+[Migration map](migration-map.md) records actual completed ownership and intentionally retained compatibility. Workspace/Next shell remains app-owned. Current business callers use canonical module owners; the obsolete service forwards are retired. Concrete composition functions live in composition. Inventory owns movement schemas/quantity decisions, LINE owns sessions/journeys and external transport has root owners. All canonical adapters keep row/range mapping out of application ports.
 
-The aggregate Sheets service remains a single composition object with its original constructor/health-check behavior. Its pure full-service declarations live in root `infrastructure/persistence/google-sheets/service-contracts.ts`; generic row types remain in `types.ts`. The former external indexes have no production replacements mixing transport and worksheets. Import concrete owners or named composition entrypoints. Do not move feature registry construction into root infrastructure.
+The Sheets business aggregate, worksheet implementations and fixed account
+configuration reader are retired from runtime source. Import concrete feature
+owners or named composition entrypoints. Google auth remains under shared
+infrastructure for Drive. Do not introduce a feature registry in root transport.
+Historical guards and predecessor sources remain part of verification only.
 
 
 ## PostgreSQL migration ownership
 
 `modules/<feature>/infrastructure/postgres/tables.ts` binds only that feature's
-operational tables and existing headers to shared PostgreSQL transport. Existing
+operational tables and named column maps to shared PostgreSQL transport. Existing
 feature-owned port mappers remain the single mapping/calculation implementation.
-The range-compatible projection stays in infrastructure; it is not a new domain
-port or a parallel business service. `composition/postgres` owns the aggregate and
+Named record projections stay in infrastructure; they do not expose SQL handles
+to business ports or recreate a parallel persistence service. `composition/postgres` owns the aggregate and
 request transaction/auth/idempotency wrapper. The LINE module owns per-event
 workflow execution/reply capture; shared transport only records/sends an effect
 attempt. Operational schemas and offline promotion/profile tools live under
@@ -116,7 +120,7 @@ Tests execute real flat-config positive/negative cases for alias, relative, eras
 
 ESLint direct-import rules do not prove transitive safety or cycles. TypeScript-resolved graph tests supplement them in runtime and runtime-plus-type modes, resolve re-exports, collapse intermediary paths for ownership, reject module/file cycles and inspect client reachability. Use [browser ownership helper](../../tests/helpers/browser-ownership.mjs) and relevant seam tests; do not silently expand closed offline loaders or global allowlists to make new code pass. Add tools/dependencies only in a separately justified tooling change.
 
-Final scopes supplement the earlier exact guards: [Sales](../../eslint/sales-application-boundaries.mjs), [Inventory](../../eslint/inventory-application-boundaries.mjs), [Orders/LINE](../../eslint/orders-line-workflows-boundaries.mjs), [external transport](../../eslint/external-infrastructure-boundaries.mjs) and [final composition/compatibility](../../eslint/final-architecture-boundaries.mjs). The final independent rules reject active legacy imports and physical implementations in compatibility paths without overriding earlier application clock/dynamic/enum safeguards. Relocated physical composition retains its own explicit import/forwarding restrictions; remaining compatibility leaves allow only their named canonical owner. [External retirement](../../eslint/externals-retirement-boundaries.mjs) rejects retired imports in production and active tests, including erased, re-export, CommonJS, import-equals and statically folded dynamic paths. It also forbids recreating the directory and runtime/provider code in the pure root service-contracts leaf.
+Final scopes supplement the earlier exact guards: [Sales](../../eslint/sales-application-boundaries.mjs), [Inventory](../../eslint/inventory-application-boundaries.mjs), [Orders/LINE](../../eslint/orders-line-workflows-boundaries.mjs), [external transport](../../eslint/external-infrastructure-boundaries.mjs) and [final composition/compatibility](../../eslint/final-architecture-boundaries.mjs). The final independent rules reject active legacy imports and physical implementations in compatibility paths without overriding earlier application clock/dynamic/enum safeguards. Relocated physical composition retains its own explicit import/forwarding restrictions; historical compatibility leaves in pinned predecessor copies allow only their named canonical owner. Current source has no service-forward directory. [External retirement](../../eslint/externals-retirement-boundaries.mjs) rejects retired imports in production and active tests, including erased, re-export, CommonJS, import-equals and statically folded dynamic paths. It also forbids recreating the directory and runtime/provider code in the pure root service-contracts leaf.
 
 ## Known legacy limits
 

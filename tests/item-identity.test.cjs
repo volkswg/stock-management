@@ -2,7 +2,15 @@
 require('./helpers/postgres-runtime.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),cp=require('node:child_process');
 const db=require('../src/infrastructure/persistence/postgres/database.ts');
-const {NativeRecords}=require('../src/infrastructure/persistence/postgres/native-records.ts');
+// Four old coupled-reference witnesses exercise the exact pre-cleanup transport.
+// The retired relationship has no current feature-map consumer. Item creation
+// and operator reproducibility below still execute current physical owners.
+const vm=require('node:vm'),ts=require('typescript'),crypto=require('node:crypto');
+const prior=JSON.parse(fs.readFileSync('tests/fixtures/safe-compatibility-cleanup-before.json')).edits['src/infrastructure/persistence/postgres/native-records.ts'];
+assert.equal(crypto.createHash('sha256').update(prior.before).digest('hex'),prior.beforeSha256);
+const priorExports={};
+new vm.Script(ts.transpileModule(prior.before,{fileName:'native-records.ts',compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText).runInNewContext({exports:priorExports,require:name=>{if(name==='server-only')return {};assert.equal(name,'./database');return db;}});
+const {NativeRecords}=priorExports;
 const {createOrderAttachmentStore}=require('../src/modules/orders/infrastructure/postgres/order-attachments.ts');
 const {createOrderItem}=require('../src/modules/orders/application/order-attachments.ts');
 let client,type,identity,queries;
@@ -19,21 +27,21 @@ test('actual item creation reserves a string ID without JavaScript precision los
  const item=await createOrderItem({store:createOrderAttachmentStore(storage),orderId:'ORDER-SYNTHETIC',imageUrl:'https://example.invalid/image',createdBy:'synthetic',runtime:{now:()=> '2026-11-20T00:00:00Z'}});
  assert.equal(item.id,'9007199254740993');assert.equal(inserted[0].id,item.id);assert.equal(allocated,1);
 });
-test('text references retain their original binds and nullable/blank behavior',async()=>{
+test('historical text references retain their original binds and nullable/blank behavior',async()=>{
  type='text';const t=references();for(const value of ['2','01','',null]){await t.insert({id:'MD-SYNTHETIC',purchaseDetailId:value});assert.doesNotMatch(queries.at(-1).sql,/::bigint/);assert.equal(queries.at(-1).values[1],value);}
  assert.equal(queries.filter(q=>q.sql.includes('pg_attribute')).length,1);
 });
-test('bigint references use explicit casts but project the existing string API field',async()=>{
+test('historical bigint references use explicit casts but project the existing string API field',async()=>{
  const t=references();await t.insert({id:'MD-SYNTHETIC',purchaseDetailId:'9007199254740993'});assert.match(queries.at(-1).sql,/nullif\(\$2::text,''\)::bigint/);assert.equal(queries.at(-1).values[1],'9007199254740993');
  for(const value of ['',null])await t.insert({id:'MD-SYNTHETIC',purchaseDetailId:value});
  const row=await t.find('MD-SYNTHETIC');assert.equal(row.purchaseDetailId,'2');await t.update(row,{purchaseDetailId:'9007199254740994'});assert.match(queries.at(-1).sql,/nullif\(\$1::text,''\)::bigint/);assert.equal(queries.at(-1).values[0],'9007199254740994');
  assert.ok(queries.some(q=>q.sql.includes('t."purchaseDetailId"::text')));
 });
-test('aliases, overflow and unsafe numeric references reject before any mutation query',async()=>{
+test('historical aliases, overflow and unsafe numeric references reject before any mutation query',async()=>{
  const t=references();for(const value of ['01','+1','-1','1.0','1e0','0x1','9223372036854775808',9007199254740992])await assert.rejects(t.insert({id:'MD-SYNTHETIC',purchaseDetailId:value}),e=>e.status===409);
  assert.equal(queries.filter(q=>q.sql.startsWith('INSERT')).length,0);
 });
-test('reference layouts are scoped to transactions and unsupported/identity references fail closed',async()=>{
+test('historical reference layouts are scoped to transactions and unsupported/identity references fail closed',async()=>{
  const t=references();type='text';await t.insert({id:'MD-SYNTHETIC',purchaseDetailId:'2'});type='bigint';nextTransaction();await t.insert({id:'MD-SYNTHETIC',purchaseDetailId:'2'});assert.match(queries.at(-1).sql,/::bigint/);assert.equal(queries.filter(q=>q.sql.includes('pg_attribute')).length,2);
  for(const layout of [['integer',''],['numeric',''],['uuid',''],['bigint','d']]){[type,identity]=layout;nextTransaction();await assert.rejects(references().prepare(),e=>e.status===503);}
 });

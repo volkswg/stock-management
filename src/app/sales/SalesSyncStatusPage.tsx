@@ -143,7 +143,7 @@ export function SalesSyncStatusPage() {
               <Text className={styles.eyebrow}>Sales</Text>
               <Title level={1}>Sync status</Title>
               <Text type="secondary">
-                Synced Loyverse sales data from Google Sheets.
+                Review synced Loyverse sales data.
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
