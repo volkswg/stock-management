@@ -25,7 +25,7 @@ export function ordersTables() {
       updatedAt: { column: "updatedAt", kind: "timestamp" },
       deletedAt: { column: "deletedAt", kind: "timestamp" },
       createdBy: { column: "createdBy", kind: "text" },
-    } as const),
+    } as const, "id", true),
     orderBills: new NativeRecords("order_bills", {
       id: { column: "id", kind: "text" },
       orderId: { column: "orderId", kind: "text" },

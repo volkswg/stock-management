@@ -2,7 +2,7 @@ import "server-only";
 import { currentTransaction, requireMutation, PersistenceFailure } from "./database";
 
 export type RecordValue = string | number | boolean | null;
-export type Column = { readonly column: string; readonly kind: "text" | "numeric" | "bigint" | "boolean" | "timestamp" | "jsonb" | "media"; readonly trimBoolean?: boolean; readonly textOnly?: boolean; readonly nullText?: "null" };
+export type Column = { readonly column: string; readonly kind: "text" | "numeric" | "bigint" | "identity-reference" | "boolean" | "timestamp" | "jsonb" | "media"; readonly trimBoolean?: boolean; readonly textOnly?: boolean; readonly nullText?: "null" };
 export type NativeRecord = Readonly<Record<string, RecordValue>>;
 export type Columns = Readonly<Record<string, Column>>;
 export type NamedRecord<C extends Columns> = { readonly [K in keyof C]: RecordValue };
@@ -20,6 +20,7 @@ export interface RecordStore {
 type Identity = { id: string; revision: string; client: ReturnType<typeof currentTransaction> };
 const schemas = new WeakMap<ReturnType<typeof currentTransaction>, Promise<void>>();
 const identityLayouts = new WeakMap<ReturnType<typeof currentTransaction>, Map<string, Promise<string | null>>>();
+const referenceLayouts = new WeakMap<ReturnType<typeof currentTransaction>, Map<string, Promise<ReadonlySet<string>>>>();
 const allocators = new WeakMap<ReturnType<typeof currentTransaction>, Map<string, Promise<{ next: number }>>>();
 const quote = (name: string) => {
   if (!/^[A-Za-z_][A-Za-z_0-9]*$/.test(name)) throw new PersistenceFailure();
@@ -69,6 +70,33 @@ export class NativeRecords<C extends Columns> {
     }
     return pending;
   }
+  // Explicit feature-owned reference fields support the released text layout
+  // and the coordinated bigint migration. Cache only inside this transaction.
+  private async numericReferences(): Promise<ReadonlySet<string>> {
+    const fields = Object.entries(this.columns).filter(([, field]) => field.kind === "identity-reference");
+    if (!fields.length) return new Set<string>();
+    const client = currentTransaction(), key = this.relation + ":" + fields.map(([name, field]) => name + "=" + field.column).join(",");
+    let layouts = referenceLayouts.get(client);
+    if (!layouts) { layouts = new Map(); referenceLayouts.set(client, layouts); }
+    let pending = layouts.get(key);
+    if (!pending) {
+      pending = (async () => {
+        const numeric = new Set<string>();
+        for (const [name, field] of fields) {
+          const result = await client.query<{ type: string; identity: string }>(
+            "SELECT format_type(atttypid,atttypmod) AS type,attidentity AS identity FROM pg_attribute WHERE attrelid=$1::regclass AND attname=$2 AND NOT attisdropped",
+            [this.relation, field.column],
+          );
+          const row = result.rows[0];
+          if (result.rowCount !== 1 || row.identity !== "" || !["text", "bigint"].includes(row.type)) throw new PersistenceFailure(503, "Unsupported record reference layout.");
+          if (row.type === "bigint") numeric.add(name);
+        }
+        return numeric;
+      })();
+      layouts.set(key, pending);
+    }
+    return pending;
+  }
   // Numeric storage still exposes the original canonical string IDs and C-order
   // tie-break. Reject aliases such as 01/+1 instead of selecting another record.
   private keyValue(id: string, numeric: boolean): boolean {
@@ -92,36 +120,40 @@ export class NativeRecords<C extends Columns> {
     this.identities.set(record, { id: __id, revision: __revision, client: currentTransaction() });
     return record as unknown as NamedRecord<C>;
   }
-  async prepare(): Promise<void> { await requireNativeSchema(); await this.identitySequence(); await currentTransaction().query(`SELECT ${this.projection()} FROM ${this.relation} t LIMIT 0`); }
+  async prepare(): Promise<void> { await requireNativeSchema(); await this.identitySequence(); await this.numericReferences(); await currentTransaction().query(`SELECT ${this.projection()} FROM ${this.relation} t LIMIT 0`); }
   async all(direction: "ascending" | "descending" = "ascending"): Promise<NamedRecord<C>[]> {
     await requireNativeSchema();
     await this.identitySequence();
+    await this.numericReferences();
     const result = await currentTransaction().query<NamedRecord<C> & { __id: string; __revision: string }>(`SELECT t.${quote(this.key)}::text AS __id,t.revision::text AS __revision,${this.projection()} FROM ${this.relation} t WHERE t."deletedAt" IS NULL ORDER BY t."createdAt" ${direction === "descending" ? "DESC" : "ASC"} NULLS LAST,t.${quote(this.key)}::text COLLATE "C" ASC`);
     return result.rows.map(row => this.tracked(row));
   }
   async find(id: string): Promise<NamedRecord<C> | undefined> {
     await requireNativeSchema();
     const numeric = !!await this.identitySequence();
+    await this.numericReferences();
     if (!this.keyValue(id, numeric)) return undefined;
     const result = await currentTransaction().query<NamedRecord<C> & { __id: string; __revision: string }>(`SELECT t.${quote(this.key)}::text AS __id,t.revision::text AS __revision,${this.projection()} FROM ${this.relation} t WHERE t.${quote(this.key)}=${this.keyParameter(1, numeric)} AND t."deletedAt" IS NULL`, [id]);
     return result.rows[0] ? this.tracked(result.rows[0]) : undefined;
   }
-  private input(name: string, position: number, numericKey = false) {
+  private input(name: string, position: number, numericKey = false, numericReferences: ReadonlySet<string> = new Set<string>()) {
     const field = this.columns[name];
     if (!field) throw new PersistenceFailure(409, "Unknown record field.");
     if (numericKey && name === this.key) return this.keyParameter(position, true);
     const value = `nullif($${position}::text,'')`;
     return field.kind === "timestamp" ? `stock_operational.native_timestamp_input($${position}::text)`
       : field.kind === "media" ? `stock_operational.media_ref_for_url_v1(${value})`
-      : value + (field.kind === "numeric" ? "::numeric" : field.kind === "bigint" ? "::bigint" : field.kind === "boolean" ? "::boolean" : field.kind === "jsonb" ? "::jsonb" : "");
+      : value + (field.kind === "numeric" ? "::numeric" : field.kind === "bigint" || numericReferences.has(name) ? "::bigint" : field.kind === "boolean" ? "::boolean" : field.kind === "jsonb" ? "::jsonb" : "");
   }
-  private values(value: Readonly<Partial<Record<keyof C, RecordValue | undefined>>>) {
+  private values(value: Readonly<Partial<Record<keyof C, RecordValue | undefined>>>, numericReferences: ReadonlySet<string> = new Set<string>()) {
     for (const item of Object.values(value)) if (item !== undefined && item !== null && !["string", "number", "boolean"].includes(typeof item)) throw new PersistenceFailure(409, "Invalid record value.");
     return Object.entries(value).map(([name, item]) => {
       if (item == null || (typeof item === "number" && !Number.isFinite(item))) return null;
       const field = this.columns[name];
       if (field?.textOnly && typeof item !== "string") throw new PersistenceFailure();
       const text = String(item);
+      if (numericReferences.has(name) && text !== "" &&
+          (!this.keyValue(text, true) || typeof item === "number" && !Number.isSafeInteger(item))) throw new PersistenceFailure(409, "Invalid record reference.");
       if (field?.kind !== "boolean" || text === "") return text;
       const boolean = (field.trimBoolean ? text.trim() : text).toLowerCase();
       // PostgreSQL accepts aliases such as 1/t/yes. Existing business adapters
@@ -133,22 +165,24 @@ export class NativeRecords<C extends Columns> {
   async insert(value: Readonly<Partial<Record<keyof C, RecordValue | undefined>>>): Promise<void> {
     const client = requireMutation(); await requireNativeSchema();
     const numeric = !!await this.identitySequence();
+    const numericReferences = await this.numericReferences();
     if (numeric && !this.keyValue(String(value[this.key] ?? ""), true)) throw new PersistenceFailure(409, "Invalid record identity.");
     const names = Object.keys(value);
     if (!names.length || (this.key === "id" && (typeof value[this.key] !== "string" || !value[this.key]))) throw new PersistenceFailure(409, "Business identity is required.");
     const synthetic = this.key === "migration_id";
-    const expressions = names.map((name, i) => this.input(name, i + 1, numeric));
-    await client.query(`INSERT INTO ${this.relation}(${synthetic ? 'migration_id,' : ''}${names.map(name => quote(this.columns[name].column)).join(",")}) VALUES(${synthetic ? "'COMP-'||gen_random_uuid()::text," : ""}${expressions.join(",")})`, this.values(value));
+    const expressions = names.map((name, i) => this.input(name, i + 1, numeric, numericReferences));
+    await client.query(`INSERT INTO ${this.relation}(${synthetic ? 'migration_id,' : ''}${names.map(name => quote(this.columns[name].column)).join(",")}) VALUES(${synthetic ? "'COMP-'||gen_random_uuid()::text," : ""}${expressions.join(",")})`, this.values(value, numericReferences));
   }
   async update(record: NamedRecord<C>, patch: Readonly<Partial<Record<keyof C, RecordValue | undefined>>>): Promise<void> {
     const client = requireMutation(), identity = this.identities.get(record);
     if (!identity || identity.client !== currentTransaction()) throw new PersistenceFailure(409, "Read the record again before editing.");
     const numeric = !!await this.identitySequence();
+    const numericReferences = await this.numericReferences();
     const names = Object.keys(patch);
     if (!names.length) return;
     if (Object.hasOwn(patch, this.key) && patch[this.key] !== identity.id) throw new PersistenceFailure(409, "Business identity cannot change.");
-    const assignments = names.map((name, i) => { const input = this.input(name, i + 1, numeric); return `${quote(this.columns[name].column)}=${input}`; }).join(",");
-    const result = await client.query<{ revision: string }>(`UPDATE ${this.relation} SET ${assignments} WHERE ${quote(this.key)}=${this.keyParameter(names.length + 1, numeric)} AND revision=$${names.length + 2} AND "deletedAt" IS NULL RETURNING revision::text`, [...this.values(patch), identity.id, identity.revision]);
+    const assignments = names.map((name, i) => { const input = this.input(name, i + 1, numeric, numericReferences); return `${quote(this.columns[name].column)}=${input}`; }).join(",");
+    const result = await client.query<{ revision: string }>(`UPDATE ${this.relation} SET ${assignments} WHERE ${quote(this.key)}=${this.keyParameter(names.length + 1, numeric)} AND revision=$${names.length + 2} AND "deletedAt" IS NULL RETURNING revision::text`, [...this.values(patch, numericReferences), identity.id, identity.revision]);
     if (result.rowCount !== 1) throw new PersistenceFailure(409, "Stale record revision.");
     identity.revision = result.rows[0].revision;
   }

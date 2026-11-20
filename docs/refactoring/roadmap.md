@@ -14,17 +14,18 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: user-state identity
+## Current scoped work: coupled item identity and movement reference
 
-PR91's corrected app and the separately approved order-bill identity conversion
-are released; browser writes and LINE reopened after recovery/record/API checks.
-Prepare only `user_state.id` for bigint identity next. Deploy dual-layout session
-allocation first; keep LINE user/reference IDs, context and API strings unchanged.
-Review the operator-only forward/inverse and synthetic acceptance in the same PR.
-Any live deployment or database conversion needs its own approval and a new pause
-for the schema change. `order_items.id` and its movement FK remain a later task.
-[The runbook](../database-migration.md#user-state-bigint-identity-prepared-not-activated)
-contains the exact scope and release gates.
+PR92's application release and the separately approved user-state identity
+conversion are complete; app and LINE reopened after full recovery/record/API
+checks. Prepare only `order_items.id` bigint identity together with nullable
+`movement_details.purchaseDetailId` bigint FK. Deploy dual-layout item allocation
+and explicit reference binding first; preserve existing IDs, string API fields,
+FK behavior, ordering and the already released bill/session sequences.
+The [runbook](../database-migration.md#coupled-order-item-identityreference-prepared-not-activated)
+contains operator-only forward/inverse, recovery and separate live-release gates.
+Other IDs, security settings, production data and live routing stay unchanged by
+this implementation. No new planning PR or production action is authorized here.
 
 ## Next major milestone: user authentication
 
