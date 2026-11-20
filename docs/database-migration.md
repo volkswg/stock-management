@@ -2,14 +2,18 @@
 
 ## Current production
 
-The Google Sheets → Supabase migration is complete, including the private
-Loyverse account configuration in PR89 (`2130318`, 2026-11-20). Browser writes and
-LINE are open. Old business Sheets remain read-only; Google Drive images retain
-their existing provider ownership. No new user authentication system was introduced.
-The last verified deployment is `dpl_EM9oHQH6kcb4Fn3M5HZCoWDGvdAL`.
-[The evidence ledger](refactoring/progress.md#latest-production-release) records the
-checkpoint; this is not a new live inspection. The order-bill identity work below
-is local preparation only, with no production conversion or deployment authorized.
+The Google Sheets → Supabase migration is complete, including private Loyverse
+account configuration. Browser writes and LINE are open. The current application
+is PR90 (`f7f50b2`), deployment `dpl_B7oHWkjUqN9EsPmuAeRbjeMM8QtD` (2026-11-20).
+Google Drive keeps its existing provider ownership; no new authentication was added.
+
+The first order-bill identity maintenance was rolled back after the Orders HTTP
+edit-revision query rejected a text/bigint UNION (SQLSTATE42804). The exact inverse
+restored all53 tables and all15 metadata sections; IDs, row/global revisions and
+configuration were preserved. The system reopened after read-only HTTP parity
+passed. `order_bills.id` remains text, with no identity sequence. The correction in
+this branch is not yet deployed. [The evidence ledger](refactoring/progress.md#latest-production-release)
+records the checkpoint; this description is not a new live inspection.
 
 | Component | Current contract |
 | --- | --- |
@@ -51,10 +55,12 @@ Release order requires separate owner approval:
    database. After conversion, recovery must also capture and restore the new
    sequence's value and `is_called`, including gaps from rolled-back reservations.
    The existing backup reader receives SELECT on this sequence only.
-2. Deploy the dual-layout app first on the unchanged text schema. Compare browser
+2. Deploy the corrected dual-layout app, including the shared edit-revision text
+   projection, first on the unchanged text schema. Compare browser
    and LINE read behavior, then retain the exact compatible build as rollback.
-   PR89 and older apps use text-only MAX/regex/COLLATE allocation and **cannot run
-   after the bigint conversion**. Never promote an old app against that schema.
+   The initial PR90 app (`f7f50b2`) and older builds **cannot run after the bigint
+   conversion**: its edit-revision UNION still mixes text and numeric IDs. Never
+   promote a build preceding this correction against the bigint schema.
 3. Obtain a supervised maintenance window, drain browser/LINE/direct-editor/job
    writes, fence writes and verify the checkpoint freshness, no late writes, exact
    target `hzynvirpedqnvtbifobx`, isolation

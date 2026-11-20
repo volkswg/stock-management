@@ -14,10 +14,16 @@ def copy_history(target):
     followup=json.loads((ROOT/'tests/fixtures/native-null-json-before.json').read_text())
     accounts=json.loads((ROOT/'tests/fixtures/postgres-accounts-before.json').read_text())
     bills=json.loads((ROOT/'tests/fixtures/bill-identity-before.json').read_text())
+    revision=json.loads((ROOT/'tests/fixtures/bill-revision-before.json').read_text())
     for name,expected in fixture['files'].items():
         edit=fixture['edits'].get(name)
         source=ROOT/name
         current=source.read_bytes() if source.exists() else None
+        revision_edit=revision['edits'].get(name)
+        if revision_edit:
+            assert (digest(current) if current is not None else None)==revision_edit['afterSha256'],name
+            current=revision_edit['before'].encode()
+            assert digest(current)==revision_edit['beforeSha256'],name
         bill_edit=bills['edits'].get(name)
         if bill_edit:
             assert (digest(current) if current is not None else None)==bill_edit['afterSha256'],name

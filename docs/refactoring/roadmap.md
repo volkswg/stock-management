@@ -16,14 +16,17 @@ its own exact scope, fresh recovery/freshness review and execution approval.
 
 ## Current scoped work: order-bill identity
 
-PR89 (`2130318`) completed the private account migration; app business and account
-reads now use PostgreSQL, with Drive uploads retained. The next focused change
-prepares only `order_bills.id` for bigint identity. Deploy a dual-layout adapter
-first; retain current IDs and string APIs, ordering and LINE behavior. A separately
-approved fenced database conversion follows fresh recovery/rehearsal. Keep all
-other ID types unchanged. [The runbook](../database-migration.md#order-bill-bigint-identity-prepared-not-activated)
-contains release order, sequence permissions, direct-editor requirements and rollback.
-No production action is authorized by this implementation task.
+PR89 completed private account migration; business/account reads use PostgreSQL
+and Drive uploads retain their provider ownership. PR90's first identity maintenance
+was rolled back after its HTTP edit-revision UNION mixed text and bigint IDs.
+Production is open on `f7f50b2`, with `order_bills.id` still text and all data preserved.
+
+The focused correction casts revision identities to text and verifies actual HTTP
+family/record tokens across the type transition. Release that corrected compatible
+app first, then obtain fresh recovery/freshness verification and a new supervised
+pause for the separately approved bigint conversion. Other table IDs stay unchanged.
+[The runbook](../database-migration.md#order-bill-bigint-identity-prepared-not-activated)
+contains sequence permissions, direct-editor requirements and rollback gates.
 
 ## Next major milestone: user authentication
 
