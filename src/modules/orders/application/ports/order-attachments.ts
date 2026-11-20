@@ -1,6 +1,6 @@
 import type { Order, OrderBill, OrderItem } from "../../contracts";
 export interface OrderAttachmentStore {
-    nextBillId(): Promise<number>;
+    nextBillId(): Promise<string | number>;
     nextItemId(): Promise<number>;
     appendBill(value: OrderBill): Promise<void>;
     appendItem(value: OrderItem): Promise<void>;

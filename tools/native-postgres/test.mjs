@@ -14,5 +14,6 @@ try {
  console.log('Current native PostgreSQL source checks');
  run('node',['--test','tests/native-postgres/contracts.test.mjs']);
  run('node',['--test','tests/postgres-accounts.test.cjs']);
+ run('node',['--test','tests/bill-identity.test.cjs']);
  run('python3',['-m','unittest','discover','-s','tools/migration','-p','test_loyverse_accounts.py']);
 } finally {rmSync(owned,{recursive:true,force:true});}

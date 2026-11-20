@@ -34,6 +34,6 @@ export function ordersTables() {
       updatedAt: { column: "updatedAt", kind: "timestamp" },
       deletedAt: { column: "deletedAt", kind: "timestamp" },
       createdBy: { column: "createdBy", kind: "text" },
-    } as const),
+    } as const, "id", true),
   };
 }
