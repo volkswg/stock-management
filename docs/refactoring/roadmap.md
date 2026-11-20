@@ -14,19 +14,17 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: order-bill identity
+## Current scoped work: user-state identity
 
-PR89 completed private account migration; business/account reads use PostgreSQL
-and Drive uploads retain their provider ownership. PR90's first identity maintenance
-was rolled back after its HTTP edit-revision UNION mixed text and bigint IDs.
-Production is open on `f7f50b2`, with `order_bills.id` still text and all data preserved.
-
-The focused correction casts revision identities to text and verifies actual HTTP
-family/record tokens across the type transition. Release that corrected compatible
-app first, then obtain fresh recovery/freshness verification and a new supervised
-pause for the separately approved bigint conversion. Other table IDs stay unchanged.
-[The runbook](../database-migration.md#order-bill-bigint-identity-prepared-not-activated)
-contains sequence permissions, direct-editor requirements and rollback gates.
+PR91's corrected app and the separately approved order-bill identity conversion
+are released; browser writes and LINE reopened after recovery/record/API checks.
+Prepare only `user_state.id` for bigint identity next. Deploy dual-layout session
+allocation first; keep LINE user/reference IDs, context and API strings unchanged.
+Review the operator-only forward/inverse and synthetic acceptance in the same PR.
+Any live deployment or database conversion needs its own approval and a new pause
+for the schema change. `order_items.id` and its movement FK remain a later task.
+[The runbook](../database-migration.md#user-state-bigint-identity-prepared-not-activated)
+contains the exact scope and release gates.
 
 ## Next major milestone: user authentication
 

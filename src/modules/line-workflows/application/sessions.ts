@@ -35,7 +35,7 @@ export async function saveMovementState(store: MovementSessionStore, state: Move
         return;
     }
     const isSameMovement = existing?.referenceId === state.masterId, now = runtime.now();
-    const value = { id: existing?.id || snapshot.nextIdentifier(), userId: state.userId, flowname: MOVEMENT_FLOW, referenceId: state.masterId, state: state.step, createdAt: isSameMovement ? existing?.createdAt || state.startedAt : state.startedAt, updatedAt: now, context: JSON.stringify(state) };
+    const value = { id: existing?.id || await snapshot.nextIdentifier(), userId: state.userId, flowname: MOVEMENT_FLOW, referenceId: state.masterId, state: state.step, createdAt: isSameMovement ? existing?.createdAt || state.startedAt : state.startedAt, updatedAt: now, context: JSON.stringify(state) };
     await snapshot.writeMovement(existing, value);
 }
 export async function createDraftOrder(context: WorkflowContext, createdBy: string) { const order = await context.orders.draft(createdBy); const id = await context.sessions.nextIdentifier(); const userState: UserState = { id, userId: createdBy, flowname: UserStateFlowName.OrderCreate, referenceId: order.id, state: OrderStatus.WaitingForBillImage, createdAt: order.createdAt, updatedAt: order.createdAt }; await context.sessions.append(userState); return order; }

@@ -12,6 +12,6 @@ export function line_workflowsTables() {
       createdAt: { column: "createdAt", kind: "timestamp" },
       updatedAt: { column: "updatedAt", kind: "timestamp" },
       context: { column: "context", kind: "jsonb" },
-    } as const),
+    } as const, "id", true),
   };
 }

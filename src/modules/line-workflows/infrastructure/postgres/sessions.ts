@@ -9,14 +9,14 @@ type ItemSnapshot = { items(readId: () => string | undefined): MovementJourneyIt
 export function createSessionAdapter(storage: Pick<Storage, "userState">, inventory: { itemSnapshot(): Promise<ItemSnapshot> }) {
   type Record = Parameters<Storage["userState"]["update"]>[0];
   async function snapshot(records: Record[]): Promise<MovementSessionSnapshot> {
-    const originals = new WeakMap<SessionEntry, Record>(), next = await storage.userState.identifierSequence();
+    const originals = new WeakMap<SessionEntry, Record>();
     function entry(record: Record): SessionEntry {
       const value = { get id() { return record.id; }, get referenceId() { return record.referenceId; }, get step() { return record.state; }, get createdAt() { return record.createdAt; }, get context() { return record.context; } }; originals.set(value, record); return value;
     }
     return {
       latestForReading(userId) { const record = records.find(r => r.userId === userId && r.flowname === MOVEMENT_FLOW); return record ? entry(record) : undefined; },
       findForWriting(readUserId) { const record = records.find(r => r.userId === readUserId() && r.flowname === MOVEMENT_FLOW); return record ? entry(record) : undefined; },
-      nextIdentifier: () => String(next()),
+      nextIdentifier: () => storage.userState.reserveIdentifier(),
       async eraseMovement(userId) { for (const record of records.filter(r => r.userId === userId && r.flowname === MOVEMENT_FLOW)) await storage.userState.softDelete(record); },
       async writeMovement(target, value) {
         const record = { id: value.id as RecordValue, userId: value.userId, flowname: value.flowname, referenceId: value.referenceId, state: value.state, createdAt: value.createdAt as RecordValue, updatedAt: value.updatedAt, context: value.context };
@@ -26,7 +26,7 @@ export function createSessionAdapter(storage: Pick<Storage, "userState">, invent
   }
   const orders: OrderSessionStore = {
     async findLatest(userId, flowname) { return (await storage.userState.all("descending")).map(mapUserStateRow).filter((v): v is UserState => Boolean(v)).find(v => v.userId === userId && v.flowname === flowname); },
-    async nextIdentifier() { return String(await storage.userState.nextIdentifier()); },
+    nextIdentifier: () => storage.userState.reserveIdentifier(),
     append: value => storage.userState.insert({ id: value.id, userId: value.userId, flowname: value.flowname, referenceId: value.referenceId, state: value.state, createdAt: value.createdAt, updatedAt: value.updatedAt }),
     reference(id) {
       let reference: Promise<Record> | undefined;
