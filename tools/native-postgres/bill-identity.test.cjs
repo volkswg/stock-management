@@ -5,6 +5,18 @@ const {transaction,closePool}=require('../../src/infrastructure/persistence/post
 const {executeCommand,hashIntent}=require('../../src/infrastructure/persistence/postgres/commands.ts');
 const {createBusinessDatabase}=require('../../src/composition/postgres/service.ts');
 const orders=require('../../src/modules/orders/server.ts');
+const {withPersistence}=require('../../src/composition/postgres/route.ts');
+const editReader=withPersistence(async()=>Response.json({ok:true}));
+async function editResponses(){
+ const rows=[];
+ for(const path of ['/api/orders','/api/orders/BI_PARENT','/api/movements']){
+  const response=await editReader(new Request('https://example.test'+path,{headers:{Authorization:'Bearer '+process.env.STOCK_STAGING_AUTH_TOKEN}}));
+  assert.equal(response.status,200,path+' must execute the actual HTTP edit-revision query');
+  rows.push({path,body:await response.text(),scope:response.headers.get('x-stock-edit-scope'),edit:response.headers.get('x-stock-edit-revision'),revision:response.headers.get('x-stock-revision')});
+  assert.match(rows.at(-1).edit,/^"stock-edit-v1-[a-f0-9]{64}"$/);
+ }
+ return rows;
+}
 let loseCommit=false;
 const driverQuery=Client.prototype.query;
 Client.prototype.query=function(...args){
@@ -63,14 +75,19 @@ test('reviewed text-to-identity transition preserves all rows, permissions, stri
  });
  // Fixture guard probes changed only the synthetic revision. Establish a new,
  // exact checkpoint after those probes before testing the successful operation.
- const checkpoint=await fingerprint();await gates();await owner.query(forward);assert.equal(await fingerprint(),checkpoint);
+ const checkpoint=await fingerprint();await gates();const beforeEdits=await editResponses();await owner.query(forward);assert.equal(await fingerprint(),checkpoint);
+ await t.test('actual HTTP family/record edit revisions preserve their tokens across text and bigint bill identities',async()=>{
+  assert.deepEqual(await editResponses(),beforeEdits);
+ });
  await t.test('only order_bills changes and the immediate inverse restores exact text records',async()=>{
   assert.equal(await scalar("SELECT pg_get_serial_sequence('stock_operational.order_bills','id') value"),'stock_operational.order_bills_id_seq');
   assert.equal(await scalar("SELECT count(*)::text value FROM information_schema.columns WHERE table_schema='stock_operational' AND column_name='id' AND data_type='bigint'"),'1');
   assert.equal(await scalar("SELECT stock_operational.lexeme_mapping_contract_v1() value"),'typed');
   await gates();await owner.query(inverse);assert.equal(await fingerprint(),checkpoint);
+  assert.deepEqual(await editResponses(),beforeEdits);
   assert.equal(await scalar("SELECT to_regclass('stock_operational.order_bills_id_seq')::text value"),null);
   await gates();await owner.query(forward);assert.equal(await fingerprint(),checkpoint);
+  assert.deepEqual(await editResponses(),beforeEdits);
  });
  await t.test('runtime has nextval only, readers cannot advance, backup can capture sequence state',async()=>{
   for(const [role,privilege,expected] of [['stock_runtime','USAGE',true],['stock_runtime','UPDATE',false],['stock_prod_backup','SELECT',true],['stock_prod_reader','USAGE',false],['lexeme_reader','USAGE',false],['anon','USAGE',false],['authenticated','USAGE',false]])assert.equal(await scalar('SELECT has_sequence_privilege($1,$2,$3) value',[role,'stock_operational.order_bills_id_seq',privilege]),expected,role+privilege);

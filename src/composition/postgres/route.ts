@@ -38,7 +38,7 @@ async function readEditRevision(scope: EditScope): Promise<string> {
   // direct edits. Hash identities/revisions only; never read business payloads
   // a second time merely to produce an edit token.
   const select = (table: string, parent: string, where = "") =>
-    `SELECT '${table}' AS source,t.id,${parent} AS parent,t.revision::text AS version FROM stock_operational.${table} t ${where}`;
+    `SELECT '${table}' AS source,t.id::text AS id,${parent} AS parent,t.revision::text AS version FROM stock_operational.${table} t ${where}`;
   const query = scope.family === "orders" ? [
     select("orders", "NULL::text", 'WHERE $1::text IS NULL OR t.id=$1'),
     select("order_items", 't."orderId"', 'WHERE $1::text IS NULL OR t."orderId"=$1'),

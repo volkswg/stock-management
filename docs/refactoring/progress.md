@@ -8,20 +8,34 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-Current production is [PR89](https://github.com/volkswg/stock-management/pull/89),
-source `21303185712f624c52beac61580d5922bb012332`, deployment
-`dpl_EM9oHQH6kcb4Fn3M5HZCoWDGvdAL` (2026-11-20). Private Loyverse account
-configuration now uses the unexposed PostgreSQL table, with runtime SELECT only
-and token-free metadata reads. Business data, browser/LINE behavior and Drive
-ownership were preserved. Recovery includes all53 application tables and private
-configuration. Protected pre-promotion comparisons and post-promotion checks
-passed; temporary access was revoked. Full receipts remain private on the Mac.
-This records the previous independently verified release, not a new inspection.
+Current production is [PR90](https://github.com/volkswg/stock-management/pull/90),
+source `f7f50b20073e3cb7112cb9947066ae7d1cfcf41d`, deployment
+`dpl_B7oHWkjUqN9EsPmuAeRbjeMM8QtD` (2026-11-20). The application release passed
+fresh53-table recovery/strict restore, five staged API comparisons, live API/page
+and request-guard checks. Deployment-only temporary access was revoked and its
+link/cookie denied. LINE stayed open; no live schema conversion was in deployment.
 
-The next local change prepares only order-bill bigint identity. It retains every
-ID and string API field, provides text/bigint compatibility, and keeps the operator
-conversion/inverse outside automatic migration discovery. Production schema,
-records, deployments and traffic remain unchanged until separate release approval.
+The subsequent supervised identity conversion was applied, then safely reverted
+when Orders HTTP acceptance returned503. SQLSTATE42804 identified the shared
+edit-revision UNION combining text IDs with the converted bigint bill ID. Earlier
+adapter comparisons did not exercise this HTTP wrapper on the converted layout.
+The exact reviewed inverse preserved all IDs, rows, revisions and configuration;
+all53 tables/all15 metadata sections matched the frozen checkpoint. Six API
+comparisons (including bill detail), two pages, client helper and request guards
+passed on the restored text schema. Only the maintenance rule was removed and the
+system reopened at11:51 Bangkok, inside the30-minute window. No recovery snapshot
+was restored over live data; no real provider calls or business canary writes ran.
+Recovery and complete execution receipts remain private on the Mac.
+
+Current work corrects only the revision selector to `t.id::text AS id` and adds a
+real PostgreSQL HTTP-wrapper regression for unchanged family/record edit tokens
+through text→bigint→text transitions. It requires a separately approved application
+release and a new maintenance pause before any conversion retry. Production remains
+on the original text ID schema; retained SQL is not authorization to retry now.
+
+[PR89](https://github.com/volkswg/stock-management/pull/89) previously moved private
+Loyverse accounts to the unexposed PostgreSQL table, with read-only runtime grants
+and token-free metadata reads. Its provider/account behavior remains unchanged.
 
 Local order-bill identity validation (2026-11-20): all703 immutable historical
 regressions,18 current source/unit tests and3 importer tests passed. Type checking,
