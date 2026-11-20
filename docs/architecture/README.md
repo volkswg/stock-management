@@ -8,7 +8,8 @@ composition wires feature-owned ports. `src/externals/` and `src/features/` are
 retired. Current consumers use canonical module owners; standalone script
 entrypoints remain explicit.
 
-Production's last verified application release is PR95 `872b714`: order images
+Production's last verified application release is PR96 `731f549`: unused service
+forwards and inactive reference mappings are retired. Order images
 upload individually on selection, and order creation sends verified media
 references. PR94 removed the unused movement purchase reference. All23 business
 tables use native `deletedAt`; operational cell/ordinal/kind/lexeme sidecars and
@@ -25,8 +26,7 @@ Existing API/report names and old-request recovery remain supported contracts.
 This cleanup removes67 unused `src/services/` forwards and the unused movement
 reference layout branch. Current UI copy describes sales and employees without
 obsolete storage labels. Retained database rollback guards, LINE behavior,
-request recovery and API fields are unchanged. It does not deploy or change
-production. See [ownership](migration-map.md), [verification](../refactoring/verification.md)
+request recovery and API fields are unchanged. The next row-only concurrency fix is not deployed and changes no schema. See [ownership](migration-map.md), [verification](../refactoring/verification.md)
 and [operations](../database-migration.md).
 
 New staff authentication/RBAC/shop permissions and backup automation remain deferred.

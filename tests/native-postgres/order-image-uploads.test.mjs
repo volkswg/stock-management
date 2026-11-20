@@ -47,6 +47,18 @@ const saved = () => Response.json({ order: { id: 'SYNTHETIC_ORDER' } }, { status
 const pendingOrderKey = 'stock-orders-pending-creation:v1';
 const refs = () => ['bill', 'product'].map((imageType, i) => ({ id: uuid(i + 1), url: `https://example.invalid/${i}`, imageType, uploadKey: 'order-image:' + uuid(i + 1) }));
 
+test('row protocol keeps uncertain order creation retryable without pinning the Orders collection',async()=>{
+ const store=storage(),posts=[];let lose=true,globalRevision=1;
+ const api=()=>load('src/modules/orders/ui/api.ts',{globals:{sessionStorage:store,fetch:async(url,init)=>{
+  if(init.method==='HEAD')return new Response(null,{headers:{'x-stock-edit-protocol':'row-v1','x-stock-revision':`"stock-v2-${globalRevision}"`}});
+  posts.push(init);if(lose)throw Error('response lost');return saved();
+ }}});
+ await assert.rejects(api().createOrderFromUploadedImages({seller:'Synthetic',images:refs()}),/unconfirmed|same|saved|confirmation/i);
+ lose=false;globalRevision=99;await api().createOrderFromUploadedImages({seller:'Synthetic',images:refs()});
+ assert.equal(posts.length,2);assert.equal(posts[0].headers['Idempotency-Key'],posts[1].headers['Idempotency-Key']);
+ assert.equal(posts[0].headers['If-Match'],undefined);assert.equal(posts[1].headers['If-Match'],undefined);
+});
+
 test('each selection uploads separately even when their combined bytes exceed the platform limit; creation sends JSON references only', async () => {
   const b = browser((init, n) => typeof init.body === 'string' ? saved() : Response.json({ image: receipt(init, n) }, { status: 201 }));
   const bill = await b.uploadOrderCreationImage(image('bill', 3_000_000), 'bill');

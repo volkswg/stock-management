@@ -96,6 +96,7 @@ sd_sql np_reference retirement | pg psql -U postgres -d np_reference -v ON_ERROR
 native_run np_reference tools/native-postgres/movement-reference-retirement.test.cjs
 native_run np_reference tools/native-postgres/media-line.test.cjs
 native_run np_reference tools/native-postgres/order-image-uploads.test.cjs
+native_run np_reference tools/native-postgres/row-edits.test.cjs
 pg psql -U postgres -d np_reference -v ON_ERROR_STOP=1 -c "SELECT nextval('stock_operational.order_items_id_seq');" > "$artifacts/retired-reference-unused-reservation.log"
 pg pg_dump -U postgres -d np_reference --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/retired-reference-recovery.sql"
 pg createdb -U postgres np_reference_restore

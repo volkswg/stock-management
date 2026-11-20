@@ -7,11 +7,16 @@ ROOT=Path(__file__).resolve().parents[2]
 def copy_previous(target):
  target=Path(target)
  if target.exists() and any(target.iterdir()):raise ValueError('Destination must be empty')
+ row_edits=json.loads((ROOT/'tests/fixtures/row-edits-before.json').read_text())
  cleanup=json.loads((ROOT/'tests/fixtures/safe-compatibility-cleanup-before.json').read_text())
  uploads=json.loads((ROOT/'tests/fixtures/order-image-uploads-before.json').read_text())
  fixture=json.loads((ROOT/'tests/fixtures/movement-reference-before.json').read_text())
  for name,expected in fixture['files'].items():
   source=ROOT/name;data=source.read_bytes() if source.exists() else None;edit=fixture['edits'].get(name)
+  row_edit=row_edits['edits'].get(name)
+  if row_edit:
+   assert (hashlib.sha256(data).hexdigest() if data is not None else None)==row_edit['afterSha256'],name
+   data=row_edit['before'].encode();assert hashlib.sha256(data).hexdigest()==row_edit['beforeSha256'],name
   cleanup_edit=cleanup['edits'].get(name)
   if cleanup_edit:
    assert (hashlib.sha256(data).hexdigest() if data is not None else None)==cleanup_edit['afterSha256'],name

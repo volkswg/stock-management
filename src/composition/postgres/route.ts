@@ -1,3 +1,4 @@
+import { mutationRow, mutationRows, batchRevision, rowTokens, withRowTokens } from "./row-edits";
 import { executeCommand, hashIntent } from "@/infrastructure/persistence/postgres/commands";
 import { executeUploadCommand } from "@/infrastructure/persistence/postgres/uploads";
 import "server-only";
@@ -56,7 +57,7 @@ async function readEditRevision(scope: EditScope): Promise<string> {
 }
 async function setEditRevision(request: Request, response: Response): Promise<void> {
   const scope = editScope(request);
-  if (scope && response.ok) {
+  if (scope && response.ok && request.headers.get("x-stock-edit-protocol") !== "row-v1") {
     response.headers.set("x-stock-edit-scope",scope.key);
     response.headers.set("x-stock-edit-revision",await readEditRevision(scope));
   }
@@ -94,25 +95,36 @@ export function withPersistence<Args extends unknown[], Result extends Response>
         const response=await handler(...args);
         response.headers.set("x-stock-revision",await readRevision());
         await setEditRevision(request,response);
-        return response;
-      });
+        return await withRowTokens(request,response) as Result;
+      }, { consistentRead: request.headers.get("x-stock-edit-protocol") === "row-v1" });
       const kind=method+":"+new URL(request.url).pathname;
       const contentType=request.headers.get("content-type") || "";
       const execute=contentType.startsWith("image/") || contentType.includes("multipart/form-data") ? executeUploadCommand : executeCommand;
       const stored = await execute<StoredResponse>(kind,request.headers.get("Idempotency-Key") || "",hashIntent({query:new URL(request.url).search,body:await requestIntent(request)}),async () => {
         const expected=request.headers.get("If-Match");
         const suppliedScope=request.headers.get("x-stock-edit-scope");
-        if (suppliedScope) {
+        if (expected?.startsWith('"stock-batch-v1-')) {
+          const path = new URL(request.url).pathname;
+          if (request.method !== "PATCH" || !/^\/api\/orders\/[^/]+\/items$/.test(path) || suppliedScope !== path ||
+            !/^"stock-batch-v1-[a-f0-9]{64}"$/.test(expected) || expected !== await batchRevision(request)) throw new EditRevisionConflict();
+        } else if (expected?.startsWith('"stock-row-v1-')) {
+          const row = await mutationRow(request);
+          if (!row || suppliedScope !== row.scope || !/^"stock-row-v1-[a-f0-9]{64}"$/.test(expected) ||
+            (await rowTokens([row]))[0]?.token !== expected) throw new EditRevisionConflict();
+        } else if (!expected && request.headers.get("x-stock-edit-protocol") === "row-v1" && (await mutationRows(request)).length) {
+          throw new PersistenceFailure(428,"Read this record before editing. Refresh and review your edit.");
+        } else if (suppliedScope) {
           const resource=editScope(request);
           if (!resource || !expected || !/^"stock-edit-v1-[a-f0-9]{64}"$/.test(expected) ||
             (suppliedScope !== resource.key && suppliedScope !== `/api/${resource.family}`)) throw new EditRevisionConflict();
           const scope=suppliedScope === resource.key ? resource : {family:resource.family,key:suppliedScope};
           if (expected !== await readEditRevision(scope)) throw new EditRevisionConflict();
         } else if(expected && expected !== await readRevision()) throw new PersistenceFailure(409,"Storage revision changed. Refresh before retrying.");
-        const response = await handler(...args);
+        let response: Response = await handler(...args);
         if (response.status >= 400) throw new RejectedResponse(response);
         response.headers.set("x-stock-revision",await readRevision());
         await setEditRevision(request,response);
+        response = await withRowTokens(request,response);
         return { status:response.status,body:Buffer.from(await response.clone().arrayBuffer()).toString("base64"),headers:[...response.headers.entries()] };
       });
       return restore(stored) as Result;

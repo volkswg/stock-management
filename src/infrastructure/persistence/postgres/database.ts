@@ -78,7 +78,7 @@ export function requireMutation(): PoolClient {
   if (!context?.open || !context.mutation) throw new PersistenceFailure(503, "A read-only request cannot mutate persistence.");
   return context.safe;
 }
-export async function transaction<T>(mutation: boolean, operation: () => Promise<T>): Promise<T> {
+export async function transaction<T>(mutation: boolean, operation: () => Promise<T>, options: { consistentRead?: boolean } = {}): Promise<T> {
   if (mutation && stagingReadOnly()) throw new PersistenceFailure(405,"Staging is read-only.");
   const previous=active.getStore();
   if (previous) {
@@ -94,7 +94,10 @@ export async function transaction<T>(mutation: boolean, operation: () => Promise
   const onError = () => { destroy = true; };
   client.on("error",onError);
   try {
-    await client.query(mutation ? "BEGIN" : "BEGIN READ ONLY");
+    // Opt-in browser reads bind payload/tokens to one snapshot. Recovery reads
+    // keep READ COMMITTED so evidence taken after waiting for the writer
+    // barrier can still observe an ambiguous original COMMIT.
+    await client.query(mutation ? "BEGIN" : options.consistentRead ? "BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY" : "BEGIN READ ONLY");
     await client.query("SET LOCAL lock_timeout = '10s'");
     await client.query("SET LOCAL statement_timeout = '30s'");
     await client.query("SET LOCAL idle_in_transaction_session_timeout = '60s'");

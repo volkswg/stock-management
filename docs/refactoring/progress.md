@@ -8,19 +8,61 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-[PR95](https://github.com/volkswg/stock-management/pull/95), source `872b714`,
-deployment `dpl_EFEr3jXVJVrB7ax1mWaKNnaisWU9`, is live. Its approved application-only
-release kept the app and LINE running. It changed only the source binding and
-application deployment; schema, database permissions, LINE cutoff and original
-protections were preserved. Passing CI covered the exact merged tree. The staged
-build was protected by Vercel SSO without a temporary link; the release check was
-corrected to recognize its302 sign-in redirect before promotion. Five live API
-reads, the new4MB upload page, idempotency/signature guards and old-deployment
-protection passed. The checked runtime window contained no error/fatal groups.
-No real-provider/business-write canary ran. Existing verified recovery was reused;
-no new live snapshot was claimed. Private release receipts remain on the Mac.
+[PR96](https://github.com/volkswg/stock-management/pull/96), source `731f549`,
+deployment `dpl_FuxGsrXtHDhebzpBouvrQiwG1Lue`, is live. The approved application-only
+release preserved the schema, data, permissions, LINE cutoff and original
+protections. The exact merged tree passed CI and the protected build was promoted
+without creating an access link. Five read-only API checks, the upload page,
+idempotency and LINE-signature rejection checks passed. The initial runtime scan
+returned no error/fatal entries. No real-provider or accepted business-write
+canary ran. The retained 53-table recovery checkpoint and three-sequence proofs
+were hash-verified; no new current data snapshot was claimed. Users and jobs may
+resume. Private release receipts remain on the Mac.
 
-### Safe compatibility cleanup — implementation, not deployed
+### Row-only edit protection — implementation, not deployed
+
+The previous Orders/Movements edit token included all children; LINE could append
+one item and invalidate a different item's quantity edit. The new opt-in
+`row-v1` protocol returns opaque `stockEditRows` sidecar metadata for records
+actually returned in a read response. Each token hashes only the edited row's
+identity/revision (and binds its route/parent identity). New browser read payloads
+and tokens share a repeatable-read snapshot, including direct editor races.
+Reconciliation reads keep READ COMMITTED and their existing writer barrier.
+Master rows exclude child
+revisions. The browser selects the exact item, with no master/collection fallback.
+A bulk product save witnesses only its submitted items, using one fixed-size
+batch token, and remains all-or-nothing if any submitted row is stale.
+
+The same mapping covers shipments, employees, timesheets, advances, expenses,
+shop/category masters, adjustment reversals, and count/cost-override month/shop
+slots. An absent upsert slot has its own witness, so a concurrent first insert
+conflicts. Existing domain validations remain, including payroll's calculated
+settlement snapshot and allowed status transitions; these are business rules,
+not a database-wide edit precondition. New creates keep their stable operation
+keys without a collection-wide precondition. Order retry support is still proved
+by the server; storage failures cannot silently enable a blind retry.
+
+Row conflicts remain409, and unseen-row edits fail closed. Pending intents keep
+their original token/key across lost responses and reloads; completed commands
+replay their original response before checking a later row version. Legacy
+aggregate/global tokens remain supported for open older tabs and old pending
+operations. They are never silently upgraded. Reload normal tabs after deployment;
+retain unresolved operation references for reconciliation. Database revisions,
+triggers, locks, SQL row CAS, LINE processing, media reconciliation and provider
+behavior are unchanged. This is application-only and requires a separately
+approved deployment; it makes no production/schema changes.
+
+Local verification passed765 Node regressions plus three Python checks and50
+actual PostgreSQL/LINE/browser checks across five fresh empty synthetic copies.
+The nine focused SQL/browser cases include LINE append vs web quantity, two
+independent browsers, same-row/direct-editor rejection, exact command replay,
+selected-item bulk atomicity and conflict rejection before image effect work.
+Type checking, lint (one inherited warning), the isolated build, unchanged route
+manifest and113 browser bundle checks passed. Both complete historical source
+reconstructions still pass through a new hash-bounded inverse; all original
+fixtures remain unchanged. These are local results; CI belongs to the review PR.
+
+### Safe compatibility cleanup — released in PR96
 
 Removed67 unused service forwards after auditing current static/erased/dynamic
 imports and standalone scripts. Removed only the unused `identity-reference`
