@@ -9,7 +9,7 @@ const {collisionPngPair}=createRequire(import.meta.url)('../tools/migration/loca
 function client(fetch,store=new Map()) {
  const window={fetch};
  vm.runInNewContext(readFileSync('public/stock-staging-operations.js','utf8'),{
-  window,fetch,Request,Response,URL,TextEncoder,Uint8Array,FormData,crypto:webcrypto,
+  window,fetch,Request,Response,Headers,URL,TextEncoder,Uint8Array,FormData,crypto:webcrypto,
   location:{href:'https://example.test/orders/create',origin:'https://example.test'},
   sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},
  });
@@ -143,4 +143,60 @@ test('legacy key-only scoped edits require reconciliation instead of inventing a
  const reload=client(async()=>{sends++;return Response.json({});},run.store);
  await assert.rejects(reload.fetch('/api/orders/O1',patch('draft')),/older page needs review/);
  assert.equal(sends,1);assert.equal(run.store.get(key),'legacy-pending-key');
+});
+
+const rowToken = n => `"stock-row-v1-${String(n).padStart(64,'0')}"`;
+const rowView = (entries, global = 1) => Response.json({stockEditRows:entries.map(([scope,n])=>({scope,token:rowToken(n)}))},{headers:{'x-stock-edit-protocol':'row-v1','x-stock-revision':`"stock-v2-${global}"`}});
+test('row protocol pins movement items and order items, never their master or collection',async()=>{
+ const writes=[];
+ const run=client(async input=>{
+  if(typeof input==='string')return rowView([['/api/movements/WT',1],['/api/movements/WT/items/I1',2],['/api/movements/WT/items/I2',3],['/api/orders/O1',4],['/api/orders/O1/items/2',5]]);
+  writes.push([input.headers.get('x-stock-edit-scope'),input.headers.get('If-Match')]);return Response.json({ok:true});
+ });
+ await run.fetch('/api/movements/WT');await run.fetch('/api/orders/O1');
+ for(const path of ['/api/movements/wt/items/i1','/api/movements/WT/items/I2/image','/api/orders/O1/items/2','/api/orders/O1'])await(await run.fetch(path,patch('synthetic'))).json();
+ assert.deepEqual(writes,[['/api/movements/WT/items/I1',rowToken(2)],['/api/movements/WT/items/I2',rowToken(3)],['/api/orders/O1/items/2',rowToken(5)],['/api/orders/O1',rowToken(4)]]);
+});
+test('row-only writes retain key and exact row precondition after loss, reload and newer reads',async()=>{
+ const writes=[];let version=1;
+ const transport=async input=>{
+  if(typeof input==='string')return rowView([['/api/movements/WT/items/I1',version]],version);
+  writes.push([input.headers.get('Idempotency-Key'),input.headers.get('If-Match'),input.headers.get('x-stock-edit-scope')]);throw Error('lost');
+ };
+ const first=client(transport);await first.fetch('/api/movements/WT');await assert.rejects(first.fetch('/api/movements/WT/items/I1',patch('draft')));
+ const second=client(transport,first.store);version=2;await second.fetch('/api/movements/WT');await assert.rejects(second.fetch('/api/movements/WT/items/I1',patch('draft')));
+ assert.deepEqual(writes[0],writes[1]);assert.equal(writes[1][1],rowToken(1));
+});
+test('other edit flows select only the requested row or month/shop slot; creates omit a stale collection precondition',async()=>{
+ const scopes=['/api/shipments/S1','/api/employees/E1','/api/employees/timesheets/T1','/api/employees/advances/A1','/api/expenses/X1','/api/expenses/masters/shops/H1','/api/expenses/masters/categories/C1','/api/stock-adjustments/A1','/api/stock-counts?month=2026-11&accountId=shop','/api/sales/profit-summary/cost-overrides?month=2026-11&accountId=shop'];
+ const writes=[];const run=client(async input=>{
+  if(typeof input==='string')return rowView(scopes.map((s,i)=>[s,i+1]));
+  writes.push([input.headers.get('x-stock-edit-scope'),input.headers.get('If-Match')]);return Response.json({ok:true});
+ });
+ await run.fetch('/api/expenses');
+ const operations=[['/api/shipments/S1',{}],['/api/employees/E1',{}],['/api/employees/timesheets/T1',{}],['/api/employees/advances',{id:'A1'}],['/api/expenses',{id:'X1'}],['/api/expenses/masters/shops',{id:'H1'}],['/api/expenses/masters/categories',{id:'C1'}],['/api/stock-adjustments',{id:'A1'}],['/api/stock-counts',{month:'2026-11',accountId:'shop'}],['/api/sales/profit-summary/cost-overrides',{month:'2026-11',accountId:'shop'}]];
+ for(const [url,body] of operations)await(await run.fetch(url,{...patch(''),body:JSON.stringify(body)})).json();
+ assert.deepEqual(writes,scopes.map((s,i)=>[s,rowToken(i+1)]));
+ await(await run.fetch('/api/orders',input)).json();await(await run.fetch('/api/orders/O1/items',input)).json();
+ assert.deepEqual(writes.slice(-2),[[null,null],[null,null]]);
+});
+test('row mode fails closed on unseen items and ignores foreign, failed and older snapshots',async()=>{
+ let response=rowView([['/api/movements/WT/items/I1',5]],5);const writes=[];
+ const run=client(async input=>{if(typeof input==='string')return response;writes.push(input.headers.get('If-Match'));return Response.json({ok:true});});
+ await run.fetch('/api/movements/WT');response=rowView([['/api/movements/WT/items/I1',1]],1);await run.fetch('/api/movements/WT');
+ response=rowView([['/api/movements/WT/items/I1',9]],9);await run.fetch('https://foreign.test/api/movements/WT');
+ await assert.rejects(run.fetch('/api/movements/WT/items/unseen',patch('draft')),/Read this record/);
+ await(await run.fetch('/api/movements/WT/items/I1',patch('draft'))).json();assert.deepEqual(writes,[rowToken(5)]);
+});
+test('bulk product saves witness exactly the selected rows and keep their original witness through uncertain reload',async()=>{
+ const store=new Map(),writes=[];let version=1;
+ const fetch=async input=>{
+  if(typeof input==='string')return rowView([['/api/orders/O/items/1',version],['/api/orders/O/items/2',2],['/api/orders/O/items/3',3]],version);
+  writes.push([input.headers.get('Idempotency-Key'),input.headers.get('If-Match'),input.headers.get('x-stock-edit-scope')]);throw Error('lost');
+ };
+ const body={method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({items:[{id:'2',productCode:'B'},{id:'1',productCode:'A'}]})};
+ const first=client(fetch,store);await first.fetch('/api/orders/O');await assert.rejects(first.fetch('/api/orders/O/items',body));
+ const expected='"stock-batch-v1-'+ await webcrypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([['/api/orders/O/items/1',rowToken(1)],['/api/orders/O/items/2',rowToken(2)]]))).then(b=>Buffer.from(b).toString('hex'))+'"';
+ assert.equal(writes[0][1],expected);assert.equal(writes[0][2],'/api/orders/O/items');
+ const reload=client(fetch,store);version=9;await reload.fetch('/api/orders/O');await assert.rejects(reload.fetch('/api/orders/O/items',body));assert.deepEqual(writes[1],writes[0]);
 });
