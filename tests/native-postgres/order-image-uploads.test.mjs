@@ -96,8 +96,11 @@ test('uploads are serialized; an uncertain provider response is retained and nev
   const gate = deferred(), b = browser((init, n) => n === 1 ? gate.promise : Response.json({ image: receipt(init, n) }, { status: 201 }));
   const first = b.uploadOrderCreationImage(image('a'), 'bill');
   const failed = assert.rejects(first, /reconciliation/);
+  // Hashing independent files may finish out of selection order. Establish the
+  // first pending provider request before testing that the next is queued.
+  await waitFor(() => b.posts.length === 1);
   const second = b.uploadOrderCreationImage(image('b'), 'product');
-  await waitFor(() => b.posts.length === 1); assert.equal(b.posts.length, 1);
+  await flush(); assert.equal(b.posts.length, 1);
   gate.resolve(Response.json({ error: 'Upload outcome requires reconciliation.' }, { status: 503 }));
   await failed; await second; assert.equal(b.posts.length, 2);
   const key = b.posts[0].headers['Idempotency-Key'];

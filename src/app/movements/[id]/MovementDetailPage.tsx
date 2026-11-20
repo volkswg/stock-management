@@ -470,7 +470,7 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, deleting
           }
         }}
       >
-        <Paragraph>This removes the entire item record from Google Sheets, including its photo link, quantity, note and flags. This cannot be undone here.</Paragraph>
+        <Paragraph>This removes the item from this movement, including its photo link, quantity, note and flags. This cannot be undone here.</Paragraph>
         <div className={styles.deleteRecordSummary}>
           <Text strong>Item {String(itemNumber).padStart(2, "0")} · {record.fromLocation} → {record.toLocation}</Text>
           <Text>{isValidMovementQuantity(record.quantity) ? `${record.quantity} pieces` : "Quantity not entered"}</Text>

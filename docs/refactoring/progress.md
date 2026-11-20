@@ -8,6 +8,46 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
+[PR95](https://github.com/volkswg/stock-management/pull/95), source `872b714`,
+deployment `dpl_EFEr3jXVJVrB7ax1mWaKNnaisWU9`, is live. Its approved application-only
+release kept the app and LINE running. It changed only the source binding and
+application deployment; schema, database permissions, LINE cutoff and original
+protections were preserved. Passing CI covered the exact merged tree. The staged
+build was protected by Vercel SSO without a temporary link; the release check was
+corrected to recognize its302 sign-in redirect before promotion. Five live API
+reads, the new4MB upload page, idempotency/signature guards and old-deployment
+protection passed. The checked runtime window contained no error/fatal groups.
+No real-provider/business-write canary ran. Existing verified recovery was reused;
+no new live snapshot was claimed. Private release receipts remain on the Mac.
+
+### Safe compatibility cleanup — implementation, not deployed
+
+Removed67 unused service forwards after auditing current static/erased/dynamic
+imports and standalone scripts. Removed only the unused `identity-reference`
+layout cache/probes/casts; no current feature map uses that kind. Corrected10 UI/
+page-description strings that still claimed Sheets storage. Hooks, event handlers,
+network calls and business behavior are unchanged by those wording edits.
+API `source` values/report names, the blank purchase-reference DTO, old multipart
+uploads, pending-operation recovery, identity/schema rollback support and LINE/
+legacy salary workflows remain intact.
+
+A new bounded source inverse restores removed/modified predecessor files before
+all existing historical layers. Original fixtures remain unchanged. Four obsolete
+reference-layout unit witnesses use the pinned predecessor transport; current
+record/application/LINE/browser acceptance still executes current physical code.
+Local `npm test` passed747 Node checks plus three Python checks. Existing
+acceptance passed26 application, five media/LINE and nine uploader/Chromium
+checks on three fresh empty synthetic PostgreSQL copies. The private setup's
+initial-server readiness race was corrected before those tests ran. The upload
+serialization unit test now waits for the first request rather than assuming
+independent hash completion order; no runtime upload code changed. Type checking,
+lint (one existing unused-variable warning) and the isolated build passed. Routes,
+113 browser chunks and private-data bundle boundaries are preserved. Both full
+predecessor source reconstructions pass after the cleanup. This source cleanup
+authorizes no production configuration, schema, data or provider changes.
+
+### Most recent schema maintenance
+
 [PR94](https://github.com/volkswg/stock-management/pull/94), source `7f96b20`,
 deployment `dpl_8RLU1FfbBv6CfQT7yVXv8yd1Xeqh`, is live. Its approved supervised
 maintenance completed on20 November2026 at19:02 Bangkok, within the30-minute
@@ -59,10 +99,8 @@ passed. The route manifest and113 browser chunks retain their boundaries. A new
 bounded source inverse preserves every prior witness; it is used only for
 historical verification, never runtime fallback.
 
-This uploader is not deployed. Its application-only release needs the merged
-source binding, protected build, approved promotion and HTTP guard checks; no
-SQL, environment redesign, LINE pause or real-provider test is required by the
-code change. Existing uncertain legacy requests remain protected until their
+This uploader is deployed in PR95 as recorded above. Its application-only
+release required no SQL, environment redesign, LINE pause or real-provider test. Existing uncertain legacy requests remain protected until their
 saved outcomes are reconciled; do not blindly clear their browser references.
 
 ### Movement purchase reference retirement: local acceptance

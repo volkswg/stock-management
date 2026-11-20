@@ -5,25 +5,29 @@
 Orders, Shipments, Inventory, Sales, Expenses, HR and LINE own their business
 workflows. Shared infrastructure owns provider transports and PostgreSQL sessions;
 composition wires feature-owned ports. `src/externals/` and `src/features/` are
-retired. Supported service/script compatibility remains explicit.
+retired. Current consumers use canonical module owners; standalone script
+entrypoints remain explicit.
 
-Production's last verified application release is PR87/88 `296529d`: all 23 business tables use
-native `deletedAt`, with 67 lifecycle timestamps including media, 61 operational
-functions and 52 triggers. LINE remained open during that application-only release.
-Operational cell/ordinal/kind/lexeme sidecars and duplicate media URLs are gone.
-Old business Sheets remain read-only; Drive and private integration accounts keep
-their existing ownership. This records the last checkpoint, not a fresh live read.
+Production's last verified application release is PR95 `872b714`: order images
+upload individually on selection, and order creation sends verified media
+references. PR94 removed the unused movement purchase reference. All23 business
+tables use native `deletedAt`; operational cell/ordinal/kind/lexeme sidecars and
+duplicate media URLs are gone. This records the verified release checkpoint,
+not a new live inspection. See the [evidence ledger](../refactoring/progress.md#latest-production-release).
 
-Business storage uses PostgreSQL-only named-record adapters. This branch retires
-the remaining Sheets configuration reader in favor of private PostgreSQL accounts.
-Each feature owns its explicit column maps and semantic port adapters;
-root transport owns SQL, transactions and private ID/revision handles. Worksheet
-classes, range/header repair, the aggregate Sheets business service and its runtime
-fallback are retired. Google Drive uploads and the fixed read-only account
-configuration remain. Existing public report type names are retained API contracts.
-This source work does not deploy, alter the schema or authorize a live change.
-See [verification](../refactoring/verification.md), [operations](../database-migration.md)
-and the [evidence ledger](../refactoring/progress.md#latest-production-release).
+Business storage and private Loyverse account configuration use PostgreSQL.
+Each feature owns explicit column maps and semantic port adapters; root transport
+owns SQL, transactions and private ID/revision handles. Worksheet classes, the
+Sheets configuration client, range/header repair, the business Sheets aggregate
+and its runtime fallback are retired. Google auth remains for Google Drive uploads.
+Existing API/report names and old-request recovery remain supported contracts.
+
+This cleanup removes67 unused `src/services/` forwards and the unused movement
+reference layout branch. Current UI copy describes sales and employees without
+obsolete storage labels. Retained database rollback guards, LINE behavior,
+request recovery and API fields are unchanged. It does not deploy or change
+production. See [ownership](migration-map.md), [verification](../refactoring/verification.md)
+and [operations](../database-migration.md).
 
 New staff authentication/RBAC/shop permissions and backup automation remain deferred.
 Existing access controls are preserved; migration completion is not an access-

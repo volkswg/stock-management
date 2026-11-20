@@ -463,7 +463,7 @@ export function EmployeesPage() {
               <Text className={styles.eyebrow}>People</Text>
               <Title level={1}>Employees</Title>
               <Text type="secondary">
-                Manage employees stored in Google Sheets.
+                Manage employees.
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>

@@ -285,7 +285,7 @@ export function SalesDailySalesPage() {
               <Text className={styles.eyebrow}>Sales</Text>
               <Title level={1}>Daily sales</Title>
               <Text type="secondary">
-                Synced sales loaded exclusively from Google Sheets.
+                Review synced sales.
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>

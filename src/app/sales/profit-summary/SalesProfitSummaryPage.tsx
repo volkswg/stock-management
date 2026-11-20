@@ -299,7 +299,7 @@ export function SalesProfitSummaryPage() {
               <Text className={styles.eyebrow}>Sales</Text>
               <Title level={1}>Profit summary</Title>
               <Text type="secondary">
-                Profit analysis from completed Google Sheets sales syncs.
+                Profit analysis from completed sales syncs.
               </Text>
             </div>
             <Space className={styles.pageActions} wrap>
