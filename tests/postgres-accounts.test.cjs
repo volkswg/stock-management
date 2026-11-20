@@ -54,7 +54,8 @@ test('historical source layer is hash pinned and the old sheet reader supplies a
  const fixture=JSON.parse(fs.readFileSync('tests/fixtures/postgres-accounts-before.json'));
  for(const [file,edit] of Object.entries(fixture.edits)){
   assert.equal(crypto.createHash('sha256').update(edit.before).digest('hex'),edit.beforeSha256,file);
-  assert.equal(fs.existsSync(file)?crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'):null,edit.afterSha256,file);
+  const current=require('./helpers/bill-identity-history.cjs').beforeBillIdentity(file);
+  assert.equal(current===null?null:crypto.createHash('sha256').update(current).digest('hex'),edit.afterSha256,file);
  }
  const source=fixture.edits['src/infrastructure/configuration/google-sheets/loyverse-accounts.ts'].before,exports={};
  new vm.Script(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText).runInNewContext({exports,require:()=>({}),Error});

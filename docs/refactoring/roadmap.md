@@ -14,19 +14,16 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: retire the remaining Sheets configuration source
+## Current scoped work: order-bill identity
 
-Native PostgreSQL business storage shipped in PR87/88 (`296529d`). The current
-branch moves the private Loyverse account configuration to an unexposed PostgreSQL
-table with read-only runtime grants and token-free metadata reads. Preserve IDs,
-order, provider behavior, account mappings, browser/LINE behavior and Drive uploads.
-One focused PR contains the additive schema, reader, guarded private import tool,
-synthetic acceptance and existing runbook updates. The old business tables need no
-resynchronization. Historical fixtures/tools remain evidence, not runtime paths.
-
-Production schema/grants, fresh private configuration capture/import, Vercel source
-setting/deployment and real provider checks require separate approval. Original
-workbook credentials remain available for rollback; no live retirement is automatic.
+PR89 (`2130318`) completed the private account migration; app business and account
+reads now use PostgreSQL, with Drive uploads retained. The next focused change
+prepares only `order_bills.id` for bigint identity. Deploy a dual-layout adapter
+first; retain current IDs and string APIs, ordering and LINE behavior. A separately
+approved fenced database conversion follows fresh recovery/rehearsal. Keep all
+other ID types unchanged. [The runbook](../database-migration.md#order-bill-bigint-identity-prepared-not-activated)
+contains release order, sequence permissions, direct-editor requirements and rollback.
+No production action is authorized by this implementation task.
 
 ## Next major milestone: user authentication
 

@@ -16,4 +16,25 @@ native_run np_records tools/native-postgres/records.test.cjs
 native_run np_application tools/native-postgres/application.test.cjs
 native_run np_media tools/native-postgres/media-line.test.cjs
 native_run np_browser tools/native-postgres/browser.test.cjs
+pg createdb -U postgres -T sd_base np_bill
+sd_sql np_bill retirement | pg psql -U postgres -d np_bill -v ON_ERROR_STOP=1 > "$artifacts/native-install-np_bill.log"
+native_run np_bill tools/native-postgres/bill-identity.test.cjs
+native_run np_bill --test-name-pattern="actual LINE order-image" tools/native-postgres/media-line.test.cjs
+# Identity sequence high-water state (including rolled-back gaps) is recovery
+# data. Exercise pg_dump/restore, not just a MAX(id) reconstruction.
+pg psql -U postgres -d np_bill -v ON_ERROR_STOP=1 -c "SELECT nextval('stock_operational.order_bills_id_seq');" > "$artifacts/bill-identity-unused-reservation.log"
+pg pg_dump -U postgres -d np_bill --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/bill-identity-recovery.sql"
+pg createdb -U postgres np_bill_restore
+pg psql -U postgres -d np_bill_restore -v ON_ERROR_STOP=1 < "$artifacts/bill-identity-recovery.sql" > "$artifacts/bill-identity-restore.log"
+for database in np_bill np_bill_restore; do
+ pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 > "$artifacts/bill-identity-$database.txt" <<'SQL'
+SELECT id::text,revision::text,to_jsonb(t)::text FROM stock_operational.order_bills t ORDER BY id;
+SELECT last_value,is_called FROM stock_operational.order_bills_id_seq;
+SELECT pg_get_serial_sequence('stock_operational.order_bills','id'),stock_operational.lexeme_mapping_contract_v1();
+SELECT relacl::text FROM pg_class WHERE oid='stock_operational.order_bills_id_seq'::regclass;
+SELECT to_jsonb(t)::text FROM stock_configuration.loyverse_accounts t ORDER BY id;
+SQL
+done
+cmp "$artifacts/bill-identity-np_bill.txt" "$artifacts/bill-identity-np_bill_restore.txt"
+echo 'PASS: order-bill identity app, guarded conversion/inverse and sequence recovery'
 echo 'PASS: CURRENT PostgreSQL-only owners on fresh final-schema clones, legacy mapper execution revoked'
