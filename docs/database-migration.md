@@ -114,8 +114,10 @@ The offline operator files are
 `tools/migration/user-state-identity.py`. They are outside automatic migration
 folders. The exact predecessor contract requires the released order-bill bigint
 identity. The inverse restores **only user-state IDs** to text; it retains the
-order-bill identity, records, revisions and configuration. Never roll the app back
-to a version predating PR91 while order-bill IDs are bigint.
+order-bill identity, records, revisions and configuration. After session conversion,
+PR91 itself is not a valid app rollback: first apply the reviewed user-state inverse
+while still frozen, or retain a session-identity-compatible app. Versions predating
+PR91 remain incompatible with the already converted order-bill IDs.
 
 Release gates:
 
