@@ -16,10 +16,16 @@ def copy_history(target):
     bills=json.loads((ROOT/'tests/fixtures/bill-identity-before.json').read_text())
     revision=json.loads((ROOT/'tests/fixtures/bill-revision-before.json').read_text())
     sessions=json.loads((ROOT/'tests/fixtures/user-state-identity-before.json').read_text())
+    items=json.loads((ROOT/'tests/fixtures/item-identity-before.json').read_text())
     for name,expected in fixture['files'].items():
         edit=fixture['edits'].get(name)
         source=ROOT/name
         current=source.read_bytes() if source.exists() else None
+        item_edit=items['edits'].get(name)
+        if item_edit:
+            assert (digest(current) if current is not None else None)==item_edit['afterSha256'],name
+            current=item_edit['before'].encode()
+            assert digest(current)==item_edit['beforeSha256'],name
         session_edit=sessions['edits'].get(name)
         if session_edit:
             assert (digest(current) if current is not None else None)==session_edit['afterSha256'],name

@@ -61,3 +61,27 @@ SQL
 done
 cmp "$artifacts/session-identity-np_sessions.txt" "$artifacts/session-identity-np_sessions_restore.txt"
 echo 'PASS: user-state identity, actual LINE order/movement image redelivery and sequence recovery'
+
+# Coupled item/reference conversion, after both earlier identity releases.
+pg createdb -U postgres -T sd_base np_items
+sd_sql np_items retirement | pg psql -U postgres -d np_items -v ON_ERROR_STOP=1 > "$artifacts/native-install-np_items.log"
+native_run np_items tools/native-postgres/item-identity.test.cjs
+native_run np_items tools/native-postgres/media-line.test.cjs
+pg psql -U postgres -d np_items -v ON_ERROR_STOP=1 -c "SELECT nextval('stock_operational.order_items_id_seq');" > "$artifacts/item-identity-unused-reservation.log"
+pg pg_dump -U postgres -d np_items --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/item-identity-recovery.sql"
+pg createdb -U postgres np_items_restore
+pg psql -U postgres -d np_items_restore -v ON_ERROR_STOP=1 < "$artifacts/item-identity-recovery.sql" > "$artifacts/item-identity-restore.log"
+for database in np_items np_items_restore; do
+ pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 > "$artifacts/item-identity-$database.txt" <<'SQL'
+SELECT to_jsonb(t)::text FROM stock_operational.order_items t ORDER BY id;
+SELECT to_jsonb(t)::text FROM stock_operational.movement_details t ORDER BY id;
+SELECT last_value,is_called FROM stock_operational.order_items_id_seq;
+SELECT last_value,is_called FROM stock_operational.order_bills_id_seq;
+SELECT last_value,is_called FROM stock_operational.user_state_id_seq;
+SELECT pg_get_constraintdef(oid),convalidated,condeferrable,condeferred FROM pg_constraint WHERE conrelid='stock_operational.movement_details'::regclass AND conname='movement_details_purchaseDetailId_fkey';
+SELECT relacl::text FROM pg_class WHERE oid='stock_operational.order_items_id_seq'::regclass;
+SELECT stock_operational.lexeme_mapping_contract_v1();
+SQL
+done
+cmp "$artifacts/item-identity-np_items.txt" "$artifacts/item-identity-np_items_restore.txt"
+echo 'PASS: coupled item/reference identity, unchanged app/LINE flows, FK and all three sequence states restored'

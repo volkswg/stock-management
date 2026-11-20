@@ -8,22 +8,41 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-PR91 `002b16f`, deployment `dpl_88FrSFaW1QuLLsekKq1EWLnTe4Ao`, is live.
-The application release kept app/LINE open and retained text bill IDs. The owner
-then confirmed a new pause for the previously approved identity conversion.
-Retained recovery restored exactly and its frozen source matched all53 tables,
-15 metadata sections and private configuration. Current-source local forward and
-inverse preserved all23 adapter projections plus actual family/record HTTP edit
-tokens. Live conversion matched that exact forward result, including sequence
-high-water/ownership/narrow grants. Six API comparisons preserved values/types,
-ordering and edit headers. The temporary write/LINE fence was removed and reopening
-verified, including the protected older incompatible app and existing signature/
-idempotency guards. No real provider/business-write canary was invoked. This is
-private operator evidence on the Mac, not a publicly reproducible hosted test.
+PR92 `fe125bb`, deployment `dpl_89Qu62n7m5EFNstxJRfWCjTqXWKQ`, is live. Its
+application-only release preserved text session IDs and kept app/LINE open. A
+fresh private53-table checkpoint restored all15 metadata sections, configuration
+and the bill sequence's exact value/`is_called`. Prior/new actual-source reads
+matched on all23 adapters and HTTP edit tokens. Six live API reads, pages and
+idempotency/LINE signature guards passed; no access link was created.
 
-Current physical bill IDs are bigint identity; API IDs remain strings. Other table
-IDs were unchanged. New work prepares only user-state identity compatibility and
-operator SQL with synthetic local/CI acceptance; it does not activate that change.
+The owner then approved a separate30-minute user-state conversion and confirmed
+all writers/jobs paused and pending work accounted for. The full frozen state
+matched recovery, and the exact locally rehearsed forward preserved all53 tables,
+records/revisions/configuration and existing bill identity/sequence state. New
+session sequence high-water/narrow grants and six API comparisons passed. Only
+the temporary fence was removed; browser/LINE reopening and original controls
+were verified, with no error/fatal function groups in the checked window. This is
+retained private operator evidence, not a public hosted-write canary.
+
+Both bill and session IDs are now bigint identity, with API string IDs retained.
+Current source work prepares the coupled item/reference compatibility stage and
+operator SQL only; production is unchanged by that implementation.
+
+### Coupled item/reference compatibility: local acceptance
+
+The focused implementation supports text/bigint item allocation and an explicit
+nullable reference mapping without changing public string IDs or creation-order
+ties. Six current unit checks and12 PostgreSQL checks passed on a fresh synthetic
+copy with the already released bill/session identities. They exercise both column
+conversions and exact inverse, the original validated deferred/restrict FK,
+parent/reference/NULL preservation, real Orders/Movements HTTP JSON and edit-token
+parity, guard refusals/late rollback, lost-COMMIT replay, stale handles, direct
+parallel inserts, deleted-ID high-water and values beyond2^53. Actual LINE product
+image creation/redelivery retained one upload/item. The existing five media/LINE
+checks also passed on the converted pair, and an actual logical restore preserved
+all three sequence states, including unused reservations, plus rows/FK/grants.
+The full historical/current regression and type witnesses passed. These are
+local/CI preparations; no production schema, data, routing or permissions changed.
 
 ### User-state identity compatibility: local acceptance
 
