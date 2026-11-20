@@ -8,25 +8,55 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-PR92 `fe125bb`, deployment `dpl_89Qu62n7m5EFNstxJRfWCjTqXWKQ`, is live. Its
-application-only release preserved text session IDs and kept app/LINE open. A
-fresh private53-table checkpoint restored all15 metadata sections, configuration
-and the bill sequence's exact value/`is_called`. Prior/new actual-source reads
-matched on all23 adapters and HTTP edit tokens. Six live API reads, pages and
-idempotency/LINE signature guards passed; no access link was created.
+[PR93](https://github.com/volkswg/stock-management/pull/93), source `4708552`,
+deployment `dpl_M9XGUAVFNQFUcC8DsvW4g43Qwe3L`, is live. Its approved supervised
+maintenance completed on20 November2026 at16:38 Bangkok. Fresh private53-table
+recovery restored all15 metadata sections, configuration and both prior sequence
+states. The corrected isolated rehearsal verified the coupled item/reference
+forward and exact inverse, all23 adapters and all three sequence restore states.
+The first local post-conversion dump command omitted its database; evidence was
+retained, the command corrected, and a new isolated restore/rehearsal passed.
 
-The owner then approved a separate30-minute user-state conversion and confirmed
-all writers/jobs paused and pending work accounted for. The full frozen state
-matched recovery, and the exact locally rehearsed forward preserved all53 tables,
-records/revisions/configuration and existing bill identity/sequence state. New
-session sequence high-water/narrow grants and six API comparisons passed. Only
-the temporary fence was removed; browser/LINE reopening and original controls
-were verified, with no error/fatal function groups in the checked window. This is
-retained private operator evidence, not a public hosted-write canary.
+The complete frozen source matched verified recovery before live SQL. Only the
+approved item/reference type changes, new item sequence/narrow grants and typed
+contract changed. All53 table values/revisions/configuration and prior sequence
+states matched the independently rehearsed result. Six live API comparisons and
+both pages passed, original protections were restored, browser/LINE reopened and
+idempotency/signature/old-deployment denial checks passed. Error/fatal function
+counts were empty in the checked window. No real-provider/business-write canary
+ran. Private checkpoints and execution receipts remain on the Mac.
 
-Both bill and session IDs are now bigint identity, with API string IDs retained.
-Current source work prepares the coupled item/reference compatibility stage and
-operator SQL only; production is unchanged by that implementation.
+Bill, session and item IDs are now bigint identities; movement purchase references
+are nullable bigint. The current scoped implementation retires only that unused
+operational relationship, preserving the API's blank field. A read-only scan of the
+retained release archive found only NULL references; this is dated checkpoint
+evidence, not a fresh live scan. It does not authorize dropping a later non-NULL
+relationship or changing production. Existing import evidence remains protected.
+
+### Movement purchase reference retirement: local acceptance
+
+The compatible app no longer reads/writes the physical relationship or exposes it
+in internal LINE journey models. Public movement responses keep a blank string.
+Four focused unit checks and11 PostgreSQL checks passed on a new synthetic copy
+of this run's earlier identity fixture. They cover retained/missing-column reads,
+active/deleted non-NULL refusal, unknown/inherited/view/function/index/CHECK/default
+and comment dependencies, limited/read-only callers, late rollback, exact retained
+rows/revisions/configuration, reviewed15-section metadata changes and all three
+sequence states. Actual GET/PATCH JSON/edit headers, quantity/remark updates,
+missing-key rejection, exact/lost-COMMIT replay, intent conflicts and stale-edit
+rejection passed. The logical inverse permits only the documented restored-column
+attnum change and restores witnessed predecessor definitions; its retained SQL
+projector's old text/bigint body-check issue was observed and handled with the
+same local validation setting used by pg_restore. Current native code has no
+runtime reliance on that helper. Existing PR93 assertions and fixtures remain
+unchanged, using a hash-pinned historical copy only for that old campaign.
+Full regression/type/lint and isolated build checks passed. Final fresh-from-text
+PostgreSQL acceptance passed all11 new checks and the existing five media/LINE
+cases on the retired layout; actual dump/restore preserved movement records,
+absence of the column, narrow grants and all three sequence states including an
+unused reservation. GitHub CI and separate production release approval remain
+gates; no live resources, credentials or business records were used or changed by
+implementation.
 
 ### Coupled item/reference compatibility: local acceptance
 

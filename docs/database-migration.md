@@ -4,7 +4,7 @@
 
 The Google Sheets → Supabase migration is complete, including private Loyverse
 account configuration. Browser writes and LINE are open. The current application
-is PR92 (`fe125bb`), deployment `dpl_89Qu62n7m5EFNstxJRfWCjTqXWKQ` (2026-11-20).
+is PR93 (`4708552`), deployment `dpl_M9XGUAVFNQFUcC8DsvW4g43Qwe3L` (2026-11-20).
 Google Drive keeps its existing provider ownership; no new authentication was added.
 
 The initial order-bill conversion was rolled back after its HTTP edit-revision
@@ -163,7 +163,15 @@ existing actual LINE order-image and movement-photo redelivery tests run again o
 the bigint-session layout. This PR does not merge/deploy/apply SQL or change live
 records, writer permissions, Vercel configuration or provider accounts.
 
-## Coupled order-item identity/reference: prepared, not activated
+<a id="coupled-order-item-identityreference-prepared-not-activated"></a>
+
+## Coupled order-item identity/reference: released
+
+PR93 and its separately approved maintenance were completed on20 November2026.
+Fresh53-table recovery, all15 metadata sections, configuration and all three
+sequence states were restored/rehearsed before the frozen live conversion. Six
+API comparisons, pages, row/permission reconciliation and reopening passed. The
+following is the retained release procedure, not authorization to rerun it.
 
 Scope is only `stock_operational.order_items.id` → bigint identity and
 `stock_operational.movement_details.purchaseDetailId` → nullable bigint FK.
@@ -217,6 +225,70 @@ the converted pair. After acknowledged writes, stop for fresh recovery and
 reconciliation; never restore old data over later work. Direct inserts omit the
 item `id`; explicit IDs do not advance the sequence and require a separately
 reviewed high-water correction. Backup automation/auth work remain deferred.
+
+## Unused movement purchase reference: prepared, not activated
+
+Only `stock_operational.movement_details."purchaseDetailId"`, its
+`movement_details_purchaseDetailId_fkey` and `movement_details_purchaseDetailId_idx`
+are proposed for retirement. The verified PR93 release checkpoint
+contained only NULL references; that dated evidence is not a fresh live scan or permission to discard
+later links. `order_items.id` and all three identity sequences stay unchanged.
+The immutable `stock_migration` field/FK/index and old migrations stay intact.
+
+The compatible application omits the field from named SQL maps and internal LINE
+journey models; public movement DTOs retain `purchaseDetailId: ""`. Quantity,
+remark, media, sorting, revision/idempotency and existing LINE behavior remain.
+Before releasing this blank-field compatibility app, recheck all current rows
+including deleted records for non-NULL references; stop and reconcile if any exist.
+
+Operator-only SQL is reproduced by `tools/migration/movement-reference-retirement.py`:
+`tools/migration/operator/20261120100400_retire_movement_purchase_reference.sql`
+and `tools/migration/operator/rollback_movement_purchase_reference.sql`. Neither is
+automatically discovered. The exact predecessor is the released PR93 bigint schema.
+The guarded transaction rejects populated references, changed column/FK/index or
+function definitions, and unknown views/functions/constraints/index dependencies.
+It drops only the reviewed FK/index/column with RESTRICT, updates the typed-schema
+contract and two owner-only movement mapping bodies, and retains the historical
+14-position wire projection with a blank ninth slot. The input helper refuses a
+nonempty retired slot instead of silently discarding it. Function owners/config,
+ACLs, runtime helper restrictions, RLS and existing controls stay unchanged.
+
+Release requires separate approval: fresh private recovery of all53 tables,
+configuration, all15 metadata sections, grants and all three sequence values and
+`is_called`; independent local restore; deployed compatibility app; a new supervised
+30-minute pause with pending saves/uploads accounted for and external consumers
+confirmed; then a reviewed temporary write/LINE fence and full freshness comparison.
+Recheck NULL-only data under the table lock immediately before removal. Operator
+GUCs are `stock.allow_movement_reference_retirement` (or inverse)
+`reviewed-null-movement-reference-v1`, `stock.movement_reference_restore_verified`
+`business-and-config-v1`, `stock.movement_reference_source` (reviewed40-char SHA),
+`stock.movement_reference_fingerprint` (verified64-char digest),
+`stock.movement_reference_revision`, `stock.expected_isolation_id` and
+`stock.expected_purpose`. Exact production remains `hzynvirpedqnvtbifobx`, isolation
+`349b9289-f684-4ec5-ac22-924b2be1946b`, purpose `production`.
+
+Verify every retained value/revision/configuration, the exact reviewed metadata
+delta, all three sequence states/grants, unchanged API strings/JSON/edit headers
+and existing LINE behavior before removing only the temporary fence. Before this
+compatibility build, apps such as PR93 still reference the column and cannot run
+on the retired schema. Keep the new build as application rollback, or apply the
+reviewed inverse while frozen before reverting the app.
+
+The inverse adds a nullable bigint column with NULL values, recreates the original
+FK/index and restores the previous function bodies; it never restores old business
+records or resets sequences. This is a **logical** inverse: PostgreSQL appends the
+re-added column, so its physical `attnum` moves. Local acceptance must enumerate
+that single column-order difference rather than claim byte-identical schema
+restoration. One inactive predecessor SQL projector still contains its pre-PR93
+text-only coalesce expression on the bigint reference. The inverse restores only
+the three hash-witnessed predecessor bodies using transaction-local
+`check_function_bodies=off`, as pg_restore does, then resets it before checking the
+schema contract. It does not grant runtime access or change function privileges;
+the native app never invokes those legacy helpers. This records the inherited
+helper limitation rather than refactoring unrelated persistence.
+After reopening/later writes, obtain fresh recovery and reconciliation;
+never restore an older dump over acknowledged work. Backup automation and new
+authentication remain deferred. Preparing this PR changes no live resources.
 
 ## Native adapter release requirements
 

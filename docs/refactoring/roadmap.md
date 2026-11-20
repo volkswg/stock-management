@@ -14,18 +14,22 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: coupled item identity and movement reference
+## Current scoped work: unused movement purchase reference
 
-PR92's application release and the separately approved user-state identity
-conversion are complete; app and LINE reopened after full recovery/record/API
-checks. Prepare only `order_items.id` bigint identity together with nullable
-`movement_details.purchaseDetailId` bigint FK. Deploy dual-layout item allocation
-and explicit reference binding first; preserve existing IDs, string API fields,
-FK behavior, ordering and the already released bill/session sequences.
-The [runbook](../database-migration.md#coupled-order-item-identityreference-prepared-not-activated)
-contains operator-only forward/inverse, recovery and separate live-release gates.
-Other IDs, security settings, production data and live routing stay unchanged by
-this implementation. No new planning PR or production action is authorized here.
+PR93's application and coupled item/reference bigint conversion are complete;
+browser/LINE reopened after recovery, exact record/metadata/API checks and the
+original traffic controls were restored. Order bill, session and item IDs are now
+bigint identities, with string API IDs retained.
+
+Prepare one PR to remove the unused operational movement purchase-reference
+storage dependency, preserve the public blank API field, and supply a guarded
+column/FK/index retirement plus logical inverse. Keep the field physically present
+until a separately approved maintenance window. Refuse populated references or
+unknown dependencies; retain import evidence, other IDs, sequences, records,
+permissions, providers and security behavior. The
+[runbook](../database-migration.md#unused-movement-purchase-reference-prepared-not-activated)
+records exact scope and release gates. No production action is authorized by this
+implementation; new authentication and backup automation remain separate/deferred.
 
 ## Next major milestone: user authentication
 
