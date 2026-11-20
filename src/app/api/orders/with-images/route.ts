@@ -6,8 +6,12 @@ import { createGoogleDriveServiceFromConfig } from "@/infrastructure/files/googl
 import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
   createOrderWithImages,
+  createOrderFromUploadedImages,
+  uploadOrderCreationImage,
   type OrderImageUpload,
 } from "@/modules/orders/server";
+
+import type { UploadedOrderCreationImage } from "@/modules/orders/contracts";
 
 export const runtime = "nodejs";
 
@@ -16,7 +20,11 @@ const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGES_PER_TYPE = 10;
 
 async function POSTOperation(request: Request): Promise<NextResponse> {
-  const input = await readCreateOrderInput(request);
+  if (request.headers.get("content-type")?.includes("application/json")) return createFromReferences(request);
+  let formData: FormData;
+  try { formData = await request.formData(); } catch { return invalidInput(); }
+  if (formData.get("operation") === "upload") return uploadSelectedImage(request, formData);
+  const input = await readCreateOrderInput(formData);
   if (!input) {
     return NextResponse.json(
       {
@@ -65,6 +73,63 @@ async function POSTOperation(request: Request): Promise<NextResponse> {
   }
 }
 
+// New browser flow: each selection is its own durable upload command. The
+// subsequent JSON order command does no provider IO and commits atomically.
+function invalidInput(): NextResponse {
+  return NextResponse.json({ error: "Enter valid order details and add at least one bill and product image." }, { status: 400 });
+}
+async function uploadSelectedImage(request: Request, form: FormData): Promise<NextResponse> {
+  const image = form.get("image"), imageType = form.get("imageType");
+  if (!(image instanceof File) || form.getAll("image").length !== 1 ||
+      !/^order-image:[a-f0-9-]{36}$/.test(request.headers.get("Idempotency-Key") || "") ||
+      !["bill", "product"].includes(String(imageType)) || image.size === 0 || !ALLOWED_IMAGE_TYPES.has(image.type)) {
+    return NextResponse.json({ error: "Select one JPEG, PNG, or WebP image." }, { status: 400 });
+  }
+  if (image.size > 4_000_000) return NextResponse.json({ error: "Each image must be smaller than 4 MB. Reduce this image and select it again." }, { status: 413 });
+  try {
+    const drive = createGoogleDriveServiceFromConfig(getConfig());
+    if (!drive) return NextResponse.json({ error: "Google Drive is not configured." }, { status: 503 });
+    return await withStagingUploadCleanup(drive, async tracked => {
+      const uploaded = await uploadOrderCreationImage({ googleDriveService: tracked, image,
+        imageType: imageType as "bill" | "product", uploadKey: request.headers.get("Idempotency-Key") || "" });
+      return NextResponse.json({ image: uploaded }, { status: 201 });
+    });
+  } catch {
+    console.error("Failed to upload selected order image; retain its operation reference for reconciliation.");
+    return NextResponse.json({ error: "The image upload needs review. Retry only this same image and request reference." }, { status: 503 });
+  }
+}
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+async function createFromReferences(request: Request): Promise<NextResponse> {
+  let value: unknown;
+  try { value = await request.json(); } catch { return invalidInput(); }
+  if (!isRecord(value) || !Array.isArray(value.images) || value.images.length < 2 || value.images.length > 20 ||
+      (value.seller !== undefined && (typeof value.seller !== "string" || value.seller.trim().length > 100)) ||
+      (value.remark !== undefined && (typeof value.remark !== "string" || value.remark.length > 1000)) ||
+      (value.totalPrice !== undefined && value.totalPrice !== null && (typeof value.totalPrice !== "number" || !Number.isFinite(value.totalPrice) || value.totalPrice < 0))) return invalidInput();
+  const images: UploadedOrderCreationImage[] = [];
+  for (const image of value.images) {
+    if (!isRecord(image) || typeof image.id !== "string" || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(image.id) ||
+        typeof image.url !== "string" || image.url.length > 4096 || typeof image.uploadKey !== "string" ||
+        !/^order-image:[a-f0-9-]{36}$/.test(image.uploadKey) || (image.imageType !== "bill" && image.imageType !== "product")) return invalidInput();
+    images.push({ id: image.id, url: image.url, uploadKey: image.uploadKey, imageType: image.imageType });
+  }
+  if (["bill", "product"].some(type => !images.some(image => image.imageType === type) || images.filter(image => image.imageType === type).length > MAX_IMAGES_PER_TYPE)) return invalidInput();
+  try {
+    const order = await createOrderFromUploadedImages({ storage: createBusinessDatabase(), images,
+      seller: typeof value.seller === "string" ? value.seller.trim() : undefined,
+      remark: typeof value.remark === "string" ? value.remark.trim() : undefined,
+      totalPrice: typeof value.totalPrice === "number" ? value.totalPrice : undefined });
+    if (!order) return NextResponse.json({ error: "An image receipt is missing, changed, or no longer available. Review the selected uploads." }, { status: 400 });
+    return NextResponse.json({ order }, { status: 201 });
+  } catch {
+    console.error("Failed to create order from completed image uploads.");
+    return NextResponse.json({ error: "The order outcome needs review. Keep the same request reference." }, { status: 500 });
+  }
+}
+
 type CreateOrderInput = {
   seller?: string;
   totalPrice?: number;
@@ -73,14 +138,8 @@ type CreateOrderInput = {
 };
 
 async function readCreateOrderInput(
-  request: Request,
+  formData: FormData,
 ): Promise<CreateOrderInput | undefined> {
-  let formData: FormData;
-  try {
-    formData = await request.formData();
-  } catch {
-    return undefined;
-  }
 
   const seller = formData.get("seller");
   const totalPrice = formData.get("totalPrice");

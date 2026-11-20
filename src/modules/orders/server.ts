@@ -127,10 +127,35 @@ import type { IGoogleDriveService } from "@/infrastructure/files/google-drive/ty
 import type { OrderImageUpload as ImageUpload } from "./application/ports/order-images";
 import type { ReplacedOrderProductImage } from "./contracts";
 import { createOrderWithImages as executeCreateImages } from "./application/order-images";
+import { createOrderFromUploadedImages as executeCreateUploadedImages } from "./application/order-images";
+import { uploadedDriveImage, verifiedOrderImages } from "./infrastructure/postgres/order-image-uploads";
+import type { UploadedOrderCreationImage } from "./contracts";
 import { replaceOrderProductImage as executeReplaceImage } from "./application/replace-product-image";
 import { createOrderImageStorage, createProductImageStorage } from "./infrastructure/google-drive/order-images";
 export type { OrderImageType } from "./contracts";
 export type OrderImageUpload = ImageUpload<Buffer>;
+export async function uploadOrderCreationImage({ googleDriveService, image, imageType, uploadKey }: {
+    googleDriveService: IGoogleDriveService; image: File; imageType: "bill" | "product"; uploadKey: string;
+}): Promise<UploadedOrderCreationImage> {
+    const extension = image.type === "image/png" ? ".png" : image.type === "image/webp" ? ".webp" : ".jpg";
+    const bytes = Buffer.from(await image.arrayBuffer());
+    const file = await createOrderImageStorage(googleDriveService).upload(() => ({
+        fileName: `order-${imageType}-${createSortableId()}${extension}`,
+        contentType: image.type, bytes,
+    }));
+    return { ...await uploadedDriveImage(file.id), imageType, uploadKey };
+}
+export async function createOrderFromUploadedImages({ storage, images, seller, totalPrice, remark }: {
+    storage: Storage; images: UploadedOrderCreationImage[]; seller?: string; totalPrice?: number | null; remark?: string;
+}): Promise<CreatedOrder | undefined> {
+    const verified = await verifiedOrderImages(images);
+    if (!verified) return undefined;
+    return executeCreateUploadedImages({ records: {
+        create: input => createOrder({ ...input, storage }),
+        bill: input => createOrderBill({ ...input, storage }),
+        item: input => createOrderItem({ ...input, storage }),
+    }, images: verified, seller, totalPrice, remark, createdBy: "web", createId: createSortableId });
+}
 export async function createOrderWithImages({ googleDriveService, storage, images, seller, totalPrice, remark, createdBy, }: {
     googleDriveService: IGoogleDriveService;
     storage: Storage;

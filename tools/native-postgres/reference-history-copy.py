@@ -7,9 +7,14 @@ ROOT=Path(__file__).resolve().parents[2]
 def copy_previous(target):
  target=Path(target)
  if target.exists() and any(target.iterdir()):raise ValueError('Destination must be empty')
+ uploads=json.loads((ROOT/'tests/fixtures/order-image-uploads-before.json').read_text())
  fixture=json.loads((ROOT/'tests/fixtures/movement-reference-before.json').read_text())
  for name,expected in fixture['files'].items():
   source=ROOT/name;data=source.read_bytes() if source.exists() else None;edit=fixture['edits'].get(name)
+  upload_edit=uploads['edits'].get(name)
+  if upload_edit:
+   assert (hashlib.sha256(data).hexdigest() if data is not None else None)==upload_edit['afterSha256'],name
+   data=upload_edit['before'].encode();assert hashlib.sha256(data).hexdigest()==upload_edit['beforeSha256'],name
   if edit:
    assert (hashlib.sha256(data).hexdigest() if data is not None else None)==edit['afterSha256'],name
    data=edit['before'].encode()

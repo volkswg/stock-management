@@ -1,10 +1,30 @@
-import type { CreatedOrder, OrderImageType } from "../contracts";
+import type { CreatedOrder, OrderImageType, UploadedOrderCreationImage } from "../contracts";
 import type { OrderImageReference, OrderImageUpload, OrderImageStorage, OrderImageRecords, OrderImageRuntime } from "./ports/order-images";
 import { createImageFileName } from "../domain/image-names";
 type UploadedOrderImage = {
     driveFile: OrderImageReference;
     imageType: OrderImageType;
 };
+export async function createOrderFromUploadedImages({ records, images, seller, totalPrice, remark, createdBy, createId }: {
+    records: OrderImageRecords;
+    images: UploadedOrderCreationImage[];
+    seller?: string;
+    totalPrice?: number | null;
+    remark?: string;
+    createdBy: string;
+    createId(): string;
+}): Promise<CreatedOrder> {
+    if (!images.some(image => image.imageType === "bill") || !images.some(image => image.imageType === "product")) {
+        throw new Error("At least one bill and product image is required.");
+    }
+    const order = await records.create({ id: createId(), seller, totalPrice, remark, createdBy });
+    for (const image of images) {
+        const input = { orderId: order.id, imageUrl: image.url, createdBy };
+        if (image.imageType === "bill") await records.bill(input);
+        else await records.item(input);
+    }
+    return order;
+}
 export async function createOrderWithImages<Bytes>({ storage, records, images, seller, totalPrice, remark, createdBy, runtime, }: {
     storage: OrderImageStorage<Bytes>;
     records: OrderImageRecords;

@@ -21,7 +21,8 @@ import {
 } from "antd";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { createOrder, getPendingOrderCreationNotice } from "../api";
+import { createOrderFromUploadedImages, uploadOrderCreationImage, getPendingOrderCreationNotice, MAX_ORDER_IMAGE_BYTES } from "../api";
+import type { OrderImageType, UploadedOrderCreationImage } from "../../contracts";
 import styles from "./orderCreate.module.css";
 
 const { Text, Title } = Typography;
@@ -33,7 +34,8 @@ type OrderFormValues = {
   remark?: string;
 };
 
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+type ImageState = { status: "uploading" | "done" | "error"; image?: UploadedOrderCreationImage; error?: string };
+const imageKey = (type: OrderImageType, file: UploadFile) => `${type}:${file.uid}`;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export function OrderCreatePage() {
@@ -48,20 +50,48 @@ export function OrderCreatePage() {
   const [productImageFiles, setProductImageFiles] = useState<UploadFile[]>([]);
   const [billImageError, setBillImageError] = useState<string>();
   const [productImageError, setProductImageError] = useState<string>();
+  const imageJobs = useRef(new Map<string, ImageState>());
+  const [imageStates, setImageStates] = useState<Record<string, ImageState>>({});
+  const mounted = useRef(true);
+  const setImageState = (key: string, state: ImageState) => {
+    imageJobs.current.set(key, state);
+    if (mounted.current) setImageStates(current => ({ ...current, [key]: state }));
+  };
+  const uploadImage = async (file: UploadFile, type: OrderImageType, retry = false) => {
+    if (submissionLocked.current || !file.originFileObj) return;
+    const key = imageKey(type, file), prior = imageJobs.current.get(key);
+    if (prior?.status === "uploading" || (!retry && prior)) return;
+    setImageState(key, { status: "uploading" });
+    try {
+      const image = await uploadOrderCreationImage(file.originFileObj, type);
+      setImageState(key, { status: "done", image });
+    } catch (error) {
+      setImageState(key, { status: "error", error: error instanceof Error ? error.message : "Image upload failed." });
+    }
+  };
+  const changeImages = (files: UploadFile[], type: OrderImageType) => {
+    if (submissionLocked.current) return;
+    if (type === "bill") { setBillImageFiles(files); if (files.length) setBillImageError(undefined); }
+    else { setProductImageFiles(files); if (files.length) setProductImageError(undefined); }
+    for (const file of files) void uploadImage(file, type);
+  };
+  const selected = [...billImageFiles.map(file => imageKey("bill", file)), ...productImageFiles.map(file => imageKey("product", file))];
+  const imagesPending = selected.some(key => imageStates[key]?.status !== "done");
+  const imagesUploading = selected.some(key => imageStates[key]?.status === "uploading");
 
   useEffect(() => {
     // Read browser storage after hydration; do not update an unmounted form.
-    let active = true;
+    let active = true; mounted.current = true;
     Promise.resolve().then(() => {
       if (active) setPendingNotice(getPendingOrderCreationNotice());
     });
-    return () => { active = false; };
+    return () => { active = false; mounted.current = false; };
   }, []);
 
   const submitOrder = async (values: OrderFormValues): Promise<void> => {
     if (submissionLocked.current) return;
-    const billImages = getFiles(billImageFiles);
-    const productImages = getFiles(productImageFiles);
+    const billImages = billImageFiles;
+    const productImages = productImageFiles;
     setBillImageError(
       billImages.length === 0 ? "Add at least one bill image." : undefined,
     );
@@ -74,6 +104,17 @@ export function OrderCreatePage() {
       return;
     }
 
+    const images: UploadedOrderCreationImage[] = [];
+    for (const [type, files] of [["bill", billImageFiles], ["product", productImageFiles]] as const) {
+      for (const file of files) {
+        const result = imageJobs.current.get(imageKey(type, file));
+        if (result?.status !== "done" || !result.image) {
+          setError("Wait for every selected image to finish uploading. Retry or remove any failed image before creating the order.");
+          return;
+        }
+        images.push(result.image);
+      }
+    }
     submissionLocked.current = true;
     setSubmitting(true);
     setError(undefined);
@@ -81,11 +122,7 @@ export function OrderCreatePage() {
     setProductImageError(undefined);
     let completed = false;
     try {
-      const response = await createOrder({
-        ...values,
-        billImages,
-        productImages,
-      });
+      const response = await createOrderFromUploadedImages({ ...values, images });
 
       completed = true;
       messageApi.success("Order created.");
@@ -180,10 +217,9 @@ export function OrderCreatePage() {
                 error={billImageError}
                 files={billImageFiles}
                 label="Bill images"
-                onChange={(files) => {
-                  setBillImageFiles(files);
-                  if (files.length > 0) setBillImageError(undefined);
-                }}
+                imageStates={Object.fromEntries(billImageFiles.map(file => [file.uid, imageStates[imageKey("bill", file)]]))}
+                onRetry={file => { void uploadImage(file, "bill", true); }}
+                onChange={files => changeImages(files, "bill")}
                 onRejected={(validationError) =>
                   messageApi.error(validationError)
                 }
@@ -194,10 +230,9 @@ export function OrderCreatePage() {
                 error={productImageError}
                 files={productImageFiles}
                 label="Product images"
-                onChange={(files) => {
-                  setProductImageFiles(files);
-                  if (files.length > 0) setProductImageError(undefined);
-                }}
+                imageStates={Object.fromEntries(productImageFiles.map(file => [file.uid, imageStates[imageKey("product", file)]]))}
+                onRetry={file => { void uploadImage(file, "product", true); }}
+                onChange={files => changeImages(files, "product")}
                 onRejected={(validationError) =>
                   messageApi.error(validationError)
                 }
@@ -249,12 +284,13 @@ export function OrderCreatePage() {
                     Cancel
                   </Button>
                   <Button
+                    disabled={submitting || imagesPending}
                     htmlType="submit"
                     icon={<PlusOutlined />}
-                    loading={submitting}
+                    loading={submitting || imagesUploading}
                     type="primary"
                   >
-                    {pendingNotice ? "Check saved outcome" : "Create order"}
+                    {imagesUploading ? "Uploading images" : pendingNotice ? "Check saved outcome" : "Create order"}
                   </Button>
                 </Space>
               </div>
@@ -273,6 +309,8 @@ function ImageUploadField({
   label,
   onChange,
   onRejected,
+  imageStates,
+  onRetry,
 }: {
   disabled: boolean;
   error?: string;
@@ -280,6 +318,8 @@ function ImageUploadField({
   label: string;
   onChange: (files: UploadFile[]) => void;
   onRejected: (error: string) => void;
+  imageStates: Record<string, ImageState | undefined>;
+  onRetry(file: UploadFile): void;
 }) {
   return (
     <Form.Item
@@ -295,33 +335,31 @@ function ImageUploadField({
             onRejected(`${file.name} is not a supported image.`);
             return Upload.LIST_IGNORE;
           }
-          if (file.size > MAX_IMAGE_SIZE_BYTES) {
-            onRejected(`${file.name} is larger than 10 MB.`);
+          if (file.size > MAX_ORDER_IMAGE_BYTES) {
+            onRejected(`${file.name} is larger than 4 MB.`);
             return Upload.LIST_IGNORE;
           }
           return false;
         }}
         disabled={disabled}
-        fileList={files}
+        fileList={files.map(file => ({ ...file, status: imageStates[file.uid]?.status, error: imageStates[file.uid]?.error }))}
         listType="picture"
         maxCount={10}
         multiple
         onChange={({ fileList }) => onChange(fileList)}
+        itemRender={(node, file) => <div>{node}{imageStates[file.uid]?.status === "error" ? <div>
+          <Text type="danger">{imageStates[file.uid]?.error}</Text>{" "}
+          <Button size="small" disabled={disabled} onClick={() => onRetry(file)}>Retry same image</Button>
+        </div> : null}</div>}
       >
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
         </p>
         <p className="ant-upload-text">Upload {label.toLowerCase()}</p>
         <p className="ant-upload-hint">
-          JPEG, PNG, or WebP. Maximum 10 MB per image.
+          JPEG, PNG, or WebP. Maximum 4 MB per image. Each image uploads when selected; order creation sends only its saved reference.
         </p>
       </Upload.Dragger>
     </Form.Item>
-  );
-}
-
-function getFiles(files: UploadFile[]): File[] {
-  return files.flatMap((file) =>
-    file.originFileObj ? [file.originFileObj] : [],
   );
 }

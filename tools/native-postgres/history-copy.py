@@ -10,6 +10,7 @@ def digest(data):return hashlib.sha256(data).hexdigest()
 def copy_history(target):
     target=Path(target)
     if target.exists() and any(target.iterdir()):raise ValueError('Historical destination must be empty')
+    uploads=json.loads((ROOT/'tests/fixtures/order-image-uploads-before.json').read_text())
     fixture=json.loads((ROOT/'tests/fixtures/native-postgres-before.json').read_text())
     followup=json.loads((ROOT/'tests/fixtures/native-null-json-before.json').read_text())
     accounts=json.loads((ROOT/'tests/fixtures/postgres-accounts-before.json').read_text())
@@ -22,6 +23,11 @@ def copy_history(target):
         edit=fixture['edits'].get(name)
         source=ROOT/name
         current=source.read_bytes() if source.exists() else None
+        upload_edit=uploads['edits'].get(name)
+        if upload_edit:
+            assert (digest(current) if current is not None else None)==upload_edit['afterSha256'],name
+            current=upload_edit['before'].encode()
+            assert digest(current)==upload_edit['beforeSha256'],name
         reference_edit=references['edits'].get(name)
         if reference_edit:
             assert (digest(current) if current is not None else None)==reference_edit['afterSha256'],name

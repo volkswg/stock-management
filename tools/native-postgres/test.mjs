@@ -13,6 +13,7 @@ try {
  run('npm',['test'],owned);run('npm',['run','typecheck'],owned);
  console.log('Current native PostgreSQL source checks');
  run('node',['--test','tests/native-postgres/contracts.test.mjs']);
+ run('node',['--test','tests/native-postgres/order-image-uploads.test.mjs']);
  run('node',['--test','tests/postgres-accounts.test.cjs']);
  run('node',['--test','tests/bill-identity.test.cjs']);
  run('node',['--test','tests/user-state-identity.test.cjs']);

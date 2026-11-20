@@ -1,6 +1,17 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import { requireMutation, transaction, PersistenceFailure } from "./database";
+import { currentTransaction, requireMutation, transaction, PersistenceFailure } from "./database";
+
+// Read an acknowledged result inside the caller's transaction. The caller still
+// validates its domain payload; an unfinished command is never an upload receipt.
+export async function completedCommandResponse(kind: string, key: string): Promise<unknown> {
+  if (!/^[a-zA-Z0-9_:.-]{8,200}$/.test(key)) return undefined;
+  const { rows } = await currentTransaction().query<{ response: { value?: unknown } }>(
+    "SELECT response FROM stock_operational.commands WHERE actor=$1 AND kind=$2 AND key=$3 AND state='complete'",
+    ["isolated-staging", kind, key],
+  );
+  return rows[0]?.response?.value;
+}
 
 function canonical(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonical);
