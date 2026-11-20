@@ -8,6 +8,41 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
+PR91 `002b16f`, deployment `dpl_88FrSFaW1QuLLsekKq1EWLnTe4Ao`, is live.
+The application release kept app/LINE open and retained text bill IDs. The owner
+then confirmed a new pause for the previously approved identity conversion.
+Retained recovery restored exactly and its frozen source matched all53 tables,
+15 metadata sections and private configuration. Current-source local forward and
+inverse preserved all23 adapter projections plus actual family/record HTTP edit
+tokens. Live conversion matched that exact forward result, including sequence
+high-water/ownership/narrow grants. Six API comparisons preserved values/types,
+ordering and edit headers. The temporary write/LINE fence was removed and reopening
+verified, including the protected older incompatible app and existing signature/
+idempotency guards. No real provider/business-write canary was invoked. This is
+private operator evidence on the Mac, not a publicly reproducible hosted test.
+
+Current physical bill IDs are bigint identity; API IDs remain strings. Other table
+IDs were unchanged. New work prepares only user-state identity compatibility and
+operator SQL with synthetic local/CI acceptance; it does not activate that change.
+
+### User-state identity compatibility: local acceptance
+
+The next focused change prepares `user_state.id` only, with async sequence
+reservation for LINE order/movement sessions and no allocation on read-only
+snapshots. Five current unit checks and12 real PostgreSQL checks passed on fresh
+synthetic copies, including text-layout creation, the already released bill
+identity, forward/inverse, guard refusals, retry after lost COMMIT, existing
+movement resume/completion, stale handles, parallel inserts and string precision
+beyond2^53. The existing five media/LINE acceptance tests passed again on bigint
+sessions, including order-image and movement-photo redelivery with fake providers.
+A real logical restore preserved both sequence states, unused reservations and
+narrow grants. The full historical/current regression and type witnesses passed.
+Hosted app/schema/traffic remain unchanged by this implementation; CI and release
+approval are separate gates. No real provider or production write was performed.
+
+### Previous application preparation and initial rollback
+
+
 Current production is [PR90](https://github.com/volkswg/stock-management/pull/90),
 source `f7f50b20073e3cb7112cb9947066ae7d1cfcf41d`, deployment
 `dpl_B7oHWkjUqN9EsPmuAeRbjeMM8QtD` (2026-11-20). The application release passed

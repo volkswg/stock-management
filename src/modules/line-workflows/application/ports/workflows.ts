@@ -23,7 +23,7 @@ export type MovementSessionWrite = {
 export interface MovementSessionSnapshot {
     latestForReading(userId: string): SessionEntry | undefined;
     findForWriting(readUserId: () => string): SessionEntry | undefined;
-    nextIdentifier(): string;
+    nextIdentifier(): Promise<string>;
     eraseMovement(userId: string): Promise<void>;
     writeMovement(target: SessionEntry | undefined, value: MovementSessionWrite): Promise<void>;
 }
