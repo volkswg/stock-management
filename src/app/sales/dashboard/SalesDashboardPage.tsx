@@ -59,7 +59,7 @@ type PaymentRow = {
 };
 type DashboardResponse = {
   ok: boolean;
-  source: "google_sheets";
+  source: "postgres";
   fromDate: string;
   toDate: string;
   accountIds: string[];

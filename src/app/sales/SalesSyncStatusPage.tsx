@@ -47,7 +47,7 @@ type SalesSyncStatusRow = {
 
 type SalesSyncStatusResponse = {
   ok: boolean;
-  source: "google_sheets";
+  source: "postgres";
   month: string;
   accountId: string | null;
   accounts: LoyverseAccount[];

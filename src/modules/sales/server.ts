@@ -1,22 +1,22 @@
 import "server-only";
 import type { Storage } from "./infrastructure/postgres/storage";
 import type { Expense } from "@/modules/expenses/contracts";
-import type { GoogleSheetsDailySalesReport, GoogleSheetsSalesDashboardReport, GoogleSheetsProfitSummary, SalesProfitCostOverride } from "./contracts";
+import type { DailySalesReport, SalesDashboardReport, ProfitSummary, SalesProfitCostOverride } from "./contracts";
 import { createSalesReports } from "./application/reports";
 import { createSalesReader } from "./infrastructure/postgres/sales-reader";
 const reports = createSalesReports(createSalesReader);
-export const getGoogleSheetsDailySales: (input: {
+export const getDailySales: (input: {
     accountId: string;
     storage: Storage;
     salesDate: string;
-}) => Promise<GoogleSheetsDailySalesReport> = reports.getGoogleSheetsDailySales;
-export const getGoogleSheetsSalesDashboard: (input: {
+}) => Promise<DailySalesReport> = reports.getDailySales;
+export const getSalesDashboard: (input: {
     accountIds?: string[];
     fromDate: string;
     storage: Storage;
     toDate: string;
-}) => Promise<GoogleSheetsSalesDashboardReport> = reports.getGoogleSheetsSalesDashboard;
-export const getGoogleSheetsProfitSummary: (input: {
+}) => Promise<SalesDashboardReport> = reports.getSalesDashboard;
+export const getProfitSummary: (input: {
     accounts: Array<{
         id: string;
         shopName: string;
@@ -25,7 +25,7 @@ export const getGoogleSheetsProfitSummary: (input: {
     expenses: Expense[];
     storage: Storage;
     year: string;
-}) => Promise<GoogleSheetsProfitSummary> = reports.getGoogleSheetsProfitSummary;
+}) => Promise<ProfitSummary> = reports.getProfitSummary;
 import type { ReceiptSource } from "./application/ports/receipt-source";
 import { syncReceipts } from "./application/sync-receipts";
 import { createReceiptSync } from "./infrastructure/postgres/receipt-sync";
@@ -94,5 +94,5 @@ export function createSalesDashboardReader(service: SalesStorage) {
             accountIds: string[];
             fromDate: string;
             toDate: string;
-        }) => reports.getGoogleSheetsSalesDashboard({ ...input, storage: service }) };
+        }) => reports.getSalesDashboard({ ...input, storage: service }) };
 }

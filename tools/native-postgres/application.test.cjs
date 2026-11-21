@@ -172,7 +172,7 @@ test('Loyverse receipt/items/payments/sync marker commit atomically and repeat s
  const second=await command(()=>sales.syncLoyverseDailySales({storage:service,account,salesDate:'2026-11-01'}));assert.equal(second.outcome,'already_synced');assert.equal(loads,1);
  await transaction(false,async()=>{
   const raw=(await currentTransaction().query('SELECT "totalMoney"::text value FROM stock_operational.sales_receipts')).rows;assert.deepEqual(raw.map(r=>r.value),[null]);
-  const report=await sales.getGoogleSheetsDailySales({storage:service,accountId:'account-synthetic',salesDate:'2026-11-01'});
+  const report=await sales.getDailySales({storage:service,accountId:'account-synthetic',salesDate:'2026-11-01'});
   assert.equal(report.totals.netSales,12.34);assert.equal(report.totals.costOfGoods,2);assert.equal(report.paymentsByType[0].netPayments,12.34);
  });
 });

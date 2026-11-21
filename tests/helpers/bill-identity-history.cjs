@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Hash-pinned source inverse for earlier immutable witnesses only. */
 const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 exports.beforeBillIdentity=(name,data=fs.existsSync(name)?fs.readFileSync(name):null)=>{
+ data=require('./sales-naming-history.cjs').beforeSalesNaming(name,data);
  const hash=v=>crypto.createHash('sha256').update(v).digest('hex');
  const shipment=JSON.parse(fs.readFileSync('tests/fixtures/order-detail-shipment-before.json')).edits[name];
  if(shipment){assert.equal(data===null?null:hash(data),shipment.afterSha256,name);assert.equal(hash(shipment.before),shipment.beforeSha256,name);data=Buffer.from(shipment.before);}

@@ -40,7 +40,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({
       ok: true,
-      source: "google_sheets",
+      source: "postgres",
       month,
       accountId: accountId || null,
       accounts,

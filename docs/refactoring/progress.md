@@ -6,6 +6,27 @@ next scope in the [roadmap](roadmap.md), and commands in [verification](verifica
 Historical counts/claims retain their original scope; this docs cleanup does not
 independently rerun or recertify every old release.
 
+## Sales naming cleanup — prepared, not deployed
+
+Daily, dashboard and profit use cases and report types now have storage-neutral
+names. Their current callers use those names directly, with no runtime aliases.
+The daily, dashboard, profit and sync-status APIs return `source: "postgres"`;
+the four page response types match, and storage-specific error messages are now
+neutral. This intentionally updates source metadata and two error messages while
+preserving report values, calculations, dates, routes, status codes and UI behavior.
+No schema, data, provider, access-control or production configuration change is
+included. Exact test-only source inverses preserve all older migration fixtures,
+rebuild/rollback tests and recovery evidence; current acceptance uses current code.
+
+Local checks passed 790 Node regressions/current checks plus three runner Python
+tests, including eight new naming/HTTP/report/history regressions. The 32 targeted
+checks passed, both retained PostgreSQL-era source-copy witnesses reproduced exact
+predecessor bytes, and type checking, lint and the credential-free build passed.
+Lint retains one inherited unused `shipmentRow` warning. The route manifest and
+113 client bundle boundary checks passed; all four changed page files emit exactly
+the same JavaScript. Actual PostgreSQL integration acceptance runs in CI; it was
+not rerun locally for this naming-only change. Production is unchanged.
+
 ## Latest production release
 
 PR98, source `0454c58ed8b0e9283658e5c1ca28646dc1c60288`, deployed as

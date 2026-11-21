@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
-  getGoogleSheetsProfitSummary,
+  getProfitSummary,
   listSalesProfitCostOverrides,
 } from "@/modules/sales/server";
 
@@ -40,7 +40,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       accountMap.set(id, { id, shopName: shop.name });
     }
     const accounts = [...accountMap.values()];
-    const summary = await getGoogleSheetsProfitSummary({
+    const summary = await getProfitSummary({
       accounts,
       costOverrides,
       expenses,
@@ -49,7 +49,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
     });
     return NextResponse.json({
       ok: true,
-      source: "google_sheets",
+      source: "postgres",
       accounts,
       ...summary,
     });

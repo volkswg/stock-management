@@ -16,6 +16,7 @@ try {
  run('node',['--test','tests/native-postgres/lean-sales.test.cjs']);
  run('node',['--test','tests/native-postgres/receipt-payments-jsonb.test.cjs']);
  run('node',['--test','tests/native-postgres/contracts.test.mjs']);
+ run('node',['--test','tests/native-postgres/sales-naming.test.cjs']);
  run('node',['--test','tests/native-postgres/order-detail-shipment.test.cjs']);
  run('node',['--test','tests/native-postgres/order-image-uploads.test.mjs']);
  run('node',['--test','tests/postgres-accounts.test.cjs']);

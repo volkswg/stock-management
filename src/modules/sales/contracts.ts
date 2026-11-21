@@ -11,7 +11,7 @@ export type SalesProfitCostOverride = {
 
 import type { Expense } from "@/modules/expenses/contracts";
 
-export type GoogleSheetsDailySalesItemRow = {
+export type DailySalesItemRow = {
   itemId: string;
   variantId: string;
   itemName: string;
@@ -29,7 +29,7 @@ export type GoogleSheetsDailySalesItemRow = {
   taxes: number;
 };
 
-export type GoogleSheetsDailySalesPaymentRow = {
+export type DailySalesPaymentRow = {
   paymentTypeId: string;
   name: string;
   type: string;
@@ -38,18 +38,18 @@ export type GoogleSheetsDailySalesPaymentRow = {
   netPayments: number;
 };
 
-export type GoogleSheetsDailySalesReport = {
+export type DailySalesReport = {
   receiptCount: number;
-  rows: GoogleSheetsDailySalesItemRow[];
-  paymentsByType: GoogleSheetsDailySalesPaymentRow[];
+  rows: DailySalesItemRow[];
+  paymentsByType: DailySalesPaymentRow[];
   totals: Omit<
-    GoogleSheetsDailySalesItemRow,
+    DailySalesItemRow,
     "itemId" | "variantId" | "itemName" | "variantName" | "sku" | "marginPercent"
   >;
   hourlyGrossSales: Array<{ hour: string; grossSales: number }>;
 };
 
-export type GoogleSheetsSalesDashboardDay = {
+export type SalesDashboardDay = {
   salesDate: string;
   syncedShopCount: number;
   receiptCount: number;
@@ -59,18 +59,18 @@ export type GoogleSheetsSalesDashboardDay = {
   netSales: number;
 };
 
-export type GoogleSheetsSalesDashboardReport = {
+export type SalesDashboardReport = {
   syncedDays: number;
-  dailySales: GoogleSheetsSalesDashboardDay[];
+  dailySales: SalesDashboardDay[];
   shopSeries: Array<{
     accountId: string;
     shopName: string;
-    dailySales: GoogleSheetsSalesDashboardDay[];
+    dailySales: SalesDashboardDay[];
   }>;
-  report: GoogleSheetsDailySalesReport;
+  report: DailySalesReport;
 };
 
-export type GoogleSheetsProfitSummaryMetrics = {
+export type ProfitSummaryMetrics = {
   netItems: number;
   netSales: number;
   averageSellingPrice: number;
@@ -81,7 +81,7 @@ export type GoogleSheetsProfitSummaryMetrics = {
   netProfit: number;
 };
 
-export type GoogleSheetsProfitSummaryShop = GoogleSheetsProfitSummaryMetrics & {
+export type ProfitSummaryShop = ProfitSummaryMetrics & {
   accountId: string;
   shopName: string;
   syncedAverageItemCost: number;
@@ -90,23 +90,23 @@ export type GoogleSheetsProfitSummaryShop = GoogleSheetsProfitSummaryMetrics & {
   expenseNote: string;
 };
 
-export type GoogleSheetsProfitSummarySharedExpense = Pick<
+export type ProfitSummarySharedExpense = Pick<
   Expense,
   "id" | "amount" | "category" | "name" | "note"
 >;
 
-export type GoogleSheetsProfitSummaryMonth = GoogleSheetsProfitSummaryMetrics & {
+export type ProfitSummaryMonth = ProfitSummaryMetrics & {
   month: string;
-  shops: GoogleSheetsProfitSummaryShop[];
+  shops: ProfitSummaryShop[];
   shopExpenses: number;
   sharedExpenseTotal: number;
-  sharedExpenses: GoogleSheetsProfitSummarySharedExpense[];
+  sharedExpenses: ProfitSummarySharedExpense[];
 };
 
-export type GoogleSheetsProfitSummary = {
+export type ProfitSummary = {
   year: string;
-  months: GoogleSheetsProfitSummaryMonth[];
-  totals: GoogleSheetsProfitSummaryMetrics;
+  months: ProfitSummaryMonth[];
+  totals: ProfitSummaryMetrics;
 };
 
 export type SalesSyncStatusRow = {

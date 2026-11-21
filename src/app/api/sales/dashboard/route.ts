@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
-  getGoogleSheetsSalesDashboard,
+  getSalesDashboard,
   isValidBangkokSalesDate,
 } from "@/modules/sales/server";
 
@@ -52,7 +52,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       );
     }
 
-    const dashboard = await getGoogleSheetsSalesDashboard({
+    const dashboard = await getSalesDashboard({
       accountIds: accountIds.length ? accountIds : undefined,
       fromDate,
       storage: createBusinessDatabase(),
@@ -61,7 +61,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({
       ok: true,
-      source: "google_sheets",
+      source: "postgres",
       fromDate,
       toDate,
       accountIds,
@@ -69,11 +69,11 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       ...dashboard,
     });
   } catch (error) {
-    console.error("Failed to load sales dashboard from Google Sheets", {
+    console.error("Failed to load sales dashboard", {
       error: getErrorMessage(error),
     });
     return NextResponse.json(
-      { ok: false, error: "Failed to load sales dashboard from Google Sheets." },
+      { ok: false, error: "Failed to load sales dashboard." },
       { status: 500 },
     );
   }

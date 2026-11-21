@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
-  getGoogleSheetsDailySales,
+  getDailySales,
   isValidBangkokSalesDate,
   listSalesSyncStatus,
 } from "@/modules/sales/server";
@@ -38,7 +38,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
 
     const storage = createBusinessDatabase();
     const [report, syncStatus] = await Promise.all([
-      getGoogleSheetsDailySales({
+      getDailySales({
         accountId,
         storage,
         salesDate: date,
@@ -55,7 +55,7 @@ async function GETOperation(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({
       ok: true,
-      source: "google_sheets",
+      source: "postgres",
       date,
       account,
       accounts,
@@ -69,12 +69,12 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error("Failed to load daily sales from Google Sheets", {
+    console.error("Failed to load daily sales", {
       error: getErrorMessage(error),
     });
 
     return NextResponse.json(
-      { ok: false, error: "Failed to load daily sales from Google Sheets." },
+      { ok: false, error: "Failed to load daily sales." },
       { status: 500 },
     );
   }
