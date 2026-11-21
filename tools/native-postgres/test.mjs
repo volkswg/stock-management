@@ -14,7 +14,7 @@ try {
  console.log('Current native PostgreSQL source checks');
  run('node',['--test','tests/postgres-browser-keys.test.mjs']);
  run('node',['--test','tests/native-postgres/lean-sales.test.cjs']);
- run('node',['--test','tests/native-postgres/single-receipt-payment.test.cjs']);
+ run('node',['--test','tests/native-postgres/receipt-payments-jsonb.test.cjs']);
  run('node',['--test','tests/native-postgres/contracts.test.mjs']);
  run('node',['--test','tests/native-postgres/order-image-uploads.test.mjs']);
  run('node',['--test','tests/postgres-accounts.test.cjs']);

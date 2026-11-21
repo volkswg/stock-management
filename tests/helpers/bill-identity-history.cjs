@@ -2,6 +2,8 @@
 const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 exports.beforeBillIdentity=(name,data=fs.existsSync(name)?fs.readFileSync(name):null)=>{
  const hash=v=>crypto.createHash('sha256').update(v).digest('hex');
+ const jsonb=JSON.parse(fs.readFileSync('tests/fixtures/receipt-payments-jsonb-before.json')).edits[name];
+ if(jsonb){assert.equal(data===null?null:hash(data),jsonb.afterSha256,name);assert.equal(hash(jsonb.before),jsonb.beforeSha256,name);data=Buffer.from(jsonb.before);}
  const payment=JSON.parse(fs.readFileSync('tests/fixtures/single-receipt-payment-before.json')).edits[name];
  if(payment){assert.equal(data===null?null:hash(data),payment.afterSha256,name);assert.equal(hash(payment.before),payment.beforeSha256,name);data=Buffer.from(payment.before);}
  const lean=JSON.parse(fs.readFileSync('tests/fixtures/lean-loyverse-before.json')).edits[name];

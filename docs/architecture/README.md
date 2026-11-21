@@ -27,9 +27,9 @@ Existing API/report names and old-request recovery remain supported contracts.
 This cleanup removes67 unused `src/services/` forwards and the unused movement
 reference layout branch. Current UI copy describes sales and employees without
 obsolete storage labels. Retained database rollback guards, LINE behavior,
-request recovery and API fields are unchanged. PR98 prepares lean Loyverse sync plus a guarded single-payment receipt layout;
-products remain separate. Production is unchanged, and the old-data rebuild
-requires resolution of cardinality exceptions and separate release approval. See [ownership](migration-map.md), [verification](../refactoring/verification.md)
+request recovery and API fields are unchanged. PR98 prepares lean Loyverse sync and receipt-owned JSONB payment arrays,
+including splits; product rows remain separate. Production is unchanged, and the
+old-data rebuild requires fresh verified recovery and separate release approval. See [ownership](migration-map.md), [verification](../refactoring/verification.md)
 and [operations](../database-migration.md).
 
 New staff authentication/RBAC/shop permissions and backup automation remain deferred.

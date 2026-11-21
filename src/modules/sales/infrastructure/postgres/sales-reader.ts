@@ -1,5 +1,5 @@
 import { currentTransaction } from "@/infrastructure/persistence/postgres/database";
-import { singleReceiptPayments, singlePaymentReceipts, receiptPaymentRows } from "./receipt-payment";
+import { receiptPaymentsEnabled, paymentReceipts, receiptPaymentRows } from "./receipt-payment";
 import "server-only";
 import type { SalesReader } from "../../application/ports/sales-reader";
 import type { Storage } from "./storage";
@@ -10,8 +10,8 @@ export function createSalesReader(storage: SalesStorage): SalesReader {
   const snapshots = new WeakMap<object, Promise<Awaited<ReturnType<SalesStorage["salesReceipts"]["all"]>>>>();
   function receipts() {
     const client = currentTransaction();let pending = snapshots.get(client);
-    if (!pending) { pending = singleReceiptPayments().then(single => single ? singlePaymentReceipts.all() : storage.salesReceipts.all()).then(visible);snapshots.set(client,pending); }
+    if (!pending) { pending = receiptPaymentsEnabled().then(inline => inline ? paymentReceipts.all() : storage.salesReceipts.all()).then(visible);snapshots.set(client,pending); }
     return pending;
   }
-  return { receipts, items: () => storage.salesReceiptItems.all().then(visible), payments: async () => await singleReceiptPayments() ? receiptPaymentRows(await receipts()) : storage.salesReceiptPayments.all().then(visible), syncs: () => storage.salesReceiptSyncs.all().then(visible) };
+  return { receipts, items: () => storage.salesReceiptItems.all().then(visible), payments: async () => await receiptPaymentsEnabled() ? receiptPaymentRows(await receipts()) : storage.salesReceiptPayments.all().then(visible), syncs: () => storage.salesReceiptSyncs.all().then(visible) };
 }

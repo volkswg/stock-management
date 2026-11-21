@@ -10,6 +10,7 @@ def digest(data):return hashlib.sha256(data).hexdigest()
 def copy_history(target):
     target=Path(target)
     if target.exists() and any(target.iterdir()):raise ValueError('Historical destination must be empty')
+    jsonb=json.loads((ROOT/'tests/fixtures/receipt-payments-jsonb-before.json').read_text())
     payment=json.loads((ROOT/'tests/fixtures/single-receipt-payment-before.json').read_text())
     lean=json.loads((ROOT/'tests/fixtures/lean-loyverse-before.json').read_text())
     row_edits=json.loads((ROOT/'tests/fixtures/row-edits-before.json').read_text())
@@ -27,6 +28,11 @@ def copy_history(target):
         edit=fixture['edits'].get(name)
         source=ROOT/name
         current=source.read_bytes() if source.exists() else None
+        jsonb_edit=jsonb['edits'].get(name)
+        if jsonb_edit:
+            assert (digest(current) if current is not None else None)==jsonb_edit['afterSha256'],name
+            current=jsonb_edit['before'].encode()
+            assert digest(current)==jsonb_edit['beforeSha256'],name
         payment_edit=payment['edits'].get(name)
         if payment_edit:
             assert (digest(current) if current is not None else None)==payment_edit['afterSha256'],name

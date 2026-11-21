@@ -20,48 +20,53 @@ groups. No business write, real-provider canary or access link was used. Retaine
 current snapshot. Private release receipts stay on the Mac. Reload normal tabs
 for row-v1; preserve unresolved pending operations for reconciliation.
 
-### Lean Loyverse sync and single receipt payment — PR98, not deployed
+### Lean Loyverse sync and receipt-owned payments — PR98, not deployed
 
 Receipt sync stops collecting16 unused header fields and eight unused item fields;
 product rows stay in `sales_receipt_items`. The original ten retained header
 fields and13 retained item fields keep the existing identities, values, quantities,
-taxes, costs and Bangkok timestamps. Incoming tax arrays still supply the retained
-tax total. Provider payloads/pagination are unchanged; this reduces stored detail,
-not provider bandwidth. Payment index/paidAt/raw details are no longer collected.
-Existing raw fields and records are retained rather than erased.
+taxes, costs and Bangkok timestamps. Provider payloads/pagination and full-payload
+overlap validation are unchanged; this reduces stored detail, not API bandwidth.
+Payment index/paidAt/raw details are no longer collected. Existing raw values are
+retained rather than erased.
 
-The expanded scope stores the one payment on `sales_receipts`: `paymentId`,
-`paymentTypeId`, `paymentName`, `paymentType`, `paymentAmount`, and
-`paymentCreatedAt`. The ID distinguishes no payment from a zero amount and retains
-the old stable identity; the timestamp preserves the former payment ordering,
-including report label/tie behavior. Items are never combined with payments.
-Existing report/API shapes, sync counts/completion, cancellations/refunds,
-idempotency and calculations stay the same.
+The revised scope adds `sales_receipts.payments jsonb NOT NULL DEFAULT '[]'`.
+Every entry retains id, paymentTypeId, paymentName, paymentType, moneyAmount,
+syncedAt and createdAt. Amounts are decimal strings normalized by PostgreSQL;
+JSON/JavaScript number conversion cannot round an existing numeric value. Stable
+IDs distinguish zero-valued payments from no entries; each payment's own sync time
+and microsecond creation time preserve prior values and global report ordering.
+Normal receipts have one entry; split receipts keep every method and amount.
+A private audit's split exception is representable without correction or merging.
+No actual receipt details or private evidence are published in the repository.
 
-The feature adapter reads the old layout until the separately approved guarded
-rebuild commits. It then projects report payments from receipt columns and writes
-no payment child rows. Partial/unknown installations fail closed. All new fetched
-batches reject multiple/invalid payments before any sales rows are saved; they do
-not select the first payment or sum different methods. Historical split receipts
-stay readable before conversion. A private read-only audit found an exception
-requiring owner review: **production backfill is NO-GO until every receipt has at
-most one payment, including retained deleted history**. No exception values or
-private audit records are published here.
+The feature adapter keeps reading/writing the complete legacy layout until the
+separately approved rebuild commits, then projects the arrays into the same report
+port and stops inserting payment child rows. Partial/unknown installations and
+invalid arrays fail closed. Valid split batches are accepted in both layouts.
+A per-document CHECK validates exact entry fields/types, decimal text, canonical
+timestamps and unique nonempty IDs; runtime reads and the inverse also reject
+IDs reused across receipts. Generated IDs remain receipt/index based. A JSONB
+entry has no independent FK/UNIQUE constraint: manual identity edits require care,
+and later physical ledger removal needs its own reviewed approval.
 
-The operator-only migration adds/backfills the six fields under an exact target,
-revision and source fingerprint guard. It preserves old records/revisions/times,
-checks exact scalar parity, retains the payment ledger and fences its runtime
-INSERT privilege. The inverse reconstructs legacy payments for later inline writes
-before removing header fields; it never overwrites later data with a stale restore.
-Neither script is in automatic migration discovery. Old-data rebuild steps and
-release approvals are in the [operations runbook](../database-migration.md#single-payment-receipt-rebuild--prepared-not-executed).
+The operator-only migration backfills complete ordered arrays from existing active
+payments, including deleted parents, checks exact entry/count parity and every
+old payload/revision, retains all raw/deleted ledger rows, and fences runtime
+INSERT on the old table. Products/syncs/sequences are unchanged. The inverse
+recreates all missing payments for later writes (including splits) before dropping
+JSONB/contract/helper; historical rows are never overwritten. Neither operator
+script is in automatic migration discovery. The [runbook](../database-migration.md#receipt-payments-jsonb-rebuild--prepared-not-executed)
+contains fresh independent recovery, supervised maintenance, app compatibility,
+old-data rebuild, reconciliation and rollback steps. Production remains unchanged.
 
-Local checks cover report equivalence, historical raw details, zero/no-payment,
-stable IDs, products, split rejection, idempotency, late rollback, strict layout
-checks, guarded rebuild/inverse and synthetic logical recovery. Current source is
-exercised independently from immutable predecessor witnesses; original fixtures
-remain unchanged. No production writes, schema changes, deployment, provider
-requests, maintenance block or data rebuild is authorized by this PR preparation.
+Local checks cover legacy/current split reports, methods and amounts, refunds,
+precision above JavaScript's safe-integer range, zero/absent/null values,
+microseconds/C ordering, idempotency, malformed batches/arrays, atomic late failure,
+layout/version checks, private validator permissions, guarded rebuild/inverse and
+complete synthetic logical recovery with all three sequences. Current owners run
+independently of immutable historical source witnesses. No production writes,
+provider request, deployment or maintenance block is part of this preparation.
 
 ### Row-only edit protection — released in PR97
 
