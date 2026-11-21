@@ -32,9 +32,12 @@ command replay, late rollback, schema-guard/dependency refusals, application,
 row edits, both LINE image workflows, uploads and real browser retry/reload.
 The unchanged PR98 rebuild/inverse passed12 historical checks separately. A real
 logical dump/restore matched all retained records and15 metadata sections, private
-configuration and three sequence states. Only dropped physical column slots were
-canonicalized to visible ordinal positions in this **test-only** restore comparison;
-production recovery fingerprint/checksum formats remain unchanged.
+configuration and three sequence states. This **test-only** restore comparison canonicalizes dropped physical column slots
+to visible ordinal positions and one pair of exact known equivalent `media_dates`
+CHECK definitions. PostgreSQL reparses their associative AND parentheses during
+logical restore;343 NULL/infinite/finite boundary combinations independently prove
+equivalence. Constraint validation flags and every other definition remain exact.
+Production recovery fingerprint/checksum formats remain unchanged.
 
 All775 Node regressions/current checks and five recovery-reader tests passed.
 Type checking, lint (one inherited unused `shipmentRow` warning) and the isolated

@@ -183,6 +183,9 @@ DDL atomicity checks. It dumps/restores the absent-table layout and compares all
 remaining recovery fingerprints,15 metadata sections, private configuration rows
 and all three sequence value/is_called states. This test-only comparison uses
 visible column positions because logical restore compacts dropped physical slots;
-all column names/order/types/defaults/ACLs stay exact. Actual current reports then run on
+all column names/order/types/defaults/ACLs stay exact. One pair of complete known
+`media_dates` CHECK definitions is also canonicalized for PostgreSQL reparse
+parentheses, with an independent343-case SQL equivalence check. Other definitions
+and validation flags stay exact. Actual current reports then run on
 the restore. The migration payment archive is always present and unchanged.
 This prepares removal but does not authorize a live DROP or certify provider IO.
