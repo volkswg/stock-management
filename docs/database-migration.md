@@ -778,3 +778,120 @@ per-release procedures are indexed once in the
 their recorded stage and cannot authorize another cutover, overwrite or restore.
 For synthetic verification use the [verification guide](refactoring/verification.md);
 for the next milestone use the [roadmap](refactoring/roadmap.md).
+
+## Single-payment receipt rebuild — prepared, not executed
+
+PR98 keeps `sales_receipt_items` separate. After the guarded rebuild, each receipt
+holds `paymentId text`, `paymentTypeId text`, `paymentName text`, `paymentType text`,
+`paymentAmount numeric` and `paymentCreatedAt timestamptz`. NULL paymentId means no
+payment; amount zero with an ID means an actual zero payment. `paymentCreatedAt`
+copies the old payment creation time for exact report ordering; future payments
+use the same `statement_timestamp()` default as the old ledger. No new payment
+sequence is introduced. Method/amount semantics and refund calculations stay the
+same. Receipt timestamps/IDs and product/sync rows are not rebuilt from providers.
+
+The app supports both complete layouts. The new contract function marks the
+committed header layout; a partial installation or unknown version fails503.
+Before conversion historical split receipts stay readable, but new sync batches
+with multiple/invalid payments fail409 atomically, with no completion marker.
+Once converted, reports read the header and new syncs never insert child payments.
+The legacy payment table stays available for recovery and its runtime INSERT is
+revoked. Its existing details are not erased. Dropping it is a separate follow-up,
+not part of this release.
+
+### Mandatory old-data preflight
+
+1. Review the private count audit and exception receipt on the Mac. **NO-GO while
+   any receipt has more than one physical payment row**, including deleted rows,
+   or any payment has no receipt. Two methods/amounts must not be silently collapsed
+   into a fictitious single method, deleted or ignored. The owner must approve an
+   explicit source correction or revised model if the exception is legitimate.
+   The migration refuses the exception before adding columns. Audit counts are
+   evidence at a point in time; recheck under the final writer fence.
+2. Obtain a separate release approval covering the merged source, guarded database
+   rebuild, legacy INSERT fence, deployment source binding and temporary traffic
+   controls. Confirm the exact production project and `environment.isolation_id`
+   from the retained private release binding, not a testing target. Check the owner
+   role, RLS, normal two-trigger layout, no inheritance/partitions, no prepared
+   transactions, no partial header columns, and predecessor table-level grant.
+3. Create a **fresh full private recovery checkpoint**, including business,
+   configuration, metadata/grants and all three identity sequence high-water
+   states. Restore independently on a disposable local copy and compare it. Run
+   the guarded rebuild, current report checks and inverse there. Backup automation
+   remains deferred; that does not replace this one-time release checkpoint.
+4. Prepare the private packet with full merged source SHA and SQL file hashes,
+   exact isolation ID/purpose, revision, recovery proof and current fingerprint.
+   No records, account secrets, credentials or raw evidence belong in GitHub/CI.
+
+### Approved maintenance execution order
+
+1. Obtain a new supervised window and explicit pause confirmation: all browser and
+   LINE users, direct editors, jobs and scripts stopped; in-flight saves/uploads
+   finished or accounted for without uncertain outcomes. Publish only the approved
+   temporary write/LINE block. Drain writers; never depend on LINE retries alone.
+   Bound the window and preserve the existing LINE cutoff and Sheets read-only state.
+2. Deploy/promote the merged compatible application after protected build/source
+   checks while the database still uses the complete legacy layout. Do not create
+   an access link or change unrelated settings without the required approval.
+   Recheck the full checkpoint's freshness after the last writer drains; capture
+   and independently verify a new one if data/sequence/metadata differs.
+3. With the read-only operator connection, re-audit all active/deleted receipts,
+   payment multiplicities, orphans and exact method/amount/timestamp values. Save
+   `tools/migration/single-receipt-payment-fingerprint.sql` output and the global
+   `revision.value` in the private packet. Never use earlier audit counts as a
+   frozen-source assertion. Confirm all input values before enabling DDL.
+4. In **one owner psql session**, load the private reviewed settings file and run
+   only the operator migration below. It locks both tables and revision, recomputes
+   the supplied fingerprint, checks every gate, adds/backfills scalar fields from
+   the retained ledger, verifies old payloads/revisions/trigger definitions and
+   exact active payment parity, fences legacy INSERT and publishes the contract.
+   Any failed assertion rolls the transaction back. Do not truncate/reimport,
+   refetch Loyverse or read new Sheets business records for this rebuild.
+
+   ```sh
+   # PGSERVICE/PGPASSFILE are existing private, TLS-verified owner connection files.
+   # packet.sql contains only the reviewed SET settings listed below, no passwords.
+   psql -X -v ON_ERROR_STOP=1 --file="$PRIVATE_PACKET/packet.sql" \
+     --file=tools/migration/operator/20261121050044_single_receipt_payment.sql
+   ```
+
+   Required session settings: `stock.allow_receipt_payment_rebuild` =
+   `reviewed-single-receipt-payment-v1`; `stock.payment_restore_verified` =
+   `business-and-config-v1`; `stock.payment_source` = merged40hex SHA;
+   `stock.expected_isolation_id` and `stock.expected_purpose` = exact approved
+   target; `stock.payment_revision` = frozen revision; `stock.payment_fingerprint`
+   = frozen64hex fingerprint. The recovery token is an operator attestation to an
+   actual independent restore, not a substitute for one. Store the packet privately
+   with source/SQL hashes and results. This runbook does not authorize execution.
+5. Verify exact old payloads, IDs/revisions, deletion flags, sequence states,
+   products, sync markers/counts, raw retained payments, grants/RLS and triggers.
+   Each active legacy payment must match all six scalar fields on its receipt;
+   absent/deleted payments must project none. Verify the contract and old INSERT
+   denial, and that anon/authenticated did not gain function access. Compare daily,
+   hourly, payment, refund/cancellation, dashboard and profit reports including
+   downstream payroll/commission and stock quantities. No multiplication by item
+   count, changed labels/ties, rounding or zero/no-payment confusion is acceptable.
+   Verify read-only HTTP/source checks and rejected request/signature probes; do
+   not invoke real providers as a canary without explicit approval.
+6. If all checks pass, remove only the maintenance rule and reopen. Retain private
+   checkpoint/reconciliation and the old payment table. Report exact deployed
+   source/contract and any unexercised real-provider writes. Future split-payment
+   sync failures require review, never silent first-payment selection.
+
+### Abort and rollback
+
+Abort before conversion on any unresolved multi-payment/orphan, changed source,
+stale fingerprint/revision/checkpoint, missing approval, wrong identity, grant/
+trigger drift or uncertain writer/provider outcome. If post-change parity or
+request checks fail, keep traffic fenced and use the reviewed inverse while the
+compatible app remains deployed. Obtain/verify a fresh checkpoint and current
+revision/fingerprint first. Use the same settings plus
+`stock.allow_receipt_payment_inverse=reviewed-single-receipt-payment-v1`, then run
+`tools/migration/operator/rollback_single_receipt_payment.sql` in place of forward
+SQL. It refuses divergent old rows, materializes missing legacy rows for new
+inline payments (including their stable IDs and order), flushes deferred FK
+checks, preserves pre-existing rows/revisions and restores the old INSERT grant
+before dropping the six fields/contract. Only then roll the app/source binding
+back if needed and verify reports before reopening. Do not restore an old dump
+over later successful writes. Unexpected drift requires operator review rather
+than a destructive forced rollback. All production execution remains unapproved.

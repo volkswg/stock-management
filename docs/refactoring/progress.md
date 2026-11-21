@@ -20,40 +20,48 @@ groups. No business write, real-provider canary or access link was used. Retaine
 current snapshot. Private release receipts stay on the Mac. Reload normal tabs
 for row-v1; preserve unresolved pending operations for reconciliation.
 
-### Lean Loyverse synchronization — implementation, not deployed
+### Lean Loyverse sync and single receipt payment — PR98, not deployed
 
-The stored receipt projection now keeps only ten fields: identity/account/day,
-receipt number/type/time, cancellation, provider creation/update times and sync
-time. It stops collecting16 unused receipt fields: shopName, refundFor, order,
-source, storeId, employeeId, customerId, posDeviceId, diningOption, totalMoney,
-totalTax, totalDiscount, tip, surcharge, pointsEarned and pointsDeducted.
+Receipt sync stops collecting16 unused header fields and eight unused item fields;
+product rows stay in `sales_receipt_items`. The original ten retained header
+fields and13 retained item fields keep the existing identities, values, quantities,
+taxes, costs and Bangkok timestamps. Incoming tax arrays still supply the retained
+tax total. Provider payloads/pagination are unchanged; this reduces stored detail,
+not provider bandwidth. Payment index/paidAt/raw details are no longer collected.
+Existing raw fields and records are retained rather than erased.
 
-Items retain13 fields for identity/link, product/variant/SKU display and grouping,
-quantity, gross money, discount, total cost, aggregated tax and sync time. Eight
-unused copies/details are omitted: lineItemId, price, totalMoney, cost, lineNote,
-lineDiscountsJson, lineTaxesJson and lineModifiersJson. Payments keep seven
-identity/link/method/amount/sync fields; paymentIndex, paidAt and paymentDetailsJson
-are omitted. Incoming line IDs/payment indexes still generate the same stable
-record IDs. Raw tax arrays still supply the retained tax total before omission.
+The expanded scope stores the one payment on `sales_receipts`: `paymentId`,
+`paymentTypeId`, `paymentName`, `paymentType`, `paymentAmount`, and
+`paymentCreatedAt`. The ID distinguishes no payment from a zero amount and retains
+the old stable identity; the timestamp preserves the former payment ordering,
+including report label/tie behavior. Items are never combined with payments.
+Existing report/API shapes, sync counts/completion, cancellations/refunds,
+idempotency and calculations stay the same.
 
-All four core tables, sync counts/completion (including zero-sales days), stable
-request/record IDs, cancellation/refund behavior and existing read adapters remain.
-The account configuration, provider pagination/date filtering/full-payload duplicate
-validation and all calculations are unchanged. The provider may still send its
-full receipt response; this is a stored-data reduction, not an API-bandwidth claim.
-Existing records/columns/defaults/permissions are retained. Old detail values are
-not rewritten or erased, and old datasets still read through the same adapters.
-New omitted columns remain NULL/default under the existing schema. This prepares
-an application-only release; dropping columns or purging existing values requires
-separate explicit production approval. Report/query optimization is separate.
+The feature adapter reads the old layout until the separately approved guarded
+rebuild commits. It then projects report payments from receipt columns and writes
+no payment child rows. Partial/unknown installations fail closed. All new fetched
+batches reject multiple/invalid payments before any sales rows are saved; they do
+not select the first payment or sum different methods. Historical split receipts
+stay readable before conversion. A private read-only audit found an exception
+requiring owner review: **production backfill is NO-GO until every receipt has at
+most one payment, including retained deleted history**. No exception values or
+private audit records are published here.
 
-Tests compare full hash-pinned predecessor mappings against lean records for daily,
-hourly, payment, tax, refund, dashboard and profit reports, including cancellation,
-zero-sales completion, missing fields and overrides/expenses. Current PostgreSQL
-checks verify only retained values are stored, downstream commission/stock inputs,
-repeat-sync behavior, atomic late-failure rollback and preservation of historical
-raw details. Earlier source witnesses are restored through a new bounded inverse;
-all original fixtures remain unchanged.
+The operator-only migration adds/backfills the six fields under an exact target,
+revision and source fingerprint guard. It preserves old records/revisions/times,
+checks exact scalar parity, retains the payment ledger and fences its runtime
+INSERT privilege. The inverse reconstructs legacy payments for later inline writes
+before removing header fields; it never overwrites later data with a stale restore.
+Neither script is in automatic migration discovery. Old-data rebuild steps and
+release approvals are in the [operations runbook](../database-migration.md#single-payment-receipt-rebuild--prepared-not-executed).
+
+Local checks cover report equivalence, historical raw details, zero/no-payment,
+stable IDs, products, split rejection, idempotency, late rollback, strict layout
+checks, guarded rebuild/inverse and synthetic logical recovery. Current source is
+exercised independently from immutable predecessor witnesses; original fixtures
+remain unchanged. No production writes, schema changes, deployment, provider
+requests, maintenance block or data rebuild is authorized by this PR preparation.
 
 ### Row-only edit protection — released in PR97
 

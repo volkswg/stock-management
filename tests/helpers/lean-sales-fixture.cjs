@@ -13,4 +13,7 @@ function receipts() {
  const refund=receipt({receipt_number:'refund-1',receipt_type:'REFUND',refund_for:'sale-1',receipt_date:'2026-11-01T04:00:00.000Z',line_items:[{...sale.line_items[0],quantity:1,gross_total_money:10,total_discount:1,total_money:9,cost_total:4,line_taxes:[{id:'tax-1',money_amount:0.63}]}],payments:[{...sale.payments[0],money_amount:9}],total_money:9});
  return [sale,refund,receipt({receipt_number:'cancelled-1',cancelled_at:'2026-11-01T05:00:00.000Z'})];
 }
-module.exports={unused,receipt,receipts};
+// Regular one-payment scenario for current write acceptance. The original rich
+// split fixture remains unchanged as the historical/report oracle and rejection case.
+function singleReceipts() { return receipts().map(r=>({...r,payments:r.payments.length?[{...r.payments[0],money_amount:r.payments.reduce((sum,p)=>sum+p.money_amount,0)}]:[]})); }
+module.exports={unused,receipt,receipts,singleReceipts};

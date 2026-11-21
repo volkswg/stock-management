@@ -5,14 +5,14 @@ const {transaction,currentTransaction,closePool}=require('../../src/infrastructu
 const {executeCommand,hashIntent}=require('../../src/infrastructure/persistence/postgres/commands.ts');
 const {createBusinessDatabase}=require('../../src/composition/postgres/service.ts');
 const sales=require('../../src/modules/sales/server.ts');
-const {receipts,unused}=require('../../tests/helpers/lean-sales-fixture.cjs');
+const {singleReceipts:receipts,unused}=require('../../tests/helpers/lean-sales-fixture.cjs');
 const service=createBusinessDatabase(),account={id:'lean-test',shopName:'Synthetic shop',service:{async getReceipts(){loads++;return receipts();}}};let loads=0;
 assert.equal(new URL(process.env.STOCK_DATABASE_URL).hostname,'127.0.0.1');global.fetch=()=>{throw Error('Real providers forbidden');};
 const command=fn=>executeCommand('lean-sales-test',crypto.randomUUID(),hashIntent('synthetic'),fn);
 test.after(closePool);
 
 test('actual sync persists only used values, retains stable receipt/item/payment identities and all sync counts',async()=>{
- const result=await command(()=>sales.syncLoyverseDailySales({account,storage:service,salesDate:'2026-11-01'}));assert.equal(result.outcome,'synced');assert.equal(result.receiptCount,3);assert.equal(result.itemCount,3);assert.equal(result.paymentCount,5);
+ const result=await command(()=>sales.syncLoyverseDailySales({account,storage:service,salesDate:'2026-11-01'}));assert.equal(result.outcome,'synced');assert.equal(result.receiptCount,3);assert.equal(result.itemCount,3);assert.equal(result.paymentCount,3);
  await transaction(false,async()=>{
   const checks=[['sales_receipts',['shopName','refundFor','order','source','storeId','employeeId','customerId','posDeviceId','diningOption','totalMoney','totalTax','totalDiscount','tip','surcharge','pointsEarned','pointsDeducted']],['sales_receipt_items',['lineItemId','price','totalMoney','cost','lineNote','lineDiscountsJson','lineTaxesJson','lineModifiersJson']],['sales_receipt_payments',['paymentIndex','paidAt','paymentDetailsJson']]];
   for(const[table,removed]of checks){const rows=(await currentTransaction().query(`SELECT to_jsonb(t) value FROM stock_operational.${table} t`)).rows;assert.ok(rows.length);for(const {value}of rows){assert.ok(value.id);assert.ok(value.syncedAt);for(const name of removed)assert.equal(value[name],null,table+'.'+name);assert.ok(!JSON.stringify(value).includes(unused));}}

@@ -7,6 +7,7 @@ ROOT=Path(__file__).resolve().parents[2]
 def copy_previous(target):
  target=Path(target)
  if target.exists() and any(target.iterdir()):raise ValueError('Destination must be empty')
+ payment=json.loads((ROOT/'tests/fixtures/single-receipt-payment-before.json').read_text())
  lean=json.loads((ROOT/'tests/fixtures/lean-loyverse-before.json').read_text())
  row_edits=json.loads((ROOT/'tests/fixtures/row-edits-before.json').read_text())
  cleanup=json.loads((ROOT/'tests/fixtures/safe-compatibility-cleanup-before.json').read_text())
@@ -14,6 +15,11 @@ def copy_previous(target):
  fixture=json.loads((ROOT/'tests/fixtures/movement-reference-before.json').read_text())
  for name,expected in fixture['files'].items():
   source=ROOT/name;data=source.read_bytes() if source.exists() else None;edit=fixture['edits'].get(name)
+  payment_edit=payment['edits'].get(name)
+  if payment_edit:
+      assert (hashlib.sha256(data).hexdigest() if data is not None else None)==payment_edit['afterSha256'],name
+      data=payment_edit['before'].encode()
+      assert hashlib.sha256(data).hexdigest()==payment_edit['beforeSha256'],name
   lean_edit=lean['edits'].get(name)
   if lean_edit:
    assert (hashlib.sha256(data).hexdigest() if data is not None else None)==lean_edit['afterSha256'],name
