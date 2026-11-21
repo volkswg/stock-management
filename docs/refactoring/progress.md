@@ -8,18 +8,67 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-[PR96](https://github.com/volkswg/stock-management/pull/96), source `731f549`,
-deployment `dpl_FuxGsrXtHDhebzpBouvrQiwG1Lue`, is live. The approved application-only
-release preserved the schema, data, permissions, LINE cutoff and original
-protections. The exact merged tree passed CI and the protected build was promoted
-without creating an access link. Five read-only API checks, the upload page,
-idempotency and LINE-signature rejection checks passed. The initial runtime scan
-returned no error/fatal entries. No real-provider or accepted business-write
-canary ran. The retained 53-table recovery checkpoint and three-sequence proofs
-were hash-verified; no new current data snapshot was claimed. Users and jobs may
-resume. Private release receipts remain on the Mac.
+[PR97](https://github.com/volkswg/stock-management/pull/97), source `7aaa063`,
+deployment `dpl_9BQv25aUJ8youkTGYXnESDTHrLu5`, is live. Its approved application-only
+release kept the app/LINE open and preserved schema, records, permissions, cutoff,
+firewall and other environment settings. Seven read-only row-protocol comparisons
+matched business values/types/order and exact returned row scopes; five legacy API
+reads, the upload page, client source, idempotency/signature rejection and old
+unique-deployment protection passed. The initial log scan returned no error/fatal
+groups. No business write, real-provider canary or access link was used. Retained
+53-table/three-sequence recovery evidence was verified without claiming a new
+current snapshot. Private release receipts stay on the Mac. Reload normal tabs
+for row-v1; preserve unresolved pending operations for reconciliation.
 
-### Row-only edit protection — implementation, not deployed
+### Lean Loyverse sync and receipt-owned payments — PR98, not deployed
+
+Receipt sync stops collecting16 unused header fields and eight unused item fields;
+product rows stay in `sales_receipt_items`. The original ten retained header
+fields and13 retained item fields keep the existing identities, values, quantities,
+taxes, costs and Bangkok timestamps. Provider payloads/pagination and full-payload
+overlap validation are unchanged; this reduces stored detail, not API bandwidth.
+Payment index/paidAt/raw details are no longer collected. Existing raw values are
+retained rather than erased.
+
+The revised scope adds `sales_receipts.payments jsonb NOT NULL DEFAULT '[]'`.
+Every entry retains id, paymentTypeId, paymentName, paymentType, moneyAmount,
+syncedAt and createdAt. Amounts are decimal strings normalized by PostgreSQL;
+JSON/JavaScript number conversion cannot round an existing numeric value. Stable
+IDs distinguish zero-valued payments from no entries; each payment's own sync time
+and microsecond creation time preserve prior values and global report ordering.
+Normal receipts have one entry; split receipts keep every method and amount.
+A private audit's split exception is representable without correction or merging.
+No actual receipt details or private evidence are published in the repository.
+
+The feature adapter keeps reading/writing the complete legacy layout until the
+separately approved rebuild commits, then projects the arrays into the same report
+port and stops inserting payment child rows. Partial/unknown installations and
+invalid arrays fail closed. Valid split batches are accepted in both layouts.
+A per-document CHECK validates exact entry fields/types, decimal text, canonical
+timestamps and unique nonempty IDs; runtime reads and the inverse also reject
+IDs reused across receipts. Generated IDs remain receipt/index based. A JSONB
+entry has no independent FK/UNIQUE constraint: manual identity edits require care,
+and later physical ledger removal needs its own reviewed approval.
+
+The operator-only migration backfills complete ordered arrays from existing active
+payments, including deleted parents, checks exact entry/count parity and every
+old payload/revision, retains all raw/deleted ledger rows, and fences runtime
+INSERT on the old table. Products/syncs/sequences are unchanged. The inverse
+recreates all missing payments for later writes (including splits) before dropping
+JSONB/contract/helper; historical rows are never overwritten. Neither operator
+script is in automatic migration discovery. The [runbook](../database-migration.md#receipt-payments-jsonb-rebuild--prepared-not-executed)
+contains fresh independent recovery, supervised maintenance, app compatibility,
+old-data rebuild, reconciliation and rollback steps. Production remains unchanged.
+
+Local checks cover legacy/current split reports, methods and amounts, refunds,
+precision above JavaScript's safe-integer range, zero/absent/null values,
+microseconds/C ordering, idempotency, malformed batches/arrays, atomic late failure,
+layout/version checks, private validator permissions, guarded rebuild/inverse and
+complete synthetic logical recovery with all three sequences. Current owners run
+independently of immutable historical source witnesses. No production writes,
+provider request, deployment or maintenance block is part of this preparation.
+
+### Row-only edit protection — released in PR97
 
 The previous Orders/Movements edit token included all children; LINE could append
 one item and invalidate a different item's quantity edit. The new opt-in

@@ -328,7 +328,15 @@ const scopes = {
   "src/modules/sales/infrastructure/postgres/receipt-record-mapping.ts": [
     "../../application/ports/receipt-source"
   ],
+  "src/modules/sales/infrastructure/postgres/receipt-payment.ts": [
+    "@/infrastructure/persistence/postgres/database",
+    "@/infrastructure/persistence/postgres/native-records",
+    "@/shared/lib/utc-timestamp",
+    "server-only"
+  ],
   "src/modules/sales/infrastructure/postgres/receipt-sync.ts": [
+    "./receipt-payment",
+    "@/infrastructure/persistence/postgres/database",
     "../../application/ports/receipt-source",
     "../../application/ports/receipt-sync",
     "../../application/receipts-for-date",
@@ -339,6 +347,8 @@ const scopes = {
     "server-only"
   ],
   "src/modules/sales/infrastructure/postgres/sales-reader.ts": [
+    "./receipt-payment",
+    "@/infrastructure/persistence/postgres/database",
     "../../application/ports/sales-reader",
     "./storage",
     "server-only"

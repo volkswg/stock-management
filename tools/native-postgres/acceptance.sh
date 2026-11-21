@@ -114,3 +114,46 @@ SQL
 done
 cmp "$artifacts/retired-reference-np_reference.txt" "$artifacts/retired-reference-np_reference_restore.txt"
 echo 'PASS: unused reference removed, unchanged actual app/LINE owners, logical inverse and all three sequence states restored'
+
+# Lean-sync acceptance owns a fresh empty final-schema copy. Never assume the
+# earlier shared reference/LINE campaigns or their historical seeds were empty.
+pg createdb -U postgres -T np_reference np_lean_sales
+pg psql -U postgres -d np_lean_sales -v ON_ERROR_STOP=1 > "$artifacts/lean-sales-empty-copy.log" <<'SQL'
+DO $$DECLARE names text;BEGIN
+ SELECT string_agg(format('%I.%I',schemaname,tablename),',') INTO names
+ FROM pg_tables WHERE schemaname='stock_operational' AND tablename NOT IN ('environment','revision');
+ EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';
+END$$;
+SQL
+native_run np_lean_sales tools/native-postgres/lean-sales.test.cjs
+echo 'PASS: lean Loyverse fields, exact reports, late rollback and retained historical details on an empty synthetic copy'
+
+# Separate fresh copy for the proposed JSONB payment rebuild and inverse.
+# Existing production data is never a test fixture.
+pg createdb -U postgres -T np_reference np_single_payment
+pg psql -U postgres -d np_single_payment -v ON_ERROR_STOP=1 > "$artifacts/single-payment-empty-copy.log" <<'SQL'
+DO $$DECLARE names text;BEGIN
+ SELECT string_agg(format('%I.%I',schemaname,tablename),',') INTO names
+ FROM pg_tables WHERE schemaname='stock_operational' AND tablename NOT IN ('environment','revision');
+ EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';
+END$$;
+SQL
+native_run np_single_payment tools/native-postgres/receipt-payments-jsonb.test.cjs
+pg pg_dump -U postgres -d np_single_payment --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/single-payment-recovery.sql"
+pg createdb -U postgres np_single_payment_restore
+pg psql -U postgres -d np_single_payment_restore -v ON_ERROR_STOP=1 < "$artifacts/single-payment-recovery.sql" > "$artifacts/single-payment-restore.log"
+for database in np_single_payment np_single_payment_restore; do
+ pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 > "$artifacts/single-payment-$database.txt" <<'SQL'
+SELECT to_jsonb(t)::text FROM stock_operational.sales_receipts t ORDER BY id COLLATE "C";
+SELECT to_jsonb(t)::text FROM stock_operational.sales_receipt_items t ORDER BY id COLLATE "C";
+SELECT to_jsonb(t)::text FROM stock_operational.sales_receipt_payments t ORDER BY id COLLATE "C";
+SELECT to_jsonb(t)::text FROM stock_operational.sales_receipt_syncs t ORDER BY id COLLATE "C";
+SELECT last_value,is_called FROM stock_operational.order_bills_id_seq;
+SELECT last_value,is_called FROM stock_operational.order_items_id_seq;
+SELECT last_value,is_called FROM stock_operational.user_state_id_seq;
+SELECT stock_operational.receipt_payment_storage_v1(),has_any_column_privilege('stock_runtime','stock_operational.sales_receipt_payments','INSERT');
+SELECT has_function_privilege('anon','stock_operational.receipt_payment_storage_v1()','EXECUTE'),has_function_privilege('authenticated','stock_operational.receipt_payment_storage_v1()','EXECUTE');
+SQL
+done
+cmp "$artifacts/single-payment-np_single_payment.txt" "$artifacts/single-payment-np_single_payment_restore.txt"
+echo 'PASS: receipt JSONB payment rebuild/inverse, exact reports, legacy write fence, split preservation and independent logical restore'

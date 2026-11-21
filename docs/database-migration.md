@@ -778,3 +778,138 @@ per-release procedures are indexed once in the
 their recorded stage and cannot authorize another cutover, overwrite or restore.
 For synthetic verification use the [verification guide](refactoring/verification.md);
 for the next milestone use the [roadmap](refactoring/roadmap.md).
+
+## Receipt payments JSONB rebuild — prepared, not executed
+
+PR98 adds `sales_receipts.payments jsonb NOT NULL DEFAULT '[]'`. Each entry has
+exactly these keys: `id`, `paymentTypeId`, `paymentName`, `paymentType`,
+`moneyAmount`, `syncedAt`, `createdAt`. The ID is a nonempty unique string within
+that receipt. Other values are strings or JSON null. Empty SQL text is represented
+as null, matching legacy normalization. Amounts are PostgreSQL-normalized decimal
+strings, not JSON numbers; this avoids JavaScript rounding on JSON parsing and
+retains numeric scale. Null amounts remain null; zero remains an actual payment.
+Creation timestamps use the existing canonical UTC formatter, preserving
+microseconds and NULLS LAST/C-ID report ordering. Each entry keeps its own sync
+time. `[]` means no active payments. Products remain in `sales_receipt_items`.
+
+Single and split receipts use the same array format. **The previously audited
+split receipt needs no correction, deletion or fictitious combined method.**
+The old single-payment proposal and its scripts are superseded before deployment.
+Keep the private audit as historical evidence and recheck counts under the final
+freeze. No receipt identity, actual method/amount pair or raw evidence is a test
+fixture. Existing APIs/calculations, cancellations/refunds and sync counts stay
+unchanged. Provider pagination/full-payload duplicate validation is unchanged.
+
+The feature adapter uses the complete legacy layout until the committed
+`receipt-payments-jsonb-v1` contract is present. Incomplete/unknown schemas fail503.
+Valid split batches work in both layouts; malformed payment containers/entries
+fail before sales rows/completion are saved. After conversion all new active
+payments live in the header and no new payment child rows are written. The old
+table and all historical/raw/deleted rows stay available for recovery. A later
+physical table/unused-column drop needs separate approval and historical-deletion
+retention review. This release does not erase old data or refetch providers.
+
+### Old-data preflight and approvals
+
+1. Obtain separate approval for the merged source, deployment binding, exact
+   production target, JSONB rebuild, legacy INSERT fence and temporary traffic
+   controls. Confirm project and `environment.isolation_id` from the retained
+   private binding; never infer production from a testing project name.
+2. Create a **fresh full private recovery checkpoint** of business/configuration,
+   schema/roles/grants/triggers and all three identity sequence high-water states.
+   Independently restore it on a disposable local copy. Rehearse the exact forward
+   SQL, current report comparisons and inverse there. Backup automation stays
+   deferred; the release checkpoint is a separate one-time requirement.
+3. Read-only preflight must see all rows, including deleted history. Count
+   receipts, active/deleted payment rows and zero/single/split receipts; reject
+   orphans. Split counts are informational, not a rejection condition. Verify
+   every active payment ID/method/amount/sync/time and check the old parent and
+   global uniqueness constraints. Confirm owner/RLS, reviewed two receipt triggers,
+   no inheritance/partition/prepared transactions, no partial/proposed scalar/JSONB
+   layout, and the predecessor runtime table-level INSERT grant.
+4. Prepare a private packet with exact isolation ID/purpose, full merged40hex
+   source, reviewed SQL hashes, restored checkpoint proof, frozen global revision
+   and the current two-table fingerprint. Keep business records, credentials and
+   evidence on the Mac or approved private storage, never in GitHub or CI.
+
+### Approved maintenance execution
+
+1. Obtain a new supervised bounded window and explicit pause confirmation: all
+   browser/LINE users, direct Supabase editors, jobs and scripts stopped; pending
+   saves/uploads completed or accounted for without uncertain outcomes. Apply
+   only the approved temporary write/LINE block, then drain existing writers.
+   Preserve the existing LINE cutoff and old Sheets read-only state.
+2. Stage/promote the merged compatible application after protected build/source
+   checks while the database still uses the legacy layout. No temporary access
+   link or unrelated settings change is implied. Recheck full checkpoint freshness
+   after the final writer drains; renew/restore it if rows, sequences or metadata
+   changed. The latest prior audit alone does not prove a frozen source.
+3. Capture full-visibility counts and exact values under the writer fence. Save
+   `tools/migration/single-receipt-payment-fingerprint.sql` output and
+   `stock_operational.revision.value` privately. Validate exact target, source and
+   checkpoint in the reviewed settings file. Splits remain separate entries.
+4. In one TLS-verified owner psql session, execute only the approved local packet
+   and CLI-generated operator file:
+
+   ```sh
+   # Existing private PGSERVICE/PGPASSFILE; no passwords in shell arguments.
+   psql -X -v ON_ERROR_STOP=1 --file="$PRIVATE_PACKET/packet.sql" \
+     --file=tools/migration/operator/20261121063257_receipt_payments_jsonb.sql
+   ```
+
+   Required settings: `stock.allow_receipt_payment_rebuild` =
+   `reviewed-receipt-payments-jsonb-v1`; `stock.payment_restore_verified` =
+   `business-and-config-v1`; `stock.payment_source` = full merged40hex SHA;
+   `stock.expected_isolation_id` and `stock.expected_purpose` = exact approved
+   target; `stock.payment_revision` = frozen revision; `stock.payment_fingerprint`
+   = frozen64hex hash. The restore token attests to an actual independently
+   verified checkpoint; merely setting it is insufficient.
+
+   The transaction locks both tables/revision, recomputes the fingerprint, adds
+   one JSONB column and a CHECK helper, builds arrays from **all active payments**
+   for every receipt including deleted parents, verifies ordered entry parity and
+   unchanged old rows/revisions/triggers, fences old runtime INSERT and publishes
+   the contract. It never sums split methods or invokes Sheets/Loyverse. Deleted
+   payment rows stay unchanged in the retained ledger. Any failed gate rolls back.
+5. Reconcile total active payments against total JSONB entries across **all**
+   receipts, per-receipt zero/single/split counts, exact IDs/methods/amounts/sync/
+   timestamps and array order. Compare original payloads/revisions/times/deletion
+   flags, products, completion counts, all three sequences, raw/deleted ledger,
+   ACLs/RLS and trigger definitions. Verify CHECK rejection of malformed/numeric
+   JSON amounts and duplicate IDs; validator/marker must remain SECURITY INVOKER,
+   with no PUBLIC/anon/authenticated execute. Existing permissions are preserved
+   except the explicitly approved old INSERT fence.
+6. Compare daily/hourly/payment/refund/cancellation/dashboard/profit reports and
+   downstream payroll/commission/stock quantities. No item multiplication, method
+   merging, changed labels/ties/rounding, lost splits or zero/null confusion is
+   acceptable. Run read-only HTTP/source comparisons and rejected-request/LINE
+   signature probes; do not invoke real providers without separate approval.
+   Remove only the maintenance rule and reopen after all checks pass. Retain
+   recovery/reconciliation and the old ledger; report real-provider testing limits.
+
+### Rollback and data integrity limits
+
+Abort on missing approval, wrong target/source, stale recovery/revision/hash,
+orphan, partial layout, permission/trigger drift, or an uncertain writer outcome.
+Splits are supported and do not require an exception waiver. Keep traffic fenced
+if any post-change report/entry/count/permission check fails.
+
+Use fresh verified recovery and current revision/fingerprint with the same packet
+settings plus `stock.allow_receipt_payment_inverse=reviewed-receipt-payments-jsonb-v1`.
+Run `tools/migration/operator/rollback_receipt_payments_jsonb.sql` in place of
+forward SQL **before rolling the compatible app back**. It expands all arrays,
+refuses globally reused IDs or changed/extra/misattached/deleted historical
+payments, and inserts only missing legacy rows for new receipts, including every
+split entry, exact decimal values, sync times and creation order. It flushes
+deferred FK checks, proves existing ledger and receipt payloads/revisions
+unchanged, then drops JSONB/contract/helper and restores legacy INSERT. Verify
+reports before app/binding rollback and reopening. Never restore a stale dump over
+later successful writes. Unexpected drift requires review, not a forced overwrite.
+
+JSONB entries do not have independent row FKs or a cross-receipt UNIQUE index.
+The CHECK enforces exact per-entry shape and per-receipt IDs; generated IDs remain
+receipt/index based, runtime reads reject reuse across returned receipts, and the
+inverse checks the full dataset. Direct editors must preserve these identities;
+invalid or reused IDs stop recovery rather than silently corrupting reports. No
+new identity registry, extension, trigger or staff-authentication feature is added.
+All production execution remains subject to separate approval.
