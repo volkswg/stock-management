@@ -7,6 +7,7 @@ ROOT=Path(__file__).resolve().parents[2]
 def copy_previous(target):
  target=Path(target)
  if target.exists() and any(target.iterdir()):raise ValueError('Destination must be empty')
+ retirement=json.loads((ROOT/'tests/fixtures/receipt-payment-retirement-before.json').read_text())
  jsonb=json.loads((ROOT/'tests/fixtures/receipt-payments-jsonb-before.json').read_text())
  payment=json.loads((ROOT/'tests/fixtures/single-receipt-payment-before.json').read_text())
  lean=json.loads((ROOT/'tests/fixtures/lean-loyverse-before.json').read_text())
@@ -16,6 +17,11 @@ def copy_previous(target):
  fixture=json.loads((ROOT/'tests/fixtures/movement-reference-before.json').read_text())
  for name,expected in fixture['files'].items():
   source=ROOT/name;data=source.read_bytes() if source.exists() else None;edit=fixture['edits'].get(name)
+  retirement_edit=retirement['edits'].get(name)
+  if retirement_edit:
+      assert (hashlib.sha256(data).hexdigest() if data is not None else None)==retirement_edit['afterSha256'],name
+      data=retirement_edit['before'].encode()
+      assert hashlib.sha256(data).hexdigest()==retirement_edit['beforeSha256'],name
   jsonb_edit=jsonb['edits'].get(name)
   if jsonb_edit:
       assert (hashlib.sha256(data).hexdigest() if data is not None else None)==jsonb_edit['afterSha256'],name

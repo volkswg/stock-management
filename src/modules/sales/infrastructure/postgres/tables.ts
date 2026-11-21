@@ -54,18 +54,6 @@ export function salesTables() {
       lineModifiersJson: { column: "lineModifiersJson", kind: "jsonb" },
       syncedAt: { column: "syncedAt", kind: "text" },
     } as const),
-    salesReceiptPayments: new NativeRecords("sales_receipt_payments", {
-      id: { column: "id", kind: "text" },
-      receiptId: { column: "receiptId", kind: "text" },
-      paymentIndex: { column: "paymentIndex", kind: "bigint" },
-      paymentTypeId: { column: "paymentTypeId", kind: "text" },
-      paymentName: { column: "paymentName", kind: "text" },
-      paymentType: { column: "paymentType", kind: "text" },
-      moneyAmount: { column: "moneyAmount", kind: "numeric" },
-      paidAt: { column: "paidAt", kind: "text" },
-      paymentDetailsJson: { column: "paymentDetailsJson", kind: "jsonb", nullText: "null" },
-      syncedAt: { column: "syncedAt", kind: "text" },
-    } as const),
     salesReceiptSyncs: new NativeRecords("sales_receipt_syncs", {
       id: { column: "id", kind: "text" },
       salesDate: { column: "salesDate", kind: "text" },

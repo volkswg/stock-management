@@ -2,6 +2,8 @@
 const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 exports.beforeBillIdentity=(name,data=fs.existsSync(name)?fs.readFileSync(name):null)=>{
  const hash=v=>crypto.createHash('sha256').update(v).digest('hex');
+ const retirement=JSON.parse(fs.readFileSync('tests/fixtures/receipt-payment-retirement-before.json')).edits[name];
+ if(retirement){assert.equal(data===null?null:hash(data),retirement.afterSha256,name);assert.equal(hash(retirement.before),retirement.beforeSha256,name);data=Buffer.from(retirement.before);}
  const jsonb=JSON.parse(fs.readFileSync('tests/fixtures/receipt-payments-jsonb-before.json')).edits[name];
  if(jsonb){assert.equal(data===null?null:hash(data),jsonb.afterSha256,name);assert.equal(hash(jsonb.before),jsonb.beforeSha256,name);data=Buffer.from(jsonb.before);}
  const payment=JSON.parse(fs.readFileSync('tests/fixtures/single-receipt-payment-before.json')).edits[name];

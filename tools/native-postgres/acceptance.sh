@@ -1,4 +1,21 @@
 # Sourced after the pinned predecessor has independently proved the final schema.
+# Older table-layout campaigns keep their original source and assertions.
+receipt_history=$(mktemp -d "$PWD/pr98-payment-source.XXXXXX")
+python3 "$STOCK_NATIVE_ROOT/tools/native-postgres/receipt-payment-history-copy.py" "$receipt_history"
+install_receipt_jsonb(){
+ local database=$1
+ {
+  printf "SELECT set_config('stock.allow_receipt_payment_rebuild','reviewed-receipt-payments-jsonb-v1',false);\n"
+  printf "SELECT set_config('stock.payment_restore_verified','business-and-config-v1',false);\n"
+  printf "SELECT set_config('stock.payment_source',repeat('1',40),false);\n"
+  printf "SELECT set_config('stock.expected_isolation_id',isolation_id::text,false),set_config('stock.expected_purpose',purpose,false) FROM stock_operational.environment;\n"
+  printf "SELECT set_config('stock.payment_revision',value::text,false) FROM stock_operational.revision;\n"
+  printf "SELECT set_config('stock.payment_fingerprint', ("
+  sed '$s/;[[:space:]]*$//' "$STOCK_NATIVE_ROOT/tools/migration/single-receipt-payment-fingerprint.sql"
+  printf "),false);\n"
+  cat "$STOCK_NATIVE_ROOT/tools/migration/operator/20261121063257_receipt_payments_jsonb.sql"
+ } | pg psql -U postgres -d "$database" -v ON_ERROR_STOP=1 > "$artifacts/native-jsonb-$database.log"
+}
 for database in np_application np_records np_media np_browser; do
   pg createdb -U postgres -T sd_base "$database"
   sd_sql "$database" retirement | pg psql -U postgres -d "$database" -v ON_ERROR_STOP=1 > "$artifacts/native-install-$database.log"
@@ -13,6 +30,7 @@ native_run(){
  (cd "${STOCK_NATIVE_SOURCE_OVERRIDE:-$STOCK_NATIVE_ROOT}" && env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-/usr/bin/google-chrome}" STOCK_TARGET_ISOLATION_ID="$target" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/$database" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test "$@")
 }
 native_run np_records tools/native-postgres/records.test.cjs
+install_receipt_jsonb np_application
 native_run np_application tools/native-postgres/application.test.cjs
 native_run np_media tools/native-postgres/media-line.test.cjs
 native_run np_browser tools/native-postgres/browser.test.cjs
@@ -125,7 +143,7 @@ DO $$DECLARE names text;BEGIN
  EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';
 END$$;
 SQL
-native_run np_lean_sales tools/native-postgres/lean-sales.test.cjs
+STOCK_NATIVE_SOURCE_OVERRIDE="$receipt_history" native_run np_lean_sales tools/native-postgres/lean-sales.test.cjs
 echo 'PASS: lean Loyverse fields, exact reports, late rollback and retained historical details on an empty synthetic copy'
 
 # Separate fresh copy for the proposed JSONB payment rebuild and inverse.
@@ -138,7 +156,7 @@ DO $$DECLARE names text;BEGIN
  EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';
 END$$;
 SQL
-native_run np_single_payment tools/native-postgres/receipt-payments-jsonb.test.cjs
+STOCK_NATIVE_SOURCE_OVERRIDE="$receipt_history" native_run np_single_payment tools/native-postgres/receipt-payments-jsonb.test.cjs
 pg pg_dump -U postgres -d np_single_payment --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/single-payment-recovery.sql"
 pg createdb -U postgres np_single_payment_restore
 pg psql -U postgres -d np_single_payment_restore -v ON_ERROR_STOP=1 < "$artifacts/single-payment-recovery.sql" > "$artifacts/single-payment-restore.log"
@@ -157,3 +175,20 @@ SQL
 done
 cmp "$artifacts/single-payment-np_single_payment.txt" "$artifacts/single-payment-np_single_payment_restore.txt"
 echo 'PASS: receipt JSONB payment rebuild/inverse, exact reports, legacy write fence, split preservation and independent logical restore'
+
+# Actual current owners, not the historical copy: table present then physically absent.
+pg createdb -U postgres -T np_single_payment np_payments_retired
+native_run np_payments_retired tools/native-postgres/receipt-payment-retirement.test.cjs
+# Every retained archive/business row and all 15 security/schema metadata sections
+# are compared after a real logical dump/restore of the table-absent layout.
+python3 "$STOCK_NATIVE_ROOT/tools/native-postgres/receipt-payment-recovery-sql.py" > "$artifacts/payment-retired-fingerprint.sql"
+pg pg_dump -U postgres -d np_payments_retired --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/payment-retired-recovery.sql"
+pg createdb -U postgres np_payments_retired_restore
+pg psql -U postgres -d np_payments_retired_restore -v ON_ERROR_STOP=1 < "$artifacts/payment-retired-recovery.sql" > "$artifacts/payment-retired-restore.log"
+for database in np_payments_retired np_payments_retired_restore; do
+ pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 < "$artifacts/payment-retired-fingerprint.sql" > "$artifacts/payment-retired-$database.txt"
+done
+cmp "$artifacts/payment-retired-np_payments_retired.txt" "$artifacts/payment-retired-np_payments_retired_restore.txt"
+native_run np_payments_retired_restore tools/native-postgres/receipt-payment-retirement-restored.test.cjs
+rm -rf "$receipt_history"
+echo 'PASS: current sync/reports/replay/rollback without operational payments; archive and complete recovery preserved'

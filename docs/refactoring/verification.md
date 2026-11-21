@@ -165,3 +165,27 @@ credential-free build pass. The build retains the route manifest and113 browser
 chunks, with no private database strings. Local acceptance does not certify real
 Loyverse connectivity, browser visuals or the future production transfer; follow
 the [separate release packet](../database-migration.md#private-account-configuration-release).
+
+
+## Legacy payment table retirement compatibility
+
+Current runtime requires the released receipt JSONB layout. The old operational
+payment repository/fallback is removed; the original archive/catalog fixtures and
+operator rebuild/inverse are unchanged. `receipt-payment-retirement-before.json`
+binds PR98 source hashes and bounded source inverses. Older schema campaigns run
+only in their owned pinned copy. Current physical owners run separately with the
+operational table absent, using the operator-only schema-guard compatibility SQL.
+No production credentials, records or providers are used.
+
+The native acceptance adds exact report/split comparisons, zero/none entries,
+command replay, late transaction failure, schema-guard refusal and dependency/
+DDL atomicity checks. It dumps/restores the absent-table layout and compares all
+remaining recovery fingerprints,15 metadata sections, private configuration rows
+and all three sequence value/is_called states. This test-only comparison uses
+visible column positions because logical restore compacts dropped physical slots;
+all column names/order/types/defaults/ACLs stay exact. One pair of complete known
+`media_dates` CHECK definitions is also canonicalized for PostgreSQL reparse
+parentheses, with an independent343-case SQL equivalence check. Other definitions
+and validation flags stay exact. Actual current reports then run on
+the restore. The migration payment archive is always present and unchanged.
+This prepares removal but does not authorize a live DROP or certify provider IO.

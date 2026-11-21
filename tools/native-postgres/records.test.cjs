@@ -15,7 +15,7 @@ const url=new URL(process.env.STOCK_DATABASE_URL);url.username='postgres';url.pa
 const owner=new Client({connectionString:url.toString()}),storage=createBusinessDatabase();
 const command=run=>executeCommand('native-records',randomUUID(),hashIntent(randomUUID()),run);
 test.before(()=>owner.connect());test.after(async()=>{await closePool();await owner.end();});
-test('all23 named projections preserve predecessor decimal scale, JSON text, booleans, timestamps and media; seven histories remain append-only',async()=>{
+test('all22 named projections preserve predecessor decimal scale, JSON text, booleans, timestamps and media; six histories remain append-only',async()=>{
  const parents={orderId:['orders','NP_PARENT_ORDER'],shipmentId:['shipments','NP_PARENT_SHIPMENT'],employeeId:['employees','NP_PARENT_EMPLOYEE'],receiptId:['sales_receipts','NP_PARENT_RECEIPT'],movementMasterId:['movements','NP_PARENT_MOVEMENT'],shopId:['shops','NP_PARENT_SHOP'],categoryId:['expense_categories','NP_PARENT_CATEGORY']};
  for(const [table,id] of Object.values(parents))await owner.query(`INSERT INTO stock_operational.${table}(id) VALUES($1)`,[id]);
  let appendOnly=0;
@@ -49,7 +49,7 @@ test('all23 named projections preserve predecessor decimal scale, JSON text, boo
   const after=(await owner.query(`SELECT revision::text,"deletedAt" FROM stock_operational.${table.table} WHERE "${key}"=$1`,[before.id])).rows[0];
   assert.equal(BigInt(after.revision),BigInt(before.revision)+1n);assert.ok(after.deletedAt);
  }
- assert.equal(appendOnly,7);
+ assert.equal(appendOnly,6);
 });
 test('stable identities reject stale updates, cross-transaction handles and column injection without losing unrelated precision',async()=>{
  await command(()=>storage.orders.insert({id:'NP_EDIT',status:'complete',totalPrice:'9007199254740993.0100',remark:'before',createdAt:'2026-11-19T00:00:00.123456Z'}));
@@ -87,7 +87,7 @@ test('current runtime cannot execute any legacy mapper and explicit Sheets selec
  try{process.env.STOCK_STORAGE='google-sheets';await assert.rejects(transaction(false,()=>storage.orders.all()),e=>e.status===503);}finally{process.env.STOCK_STORAGE=old;}
 });
 
-test('all23 native projections preserve predecessor NULL defaults, including historical payment JSON',async()=>{
+test('all22 native projections preserve predecessor NULL defaults',async()=>{
  const parents={orderId:'NP_PARENT_ORDER',shipmentId:'NP_PARENT_SHIPMENT',employeeId:'NP_PARENT_EMPLOYEE',receiptId:'NP_PARENT_RECEIPT',movementMasterId:'NP_PARENT_MOVEMENT',shopId:'NP_PARENT_SHOP',categoryId:'NP_PARENT_CATEGORY'};
  for(const table of Object.values(storage)){
   const value=Object.fromEntries(Object.keys(table.columns).map(name=>[name,name==='id'?'NP_NULL_'+table.table:parents[name]||'']));
@@ -96,7 +96,6 @@ test('all23 native projections preserve predecessor NULL defaults, including his
   const row=(await owner.query(`SELECT "${key}" id,stock_operational.typed_project_${table.table}(t) expected FROM stock_operational.${table.table} t WHERE ${condition} AND "deletedAt" IS NULL`,[key==='migration_id'?parents.employeeId:value.id])).rows[0];assert.ok(row,table.table);
   await transaction(false,async()=>{
    const record=await table.find(row.id);assert.ok(record,table.table);assert.deepEqual(Object.values(record),table.table==='movement_details'?row.expected.filter((_,i)=>i!==8):row.expected,table.table);
-   if(table.table==='sales_receipt_payments')assert.equal(record.paymentDetailsJson,'null');
   });
  }
 });

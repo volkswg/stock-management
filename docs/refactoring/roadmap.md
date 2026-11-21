@@ -14,22 +14,18 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: unused movement purchase reference
+## Current scoped work: retire the legacy operational payment dependency
 
-PR93's application and coupled item/reference bigint conversion are complete;
-browser/LINE reopened after recovery, exact record/metadata/API checks and the
-original traffic controls were restored. Order bill, session and item IDs are now
-bigint identities, with string API IDs retained.
+PR98's JSONB rebuild is deployed. Prepare one cleanup PR removing runtime access
+to `stock_operational.sales_receipt_payments`, preserving payments, products,
+reports, sync/replay and LINE behavior. Test actual current owners with the table
+physically absent, plus complete recovery/restore and archive preservation.
 
-Prepare one PR to remove the unused operational movement purchase-reference
-storage dependency, preserve the public blank API field, and supply a guarded
-column/FK/index retirement plus logical inverse. Keep the field physically present
-until a separately approved maintenance window. Refuse populated references or
-unknown dependencies; retain import evidence, other IDs, sequences, records,
-permissions, providers and security behavior. The
-[runbook](../database-migration.md#unused-movement-purchase-reference-prepared-not-activated)
-records exact scope and release gates. No production action is authorized by this
-implementation; new authentication and backup automation remain separate/deferred.
+Keep production, the migration archive, credentials and all existing private
+recovery evidence unchanged. This is an application compatibility stage, not an
+automatic DROP migration. Subsequent release/table removal requires a fresh exact
+approval packet and recovery checkpoint; see the
+[retirement procedure](../database-migration.md#legacy-operational-payment-table-retirement).
 
 ## Next major milestone: user authentication
 

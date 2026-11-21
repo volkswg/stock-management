@@ -28,7 +28,8 @@ test('lean sync omits exactly the 27 unused persisted fields and leaves incoming
  assert.equal(JSON.stringify(input),original);assert.ok(JSON.stringify(old).includes(unused));assert.ok(!JSON.stringify(data).includes(unused));
  const tables=salesTables();
  const reductions=[['salesReceipts','receipts',16,10],['salesReceiptItems','items',8,13],['salesReceiptPayments','payments',3,7]];
- for(const [table,kind,removed,kept] of reductions){assert.equal(Object.keys(old[kind][0]).length-Object.keys(data[kind][0]).length,removed);assert.equal(Object.keys(data[kind][0]).length,kept);for(const row of data[kind])assert.ok(Object.keys(row).every(key=>Object.hasOwn(tables[table].columns,key)));}
+ for(const [table,kind,removed,kept] of reductions){assert.equal(Object.keys(old[kind][0]).length-Object.keys(data[kind][0]).length,removed);assert.equal(Object.keys(data[kind][0]).length,kept);for(const row of data[kind])assert.ok(Object.keys(row).every(key=>table==='salesReceiptPayments'?['id','receiptId','paymentTypeId','paymentName','paymentType','moneyAmount','syncedAt'].includes(key):Object.hasOwn(tables[table].columns,key)));
+  if(table==='salesReceiptPayments')assert.equal(Object.hasOwn(tables,table),false);}
  assert.deepEqual(data.syncs,old.syncs);
 });
 test('daily sales, refunds, product grouping, payments, taxes and Bangkok hourly totals match the full predecessor payload',async()=>{
