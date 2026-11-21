@@ -28,7 +28,7 @@ function findShipmentIdForOrder(
   orderId: string,
 ): string | null {
   for (let index = rows.length - 1; index >= 0; index -= 1) {
-    const { shipmentId, linkedOrderId, deletedAt } = rows[index];
+    const { shipmentId, orderId: linkedOrderId, deletedAt } = rows[index];
     if (
       toStringValue(linkedOrderId) === orderId &&
       !toStringValue(deletedAt)
