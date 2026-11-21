@@ -27,7 +27,7 @@ map, and the adapters implementing its existing semantic application ports.
 | Orders | orders, order_items, order_bills |
 | Shipments | shipments, shipment_orders |
 | Inventory | movements, movement_details, stock_counts, stock_adjustments |
-| Sales | sales_receipts, sales_receipt_items, sales_receipt_payments, sales_receipt_syncs, sales_profit_cost_overrides |
+| Sales | sales_receipts (payments JSONB), sales_receipt_items, sales_receipt_syncs, sales_profit_cost_overrides |
 | Expenses | expenses, expense_categories, shops |
 | HR | employees, employee_compensations, employee_timesheets, employee_advances, payroll_settlements |
 | LINE | user_state |
@@ -136,3 +136,7 @@ No database function or schema is dropped by this application change. The retain
 current acceptance revokes runtime EXECUTE on them to prove they are unused.
 `tools/migration` remains the historical import/operator/recovery owner. Do not
 remove its protected evidence or rerun old imports on production.
+
+The old operational `sales_receipt_payments` table is retained in production pending
+a separately approved retirement. Current runtime has no repository/fallback for
+it. `stock_migration.sales_receipt_payments` remains immutable recovery evidence.

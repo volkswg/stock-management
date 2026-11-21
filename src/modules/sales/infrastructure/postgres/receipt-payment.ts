@@ -3,8 +3,8 @@ import { utcTimestampComparisonKey } from "@/shared/lib/utc-timestamp";
 import { currentTransaction, PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
 import { NativeRecords, type NativeRecord } from "@/infrastructure/persistence/postgres/native-records";
 
-const layouts = new WeakMap<object, Promise<boolean>>();
-export function receiptPaymentsEnabled(): Promise<boolean> {
+const layouts = new WeakMap<object, Promise<void>>();
+export function requireReceiptPayments(): Promise<void> {
   const client = currentTransaction();
   let pending = layouts.get(client);
   if (!pending) {
@@ -15,11 +15,9 @@ export function receiptPaymentsEnabled(): Promise<boolean> {
         (SELECT count(*)::text FROM pg_attribute WHERE attrelid='stock_operational.sales_receipts'::regclass AND NOT attisdropped AND attname='payments' AND atttypid='jsonb'::regtype AND attnotnull) AS columns,
         (SELECT count(*)::text FROM pg_attribute WHERE attrelid='stock_operational.sales_receipts'::regclass AND NOT attisdropped AND attname IN ('payments','paymentId','paymentTypeId','paymentName','paymentType','paymentAmount','paymentCreatedAt')) AS present`);
       const row = rows[0];
-      if (row?.contract === null && row.validator === null && row.present === "0") return false;
       if (!row?.contract || !row.validator || row.columns !== "1" || row.present !== "1") throw new PersistenceFailure(503, "Incomplete receipt payment storage. No fallback was attempted.");
       const version = await client.query<{ version: string }>("SELECT stock_operational.receipt_payment_storage_v1() AS version");
       if (version.rows[0]?.version !== "receipt-payments-jsonb-v1") throw new PersistenceFailure(503, "Unsupported receipt payment storage.");
-      return true;
     })();
     layouts.set(client, pending);
   }

@@ -5,7 +5,7 @@ import path from 'node:path';
 import ts from 'typescript';
 const read=p=>readFileSync(p,'utf8');
 function files(dir){return readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?files(path.join(dir,e.name)):[path.join(dir,e.name)]);}
-test('current business runtime has only named PostgreSQL repositories and all23 explicit maps',()=>{
+test('current business runtime has only named PostgreSQL repositories and all22 explicit maps',()=>{
  const features=['orders','shipments','inventory','hr','expenses','sales','line-workflows'];let tables=0;
  for(const feature of features){
   assert.equal(existsSync(`src/modules/${feature}/infrastructure/google-sheets`+'/orders/const.ts'),false);
@@ -14,7 +14,7 @@ test('current business runtime has only named PostgreSQL repositories and all23 
   assert.doesNotMatch(source,/headers|google-sheets|typed_(input|project)|row_order|business_cells/);
   for(const file of files(`src/modules/${feature}/infrastructure/postgres`))assert.doesNotMatch(read(file),/GoogleSheet|\.readRows\(|\.appendRows\(|\.updateRows\(|referenceRow|["'`]A[12]?:[A-Z]/,file);
  }
- assert.equal(tables,23);assert.equal(existsSync('src/infrastructure/persistence/postgres/records.ts'),false);
+ assert.equal(tables,22);assert.equal(existsSync('src/infrastructure/persistence/postgres/records.ts'),false);
  assert.doesNotMatch(read('src/composition/postgres/service.ts'),/GoogleSheet|readMovementRanges/);
  assert.match(read('src/infrastructure/persistence/postgres/database.ts'),/if \(mode !== "supabase"\)/);
  assert.doesNotMatch(read('src/composition/postgres/route.ts'),/storageMode\(\) === "google-sheets"/);

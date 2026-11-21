@@ -779,7 +779,7 @@ their recorded stage and cannot authorize another cutover, overwrite or restore.
 For synthetic verification use the [verification guide](refactoring/verification.md);
 for the next milestone use the [roadmap](refactoring/roadmap.md).
 
-## Receipt payments JSONB rebuild — prepared, not executed
+## Receipt payments JSONB rebuild — released PR98
 
 PR98 adds `sales_receipts.payments jsonb NOT NULL DEFAULT '[]'`. Each entry has
 exactly these keys: `id`, `paymentTypeId`, `paymentName`, `paymentType`,
@@ -913,3 +913,67 @@ inverse checks the full dataset. Direct editors must preserve these identities;
 invalid or reused IDs stop recovery rather than silently corrupting reports. No
 new identity registry, extension, trigger or staff-authentication feature is added.
 All production execution remains subject to separate approval.
+
+
+## Legacy operational payment table retirement
+
+PR98 `0454c58` was deployed and the JSONB rebuild verified on 2026-11-21.
+Browser writes and LINE are open. The legacy operational table remains present,
+with runtime INSERT revoked. Existing private 53-table/three-sequence recovery
+and release evidence remain on the Mac; do not overwrite or delete them.
+
+The cleanup application requires `receipt-payments-jsonb-v1`, its validator and
+non-null JSONB column. Missing, partial or unsupported layouts fail503 without a
+legacy fallback. It works with the old operational table either present or absent.
+Deploy this compatible application **before** any separately approved removal.
+No automatic migration in this cleanup drops a table.
+
+For a later exact removal packet, obtain fresh private full recovery, including
+`stock_configuration`, all sequence high-water states and the entire legacy
+payment table (raw details, deletion history, revisions, constraints and grants).
+Independently restore and verify it before a supervised write/LINE pause.
+Recheck checkpoint freshness, JSONB contract, payment parity and unknown external
+consumers/dependencies. Old active payment entries must still agree with JSONB;
+new entries may exist only in JSONB. Never rebuild JSONB from the stale ledger.
+Preserve the original migration archive and the current receipt arrays unchanged.
+
+The operator-only
+`tools/migration/operator/20261121103218_receipt_payment_retirement_compatibility.sql`
+prepares the two shared schema guards for both layouts while retaining their
+remaining column/trigger checks, owners, invoker execution and ACLs. It is outside
+automatic migrations and requires separate exact-target/source/revision/recovery
+approval. Apply it before removal; the original guards require23 tables and would
+reject the reduced layout. Its predecessor bodies are hash-pinned; unknown drift
+refuses. Recovery must retain both original function definitions for inverse use.
+This compatibility artifact itself removes no table and changes no records.
+
+Retire only `stock_operational.sales_receipt_payments` and its two obsolete
+row-type mapper functions (`typed_input_sales_receipt_payments(jsonb)` and
+`typed_project_sales_receipt_payments(stock_operational.sales_receipt_payments)`),
+after confirming their exact reviewed definitions and dependencies. Use a single
+transaction and `RESTRICT`, never `CASCADE`; stop on any unknown dependency.
+Keep all shared functions, receipt JSONB CHECK/validator/contract and
+`stock_migration.sales_receipt_payments`. Reconcile all retained records/revisions,
+permissions, three sequence states and report values/types/order, then verify
+request/signature rejection and reopen. Production execution needs separate approval.
+
+After removal, recovery capture/verify must explicitly select
+`--without-legacy-payments` (plus the existing `--include-media`, history, purpose
+and target flags). The old default still requires the operational table; the new
+flag requires its absence, the migration archive and the released JSONB layout.
+The receipt binds this choice and verify rejects a different layout. This omits
+only one operational table: 51 business/archive/metadata tables plus the separate
+private configuration table. Continue using the existing configuration and
+sequence recovery procedures; do not claim that recovery.py alone exports those.
+
+Rollback after removal requires a fresh current checkpoint and a supervised pause.
+Restore the retired table's exact schema/rows/constraints/triggers/grants from the
+verified **pre-removal** checkpoint through a reviewed selective restore rehearsed
+locally. Do not restore the entire old database over later writes. Reconcile
+current JSONB entries before any legacy application rollback. The retained
+`rollback_receipt_payments_jsonb.sql` is a historical PR98 inverse: it requires the
+legacy table to exist and can materialize later inline payments while refusing
+changed/reused historical identities. It is not a standalone inverse for table
+retirement, and the new JSONB-only app cannot run after it removes the contract.
+A legacy rollback must pair it with the matching prior application. Until such an
+exact restore/inverse packet is verified and approved, keep the table present.

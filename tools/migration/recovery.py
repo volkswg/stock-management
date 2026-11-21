@@ -46,19 +46,29 @@ def validate_readers(workers):
     if type(workers) is not int or workers not in (1, 2): raise ValueError('recovery readers must be 1 or 2')
 
 
-def history_guard_sql(history, include_media=False):
+def operational_catalog(without_legacy_payments=False):
+    if type(without_legacy_payments) is not bool: raise ValueError("payment retirement layout must be explicit")
+    return [name for name in CATALOG if not (without_legacy_payments and name == "sales_receipt_payments")]
+
+
+def history_guard_sql(history, include_media=False, without_legacy_payments=False):
     if type(include_media) is not bool: raise ValueError("media layout must be explicit")
+    operational_catalog(without_legacy_payments)
     chosen = history_table(history)
     other = 'audit' if chosen == 'revision' else 'revision'
     media_guard = "IS NOT NULL" if include_media else "IS NULL"
-    return f"SELECT 1 / (to_regclass('stock_operational.{chosen}') IS NOT NULL AND to_regclass('stock_operational.{other}') IS NULL AND to_regclass('stock_operational.media') {media_guard})::int;"
+    payment_guard = "IS NULL" if without_legacy_payments else "IS NOT NULL"
+    guards = f" AND to_regclass('stock_migration.sales_receipt_payments') IS NOT NULL AND to_regclass('stock_operational.sales_receipt_payments') {payment_guard}"
+    if without_legacy_payments:
+        guards += " AND to_regprocedure('stock_operational.receipt_payment_storage_v1()') IS NOT NULL AND to_regprocedure('stock_operational.valid_receipt_payments_v1(jsonb)') IS NOT NULL AND EXISTS (SELECT FROM pg_attribute WHERE attrelid='stock_operational.sales_receipts'::regclass AND attname='payments' AND NOT attisdropped AND atttypid='jsonb'::regtype AND attnotnull)"
+    return f"SELECT 1 / (to_regclass('stock_operational.{chosen}') IS NOT NULL AND to_regclass('stock_operational.{other}') IS NULL AND to_regclass('stock_operational.media') {media_guard}{guards})::int;"
 
 
-def fingerprint_sql(history='revision', include_media=False):
+def fingerprint_sql(history='revision', include_media=False, without_legacy_payments=False):
     history = history_table(history)
     queries = []
     for schema, tables in [('stock_migration', ['import_batches'] + list(CATALOG)),
-                          ('stock_operational', ['commands', history, 'side_effects', 'environment'] + (['media'] if include_media else []) + list(CATALOG))]:
+                          ('stock_operational', ['commands', history, 'side_effects', 'environment'] + (['media'] if include_media else []) + operational_catalog(without_legacy_payments))]:
         for table in tables:
             # Serialize large JSONB rows once, rather than rebuilding them for
             # the length prefix, concatenation and C-collation sort key.
@@ -116,23 +126,26 @@ def exported_snapshot(target, target_purpose='isolated-staging'):
             process.kill(); process.communicate()
 
 
-def fingerprint(target, snapshot=None, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', include_media=False):
+def fingerprint(target, snapshot=None, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', include_media=False, without_legacy_payments=False):
     validate_readers(workers)
+    operational_catalog(without_legacy_payments)
     history = history_table(history)
     deadline=time.monotonic()+150
     if snapshot is None:
         with exported_snapshot(target, target_purpose) as held:
-            return _fingerprint_snapshot(target,held,deadline,workers,history,row_digests,target_purpose,include_media)
-    return _fingerprint_snapshot(target,snapshot,deadline,workers,history,row_digests,target_purpose,include_media)
+            return _fingerprint_snapshot(target,held,deadline,workers,history,row_digests,target_purpose,include_media,without_legacy_payments)
+    return _fingerprint_snapshot(target,snapshot,deadline,workers,history,row_digests,target_purpose,include_media,without_legacy_payments)
 
 
-def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', include_media=False):
+def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', include_media=False, without_legacy_payments=False):
     sql = 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n'
     if snapshot:
         if not re.fullmatch(r'[A-Fa-f0-9-]+', snapshot): raise ValueError('invalid snapshot')
         sql += f"SET TRANSACTION SNAPSHOT '{snapshot}';\n"
     sql += "SET LOCAL statement_timeout='120s'; SET LOCAL client_encoding='UTF8';\n" + secure_connection_sql()+'\n'+guard_sql(target, target_purpose) + '\n'
-    sql += history_guard_sql(history, include_media) + '\n'
+    sql += history_guard_sql(history, include_media, without_legacy_payments) + '\n'
+    if without_legacy_payments:
+        sql += "SELECT 1 / (stock_operational.receipt_payment_storage_v1()='receipt-payments-jsonb-v1')::int;\n"
     sql += 'SELECT pg_advisory_xact_lock_shared(835107241);\nSELECT pg_advisory_xact_lock_shared(835107242);\n'
     # The complete frozen snapshot is much larger than individual business rows.
     # Read its exact JSONB representation in partitions; never reconstruct the
@@ -143,7 +156,7 @@ def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revisi
     # across otherwise small table reads. The original 150s overall limit stays.
     with read_session(sql + "SET LOCAL standard_conforming_strings=on; SET LOCAL client_encoding='UTF8';", deadline-time.monotonic()) as session:
         rows.append(batch_fingerprint(session))
-    names = [f'{schema}.{table}' for schema,tables in [('stock_migration',list(CATALOG)),('stock_operational',['commands',history,'side_effects','environment']+(['media'] if include_media else [])+list(CATALOG))] for table in tables]
+    names = [f'{schema}.{table}' for schema,tables in [('stock_migration',list(CATALOG)),('stock_operational',['commands',history,'side_effects','environment']+(['media'] if include_media else [])+operational_catalog(without_legacy_payments))] for table in tables]
     stopped = Event()
     def table_fingerprint(name):
         if stopped.is_set(): raise ValueError('recovery read cancelled')
@@ -161,9 +174,9 @@ def _fingerprint_snapshot(target, snapshot, deadline, workers=1, history='revisi
         with ThreadPoolExecutor(max_workers=workers) as pool:
             rows.extend(pool.map(table_fingerprint,names))
     with read_session(sql,deadline-time.monotonic()) as session:
-        for query in fingerprint_sql(history, include_media).splitlines()[2*len(CATALOG)+5+int(include_media):]:
+        for query in fingerprint_sql(history, include_media, without_legacy_payments).splitlines()[len(CATALOG)+len(operational_catalog(without_legacy_payments))+5+int(include_media):]:
             rows.extend(json.loads(line) for line in session.rows(query) if line.startswith(b'{'))
-    tables = {f'{schema}.{table}' for schema, names in [('stock_migration', ['import_batches']+list(CATALOG)), ('stock_operational', ['commands',history,'side_effects','environment']+(['media'] if include_media else [])+list(CATALOG))] for table in names}
+    tables = {f'{schema}.{table}' for schema, names in [('stock_migration', ['import_batches']+list(CATALOG)), ('stock_operational', ['commands',history,'side_effects','environment']+(['media'] if include_media else [])+operational_catalog(without_legacy_payments))] for table in names}
     keys = [r.get('table', r.get('metadata')) for r in rows]
     if len(keys) != len(tables | METADATA_NAMES) or set(keys) != tables | METADATA_NAMES: raise ValueError('incomplete recovery inventory')
     return rows
@@ -183,8 +196,9 @@ def full_row_security_reader_sql():
       WHERE n.nspname IN ('stock_migration','stock_operational') AND c.relkind IN ('r','p');"""
 
 
-def capture(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', row_security_reader=False, include_media=False):
+def capture(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', row_security_reader=False, include_media=False, without_legacy_payments=False):
     validate_readers(workers)
+    operational_catalog(without_legacy_payments)
     if type(row_security_reader) is not bool: raise ValueError('row-security reader must be an explicit boolean')
     history = history_table(history)
     target = str(uuid.UUID(target))
@@ -197,14 +211,14 @@ def capture(directory, target, *, workers=1, history='revision', row_digests=Fal
             begin = f"BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY; SET TRANSACTION SNAPSHOT '{snapshot}';\n"
             with read_session(begin + secure_connection_sql()+'\n'+guard_sql(target,target_purpose)) as session:
                 session.rows(full_row_security_reader_sql())
-        records = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose, include_media=include_media)
+        records = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose, include_media=include_media, without_legacy_payments=without_legacy_payments)
         fd = os.open(directory / 'database.dump', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, 'wb') as stream:
             args = ['pg_dump', '-w', '-Fc', '--snapshot=' + snapshot, '-n', 'stock_migration', '-n', 'stock_operational']
             if row_security_reader: args.append('--enable-row-security')
             run = subprocess.run(args, stdout=stream, stderr=subprocess.PIPE, env=client_environment(), timeout=1800)
         if run.returncode: raise ValueError('backup failed; incomplete directory must be quarantined')
-        if fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose, include_media=include_media) != records: raise ValueError('security/sequence metadata changed during backup')
+        if fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose, include_media=include_media, without_legacy_payments=without_legacy_payments) != records: raise ValueError('security/sequence metadata changed during backup')
     with (directory / 'database.dump').open('rb') as stream:
         check = subprocess.run(['pg_restore', '--list'], stdin=stream, capture_output=True, timeout=60)
     if check.returncode: raise ValueError('backup archive is unreadable')
@@ -215,25 +229,28 @@ def capture(directory, target, *, workers=1, history='revision', row_digests=Fal
                'restoreVerified': False, 'encryptionVerified': False}
     if target_purpose != 'isolated-staging': receipt['sourcePurpose'] = target_purpose
     if include_media: receipt['includesMediaCatalog'] = True
+    if without_legacy_payments: receipt['withoutLegacyPayments'] = True
     if row_security_reader: receipt['fullRowSecurityReaderVerified'] = True
     if row_digests: receipt.update({'version':2,'fingerprintFormat':'sorted-row-sha256-v2'})
     write_private(directory / 'receipt.json', json.dumps(receipt, indent=2) + '\n')
     return receipt
 
 
-def verify(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', include_media=False):
+def verify(directory, target, *, workers=1, history='revision', row_digests=False, target_purpose='isolated-staging', include_media=False, without_legacy_payments=False):
     validate_readers(workers)
+    operational_catalog(without_legacy_payments)
     history = history_table(history)
     directory = Path(directory); receipt = json.loads((directory / 'receipt.json').read_text())
     if checksum(directory / 'database.dump') != receipt['dumpSha256'] or checksum(directory / 'fingerprint.json') != receipt['fingerprintSha256']:
         raise ValueError('backup artifact checksum mismatch')
     guard_sql(target, target_purpose)
     if receipt.get('sourcePurpose', 'isolated-staging') != target_purpose: raise ValueError('backup target purpose mismatch')
+    if receipt.get('withoutLegacyPayments',False) != without_legacy_payments: raise ValueError('backup payment layout mismatch')
     if receipt.get('includesMediaCatalog',False) != include_media: raise ValueError('backup media layout mismatch')
     chosen = 'sorted-row-sha256-v2' if row_digests else 'legacy-jsonb-text-v1'
     if receipt.get('fingerprintFormat','legacy-jsonb-text-v1') != chosen: raise ValueError('backup fingerprint format mismatch')
     expected = json.loads((directory / 'fingerprint.json').read_text())
-    with exported_snapshot(target, target_purpose) as snapshot: actual = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose, include_media=include_media)
+    with exported_snapshot(target, target_purpose) as snapshot: actual = fingerprint(target, snapshot, workers=workers, history=history, row_digests=row_digests, target_purpose=target_purpose, include_media=include_media, without_legacy_payments=without_legacy_payments)
     key = lambda row: row.get('table', row.get('metadata'))
     before, after = ({key(row): row for row in rows} for rows in [expected, actual])
     differences = sorted(k for k in before.keys() | after.keys() if before.get(k) != after.get(k))
@@ -253,10 +270,11 @@ def main():
         p.add_argument('--workers', type=int, choices=(1,2), default=1, help='Bounded readers sharing the same snapshot and 150s deadline')
         p.add_argument('--row-digests', action='store_true', help='Explicit version 2 sorted full-row SHA256 fingerprints; reduces network transfer')
         p.add_argument('--target-purpose', choices=('isolated-staging','production'), default='isolated-staging', help='Explicit production opt-in; exact UUID and purpose are checked in every snapshot')
-        p.add_argument('--include-media', action='store_true', help='Explicit media catalog layout; all 52 private tables are fingerprinted, never silently omit media')
+        p.add_argument('--without-legacy-payments', action='store_true', help='Explicit retired operational payment table layout; migration payment archive remains required')
+        p.add_argument('--include-media', action='store_true', help='Include the required media catalog in the explicitly selected recovery layout')
         p.add_argument('--history', choices=('audit','revision'), default='revision', help='Explicit source schema layout; never auto-fallback')
     args = parser.parse_args()
-    result = capture(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose, row_security_reader=args.row_security_reader, include_media=args.include_media) if args.command == 'capture' else verify(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose, include_media=args.include_media)
+    result = capture(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose, row_security_reader=args.row_security_reader, include_media=args.include_media, without_legacy_payments=args.without_legacy_payments) if args.command == 'capture' else verify(args.directory, args.target_id, workers=args.workers, history=args.history, row_digests=args.row_digests, target_purpose=args.target_purpose, include_media=args.include_media, without_legacy_payments=args.without_legacy_payments)
     if args.command == 'verify': write_private(args.output, json.dumps(result, indent=2) + '\n')
     print(json.dumps({'completed': True, 'restoreMatch': result.get('match'), 'differentSections':result.get('differentSections',[]), 'dumpChecksum': result.get('dumpSha256', result.get('backupDumpSha256'))}))
     return 0 if result.get('match', True) else 1

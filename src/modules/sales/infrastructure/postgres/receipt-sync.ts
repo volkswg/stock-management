@@ -1,4 +1,4 @@
-import { receiptPaymentsEnabled, paymentReceipts, withReceiptPayments, prepareReceiptPayments } from "./receipt-payment";
+import { requireReceiptPayments, paymentReceipts, withReceiptPayments, prepareReceiptPayments } from "./receipt-payment";
 import { PersistenceFailure } from "@/infrastructure/persistence/postgres/database";
 import type { NativeRecord } from "@/infrastructure/persistence/postgres/native-records";
 import type { Storage } from "./storage";
@@ -68,18 +68,16 @@ export function createReceiptSync(storage: Storage, account: {
                 const syncRows = await storage.salesReceiptSyncs.all();
                 return Boolean(syncRows.find(record => record.id === syncId && record.status === "complete"));
             },
-            prepare: async () => { await Promise.all([storage.salesReceipts.prepare(), storage.salesReceiptItems.prepare(), storage.salesReceiptPayments.prepare(), storage.salesReceiptSyncs.prepare()]); },
+            prepare: async () => { await requireReceiptPayments(); await Promise.all([paymentReceipts.prepare(), storage.salesReceiptItems.prepare(), storage.salesReceiptSyncs.prepare()]); },
             async append(batch) {
                 const { receiptRows, itemRows, paymentRows } = batches.get(batch)!;
-                const inline = await receiptPaymentsEnabled();
+                await requireReceiptPayments();
                 const payments = new Map<NativeRecord["id"], NativeRecord[]>();
                 for (const row of paymentRows) payments.set(row.receiptId, [...(payments.get(row.receiptId) ?? []), row]);
                 for (const record of receiptRows) {
-                    if (inline) await paymentReceipts.insert(withReceiptPayments(record, await prepareReceiptPayments(payments.get(record.id) ?? [])));
-                    else await storage.salesReceipts.insert(record);
+                    await paymentReceipts.insert(withReceiptPayments(record, await prepareReceiptPayments(payments.get(record.id) ?? [])));
                 }
                 for (const record of itemRows) await storage.salesReceiptItems.insert(record);
-                if (!inline) for (const record of paymentRows) await storage.salesReceiptPayments.insert(record);
             },
             async complete(syncId, salesDate, batch, syncedAt) {
                 await storage.salesReceiptSyncs.insert({ id: syncId, salesDate, accountId: account.id, shopName: account.shopName, status: "complete", receiptCount: String(batch.receiptCount), itemCount: String(batch.itemCount), paymentCount: String(batch.paymentCount), syncedAt });

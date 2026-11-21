@@ -8,6 +8,45 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
+PR98, source `0454c58ed8b0e9283658e5c1ca28646dc1c60288`, deployed as
+`dpl_ExGQBqzMtc3PNLmRHJKSC8G6oSsh` on 2026-11-21. The approved receipt JSONB rebuild
+preserved split payments, all original rows/revisions and existing controls.
+Fresh private recovery covered53 tables,15 business metadata sections and three
+sequence states; local restore/rehearsal and eight frozen/live HTTP comparisons
+passed. Browser writes and LINE reopened within the approved window. No provider
+write canary/access link was used. The legacy operational table remains for recovery;
+old business Sheets remain read-only. Private receipts stay on the Mac.
+
+### Legacy operational payment dependency cleanup — prepared, not deployed
+
+Current source removes the old payment repository and fallback and requires the
+released receipt JSONB contract. A separate operator-only compatibility artifact
+keeps both shared schema guards effective before/after retirement; it drops no
+table and is outside automatic migrations. Runtime permissions are unchanged.
+Recovery adds an explicit absent-table layout while always retaining the migration
+payment archive. Old rebuild/inverse witnesses retain their pinned PR98 source.
+
+Local synthetic acceptance passed59 checks through physical current owners on
+fresh disposable copies: table absence, split/refund/report parity, zero/none,
+command replay, late rollback, schema-guard/dependency refusals, application,
+row edits, both LINE image workflows, uploads and real browser retry/reload.
+The unchanged PR98 rebuild/inverse passed12 historical checks separately. A real
+logical dump/restore matched all retained records and15 metadata sections, private
+configuration and three sequence states. Only dropped physical column slots were
+canonicalized to visible ordinal positions in this **test-only** restore comparison;
+production recovery fingerprint/checksum formats remain unchanged.
+
+All775 Node regressions/current checks and five recovery-reader tests passed.
+Type checking, lint (one inherited unused `shipmentRow` warning) and the isolated
+credential-free build passed; routes and113 browser chunks are unchanged. Direct
+current Python discovery passes79/80; the deployment-plan migration-list test also
+fails on unchanged PR98 source because the already-existing private-account
+migration is absent from its old expected list. It is unrelated baseline debt,
+not a reason to rewrite historical fixtures. No production/provider access or live
+change was used. Credentials, snapshots and retained recovery evidence are intact.
+
+### Previous application release — PR97
+
 [PR97](https://github.com/volkswg/stock-management/pull/97), source `7aaa063`,
 deployment `dpl_9BQv25aUJ8youkTGYXnESDTHrLu5`, is live. Its approved application-only
 release kept the app/LINE open and preserved schema, records, permissions, cutoff,
@@ -20,7 +59,7 @@ groups. No business write, real-provider canary or access link was used. Retaine
 current snapshot. Private release receipts stay on the Mac. Reload normal tabs
 for row-v1; preserve unresolved pending operations for reconciliation.
 
-### Lean Loyverse sync and receipt-owned payments — PR98, not deployed
+### Lean Loyverse sync and receipt-owned payments — PR98 implementation evidence
 
 Receipt sync stops collecting16 unused header fields and eight unused item fields;
 product rows stay in `sales_receipt_items`. The original ten retained header

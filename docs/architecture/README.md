@@ -8,14 +8,11 @@ composition wires feature-owned ports. `src/externals/` and `src/features/` are
 retired. Current consumers use canonical module owners; standalone script
 entrypoints remain explicit.
 
-Production's last verified application release is PR97 `7aaa063`: row-only edit
-protection is live; the schema is unchanged. PR96's unused service
-forwards and inactive reference mappings are retired. Order images
-upload individually on selection, and order creation sends verified media
-references. PR94 removed the unused movement purchase reference. All23 business
-tables use native `deletedAt`; operational cell/ordinal/kind/lexeme sidecars and
-duplicate media URLs are gone. This records the verified release checkpoint,
-not a new live inspection. See the [evidence ledger](../refactoring/progress.md#latest-production-release).
+Production's last verified application release is PR98 `0454c58`: receipt-owned
+JSONB payments and lean Loyverse sync are live, including split payments. Browser
+writes and LINE reopened after the approved rebuild, recovery and API checks.
+The old operational payment table is retained; no new live action is authorized
+by the current cleanup. See the [evidence ledger](../refactoring/progress.md#latest-production-release).
 
 Business storage and private Loyverse account configuration use PostgreSQL.
 Each feature owns explicit column maps and semantic port adapters; root transport
@@ -27,9 +24,10 @@ Existing API/report names and old-request recovery remain supported contracts.
 This cleanup removes67 unused `src/services/` forwards and the unused movement
 reference layout branch. Current UI copy describes sales and employees without
 obsolete storage labels. Retained database rollback guards, LINE behavior,
-request recovery and API fields are unchanged. PR98 prepares lean Loyverse sync and receipt-owned JSONB payment arrays,
-including splits; product rows remain separate. Production is unchanged, and the
-old-data rebuild requires fresh verified recovery and separate release approval. See [ownership](migration-map.md), [verification](../refactoring/verification.md)
+request recovery and API fields are unchanged. The current cleanup requires the released JSONB payment contract and removes the
+legacy operational payment repository/fallback. Product rows remain separate.
+Deploy this application before separately approved table retirement; historical
+rebuild/inverse tests use pinned source, never a production runtime fallback. See [ownership](migration-map.md), [verification](../refactoring/verification.md)
 and [operations](../database-migration.md).
 
 New staff authentication/RBAC/shop permissions and backup automation remain deferred.
