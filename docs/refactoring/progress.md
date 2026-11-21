@@ -8,18 +8,54 @@ independently rerun or recertify every old release.
 
 ## Latest production release
 
-[PR96](https://github.com/volkswg/stock-management/pull/96), source `731f549`,
-deployment `dpl_FuxGsrXtHDhebzpBouvrQiwG1Lue`, is live. The approved application-only
-release preserved the schema, data, permissions, LINE cutoff and original
-protections. The exact merged tree passed CI and the protected build was promoted
-without creating an access link. Five read-only API checks, the upload page,
-idempotency and LINE-signature rejection checks passed. The initial runtime scan
-returned no error/fatal entries. No real-provider or accepted business-write
-canary ran. The retained 53-table recovery checkpoint and three-sequence proofs
-were hash-verified; no new current data snapshot was claimed. Users and jobs may
-resume. Private release receipts remain on the Mac.
+[PR97](https://github.com/volkswg/stock-management/pull/97), source `7aaa063`,
+deployment `dpl_9BQv25aUJ8youkTGYXnESDTHrLu5`, is live. Its approved application-only
+release kept the app/LINE open and preserved schema, records, permissions, cutoff,
+firewall and other environment settings. Seven read-only row-protocol comparisons
+matched business values/types/order and exact returned row scopes; five legacy API
+reads, the upload page, client source, idempotency/signature rejection and old
+unique-deployment protection passed. The initial log scan returned no error/fatal
+groups. No business write, real-provider canary or access link was used. Retained
+53-table/three-sequence recovery evidence was verified without claiming a new
+current snapshot. Private release receipts stay on the Mac. Reload normal tabs
+for row-v1; preserve unresolved pending operations for reconciliation.
 
-### Row-only edit protection — implementation, not deployed
+### Lean Loyverse synchronization — implementation, not deployed
+
+The stored receipt projection now keeps only ten fields: identity/account/day,
+receipt number/type/time, cancellation, provider creation/update times and sync
+time. It stops collecting16 unused receipt fields: shopName, refundFor, order,
+source, storeId, employeeId, customerId, posDeviceId, diningOption, totalMoney,
+totalTax, totalDiscount, tip, surcharge, pointsEarned and pointsDeducted.
+
+Items retain13 fields for identity/link, product/variant/SKU display and grouping,
+quantity, gross money, discount, total cost, aggregated tax and sync time. Eight
+unused copies/details are omitted: lineItemId, price, totalMoney, cost, lineNote,
+lineDiscountsJson, lineTaxesJson and lineModifiersJson. Payments keep seven
+identity/link/method/amount/sync fields; paymentIndex, paidAt and paymentDetailsJson
+are omitted. Incoming line IDs/payment indexes still generate the same stable
+record IDs. Raw tax arrays still supply the retained tax total before omission.
+
+All four core tables, sync counts/completion (including zero-sales days), stable
+request/record IDs, cancellation/refund behavior and existing read adapters remain.
+The account configuration, provider pagination/date filtering/full-payload duplicate
+validation and all calculations are unchanged. The provider may still send its
+full receipt response; this is a stored-data reduction, not an API-bandwidth claim.
+Existing records/columns/defaults/permissions are retained. Old detail values are
+not rewritten or erased, and old datasets still read through the same adapters.
+New omitted columns remain NULL/default under the existing schema. This prepares
+an application-only release; dropping columns or purging existing values requires
+separate explicit production approval. Report/query optimization is separate.
+
+Tests compare full hash-pinned predecessor mappings against lean records for daily,
+hourly, payment, tax, refund, dashboard and profit reports, including cancellation,
+zero-sales completion, missing fields and overrides/expenses. Current PostgreSQL
+checks verify only retained values are stored, downstream commission/stock inputs,
+repeat-sync behavior, atomic late-failure rollback and preservation of historical
+raw details. Earlier source witnesses are restored through a new bounded inverse;
+all original fixtures remain unchanged.
+
+### Row-only edit protection — released in PR97
 
 The previous Orders/Movements edit token included all children; LINE could append
 one item and invalidate a different item's quantity edit. The new opt-in

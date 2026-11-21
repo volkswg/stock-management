@@ -162,13 +162,15 @@ test('Inventory movement transitions, retained deletion, counts and reversal tot
 });
 
 test('Loyverse receipt/items/payments/sync marker commit atomically and repeat sync preserves financial totals',async()=>{
- const receipt={receipt_number:'receipt-synthetic',receipt_type:'SALE',receipt_date:'2026-11-01T01:00:00.000Z',created_at:'2026-11-01T01:00:00.000Z',updated_at:'2026-11-01T01:00:00.000Z',total_money:12.34,total_tax:0,total_discount:0,line_items:[{id:'line-1',item_name:'Synthetic',quantity:2,price:6.17,total_money:12.34,cost:1,cost_total:2}],payments:[{money_amount:12.34,name:'Cash'}]};
+ const receipt={receipt_number:'receipt-synthetic',receipt_type:'SALE',receipt_date:'2026-11-01T01:00:00.000Z',created_at:'2026-11-01T01:00:00.000Z',updated_at:'2026-11-01T01:00:00.000Z',total_money:12.34,total_tax:0,total_discount:0,line_items:[{id:'line-1',item_name:'Synthetic',quantity:2,price:6.17,gross_total_money:12.34,total_money:12.34,cost:1,cost_total:2}],payments:[{money_amount:12.34,name:'Cash'}]};
  let loads=0;
  const account={id:'account-synthetic',shopName:'Synthetic shop',service:{async getReceipts(){loads++;return [receipt];}}};
  const first=await command(()=>sales.syncLoyverseDailySales({storage:service,account,salesDate:'2026-11-01'}));assert.equal(first.outcome,'synced');
  const second=await command(()=>sales.syncLoyverseDailySales({storage:service,account,salesDate:'2026-11-01'}));assert.equal(second.outcome,'already_synced');assert.equal(loads,1);
  await transaction(false,async()=>{
-  const raw=(await currentTransaction().query('SELECT "totalMoney"::text value FROM stock_operational.sales_receipts')).rows;assert.deepEqual(raw.map(r=>r.value),['12.34']);
+  const raw=(await currentTransaction().query('SELECT "totalMoney"::text value FROM stock_operational.sales_receipts')).rows;assert.deepEqual(raw.map(r=>r.value),[null]);
+  const report=await sales.getGoogleSheetsDailySales({storage:service,accountId:'account-synthetic',salesDate:'2026-11-01'});
+  assert.equal(report.totals.netSales,12.34);assert.equal(report.totals.costOfGoods,2);assert.equal(report.paymentsByType[0].netPayments,12.34);
  });
 });
 
