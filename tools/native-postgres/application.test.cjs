@@ -102,6 +102,9 @@ test('Shipments create, link and read use existing business ports in one transac
  const linked=await command(()=>shipments.linkOrderToShipment({storage:service,shipmentId:shipment.id,orderId:'order-valid',createdBy:'synthetic'}));
  assert.ok(linked);
  const result=await transaction(false,()=>shipments.listShipments({storage:service}));assert.equal(result[0].id,shipment.id);
+ const {PostgresOrderDetailShipmentProjection}=require('../../src/modules/shipments/infrastructure/postgres/order-detail-shipment-projection.ts');
+ const detail=await transaction(false,()=>orders.getOrderDetail({storage:service,orderId:'order-valid',shipmentProjection:new PostgresOrderDetailShipmentProjection(service)}));
+ assert.equal(detail.shipmentId,shipment.id);assert.equal(detail.shipment.id,shipment.id);assert.equal(detail.shipment.poNumber,'PO-synthetic');
 });
 
 test('Expenses and shop configuration retain amounts, master mappings and soft-deletion history',async()=>{
