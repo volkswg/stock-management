@@ -66,6 +66,7 @@ function http(owner, previous = false, fail = false) {
   const reports = reportPair()[previous ? 'previous' : 'current'], errors = [];
   const failIfNeeded = () => { if (fail) throw Error('Synthetic unavailable storage'); };
   const sales = { isValidBangkokSalesDate: server.isValidBangkokSalesDate, listSalesProfitCostOverrides: async () => [], listSalesSyncStatus: async () => { failIfNeeded(); return { rows: data().syncs, summary: { complete: 2 } }; } };
+  sales.projectProfitExpenses = server.projectProfitExpenses;
   for (const [name, oldName] of names) { const key = previous ? oldName : name; sales[key] = async input => { failIfNeeded(); return reports[key](input); }; }
   const imports = {
     '@/composition/postgres/route': { withPersistence: handler => handler },
@@ -74,7 +75,7 @@ function http(owner, previous = false, fail = false) {
     '@/config': { getConfig: () => ({}) },
     '@/composition/postgres/service': { createBusinessDatabase: () => ({}) },
     '@/modules/sales/server': sales,
-    '@/modules/expenses/server': { listExpenses: async () => [], listExpenseShops: async () => [] },
+    '@/modules/expenses/server': { listExpenses: async () => [], listExpenseShops: async () => [], listExpenseCategories: async () => [] },
   };
   const file = `src/app/api/sales/${owner}/route.ts`;
   return { api: evaluate(file, previous ? beforeSalesNaming(file).toString() : fs.readFileSync(file, 'utf8'), imports, errors), errors };

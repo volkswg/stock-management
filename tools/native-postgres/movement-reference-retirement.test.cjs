@@ -48,7 +48,7 @@ test('unused movement reference retires safely with identical browser/LINE behav
  await t.test('current app reads and writes work with retained column; response keeps a blank field',async()=>{
   await command(()=>inventory.appendMovementJourneyItem(storage,()=>({id:'REF_COMPAT',masterId:'REF_MOVE',shop:'NJ',quantity:'2',remark:'retained',fromLocation:'Home',toLocation:'NJ',imageUrl:'',status:'created',createdAt:'2026-11-20T00:00:00Z',updatedAt:'',stockCounted:false,isNewArrival:false})));
   assert.equal(await scalar("SELECT \"purchaseDetailId\" value FROM stock_operational.movement_details WHERE id='REF_COMPAT'"),null);
-  const result=await views();const text=JSON.stringify(result.find(r=>r.path==='/api/movements/REF_MOVE').body);assert.match(text,/"purchaseDetailId":""/);
+  const result=await views();const rows=result.find(r=>r.path==='/api/movements/REF_MOVE').body.records;assert.ok(rows.length);assert.ok(rows.every(row=>!Object.hasOwn(row,'purchaseDetailId')));
  });
  await t.test('unapproved/stale/wrong target and populated active or deleted references refuse',async()=>{
   await refused(forward);await gates();await owner.query("SET stock.movement_reference_revision='-1'");await refused(forward);await gates();await owner.query("SET stock.expected_isolation_id='00000000-0000-0000-0000-000000000000'");await refused(forward);

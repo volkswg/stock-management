@@ -6,6 +6,7 @@ const scopes={
     "@/modules/expenses/contracts",
     "./contracts",
     "./application/reports",
+    "./application/project-profit-expenses",
     "./infrastructure/google-sheets/sales-reader",
     "@/infrastructure/external/loyverse",
     "./application/sync-receipts",
@@ -25,6 +26,10 @@ const scopes={
     "@/modules/expenses/contracts",
     "../contracts",
     "./ports/sales-reader"
+  ],
+  "src/modules/sales/application/project-profit-expenses.ts": [
+    "@/modules/expenses/contracts",
+    "../contracts"
   ],
   "src/modules/sales/application/ports/sales-reader.ts": [],
   "src/modules/sales/application/sync-receipts.ts": [

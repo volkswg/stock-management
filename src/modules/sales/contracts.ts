@@ -11,6 +11,12 @@ export type SalesProfitCostOverride = {
 
 import type { Expense } from "@/modules/expenses/contracts";
 
+// Resolved input owned by reporting; never an expense API/storage record.
+export type ProfitExpense = Pick<Expense, "id" | "month" | "scope" | "amount" | "name" | "note"> & {
+  accountId: string;
+  category: string;
+};
+
 export type DailySalesItemRow = {
   itemId: string;
   variantId: string;
@@ -91,7 +97,7 @@ export type ProfitSummaryShop = ProfitSummaryMetrics & {
 };
 
 export type ProfitSummarySharedExpense = Pick<
-  Expense,
+  ProfitExpense,
   "id" | "amount" | "category" | "name" | "note"
 >;
 

@@ -6,6 +6,7 @@ const scopes={
     "@/modules/expenses/contracts",
     "./contracts",
     "./application/reports",
+    "./application/project-profit-expenses",
     "./application/ports/receipt-source",
     "./infrastructure/google-sheets/sales-reader",
     "@/infrastructure/external/loyverse",

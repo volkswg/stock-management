@@ -97,6 +97,14 @@ test('handled HTTP failure rolls back all earlier writes; missing keys and auth 
  assert.equal(ran,1);
 });
 
+test('previously completed API snapshots replay byte-for-byte without rewriting retired response fields',async()=>{
+ const snapshot={status:200,headers:[['content-type','application/json']],body:Buffer.from(JSON.stringify({records:[{movementId:'synthetic',purchaseDetailId:''}],expenses:[{id:'synthetic',accountId:'legacy',category:'Legacy'}]})).toString('base64')};
+ const key='legacy-api-field-snapshot',intent=hashIntent({quantity:'5'});
+ assert.deepEqual(await executeCommand('api-field-history',key,intent,async()=>snapshot),snapshot);
+ const replay=await executeCommand('api-field-history',key,intent,async()=>assert.fail('Completed operation reexecuted'));
+ assert.deepEqual(replay,snapshot);assert.equal(replay.body,snapshot.body);
+});
+
 test('Shipments create, link and read use existing business ports in one transaction',async()=>{
  const shipment=await command(()=>shipments.createShipment({storage:service,poNumber:'PO-synthetic',createdBy:'synthetic'}));
  const linked=await command(()=>shipments.linkOrderToShipment({storage:service,shipmentId:shipment.id,orderId:'order-valid',createdBy:'synthetic'}));
@@ -115,6 +123,11 @@ test('Expenses and shop configuration retain amounts, master mappings and soft-d
   categoryId=(await expenses.listExpenseCategories(service))[0].id;
   const id=await expenses.saveExpense(service,{requestId:'00000000-0000-0000-0000-000000000001',month:'2026-11',expenseDate:'2026-11-01',scope:'SHOP',shopId,categoryId,name:'Synthetic expense',amount:12.34,note:''});
   const rows=await expenses.listExpenses({storage:service,year:'2026'});assert.equal(rows[0].amount,12.34);
+ assert.ok(rows.every(row=>!Object.hasOwn(row,'accountId')&&!Object.hasOwn(row,'category')));
+ const salesOwner=require('../../src/modules/sales/server.ts');
+ const projected=salesOwner.projectProfitExpenses(rows.filter(row=>row.id===id),await expenses.listExpenseShops(service),await expenses.listExpenseCategories(service));
+ assert.equal(projected[0].accountId,'account-synthetic');assert.equal(projected[0].category,'Synthetic category');
+ const profit=await salesOwner.getProfitSummary({storage:service,year:'2026',accounts:[{id:'account-synthetic',shopName:'Synthetic shop'}],expenses:projected,costOverrides:[]});assert.equal(profit.totals.expenses,12.34);
   await expenses.removeExpense(service,id);assert.equal((await expenses.listExpenses({storage:service,year:'2026'})).length,0);
   assert.ok((await currentTransaction().query('SELECT "deletedAt" FROM stock_operational.expenses WHERE id=$1',[id])).rows[0].deletedAt);
  });
@@ -152,7 +165,7 @@ test('Inventory movement transitions, retained deletion, counts and reversal tot
  await command(async()=>{
   const identity={masterId:'movement-synthetic',userId:'user',startedAt:'2026-11-01T01:00:00.000Z'};
   await inventory.synchronizeMovementJourney(service,identity);
-  await inventory.appendMovementJourneyItem(service,()=>({id:'movement-item-synthetic',masterId:identity.masterId,shop:account.shopName,quantity:'3',remark:'',fromLocation:'',toLocation:'',imageUrl:'https://example.test/photo',purchaseDetailId:'',status:'created',createdAt:identity.startedAt,updatedAt:identity.startedAt,stockCounted:true,isNewArrival:true}));
+  await inventory.appendMovementJourneyItem(service,()=>({id:'movement-item-synthetic',masterId:identity.masterId,shop:account.shopName,quantity:'3',remark:'',fromLocation:'',toLocation:'',imageUrl:'https://example.test/photo',status:'created',createdAt:identity.startedAt,updatedAt:identity.startedAt,stockCounted:true,isNewArrival:true}));
   await inventory.synchronizeMovementJourney(service,identity,true);
   const delivered=await inventory.markMovementDelivered({storage:service,movementMasterId:identity.masterId});assert.ok(delivered);
   const count=await inventory.saveMonthlyStockCount({account,storage:service,month:'2026-11',physicalCount:3,note:'',updatedBy:'synthetic'});assert.equal(count.physicalCount,3);

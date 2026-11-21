@@ -1,7 +1,8 @@
 import type { BusinessDatabase } from "../../src/composition/postgres/service";
 import type { OrderListItem, CreatedOrder, OrderDetail } from "../../src/modules/orders/contracts";
 import type { Employee, EmployeeTimesheet } from "../../src/modules/hr/contracts";
-import type { MovementJourneyItem } from "../../src/modules/inventory/contracts";
+import type { MovementJourneyItem, ProductMovementRecord } from "../../src/modules/inventory/contracts";
+import type { Expense } from "../../src/modules/expenses/contracts";
 import type { MovementEventClassification } from "../../src/modules/line-workflows/contracts";
 import type * as orders from "../../src/modules/orders/server";
 import type * as hr from "../../src/modules/hr/server";
@@ -27,4 +28,6 @@ export function nativeStorageTypes(database: BusinessDatabase) {
 }
 
 type RetiredMovementReference = Assert<Equal<Extract<keyof MovementJourneyItem, "purchaseDetailId">, never>>;
-export type { RetiredMovementReference };
+type RetiredMovementApiField = Assert<Equal<Extract<keyof ProductMovementRecord, "purchaseDetailId">, never>>;
+type RetiredExpenseApiFields = Assert<Equal<Extract<keyof Expense, "accountId" | "category">, never>>;
+export type { RetiredMovementReference, RetiredMovementApiField, RetiredExpenseApiFields };

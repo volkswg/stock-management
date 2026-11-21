@@ -1,5 +1,4 @@
-import type { Expense } from "@/modules/expenses/contracts";
-import type { DailySalesItemRow, DailySalesPaymentRow, DailySalesReport, SalesDashboardDay, SalesDashboardReport, ProfitSummaryMetrics, ProfitSummaryShop, ProfitSummaryMonth, ProfitSummary, SalesProfitCostOverride } from "../contracts";
+import type { DailySalesItemRow, DailySalesPaymentRow, DailySalesReport, SalesDashboardDay, SalesDashboardReport, ProfitSummaryMetrics, ProfitSummaryShop, ProfitSummaryMonth, ProfitSummary, ProfitExpense, SalesProfitCostOverride } from "../contracts";
 import type { SalesReader, SalesRecord, SalesValue } from "./ports/sales-reader";
 
 // A single composed async function preserves the original rejection phase during parallel reads.
@@ -117,7 +116,7 @@ async function getProfitSummary({
 }: {
   accounts: Array<{ id: string; shopName: string }>;
   costOverrides: SalesProfitCostOverride[];
-  expenses: Expense[];
+  expenses: ProfitExpense[];
   storage: Context;
   year: string;
 }): Promise<ProfitSummary> {
@@ -153,7 +152,7 @@ async function getProfitSummary({
   const sharedExpenses = expenses.filter(
     (expense) => expense.scope === "SHARED",
   );
-  const expensesByShopKey = new Map<string, Expense[]>();
+  const expensesByShopKey = new Map<string, ProfitExpense[]>();
   for (const expense of shopExpenses) {
     const key = `${expense.month}:${expense.accountId}`;
     expensesByShopKey.set(key, [
@@ -502,7 +501,7 @@ function aggregateTotals(
 function createProfitSummaryMonth(
   month: string,
   shops: ProfitSummaryShop[],
-  sharedExpenses: Expense[],
+  sharedExpenses: ProfitExpense[],
 ): ProfitSummaryMonth {
   const shopTotals = aggregateProfitRows(shops);
   const sharedExpenseTotal = normalizeNumber(

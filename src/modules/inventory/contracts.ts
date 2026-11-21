@@ -64,7 +64,6 @@ export type ProductMovementRecord = {
   fromLocation: string;
   toLocation: string;
   productImageUrl: string;
-  purchaseDetailId: string;
   status: "created" | "delivered";
   createdAt: string;
   updatedAt: string;

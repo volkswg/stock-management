@@ -374,6 +374,7 @@ const scopes = {
     "./application/ports/receipt-sync",
     "./application/receipts-for-date",
     "./application/reports",
+    "./application/project-profit-expenses",
     "./application/sync-receipts",
     "./application/sync-status",
     "./contracts",

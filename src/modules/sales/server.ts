@@ -1,7 +1,7 @@
 import "server-only";
 import type { Storage } from "./infrastructure/postgres/storage";
-import type { Expense } from "@/modules/expenses/contracts";
-import type { DailySalesReport, SalesDashboardReport, ProfitSummary, SalesProfitCostOverride } from "./contracts";
+import type { DailySalesReport, SalesDashboardReport, ProfitSummary, ProfitExpense, SalesProfitCostOverride } from "./contracts";
+export { projectProfitExpenses } from "./application/project-profit-expenses";
 import { createSalesReports } from "./application/reports";
 import { createSalesReader } from "./infrastructure/postgres/sales-reader";
 const reports = createSalesReports(createSalesReader);
@@ -22,7 +22,7 @@ export const getProfitSummary: (input: {
         shopName: string;
     }>;
     costOverrides: SalesProfitCostOverride[];
-    expenses: Expense[];
+    expenses: ProfitExpense[];
     storage: Storage;
     year: string;
 }) => Promise<ProfitSummary> = reports.getProfitSummary;

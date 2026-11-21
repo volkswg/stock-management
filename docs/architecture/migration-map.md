@@ -63,6 +63,12 @@ Sales GET responses identify their storage as `source: "postgres"`. Report data,
 calculations and HTTP routes are unchanged. Business APIs and LINE cannot select
 Sheets storage. Historical source witnesses retain the former names only in tests.
 
+New movement responses omit the retired purchase-detail reference. Expense
+responses expose canonical `shopId`/`categoryId` only; Sales resolves account and
+category display data in its own report-only projection. Profit output and totals
+keep their existing meaning. Historical command responses remain exact replay
+snapshots, including their original fields; no command history is rewritten.
+
 ## Retired service forwards and inactive reference layout
 
 All67 `src/services/` files were import/export forwards or aliases, with no
