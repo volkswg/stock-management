@@ -1073,3 +1073,22 @@ replaces that inherited broken anchor without rewriting the archived record.
 These original source/status witnesses retain the recorded revision, not current production state. Their full context is in the [prior ledger](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md).
 
 - [tools/migration/phase3-status.json at 65ed6f65](https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json)
+
+## Product Master UAT — 22 November 2026
+
+Owner approved product creation from order items, local service/database UAT and
+a hosted plan, subsequently selecting the existing staging project with no new
+paid resource. Branch `uat/product-master-from-order-item`, based on PR102
+`bd7b1bfadf88de2a4aa690927e81681bf9f01d6f`, adds a native catalogue and nullable
+item link; production remains unchanged. Local verification passed: 815 Node tests plus three Python tests, lint and
+TypeScript; nine new actual-PostgreSQL tests plus all 27 existing application and
+five media/LINE checks on separate fresh synthetic copies with the feature schema;
+missing/wrong-target opt-in rejection, empty inverse and nonempty inverse refusal;
+independent logical restore of products/links/media/identity state. Isolated build
+retained every prior route entry and added exactly three routes; 111 browser chunks
+contained no private database strings. Actual headless browser create/link,
+duplicate review/existing link and lost-response/page-reload/exact-key replay passed
+with zero page errors, external requests or duplicate products. Private evidence
+stays on the Mac. Hosted metadata is verified, but the legacy staging schema
+needs a private recovery/rehearsal/upgrade packet and approval before hosted UAT.
+The [procedure](../database-migration.md#product-master-uat) is the execution scope.

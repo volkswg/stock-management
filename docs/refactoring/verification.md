@@ -189,3 +189,24 @@ parentheses, with an independent343-case SQL equivalence check. Other definition
 and validation flags stay exact. Actual current reports then run on
 the restore. The migration payment archive is always present and unchanged.
 This prepares removal but does not authorize a live DROP or certify provider IO.
+
+## Product catalogue UAT
+
+`npm test` includes current catalogue browser/domain/port/boundary regressions.
+The PostgreSQL acceptance campaign adds a fresh `np_product_uat` clone only after
+the final schema is proven; it runs `tools/product-uat/postgres.test.cjs` against
+actual current Orders/Products/HTTP owners. Existing predecessor fixtures remain
+immutable behind a new exact test-only inverse; none of that inverse is runtime
+compatibility code. The isolated build allows only three new catalogue route
+entries and requires every previous route entry to retain its original hash.
+
+On the Mac, `tools/product-uat/local.py --snapshot <private-synthetic-fixture>
+--artifacts <private-output> [--docker-host <existing-local-engine>] --serve` starts
+a sanitized synthetic browser target; see the [UAT runbook](../database-migration.md#product-master-uat).
+Use an existing Playwright installation through `NODE_PATH` and set
+`STOCK_CHROMIUM_EXECUTABLE`, then run
+`node tools/product-uat/browser.cjs <printed-localhost-order-url> <private-screenshot>`.
+It exercises create/link, duplicate review, a dropped post-commit response, page
+reload and exact-key replay against the real HTTP server/database. It refuses
+non-local URLs and aborts any external browser request. These tools are not hosted
+access adapters and must never receive production credentials or real snapshots.

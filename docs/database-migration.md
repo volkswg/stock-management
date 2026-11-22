@@ -977,3 +977,84 @@ changed/reused historical identities. It is not a standalone inverse for table
 retirement, and the new JSONB-only app cannot run after it removes the contract.
 A legacy rollback must pair it with the matching prior application. Until such an
 exact restore/inverse packet is verified and approved, keep the table present.
+
+## Product Master UAT
+
+This feature is review/UAT only. Production and LINE remain running. The old
+Sheets Product Master PR47 was closed, not merged; do not revive its storage or
+authentication design. The Git branch `uat/product-master-from-order-item` binds
+service code and `20261122050700_product_master_order_item_uat.sql` together.
+The schema adds `products` (bigint identity, code/name/variant, reference media,
+native lifecycle timestamps and row revision) and nullable `order_items.productId`.
+Existing order rows remain unlinked; there is no historic automatic import.
+The migration also scopes the two existing media-contract FK counts to their
+five named legacy owners so adding the new reference does not disable old APIs.
+It hash-checks the predecessor function bodies before replacing them. Runtime
+privileges remain private; no anonymous/authenticated catalogue API is exposed
+through Supabase. Existing application access policy is not changed or certified.
+
+### Local service and database
+
+`python3 tools/product-uat/local.py --help` describes the no-cost disposable runner.
+Supply the privately retained **synthetic** final-schema fixture as `--snapshot`
+and a private `--artifacts` directory. Its pinned SHA-256 is
+`8d8feb268ca551a71e2953146945fe9f8635dd94fa434bbe374654576fe8e13c`.
+It refuses other snapshots, including production recovery. Use an existing local
+Docker engine/image `postgres:17.7`; the runner does not pull/install services.
+It creates its own localhost-only container, exercises migration guards/inverse,
+actual APIs, durable retries, recovery and existing application/LINE regressions.
+`--serve` also creates a separate synthetic browser database and an environment-free
+app copy; the printed localhost URL opens the test order. Only catalogue writes
+are allowed through its local proxy; provider/other writes are denied. The staging
+bearer is injected on the local server and never included in browser assets.
+Ctrl-C stops only these new processes/container and removes only the temporary app.
+Keep private synthetic logs/recovery outside Git. There are no provider credentials.
+
+### Existing hosted staging target — preparation only
+
+Owner chose existing `stock-management` (`orjnazrothkdgmzlsuto`), ap-northeast-1,
+in `volkswg's Org`. **Never** point UAT at production `hzynvirpedqnvtbifobx`.
+No new project, paid database branch, plan upgrade or paid service is authorized.
+Use existing capacity and stop if usage/capacity would require a paid change.
+Read-only metadata inspection found legacy `row_order`, `business_cells`,
+`archived_at` and `imageUrl`; `media` and final soft-delete/media contracts are
+absent. This target is not compatible with the current app yet. The new feature
+migration intentionally fails closed there. Do not reset or overwrite its records.
+
+Before hosted execution: inspect schema/privileges and current usage, identify
+existing consumers/writers, verify a private full staging recovery and independent
+restore, rehearse the historical schema upgrade on a local staging clone, and
+produce the exact guarded migration/fingerprint packet. Retain all business IDs,
+records, permissions, archive and recovery evidence. Obtain approval for that
+concrete hosted schema/data upgrade and any write pause before applying it.
+Only then install the additive product UAT migration with the exact staging
+isolation UUID and `stock.product_master_uat=reviewed-product-master-uat-v1`.
+Do not alter the environment purpose to evade its guard.
+
+A hosted app would use a protected preview in the existing Vercel project with
+deployment-specific staging connection/identity/bearer, never production variables,
+source binding, domain aliases, cron or provider credentials. Preserve deployment
+protection and keep writes scoped to synthetic records. Browser access must be
+verified against staging bearer protection before claiming hosted UAT ready; the
+localhost helper is not a hosted authentication solution. No preview deployment,
+access link or protection change is authorized by this plan.
+
+### Pass/fail and rollback
+
+Pass only when: create+link is atomic; double-click/identical/lost-response retries
+produce one product; changed pending input is refused; duplicate suggestions need
+explicit review; linking uses an active product; big IDs remain exact strings;
+existing photo media is reused without uploads; product/item stale edits fail
+without orphan rows; unrelated item changes succeed; archived products cannot be
+newly linked and existing links remain readable; old quantity/remark/order/LINE
+flows and all existing route entries pass; private recovery independently restores
+product rows, links and identity state. Capture exact service/migration hashes.
+Any mismatch, provider call, unexpected privilege, production target, unknown
+staging writer or paid-resource requirement is a STOP.
+
+Rollback the UAT app first. Prefer retaining additive schema/data for investigation.
+`tools/product-uat/rollback-empty.sql` only reverses an approved isolated empty
+catalogue; it refuses every product (including archived rows) or link and restores
+the exact two predecessor media contracts. With UAT records present, preserve and
+review recovery/data disposition separately; never discard them automatically.
+Production release/migration and external integrations require separate approval.

@@ -26,6 +26,23 @@ Browser pending-operation guards, multipart server support, upload reconciliatio
 identity rollback and active LINE session resumption remain supported. This is one
 application-only review PR, with no database migration or deployment authorization.
 
+## Product Master UAT (current approved feature scope)
+
+Use branch `uat/product-master-from-order-item` for both service and schema.
+Create a product from an active order item, reuse its media row, explicitly review
+similar products, or link an existing product. Catalogue edits protect the product
+row; linking protects the item row. Quantities, remarks, original product codes,
+order APIs and LINE journeys retain their existing behavior. No staff login,
+automatic historic backfill, stock aggregation or Loyverse SKU mapping is included.
+
+The local UAT uses only synthetic records. Hosted UAT must reuse the existing
+`stock-management` project (`orjnazrothkdgmzlsuto`), preserve its data, and fit its
+existing capacity. Do not create projects/paid branches, upgrade a plan or add paid
+services. Its legacy schema needs a separately reviewed recovery/rehearsal and
+upgrade packet before hosted execution. See the
+[UAT procedure](../database-migration.md#product-master-uat).
+Production remains unchanged until a separately approved release.
+
 ## Next major milestone: user authentication
 
 The [authentication roadmap](../architecture/user-authentication-roadmap.md)

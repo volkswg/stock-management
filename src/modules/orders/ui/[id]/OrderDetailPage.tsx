@@ -1,5 +1,7 @@
 "use client";
 
+import {OrderItemCatalogue} from "../OrderItemCatalogue";
+
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
@@ -553,6 +555,7 @@ function OrderContent({
                                     : { deliveredQuantity: quantity },
                                 )}
                               />
+                              <OrderItemCatalogue orderId={order.id} itemId={image.id} productCode={image.productCode} onSaved={async()=>{const result=await getOrder(order.id);onOrderChange(result.order);}} />
                               <OrderQuantityStatus
                                 deliveredQuantity={getProductQuantity(image, OrderItemQuantityType.Delivered)}
                                 quoteQuantity={getProductQuantity(image, OrderItemQuantityType.Quote)}

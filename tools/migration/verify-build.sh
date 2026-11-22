@@ -19,11 +19,16 @@ for folder in ['src','public']:
   if source.is_file():
    assert source.read_bytes()==Path(source.relative_to(root)).read_bytes(),source
 manifest=Path('.next/server/app-paths-manifest.json')
-assert hashlib.sha256(manifest.read_bytes()).hexdigest()=='32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e','Route manifest changed'
+routes=json.loads(manifest.read_bytes())
+additions=['/api/products/route','/api/products/[id]/route','/api/orders/[id]/items/[itemId]/product/route']
+for route in additions:
+ assert routes.pop(route,None)=='app'+route+'.js',route
+# All pre-existing route entries must still match the immutable baseline.
+assert hashlib.sha256(json.dumps(routes,indent=2).encode()).hexdigest()=='32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e','Existing route manifest changed'
 chunks=list(Path('.next/static').rglob('*.js'))
 for path in chunks:
  text=path.read_text()
  for private in ['STOCK_DATABASE_URL','STOCK_STAGING_AUTH_TOKEN','STOCK_TARGET_ISOLATION_ID','stock_operational','postgres://','postgresql://']:
   assert private not in text,(path,private)
-print(json.dumps({'sourceMatches':True,'routeManifestUnchanged':True,'clientChunksChecked':len(chunks),'privateDatabaseStrings':0}))
+print(json.dumps({'sourceMatches':True,'existingRoutesUnchanged':True,'approvedNewRoutes':3,'clientChunksChecked':len(chunks),'privateDatabaseStrings':0}))
 PY
