@@ -1010,34 +1010,40 @@ bearer is injected on the local server and never included in browser assets.
 Ctrl-C stops only these new processes/container and removes only the temporary app.
 Keep private synthetic logs/recovery outside Git. There are no provider credentials.
 
-### Existing hosted staging target — preparation only
+### Existing hosted staging target
 
-Owner chose existing `stock-management` (`orjnazrothkdgmzlsuto`), ap-northeast-1,
-in `volkswg's Org`. **Never** point UAT at production `hzynvirpedqnvtbifobx`.
-No new project, paid database branch, plan upgrade or paid service is authorized.
-Use existing capacity and stop if usage/capacity would require a paid change.
-Read-only metadata inspection found legacy `row_order`, `business_cells`,
-`archived_at` and `imageUrl`; `media` and final soft-delete/media contracts are
-absent. This target is not compatible with the current app yet. The new feature
-migration intentionally fails closed there. Do not reset or overwrite its records.
+Owner approved reusing `stock-management` (`orjnazrothkdgmzlsuto`), ap-northeast-1,
+in `volkswg's Org`, then deploying UAT. No new project, paid branch, plan upgrade or
+paid service is authorized. Production `hzynvirpedqnvtbifobx` is excluded.
 
-Before hosted execution: inspect schema/privileges and current usage, identify
-existing consumers/writers, verify a private full staging recovery and independent
-restore, rehearse the historical schema upgrade on a local staging clone, and
-produce the exact guarded migration/fingerprint packet. Retain all business IDs,
-records, permissions, archive and recovery evidence. Obtain approval for that
-concrete hosted schema/data upgrade and any write pause before applying it.
-Only then install the additive product UAT migration with the exact staging
-isolation UUID and `stock.product_master_uat=reviewed-product-master-uat-v1`.
-Do not alter the environment purpose to evade its guard.
+The original staging layout predates the current app. A fresh private full backup
+of all 51 operational/archive tables was independently restored and reconciled.
+The locally rehearsed install retains the entire previous operational schema as
+`stock_operational_legacy_20261122`, including its rows, functions and constraints;
+`stock_migration` stays unchanged. It creates the current native operational schema
+and empty private configuration, installs the additive product migration and seeds
+one synthetic order with two items. All 51 retained-table row counts/digests are
+reconciled again after installation. This preserves old records rather than
+rewriting them into the new UAT dataset. Runtime access to the legacy namespace is
+revoked; the previous read-only account retains its original archive access.
+The limited UAT service login expires on 29 November 2026; it is not an administrator.
+Private recovery, exact guarded installation, credentials and receipts stay on the Mac.
 
-A hosted app would use a protected preview in the existing Vercel project with
-deployment-specific staging connection/identity/bearer, never production variables,
-source binding, domain aliases, cron or provider credentials. Preserve deployment
-protection and keep writes scoped to synthetic records. Browser access must be
-verified against staging bearer protection before claiming hosted UAT ready; the
-localhost helper is not a hosted authentication solution. No preview deployment,
-access link or protection change is authorized by this plan.
+The hosted app uses only a protected preview in the existing Vercel project, with
+**deployment-only** staging connection, CA, identity, bearer and explicit
+`STOCK_UAT_HOSTED_BROWSER=reviewed-preview-product-uat-v1`. No production source
+binding, global variables, custom domain aliases, cron or provider credentials change.
+`src/proxy.ts` supplies the server-held bearer only on that exact unique preview
+hostname, with the fixed original staging identity and UAT runtime login. It fails
+closed for production, custom domains, mismatched identity/connection or cross-origin
+writes. Existing Vercel Authentication remains the perimeter; no public share link
+or global bypass is created. Normal staging bearer checks remain in place.
+
+Only catalogue/order/shipment reads, catalogue writes and order-item edits are
+allowed for this scoped UAT. LINE, uploads, provider sync and unrelated operations
+are rejected. The banner identifies synthetic UAT data. The static reference photo
+has no external dependency. This is not approval to enable real providers or deploy
+the feature to production. Preserve the archived schema and recovery evidence.
 
 ### Pass/fail and rollback
 
@@ -1057,4 +1063,9 @@ Rollback the UAT app first. Prefer retaining additive schema/data for investigat
 catalogue; it refuses every product (including archived rows) or link and restores
 the exact two predecessor media contracts. With UAT records present, preserve and
 review recovery/data disposition separately; never discard them automatically.
+To revert the hosted UAT takeover, first stop its writers, disable the new login
+and revoke its writer membership, then acquire the writer barrier. Retain the UAT
+schema under a separate name, restore the original legacy schema name and original
+`stock_runtime` schema USAGE, and reconcile the retained rows/permissions before
+reopening the former staging app. Never restore an old dump over later UAT writes.
 Production release/migration and external integrations require separate approval.

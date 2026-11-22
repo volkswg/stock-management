@@ -38,8 +38,8 @@ automatic historic backfill, stock aggregation or Loyverse SKU mapping is includ
 The local UAT uses only synthetic records. Hosted UAT must reuse the existing
 `stock-management` project (`orjnazrothkdgmzlsuto`), preserve its data, and fit its
 existing capacity. Do not create projects/paid branches, upgrade a plan or add paid
-services. Its legacy schema needs a separately reviewed recovery/rehearsal and
-upgrade packet before hosted execution. See the
+services. Its previous operational schema is retained intact for recovery; the UAT
+dataset uses current native tables and synthetic records only. See the
 [UAT procedure](../database-migration.md#product-master-uat).
 Production remains unchanged until a separately approved release.
 

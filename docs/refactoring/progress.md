@@ -1092,3 +1092,17 @@ with zero page errors, external requests or duplicate products. Private evidence
 stays on the Mac. Hosted metadata is verified, but the legacy staging schema
 needs a private recovery/rehearsal/upgrade packet and approval before hosted UAT.
 The [procedure](../database-migration.md#product-master-uat) is the execution scope.
+
+### Hosted UAT preparation and staging reuse
+
+Owner subsequently requested deployment to UAT on the existing staging project.
+Fresh private recovery of 51 tables was independently restored; the retained old
+operational namespace and unchanged migration archive reconcile exactly after the
+rehearsed install. A new native UAT dataset contains one synthetic order/two items,
+with a restricted non-admin runtime account and no real-provider credentials.
+Five additional preview-gateway regressions pass (820 Node tests total); normal
+staging/production authorization is unchanged when the UAT flag is absent.
+The gateway requires the exact protected preview hostname, staging identity and
+login, keeps its bearer server-side, denies provider/unrelated operations and rejects
+cross-origin writes. Build, lint and typecheck pass. Deployment checks and receipts
+remain private; production and existing platform protections stay unchanged.
