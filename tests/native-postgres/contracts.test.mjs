@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,readdirSync,existsSync} from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import namingHistory from '../helpers/sales-naming-history.cjs';
 const read=p=>readFileSync(p,'utf8');
 function files(dir){return readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?files(path.join(dir,e.name)):[path.join(dir,e.name)]);}
 test('current business runtime has only named PostgreSQL repositories and all22 explicit maps',()=>{
@@ -49,7 +50,7 @@ test('financial rules, business use cases, provider implementations and browser 
   if(!/^src\/modules\/[^/]+\/(domain|application|ui)\//.test(file)&&!/^src\/infrastructure\/(external|files|configuration)\//.test(file))continue;
   const edit=fixture.edits[file];
   if(file==='src/modules/sales/application/reports.ts'){
-   assert.equal(read(file),edit.before.replaceAll('googleSheetsService','storage'));continue;
+   assert.equal(namingHistory.beforeSalesNaming(file).toString(),edit.before.replaceAll('googleSheetsService','storage'));continue;
   }
   assert.equal(edit,undefined,`Unexpected behavior change: ${file}`);
  }

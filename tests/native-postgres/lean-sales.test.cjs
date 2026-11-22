@@ -35,20 +35,20 @@ test('lean sync omits exactly the 27 unused persisted fields and leaves incoming
 test('daily sales, refunds, product grouping, payments, taxes and Bangkok hourly totals match the full predecessor payload',async()=>{
  const old=records(before('src/modules/sales/infrastructure/postgres/receipt-record-mapping.ts')),lean=records(mapping);
  const input={accountId:'synthetic-account',salesDate:'2026-11-01',storage:{}};
- const expected=await reports(old).getGoogleSheetsDailySales(input),actual=await reports(lean).getGoogleSheetsDailySales(input);
+ const expected=await reports(old).getDailySales(input),actual=await reports(lean).getDailySales(input);
  assert.deepEqual(plain(actual),plain(expected));assert.equal(actual.receiptCount,2);assert.equal(actual.totals.netSales,18);assert.equal(actual.totals.costOfGoods,8);assert.equal(actual.totals.taxes,1.26);assert.equal(actual.totals.itemsSold-actual.totals.itemsRefunded,2);assert.equal(actual.hourlyGrossSales[9].grossSales,30);assert.equal(actual.paymentsByType.reduce((n,r)=>n+r.netPayments,0),18);
 });
 test('dashboard, zero-sales completion and profit with expenses/overrides match the full predecessor data',async()=>{
  const old=reports(records(before('src/modules/sales/infrastructure/postgres/receipt-record-mapping.ts'))),lean=reports(records(mapping));
  const input={accountIds:['synthetic-account'],fromDate:'2026-11-01',toDate:'2026-11-02',storage:{}};
- const dashboard=await lean.getGoogleSheetsSalesDashboard(input);assert.deepEqual(plain(dashboard),plain(await old.getGoogleSheetsSalesDashboard(input)));assert.equal(dashboard.dailySales.length,2);assert.equal(dashboard.dailySales[1].netSales,0);
+ const dashboard=await lean.getSalesDashboard(input);assert.deepEqual(plain(dashboard),plain(await old.getSalesDashboard(input)));assert.equal(dashboard.dailySales.length,2);assert.equal(dashboard.dailySales[1].netSales,0);
  const profit={year:'2026',accounts:[{id:'synthetic-account',shopName:'Synthetic shop'}],expenses:[{id:'expense',month:'2026-11',accountId:'synthetic-account',scope:'SHOP',amount:2,name:'Synthetic',category:'Synthetic',note:''}],costOverrides:[{id:'cost',month:'2026-11',accountId:'synthetic-account',averageItemCost:5,note:'',createdAt:'',updatedAt:'',createdBy:''}],storage:{}};
- assert.deepEqual(plain(await lean.getGoogleSheetsProfitSummary(profit)),plain(await old.getGoogleSheetsProfitSummary(profit)));
+ assert.deepEqual(plain(await lean.getProfitSummary(profit)),plain(await old.getProfitSummary(profit)));
 });
 test('missing optional provider details and identity fallbacks preserve all report values',async()=>{
  const r=receipt({line_items:[{id:'',quantity:0,item_id:null,variant_id:null,item_name:'Fallback',sku:'FALLBACK'}],payments:[{name:'Fallback',money_amount:0}]});
  const old=records(before('src/modules/sales/infrastructure/postgres/receipt-record-mapping.ts'),[r]),lean=records(mapping,[r]);
- const input={accountId:'synthetic-account',salesDate:'2026-11-01',storage:{}};assert.deepEqual(plain(await reports(lean).getGoogleSheetsDailySales(input)),plain(await reports(old).getGoogleSheetsDailySales(input)));assert.equal(lean.items[0].id,old.items[0].id);assert.equal(lean.payments[0].id,old.payments[0].id);
+ const input={accountId:'synthetic-account',salesDate:'2026-11-01',storage:{}};assert.deepEqual(plain(await reports(lean).getDailySales(input)),plain(await reports(old).getDailySales(input)));assert.equal(lean.items[0].id,old.items[0].id);assert.equal(lean.payments[0].id,old.payments[0].id);
 });
 test('every report input field remains in the lean stored records',()=>{
  const source=ts.createSourceFile('reports.ts',fs.readFileSync('src/modules/sales/application/reports.ts','utf8'),ts.ScriptTarget.Latest,true);

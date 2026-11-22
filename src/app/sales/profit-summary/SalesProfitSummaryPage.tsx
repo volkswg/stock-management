@@ -71,7 +71,7 @@ type SharedExpenseRow = {
 
 type ProfitSummaryResponse = {
   ok: boolean;
-  source?: "google_sheets";
+  source?: "postgres";
   year?: string;
   months?: MonthProfitRow[];
   totals?: ProfitMetrics;

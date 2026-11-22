@@ -4,11 +4,12 @@ import { NextResponse } from "next/server";
 import { getConfig } from "@/config";
 import { createBusinessDatabase } from "@/composition/postgres/service";
 import {
-  getGoogleSheetsProfitSummary,
+  getProfitSummary,
+  projectProfitExpenses,
   listSalesProfitCostOverrides,
 } from "@/modules/sales/server";
 
-import { listExpenses, listExpenseShops } from "@/modules/expenses/server";
+import { listExpenses, listExpenseShops, listExpenseCategories } from "@/modules/expenses/server";
 
 export const runtime = "nodejs";
 
@@ -29,10 +30,11 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       shopName,
     }));
     const storage = createBusinessDatabase();
-    const [expenses, costOverrides, shops] = await Promise.all([
+    const [expenses, costOverrides, shops, categories] = await Promise.all([
       listExpenses({ storage, year }),
       listSalesProfitCostOverrides({ storage, year }),
       listExpenseShops(storage),
+      listExpenseCategories(storage),
     ]);
     const accountMap = new Map(configuredAccounts.map(account => [account.id, account]));
     for (const shop of shops) {
@@ -40,16 +42,16 @@ async function GETOperation(request: Request): Promise<NextResponse> {
       accountMap.set(id, { id, shopName: shop.name });
     }
     const accounts = [...accountMap.values()];
-    const summary = await getGoogleSheetsProfitSummary({
+    const summary = await getProfitSummary({
       accounts,
       costOverrides,
-      expenses,
+      expenses: projectProfitExpenses(expenses, shops, categories),
       storage,
       year,
     });
     return NextResponse.json({
       ok: true,
-      source: "google_sheets",
+      source: "postgres",
       accounts,
       ...summary,
     });

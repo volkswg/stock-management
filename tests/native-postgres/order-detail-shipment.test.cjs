@@ -109,10 +109,11 @@ test('order-detail GET retains missing-order and blank-ID responses', async () =
 test('historical inverse is limited to the exact reviewed source delta and rejects other bytes', () => {
   const { createHash } = require('node:crypto');
   const { beforeBillIdentity } = require('../helpers/bill-identity-history.cjs');
+  const { beforeSalesNaming } = require('../helpers/sales-naming-history.cjs');
   const fixture = JSON.parse(fs.readFileSync('tests/fixtures/order-detail-shipment-before.json', 'utf8'));
   const hash = value => createHash('sha256').update(value).digest('hex');
   for (const [file, edit] of Object.entries(fixture.edits)) {
-    assert.equal(hash(fs.readFileSync(file)), edit.afterSha256, file);
+    assert.equal(hash(beforeSalesNaming(file)), edit.afterSha256, file);
     assert.equal(hash(edit.before), edit.beforeSha256, file);
     assert.throws(() => beforeBillIdentity(file, Buffer.concat([fs.readFileSync(file), Buffer.from('\n')])), { code: 'ERR_ASSERTION' });
   }

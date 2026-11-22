@@ -18,9 +18,9 @@ const account=(id,rows)=>({id,shopName:'Synthetic shop',service:{async getReceip
 const sync=(a,key=randomUUID(),store=storage)=>executeCommand('retired-payments',key,hashIntent(a.id),()=>sales.syncLoyverseDailySales({account:a,storage:store,salesDate:'2026-11-01'}));
 async function reports(id='after'){
  return db.transaction(false,async()=>({
-  daily:await sales.getGoogleSheetsDailySales({storage,accountId:id,salesDate:'2026-11-01'}),
-  dashboard:await sales.getGoogleSheetsSalesDashboard({storage,accountIds:[id],fromDate:'2026-11-01',toDate:'2026-11-02'}),
-  profit:await sales.getGoogleSheetsProfitSummary({storage,year:'2026',accounts:[{id,shopName:'Synthetic shop'}],expenses:[],costOverrides:[]}),
+  daily:await sales.getDailySales({storage,accountId:id,salesDate:'2026-11-01'}),
+  dashboard:await sales.getSalesDashboard({storage,accountIds:[id],fromDate:'2026-11-01',toDate:'2026-11-02'}),
+  profit:await sales.getProfitSummary({storage,year:'2026',accounts:[{id,shopName:'Synthetic shop'}],expenses:[],costOverrides:[]}),
   payments:await createSalesReader(storage).payments(),
  }));
 }

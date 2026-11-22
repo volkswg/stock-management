@@ -61,7 +61,7 @@ type SalesByPaymentTypeRow = {
 
 type DailySalesResponse = {
   ok: boolean;
-  source: "google_sheets";
+  source: "postgres";
   date: string;
   account: SalesAccount;
   accounts: SalesAccount[];

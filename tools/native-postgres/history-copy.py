@@ -11,6 +11,7 @@ def copy_history(target):
     target=Path(target)
     if target.exists() and any(target.iterdir()):raise ValueError('Historical destination must be empty')
     retirement=json.loads((ROOT/'tests/fixtures/receipt-payment-retirement-before.json').read_text())
+    naming=json.loads((ROOT/'tests/fixtures/sales-naming-before.json').read_text())
     jsonb=json.loads((ROOT/'tests/fixtures/receipt-payments-jsonb-before.json').read_text())
     payment=json.loads((ROOT/'tests/fixtures/single-receipt-payment-before.json').read_text())
     lean=json.loads((ROOT/'tests/fixtures/lean-loyverse-before.json').read_text())
@@ -29,6 +30,11 @@ def copy_history(target):
         edit=fixture['edits'].get(name)
         source=ROOT/name
         current=source.read_bytes() if source.exists() else None
+        naming_edit=naming['edits'].get(name)
+        if naming_edit:
+            assert (digest(current) if current is not None else None)==naming_edit['afterSha256'],name
+            current=naming_edit['before'].encode()
+            assert digest(current)==naming_edit['beforeSha256'],name
         retirement_edit=retirement['edits'].get(name)
         if retirement_edit:
             assert (hashlib.sha256(current).hexdigest() if current is not None else None)==retirement_edit['afterSha256'],name

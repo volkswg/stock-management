@@ -21,15 +21,15 @@ test('actual sync persists only used values, retains stable receipt/item/payment
 });
 test('daily reports, refund signs, payment splits, taxes, hourly sales, commission inputs and stock quantities remain correct',async()=>{
  await transaction(false,async()=>{
-  const daily=await sales.getGoogleSheetsDailySales({storage:service,accountId:account.id,salesDate:'2026-11-01'});assert.equal(daily.receiptCount,2);assert.equal(daily.totals.netSales,18);assert.equal(daily.totals.grossProfit,10);assert.equal(daily.totals.taxes,1.26);assert.equal(daily.paymentsByType.reduce((n,r)=>n+r.netPayments,0),18);assert.equal(daily.hourlyGrossSales[9].grossSales,30);
-  const dashboard=await sales.getGoogleSheetsSalesDashboard({storage:service,accountIds:[account.id],fromDate:'2026-11-01',toDate:'2026-11-01'});const day=dashboard.shopSeries[0].dailySales[0];assert.equal(day.netSales,18);assert.equal(day.itemsSold-day.itemsRefunded,2);
-  const profit=await sales.getGoogleSheetsProfitSummary({storage:service,year:'2026',accounts:[{id:account.id,shopName:account.shopName}],expenses:[],costOverrides:[]});assert.equal(profit.totals.netSales,18);assert.equal(profit.totals.grossProfit,10);
+  const daily=await sales.getDailySales({storage:service,accountId:account.id,salesDate:'2026-11-01'});assert.equal(daily.receiptCount,2);assert.equal(daily.totals.netSales,18);assert.equal(daily.totals.grossProfit,10);assert.equal(daily.totals.taxes,1.26);assert.equal(daily.paymentsByType.reduce((n,r)=>n+r.netPayments,0),18);assert.equal(daily.hourlyGrossSales[9].grossSales,30);
+  const dashboard=await sales.getSalesDashboard({storage:service,accountIds:[account.id],fromDate:'2026-11-01',toDate:'2026-11-01'});const day=dashboard.shopSeries[0].dailySales[0];assert.equal(day.netSales,18);assert.equal(day.itemsSold-day.itemsRefunded,2);
+  const profit=await sales.getProfitSummary({storage:service,year:'2026',accounts:[{id:account.id,shopName:account.shopName}],expenses:[],costOverrides:[]});assert.equal(profit.totals.netSales,18);assert.equal(profit.totals.grossProfit,10);
  });
 });
 test('completed dates never refetch and empty dates still produce a complete zero-count marker',async()=>{
  const again=await command(()=>sales.syncLoyverseDailySales({account,storage:service,salesDate:'2026-11-01'}));assert.equal(again.outcome,'already_synced');assert.equal(loads,1);
  const empty={...account,service:{async getReceipts(){return [];}}};const zero=await command(()=>sales.syncLoyverseDailySales({account:empty,storage:service,salesDate:'2026-11-02'}));assert.equal(zero.receiptCount,0);
- await transaction(false,async()=>{const statuses=await sales.listSalesSyncStatus({storage:service,month:'2026-11',accountId:account.id});assert.ok(JSON.stringify(statuses).includes('2026-11-02'));const dashboard=await sales.getGoogleSheetsSalesDashboard({storage:service,accountIds:[account.id],fromDate:'2026-11-01',toDate:'2026-11-02'});assert.equal(dashboard.dailySales.length,2);assert.equal(dashboard.dailySales[1].netSales,0);});
+ await transaction(false,async()=>{const statuses=await sales.listSalesSyncStatus({storage:service,month:'2026-11',accountId:account.id});assert.ok(JSON.stringify(statuses).includes('2026-11-02'));const dashboard=await sales.getSalesDashboard({storage:service,accountIds:[account.id],fromDate:'2026-11-01',toDate:'2026-11-02'});assert.equal(dashboard.dailySales.length,2);assert.equal(dashboard.dailySales[1].netSales,0);});
 });
 test('a late sync-marker failure rolls back every new receipt, item and payment, and its command receipt',async()=>{
  let reachedMarker=false;const failedKey='lean-failed-sync-command';

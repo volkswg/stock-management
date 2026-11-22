@@ -1,10 +1,9 @@
-import type { Expense } from "@/modules/expenses/contracts";
-import type { GoogleSheetsDailySalesItemRow, GoogleSheetsDailySalesPaymentRow, GoogleSheetsDailySalesReport, GoogleSheetsSalesDashboardDay, GoogleSheetsSalesDashboardReport, GoogleSheetsProfitSummaryMetrics, GoogleSheetsProfitSummaryShop, GoogleSheetsProfitSummaryMonth, GoogleSheetsProfitSummary, SalesProfitCostOverride } from "../contracts";
-import type { SalesReader, SalesRecord as SheetRecord, SalesValue } from "./ports/sales-reader";
+import type { DailySalesItemRow, DailySalesPaymentRow, DailySalesReport, SalesDashboardDay, SalesDashboardReport, ProfitSummaryMetrics, ProfitSummaryShop, ProfitSummaryMonth, ProfitSummary, ProfitExpense, SalesProfitCostOverride } from "../contracts";
+import type { SalesReader, SalesRecord, SalesValue } from "./ports/sales-reader";
 
 // A single composed async function preserves the original rejection phase during parallel reads.
 export function createSalesReports<Context>(createReader: (context: Context) => SalesReader) {
-async function getGoogleSheetsDailySales({
+async function getDailySales({
   accountId,
   storage,
   salesDate,
@@ -12,7 +11,7 @@ async function getGoogleSheetsDailySales({
   accountId: string;
   storage: Context;
   salesDate: string;
-}): Promise<GoogleSheetsDailySalesReport> {
+}): Promise<DailySalesReport> {
   const reader = createReader(storage);
   const [receiptRecords, itemRecords, paymentRecords] = await Promise.all([
     reader.receipts(),
@@ -29,7 +28,7 @@ async function getGoogleSheetsDailySales({
   return createSalesReport(receipts, itemRecords, paymentRecords);
 }
 
-async function getGoogleSheetsSalesDashboard({
+async function getSalesDashboard({
   accountIds,
   fromDate,
   storage,
@@ -39,7 +38,7 @@ async function getGoogleSheetsSalesDashboard({
   fromDate: string;
   storage: Context;
   toDate: string;
-}): Promise<GoogleSheetsSalesDashboardReport> {
+}): Promise<SalesDashboardReport> {
   const reader = createReader(storage);
   const [receiptRecords, itemRecords, paymentRecords, syncRecords] =
     await Promise.all([
@@ -108,7 +107,7 @@ async function getGoogleSheetsSalesDashboard({
   };
 }
 
-async function getGoogleSheetsProfitSummary({
+async function getProfitSummary({
   accounts,
   costOverrides,
   expenses,
@@ -117,10 +116,10 @@ async function getGoogleSheetsProfitSummary({
 }: {
   accounts: Array<{ id: string; shopName: string }>;
   costOverrides: SalesProfitCostOverride[];
-  expenses: Expense[];
+  expenses: ProfitExpense[];
   storage: Context;
   year: string;
-}): Promise<GoogleSheetsProfitSummary> {
+}): Promise<ProfitSummary> {
   const reader = createReader(storage);
   const [receiptRecords, itemRecords, syncRecords] = await Promise.all([
     reader.receipts(),
@@ -153,7 +152,7 @@ async function getGoogleSheetsProfitSummary({
   const sharedExpenses = expenses.filter(
     (expense) => expense.scope === "SHARED",
   );
-  const expensesByShopKey = new Map<string, Expense[]>();
+  const expensesByShopKey = new Map<string, ProfitExpense[]>();
   for (const expense of shopExpenses) {
     const key = `${expense.month}:${expense.accountId}`;
     expensesByShopKey.set(key, [
@@ -249,7 +248,7 @@ async function getGoogleSheetsProfitSummary({
   const months = monthKeys.map((month) => {
     const monthShops = shops
       .filter((shop) => shop.month === month)
-      .map<GoogleSheetsProfitSummaryShop>((shop) => ({
+      .map<ProfitSummaryShop>((shop) => ({
         accountId: shop.accountId,
         shopName: shop.shopName,
         netItems: shop.netItems,
@@ -279,15 +278,15 @@ async function getGoogleSheetsProfitSummary({
   };
 }
 
-return { getGoogleSheetsDailySales, getGoogleSheetsSalesDashboard, getGoogleSheetsProfitSummary };
+return { getDailySales, getSalesDashboard, getProfitSummary };
 }
 
 function createDashboardDays(
-  syncRecords: SheetRecord[],
-  receipts: SheetRecord[],
-  itemRecords: SheetRecord[],
-  paymentRecords: SheetRecord[],
-): GoogleSheetsSalesDashboardDay[] {
+  syncRecords: SalesRecord[],
+  receipts: SalesRecord[],
+  itemRecords: SalesRecord[],
+  paymentRecords: SalesRecord[],
+): SalesDashboardDay[] {
   const syncedDates = [
     ...new Set(syncRecords.map((sync) => toString(sync.salesDate))),
   ]
@@ -320,10 +319,10 @@ function createDashboardDays(
 }
 
 function createSalesReport(
-  receipts: SheetRecord[],
-  itemRecords: SheetRecord[],
-  paymentRecords: SheetRecord[],
-): GoogleSheetsDailySalesReport {
+  receipts: SalesRecord[],
+  itemRecords: SalesRecord[],
+  paymentRecords: SalesRecord[],
+): DailySalesReport {
   const receiptsById = new Map(
     receipts.map((receipt) => [toString(receipt.id), receipt]),
   );
@@ -345,10 +344,10 @@ function createSalesReport(
 }
 
 function aggregateItems(
-  items: SheetRecord[],
-  receiptsById: Map<string, SheetRecord>,
-): GoogleSheetsDailySalesItemRow[] {
-  const rowsByItem = new Map<string, GoogleSheetsDailySalesItemRow>();
+  items: SalesRecord[],
+  receiptsById: Map<string, SalesRecord>,
+): DailySalesItemRow[] {
+  const rowsByItem = new Map<string, DailySalesItemRow>();
 
   for (const item of items) {
     const receipt = receiptsById.get(toString(item.receiptId));
@@ -387,7 +386,7 @@ function aggregateItems(
     .sort((left, right) => right.netSales - left.netSales);
 }
 
-function createItemRow(item: SheetRecord): GoogleSheetsDailySalesItemRow {
+function createItemRow(item: SalesRecord): DailySalesItemRow {
   return {
     itemId: toString(item.itemId),
     variantId: toString(item.variantId),
@@ -408,8 +407,8 @@ function createItemRow(item: SheetRecord): GoogleSheetsDailySalesItemRow {
 }
 
 function finalizeItemRow(
-  row: GoogleSheetsDailySalesItemRow,
-): GoogleSheetsDailySalesItemRow {
+  row: DailySalesItemRow,
+): DailySalesItemRow {
   const netSales = row.grossSales - row.discounts - row.refunds;
   const grossProfit = netSales - row.costOfGoods;
   return {
@@ -429,10 +428,10 @@ function finalizeItemRow(
 }
 
 function aggregatePayments(
-  payments: SheetRecord[],
-  receiptsById: Map<string, SheetRecord>,
-): GoogleSheetsDailySalesPaymentRow[] {
-  const rowsByType = new Map<string, GoogleSheetsDailySalesPaymentRow>();
+  payments: SalesRecord[],
+  receiptsById: Map<string, SalesRecord>,
+): DailySalesPaymentRow[] {
+  const rowsByType = new Map<string, DailySalesPaymentRow>();
 
   for (const payment of payments) {
     const receipt = receiptsById.get(toString(payment.receiptId));
@@ -467,9 +466,9 @@ function aggregatePayments(
 }
 
 function aggregateTotals(
-  rows: GoogleSheetsDailySalesItemRow[],
-): GoogleSheetsDailySalesReport["totals"] {
-  const totals = rows.reduce<GoogleSheetsDailySalesReport["totals"]>(
+  rows: DailySalesItemRow[],
+): DailySalesReport["totals"] {
+  const totals = rows.reduce<DailySalesReport["totals"]>(
     (result, row) => ({
       itemsSold: result.itemsSold + row.itemsSold,
       grossSales: result.grossSales + row.grossSales,
@@ -496,14 +495,14 @@ function aggregateTotals(
 
   return Object.fromEntries(
     Object.entries(totals).map(([key, value]) => [key, normalizeNumber(value)]),
-  ) as GoogleSheetsDailySalesReport["totals"];
+  ) as DailySalesReport["totals"];
 }
 
 function createProfitSummaryMonth(
   month: string,
-  shops: GoogleSheetsProfitSummaryShop[],
-  sharedExpenses: Expense[],
-): GoogleSheetsProfitSummaryMonth {
+  shops: ProfitSummaryShop[],
+  sharedExpenses: ProfitExpense[],
+): ProfitSummaryMonth {
   const shopTotals = aggregateProfitRows(shops);
   const sharedExpenseTotal = normalizeNumber(
     sharedExpenses.reduce((total, expense) => total + expense.amount, 0),
@@ -532,7 +531,7 @@ function createProfitSummaryMonth(
 function aggregateProfitRows(
   rows: Array<
     Pick<
-      GoogleSheetsProfitSummaryShop,
+      ProfitSummaryShop,
       | "netItems"
       | "netSales"
       | "averageItemCost"
@@ -541,7 +540,7 @@ function aggregateProfitRows(
       | "netProfit"
     >
   >,
-): GoogleSheetsProfitSummaryMetrics {
+): ProfitSummaryMetrics {
   const totals = rows.reduce(
     (result, row) => ({
       netItems: result.netItems + row.netItems,
@@ -584,9 +583,9 @@ function safeAverage(total: number, quantity: number): number {
 }
 
 function aggregateHourlySales(
-  items: SheetRecord[],
-  receiptsById: Map<string, SheetRecord>,
-): GoogleSheetsDailySalesReport["hourlyGrossSales"] {
+  items: SalesRecord[],
+  receiptsById: Map<string, SalesRecord>,
+): DailySalesReport["hourlyGrossSales"] {
   const values = Array.from({ length: 24 }, (_, hour) => ({
     hour: `${String(hour).padStart(2, "0")}:00`,
     grossSales: 0,

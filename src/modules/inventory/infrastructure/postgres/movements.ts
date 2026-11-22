@@ -43,8 +43,6 @@ function rowToMovement(row: NativeRecord): ProductMovementRecord {
     fromLocation: cell(row.fromLocation),
     toLocation: cell(row.toLocation),
     productImageUrl: cell(row.productImageUrl),
-    // Retired storage relationship; preserve the existing public response field.
-    purchaseDetailId: "",
     status: cell(row.status).toLowerCase() === "delivered" ? "delivered" : "created",
     createdAt: cell(row.createdAt),
     updatedAt: cell(row.updatedAt),

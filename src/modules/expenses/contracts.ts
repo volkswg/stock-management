@@ -12,9 +12,6 @@ export type Expense = {
   updatedAt: string;
   createdBy: string;
   deletedAt: string;
-  // Derived compatibility fields used by sales reports; not stored in expenses.
-  accountId: string;
-  category: string;
 };
 export type ExpenseCategory = { id: string; name: string; active: boolean; createdAt: string; updatedAt: string };
 export type ExpenseShop = { id: string; name: string; active: boolean; loyverseAccountId: string; createdAt: string; updatedAt: string };

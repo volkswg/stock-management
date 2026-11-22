@@ -15,10 +15,10 @@ test('current movement SQL never selects or writes the retired relationship',asy
  assert.ok(queries.every(q=>!q.sql.includes('purchaseDetailId')));
  await assert.rejects(movementDetails.update(row,{purchaseDetailId:'1'}),e=>e.status===409);
 });
-test('public movement response retains a blank field without reading the removed column',async()=>{
+test('public movement response omits the retired field without reading the removed column',async()=>{
  const row={...record};Object.defineProperty(row,'purchaseDetailId',{get(){assert.fail('Retired database field read');}});
  const store=createMovementStore({movementDetails:{all:async()=>[row]}}),result=(await store.readDetails()).records()[0];
- assert.equal(result.purchaseDetailId,'');assert.equal(result.quantity,'3');assert.equal(result.remark,'note');
+ assert.equal(Object.hasOwn(result,'purchaseDetailId'),false);assert.equal(result.quantity,'3');assert.equal(result.remark,'note');
 });
 test('LINE movement journey reads and inserts omit the internal retired field',async()=>{
  const saved=[];const adapter=createMovementJourneyAdapter({movementDetails:{all:async()=>[{...record}],insert:async value=>saved.push(value)}});

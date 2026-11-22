@@ -10,13 +10,11 @@ export async function listExpenseCategories(store: Pick<ExpenseMastersReader, "r
 export async function listExpenseShops(store: Pick<ExpenseMastersReader, "readShops">): Promise<ExpenseShop[]> {
   return (await store.readShops()).filter(row => row.id).map(row => ({ id: text(row.id), name: text(row.name), active: active(row.active), loyverseAccountId: text(row.loyverseAccountId), createdAt: text(row.createdAt), updatedAt: text(row.updatedAt) }));
 }
-export async function listExpenses({ store, year }: { store: ExpenseReader & ExpenseMastersReader; year: string }): Promise<Expense[]> {
-  const [rows, shops, categories] = await Promise.all([store.readExpenses(), listExpenseShops(store), listExpenseCategories(store)]);
+export async function listExpenses({ store, year }: { store: ExpenseReader; year: string }): Promise<Expense[]> {
+  const rows = await store.readExpenses();
   return rows.filter(row => row.id && !text(row.deletedAt) && text(row.month).startsWith(`${year}-`)).map(row => ({
     id: text(row.id), month: text(row.month), expenseDate: text(row.expenseDate), shopId: text(row.shopId), scope: text(row.scope) === "SHARED" ? "SHARED" as const : "SHOP" as const,
     categoryId: text(row.categoryId), name: text(row.name), amount: Number(row.amount), note: text(row.note), createdAt: text(row.createdAt), updatedAt: text(row.updatedAt), createdBy: text(row.createdBy), deletedAt: text(row.deletedAt),
-    accountId: shops.find(shop => shop.id === text(row.shopId))?.loyverseAccountId || text(row.shopId),
-    category: categories.find(category => category.id === text(row.categoryId))?.name || text(row.categoryId),
   })).sort((a, b) => `${b.month}:${b.expenseDate}:${b.createdAt}`.localeCompare(`${a.month}:${a.expenseDate}:${a.createdAt}`));
 }
 export async function saveExpense(store: ExpenseWriter & ExpenseMastersReader, input: ExpenseInput, runtime: ExpenseRuntime, createdBy = "web"): Promise<string> {

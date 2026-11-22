@@ -30,9 +30,9 @@ async function snapshot() {
 function oldFields(snapshot){const copy=structuredClone(snapshot);for(const row of copy.sales_receipts)for(const key of columns)delete row.value[key];return copy;}
 async function reports(id='before') {
  return db.transaction(false,async()=>({
-  daily:await sales.getGoogleSheetsDailySales({storage,accountId:id,salesDate:'2026-11-01'}),
-  dashboard:await sales.getGoogleSheetsSalesDashboard({storage,accountIds:[id],fromDate:'2026-11-01',toDate:'2026-11-02'}),
-  profit:await sales.getGoogleSheetsProfitSummary({storage,year:'2026',accounts:[{id,shopName:'Synthetic shop'}],expenses:[],costOverrides:[]}),
+  daily:await sales.getDailySales({storage,accountId:id,salesDate:'2026-11-01'}),
+  dashboard:await sales.getSalesDashboard({storage,accountIds:[id],fromDate:'2026-11-01',toDate:'2026-11-02'}),
+  profit:await sales.getProfitSummary({storage,year:'2026',accounts:[{id,shopName:'Synthetic shop'}],expenses:[],costOverrides:[]}),
   payments:(await createSalesReader(storage).payments()).map(p=>Object.fromEntries(['id','receiptId','paymentTypeId','paymentName','paymentType','moneyAmount','syncedAt'].map(k=>[k,p[k]]))),
  }));
 }

@@ -58,9 +58,21 @@ has no public export map. The old [PR86 tree](https://github.com/volkswg/stock-m
 is the historical worksheet/header ownership index.
 
 The Sheets HTTP/configuration clients and their generic value/range types are
-retired. `GoogleSheets*` report names and `source: "google_sheets"` API values
-remain compatibility contracts; they do not read a workbook. Business APIs and
-LINE cannot select Sheets storage.
+retired. Sales reports use storage-neutral function/type names, and the four
+Sales GET responses identify their storage as `source: "postgres"`. Report data,
+calculations and HTTP routes are unchanged. Business APIs and LINE cannot select
+Sheets storage. Historical source witnesses retain the former names only in tests.
+
+New movement responses omit the retired purchase-detail reference. Expense
+responses expose canonical `shopId`/`categoryId` only; Sales resolves account and
+category display data in its own report-only projection. Profit output and totals
+keep their existing meaning. Historical command responses remain exact replay
+snapshots, including their original fields; no command history is rewritten.
+
+The browser creates orders from individually uploaded image references. Its unused
+multipart order-creation helper/type are retired; order submission uses JSON only.
+The server multipart endpoint, shared file fingerprints, pending-operation guards,
+revision negotiation and upload reconciliation remain supported for safe retries.
 
 ## Retired service forwards and inactive reference layout
 
