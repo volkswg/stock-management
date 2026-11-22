@@ -21,14 +21,6 @@ export type OrderResponse = {
   order: OrderDetail;
 };
 
-export type CreateOrderInput = {
-  seller?: string;
-  totalPrice?: number | null;
-  remark?: string;
-  billImages: File[];
-  productImages: File[];
-};
-
 export type CreateOrderResponse = {
   order: CreatedOrder;
 };
@@ -124,25 +116,6 @@ export async function getOrder(
   return body;
 }
 
-export async function createOrder(
-  input: CreateOrderInput,
-): Promise<CreateOrderResponse> {
-  const formData = new FormData();
-  if (input.seller !== undefined) formData.set("seller", input.seller);
-  if (input.totalPrice !== undefined && input.totalPrice !== null) {
-    formData.set("totalPrice", String(input.totalPrice));
-  }
-  if (input.remark !== undefined) formData.set("remark", input.remark);
-  for (const image of input.billImages) {
-    formData.append("billImages", image);
-  }
-  for (const image of input.productImages) {
-    formData.append("productImages", image);
-  }
-
-  return submitOrderCreation(formData, fingerprintOrderCreation(formData));
-}
-
 export async function createOrderFromUploadedImages(input: {
   seller?: string; totalPrice?: number | null; remark?: string; images: UploadedOrderCreationImage[];
 }): Promise<CreateOrderResponse> {
@@ -153,7 +126,7 @@ export async function createOrderFromUploadedImages(input: {
   return submitOrderCreation(body, fingerprintOrderCreation(identity));
 }
 
-async function submitOrderCreation(body: FormData | string, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
+async function submitOrderCreation(body: string, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
   const active = orderCreationInFlight;
   if (active) {
     if ((await fingerprint) !== (await active.fingerprint)) {
@@ -258,7 +231,7 @@ async function orderCreationRevision(): Promise<{ value: string; scope?: string;
     return response.ok && revision && /^"stock-v2-\d+"$/.test(revision) ? { value: revision } : undefined;
   } catch { return undefined; }
 }
-async function sendOrderCreation(bodyData: FormData | string, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
+async function sendOrderCreation(bodyData: string, fingerprint: Promise<string>): Promise<CreateOrderResponse> {
   const intent = await fingerprint;
   let pending = readPendingOrder();
   if (pending && pending.fingerprint !== intent && pending.phase !== "rejected") throw pendingOrderError(pending.key);
@@ -281,14 +254,14 @@ async function sendOrderCreation(bodyData: FormData | string, fingerprint: Promi
   const revision = await orderCreationRevision();
   if (retry && !revision) throw new Error(`Cannot confirm safe retry support. Keep this order pending and contact the operator. Reference: ${pending.key}.`);
   pending = { ...pending, phase: "pending", retrySafe: revision !== undefined };
-  savePendingOrder(pending); // Must persist before any multipart POST can leave.
+  savePendingOrder(pending); // Must persist before the POST can leave.
   let response: Response, body: unknown;
   try {
     response = await fetch("/api/orders/with-images", {
       method: "POST",
       headers: {
         Accept: "application/json",
-        ...(typeof bodyData === "string" ? { "Content-Type": "application/json" } : {}),
+        "Content-Type": "application/json",
         "Idempotency-Key": pending.key,
         ...(revision && !revision.rowOnly ? { "If-Match": revision.value, ...(revision.scope ? { "x-stock-edit-scope": revision.scope } : {}) } : {}),
       },

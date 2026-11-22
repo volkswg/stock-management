@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { webcrypto } from 'node:crypto';
+import { webcrypto, createHash } from 'node:crypto';
 import ts from 'typescript';
+import namingHistory from '../helpers/sales-naming-history.cjs';
 import { dirname, resolve } from 'node:path';
 const plain = value => JSON.parse(JSON.stringify(value));
 async function waitFor(predicate) { for (let n = 0; n < 250; n++) { if (predicate()) return; await new Promise(resolve => setTimeout(resolve, 2)); } assert.ok(predicate(), "Expected async operation did not start"); }
@@ -33,9 +34,9 @@ function storage() {
 }
 const image = (text = 'synthetic', size) => new File([size ? new Uint8Array(size) : text], text + '.jpeg', { type: 'image/jpeg' });
 const uuid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
-function browser(post, store = storage(), postgres = true) {
+function browser(post, store = storage(), postgres = true, source) {
   const posts = [];
-  const api = load('src/modules/orders/ui/api.ts', { globals: { sessionStorage: store, fetch: async (url, init) => {
+  const api = load('src/modules/orders/ui/api.ts', { ...(source === undefined ? {} : { source }), globals: { sessionStorage: store, fetch: async (url, init) => {
     assert.equal(url, '/api/orders' + (init.method === 'HEAD' ? '' : '/with-images'));
     if (init.method === 'HEAD') return new Response(null, { headers: postgres ? { 'x-stock-revision': '"stock-v2-23"' } : {} });
     posts.push(init); return post(init, posts.length);
@@ -46,6 +47,51 @@ const receipt = (init, n = 1) => ({ id: uuid(n), url: `https://example.invalid/i
 const saved = () => Response.json({ order: { id: 'SYNTHETIC_ORDER' } }, { status: 201 });
 const pendingOrderKey = 'stock-orders-pending-creation:v1';
 const refs = () => ['bill', 'product'].map((imageType, i) => ({ id: uuid(i + 1), url: `https://example.invalid/${i}`, imageType, uploadKey: 'order-image:' + uuid(i + 1) }));
+
+test('current browser exposes only reference-based order creation and sends JSON', async () => {
+  const b = browser(init => { assert.equal(typeof init.body, 'string'); assert.equal(init.headers['Content-Type'], 'application/json'); return saved(); });
+  assert.equal(b.createOrder, undefined);
+  const source = ts.createSourceFile('api.ts', readFileSync('src/modules/orders/ui/api.ts', 'utf8'), ts.ScriptTarget.Latest, true);
+  assert.equal(source.statements.some(statement => ts.isTypeAliasDeclaration(statement) && statement.name.text === 'CreateOrderInput'), false);
+  await b.createOrderFromUploadedImages({ seller: 'Synthetic', images: refs() });
+  assert.equal(b.posts.length, 1); assert.deepEqual(JSON.parse(b.posts[0].body).images, refs());
+});
+
+test('a pending JSON order from the previous browser survives reload with its exact body and key', async () => {
+  const store = storage(), input = { seller: 'Synthetic', images: refs() };
+  const previous = browser(() => { throw Error('Previous response lost'); }, store, true, namingHistory.beforeSalesNaming('src/modules/orders/ui/api.ts').toString());
+  await assert.rejects(previous.createOrderFromUploadedImages(input), /previous order/);
+  const current = browser(saved, store);
+  await current.createOrderFromUploadedImages(input);
+  assert.equal(current.posts[0].body, previous.posts[0].body);
+  assert.equal(current.posts[0].headers['Idempotency-Key'], previous.posts[0].headers['Idempotency-Key']);
+  assert.equal(store.getItem(pendingOrderKey), null);
+});
+
+test('the older global pending namespace still blocks a replacement operation without resetting identity', async () => {
+  const b = browser(() => { throw Error('Synthetic lost response'); });
+  const input = { images: refs() }; await assert.rejects(b.createOrderFromUploadedImages(input));
+  const pending = JSON.parse(b.store.getItem(pendingOrderKey));
+  // Synthetic old-browser state only. Never clear a real pending operation.
+  b.store.removeItem(pendingOrderKey); b.store.setItem(`stock-pending-operation:${pending.fingerprint}`, pending.key);
+  const next = browser(() => assert.fail('Older pending operation was bypassed'), b.store);
+  await assert.rejects(next.createOrderFromUploadedImages(input), error => error.message.includes(pending.key));
+  assert.equal(next.posts.length, 0); assert.equal(b.store.getItem(`stock-pending-operation:${pending.fingerprint}`), pending.key);
+  assert.equal(b.store.getItem(pendingOrderKey), null);
+});
+
+test('server multipart support and shared retry/fingerprint/upload function bodies remain unchanged', () => {
+  const file = 'src/app/api/orders/with-images/route.ts';
+  const witness = JSON.parse(readFileSync('tests/fixtures/receipt-payment-retirement-before.json', 'utf8'));
+  assert.equal(createHash('sha256').update(readFileSync(file)).digest('hex'), witness.files[file]);
+  const api = 'src/modules/orders/ui/api.ts';
+  const before = ts.createSourceFile(api, namingHistory.beforeSalesNaming(api).toString(), ts.ScriptTarget.Latest, true);
+  const after = ts.createSourceFile(api, readFileSync(api, 'utf8'), ts.ScriptTarget.Latest, true);
+  for (const name of ['fingerprintOrderCreation', 'orderCreationRevision', 'submitOrderCreation', 'readPendingOrder', 'savePendingOrder', 'getPendingOrderCreationNotice', 'readImageUpload', 'uploadOrderCreationImage']) {
+    const body = tree => tree.statements.find(statement => ts.isFunctionDeclaration(statement) && statement.name?.text === name)?.body?.getText(tree);
+    assert.equal(typeof body(before), 'string', name); assert.equal(body(after), body(before), name);
+  }
+});
 
 test('row protocol keeps uncertain order creation retryable without pinning the Orders collection',async()=>{
  const store=storage(),posts=[];let lose=true,globalRevision=1;
@@ -134,7 +180,7 @@ test('missing storage or malformed upload metadata stops the request; a legacy u
   const store = storage(); store.setItem = () => { throw Error('Unavailable'); };
   const b = browser(() => assert.fail('Storage failure was bypassed'), store);
   await assert.rejects(b.uploadOrderCreationImage(image(), 'bill'), /preserve/); assert.equal(b.posts.length, 0);
-  const legacy = browser(() => { throw Error('Lost legacy order response'); });
+  const legacy = browser(() => { throw Error('Lost legacy order response'); }, storage(), true, namingHistory.beforeSalesNaming('src/modules/orders/ui/api.ts').toString());
   await assert.rejects(legacy.createOrder({ billImages: [image('bill')], productImages: [image('product')] }));
   const bad = browser(() => { throw Error('Lost image'); });
   await assert.rejects(bad.uploadOrderCreationImage(image(), 'bill'));
@@ -145,6 +191,8 @@ test('missing storage or malformed upload metadata stops the request; a legacy u
   const original = legacy.store.getItem(pendingOrderKey);
   const next = browser(() => assert.fail('Legacy uncertainty was bypassed'), legacy.store);
   await assert.rejects(next.uploadOrderCreationImage(image('new'), 'bill'), /previous order/);
+  await assert.rejects(next.createOrderFromUploadedImages({ images: refs() }), /previous order/);
+  assert.equal(next.posts.length, 0);
   assert.equal(next.store.getItem(pendingOrderKey), original);
 });
 

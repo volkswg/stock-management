@@ -69,6 +69,11 @@ category display data in its own report-only projection. Profit output and total
 keep their existing meaning. Historical command responses remain exact replay
 snapshots, including their original fields; no command history is rewritten.
 
+The browser creates orders from individually uploaded image references. Its unused
+multipart order-creation helper/type are retired; order submission uses JSON only.
+The server multipart endpoint, shared file fingerprints, pending-operation guards,
+revision negotiation and upload reconciliation remain supported for safe retries.
+
 ## Retired service forwards and inactive reference layout
 
 All67 `src/services/` files were import/export forwards or aliases, with no

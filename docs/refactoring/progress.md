@@ -6,7 +6,7 @@ next scope in the [roadmap](roadmap.md), and commands in [verification](verifica
 Historical counts/claims retain their original scope; this docs cleanup does not
 independently rerun or recertify every old release.
 
-## Sales naming and old API fields cleanup — prepared, not deployed
+## Sales, old API fields and browser helper cleanup — prepared, not deployed
 
 Daily, dashboard and profit use cases and report types now have storage-neutral
 names. Their current callers use those names directly, with no runtime aliases.
@@ -26,10 +26,18 @@ category labels stay unchanged. Frontend ID consumers and LINE journeys need no
 behavior changes. Existing completed command snapshots keep their original bytes
 for safe retries; this release never rewrites old responses or business records.
 
-The combined cleanup passed 798 Node regressions/current checks plus three runner Python
-tests, including sixteen new naming/API/report/history regressions. The 44 targeted
-checks passed, both retained PostgreSQL-era source-copy witnesses reproduced exact
-predecessor bytes, and type checking, lint and the credential-free build passed.
+The unused browser multipart `createOrder` helper and its input type are removed.
+Current order submission accepts JSON only; individual image uploads keep their
+multipart/file fingerprinting. The server multipart endpoint is byte-identical
+to the prior immutable witness. Older pending multipart orders remain blocked
+for review, while an older pending JSON order can retry with its exact body/key.
+Pending-key namespaces, revision negotiation and reconciliation are unchanged.
+
+The combined cleanup passed 802 Node regressions/current checks plus three runner Python
+tests, including twenty new naming/API/report/history/browser regressions. The 36
+browser-focused targeted checks also passed, both retained PostgreSQL-era source-copy
+witnesses reproduced exact predecessor bytes, and type checking, lint and the
+credential-free build passed.
 Lint retains one inherited unused `shipmentRow` warning. The route manifest and
 113 client bundle boundary checks passed; all four changed page files emit exactly
 the same JavaScript. Actual PostgreSQL integration acceptance runs in CI; it was
