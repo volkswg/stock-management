@@ -1146,3 +1146,15 @@ application/media/LINE tests pass on fresh local copies. Browser checks cover
 workspace navigation, search, edit/cancel, archive acknowledgement loss/reload/replay
 and preserved archived links. Hosted publication uses an application-only preview
 update and read-only checks; existing hosted records and production are preserved.
+
+### Product Master production preparation
+
+Owner accepted UAT on 22 November 2026. The production packet adds separate exact-
+identity, approval/revision-gated operator install and empty-only inverse artifacts;
+UAT guards and records stay intact. The additive catalogue starts empty and keeps
+existing order items unlinked. Production changes still require merge, live-release
+and fresh pause approvals. Current private recovery, independent restore and exact
+install/inverse rehearsal receipts are retained on the Mac; online evidence must
+be rechecked under the final write fence. Synthetic guard coverage is included in
+current native CI, alongside existing Product/application/LINE tests. Stock tracking,
+new authentication and backup automation remain outside this release.

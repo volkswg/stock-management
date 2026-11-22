@@ -204,3 +204,8 @@ SQL
  cat "$STOCK_NATIVE_ROOT/supabase/migrations/20261122050700_product_master_order_item_uat.sql"
 } | pg psql -U postgres -d np_product_uat -v ON_ERROR_STOP=1 > "$artifacts/product-uat-install.log"
 native_run np_product_uat tools/product-uat/postgres.test.cjs
+
+# Production-specific SQL is exercised on another owned synthetic localhost copy.
+# The real production identity exists only inside that disposable clone.
+pg createdb -U postgres -T np_payments_retired np_product_release
+native_run np_product_release tools/product-uat/production-release.test.cjs

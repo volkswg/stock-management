@@ -38,6 +38,7 @@ try:
  run(['exec','-i',container,'psql','-U','postgres','-v','ON_ERROR_STOP=1'],statements+'GRANT stock_runtime TO stock_test;')
  run(['exec',container,'createdb','-U','postgres','uat']);sql(fixture.decode())
  isolation,purpose=sql('SELECT isolation_id,purpose FROM stock_operational.environment WHERE singleton').stdout.strip().split('|')
+ run(['exec',container,'createdb','-U','postgres','-T','uat','production_packet'])
  assert purpose=='isolated-staging' and isolation!='349b9289-f684-4ec5-ac22-924b2be1946b'
  # Clear only THIS owned synthetic clone before adding the UAT schema.
  sql("DO $$DECLARE names text;BEGIN SELECT string_agg(format('%I.%I',schemaname,tablename),',') INTO names FROM pg_tables WHERE schemaname='stock_operational' AND tablename NOT IN ('environment','revision');EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';END$$;")
@@ -55,6 +56,8 @@ try:
  sql(settings+migration)
  port=run(['port',container,'5432/tcp']).stdout.strip().split(':')[-1]
  childenv={'PATH':env['PATH'],'CI':'1','NEXT_TELEMETRY_DISABLED':'1','STOCK_STORAGE':'supabase','STOCK_STAGING_ENABLED':'true','STOCK_ALLOW_LOCAL_TEST_DATABASE':'true','STOCK_TARGET_ISOLATION_ID':isolation,'STOCK_DATABASE_URL':'postgres://stock_test:synthetic-only@127.0.0.1:'+port+'/uat','STOCK_STAGING_AUTH_TOKEN':secrets.token_hex(32)}
+ productionenv={**childenv,'STOCK_DATABASE_URL':childenv['STOCK_DATABASE_URL'].replace('/uat','/production_packet')}
+ releasecheck=subprocess.run(['node','--test','tools/product-uat/production-release.test.cjs'],cwd=root,env=productionenv,text=True,capture_output=True,timeout=180);log.write(releasecheck.stdout+releasecheck.stderr);log.flush();print(releasecheck.stdout+releasecheck.stderr,flush=True);assert releasecheck.returncode==0,'Production release SQL guards failed'
  r=subprocess.run(['node','--test','tools/product-uat/postgres.test.cjs'],cwd=root,env=childenv,text=True,capture_output=True,timeout=180);log.write(r.stdout+r.stderr);log.flush();print(r.stdout+r.stderr,flush=True);assert r.returncode==0,'Product UAT PostgreSQL tests failed'
  assert sql("SET stock.expected_isolation_id='"+isolation+"';"+(root/'tools/product-uat/rollback-empty.sql').read_text(),False).returncode!=0
  # Full private logical recovery includes the new identity high-water state.
