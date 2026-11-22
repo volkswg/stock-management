@@ -40,7 +40,7 @@ export async function processWebhookEvents<Bytes>({ events, lineBotService, getC
         let imageUpload: MovementImageUploadProgress | undefined;
         if (event.message?.type === LineMessageType.Image)
             attemptedImages++;
-        // Route and handle sequentially: earlier events may advance a Sheets checkpoint.
+        // Route and handle sequentially: earlier events may advance the workflow session.
         try {
             const classification = await classifyLineEvent({
                 event,

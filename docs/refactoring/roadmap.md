@@ -14,18 +14,17 @@ cutover plans as pending work. Retained import tables, journals, credentials,
 snapshots and recovery evidence remain protected. A later live change still needs
 its own exact scope, fresh recovery/freshness review and execution approval.
 
-## Current scoped work: retire the legacy operational payment dependency
+## Current scoped work: remove unused integration wrappers
 
-PR98's JSONB rebuild is deployed. Prepare one cleanup PR removing runtime access
-to `stock_operational.sales_receipt_payments`, preserving payments, products,
-reports, sync/replay and LINE behavior. Test actual current owners with the table
-physically absent, plus complete recovery/restore and archive preservation.
+PR99's operational payment-table retirement and PR101's Sales/API/browser cleanup
+are deployed. Remove only unused LINE server wrappers and the synchronous Loyverse
+factory, correct internal Sheets names/comments and stale current-status docs,
+and preserve current regression coverage through canonical session owners.
 
-Keep production, the migration archive, credentials and all existing private
-recovery evidence unchanged. This is an application compatibility stage, not an
-automatic DROP migration. Subsequent release/table removal requires a fresh exact
-approval packet and recovery checkpoint; see the
-[retirement procedure](../database-migration.md#legacy-operational-payment-table-retirement).
+Keep production, credentials, migration archives and recovery evidence unchanged.
+Browser pending-operation guards, multipart server support, upload reconciliation,
+identity rollback and active LINE session resumption remain supported. This is one
+application-only review PR, with no database migration or deployment authorization.
 
 ## Next major milestone: user authentication
 
@@ -48,8 +47,8 @@ retains the historical security tracking context.
   migration. Their current count alone is not a removal approval.
 - Broader provider replacement, cross-provider transactions/queues, tenant/billing
   features and Workspace redesign need separate product decisions.
-- Retained semantic service/script interfaces remain; business Sheets and positional
-  adapter retirement are part of the currently approved native-storage conversion.
+- Standalone script interfaces remain; business Sheets and positional adapter
+  retirement are complete.
 
 ## Gates for future changes
 

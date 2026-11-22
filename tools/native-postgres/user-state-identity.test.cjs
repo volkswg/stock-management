@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Real current LINE owners, synthetic local PostgreSQL and no real providers. */
+const sessionPrimitives=require('../../tests/helpers/native-line-primitives.cjs');
 require('../../tests/helpers/postgres-runtime.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{randomUUID,createHash}=require('node:crypto'),{Client}=require('pg');
 const db=require('../../src/infrastructure/persistence/postgres/database.ts');
 const {executeCommand,hashIntent}=require('../../src/infrastructure/persistence/postgres/commands.ts');
 const {createBusinessDatabase}=require('../../src/composition/postgres/service.ts');
 const {createSessionAdapter}=require('../../src/modules/line-workflows/infrastructure/postgres/sessions.ts');
-const line=require('../../src/modules/line-workflows/server.ts');
 const {readMovementSession}=require('../../src/modules/line-workflows/application/sessions.ts');
 global.fetch=()=>{throw Error('Providers forbidden in session identity acceptance');};
 const url=new URL(process.env.STOCK_DATABASE_URL);assert.equal(url.hostname,'127.0.0.1');url.username='postgres';url.password='';
@@ -42,8 +42,8 @@ test.after(async()=>{await db.closePool();await owner.end();});
 test('user-state identity preserves IDs, current LINE flows and the released order-bill identity',async t=>{
  await t.test('conversion refuses the older all-text bill contract',async()=>{await gates();await refused(forward);await gates('bill');await owner.query(billForward);});
  await t.test('the compatible app creates order and movement sessions on text before conversion',async()=>{
-  await command(()=>line.createDraftOrder({storage,createdBy:'USI_TEXT_ORDER'}));
-  await command(()=>line.saveMovementState(storage,{masterId:'USI_TEXT_MOVE',itemId:'MOVED-TEXT',userId:'USI_TEXT_MOVE_USER',step:'quantity',startedAt:'2026-11-20T00:00:00Z',shop:'NJ',quantity:'3',remark:'unchanged',imageUrl:'',lastEventId:'text-event'}));
+  await command(()=>sessionPrimitives.createDraftOrder({storage,createdBy:'USI_TEXT_ORDER'}));
+  await command(()=>sessionPrimitives.saveMovementState(storage,{masterId:'USI_TEXT_MOVE',itemId:'MOVED-TEXT',userId:'USI_TEXT_MOVE_USER',step:'quantity',startedAt:'2026-11-20T00:00:00Z',shop:'NJ',quantity:'3',remark:'unchanged',imageUrl:'',lastEventId:'text-event'}));
   await db.transaction(false,async()=>assert.ok((await storage.userState.all()).every(r=>typeof r.id==='string')));
  });
  await t.test('unapproved/stale/aliased/overflow/FK/view/default-grant and late-failure attempts refuse atomically',async()=>{
@@ -75,7 +75,7 @@ test('user-state identity preserves IDs, current LINE flows and the released ord
  });
  await t.test('uncertain order creation retries reuse the committed session without another reservation',async()=>{
   const key=randomUUID();let executions=0;
-  const run=()=>executeCommand('USI_RETRY',key,hashIntent({user:'USI_RETRY_USER'}),async()=>{executions++;return line.createDraftOrder({storage,createdBy:'USI_RETRY_USER'});});
+  const run=()=>executeCommand('USI_RETRY',key,hashIntent({user:'USI_RETRY_USER'}),async()=>{executions++;return sessionPrimitives.createDraftOrder({storage,createdBy:'USI_RETRY_USER'});});
   loseCommit=true;await assert.rejects(run());const beforeRetry=await scalar('SELECT last_value::text value FROM stock_operational.user_state_id_seq');const order=await run();assert.deepEqual(await run(),order);assert.equal(executions,1);
   assert.equal(await scalar('SELECT last_value::text value FROM stock_operational.user_state_id_seq'),beforeRetry);
   assert.equal(await scalar("SELECT count(*)::text value FROM stock_operational.user_state WHERE \"userId\"='USI_RETRY_USER'"),'1');
@@ -84,9 +84,9 @@ test('user-state identity preserves IDs, current LINE flows and the released ord
  await t.test('existing movement resumes, deduplicates, updates and completes with the same session ID',async()=>{
   const before=(await owner.query("SELECT id::text id,context FROM stock_operational.user_state WHERE \"userId\"='USI_TEXT_MOVE_USER'")).rows[0];const state=before.context;
   await db.transaction(false,async()=>{const adapter=createSessionAdapter(storage,{itemSnapshot:async()=>({items:()=>[]})});assert.equal((await readMovementSession(adapter.movements,state.userId,state.lastEventId)).processed,true);});
-  await command(()=>line.saveMovementState(storage,{...state,quantity:'4',lastEventId:'bigint-event'}));
+  await command(()=>sessionPrimitives.saveMovementState(storage,{...state,quantity:'4',lastEventId:'bigint-event'}));
   const after=(await owner.query('SELECT id::text id,context FROM stock_operational.user_state WHERE id=$1',[before.id])).rows[0];assert.equal(after.id,before.id);assert.equal(after.context.quantity,'4');
-  await command(()=>line.saveMovementState(storage,{...state,step:'complete'}));await db.transaction(false,async()=>assert.equal(await storage.userState.find(before.id),undefined));
+  await command(()=>sessionPrimitives.saveMovementState(storage,{...state,step:'complete'}));await db.transaction(false,async()=>assert.equal(await storage.userState.find(before.id),undefined));
  });
  await t.test('stale and immutable session handles remain protected on bigint',async()=>{
   await command(async()=>{const first=await storage.userState.find('2'),stale=await storage.userState.find('2');await storage.userState.update(first,{state:'quantity'});await assert.rejects(storage.userState.update(stale,{state:'lost'}),e=>e.status===409);await assert.rejects(storage.userState.update(first,{id:'3'}),e=>e.status===409);});
@@ -94,7 +94,7 @@ test('user-state identity preserves IDs, current LINE flows and the released ord
  await t.test('direct and parallel inserts have unique IDs; application IDs retain precision beyond 2^53',async()=>{
   const clients=Array.from({length:6},()=>new Client({connectionString:url.toString()}));await Promise.all(clients.map(c=>c.connect()));
   try{const ids=await Promise.all(clients.map(async(c,i)=>(await c.query('INSERT INTO stock_operational.user_state("userId") VALUES($1) RETURNING id::text',['USI_PARALLEL_'+i])).rows[0].id));assert.equal(new Set(ids).size,ids.length);}finally{await Promise.all(clients.map(c=>c.end()));}
-  await owner.query("SELECT setval('stock_operational.user_state_id_seq',9007199254740993,true)");await command(()=>line.createDraftOrder({storage,createdBy:'USI_PRECISE'}));
+  await owner.query("SELECT setval('stock_operational.user_state_id_seq',9007199254740993,true)");await command(()=>sessionPrimitives.createDraftOrder({storage,createdBy:'USI_PRECISE'}));
   assert.equal(await scalar("SELECT id::text value FROM stock_operational.user_state WHERE \"userId\"='USI_PRECISE'"),'9007199254740994');
   await db.transaction(false,async()=>assert.ok((await storage.userState.all()).every(r=>typeof r.id==='string')));
  });

@@ -6,7 +6,30 @@ next scope in the [roadmap](roadmap.md), and commands in [verification](verifica
 Historical counts/claims retain their original scope; this docs cleanup does not
 independently rerun or recertify every old release.
 
-## Sales, old API fields and browser helper cleanup — prepared, not deployed
+## Unused integration wrappers — prepared, not deployed
+
+The synchronous Loyverse factory/type/barrel exports and unused LINE public
+server wrappers are retired after auditing current callers. The live LINE route
+still imports the same parser and transactional dispatcher. Canonical session
+functions, movement resumption, Drive, account-source selection, browser retries,
+record revisions and identity rollback remain intact. Current PostgreSQL tests
+compose the real application session functions/adapters directly; no runtime
+replacement wrapper or provider mock is introduced by the production change.
+Obsolete internal Sheets variable names/comments and current-status docs are
+corrected. Historical source/fixtures, database records and production are unchanged.
+
+Local checks passed807 Node tests and three runner Python tests, including five
+new current-owner cleanup regressions. Twelve initial and18 final targeted checks
+passed. On fresh synthetic PostgreSQL copies,27 application, five LINE media and12
+session-identity checks passed, preserving uncertain commit/retry, media references,
+session completion/resumption and identity recovery. The retained history source
+copies reproduced exact predecessor bytes. Type checking, lint (one inherited
+unused `shipmentRow` warning), isolated build, unchanged routes and113 client
+bundle checks passed. Seven rename/comment-only files emit equivalent JavaScript
+after the local rename. All pre-existing fixtures are byte-identical. CI remains
+required before merge; no production/provider access or deployment was performed.
+
+## Sales, old API fields and browser helper cleanup — released in PR101
 
 Daily, dashboard and profit use cases and report types now have storage-neutral
 names. Their current callers use those names directly, with no runtime aliases.
@@ -41,9 +64,22 @@ credential-free build passed.
 Lint retains one inherited unused `shipmentRow` warning. The route manifest and
 113 client bundle boundary checks passed; all four changed page files emit exactly
 the same JavaScript. Actual PostgreSQL integration acceptance runs in CI; it was
-not rerun locally for this application-only cleanup. Production is unchanged.
+not rerun locally during that initial preparation. The later CI and approved
+production release are recorded below.
 
 ## Latest production release
+
+PR101, merge `e3d5dfc0fae2c041b11322370bcf293fa12c9782`, deployed as
+`dpl_4fBbjKoKXmwvgAw5iBvCVFGt9wz1` on 2026-11-22. CI
+[44974605626](https://github.com/volkswg/stock-management/actions/runs/44974605626)
+passed on `77a23b2`; the merged tree was identical. Eleven private live API
+comparisons passed with only the approved metadata/field changes, the database
+revision was unchanged, and signature/idempotency guards remained effective.
+No database, provider, traffic-rule or temporary-access changes were made. The
+existing independently restored recovery artifacts passed integrity verification.
+Users, jobs and LINE senders may resume. Private release receipts stay on the Mac.
+
+### Earlier PR98 release evidence
 
 PR98, source `0454c58ed8b0e9283658e5c1ca28646dc1c60288`, deployed as
 `dpl_ExGQBqzMtc3PNLmRHJKSC8G6oSsh` on 2026-11-21. The approved receipt JSONB rebuild
@@ -54,9 +90,13 @@ passed. Browser writes and LINE reopened within the approved window. No provider
 write canary/access link was used. The legacy operational table remains for recovery;
 old business Sheets remain read-only. Private receipts stay on the Mac.
 
-### Legacy operational payment dependency cleanup — prepared, not deployed
+### Legacy operational payment dependency cleanup — released in PR99
 
-Current source removes the old payment repository and fallback and requires the
+PR99 subsequently deployed this cleanup and retired the operational table; the
+migration archive and recovery evidence remain protected. The original preparation
+evidence below retains its scope.
+
+The prepared source removes the old payment repository and fallback and requires the
 released receipt JSONB contract. A separate operator-only compatibility artifact
 keeps both shared schema guards effective before/after retirement; it drops no
 table and is outside automatic migrations. Runtime permissions are unchanged.
@@ -88,7 +128,7 @@ change was used. Credentials, snapshots and retained recovery evidence are intac
 ### Previous application release — PR97
 
 [PR97](https://github.com/volkswg/stock-management/pull/97), source `7aaa063`,
-deployment `dpl_9BQv25aUJ8youkTGYXnESDTHrLu5`, is live. Its approved application-only
+deployment `dpl_9BQv25aUJ8youkTGYXnESDTHrLu5`, was released. Its approved application-only
 release kept the app/LINE open and preserved schema, records, permissions, cutoff,
 firewall and other environment settings. Seven read-only row-protocol comparisons
 matched business values/types/order and exact returned row scopes; five legacy API
