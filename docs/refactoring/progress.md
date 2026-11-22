@@ -1073,3 +1073,88 @@ replaces that inherited broken anchor without rewriting the archived record.
 These original source/status witnesses retain the recorded revision, not current production state. Their full context is in the [prior ledger](https://github.com/volkswg/stock-management/blob/2471ac1106a9501f2a084b2d0825572b1b6fb1fe/docs/refactoring/progress.md).
 
 - [tools/migration/phase3-status.json at 65ed6f65](https://github.com/volkswg/stock-management/blob/65ed6f65256e59f7f6fce44bcd4fb88a819ae95c/tools/migration/phase3-status.json)
+
+## Product Master UAT — 22 November 2026
+
+Owner approved product creation from order items, local service/database UAT and
+a hosted plan, subsequently selecting the existing staging project with no new
+paid resource. Branch `uat/product-master-from-order-item`, based on PR102
+`bd7b1bfadf88de2a4aa690927e81681bf9f01d6f`, adds a native catalogue and nullable
+item link; production remains unchanged. Local verification passed: 815 Node tests plus three Python tests, lint and
+TypeScript; nine new actual-PostgreSQL tests plus all 27 existing application and
+five media/LINE checks on separate fresh synthetic copies with the feature schema;
+missing/wrong-target opt-in rejection, empty inverse and nonempty inverse refusal;
+independent logical restore of products/links/media/identity state. Isolated build
+retained every prior route entry and added exactly three routes; 111 browser chunks
+contained no private database strings. Actual headless browser create/link,
+duplicate review/existing link and lost-response/page-reload/exact-key replay passed
+with zero page errors, external requests or duplicate products. Private evidence
+stays on the Mac. Hosted metadata is verified, but the legacy staging schema
+needs a private recovery/rehearsal/upgrade packet and approval before hosted UAT.
+The [procedure](../database-migration.md#product-master-uat) is the execution scope.
+
+### Hosted UAT preparation and staging reuse
+
+Owner subsequently requested deployment to UAT on the existing staging project.
+Fresh private recovery of 51 tables was independently restored; the retained old
+operational namespace and unchanged migration archive reconcile exactly after the
+rehearsed install. A new native UAT dataset contains one synthetic order/two items,
+with a restricted non-admin runtime account and no real-provider credentials.
+Five additional preview-gateway regressions pass (820 Node tests total); normal
+staging/production authorization is unchanged when the UAT flag is absent.
+The gateway requires the exact protected preview hostname, staging identity and
+login, keeps its bearer server-side, denies provider/unrelated operations and rejects
+cross-origin writes. Build, lint and typecheck pass. Deployment checks and receipts
+remain private; production and existing platform protections stay unchanged.
+
+### Order-item linked-product selection
+
+Linked products use the existing order-field presentation: a secondary label,
+neutral wrapping text and a pencil button spanning the full card width. The pencil
+opens a searchable product dropdown with the saved link selected. Selecting another
+product changes only the draft; Save link updates that order item, while Cancel
+makes no write. Catalogue editing and archiving remain in Product Master, not the
+item popup. Creating a product from an item is a separate deliberate action; unlink
+still requires confirmation. Archived links remain visible and can be replaced.
+
+Pending operations retain their exact identity, including requests from the prior
+item editor, and open recovery only. Background card refreshes never advance an
+open selector's item revision; conflicts require explicit reload and discard the
+old selection. A confirmed save with failed refresh offers only a read. Search
+ignores out-of-order results and retains the selected product label. This changes
+UI only, with no API/schema or production change. Focused UI and disposable browser
+checks cover dropdown selection/cancel, creation, duplicate review, link conflicts,
+and lost-response/reload/exact-request recovery. Current evidence stays private.
+
+### Product Master workspace menu
+
+The Stock menu includes Product Master at `/products`, with search, photos, names,
+codes and variants. Editing opens on demand with a fresh revision; archive retains
+existing links and media. Creation continues from order items. The active search
+returns up to 30 matches and the page makes that limit explicit. The product-owned
+browser client reuses the original journal namespace and preserves pending item
+operations through the ownership move. Master-page pending changes have one
+recovery scope, including archives that disappear from active search. Only a
+protected product-detail GET and the new page are added; schema/data and production
+remain unchanged. Current UAT verification/evidence stays private on the Mac.
+
+Menu verification passed before the selector update: 834 Node tests plus three Python tests, lint, typecheck
+and isolated build. Existing routes retain their baseline hash after exactly four
+feature additions (three APIs and `/products`); 112 client chunks contain no private
+database strings. Ten actual PostgreSQL feature tests plus the existing 32
+application/media/LINE tests pass on fresh local copies. Browser checks cover
+workspace navigation, search, edit/cancel, archive acknowledgement loss/reload/replay
+and preserved archived links. Hosted publication uses an application-only preview
+update and read-only checks; existing hosted records and production are preserved.
+
+### Product Master production preparation
+
+Owner accepted UAT on 22 November 2026. The production packet adds separate exact-
+identity, approval/revision-gated operator install and empty-only inverse artifacts;
+UAT guards and records stay intact. The additive catalogue starts empty and keeps
+existing order items unlinked. Production changes still require merge, live-release
+and fresh pause approvals. Current private recovery, independent restore and exact
+install/inverse rehearsal receipts are retained on the Mac; online evidence must
+be rechecked under the final write fence. Synthetic guard coverage is included in
+current native CI, alongside existing Product/application/LINE tests. Stock tracking,
+new authentication and backup automation remain outside this release.

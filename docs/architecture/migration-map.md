@@ -159,3 +159,23 @@ remove its protected evidence or rerun old imports on production.
 The operational `sales_receipt_payments` table was retired in PR99. Current runtime
 has no repository/fallback for it. `stock_migration.sales_receipt_payments` remains
 immutable recovery evidence.
+
+## Product Master UAT ownership
+
+`modules/products/{domain,application,infrastructure/postgres}` owns catalogue
+validation, search/create/update/archive and explicit SQL. `products/contracts.ts`
+is the only browser-safe cross-feature leaf; `products/server.ts` is its server
+composition. Orders owns the item-link port/use case, SQL adapter, public
+`product-catalogue-contracts.ts`, `product-catalogue-server.ts` and item modal/client.
+`composition/order-products.ts` supplies the catalogue to the Orders port. No
+Orders dependency enters Products or generic PostgreSQL transport.
+`eslint/product-catalogue-boundaries.mjs` admits these exact named edges.
+The UAT migration is isolated-staging-only and is not a production release.
+
+The Product Master menu/page lives at `app/products/page.tsx` →
+`modules/products/ui/ProductMasterPage.tsx`. It searches the existing active
+catalogue, reads a fresh product revision for edits, and archives through existing
+mutation APIs. `modules/products/browser.ts` owns shared durable request handling;
+Orders' browser adapter delegates those named product operations while retaining
+its item read/link methods. Existing storage namespace, bodies and retry identities
+remain unchanged. `/api/products/[id]` adds protected GET for fresh/archived reads.

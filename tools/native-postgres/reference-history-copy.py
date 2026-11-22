@@ -8,6 +8,7 @@ def copy_previous(target):
  target=Path(target)
  if target.exists() and any(target.iterdir()):raise ValueError('Destination must be empty')
  retirement=json.loads((ROOT/'tests/fixtures/receipt-payment-retirement-before.json').read_text())
+ products=json.loads((ROOT/'tests/fixtures/product-master-uat-before.json').read_text())
  wrappers = json.loads((ROOT/'tests/fixtures/wrapper-cleanup-before.json').read_text())
  naming=json.loads((ROOT/'tests/fixtures/sales-naming-before.json').read_text())
  shipment=json.loads((ROOT/'tests/fixtures/order-detail-shipment-before.json').read_text())
@@ -20,6 +21,11 @@ def copy_previous(target):
  fixture=json.loads((ROOT/'tests/fixtures/movement-reference-before.json').read_text())
  for name,expected in fixture['files'].items():
   source=ROOT/name;data=source.read_bytes() if source.exists() else None;edit=fixture['edits'].get(name)
+  product_edit=products['edits'].get(name)
+  if product_edit:
+      assert (hashlib.sha256(data).hexdigest() if data is not None else None)==product_edit['afterSha256'],name
+      data=product_edit['before'].encode()
+      assert hashlib.sha256(data).hexdigest()==product_edit['beforeSha256'],name
   wrapper_edit = wrappers['edits'].get(name)
   if wrapper_edit:
       assert (hashlib.sha256(data).hexdigest() if data is not None else None) == wrapper_edit['afterSha256'], name

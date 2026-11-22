@@ -1,5 +1,7 @@
 "use client";
 
+import {OrderItemCatalogue} from "../OrderItemCatalogue";
+
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
@@ -157,6 +159,7 @@ function OrderContent({
   onOrderChange: Dispatch<SetStateAction<OrderDetail | undefined>>;
   shipmentPicker: OrderShipmentPickerPort;
 }) {
+  const [catalogueVersion, setCatalogueVersion] = useState(0);
   const [quantityType, setQuantityType] = useState<OrderItemQuantityType>(
     OrderItemQuantityType.Quote,
   );
@@ -553,6 +556,7 @@ function OrderContent({
                                     : { deliveredQuantity: quantity },
                                 )}
                               />
+                              <OrderItemCatalogue orderId={order.id} itemId={image.id} productCode={image.productCode} reloadVersion={catalogueVersion} onSaved={async()=>{const result=await getOrder(order.id);onOrderChange(result.order);setCatalogueVersion(value=>value+1);}} />
                               <OrderQuantityStatus
                                 deliveredQuantity={getProductQuantity(image, OrderItemQuantityType.Delivered)}
                                 quoteQuantity={getProductQuantity(image, OrderItemQuantityType.Quote)}

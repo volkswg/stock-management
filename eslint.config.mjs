@@ -1,4 +1,5 @@
 import { nativePostgresBoundaries } from "./eslint/native-postgres-boundaries.mjs";
+import { productCatalogueBoundaries } from "./eslint/product-catalogue-boundaries.mjs";
 import {externalsRetirementBoundaries} from "./eslint/externals-retirement-boundaries.mjs";
 import {loyverseAccountsBoundaries} from "./eslint/loyverse-accounts-boundaries.mjs";
 import {featuresRetirementBoundaries} from "./eslint/features-retirement-boundaries.mjs";
@@ -49,6 +50,7 @@ const eslintConfig = defineConfig([
   ...loyverseAccountsBoundaries,
   ...featuresRetirementBoundaries,
   ...nativePostgresBoundaries,
+  ...productCatalogueBoundaries,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

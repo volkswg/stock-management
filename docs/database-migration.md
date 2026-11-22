@@ -977,3 +977,220 @@ changed/reused historical identities. It is not a standalone inverse for table
 retirement, and the new JSONB-only app cannot run after it removes the contract.
 A legacy rollback must pair it with the matching prior application. Until such an
 exact restore/inverse packet is verified and approved, keep the table present.
+
+## Product Master UAT
+
+This feature is review/UAT only. Production and LINE remain running. The old
+Sheets Product Master PR47 was closed, not merged; do not revive its storage or
+authentication design. The Git branch `uat/product-master-from-order-item` binds
+service code and `20261122050700_product_master_order_item_uat.sql` together.
+The schema adds `products` (bigint identity, code/name/variant, reference media,
+native lifecycle timestamps and row revision) and nullable `order_items.productId`.
+Existing order rows remain unlinked; there is no historic automatic import.
+The migration also scopes the two existing media-contract FK counts to their
+five named legacy owners so adding the new reference does not disable old APIs.
+It hash-checks the predecessor function bodies before replacing them. Runtime
+privileges remain private; no anonymous/authenticated catalogue API is exposed
+through Supabase. Existing application access policy is not changed or certified.
+
+### Local service and database
+
+`python3 tools/product-uat/local.py --help` describes the no-cost disposable runner.
+Supply the privately retained **synthetic** final-schema fixture as `--snapshot`
+and a private `--artifacts` directory. Its pinned SHA-256 is
+`8d8feb268ca551a71e2953146945fe9f8635dd94fa434bbe374654576fe8e13c`.
+It refuses other snapshots, including production recovery. Use an existing local
+Docker engine/image `postgres:17.7`; the runner does not pull/install services.
+It creates its own localhost-only container, exercises migration guards/inverse,
+actual APIs, durable retries, recovery and existing application/LINE regressions.
+`--serve` also creates a separate synthetic browser database and an environment-free
+app copy; the printed localhost URL opens the test order. Only catalogue writes
+are allowed through its local proxy; provider/other writes are denied. The staging
+bearer is injected on the local server and never included in browser assets.
+Ctrl-C stops only these new processes/container and removes only the temporary app.
+Keep private synthetic logs/recovery outside Git. There are no provider credentials.
+
+### Existing hosted staging target
+
+Owner approved reusing `stock-management` (`orjnazrothkdgmzlsuto`), ap-northeast-1,
+in `volkswg's Org`, then deploying UAT. No new project, paid branch, plan upgrade or
+paid service is authorized. Production `hzynvirpedqnvtbifobx` is excluded.
+
+The original staging layout predates the current app. A fresh private full backup
+of all 51 operational/archive tables was independently restored and reconciled.
+The locally rehearsed install retains the entire previous operational schema as
+`stock_operational_legacy_20261122`, including its rows, functions and constraints;
+`stock_migration` stays unchanged. It creates the current native operational schema
+and empty private configuration, installs the additive product migration and seeds
+one synthetic order with two items. All 51 retained-table row counts/digests are
+reconciled again after installation. This preserves old records rather than
+rewriting them into the new UAT dataset. Runtime access to the legacy namespace is
+revoked; the previous read-only account retains its original archive access.
+The limited UAT service login expires on 29 November 2026; it is not an administrator.
+Private recovery, exact guarded installation, credentials and receipts stay on the Mac.
+
+The hosted app uses only a protected preview in the existing Vercel project, with
+**deployment-only** staging connection, CA, identity, bearer and explicit
+`STOCK_UAT_HOSTED_BROWSER=reviewed-preview-product-uat-v1`. No production source
+binding, global variables, custom domain aliases, cron or provider credentials change.
+`src/proxy.ts` supplies the server-held bearer only on that exact unique preview
+hostname, with the fixed original staging identity and UAT runtime login. It fails
+closed for production, custom domains, mismatched identity/connection or cross-origin
+writes. Existing Vercel Authentication remains the perimeter; no public share link
+or global bypass is created. Normal staging bearer checks remain in place.
+
+Only catalogue/order/shipment reads, catalogue writes and order-item edits are
+allowed for this scoped UAT. LINE, uploads, provider sync and unrelated operations
+are rejected. The banner identifies synthetic UAT data. The static reference photo
+has no external dependency. This is not approval to enable real providers or deploy
+the feature to production. Preserve the archived schema and recovery evidence.
+
+### Pass/fail and rollback
+
+Pass only when: create+link is atomic; double-click/identical/lost-response retries
+produce one product; changed pending input is refused; duplicate suggestions need
+explicit review; linking uses an active product; big IDs remain exact strings;
+existing photo media is reused without uploads; product/item stale edits fail
+without orphan rows; unrelated item changes succeed; archived products cannot be
+newly linked and existing links remain readable; old quantity/remark/order/LINE
+flows and all existing route entries pass; private recovery independently restores
+product rows, links and identity state. Capture exact service/migration hashes.
+Any mismatch, provider call, unexpected privilege, production target, unknown
+staging writer or paid-resource requirement is a STOP.
+
+Rollback the UAT app first. Prefer retaining additive schema/data for investigation.
+`tools/product-uat/rollback-empty.sql` only reverses an approved isolated empty
+catalogue; it refuses every product (including archived rows) or link and restores
+the exact two predecessor media contracts. With UAT records present, preserve and
+review recovery/data disposition separately; never discard them automatically.
+To revert the hosted UAT takeover, first stop its writers, disable the new login
+and revoke its writer membership, then acquire the writer barrier. Retain the UAT
+schema under a separate name, restore the original legacy schema name and original
+`stock_runtime` schema USAGE, and reconcile the retained rows/permissions before
+reopening the former staging app. Never restore an old dump over later UAT writes.
+Production release/migration and external integrations require separate approval.
+
+## Product Master production release — preparation only
+
+Owner accepted the Product Master UAT on 22 November 2026. PR103 remains unmerged
+until separate merge approval; no production maintenance or deployment is approved
+by this preparation. Stock tracking is a separate milestone. The existing UAT
+migration, target purpose and retained staging records must remain unchanged.
+
+### Exact scope and target
+
+Use only `stock-management-production` (`hzynvirpedqnvtbifobx`), isolation
+`349b9289-f684-4ec5-ac22-924b2be1946b`, purpose `production`. Existing app domain:
+`inventra-beta-one.vercel.app`; existing Vercel project:
+`prj_XH4nEje5cicuBuucGumuHgr73l1E`. Bind the final merged source and passing CI in
+private receipts; never promote a UAT preview or copy its environment/records.
+
+The reviewed install is
+[`20261122110945_product_master_production_release.sql`](../tools/migration/operator/20261122110945_product_master_production_release.sql).
+It creates an empty `products` catalogue, nullable `order_items.productId` and its
+index, grants only the reviewed new catalogue/link capabilities to existing private
+roles, and updates the same two media-contract function bodies as the accepted UAT.
+All existing business values, IDs, revisions, timestamps, media and account tokens
+must remain unchanged. Old items start unlinked. There is no historical product
+inference, stock posting, new login, provider call, paid resource or UAT data import.
+
+The install requires all three session settings, an exact target/purpose, matching
+frozen `revision.value`, existing private non-admin roles, absent catalogue/link
+schema, and exact predecessor contracts. It reacquires the standard writer barriers
+and bounded table locks before checking revision and applying DDL atomically.
+The original UAT-only migration still refuses production. Do not run `db push` or
+replay historical migrations as a substitute for this operator packet.
+
+### Recovery after catalogue installation
+
+The existing core recovery tool's fixed table list does not fingerprint `products`.
+After installation, append
+[`recovery-fingerprint.sql`](../tools/product-uat/recovery-fingerprint.sql) inside
+**the same read-only exported snapshot** as the full dump and core fingerprint.
+This supplements all product rows (including archived records) and the fourth
+identity sequence; existing `order_items` fingerprints already include links.
+Capture all four sequence states before/after an online dump and stop on advancement.
+Compare the supplement on the independent restore along with the full existing
+fingerprints and metadata. Never claim complete post-release recovery from the
+core report alone. Native CI and the local UAT runner exercise the same supplement
+against a real dump/restore. Pre-change recovery still has 52 tables/three sequences;
+post-change recovery has 53 tables/four sequences. No backup automation is enabled.
+
+### Preparation and approval packet
+
+1. Keep users, LINE and jobs running. Capture a fresh private online MVCC checkpoint
+   using the existing read-only TLS backup profile, without cooperative writer
+   locks. Include all current operational/archive/configuration tables, all three
+   existing identity sequence states and password-free role/locale metadata.
+2. Independently restore into a new network-isolated local container. Reconcile
+   every table, the 15 operational/archive metadata sections, private configuration
+   and sequence state. Rehearse the exact install and empty-only inverse; compare
+   actual current application/LINE read projections before/after. Keep all records,
+   credentials, SQL results, dumps and evidence on the Mac or approved private
+   storage. Backup automation remains deferred.
+3. Confirm live source/domain binding, PostgreSQL identity/runtime user, LINE cutoff,
+   active firewall and all existing environment/protection settings by read-only
+   inspection. Prepare exact file/source/recovery hashes and rollback references.
+   An online checkpoint can precede later writes and is not a frozen checkpoint.
+4. Obtain merge approval for the tested PR. Resolve and verify the actual merge
+   commit/tree and CI. Obtain separate approval for the live DDL, source-binding
+   update, protected production build/promotion and temporary traffic fence, then
+   a fresh supervised pause confirmation. Preparation never pauses users itself.
+
+### Approved maintenance execution
+
+Use the general maintenance procedure above and a supervised window whose abort
+budget includes refreshing/restoring recovery if the source has changed. Start no
+live operation without the separately approved packet and confirmed pause.
+
+1. Confirm all browser/LINE users, direct editors, jobs and scripts have stopped;
+   outstanding saves/uploads have finished or are accounted for with no uncertain
+   outcome. This is a coordinated sender pause, not a durable LINE event inbox.
+2. Publish only the approved temporary non-read-method block; preserve all other
+   rules/protections. Drain writers and recheck identity, active transactions,
+   full recovery fingerprints, private configuration, three sequences and metadata.
+   On drift, refresh and independently verify recovery before DDL, or abort/reopen.
+3. Record private baseline GET responses for existing orders, linked shipment detail,
+   movements, stock counts, Sales/Expenses and HR readers. Bind exact source/SQL/
+   recovery hashes and frozen revision in the private approval receipt.
+4. Use the approved owner profile in a private operator session. Set
+   `stock.product_master_release=reviewed-product-master-production-install-v1`,
+   `stock.expected_isolation_id=349b9289-f684-4ec5-ac22-924b2be1946b` and
+   `stock.expected_revision` to the numeric **frozen** `revision.value`. Verify the
+   SQL file hash and run only the reviewed install. Do not change the purpose label.
+   On timeout/uncertain result, inspect committed schema before any retry.
+5. Verify the exact allowed schema/security delta. Require zero products, all item
+   links NULL, unchanged existing values/revisions/sequences/account credentials,
+   expected RLS/private grants, and both media contracts still returning the
+   reviewed layout. Unexpected dependencies, permissions or record changes abort.
+6. Change only the production release binding's source commit, preserving its
+   connection, identity, runtime user, access policy and every other setting. Build
+   a protected **production** deployment with automatic domain assignment disabled.
+   Do not copy UAT flags/bearers or create a share link/global bypass. Use separately
+   approved temporary access only if protected checks require it; otherwise follow
+   the reviewed promote-and-immediate-read-validation/app-rollback procedure.
+7. Promote only the approved production build. Verify `/products`, empty catalogue
+   GET, item link GET returning NULL, existing read baselines and rejected mutation/
+   signature/idempotency probes. Do not make an unapproved business/provider canary.
+   Preserve LINE signature verification, cutoff and old Sheets read-only status.
+8. Remove only this window's block after successful checks. Confirm original rules,
+   environment/protections, live source/domain and LINE availability; scan runtime
+   errors, save private receipts, and announce reopening. Keep UAT and recovery.
+
+### Rollback
+
+Before DDL commit, an error must leave the old layout intact. After commit, prefer
+rolling back only the application/source binding and retaining additive schema and
+all product/link records. Never restore an older dump over later accepted writes.
+
+The separately reviewed
+[`20261122110945_product_master_production_rollback_empty.sql`](../tools/migration/operator/20261122110945_product_master_production_rollback_empty.sql)
+is an **empty-only** schema inverse. It requires the same exact production identity,
+a fresh numeric revision and
+`stock.product_master_release=reviewed-product-master-production-rollback-v1`.
+It checks both installed media-function hashes, takes writer/table locks and refuses
+any product, including archived rows, or any item link. Only then may it drop the
+new empty schema and restore the exact predecessor media contracts. With records
+present, retain them and use app rollback; removal/data disposition needs separate
+review and approval. Existing orders, media, archive and private configuration are
+never cleanup targets.

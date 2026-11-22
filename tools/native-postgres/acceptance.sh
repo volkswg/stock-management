@@ -192,3 +192,35 @@ cmp "$artifacts/payment-retired-np_payments_retired.txt" "$artifacts/payment-ret
 native_run np_payments_retired_restore tools/native-postgres/receipt-payment-retirement-restored.test.cjs
 rm -rf "$receipt_history"
 echo 'PASS: current sync/reports/replay/rollback without operational payments; archive and complete recovery preserved'
+
+# Product UAT runs only on a new disposable final-schema copy; never the archive.
+pg createdb -U postgres -T np_payments_retired np_product_uat
+pg psql -U postgres -d np_product_uat -v ON_ERROR_STOP=1 > "$artifacts/product-uat-empty.log" <<'SQL'
+DO $$DECLARE names text;BEGIN SELECT string_agg(format('%I.%I',schemaname,tablename),',') INTO names FROM pg_tables WHERE schemaname='stock_operational' AND tablename NOT IN ('environment','revision');EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';END$$;
+SQL
+{
+ printf "SELECT set_config('stock.product_master_uat','reviewed-product-master-uat-v1',false);\n"
+ printf "SELECT set_config('stock.expected_isolation_id',isolation_id::text,false) FROM stock_operational.environment;\n"
+ cat "$STOCK_NATIVE_ROOT/supabase/migrations/20261122050700_product_master_order_item_uat.sql"
+} | pg psql -U postgres -d np_product_uat -v ON_ERROR_STOP=1 > "$artifacts/product-uat-install.log"
+native_run np_product_uat tools/product-uat/postgres.test.cjs
+
+# Production-specific SQL is exercised on another owned synthetic localhost copy.
+# The real production identity exists only inside that disposable clone.
+pg createdb -U postgres -T np_payments_retired np_product_release
+native_run np_product_release tools/product-uat/production-release.test.cjs
+
+# Product rows, archived records and the fourth identity sequence are recovery data.
+pg pg_dump -U postgres -d np_product_uat --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/product-master-recovery.sql"
+pg createdb -U postgres np_product_restore
+pg psql -U postgres -d np_product_restore -v ON_ERROR_STOP=1 < "$artifacts/product-master-recovery.sql" > "$artifacts/product-master-restore.log"
+for database in np_product_uat np_product_restore; do
+ {
+  printf 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n'
+  printf "SELECT set_config('stock.expected_isolation_id',isolation_id::text,false) FROM stock_operational.environment;\n"
+  cat "$STOCK_NATIVE_ROOT/tools/product-uat/recovery-fingerprint.sql"
+  printf 'COMMIT;\n'
+ } | pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 > "$artifacts/product-master-recovery-$database.txt"
+done
+cmp "$artifacts/product-master-recovery-np_product_uat.txt" "$artifacts/product-master-recovery-np_product_restore.txt"
+echo 'PASS: product catalogue rows, archived records and identity sequence independently restored'

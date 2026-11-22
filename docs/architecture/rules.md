@@ -33,7 +33,8 @@ Root configuration/dependency files, `public` assets and existing operational gu
 
 | Module | Responsibility as migrations proceed |
 | --- | --- |
-| Orders | Draft/create/update/list/detail, bills, quantities, product codes/images; LINE journey state belongs to LINE workflows |
+| Orders | Draft/create/update/list/detail, bills, quantities, product codes/images, item-to-product linking; LINE journey state belongs to LINE workflows |
+| Products | PostgreSQL product catalogue, reference media, duplicate review, product lifecycle; Orders consumes its public DTOs through an item-specific seam |
 | Shipments | Shipment reads/creation/status, order links and bill coordination; consumes Orders contracts, does not own Order persistence |
 | Inventory | Movements/delivery, monthly counts, reversals and adjustments; pure quantity parsing belongs here rather than LINE |
 | Sales | Loyverse sync, receipts/refunds/reports and profit overrides; protocol client is root infrastructure |
@@ -97,6 +98,11 @@ Rules cover static/relative/alias imports, re-exports, erased types, import-type
 - Runtime module DAG: LINE workflows→Orders/Inventory, Inventory→HR/Sales, Shipments→Orders. Types add HR→Expenses and Sales→Expenses. Registered public leaves are contracts/server/status/quantity, LINE's specifically consumed Orders rules leaf, and the existing Shipment→Orders projection/gallery exceptions.
 
 No module imports app/root composition. A public feature entrypoint may reach its own implementation; private dependencies across feature edges remain forbidden. Shared transport imports no feature even through erased declarations.
+
+Products exposes browser-safe `contracts.ts` to Orders catalogue contracts, its
+consumer port and catalogue UI only. `composition/order-products.ts` wires the two
+public server entrypoints. Products never imports Orders. The item-link use case
+and product creation share the existing durable command transaction.
 
 ## Scoped enforcement
 
@@ -170,3 +176,9 @@ without clocks, provider IO, DTO mutation or changes to business-date priorities
 this is not a general shared import exception. Current executable source loaders
 read the actual leaf, while bounded timestamp inverses preserve earlier historical
 fixtures and file inventories separately.
+
+Products exposes `browser.ts` as a named browser-safe client to its Product Master
+page and the Orders catalogue client. It owns the existing durable product-request
+identity/journal protocol. Orders retains its item-specific endpoint and DTOs;
+Products never imports Orders. The workspace links to `/products`, whose page
+composition renders Products-owned UI. No server dependency enters this browser leaf.

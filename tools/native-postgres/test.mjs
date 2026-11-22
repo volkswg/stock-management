@@ -12,6 +12,7 @@ try {
  console.log('Historical regression and type witnesses: pinned pre-native source (not current acceptance)');
  run('npm',['test'],owned);run('npm',['run','typecheck'],owned);
  console.log('Current native PostgreSQL source checks');
+ run('node',['--test','tests/native-postgres/product-catalogue.test.mjs','tests/native-postgres/product-uat-gateway.test.cjs','tests/native-postgres/product-catalogue-ui.test.mjs','tests/native-postgres/product-master-page.test.mjs']);
  run('node',['--test','tests/postgres-browser-keys.test.mjs']);
  run('node',['--test','tests/native-postgres/lean-sales.test.cjs']);
  run('node',['--test','tests/native-postgres/receipt-payments-jsonb.test.cjs']);
