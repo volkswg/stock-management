@@ -1106,3 +1106,18 @@ The gateway requires the exact protected preview hostname, staging identity and
 login, keeps its bearer server-side, denies provider/unrelated operations and rejects
 cross-origin writes. Build, lint and typecheck pass. Deployment checks and receipts
 remain private; production and existing platform protections stay unchanged.
+
+### Simplified linked-product interface
+
+Linked order items display the product name inline and open a prefilled edit popup
+only on request. Unlinked items open a chooser; creation is a separate deliberate
+step. Saving closes the popup; change/unlink/archive actions remain under More
+options. Pending operations keep their existing identity and open a recovery-only
+view. Background card refreshes never advance an open editor's revision; conflicts
+require explicit reload. A confirmed save followed by failed refresh offers only a
+read, preserving uncertain-save safety. This changes UI only, with no API/schema
+or production change. Seven focused UI regressions supplement the existing client
+and gateway checks; browser UAT covers inline display, edits, cancellation, chooser,
+creation, duplicate review and reload-safe reconciliation on a disposable copy.
+Full validation passed: 827 Node tests plus three Python tests, lint, typecheck
+and isolated build; API routes and database/server contracts are unchanged.

@@ -19,13 +19,13 @@ export function pendingCatalogueRequest(scope: string): Pending | null {
   }
   return value;
 }
-async function json<T>(path: string): Promise<T> {
-  const response = await fetch(path, { headers: { Accept: 'application/json', 'x-stock-edit-protocol': 'row-v1' }, cache: 'no-store' });
+async function json<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(path, { headers: { Accept: 'application/json', 'x-stock-edit-protocol': 'row-v1' }, cache: 'no-store', signal });
   const value = await response.json();
   if (!response.ok) throw new CatalogueRequestError(value.error || 'Could not load the product catalogue.', response.status, value.code);
   return value;
 }
-export const readItemCatalogue = (orderId: string, itemId: string) => json<{ item: OrderItemCatalogue }>(itemCataloguePath(orderId, itemId));
+export const readItemCatalogue = (orderId: string, itemId: string, {signal}: {signal?: AbortSignal} = {}) => json<{ item: OrderItemCatalogue }>(itemCataloguePath(orderId, itemId), signal);
 export const searchCatalogue = (query: string) => json<{ products: Product[] }>('/api/products?q=' + encodeURIComponent(query));
 async function send<T>(path: string, method: string, body: string, scope: string): Promise<T> {
   const existing = pendingCatalogueRequest(scope);
