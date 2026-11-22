@@ -107,3 +107,36 @@ confirmed shop/movement photo totals. Counts describe this HTTP request, not all
 requests comprising a LINE image set. Order-flow uploads are not counted as
 movement uploads. The HTTP JSON is not itself displayed by LINE; the chat text
 is sent through the existing reply flow.
+
+## Shop-master destination IDs — prepared, not deployed
+
+The next release replaces the fixed NJ/YY destination list with active, non-deleted
+Shop master records. LINE shows names and sends a movement-bound postback carrying
+`shops.id`; a choice from another movement is rejected. Lists paginate within LINE's
+quick-reply limits. Existing quantities, images, remarks, Home origin, delivery,
+image reconciliation and durable retry keys retain their behavior.
+
+`movement_details.shopId` is a nullable text FK with `ON DELETE RESTRICT` and an
+index. `shopName` and `toLocation` remain saved display labels. Web details group
+by ID, including records saved under different names; old name-based detail links
+still resolve. List responses retain `shopQuantities` and add `shopIdQuantities`
+and `unlinkedShopQuantities` when linked items are present. Item responses add
+`shopId` only when populated.
+
+New choices require an active, non-deleted master. Previously selected inactive
+shops may finish their existing pending workflow; deleted/unavailable destinations
+stop before a new provider upload. Inactive/deleted masters remain available for
+historical stock/account attribution. Old sessions gain an ID only after an
+unambiguous match to the master name or a retained, explicitly backfilled historical
+label. Ambiguous sessions keep their pending quantity and confirmed upload URL and
+ask for an explicit destination choice. Existing NJ/YY text buttons still work
+when that unique mapping exists; there is no guessed or fixed fallback destination.
+
+Monthly stock-in follows `shopId` through the master's Loyverse mapping. Linked
+records never fall back to their display name if the mapping is missing; the
+report warns that totals may be incomplete. Only unlinked legacy rows retain the
+former name lookup, without double counting linked rows.
+
+The guarded schema install and explicit old-data/session backfill require their
+own production release approval and supervised pause. See the
+[production procedure](database-migration.md#movement-shop-id-release--prepared-only).

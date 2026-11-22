@@ -86,11 +86,13 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
 
   const recordsByShop = useMemo(() => groupByShop(records), [records]);
   const shops = Object.keys(recordsByShop);
+  const shopLabel = (key: string) => recordsByShop[key]?.[0]?.shopName || "Unknown";
   const selectedShop = searchParams.get("shop")?.trim() || "";
   const currentShop =
     shops.find(
       (shop) => shop.toLocaleLowerCase() === selectedShop.toLocaleLowerCase(),
     ) ||
+    shops.find(shop => recordsByShop[shop].some(record => record.shopName.toLocaleLowerCase() === selectedShop.toLocaleLowerCase())) ||
     shops[0] ||
     "";
   const currentRecords = recordsByShop[currentShop] || [];
@@ -228,7 +230,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
           </div>
           <header className={styles.pageHeader}>
             <div>
-              <Text className={styles.eyebrow}>Home → {shops.length > 0 ? shops.join(" + ") : "Shop"}</Text>
+              <Text className={styles.eyebrow}>Home → {shops.length > 0 ? shops.map(shopLabel).join(" + ") : "Shop"}</Text>
               <Title level={1}>Movement details</Title>
               <Text className={styles.movementReference}>{movementMasterId}</Text>
             </div>
@@ -250,7 +252,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                 <Segmented
                   aria-label="Movement shops"
                   className={styles.shopTabs}
-                  options={shops.map((shop) => ({ label: `${shop} · ${recordsByShop[shop].length} ${recordsByShop[shop].length === 1 ? "item" : "items"}`, value: shop }))}
+                  options={shops.map((shop) => ({ label: `${shopLabel(shop)} · ${recordsByShop[shop].length} ${recordsByShop[shop].length === 1 ? "item" : "items"}`, value: shop }))}
                   value={currentShop}
                   onChange={selectShop}
                   block
@@ -260,7 +262,7 @@ export function MovementDetailPage({ movementMasterId }: { movementMasterId: str
                   <Button type={itemFilter === "missing" ? "primary" : "default"} aria-pressed={itemFilter === "missing"} onClick={() => setItemFilter("missing")}>Needs quantity <span>{shopMissingCount}</span></Button>
                 </div>
               </div>
-              <section id="movement-items" className={styles.itemGrid} aria-label={`${currentShop} movement items`}>
+              <section id="movement-items" className={styles.itemGrid} aria-label={`${shopLabel(currentShop)} movement items`}>
                 {visibleRecords.length === 0 ? <Card className={styles.emptyCard}><Empty description="All quantities for this shop are ready"><Button onClick={() => setItemFilter("all")}>Show all items</Button></Empty></Card> : null}
                 {visibleRecords.map((record) => (
                   <MovementItem
@@ -484,11 +486,12 @@ function MovementItem({ checked, record, itemNumber, saving, uploading, deleting
 }
 
 function groupByShop(records: ProductMovementRecord[]): Record<string, ProductMovementRecord[]> {
-  return records.reduce<Record<string, ProductMovementRecord[]>>((groups, record) => {
-    const shop = record.shopName || "Unknown";
-    groups[shop] = [...(groups[shop] || []), record];
-    return groups;
-  }, {});
+  const groups = new Map<string, ProductMovementRecord[]>();
+  for (const record of records) {
+    const shop = record.shopId || record.shopName || "Unknown";
+    groups.set(shop, [...(groups.get(shop) || []), record]);
+  }
+  return Object.fromEntries(groups);
 }
 
 function sumQuantity(records: ProductMovementRecord[]): number {

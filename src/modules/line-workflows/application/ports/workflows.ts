@@ -70,7 +70,9 @@ export interface WorkflowInventory {
     } | undefined>;
     append(readItem: () => MovementJourneyItem): Promise<void>;
 }
+export type MovementShop = { id: string; name: string; active: boolean; deleted?: boolean; aliases: string[] };
 export interface WorkflowContext {
+    shops(): Promise<MovementShop[]>;
     sessions: OrderSessionStore;
     movements: MovementSessionStore;
     orders: WorkflowOrders;

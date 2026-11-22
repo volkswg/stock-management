@@ -3,17 +3,17 @@ import { isActiveOrderCreateState } from "@/modules/orders/rules";
 import { parseQuantity, summarizeMovementJourney } from "@/modules/inventory/quantity";
 import type { MovementJourneyItem } from "@/modules/inventory/contracts";
 import { MovementStartCommandEnum, UserStateFlowName, type MovementState, type MovementImageUploadProgress, type MovementCreateMode, type MovementEventClassification } from "../contracts";
-import type { WorkflowContext, WorkflowImages, WorkflowLine, WorkflowRuntime } from "./ports/workflows";
+import type { WorkflowContext, WorkflowImages, WorkflowLine, WorkflowRuntime, MovementShop } from "./ports/workflows";
 import { isMovementStartCommand } from "./classify-event";
 import { resumeLegacyMovement, saveMovementState } from "./sessions";
 import { replyText } from "./reply";
 const START_CHOICES = [["Create New", "create:new-movement"], ["Resume Unfinished", "resume:movement"]];
-function savedPhotoCounts(items: MovementJourneyItem[], shop: string) {
+function savedPhotoCounts(items: MovementJourneyItem[], shop: string, shopId?: string) {
     // Count unique confirmed image-bearing rows, not delivery order or image-set index.
     const photos = new Map(items.filter((row) => row.id && String(row.imageUrl || "").trim())
         .map((row) => [String(row.id), row]));
     return {
-        shopPhotosSaved: [...photos.values()].filter((row) => row.shop === shop).length,
+        shopPhotosSaved: [...photos.values()].filter((row) => shopId ? row.shopId === shopId : row.shop === shop).length,
         movementPhotosSaved: photos.size,
     };
 }
@@ -29,13 +29,15 @@ export async function handleMovementEvent<Bytes>({ event, session, context, driv
     createMode?: MovementCreateMode;
     imageUpload?: MovementImageUploadProgress;
 }): Promise<void> {
+    const shops = await context.shops();
     const photoOnly = createMode === "photo_only";
-    const prompt = (line: WorkflowLine<Bytes>, event: LineEvent, state: MovementState, prefix = "") => promptMovement(line, event, state, prefix, createMode);
+    const prompt = (line: WorkflowLine<Bytes>, event: LineEvent, state: MovementState, prefix = "") => promptMovement(line, event, state, prefix, createMode, shops);
     const userId = event.source.userId;
     const text = event.message.text?.trim() || "";
     const command = text.toLowerCase();
     const eventId = event.webhookEventId || event.message.id;
-    const { state, processed } = session;
+    let state = session.state;
+    const { processed } = session;
     if (state && processed) {
         if (state.step === "complete") {
             await summary(line, event, context, state, publicBaseUrl);
@@ -44,7 +46,7 @@ export async function handleMovementEvent<Bytes>({ event, session, context, driv
             // Repair the master if the current state saved but its master sync failed.
             const items = await context.inventory.sync(state);
             if (imageUpload && state.step === "close_bag") {
-                Object.assign(imageUpload, { alreadySaved: true, shop: state.shop, ...savedPhotoCounts(items, state.shop) });
+                Object.assign(imageUpload, { alreadySaved: true, shop: state.shop, ...savedPhotoCounts(items, state.shop, state.shopId) });
             }
             const photoSummary = imageUpload?.alreadySaved
                 ? `✅ Photo already saved\nPhotos saved for ${state.shop} in this movement: ${imageUpload.shopPhotosSaved}\nMovement photos saved: ${imageUpload.movementPhotosSaved}\n\n`
@@ -95,6 +97,31 @@ export async function handleMovementEvent<Bytes>({ event, session, context, driv
             imageUpload.ignored = true;
         return;
     }
+    // Old context JSON and already-visible NJ/YY buttons are resolved only by
+    // unique master names or retained labels explicitly linked during backfill.
+    if (state.shop && !state.shopId) {
+        const candidates = matchingShops(shops, state.shop);
+        const selected = selection(shops, text, state.masterId);
+        const shop = selected || (candidates.length === 1 ? candidates[0] : undefined);
+        if (!shop) {
+            await chooseShop(line, event, state, shops, "The saved destination needs confirmation. Your quantities and upload progress are kept.\n\n", shopPage(text, state.masterId) || 0);
+            return;
+        }
+        state = { ...state, shopId: shop.id, ...(selected ? { shop: shop.name } : {}) };
+        await saveMovementState(context.movements, state, runtime);
+        if (selected) { await prompt(line, event, state, "Destination confirmed. Continue the pending step.\n\n"); return; }
+    }
+    // Distinct LINE events may repeat an old button after the first selection.
+    // Never feed encoded IDs (which contain digits) into quantity parsing.
+    if (state.step !== "shop" && (text.startsWith("movement:shop:") || text.startsWith("movement:shops:"))) {
+        await prompt(line, event, state);
+        return;
+    }
+    // A removed shop must be reviewed before downloading/uploading a new photo.
+    if (state.shopId && !shops.some(shop => shop.id === state!.shopId && !shop.deleted) && event.message.type === LineMessageType.Image) {
+        await replyText(line, event, "The saved shop is unavailable. Your movement progress is kept. Ask the operator to review this destination before resending the photo.");
+        return;
+    }
     if (command === "create:order" || command === "create:purchase-order") {
         await prompt(line, event, state, "Please complete your movement before starting an order.\n");
         return;
@@ -109,6 +136,10 @@ export async function handleMovementEvent<Bytes>({ event, session, context, driv
             await prompt(line, event, state);
             return;
         }
+        if (!state.shopId) {
+            await replyText(line, event, "The saved destination has no shop identity. Your progress is kept. Ask the operator to confirm the destination before resending the photo.");
+            return;
+        }
         // Photo-only IDs belong to the incoming image, not the shared session cursor.
         // Distinct images can never consume the same item ID or pending quantity.
         const imageState = photoOnly ? {
@@ -119,12 +150,16 @@ export async function handleMovementEvent<Bytes>({ event, session, context, driv
     }
     let next: MovementState = { ...state, lastEventId: eventId };
     if (state.step === "shop") {
-        const shop = text.toUpperCase();
-        if (shop !== "NJ" && shop !== "YY") {
+        const page = shopPage(text, state.masterId);
+        if (page !== undefined) { await chooseShop(line, event, state, shops, "", page); return; }
+        const byId = selection(shops, text, state.masterId);
+        const candidates = text.startsWith("movement:") ? [] : matchingShops(shops.filter(shop => shop.active), text);
+        const shop = byId || (candidates.length === 1 ? candidates[0] : undefined);
+        if (!shop) {
             await prompt(line, event, state);
             return;
         }
-        next = { ...next, shop, step: photoOnly ? "close_bag" : "quantity" };
+        next = { ...next, shop: shop.name, shopId: shop.id, step: photoOnly ? "close_bag" : "quantity" };
     }
     else if (state.step === "quantity" || state.step === "close_bag") {
         if ((photoOnly || state.step === "close_bag") && command === "close bag") {
@@ -144,7 +179,7 @@ export async function handleMovementEvent<Bytes>({ event, session, context, driv
         }
     }
     else if (state.step === "bag_closed" && command === "another shop") {
-        next = { ...next, step: "shop", itemId: `MOVED-${runtime.createId()}`, shop: "", quantity: "", remark: "", imageUrl: "" };
+        next = { ...next, step: "shop", itemId: `MOVED-${runtime.createId()}`, shop: "", shopId: undefined, quantity: "", remark: "", imageUrl: "" };
     }
     else if (state.step === "bag_closed" && ["summary", "movement summary"].includes(command)) {
         await context.inventory.sync(state, true);
@@ -229,12 +264,12 @@ async function saveImage<Bytes>({ state, event, eventId, context, drive, line, c
         const now = runtime.eventTime(() => event.timestamp);
         if (imageUpload)
             imageUpload.saveUncertain = true;
-        await context.inventory.append(() => ({ id: state.itemId, masterId: state.masterId, shop: state.shop, quantity: state.quantity, remark: state.remark, fromLocation: "Home", toLocation: state.shop, imageUrl, status: "created", createdAt: now, updatedAt: now, stockCounted: false, isNewArrival: false }));
+        await context.inventory.append(() => ({ id: state.itemId, masterId: state.masterId, shop: state.shop, shopId: state.shopId, quantity: state.quantity, remark: state.remark, fromLocation: "Home", toLocation: state.shop, imageUrl, status: "created", createdAt: now, updatedAt: now, stockCounted: false, isNewArrival: false }));
         if (imageUpload)
             Object.assign(imageUpload, { saved: true, saveUncertain: false });
     }
     const savedItems = await context.inventory.sync(state);
-    const counts = savedPhotoCounts(savedItems, savedShop);
+    const counts = savedPhotoCounts(savedItems, savedShop, String(existing?.shopId || state.shopId || "") || undefined);
     if (imageUpload)
         Object.assign(imageUpload, counts);
     const photoCountText = `Photos saved for ${savedShop} in this movement: ${counts.shopPhotosSaved}\nMovement photos saved: ${counts.movementPhotosSaved}`;
@@ -273,17 +308,59 @@ async function summary<Bytes>(line: WorkflowLine<Bytes>, event: LineEvent, conte
             },
         }]);
 }
-async function promptMovement<Bytes>(line: WorkflowLine<Bytes>, event: LineEvent, state: MovementState, prefix = "", createMode: MovementCreateMode = "quantity_photo"): Promise<void> {
+async function promptMovement<Bytes>(line: WorkflowLine<Bytes>, event: LineEvent, state: MovementState, prefix = "", createMode: MovementCreateMode = "quantity_photo", shops: MovementShop[] = []): Promise<void> {
     if (createMode === "photo_only" && ["quantity", "product_image", "close_bag"].includes(state.step)) {
         await replyText(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send product photos. Set quantities and notes on the web page afterward.\n➡️ Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
         return;
     }
     switch (state.step) {
-        case "shop": return replyText(line, event, prefix + "📍 Choose destination shop\nFrom: Home\n\n➡️ Tap NJ or YY.", [["NJ", "NJ"], ["YY", "YY"]]);
+        case "shop": return chooseShop(line, event, state, shops, prefix);
         case "quantity": return replyText(line, event, prefix + `📍 Home → ${state.shop}\n\n➡️ Send the quantity for one product photo.\nExample: 12\n\nFor a breakdown, put each quantity on a new line:\nขาว 5\nดำ 5\nThe quantities will be added together.`);
         case "product_image": return replyText(line, event, prefix + `📍 Home → ${state.shop}\nQuantity entered: ${state.quantity}${state.remark ? `\nBreakdown / note:\n${state.remark}` : ""}\n\n⏳ Item not saved yet.\n➡️ Send a product photo to save this item.`);
         case "close_bag": return replyText(line, event, prefix + `Next for ${state.shop}:\n• Add another item: send its quantity, then its photo.\n• Finished this bag: tap Close Bag.`, [["Close Bag", "close bag"]]);
         case "bag_closed": return replyText(line, event, prefix + `✅ Bag closed for ${state.shop}\n\n➡️ Another Shop: choose a shop and add more items.\n➡️ Summary: finish this movement and view totals.`, [["Another Shop", "another shop"], ["Summary", "summary"]]);
         case "complete": return replyText(line, event, prefix + "✅ Movement completed\nAll saved items are included.\n\n➡️ Tap Create New to start another movement.", START_CHOICES);
     }
+}
+
+function matchingShops(shops: MovementShop[], value: string): MovementShop[] {
+    const normalized = value.trim().toUpperCase();
+    return shops.filter(shop => !shop.deleted && [shop.name, ...shop.aliases].some(label => label.trim().toUpperCase() === normalized));
+}
+function selection(shops: MovementShop[], text: string, masterId: string): MovementShop | undefined {
+    if (!text.startsWith("movement:shop:") || text.length > 300) return undefined;
+    try {
+        const parts = text.slice("movement:shop:".length).split(":");
+        if (parts.length !== 2 || decodeURIComponent(parts[0]) !== masterId) return undefined;
+        return shops.find(shop => shop.id === decodeURIComponent(parts[1]) && shop.active && !shop.deleted);
+    } catch { return undefined; }
+}
+function shopPage(text: string, masterId: string): number | undefined {
+    if (!text.startsWith("movement:shops:") || text.length > 300) return undefined;
+    try {
+        const parts = text.slice("movement:shops:".length).split(":");
+        return parts.length === 2 && decodeURIComponent(parts[0]) === masterId && /^(0|[1-9][0-9]{0,5})$/.test(parts[1]) ? Number(parts[1]) : undefined;
+    } catch { return undefined; }
+}
+async function chooseShop<Bytes>(line: WorkflowLine<Bytes>, event: LineEvent, state: MovementState, shops: MovementShop[], prefix = "", requestedPage = 0): Promise<void> {
+    const active = shops.filter(shop => shop.active && !shop.deleted);
+    if (active.some(shop => !shop.name.trim() || shop.name.length > 300 || `movement:shop:${encodeURIComponent(state.masterId)}:${encodeURIComponent(shop.id)}`.length > 300)) {
+        await replyText(line, event, "Shop configuration needs operator review before choosing a destination. Your movement progress is kept.");
+        return;
+    }
+    const pages = Math.max(1, Math.ceil(active.length / 11)), page = Math.min(requestedPage, pages - 1);
+    const items = active.slice(page * 11, (page + 1) * 11).map(shop => ({ type: "action" as const, action: {
+        type: "postback" as const, label: shortLabel(shop.name),
+        displayText: shop.name, data: `movement:shop:${encodeURIComponent(state.masterId)}:${encodeURIComponent(shop.id)}`,
+    }}));
+    for (const [label, target] of [["Previous shops", page - 1], ["More shops", page + 1]] as const) {
+        if (target >= 0 && target < pages) items.push({type:"action",action:{type:"postback",label,displayText:label,data:`movement:shops:${encodeURIComponent(state.masterId)}:${target}`}});
+    }
+    await line.sendReply(event.replyToken, [{type:"text",text:prefix + (active.length ? "📍 Choose destination shop\nFrom: Home\n\n➡️ Tap a shop." : "No active shops are configured. Ask the operator to update Shop master, then resume this movement."),...(items.length ? {quickReply:{items}} : {})}]);
+}
+
+function shortLabel(name: string): string {
+    let label = "";
+    for (const character of name) { if (label.length + character.length > 20) break; label += character; }
+    return label;
 }

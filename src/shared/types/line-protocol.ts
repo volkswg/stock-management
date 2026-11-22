@@ -14,6 +14,11 @@ export interface LineQuickReply {
             type: "message";
             label: string;
             text: string;
+        } | {
+            type: "postback";
+            label: string;
+            data: string;
+            displayText: string;
         };
     }>;
 }
@@ -64,6 +69,7 @@ export type LineEvent = {
         userId?: string;
         groupId?: string;
     };
+    postback?: { data: string };
     message?: {
         id: string;
         type: LineMessageType;

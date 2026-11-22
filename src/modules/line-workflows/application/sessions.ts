@@ -25,6 +25,8 @@ export async function readMovementSession(store: MovementSessionStore, userId: s
     }
     if (!isRecord(context) || !["masterId", "itemId", "userId", "startedAt", "shop", "quantity", "remark", "imageUrl", "lastEventId"].every(key => typeof context[key] === "string") || !isStep(context.step) || context.masterId !== entry.referenceId || context.userId !== userId || context.step !== entry.step)
         throw new Error("Movement user state is incomplete. Please resume the movement.");
+    if (context.shopId !== undefined && (typeof context.shopId !== "string" || !context.shopId.trim()))
+        throw new Error("Movement user state contains an invalid shop identity.");
     const state = context as MovementState;
     return { state, processed: state.lastEventId === eventId };
 }

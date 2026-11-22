@@ -1,6 +1,7 @@
 import "server-only";
 import type { Storage } from "./infrastructure/postgres/storage";
 import type { StockCountAccount, AdjustmentEmployee } from "./contracts";
+import { readMovementShopDirectory } from "@/modules/expenses/server";
 import { readEmployeeDirectory } from "@/modules/hr/server";
 import { listAdjustmentEmployees as executeListAdjustmentEmployees } from "./application/list-adjustment-employees";
 import { createAdjustmentStore } from "./infrastructure/postgres/adjustments";
@@ -28,7 +29,7 @@ export async function getMonthlyStockCounts({ accounts, storage, month, }: {
     storage: Storage;
     month: string;
 }): Promise<MonthlyShopStockCount[]> {
-    return counts.getMonthlyStockCounts({ accounts, store: createStockCountStore(storage), month, runtime: { ...runtime, uuid: randomUUID }, readers: { movements: () => listMovements({ filter: {}, storage }), adjustments: () => listStockAdjustments(storage), sales: createSalesDashboardReader(storage).readSales } });
+    return counts.getMonthlyStockCounts({ accounts, store: createStockCountStore(storage), month, runtime: { ...runtime, uuid: randomUUID }, readers: { shops: () => readMovementShopDirectory(), movements: () => listMovements({ filter: {}, storage }), adjustments: () => listStockAdjustments(storage), sales: createSalesDashboardReader(storage).readSales } });
 }
 export async function saveMonthlyStockCount({ account, storage, month, note, physicalCount, updatedBy, }: {
     account: StockCountAccount;
@@ -107,3 +108,5 @@ export async function movementJourneyItems(storage: Pick<Storage, "movementMaste
 export async function synchronizeMovementJourney(storage: Pick<Storage, "movementMasters" | "movementDetails">, state: MovementJourneyIdentity, complete = false) { return movementJourneys.synchronizeMovementJourney(createMovementJourneyAdapter(storage).store, state, complete, () => new Date().toISOString()); }
 export async function findResumableMovementJourney(storage: Pick<Storage, "movementMasters" | "movementDetails">, userId: string) { return movementJourneys.findResumableMovementJourney(createMovementJourneyAdapter(storage).store, userId); }
 export async function appendMovementJourneyItem(storage: Pick<Storage, "movementMasters" | "movementDetails">, readItem: () => MovementJourneyItem) { return movementJourneys.appendMovementJourneyItem(createMovementJourneyAdapter(storage).store, readItem); }
+
+export { readMovementShopAliases } from "./infrastructure/postgres/movement-shop-aliases";

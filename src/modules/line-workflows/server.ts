@@ -7,15 +7,20 @@ import type { LineEvent } from "@/shared/types/line-protocol";
 import type { AppConfig } from "@/config";
 import { createSortableId } from "@/infrastructure/runtime/create-sortable-id";
 import { createDraftRecord, createOrderBill, createOrderItem, prepareOrderTransition, orderExists } from "@/modules/orders/server";
-import { createMovementJourneyAdapter, movementJourneyItems, synchronizeMovementJourney, findResumableMovementJourney, appendMovementJourneyItem } from "@/modules/inventory/server";
+import { readMovementShopAliases, createMovementJourneyAdapter, movementJourneyItems, synchronizeMovementJourney, findResumableMovementJourney, appendMovementJourneyItem } from "@/modules/inventory/server";
 import type { WorkflowContext } from "./application/ports/workflows";
 import { createSessionAdapter } from "./infrastructure/postgres/sessions";
 import { createWorkflowRuntime } from "./infrastructure/runtime";
 export { parseLineWebhookPayload } from "./infrastructure/payload";
+import { readMovementShopDirectory } from "@/modules/expenses/server";
 const runtime = createWorkflowRuntime(createSortableId);
 function createContext(storage: Storage) {
     const inventory = createMovementJourneyAdapter(storage), adapter = createSessionAdapter(storage, inventory);
-    const context: WorkflowContext = { sessions: adapter.orders, movements: adapter.movements,
+    const context: WorkflowContext = {
+        async shops() {
+            const [shops, aliases] = await Promise.all([readMovementShopDirectory(), readMovementShopAliases()]);
+            return shops.map(({id,name,active,deleted}) => ({id,name,active:active && !deleted,deleted,aliases:aliases.filter(alias => alias.shopId === id).map(alias => alias.label)}));
+        }, sessions: adapter.orders, movements: adapter.movements,
         orders: { draft: createdBy => createDraftRecord({ storage: storage, createdBy }), bill: input => createOrderBill({ ...input, storage: storage }), item: input => createOrderItem({ ...input, storage: storage }), transition: orderId => prepareOrderTransition({ storage: storage, orderId }), exists: orderId => orderExists({ storage: storage, orderId }) },
         inventory: { items: masterId => movementJourneyItems(storage, masterId), sync: (state, complete) => synchronizeMovementJourney(storage, state, complete), resumable: userId => findResumableMovementJourney(storage, userId), append: readItem => appendMovementJourneyItem(storage, readItem) }, photoContext: adapter.photoContext };
     return { context, adapter, inventory };

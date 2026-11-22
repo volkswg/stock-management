@@ -19,7 +19,7 @@ export async function getMonthlyStockCounts({
   const monthStart = `${month}-01`;
   const monthEnd = getMonthEnd(month);
   const previousMonth = shiftMonth(month, -1);
-  const [countRows, movements, salesDashboard, adjustments] = await Promise.all([
+  const [countRows, movements, salesDashboard, adjustments, shops] = await Promise.all([
     store.read(),
     readers.movements(),
     readers.sales({
@@ -28,11 +28,12 @@ export async function getMonthlyStockCounts({
       toDate: monthEnd,
     }),
     readers.adjustments(),
+    readers.shops ? readers.shops() : Promise.resolve([]),
   ]);
   const counts = countRows.records();
   const currentByAccount = recordsByAccount(counts, month);
   const previousByAccount = recordsByAccount(counts, previousMonth);
-  const stockInByAccount = calculateStockIn({ accounts, month, movements });
+  const stockInByAccount = calculateStockIn({ accounts, month, movements, shops });
   const stockOutByAccount = new Map(
     accounts.map((account) => {
       const series = salesDashboard.shopSeries.find(
@@ -67,6 +68,12 @@ export async function getMonthlyStockCounts({
     const syncedDates = new Set(salesDashboard.shopSeries.find(shop => shop.accountId === account.id)?.dailySales.map(day => day.salesDate) || []);
     const missingSalesDays = Array.from({ length: expectedSalesDays }, (_, i) => `${month}-${String(i + 1).padStart(2, "0")}`).filter(date => !syncedDates.has(date)).length;
     const warnings: string[] = [];
+    const accountsWithMapping = new Set(shops.filter(shop => accounts.some(a => a.id === (shop.loyverseAccountId || shop.id))).map(shop => shop.id));
+    const unmappedDelivery = movements.some(movement =>
+      movement.status === "delivered" && movement.deliverDateTime &&
+      toBangkokDate(movement.deliverDateTime).slice(0, 7) === month &&
+      Object.keys(movement.shopIdQuantities || {}).some(id => !accountsWithMapping.has(id)));
+    if (unmappedDelivery) warnings.push("Some delivered movement shops have no configured sales-account mapping. Stock-in totals may be incomplete.");
     if (!previous) warnings.push("No previous physical count: opening stock is assumed to be 0.");
     if (missingSalesDays) warnings.push(`${missingSalesDays} of ${expectedSalesDays} days have no completed sales sync. Calculated stock may be incomplete.`);
     if (calculatedStock < 0) warnings.push("Calculated stock is negative. Review opening counts, deliveries, sales and adjustments.");
@@ -141,10 +148,12 @@ function calculateStockIn({
   accounts,
   month,
   movements,
+  shops,
 }: {
   accounts: StockCountAccount[];
   month: string;
   movements: ProductMovementMasterRecord[];
+  shops: Array<{ id: string; loyverseAccountId: string }>;
 }): Map<string, number> {
   const accountIdByShop = new Map<string, string>();
   for (const account of accounts) {
@@ -152,6 +161,8 @@ function calculateStockIn({
     accountIdByShop.set(normalizeShop(account.shopName), account.id);
     accountIdByShop.set(shopAlias(account.shopName), account.id);
   }
+  const accountIds = new Set(accounts.map(account => account.id));
+  const accountByShopId = new Map(shops.map(shop => [shop.id, shop.loyverseAccountId || shop.id]));
   const totals = new Map<string, number>();
   for (const movement of movements) {
     if (
@@ -161,8 +172,14 @@ function calculateStockIn({
     ) {
       continue;
     }
+    for (const [shopId, quantity] of Object.entries(movement.shopIdQuantities || {})) {
+      const accountId = accountByShopId.get(shopId);
+      if (accountId && accountIds.has(accountId)) totals.set(accountId, normalizeNumber((totals.get(accountId) || 0) + quantity));
+    }
+    // Null-ID historical rows alone retain the former label matching. Never
+    // route an ID-linked row to a different account by its saved display name.
     for (const [shopName, quantity] of Object.entries(
-      movement.shopQuantities,
+      movement.shopIdQuantities ? movement.unlinkedShopQuantities || {} : movement.shopQuantities,
     )) {
       const accountId =
         accountIdByShop.get(normalizeShop(shopName)) ||

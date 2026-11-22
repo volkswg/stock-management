@@ -9,9 +9,16 @@ export async function classifyLineEvent({ event, getContext, }: {
     event: LineEvent;
     getContext: () => WorkflowContext;
 }): Promise<LineEventClassification> {
-    const message = event.message;
+    // Only our destination postback is adapted to the existing text journey.
+    // The original provider event is still the durable command intent.
+    const selection = event.type === "postback" && typeof event.postback?.data === "string"
+        && (event.postback.data.startsWith("movement:shop:") || event.postback.data.startsWith("movement:shops:")) && event.postback.data.length <= 300
+        && event.webhookEventId;
+    const message = selection
+        ? { type: LineMessageType.Text, id: event.webhookEventId!, text: event.postback!.data }
+        : event.message;
     const userId = event.source?.userId;
-    if (event.type !== "message" ||
+    if ((!selection && event.type !== "message") ||
         !message ||
         !userId ||
         (message.type !== LineMessageType.Text && message.type !== LineMessageType.Image)) {

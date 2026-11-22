@@ -1158,3 +1158,24 @@ install/inverse rehearsal receipts are retained on the Mac; online evidence must
 be rechecked under the final write fence. Synthetic guard coverage is included in
 current native CI, alongside existing Product/application/LINE tests. Stock tracking,
 new authentication and backup automation remain outside this release.
+
+## Movement shop-master IDs — implementation, not released
+
+The feature branch prepares dynamic LINE destination selection backed by Shop master
+IDs, nullable movement-detail FK, retained historical labels, safe old-session
+resolution, ID-based web grouping and stock-to-account attribution. An operator-only
+backfill requires a private explicit label-to-ID map, exact target/purpose/revision
+and supervised writer fencing; it refuses missing/ambiguous/conflicting mappings
+and preserves existing values, times and revisions. No production access or change,
+provider calls, new resources, merge or deployment is authorized by this preparation.
+Local verification passed 857 Node tests and three Python checks, including 19
+new current-owner regressions. Fresh synthetic PostgreSQL copies passed 55 checks,
+including seven guarded backfill/identity cases, malformed/late rollback, old-reader
+compatibility and actual LINE callback/image redelivery. Shop links, saved contexts
+and FK definitions survived an independent logical dump/restore. The broader native
+acceptance campaign also passed (historical schema proofs, current explicit maps,
+browser/API checks, identity/recovery and media/LINE flows). Final lint retains only
+the two inherited unused-variable warnings; type checking and a credential-free
+build preserve all routes and check 112 client chunks without private database
+strings. These local checks use no real provider or hosted database; final-commit
+CI and owner review remain required before merge/release.
