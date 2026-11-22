@@ -40,7 +40,7 @@ test('synchronous Loyverse factory is absent while canonical account sources sta
 
 test('historical cleanup controls retain exact bytes through the bounded shop-ID feature inverse',()=>{
  const fixture=JSON.parse(fs.readFileSync('tests/fixtures/wrapper-cleanup-before.json'));
- for(const [file,hash] of Object.entries(fixture.preserved))assert.equal(createHash('sha256').update(beforeMovementShopIds(file)).digest('hex'),hash,file);
+ for(const [file,hash] of Object.entries(fixture.preserved))assert.equal(createHash('sha256').update(require('../helpers/connection-pooling-history.cjs').beforePooling(file,beforeMovementShopIds(file))).digest('hex'),hash,file);
  assert.match(fs.readFileSync('src/modules/line-workflows/application/movement-events.ts','utf8'),/await resumeLegacyMovement\(context, userId, runtime\)/);
  const helper=fs.readFileSync('tests/helpers/native-line-primitives.cjs','utf8');assert.match(helper,/application\/sessions.ts/);assert.match(helper,/infrastructure\/postgres\/sessions.ts/);assert.doesNotMatch(helper,/beforeWrapper|vm\.|readFile/);
 });

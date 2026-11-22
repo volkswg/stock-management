@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import sys
 
+from pooling_history import before_pooling
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -29,6 +30,7 @@ def copy_previous(target):
             assert (hashlib.sha256(data).hexdigest() if data is not None else None)==movement_edit['afterSha256'],name
             data=movement_edit['before'].encode()
             assert hashlib.sha256(data).hexdigest()==movement_edit['beforeSha256'],name
+        data=before_pooling(name,data)
         product_edit=products['edits'].get(name)
         if product_edit:
             assert (hashlib.sha256(data).hexdigest() if data is not None else None)==product_edit['afterSha256'],name

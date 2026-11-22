@@ -6,6 +6,43 @@ next scope in the [roadmap](roadmap.md), and commands in [verification](verifica
 Historical counts/claims retain their original scope; this docs cleanup does not
 independently rerun or recertify every old release.
 
+## Runtime connection exhaustion correction — released PR105
+
+CI run123 passed and PR105 merged/deployed as `c66bd97`. Approved maintenance
+completed with transaction pooling on6543, shared pool4, runtime role limit6 and
+the original protections/cutoff. Eight API reads, two pages and the428/401
+idempotency/signature rejection probes passed, with unchanged business revision
+and no new53300 during controlled verification. The old connections drained on
+pool reload without manual termination. Users and LINE were reopened. Private
+execution/recovery evidence remains on the Mac; no business data is published.
+The implementation/pre-release evidence below retains its original scope.
+
+The November22 investigation confirmed PostgreSQL53300 for the production runtime
+login (six-connection limit), alongside46 HTTP503s across database-backed routes.
+The two-client pg limit was per Vercel instance; session pooling could retain idle
+backends across instances. The focused correction starts from production44ab4ac9,
+separate from the paused shop-ID branch/PR104. It adds the pinned official Vercel
+pool lifecycle hook, exact transaction-pool endpoint validation and allowlisted
+connection diagnostics. Target/TLS/role/permissions, transactions, idempotency,
+uncertain-COMMIT handling, API/UI/LINE behavior and database schema stay intact.
+
+Local verification passed856 Node tests (18 new current transport checks) and
+three runner Python tests, plus five actual PostgreSQL17.7/PgBouncer1.26.1 pooling
+tests. Six idle direct sessions reproduce53300;24 clients across12 copies of the
+current transport share at most four backends. Tests preserve read-only/repeatable
+reads, transaction affinity, role reset, permission denial, queued writes, rollback,
+concurrent replay/input conflicts and lost-COMMIT recovery. The real Vercel helper
+drains a real pg pool under synthetic request context/idle timers. Type checking,
+lint (two inherited warnings) and the isolated build passed; existing routes and
+112 browser chunks passed the private-string check. Exact predecessor copies and
+all original JSON fixtures are preserved by a new bounded test-only inverse.
+
+The [release procedure](../database-migration.md#connection-pooling-correction--released-in-pr105)
+requires separate application/configuration/pool-size approval, verified combined
+login budget and an old-session drain. Local PgBouncer evidence does not establish
+hosted Supavisor/Vercel behavior. CI remains a merge gate. No hosted configuration,
+data, schema, role limits, traffic or deployment changed; no real provider invoked.
+
 ## Unused integration wrappers — prepared, not deployed
 
 The synchronous Loyverse factory/type/barrel exports and unused LINE public
@@ -1160,6 +1197,24 @@ current native CI, alongside existing Product/application/LINE tests. Stock trac
 new authentication and backup automation remain outside this release.
 
 ## Movement shop-master IDs — implementation, not released
+
+The post-pooling recheck updates PR104 against deployed main `c66bd97`. Six
+conflicts in historical loaders/runners are resolved with the shop inverse first,
+then the immutable pooling inverse; both current test suites remain enabled. The
+pooling transport, command/upload handling, dependencies and CI workflow are
+byte-identical to main. Combined local checks pass875 Node tests and three Python
+checks, including50 targeted shop/pooling/history cases, plus55 actual PostgreSQL
+checks and shop/session dump-restore on fresh synthetic copies. Lint retains two
+inherited warnings; type checking and the isolated build pass, with unchanged
+routes and112 client chunks checked. Earlier results below describe the original
+feature head; the updated head requires its own CI before merge.
+
+Production is unchanged by this recheck. The next release gates are updated CI
+and owner merge review, separately approved private destination/master/session
+inventory and explicit mapping, fresh53-table/four-sequence recovery and local
+rehearsal, then an exact supervised maintenance approval. No fresh hosted business
+records, recovery export, provider call or deployment was performed here. The
+release and rollback must retain PR105's transaction6543/pool4/role-limit6 profile.
 
 The feature branch prepares dynamic LINE destination selection backed by Shop master
 IDs, nullable movement-detail FK, retained historical labels, safe old-session

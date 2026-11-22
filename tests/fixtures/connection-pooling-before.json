@@ -1,0 +1,274 @@
+{
+  "sourceCommit": "44ab4ac9e972b180c97fa431fb30bf679861f92c",
+  "purpose": "Test-only exact inverse; original fixtures stay immutable and current acceptance uses physical source",
+  "edits": {
+    ".github/workflows/migration-acceptance.yml": {
+      "beforeSha256": "fcbaeebe8a6b8650592e8abfadeaa1366ba951884cd553a80b25097016f9fc49",
+      "afterSha256": "17ec25038f1525e6e3dd812ddd4b2d5f4e6cda005ee44d62054046e5e917981a",
+      "inverse": [
+        {
+          "start": 58,
+          "count": 4,
+          "before": ""
+        }
+      ]
+    },
+    "docs/database-migration.md": {
+      "beforeSha256": "84c77843573ad6b9776a215ebd0f38429eeca72d7959de1a4028f9091f06706e",
+      "afterSha256": "b1e878c9473b4166a35bd5d3c0dcf98e9c79e15e34855bb25a4c6cbb4e160e8e",
+      "inverse": [
+        {
+          "start": 434,
+          "count": 72,
+          "before": ""
+        }
+      ]
+    },
+    "docs/refactoring/progress.md": {
+      "beforeSha256": "24d6f710a7513765b84ea40d77f6c61ced5378895980a7d9d790795b0a1caff4",
+      "afterSha256": "fa7cc796f007417a02081a7a414e61a9c228e9134a951613f486a9bbafd5f0b9",
+      "inverse": [
+        {
+          "start": 7,
+          "count": 28,
+          "before": ""
+        }
+      ]
+    },
+    "docs/refactoring/verification.md": {
+      "beforeSha256": "6f0cee94ff431853b10354642f2d076a1eacde850506fe84d0c512662e121008",
+      "afterSha256": "a1c74d5fc4279e0d60bca7f29a8263d2a3c7e828e5b38427a641ece1a50a2a87",
+      "inverse": [
+        {
+          "start": 48,
+          "count": 3,
+          "before": ""
+        },
+        {
+          "start": 57,
+          "count": 17,
+          "before": ""
+        }
+      ]
+    },
+    "package.json": {
+      "beforeSha256": "353901f83960326f790a71c2dd654cbb03b316d0198b5985ba898ad4eed64a56",
+      "afterSha256": "7631066ff481515e87071e4a4c0e90432fe207a5baf281dd6bce515c5497eb2f",
+      "inverse": [
+        {
+          "start": 16,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "src/infrastructure/persistence/postgres/database.ts": {
+      "beforeSha256": "426eb28cca932920fd8c156fde0342ee4612772d32ef84dbc9fccee19703ea24",
+      "afterSha256": "ee00bcce7c09b7bfca5be15bd6ab66a4617416742b61bfca7157dce98836f62b",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 12,
+          "count": 6,
+          "before": ""
+        },
+        {
+          "start": 49,
+          "count": 1,
+          "before": "  const session = release.connectionMode === \"session\" && /^aws-[0-9]+-ap-northeast-1\\.pooler\\.supabase\\.com$/.test(String(release.databaseHost));\n"
+        },
+        {
+          "start": 51,
+          "count": 3,
+          "before": "  const username = session ? release.runtimeUser + \".\" + release.projectRef : release.runtimeUser;\n  if (!(direct || session) || ![\"postgres:\", \"postgresql:\"].includes(parsed.protocol) || parsed.hostname !== release.databaseHost || Number(parsed.port || 5432) !== 5432 || parsed.pathname !== \"/postgres\" || parsed.search || parsed.hash || login !== username || !parsed.password) return fail();\n"
+        },
+        {
+          "start": 71,
+          "count": 3,
+          "before": "    // Never propagate driver errors, SQL text, bind values or connection URLs to HTTP/logs.\n    pool.on(\"error\", () => {});\n"
+        },
+        {
+          "start": 99,
+          "count": 1,
+          "before": "  try { client = await connectionPool().connect(); } catch { throw new PersistenceFailure(); }\n"
+        }
+      ]
+    },
+    "tests/helpers/product-master-uat-history.cjs": {
+      "beforeSha256": "afff7e5813e5261452a6f404e10f393f4c8458b747f61e9cd36df131bfe3d56a",
+      "afterSha256": "d9f4bdcc5cfd3198d102fab100fb5a9673cd9214a35aa04b7532b477c95d868d",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tests/native-postgres/wrapper-cleanup.test.cjs": {
+      "beforeSha256": "64b57ac5ef2c3c40b137b4d098d9ddd41ee6c9299ecba340a0783e53edc72ce4",
+      "afterSha256": "b911f7c946bec2a45c49577e08ee7979dda25542d835fa5b65201bc6304bce36",
+      "inverse": [
+        {
+          "start": 41,
+          "count": 1,
+          "before": " for(const [file,hash] of Object.entries(fixture.preserved))assert.equal(createHash('sha256').update(fs.readFileSync(file)).digest('hex'),hash,file);\n"
+        }
+      ]
+    },
+    "tools/native-postgres/history-copy.py": {
+      "beforeSha256": "f4010fae94313b6ef7b8e6be04084c810d534ea9d4caa4e6200a70d675912a05",
+      "afterSha256": "f8c2480210ac79ca56d72260285fc914c6808e829b386b9b66cac5ba73dd20b2",
+      "inverse": [
+        {
+          "start": 7,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 35,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/receipt-payment-history-copy.py": {
+      "beforeSha256": "8c492b2537bb0d625a76770f6f8cea1fc3c278a05360c74cec98b5f4ac20c5fc",
+      "afterSha256": "536c5a84e7e75cc8077ce6ba564ffd6ed5a7e8d7f6e7fdbf370f8d2592fb01f2",
+      "inverse": [
+        {
+          "start": 11,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 27,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/reference-history-copy.py": {
+      "beforeSha256": "d289a7a0f0a5d49a4656a45feb34c3f25e69d254655e4868b815b8306adf2ed9",
+      "afterSha256": "e2d5184b129ce3345606c3030e6ec2cdc1c5f97ccc65116bfb41691db4078700",
+      "inverse": [
+        {
+          "start": 5,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 24,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/test.mjs": {
+      "beforeSha256": "3ca24642719d08f9b7c7ee90848db409fe4a8b6350d0a921079e45b303a780bc",
+      "afterSha256": "0fa90eb5a344f67ae166763e1cfa69dc49b72d9fc2bd72e851b0e4ac2f16a001",
+      "inverse": [
+        {
+          "start": 14,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "yarn.lock": {
+      "beforeSha256": "e97b7b1c9b9c8a00df2423110580d9f22d792a14d1ab42922f09d385c685430a",
+      "afterSha256": "5d7fe4961603ec28e2b705d79c816785a45a1462bad33808a5727989af606cb1",
+      "inverse": [
+        {
+          "start": 1308,
+          "count": 31,
+          "before": ""
+        },
+        {
+          "start": 1698,
+          "count": 1,
+          "before": "cross-spawn@^7.0.6:\n"
+        },
+        {
+          "start": 2191,
+          "count": 15,
+          "before": ""
+        },
+        {
+          "start": 2365,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 2477,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 2673,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 2743,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 2876,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 2893,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 2975,
+          "count": 7,
+          "before": ""
+        },
+        {
+          "start": 3048,
+          "count": 7,
+          "before": ""
+        },
+        {
+          "start": 3066,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 3113,
+          "count": 1,
+          "before": "path-key@^3.1.0:\n"
+        },
+        {
+          "start": 3541,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 3647,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 3940,
+          "count": 14,
+          "before": ""
+        },
+        {
+          "start": 3985,
+          "count": 5,
+          "before": ""
+        }
+      ]
+    }
+  }
+}
