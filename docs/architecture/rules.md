@@ -182,3 +182,12 @@ page and the Orders catalogue client. It owns the existing durable product-reque
 identity/journal protocol. Orders retains its item-specific endpoint and DTOs;
 Products never imports Orders. The workspace links to `/products`, whose page
 composition renders Products-owned UI. No server dependency enters this browser leaf.
+
+The movement destination stage adds two exact server-reader edges: LINE and
+Inventory server composition consume Expenses' public `readMovementShopDirectory`.
+Expenses owns the fixed-column, read-only shop projection (including inactive/deleted
+masters for historical attribution); Inventory owns retained movement-label aliases.
+LINE core receives only its semantic shop port and never reads shop SQL or tokens.
+The native lint scopes name only these entrypoints/adapters; browser/core SQL and
+cross-feature private imports remain forbidden. Historical source inverses are
+test-only, hash bounded, and separate from actual current-source acceptance.

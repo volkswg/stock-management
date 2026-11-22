@@ -24,3 +24,5 @@ export async function removeExpense(service: ExpenseStorage, id: string): Promis
 export async function saveExpenseMaster(service: ExpenseStorage, kind: "categories" | "shops", input: { id?: string; name: string; active: boolean; loyverseAccountId?: string }) {
   return executeSaveMaster(new PostgresExpenseStore(service), kind, input, runtime);
 }
+
+export { readMovementShopDirectory } from "./infrastructure/postgres/movement-shop-directory";

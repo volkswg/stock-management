@@ -433,7 +433,17 @@ GitHub. Attendance `employee_timesheets.shopId` refers to the external account I
 not the expense `shops.id`. Preserve opaque IDs and approved metadata mappings;
 do not invent accounts, employee IDs, relationships or missing historical dates.
 
-## Connection-pooling correction — prepared, production unchanged
+## Connection-pooling correction — released in PR105
+
+PR105 is merged and deployed as `c66bd976c36f396309037aa3d56d439694598cbe`.
+The approved November22 maintenance changed the existing shared endpoint to
+transaction mode on port6543 and the shared server pool from15 to4. The runtime
+role limit remains6, database maximum60 and max clients200. Eight API reads,
+two pages and the idempotency/LINE-signature rejection checks passed; records,
+permissions, protections and LINE cutoff were preserved and the system reopened.
+The old session connections drained during the pool reload, without manual
+termination. Preserve this deployed configuration in the shop-ID release; the
+historical activation packet below must not be rerun as a prerequisite.
 
 The November22 investigation found46 PostgreSQL `53300` FATAL events for the
 runtime role and46 HTTP503 responses across database-backed screens in the same
@@ -1266,3 +1276,73 @@ new empty schema and restore the exact predecessor media contracts. With records
 present, retain them and use app rollback; removal/data disposition needs separate
 review and approval. Existing orders, media, archive and private configuration are
 never cleanup targets.
+
+## Movement shop-ID release — prepared only
+
+No live change is authorized by this implementation. Target remains
+`hzynvirpedqnvtbifobx`, isolation `349b9289-f684-4ec5-ac22-924b2be1946b`, purpose
+`production`, on the existing Vercel project/domain. Product Master and all business
+records, private configuration, permissions, four identity sequences and retained
+recovery/archive evidence must be preserved. No new resource or provider canary.
+
+1. Before requesting maintenance, inspect the merged source/CI and verify a fresh
+   full private recovery checkpoint and independent restore. There are still 53
+   private tables/four sequences; the existing same-snapshot Products supplement
+   remains required. Rehearse the exact schema/backfill on a disposable clone.
+   The current application baseline is PR105 (`c66bd97`), with transaction pooling
+   on6543, shared pool4 and runtime limit6. The shop-ID source must include that
+   fix, retain its lifecycle hook/diagnostics and change only the release source
+   commit during deployment. Do not restore the old session endpoint/pool15.
+2. With separately approved data access, prepare a private JSON array of explicit
+   `{ "label": "existing destination", "shopId": "existing master ID" }` mappings.
+   Include every destination in movement details, including deleted history, and
+   every nonempty saved MovementCreate context. Owners must resolve missing or
+   ambiguous destinations. Several historical labels may map to one ID; a normalized
+   label may not map to multiple IDs. Do not infer mappings from Loyverse names.
+   That inventory/mapping and fresh recovery have not been performed by the
+   post-pooling PR recheck. Do not claim the retained pre-product checkpoint is
+   sufficient for this53-table/four-sequence schema/backfill release.
+3. Obtain separate approval for live DDL/backfill, source-binding/build/promotion,
+   temporary traffic block and a supervised writer pause. Account for browser/LINE
+   saves/uploads, direct editors and jobs. Recheck the full frozen checkpoint and
+   pending state freshness after fencing; refresh/verify recovery on any drift.
+4. In the approved private owner session set `stock.expected_isolation_id`,
+   `stock.expected_purpose` and numeric frozen `stock.expected_revision`. For
+   `supabase/migrations/20261122125311_movement_shop_ids.sql`, also set
+   `stock.movement_shop_install=reviewed-movement-shop-ids-v1`. Only the nullable
+   FK/index and existing-runtime column capabilities are added. RLS/public grants
+   and every existing value stay unchanged. Do not run unrelated migrations.
+5. In a separate transaction use the same identity/purpose and current frozen
+   revision, `stock.movement_shop_backfill=reviewed-movement-shop-backfill-v1`, and
+   private `stock.movement_shop_map` array, then execute
+   `tools/migration/operator/backfill_movement_shop_ids.sql`. It refuses duplicate,
+   missing, conflicting or malformed mappings/context before updates. It preserves
+   labels, quantities, media, times, row/global revisions and all other context
+   values while adding the reference. Only the four reviewed validation/revision
+   triggers are temporarily disabled under writer/table locks, restored before
+   commit; FK checking stays enabled. A failure rolls the entire transaction back.
+6. Verify all old values with only the reviewed ID/context augmentation, all detail
+   IDs populated (including deleted history), saved session identities, triggers,
+   FK/index/column privileges, unchanged account credentials and sequences. Require
+   zero unexplained differences and complete shop-to-account mapping for existing
+   stock-count accounts. On uncertainty inspect committed results before retrying.
+7. Deploy only the reviewed merged source, preserving all other production settings
+   and protections. Compare existing order, movement, sales, expense and HR reads;
+   allow only the reviewed additive movement fields/grouping. Verify old name links,
+   master-based choices, no-active/ambiguous behavior, pending-session resolution,
+   unchanged counts, idempotency, LINE signature/cutoff and image retry behavior.
+   Real provider/business canaries need their own approval.
+8. Remove only this window's maintenance rule after successful checks. Confirm actual
+   application guards after WAF removal and before announcing reopening. Retain the
+   fresh checkpoint, mapping, reconciliation and deployment/rollback receipts privately.
+
+Rollback before reopening prefers the previous app/source binding while retaining
+all added IDs and schema; old readers ignore the nullable column/additional context
+key. Never restore an old dump over acknowledged work or automatically drop the
+column. After users have received new dynamic choices or saved work, re-fence
+LINE/browser writes first, account for pending callbacks/uploads, and review the
+old app's fixed-destination limitations before reopening. New records created by an
+old writer may lack `shopId` and require another approved explicit reconciliation.
+New staff auth, stock-by-product balances and backup automation remain deferred.
+The rollback application is the deployed PR105 baseline with its transaction
+endpoint/pool4, not a pre-pooling application or pool configuration.

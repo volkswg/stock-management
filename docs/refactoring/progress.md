@@ -6,7 +6,16 @@ next scope in the [roadmap](roadmap.md), and commands in [verification](verifica
 Historical counts/claims retain their original scope; this docs cleanup does not
 independently rerun or recertify every old release.
 
-## Runtime connection exhaustion correction — prepared, not deployed
+## Runtime connection exhaustion correction — released PR105
+
+CI run123 passed and PR105 merged/deployed as `c66bd97`. Approved maintenance
+completed with transaction pooling on6543, shared pool4, runtime role limit6 and
+the original protections/cutoff. Eight API reads, two pages and the428/401
+idempotency/signature rejection probes passed, with unchanged business revision
+and no new53300 during controlled verification. The old connections drained on
+pool reload without manual termination. Users and LINE were reopened. Private
+execution/recovery evidence remains on the Mac; no business data is published.
+The implementation/pre-release evidence below retains its original scope.
 
 The November22 investigation confirmed PostgreSQL53300 for the production runtime
 login (six-connection limit), alongside46 HTTP503s across database-backed routes.
@@ -28,7 +37,7 @@ lint (two inherited warnings) and the isolated build passed; existing routes and
 112 browser chunks passed the private-string check. Exact predecessor copies and
 all original JSON fixtures are preserved by a new bounded test-only inverse.
 
-The [release procedure](../database-migration.md#connection-pooling-correction--prepared-production-unchanged)
+The [release procedure](../database-migration.md#connection-pooling-correction--released-in-pr105)
 requires separate application/configuration/pool-size approval, verified combined
 login budget and an old-session drain. Local PgBouncer evidence does not establish
 hosted Supavisor/Vercel behavior. CI remains a merge gate. No hosted configuration,
@@ -1186,3 +1195,42 @@ install/inverse rehearsal receipts are retained on the Mac; online evidence must
 be rechecked under the final write fence. Synthetic guard coverage is included in
 current native CI, alongside existing Product/application/LINE tests. Stock tracking,
 new authentication and backup automation remain outside this release.
+
+## Movement shop-master IDs — implementation, not released
+
+The post-pooling recheck updates PR104 against deployed main `c66bd97`. Six
+conflicts in historical loaders/runners are resolved with the shop inverse first,
+then the immutable pooling inverse; both current test suites remain enabled. The
+pooling transport, command/upload handling, dependencies and CI workflow are
+byte-identical to main. Combined local checks pass875 Node tests and three Python
+checks, including50 targeted shop/pooling/history cases, plus55 actual PostgreSQL
+checks and shop/session dump-restore on fresh synthetic copies. Lint retains two
+inherited warnings; type checking and the isolated build pass, with unchanged
+routes and112 client chunks checked. Earlier results below describe the original
+feature head; the updated head requires its own CI before merge.
+
+Production is unchanged by this recheck. The next release gates are updated CI
+and owner merge review, separately approved private destination/master/session
+inventory and explicit mapping, fresh53-table/four-sequence recovery and local
+rehearsal, then an exact supervised maintenance approval. No fresh hosted business
+records, recovery export, provider call or deployment was performed here. The
+release and rollback must retain PR105's transaction6543/pool4/role-limit6 profile.
+
+The feature branch prepares dynamic LINE destination selection backed by Shop master
+IDs, nullable movement-detail FK, retained historical labels, safe old-session
+resolution, ID-based web grouping and stock-to-account attribution. An operator-only
+backfill requires a private explicit label-to-ID map, exact target/purpose/revision
+and supervised writer fencing; it refuses missing/ambiguous/conflicting mappings
+and preserves existing values, times and revisions. No production access or change,
+provider calls, new resources, merge or deployment is authorized by this preparation.
+Local verification passed 857 Node tests and three Python checks, including 19
+new current-owner regressions. Fresh synthetic PostgreSQL copies passed 55 checks,
+including seven guarded backfill/identity cases, malformed/late rollback, old-reader
+compatibility and actual LINE callback/image redelivery. Shop links, saved contexts
+and FK definitions survived an independent logical dump/restore. The broader native
+acceptance campaign also passed (historical schema proofs, current explicit maps,
+browser/API checks, identity/recovery and media/LINE flows). Final lint retains only
+the two inherited unused-variable warnings; type checking and a credential-free
+build preserve all routes and check 112 client chunks without private database
+strings. These local checks use no real provider or hosted database; final-commit
+CI and owner review remain required before merge/release.

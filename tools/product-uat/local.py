@@ -68,10 +68,24 @@ try:
  assert sql(fingerprint).stdout==sql(fingerprint,db='uat_restore').stdout
  product_fingerprint="BEGIN READ ONLY; SET stock.expected_isolation_id='"+isolation+"';\n"+(root/'tools/product-uat/recovery-fingerprint.sql').read_text()+"\nCOMMIT;"
  assert sql(product_fingerprint).stdout==sql(product_fingerprint,db='uat_restore').stdout
+ # This current-source stage also requires the movement destination schema.
+ def install_movement_shops(db):
+  settings="SELECT set_config('stock.movement_shop_install','reviewed-movement-shop-ids-v1',false);SELECT set_config('stock.expected_isolation_id',isolation_id::text,false),set_config('stock.expected_purpose',purpose,false) FROM stock_operational.environment;SELECT set_config('stock.expected_revision',value::text,false) FROM stock_operational.revision;"
+  sql(settings+(root/'supabase/migrations/20261122125311_movement_shop_ids.sql').read_text(),db=db)
+ run(['exec',container,'createdb','-U','postgres','-T','uat','movement_shops'])
+ install_movement_shops('movement_shops')
+ movementenv={**childenv,'STOCK_DATABASE_URL':childenv['STOCK_DATABASE_URL'].replace('/uat','/movement_shops')}
+ r=subprocess.run(['node','--test','tools/movement-shops/postgres.test.cjs'],cwd=root,env=movementenv,text=True,capture_output=True,timeout=180);log.write(r.stdout+r.stderr);log.flush();print(r.stdout+r.stderr,flush=True);assert r.returncode==0,'Movement shop-ID PostgreSQL tests failed'
+ dumped=run(['exec',container,'pg_dump','-U','postgres','-d','movement_shops','--schema=stock_operational','--schema=stock_migration','--schema=stock_configuration']).stdout
+ run(['exec',container,'createdb','-U','postgres','movement_shops_restore']);sql(dumped,db='movement_shops_restore')
+ proof='SELECT to_jsonb(t)::text FROM stock_operational.movement_details t ORDER BY id;SELECT to_jsonb(t)::text FROM stock_operational.user_state t ORDER BY id;SELECT to_jsonb(t)::text FROM stock_operational.shops t ORDER BY id;SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid=\'stock_operational.movement_details\'::regclass ORDER BY conname;'
+ assert sql(proof,db='movement_shops').stdout==sql(proof,db='movement_shops_restore').stdout
+ print(json.dumps({'movementShopLinksAndSessionsDumpRestoreVerified':True,'syntheticOnly':True}),flush=True)
  # Existing app and LINE/database behavior must remain usable with the added FK.
  for testfile in ['tools/native-postgres/application.test.cjs','tools/native-postgres/media-line.test.cjs']:
   run(['exec',container,'createdb','-U','postgres','-T','uat','regression'])
   sql("DO $$DECLARE names text;BEGIN SELECT string_agg(format('%I.%I',schemaname,tablename),',') INTO names FROM pg_tables WHERE schemaname='stock_operational' AND tablename NOT IN ('environment','revision');EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';END$$;",db='regression')
+  install_movement_shops('regression')
   regressionenv={**childenv,'STOCK_DATABASE_URL':childenv['STOCK_DATABASE_URL'].replace('/uat','/regression')}
   result=subprocess.run(['node','--test',testfile],cwd=root,env=regressionenv,text=True,capture_output=True,timeout=240);log.write(result.stdout+result.stderr);log.flush();print(result.stdout+result.stderr,flush=True);assert result.returncode==0,testfile
   run(['exec',container,'dropdb','-U','postgres','regression'])
@@ -81,6 +95,7 @@ try:
  run(['exec',container,'createdb','-U','postgres','-T','uat','uat_browser'])
  sql('TRUNCATE stock_operational.products,stock_operational.order_items,stock_operational.orders,stock_operational.commands RESTART IDENTITY CASCADE;',db='uat_browser')
  sql((root/'tools/product-uat/seed.sql').read_text(),db='uat_browser')
+ install_movement_shops('uat_browser')
  childenv['STOCK_DATABASE_URL']=childenv['STOCK_DATABASE_URL'].replace('/uat','/uat_browser')
  app=Path(tempfile.mkdtemp(prefix='product-uat-app-',dir=a.artifacts))
  for entry in ['src','public'] :shutil.copytree(root/entry,app/entry)

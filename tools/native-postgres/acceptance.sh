@@ -24,8 +24,22 @@ for database in np_application np_records np_media np_browser; do
 DO $$DECLARE f record; BEGIN FOR f IN SELECT oid::regprocedure sig FROM pg_proc WHERE pronamespace='stock_operational'::regnamespace AND (proname LIKE 'typed_input_%' OR proname LIKE 'typed_project_%') LOOP EXECUTE format('REVOKE EXECUTE ON FUNCTION %s FROM stock_runtime',f.sig); END LOOP; END$$;
 SQL
 done
+install_movement_shop_schema(){
+ local database=$1
+ local present
+ present=$(pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 -c "SELECT EXISTS(SELECT FROM pg_attribute WHERE attrelid='stock_operational.movement_details'::regclass AND attname='shopId' AND NOT attisdropped)")
+ if [[ "$present" == f ]]; then
+  {
+   printf "SELECT set_config('stock.movement_shop_install','reviewed-movement-shop-ids-v1',false);\n"
+   printf "SELECT set_config('stock.expected_isolation_id',isolation_id::text,false),set_config('stock.expected_purpose',purpose,false) FROM stock_operational.environment;\n"
+   printf "SELECT set_config('stock.expected_revision',value::text,false) FROM stock_operational.revision;\n"
+   cat "$STOCK_NATIVE_ROOT/supabase/migrations/20261122125311_movement_shop_ids.sql"
+  } | pg psql -U postgres -d "$database" -v ON_ERROR_STOP=1 > "$artifacts/movement-shop-install-$database.log"
+ fi
+}
 native_run(){
  local database=$1; shift
+ if [[ -z "${STOCK_NATIVE_SOURCE_OVERRIDE:-}" ]]; then install_movement_shop_schema "$database"; fi
  local target; target=$(identity "$database")
  (cd "${STOCK_NATIVE_SOURCE_OVERRIDE:-$STOCK_NATIVE_ROOT}" && env -i PATH="$PATH" NODE_PATH="${NODE_PATH:-}" STOCK_CHROMIUM_EXECUTABLE="${STOCK_CHROMIUM_EXECUTABLE:-/usr/bin/google-chrome}" STOCK_TARGET_ISOLATION_ID="$target" STOCK_STORAGE=supabase STOCK_STAGING_ENABLED=true STOCK_ALLOW_LOCAL_TEST_DATABASE=true STOCK_DATABASE_URL="postgres://stock_test:synthetic-only@127.0.0.1:$port/$database" STOCK_STAGING_AUTH_TOKEN=synthetic-authorization-token-32-characters node --test "$@")
 }
@@ -224,3 +238,7 @@ for database in np_product_uat np_product_restore; do
 done
 cmp "$artifacts/product-master-recovery-np_product_uat.txt" "$artifacts/product-master-recovery-np_product_restore.txt"
 echo 'PASS: product catalogue rows, archived records and identity sequence independently restored'
+
+# Actual guarded backfill and LINE destination IDs on a separate synthetic copy.
+pg createdb -U postgres -T np_product_uat np_movement_shops
+native_run np_movement_shops tools/movement-shops/postgres.test.cjs

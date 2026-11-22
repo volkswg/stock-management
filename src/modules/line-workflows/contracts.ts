@@ -21,6 +21,7 @@ export type MovementState = {
     step: MovementStep;
     startedAt: string;
     shop: string;
+    shopId?: string;
     quantity: string;
     remark: string;
     imageUrl: string;

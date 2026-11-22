@@ -17,6 +17,7 @@ export type StockCountRuntime = {
     uuid(): string;
 };
 export interface StockCountReaders {
+    shops?(): Promise<Array<{ id: string; loyverseAccountId: string }>>;
     movements(): Promise<ProductMovementMasterRecord[]>;
     adjustments(): Promise<StockAdjustment[]>;
     sales(input: {

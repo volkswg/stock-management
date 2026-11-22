@@ -46,6 +46,7 @@ export function inventoryTables() {
     movementDetails: new NativeRecords("movement_details", {
       id: { column: "id", kind: "text" },
       movementMasterId: { column: "movementMasterId", kind: "text" },
+      shopId: { column: "shopId", kind: "text" },
       shopName: { column: "shopName", kind: "text" },
       quantity: { column: "quantity", kind: "numeric" },
       remark: { column: "remark", kind: "text" },

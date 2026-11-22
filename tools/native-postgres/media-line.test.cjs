@@ -62,6 +62,7 @@ test('actual LINE order-image workflow links media with known metadata and survi
  assert.equal((await owner.query('SELECT count(*) FROM stock_operational.order_bills WHERE "imageMediaId"=$1',[media.id])).rows[0].count,'1');
 });
 test('actual LINE movement photo saves one media reference and preserves quantity/note on redelivery',async()=>{
+ await owner.query(`INSERT INTO stock_operational.shops(id,name,active) VALUES('MC_SHOP_NJ','NJ',true),('MC_SHOP_YY','YY',true) ON CONFLICT(id) DO NOTHING`);
  let uploads=0;
  const args={lineBotService:{sendReply:async()=>{},downloadMessageContent:async()=>({contentType:'image/jpeg',bytes:Buffer.from('synthetic movement')})},getStorage:()=>service,
   getGoogleDriveService:()=>({async uploadImage(){uploads++;return file('MC_LINE_MOVEMENT');},async deleteFile(){assert.fail('Committed movement file deleted');}}),

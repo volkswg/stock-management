@@ -38,6 +38,7 @@ function rowToMovement(row: NativeRecord): ProductMovementRecord {
     movementId: cell(row.id),
     movementMasterId: cell(row.movementMasterId),
     shopName: cell(row.shopName),
+    ...(cell(row.shopId) ? { shopId: cell(row.shopId) } : {}),
     quantity: cell(row.quantity),
     remark: cell(row.remark),
     fromLocation: cell(row.fromLocation),
@@ -71,11 +72,11 @@ function rowToMovementMaster(
     createdAt: cell(row.createdAt),
     updatedAt: cell(row.updatedAt),
     itemCount: details.length,
-    shopQuantities: details.reduce<Record<string, number>>((totals, detail) => {
-      const shop = detail.shopName || "Unknown";
-      totals[shop] = (totals[shop] || 0) + toNumber(detail.quantity);
-      return totals;
-    }, {}),
+    ...(details.some(detail => detail.shopId) ? {
+      shopIdQuantities: quantitiesBy(details.filter(detail => detail.shopId), detail => detail.shopId!),
+      unlinkedShopQuantities: quantitiesBy(details.filter(detail => !detail.shopId), detail => detail.shopName || "Unknown"),
+    } : {}),
+    shopQuantities: quantitiesBy(details, detail => detail.shopName || "Unknown"),
   };
 }
 
@@ -85,4 +86,10 @@ function cell(value: RecordValue): string {
 
 function booleanCell(value: RecordValue): boolean {
   return value === true || cell(value).toLowerCase() === "true";
+}
+
+function quantitiesBy(details: ProductMovementRecord[], key: (detail: ProductMovementRecord) => string): Record<string, number> {
+  const totals = new Map<string, number>();
+  for (const detail of details) totals.set(key(detail), (totals.get(key(detail)) || 0) + toNumber(detail.quantity));
+  return Object.fromEntries(totals);
 }

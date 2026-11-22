@@ -22,6 +22,11 @@ def copy_previous(target):
  fixture=json.loads((ROOT/'tests/fixtures/movement-reference-before.json').read_text())
  for name,expected in fixture['files'].items():
   source=ROOT/name;data=source.read_bytes() if source.exists() else None;edit=fixture['edits'].get(name)
+  movement_edit=json.loads((ROOT/'tests/fixtures/movement-shop-ids-before.json').read_text())['edits'].get(name)
+  if movement_edit:
+      assert (hashlib.sha256(data).hexdigest() if data is not None else None)==movement_edit['afterSha256'],name
+      data=movement_edit['before'].encode()
+      assert hashlib.sha256(data).hexdigest()==movement_edit['beforeSha256'],name
   data=before_pooling(name,data)
   product_edit=products['edits'].get(name)
   if product_edit:

@@ -59,6 +59,7 @@ export type ProductMovementRecord = {
   movementId: string;
   movementMasterId: string;
   shopName: string;
+  shopId?: string;
   quantity: string;
   remark: string;
   fromLocation: string;
@@ -82,6 +83,8 @@ export type ProductMovementMasterRecord = {
   updatedAt: string;
   itemCount: number;
   shopQuantities: Record<string, number>;
+  shopIdQuantities?: Record<string, number>;
+  unlinkedShopQuantities?: Record<string, number>;
 };
 
 export type MovementDateFilter = {
@@ -92,6 +95,6 @@ export type MovementDateFilter = {
 
 // Uncoerced semantic projection for existing LINE movement checkpoints and summaries.
 export type MovementJourneyValue=string|number|boolean|null|undefined;
-export type MovementJourneyItem={id:MovementJourneyValue;masterId:MovementJourneyValue;shop:MovementJourneyValue;quantity:MovementJourneyValue;remark:MovementJourneyValue;fromLocation:MovementJourneyValue;toLocation:MovementJourneyValue;imageUrl:MovementJourneyValue;status:MovementJourneyValue;createdAt:MovementJourneyValue;updatedAt:MovementJourneyValue;stockCounted:MovementJourneyValue;isNewArrival:MovementJourneyValue};
+export type MovementJourneyItem={id:MovementJourneyValue;masterId:MovementJourneyValue;shop:MovementJourneyValue;shopId?:MovementJourneyValue;quantity:MovementJourneyValue;remark:MovementJourneyValue;fromLocation:MovementJourneyValue;toLocation:MovementJourneyValue;imageUrl:MovementJourneyValue;status:MovementJourneyValue;createdAt:MovementJourneyValue;updatedAt:MovementJourneyValue;stockCounted:MovementJourneyValue;isNewArrival:MovementJourneyValue};
 export type MovementJourneyMaster={id:MovementJourneyValue;userId:MovementJourneyValue;packingDate:MovementJourneyValue;deliveredAt:MovementJourneyValue;status:MovementJourneyValue;quantity:MovementJourneyValue;createdAt:MovementJourneyValue;updatedAt:MovementJourneyValue};
 export type MovementJourneyIdentity={masterId:string;userId:string;startedAt:string};

@@ -2,6 +2,7 @@
 require('../helpers/postgres-runtime.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript'),{createHash}=require('node:crypto'),{createRequire}=require('node:module');
 const {beforeWrapperCleanup}=require('../helpers/wrapper-cleanup-history.cjs');
+const {beforeMovementShopIds}=require('../helpers/movement-shop-ids-history.cjs');
 const server='src/modules/line-workflows/server.ts';
 const before=()=>beforeWrapperCleanup(server).toString();
 const compile=text=>ts.transpileModule(text,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,removeComments:true}}).outputText;
@@ -21,13 +22,13 @@ test('LINE public surface contains only the two live webhook entrypoints',()=>{
  assert.equal(current.calls(),0);assert.equal(previous.calls(),0);
 });
 
-test('webhook composition retains lazy storage, exact callbacks and canonical context wiring',async()=>{
+test('webhook composition adds only the lazy shop reader; historical cleanup callbacks stay exact',async()=>{
  const current=run(fs.readFileSync(server,'utf8')),previous=run(before());
  const events=[{webhookEventId:'SYNTHETIC',type:'message'}],line={},images=()=>undefined,mode=()=> 'quantity_photo',base=()=> 'https://example.invalid';let loads=0;
  const input={events,lineBotService:line,getStorage:()=>{loads++;return {};},getGoogleDriveService:images,getCreateMode:mode,getPublicBaseUrl:base};
  const a=await current.exports.processLineWebhook(input),b=await previous.exports.processLineWebhook(input);
- assert.equal(loads,2);assert.equal(a.events,events);assert.equal(a.line,line);assert.equal(a.images,images);assert.equal(a.mode,mode);assert.equal(a.base,base);assert.deepEqual(plain(a),plain(b));
- for(const name of ['createContext','processLineWebhook'])assert.equal(compile(declaration(fs.readFileSync(server,'utf8'),name)),compile(declaration(before(),name).replace(/\bsheets\b/g,'storage')),name);
+ assert.equal(loads,2);assert.equal(a.events,events);assert.equal(a.line,line);assert.equal(a.images,images);assert.equal(a.mode,mode);assert.equal(a.base,base);assert.deepEqual(plain({...a,contextKeys:a.contextKeys.filter(key=>key!=='shops')}),plain(b));assert.ok(a.contextKeys.includes('shops'));
+ for(const name of ['createContext','processLineWebhook'])assert.equal(compile(declaration(beforeMovementShopIds(server).toString(),name)),compile(declaration(before(),name).replace(/\bsheets\b/g,'storage')),name);
 });
 
 test('synchronous Loyverse factory is absent while canonical account sources stay available',()=>{
@@ -37,9 +38,9 @@ test('synchronous Loyverse factory is absent while canonical account sources sta
  const source=fs.readFileSync('src/composition/loyverse-accounts.ts','utf8');assert.match(source,/accountSource === "env"/);assert.match(source,/PostgresLoyverseAccounts/);
 });
 
-test('active LINE resumption, browser recovery, native rollback and integration controls retain exact bytes',()=>{
+test('historical cleanup controls retain exact bytes through the bounded shop-ID feature inverse',()=>{
  const fixture=JSON.parse(fs.readFileSync('tests/fixtures/wrapper-cleanup-before.json'));
- for(const [file,hash] of Object.entries(fixture.preserved))assert.equal(createHash('sha256').update(require('../helpers/connection-pooling-history.cjs').beforePooling(file)).digest('hex'),hash,file);
+ for(const [file,hash] of Object.entries(fixture.preserved))assert.equal(createHash('sha256').update(require('../helpers/connection-pooling-history.cjs').beforePooling(file,beforeMovementShopIds(file))).digest('hex'),hash,file);
  assert.match(fs.readFileSync('src/modules/line-workflows/application/movement-events.ts','utf8'),/await resumeLegacyMovement\(context, userId, runtime\)/);
  const helper=fs.readFileSync('tests/helpers/native-line-primitives.cjs','utf8');assert.match(helper,/application\/sessions.ts/);assert.match(helper,/infrastructure\/postgres\/sessions.ts/);assert.doesNotMatch(helper,/beforeWrapper|vm\.|readFile/);
 });
