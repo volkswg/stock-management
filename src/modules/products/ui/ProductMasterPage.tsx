@@ -1,7 +1,6 @@
 'use client';
 
 import {useEffect,useRef,useState} from 'react';
-import Link from 'next/link';
 import {ArrowLeftOutlined,ReloadOutlined} from '@ant-design/icons';
 import {Alert,Button,Card,ConfigProvider,Empty,Image,Input,Modal,Popconfirm,Space,Table,Typography} from 'antd';
 import type {Product,ProductInput} from '../contracts';
@@ -68,10 +67,10 @@ export function ProductMasterPage(){
   needsRefresh?<Space><Button disabled={busy} onClick={()=>setOpen(false)}>Close</Button><Button type="primary" loading={busy} onClick={()=>void refreshSaved()}>Refresh saved result</Button></Space>:
   stale?<Space><Button disabled={busy} onClick={()=>setOpen(false)}>Cancel</Button><Button type="primary" loading={busy} onClick={()=>dialogId.current&&void loadProduct(dialogId.current)}>Reload latest values</Button></Space>:
   <Space><Button disabled={busy} onClick={()=>setOpen(false)}>Cancel</Button>{product&&!product.deletedAt?<Button type="primary" loading={busy} disabled={blocked||!fields.productName.trim()} onClick={()=>void act(()=>updateCatalogueProduct(product,fields,scope))}>Save product</Button>:null}</Space>;
- return <ConfigProvider theme={{token:{colorPrimary:'#157347',colorBgLayout:'#f3f5f4',borderRadius:6}}}>
+ return <ConfigProvider theme={{token:{colorPrimary:'#157347',colorBgLayout:'#f3f5f4',colorBorderSecondary:'#e1e5e2',borderRadius:6,fontFamily:'Arial, Helvetica, sans-serif'},components:{Table:{headerBg:'#f7f8f7',headerColor:'#66716b'}}}}>
   <div className={styles.shell}><main className={styles.page}>
-   <Link href="/"><ArrowLeftOutlined/> Workspace</Link>
-   <div className={styles.header}><div><span className={styles.eyebrow}>Stock</span><h1>Product Master</h1><p>Search and manage your product catalogue.</p></div><Button href="/orders">Create from an order item</Button></div>
+   <Button href="/" type="text" icon={<ArrowLeftOutlined/>}>Workspace</Button>
+   <div className={styles.header}><div><Typography.Text className={styles.eyebrow}>Stock</Typography.Text><Typography.Title level={1}>Product Master</Typography.Title><Typography.Text type="secondary">Search and manage your product catalogue.</Typography.Text></div><Button href="/orders">Create from an order item</Button></div>
    <Space orientation="vertical" size="middle" style={{width:'100%'}}>
     {pending?<Alert type="warning" showIcon title="A previous product change needs confirmation" action={<Button onClick={review}>Review saved change</Button>}/>:null}
     {needsRefresh&&!open?<Alert type="info" title="Your change was saved. Refresh the list before editing again." action={<Button onClick={()=>void refreshSaved()}>Refresh saved result</Button>}/>:null}
