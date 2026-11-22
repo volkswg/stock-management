@@ -1107,25 +1107,24 @@ login, keeps its bearer server-side, denies provider/unrelated operations and re
 cross-origin writes. Build, lint and typecheck pass. Deployment checks and receipts
 remain private; production and existing platform protections stay unchanged.
 
-### Simplified linked-product interface
-
-Linked order items display the product name inline and open a prefilled edit popup
-only on request. Unlinked items open a chooser; creation is a separate deliberate
-step. Saving closes the popup; change/unlink/archive actions remain under More
-options. Pending operations keep their existing identity and open a recovery-only
-view. Background card refreshes never advance an open editor's revision; conflicts
-require explicit reload. A confirmed save followed by failed refresh offers only a
-read, preserving uncertain-save safety. This changes UI only, with no API/schema
-or production change. Seven focused UI regressions supplement the existing client
-and gateway checks; browser UAT covers inline display, edits, cancellation, chooser,
-creation, duplicate review and reload-safe reconciliation on a disposable copy.
-Full validation passed: 827 Node tests plus three Python tests, lint, typecheck
-and isolated build; API routes and database/server contracts are unchanged.
+### Order-item linked-product selection
 
 Linked products use the existing order-field presentation: a secondary label,
-neutral wrapping text and an accessible pencil button. The field spans the card
-width to avoid squeezing product names beside quantity controls. Only presentation
-changes; the on-demand popup and pending-save/revision behavior stay intact.
+neutral wrapping text and a pencil button spanning the full card width. The pencil
+opens a searchable product dropdown with the saved link selected. Selecting another
+product changes only the draft; Save link updates that order item, while Cancel
+makes no write. Catalogue editing and archiving remain in Product Master, not the
+item popup. Creating a product from an item is a separate deliberate action; unlink
+still requires confirmation. Archived links remain visible and can be replaced.
+
+Pending operations retain their exact identity, including requests from the prior
+item editor, and open recovery only. Background card refreshes never advance an
+open selector's item revision; conflicts require explicit reload and discard the
+old selection. A confirmed save with failed refresh offers only a read. Search
+ignores out-of-order results and retains the selected product label. This changes
+UI only, with no API/schema or production change. Focused UI and disposable browser
+checks cover dropdown selection/cancel, creation, duplicate review, link conflicts,
+and lost-response/reload/exact-request recovery. Current evidence stays private.
 
 ### Product Master workspace menu
 
@@ -1139,7 +1138,7 @@ recovery scope, including archives that disappear from active search. Only a
 protected product-detail GET and the new page are added; schema/data and production
 remain unchanged. Current UAT verification/evidence stays private on the Mac.
 
-Menu verification passed: 834 Node tests plus three Python tests, lint, typecheck
+Menu verification passed before the selector update: 834 Node tests plus three Python tests, lint, typecheck
 and isolated build. Existing routes retain their baseline hash after exactly four
 feature additions (three APIs and `/products`); 112 client chunks contain no private
 database strings. Ten actual PostgreSQL feature tests plus the existing 32

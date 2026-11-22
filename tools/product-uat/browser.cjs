@@ -12,7 +12,8 @@ assert.equal(url.hostname,'127.0.0.1');assert.equal(url.pathname,'/orders/UAT-PR
   const dialog=page.getByRole('dialog');
   const fill=async(code,name)=>{await dialog.getByLabel('Product code',{exact:true}).fill(code);await dialog.getByLabel('Product name',{exact:true}).fill(name);await dialog.getByLabel('Product variant',{exact:true}).fill('Blue');};
   const closed=()=>dialog.waitFor({state:'hidden'});
-  const edit=name=>page.getByRole('button',{name:'Edit product: '+name,exact:true});
+  const edit=name=>page.getByRole('button',{name:'Change linked product: '+name,exact:true});
+  const choose=async name=>{await dialog.getByRole('combobox',{name:'Select linked product',exact:true}).click();await page.locator('.ant-select-item-option').filter({hasText:name}).click();};
   await page.getByRole('button',{name:'Link product',exact:true}).first().waitFor({timeout:30000});
   await page.getByRole('button',{name:'Link product',exact:true}).first().click();
   assert.equal(await dialog.getByLabel('Product name',{exact:true}).count(),0);
@@ -21,21 +22,25 @@ assert.equal(url.hostname,'127.0.0.1');assert.equal(url.pathname,'/orders/UAT-PR
   await dialog.getByRole('button',{name:'Create and link',exact:true}).click();await closed();await edit('Synthetic catalogue chair').waitFor();
   assert.equal(await page.getByLabel('Product name',{exact:true}).count(),0);
   await edit('Synthetic catalogue chair').click();
-  assert.equal(await dialog.getByLabel('Product name',{exact:true}).inputValue(),'Synthetic catalogue chair');
-  assert.equal(await dialog.getByLabel('Search products',{exact:true}).count(),0);
+  await dialog.getByRole('combobox',{name:'Select linked product',exact:true}).waitFor();
+  assert.equal(await dialog.getByLabel('Product name',{exact:true}).count(),0);
+  assert.equal(await dialog.getByRole('button',{name:'Save link',exact:true}).isDisabled(),true);
+  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await closed();
+  // Catalogue edits belong to Product Master, never to the order-item link popup.
+  await page.goto(url.origin+'/products');await page.getByRole('button',{name:'Edit product: Synthetic catalogue chair',exact:true}).click();
   await dialog.getByLabel('Product name',{exact:true}).fill('Synthetic catalogue chair edited');
-  await dialog.getByRole('button',{name:'Save product',exact:true}).click();await closed();await edit('Synthetic catalogue chair edited').waitFor();
-  await edit('Synthetic catalogue chair edited').click();await dialog.getByLabel('Product name',{exact:true}).fill('Cancelled edit');
-  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await closed();await edit('Synthetic catalogue chair edited').waitFor();
+  await dialog.getByRole('button',{name:'Save product',exact:true}).click();await closed();
+  await page.goto(url.href);await edit('Synthetic catalogue chair edited').click();
+  assert.equal(await dialog.getByLabel('Product name',{exact:true}).count(),0);
+  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await closed();
   await page.getByRole('button',{name:'Link product',exact:true}).click();
   await dialog.getByRole('button',{name:'Create new product',exact:true}).click();
   await fill('UAT-CHAIR','Synthetic catalogue chair edited');await dialog.getByRole('button',{name:'Create and link',exact:true}).click();
   await dialog.getByText(/Similar products exist/).waitFor();
   await dialog.getByRole('button',{name:'Choose existing product',exact:true}).click();
-  await dialog.getByRole('button',{name:'Use this product',exact:true}).first().click();await closed();assert.equal(await edit('Synthetic catalogue chair edited').count(),2);
-  // Start an intentional replacement through the secondary link management action.
-  await edit('Synthetic catalogue chair edited').first().click();await dialog.locator('summary',{hasText:'More options'}).click();
-  await dialog.getByRole('button',{name:'Change linked product',exact:true}).click();
+  await choose('Synthetic catalogue chair edited');await dialog.getByRole('button',{name:'Save link',exact:true}).click();await closed();assert.equal(await edit('Synthetic catalogue chair edited').count(),2);
+  // Creation is a separate intentional action inside the link chooser.
+  await edit('Synthetic catalogue chair edited').first().click();
   await dialog.getByRole('button',{name:'Create new product',exact:true}).click();await fill('UAT-PENDING','Synthetic pending chair');let lost;
   await page.route('**/api/orders/UAT-PRODUCT-ORDER/items/*/product',async route=>{
    if(route.request().method()!=='POST'||lost)return route.continue();
@@ -50,8 +55,19 @@ assert.equal(url.hostname,'127.0.0.1');assert.equal(url.pathname,'/orders/UAT-PR
   await closed();await edit('Synthetic pending chair').waitFor();
   const products=await page.evaluate(async()=>{const r=await fetch('/api/products?q=UAT-PENDING');return r.json();});
   assert.equal(products.products.length,1);assert.equal(products.products[0].id,lost.value.item.product.id);
+  // Selecting a replacement can be cancelled, then a lost link ACK replays exactly.
+  await edit('Synthetic pending chair').click();await choose('Synthetic catalogue chair edited');
+  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await closed();await edit('Synthetic pending chair').waitFor();
+  await page.unroute('**/api/orders/UAT-PRODUCT-ORDER/items/*/product');let lostLink;
+  await page.route('**/api/orders/UAT-PRODUCT-ORDER/items/*/product',async route=>{
+   if(route.request().method()!=='POST'||lostLink)return route.continue();
+   assert.equal(JSON.parse(route.request().postData()).mode,'link');const response=await route.fetch();assert.equal(response.status(),200);lostLink={key:route.request().headers()['idempotency-key'],body:route.request().postData()};await route.abort('failed');
+  });
+  await edit('Synthetic pending chair').click();await choose('Synthetic catalogue chair edited');await dialog.getByRole('button',{name:'Save link',exact:true}).click();await dialog.getByRole('button',{name:'Retry saved request',exact:true}).waitFor();
+  await page.reload();await page.getByRole('button',{name:'Review pending product change',exact:true}).click();
+  const replay=page.waitForRequest(r=>r.method()==='POST'&&r.url().endsWith('/product'));await dialog.getByRole('button',{name:'Retry saved request',exact:true}).click();const linkRequest=await replay;assert.equal(linkRequest.headers()['idempotency-key'],lostLink.key);assert.equal(linkRequest.postData(),lostLink.body);await closed();assert.equal(await edit('Synthetic catalogue chair edited').count(),2);
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
   if(process.argv[3])await page.screenshot({path:process.argv[3],fullPage:true});
-  console.log(JSON.stringify({pass:true,inlineLinkedProduct:true,editPopupOnDemand:true,editAndCancel:true,separateLinkAndCreate:true,browserCreateAndLink:true,duplicateReviewAndExistingLink:true,lostResponseReloadReplay:true,duplicateProducts:0,pageErrors:0,externalRequests:0}));
+  console.log(JSON.stringify({pass:true,inlineLinkedProduct:true,selectionPopupOnDemand:true,dropdownSelectionAndCancel:true,masterOnlyProductEditing:true,linkLostResponseReloadReplay:true,separateLinkAndCreate:true,browserCreateAndLink:true,duplicateReviewAndExistingLink:true,lostResponseReloadReplay:true,duplicateProducts:0,pageErrors:0,externalRequests:0}));
  }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

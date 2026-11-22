@@ -28,3 +28,12 @@
 .display .edit {
   flex: 0 0 auto;
 }
+
+.select {
+  width: 100%;
+}
+
+.option {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

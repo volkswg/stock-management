@@ -2,32 +2,32 @@
 
 import {useEffect,useRef,useState} from 'react';
 import {EditOutlined} from '@ant-design/icons';
-import {Alert,Button,Checkbox,Input,Modal,Popconfirm,Space,Typography} from 'antd';
+import {Alert,Button,Checkbox,Input,Modal,Popconfirm,Select,Space,Typography} from 'antd';
 import type {Product,ProductInput} from '@/modules/products/contracts';
 import type {OrderItemCatalogue as Item} from '../product-catalogue-contracts';
 import {
- archiveCatalogueProduct,CatalogueRequestError,itemCataloguePath,pendingCatalogueRequest,
- readItemCatalogue,retryItemCatalogue,saveItemCatalogue,searchCatalogue,updateCatalogueProduct,
+ CatalogueRequestError,itemCataloguePath,pendingCatalogueRequest,
+ readItemCatalogue,retryItemCatalogue,saveItemCatalogue,searchCatalogue,
 } from './catalogue-api';
 import styles from './orderItemCatalogue.module.css';
 
 const empty:ProductInput={productCode:'',productName:'',variant:''};
-type View='choose'|'create'|'edit'|'review';
-const productFields=(product:Product):ProductInput=>({productCode:product.productCode,productName:product.productName,variant:product.variant});
+type View='choose'|'create'|'review';
 const productLabel=(product:Product)=>[product.productCode,product.productName,product.variant].filter(Boolean).join(' · ')+(product.deletedAt?' (archived)':'');
 
 type Props={orderId:string;itemId:string;productCode:string;onSaved:()=>Promise<void>;reloadVersion?:number};
-export function OrderItemCatalogue({orderId,itemId,productCode,onSaved,reloadVersion=0}:Props){
+export function OrderItemCatalogue({orderId,itemId,onSaved,reloadVersion=0}:Props){
  const [preview,setPreview]=useState<Item>();
- // Background card refreshes must never advance an open editor's revision snapshot.
+ // Background card refreshes must never advance an open selector's revision snapshot.
  const [item,setItem]=useState<Item>();
  const [open,setOpen]=useState(false),[view,setView]=useState<View>('choose');
- const [fields,setFields]=useState<ProductInput>(empty),[query,setQuery]=useState(productCode);
+ const [fields,setFields]=useState<ProductInput>(empty),[selected,setSelected]=useState<Product>();
  const [products,setProducts]=useState<Product[]>([]),[useImage,setUseImage]=useState(true),[confirm,setConfirm]=useState(false);
  const [error,setError]=useState(''),[readError,setReadError]=useState('');
  const [pending,setPending]=useState(false),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
  const [stale,setStale]=useState(false),[needsRefresh,setNeedsRefresh]=useState(false),[duplicateReview,setDuplicateReview]=useState(false);
- const saving=useRef(false),serial=useRef(0),scope=itemCataloguePath(orderId,itemId);
+ const [searching,setSearching]=useState(false);
+ const saving=useRef(false),serial=useRef(0),searchSerial=useRef(0),scope=itemCataloguePath(orderId,itemId);
 
  useEffect(()=>{
   const controller=new AbortController();
@@ -43,7 +43,7 @@ export function OrderItemCatalogue({orderId,itemId,productCode,onSaved,reloadVer
  },[orderId,itemId,scope,reloadVersion]);
 
  const loadDialog=async(requested?:View)=>{
-  const currentSerial=++serial.current;setBusy(true);setError('');
+  const currentSerial=++serial.current;++searchSerial.current;setSearching(false);setBusy(true);setError('');
   try{
    const saved=pendingCatalogueRequest(scope);
    setPending(!!saved);
@@ -53,12 +53,11 @@ export function OrderItemCatalogue({orderId,itemId,productCode,onSaved,reloadVer
    if(saved){setView('review');return;}
    if(needsRefresh)await onSaved();
    setNeedsRefresh(false);setStale(false);setDuplicateReview(false);setConfirm(false);
-   const next=requested==='create'?'create':requested==='choose'?'choose':current.product?'edit':'choose';
-   setView(next);setFields(next==='edit'&&current.product?productFields(current.product):{...empty,productCode:current.productCode});
+   const next=requested==='create'?'create':'choose';
+   setView(next);setSelected(current.product??undefined);setFields({...empty,productCode:current.productCode});
    setUseImage(!!current.imageUrl);
    if(next==='choose'){
-    const search=current.productCode||current.product?.productCode||'';
-    setQuery(search);const result=await searchCatalogue(search);
+    setProducts([]);const result=await searchCatalogue('');
     if(currentSerial===serial.current)setProducts(result.products);
    }
   }catch(e){if(currentSerial===serial.current)setError(e instanceof Error?e.message:'Could not load the product.');}
@@ -85,25 +84,26 @@ export function OrderItemCatalogue({orderId,itemId,productCode,onSaved,reloadVer
    }
   }finally{saving.current=false;setBusy(false);}
  };
- const choose=async()=>{
-  setView('choose');setError('');setBusy(true);
-  try{const result=await searchCatalogue(query);setProducts(result.products);}
-  catch(e){setError(e instanceof Error?e.message:'Search failed.');}
-  finally{setBusy(false);}
+ const search=async(query:string)=>{
+  const currentSearch=++searchSerial.current,currentDialog=serial.current;
+  setSearching(true);setError('');setProducts([]);
+  try{const result=await searchCatalogue(query.slice(0,200));if(currentSearch===searchSerial.current&&currentDialog===serial.current)setProducts(result.products);}
+  catch(e){if(currentSearch===searchSerial.current&&currentDialog===serial.current)setError(e instanceof Error?e.message:'Search failed.');}
+  finally{if(currentSearch===searchSerial.current&&currentDialog===serial.current)setSearching(false);}
  };
- const search=async()=>{setBusy(true);setError('');try{setProducts((await searchCatalogue(query)).products);}catch(e){setError(e instanceof Error?e.message:'Search failed.');}finally{setBusy(false);}};
+ const choose=()=>{setView('choose');setError('');void search('');};
  const change=(key:keyof ProductInput,value:string)=>{setFields(previous=>({...previous,[key]:value}));setConfirm(false);};
- const blocked=busy||pending||stale||needsRefresh;
- const editing=view==='edit',archived=editing&&!!item?.product?.deletedAt;
+ const blocked=busy||searching||pending||stale||needsRefresh;
+ const available=selected?[selected,...products.filter(product=>product.id!==selected.id)]:products;
  const save=()=>{
   if(!item||blocked)return;
-  if(editing&&item.product)void act(()=>updateCatalogueProduct(item.product!,fields,scope));
+  if(view==='choose'&&selected&&selected.id!==item.product?.id&&!selected.deletedAt)void act(()=>saveItemCatalogue(orderId,itemId,{mode:'link',productId:selected.id,expectedRevision:item.revision}));
   else if(view==='create')void act(()=>saveItemCatalogue(orderId,itemId,{mode:'create',product:fields,useItemImage:useImage,confirmSimilar:confirm,expectedRevision:item.revision}));
  };
  let footer=<Button onClick={()=>setOpen(false)} disabled={busy}>Cancel</Button>;
  if(pending)footer=<Space><Button disabled={busy} onClick={()=>setOpen(false)}>Close</Button><Button type="primary" loading={busy} onClick={()=>void act(()=>retryItemCatalogue(orderId,itemId))}>Retry saved request</Button></Space>;
  else if(needsRefresh||stale)footer=<Space><Button disabled={busy} onClick={()=>setOpen(false)}>Close</Button><Button type="primary" loading={busy} onClick={()=>void loadDialog()}>{needsRefresh?'Refresh saved product':'Reload latest values'}</Button></Space>;
- else if(item&&(view==='create'||editing&&!archived))footer=<Space>{view==='create'?<Button disabled={busy} onClick={()=>void choose()}>Choose existing product</Button>:null}<Button disabled={busy} onClick={()=>setOpen(false)}>Cancel</Button><Button type="primary" loading={busy} disabled={blocked||!fields.productName.trim()} onClick={save}>{editing?'Save product':'Create and link'}</Button></Space>;
+ else if(item)footer=<Space>{view==='create'?<Button disabled={busy} onClick={choose}>Choose existing product</Button>:null}<Button disabled={busy} onClick={()=>setOpen(false)}>Cancel</Button><Button type="primary" loading={busy} disabled={blocked||(view==='create'?!fields.productName.trim():!selected||selected.id===item.product?.id||!!selected.deletedAt)} onClick={save}>{view==='create'?'Create and link':'Save link'}</Button></Space>;
 
  return <>
   <div className={styles.field}>
@@ -111,37 +111,35 @@ export function OrderItemCatalogue({orderId,itemId,productCode,onSaved,reloadVer
   {pending||needsRefresh?<Button size="small" onClick={launch}>{pending?'Review pending product change':'Refresh saved product'}</Button>:
    preview?.product?<div className={styles.display}>
     <Typography.Text className={styles.value}>{productLabel(preview.product)}</Typography.Text>
-    <Button type="text" size="small" className={styles.edit} icon={<EditOutlined/>} onClick={launch} aria-label={'Edit product: '+preview.product.productName} title="Edit product"/>
+    <Button type="text" size="small" className={styles.edit} icon={<EditOutlined/>} onClick={launch} aria-label={'Change linked product: '+preview.product.productName} title="Change linked product"/>
    </div>:
    <Button size="small" loading={loading} disabled={loading} onClick={launch}>{readError?'Retry loading product':'Link product'}</Button>}
   </div>
-  {open?<Modal title={pending?'Confirm previous product change':needsRefresh?'Refresh saved product':editing?'Edit product':view==='create'?'Create product':'Link product'} open onCancel={()=>{if(!busy){serial.current++;setOpen(false);}}} maskClosable={!busy} footer={footer}>
+  {open?<Modal title={pending?'Confirm previous product change':needsRefresh?'Refresh saved product':view==='create'?'Create product':'Select linked product'} open onCancel={()=>{if(!busy){serial.current++;setOpen(false);}}} maskClosable={!busy} footer={footer}>
    <Space orientation="vertical" size="middle" style={{width:'100%'}}>
     {error?<Alert type="error" showIcon title={error}/>:null}
     {pending?<Typography.Text>A previous save needs confirmation. Retry its saved request to check the result.</Typography.Text>:
      needsRefresh?<Typography.Text>The save is confirmed. Refreshing will read the saved result without submitting it again.</Typography.Text>:
      !item?<Button loading={busy} onClick={()=>void loadDialog()}>Load product</Button>:
      view==='choose'?<>
-      <Input.Search aria-label="Search products" placeholder="Search by code or name" value={query} disabled={blocked} onChange={e=>setQuery(e.target.value)} onSearch={()=>void search()} enterButton="Search"/>
-      {products.length?products.map(product=><Space key={product.id} style={{width:'100%',justifyContent:'space-between'}}><Typography.Text>{productLabel(product)}</Typography.Text>{product.id===item.product?.id?<Typography.Text type="secondary">Linked</Typography.Text>:<Button disabled={blocked} onClick={()=>void act(()=>saveItemCatalogue(orderId,itemId,{mode:'link',productId:product.id,expectedRevision:item.revision}))}>Use this product</Button>}</Space>):<Typography.Text type="secondary">No matching products.</Typography.Text>}
-      <Button type="primary" disabled={blocked} onClick={()=>{setFields({...empty,productCode:item.productCode});setView('create');setError('');setConfirm(false);setDuplicateReview(false);}}>Create new product</Button>
-      {item.product?<Button type="link" disabled={blocked} onClick={()=>{setFields(productFields(item.product!));setView('edit');setError('');}}>Back to linked product</Button>:null}
+      <label htmlFor={'linked-product-'+itemId}>Linked product</label>
+      <Select<string> id={'linked-product-'+itemId} aria-label="Select linked product" className={styles.select}
+       placeholder="Search and select a product" value={selected?.id} disabled={busy||pending||stale||needsRefresh} loading={searching}
+       showSearch={{filterOption:false,onSearch:query=>void search(query)}}
+       options={available.map(product=>({value:product.id,label:productLabel(product),disabled:!!product.deletedAt}))}
+       optionRender={option=><span className={styles.option}>{option.label}</span>}
+       onChange={id=>setSelected(available.find(product=>product.id===id))}
+       notFoundContent={searching?'Searching products…':'No matching products. Try another code or name.'}/>
+      <Typography.Text type="secondary">Search by code or name. Only this order item’s link will change. Edit product details in <a href="/products">Product Master</a>.</Typography.Text>
+      {item.product?.deletedAt?<Alert type="info" title="The linked product is archived. Select an available product or unlink it."/>:null}
+      <Button disabled={blocked} onClick={()=>{setFields({...empty,productCode:item.productCode});setView('create');setError('');setConfirm(false);setDuplicateReview(false);}}>Create new product</Button>
+      {item.product?<Popconfirm title="Unlink this product?" description="The catalogue product and original order data will be kept." disabled={blocked} onConfirm={()=>act(()=>saveItemCatalogue(orderId,itemId,{mode:'link',productId:null,expectedRevision:item.revision}))}><Button disabled={blocked}>Unlink product</Button></Popconfirm>:null}
      </>:<>
-      {archived?<Alert type="info" title="This product is archived. You can change or remove this item’s link."/>:null}
-      <label>Product name<Input aria-label="Product name" value={fields.productName} maxLength={200} disabled={blocked||archived} onChange={e=>change('productName',e.target.value)}/></label>
-      <label>Product code<Input aria-label="Product code" value={fields.productCode} maxLength={100} disabled={blocked||archived} onChange={e=>change('productCode',e.target.value)}/></label>
-      <label>Variant<Input aria-label="Product variant" value={fields.variant} maxLength={100} disabled={blocked||archived} onChange={e=>change('variant',e.target.value)}/></label>
-      {view==='create'?<>
-       <Checkbox checked={useImage} disabled={blocked||!item.imageUrl} onChange={e=>setUseImage(e.target.checked)}>Use this item’s existing photo</Checkbox>
-       <details open={duplicateReview||undefined}><summary>Duplicate handling</summary><Checkbox checked={confirm} disabled={blocked} onChange={e=>setConfirm(e.target.checked)}>I reviewed matching products and want a separate product</Checkbox></details>
-      </>:item.product?<>
-       <Typography.Text type="secondary">Changes update this catalogue product wherever it is linked.</Typography.Text>
-       <details><summary>More options</summary><Space orientation="vertical" align="start">
-        <Button type="link" disabled={blocked} onClick={()=>void choose()}>Change linked product</Button>
-        <Popconfirm title="Unlink this product?" description="The catalogue product and original order data will be kept." disabled={blocked} onConfirm={()=>act(()=>saveItemCatalogue(orderId,itemId,{mode:'link',productId:null,expectedRevision:item.revision}))}><Button disabled={blocked}>Unlink product</Button></Popconfirm>
-        {!archived?<Popconfirm title="Archive this catalogue product?" description="It will be unavailable for new links. Existing links remain." disabled={blocked} onConfirm={()=>act(()=>archiveCatalogueProduct(item.product!,scope))}><Button danger disabled={blocked}>Archive product</Button></Popconfirm>:null}
-       </Space></details>
-      </>:null}
+      <label>Product name<Input aria-label="Product name" value={fields.productName} maxLength={200} disabled={blocked} onChange={e=>change('productName',e.target.value)}/></label>
+      <label>Product code<Input aria-label="Product code" value={fields.productCode} maxLength={100} disabled={blocked} onChange={e=>change('productCode',e.target.value)}/></label>
+      <label>Variant<Input aria-label="Product variant" value={fields.variant} maxLength={100} disabled={blocked} onChange={e=>change('variant',e.target.value)}/></label>
+      <Checkbox checked={useImage} disabled={blocked||!item.imageUrl} onChange={e=>setUseImage(e.target.checked)}>Use this item’s existing photo</Checkbox>
+      <details open={duplicateReview||undefined}><summary>Duplicate handling</summary><Checkbox checked={confirm} disabled={blocked} onChange={e=>setConfirm(e.target.checked)}>I reviewed matching products and want a separate product</Checkbox></details>
      </>}
    </Space>
   </Modal>:null}
