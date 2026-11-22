@@ -45,7 +45,7 @@ test.before(async()=>{
 });
 test.after(async()=>{await db.closePool();await owner.end();});
 test('unused movement reference retires safely with identical browser/LINE behavior and recoverable identities',async t=>{
- await t.test('current app reads and writes work with retained column; response keeps a blank field',async()=>{
+ await t.test('current app reads and writes work with retained column; response omits the retired field',async()=>{
   await command(()=>inventory.appendMovementJourneyItem(storage,()=>({id:'REF_COMPAT',masterId:'REF_MOVE',shop:'NJ',quantity:'2',remark:'retained',fromLocation:'Home',toLocation:'NJ',imageUrl:'',status:'created',createdAt:'2026-11-20T00:00:00Z',updatedAt:'',stockCounted:false,isNewArrival:false})));
   assert.equal(await scalar("SELECT \"purchaseDetailId\" value FROM stock_operational.movement_details WHERE id='REF_COMPAT'"),null);
   const result=await views();const rows=result.find(r=>r.path==='/api/movements/REF_MOVE').body.records;assert.ok(rows.length);assert.ok(rows.every(row=>!Object.hasOwn(row,'purchaseDetailId')));
@@ -105,7 +105,7 @@ test('unused movement reference retires safely with identical browser/LINE behav
   const current=await detail(new Request('https://example.test/api/movements/REF_MOVE',{headers:auth}),{params:Promise.resolve({id:'REF_MOVE'})});assert.equal(current.status,200);
   const key=randomUUID(),headers={...auth,'content-type':'application/json','Idempotency-Key':key,'x-stock-edit-scope':current.headers.get('x-stock-edit-scope'),'If-Match':current.headers.get('x-stock-edit-revision')};
   const request=(body,h=headers)=>new Request('https://example.test'+path,{method:'PATCH',headers:h,body:JSON.stringify(body)});
-  const body={quantity:'9',remark:'HTTP after removal'},first=await patch(request(body),context);assert.equal(first.status,200);const result=await first.json();assert.equal(result.record.quantity,'9');assert.equal(result.record.remark,body.remark);assert.equal(result.record.purchaseDetailId,'');
+  const body={quantity:'9',remark:'HTTP after removal'},first=await patch(request(body),context);assert.equal(first.status,200);const result=await first.json();assert.equal(result.record.quantity,'9');assert.equal(result.record.remark,body.remark);assert.equal(Object.hasOwn(result.record,'purchaseDetailId'),false);assert.ok(result.records.every(row=>!Object.hasOwn(row,'purchaseDetailId')));
   const retry=await patch(request(body),context);assert.equal(retry.status,200);assert.deepEqual(await retry.json(),result);
   assert.equal((await patch(request({...body,quantity:'10'}),context)).status,409);
   const stale=await patch(request({...body,remark:'stale'},{...headers,'Idempotency-Key':randomUUID()}),context);assert.equal(stale.status,409);assert.equal((await stale.json()).code,'stock_revision_conflict');
