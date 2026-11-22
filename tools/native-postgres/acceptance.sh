@@ -209,3 +209,18 @@ native_run np_product_uat tools/product-uat/postgres.test.cjs
 # The real production identity exists only inside that disposable clone.
 pg createdb -U postgres -T np_payments_retired np_product_release
 native_run np_product_release tools/product-uat/production-release.test.cjs
+
+# Product rows, archived records and the fourth identity sequence are recovery data.
+pg pg_dump -U postgres -d np_product_uat --schema=stock_operational --schema=stock_migration --schema=stock_configuration > "$artifacts/product-master-recovery.sql"
+pg createdb -U postgres np_product_restore
+pg psql -U postgres -d np_product_restore -v ON_ERROR_STOP=1 < "$artifacts/product-master-recovery.sql" > "$artifacts/product-master-restore.log"
+for database in np_product_uat np_product_restore; do
+ {
+  printf 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n'
+  printf "SELECT set_config('stock.expected_isolation_id',isolation_id::text,false) FROM stock_operational.environment;\n"
+  cat "$STOCK_NATIVE_ROOT/tools/product-uat/recovery-fingerprint.sql"
+  printf 'COMMIT;\n'
+ } | pg psql -U postgres -d "$database" -XqAt -v ON_ERROR_STOP=1 > "$artifacts/product-master-recovery-$database.txt"
+done
+cmp "$artifacts/product-master-recovery-np_product_uat.txt" "$artifacts/product-master-recovery-np_product_restore.txt"
+echo 'PASS: product catalogue rows, archived records and identity sequence independently restored'

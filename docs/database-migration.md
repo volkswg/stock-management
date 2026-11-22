@@ -1101,6 +1101,21 @@ and bounded table locks before checking revision and applying DDL atomically.
 The original UAT-only migration still refuses production. Do not run `db push` or
 replay historical migrations as a substitute for this operator packet.
 
+### Recovery after catalogue installation
+
+The existing core recovery tool's fixed table list does not fingerprint `products`.
+After installation, append
+[`recovery-fingerprint.sql`](../tools/product-uat/recovery-fingerprint.sql) inside
+**the same read-only exported snapshot** as the full dump and core fingerprint.
+This supplements all product rows (including archived records) and the fourth
+identity sequence; existing `order_items` fingerprints already include links.
+Capture all four sequence states before/after an online dump and stop on advancement.
+Compare the supplement on the independent restore along with the full existing
+fingerprints and metadata. Never claim complete post-release recovery from the
+core report alone. Native CI and the local UAT runner exercise the same supplement
+against a real dump/restore. Pre-change recovery still has 52 tables/three sequences;
+post-change recovery has 53 tables/four sequences. No backup automation is enabled.
+
 ### Preparation and approval packet
 
 1. Keep users, LINE and jobs running. Capture a fresh private online MVCC checkpoint

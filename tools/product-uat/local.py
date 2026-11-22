@@ -66,6 +66,8 @@ try:
  run(['exec',container,'createdb','-U','postgres','uat_restore']);sql(dumped,db='uat_restore')
  fingerprint="SELECT to_jsonb(t)::text FROM stock_operational.products t ORDER BY id;SELECT to_jsonb(t)::text FROM stock_operational.order_items t ORDER BY id;SELECT to_jsonb(t)::text FROM stock_operational.media t ORDER BY id;SELECT last_value,is_called FROM stock_operational.products_id_seq;SELECT stock_operational.media_catalog_v1(),stock_operational.media_record_contract_v1();"
  assert sql(fingerprint).stdout==sql(fingerprint,db='uat_restore').stdout
+ product_fingerprint="BEGIN READ ONLY; SET stock.expected_isolation_id='"+isolation+"';\n"+(root/'tools/product-uat/recovery-fingerprint.sql').read_text()+"\nCOMMIT;"
+ assert sql(product_fingerprint).stdout==sql(product_fingerprint,db='uat_restore').stdout
  # Existing app and LINE/database behavior must remain usable with the added FK.
  for testfile in ['tools/native-postgres/application.test.cjs','tools/native-postgres/media-line.test.cjs']:
   run(['exec',container,'createdb','-U','postgres','-T','uat','regression'])
