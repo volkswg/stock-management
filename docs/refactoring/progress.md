@@ -1122,6 +1122,11 @@ creation, duplicate review and reload-safe reconciliation on a disposable copy.
 Full validation passed: 827 Node tests plus three Python tests, lint, typecheck
 and isolated build; API routes and database/server contracts are unchanged.
 
+Linked products use the existing order-field presentation: a secondary label,
+neutral wrapping text and an accessible pencil button. The field spans the card
+width to avoid squeezing product names beside quantity controls. Only presentation
+changes; the on-demand popup and pending-save/revision behavior stay intact.
+
 ### Product Master workspace menu
 
 The Stock menu includes Product Master at `/products`, with search, photos, names,

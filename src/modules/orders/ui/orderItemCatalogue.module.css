@@ -1,0 +1,30 @@
+.field {
+  grid-column: 1 / -1;
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+}
+
+.field .label {
+  font-size: 12px;
+}
+
+.display {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.display .value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.display .edit {
+  flex: 0 0 auto;
+}

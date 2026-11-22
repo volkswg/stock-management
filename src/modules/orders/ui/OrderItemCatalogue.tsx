@@ -9,6 +9,7 @@ import {
  archiveCatalogueProduct,CatalogueRequestError,itemCataloguePath,pendingCatalogueRequest,
  readItemCatalogue,retryItemCatalogue,saveItemCatalogue,searchCatalogue,updateCatalogueProduct,
 } from './catalogue-api';
+import styles from './orderItemCatalogue.module.css';
 
 const empty:ProductInput={productCode:'',productName:'',variant:''};
 type View='choose'|'create'|'edit'|'review';
@@ -105,9 +106,15 @@ export function OrderItemCatalogue({orderId,itemId,productCode,onSaved,reloadVer
  else if(item&&(view==='create'||editing&&!archived))footer=<Space>{view==='create'?<Button disabled={busy} onClick={()=>void choose()}>Choose existing product</Button>:null}<Button disabled={busy} onClick={()=>setOpen(false)}>Cancel</Button><Button type="primary" loading={busy} disabled={blocked||!fields.productName.trim()} onClick={save}>{editing?'Save product':'Create and link'}</Button></Space>;
 
  return <>
+  <div className={styles.field}>
+  <Typography.Text type="secondary" className={styles.label}>Linked product</Typography.Text>
   {pending||needsRefresh?<Button size="small" onClick={launch}>{pending?'Review pending product change':'Refresh saved product'}</Button>:
-   preview?.product?<Button type="link" size="small" icon={<EditOutlined/>} onClick={launch} aria-label={'Edit product: '+preview.product.productName} style={{paddingInline:0,height:'auto',whiteSpace:'normal',textAlign:'left'}}>{productLabel(preview.product)}</Button>:
+   preview?.product?<div className={styles.display}>
+    <Typography.Text className={styles.value}>{productLabel(preview.product)}</Typography.Text>
+    <Button type="text" size="small" className={styles.edit} icon={<EditOutlined/>} onClick={launch} aria-label={'Edit product: '+preview.product.productName} title="Edit product"/>
+   </div>:
    <Button size="small" loading={loading} disabled={loading} onClick={launch}>{readError?'Retry loading product':'Link product'}</Button>}
+  </div>
   {open?<Modal title={pending?'Confirm previous product change':needsRefresh?'Refresh saved product':editing?'Edit product':view==='create'?'Create product':'Link product'} open onCancel={()=>{if(!busy){serial.current++;setOpen(false);}}} maskClosable={!busy} footer={footer}>
    <Space orientation="vertical" size="middle" style={{width:'100%'}}>
     {error?<Alert type="error" showIcon title={error}/>:null}
