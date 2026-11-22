@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Real current owners against a fresh synthetic PostgreSQL clone; fake providers only. */
+const sessionPrimitives=require('../../tests/helpers/native-line-primitives.cjs');
 require('../../tests/helpers/postgres-runtime.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),{randomUUID,createHash}=require('node:crypto'),{Client}=require('pg');
 const db=require('../../src/infrastructure/persistence/postgres/database.ts');
@@ -96,7 +97,7 @@ test('coupled item identity preserves references, existing identities, app/LINE 
   let uploads=0;const bot={sendReply:async()=>{},downloadMessageContent:async()=>({contentType:'image/jpeg',bytes:Buffer.from('synthetic product')})};const drive={async uploadImage(){uploads++;const id='ITEM_LINE_FILE_'+uploads;return {id,name:id+'.jpg',webViewLink:'https://drive.google.com/file/d/'+id+'/view'};},async deleteFile(){assert.fail('Committed item image deleted');}};
   const args={lineBotService:bot,getStorage:()=>storage,getGoogleDriveService:()=>drive,getCreateMode:()=> 'quantity_photo',getPublicBaseUrl:()=> 'https://example.invalid'};
   const event={type:'message',webhookEventId:'ITEM_LINE_CREATE',replyToken:'synthetic',timestamp:Date.parse('2026-11-20T00:00:00Z'),source:{type:'user',userId:'ITEM_LINE_USER'},message:{id:'ITEM_LINE_COMMAND',type:'text',text:'create:order'}};
-  await line.processLineWebhook({...args,events:[event]});await command(async()=>{const session=await line.findLatestUserState({storage,userId:'ITEM_LINE_USER',flowname:'OrderCreate'});await line.completeOrderBill({storage,orderId:session.referenceId,userStateId:session.id,userStateCreatedAt:session.createdAt});});
+  await line.processLineWebhook({...args,events:[event]});await command(async()=>{const session=await sessionPrimitives.findLatestUserState({storage,userId:'ITEM_LINE_USER',flowname:'OrderCreate'});await sessionPrimitives.completeOrderBill({storage,orderId:session.referenceId,userStateId:session.id,userStateCreatedAt:session.createdAt});});
   const image={...event,webhookEventId:'ITEM_LINE_PRODUCT',message:{id:'ITEM_LINE_PRODUCT_BYTES',type:'image'}};await line.processLineWebhook({...args,events:[image]});await line.processLineWebhook({...args,events:[{...image,replyToken:'redelivery',deliveryContext:{isRedelivery:true}}]});assert.equal(uploads,1);
   const row=(await owner.query("SELECT id::text id FROM stock_operational.order_items WHERE \"createdBy\"='ITEM_LINE_USER'")).rows;assert.equal(row.length,1);assert.ok(BigInt(row[0].id)>9007199254740993n);
  });

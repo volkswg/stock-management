@@ -11,10 +11,10 @@ This map describes current source ownership; the external namespace retirement w
 | Expenses | Pure Expense/Shop/Category/Input contracts, ledger/master application/ports/rules, PostgreSQL adapter/server | HR shop reader and Sales expense projection use public contracts/entrypoints |
 | HR | Pure employee/compensation/attendance/payroll/advance/settlement contracts; financial/date rules, all workforce/financial applications/ports and own persistence/runtime/hash adapters | Named workforce/payroll servers receive explicit reader ports; no legacy implementation in core, no Payroll↔Advance cycle |
 | LINE workflows | Public workflow contracts/commands, sessions/context validation, order/movement journeys/replies, sequential webhook orchestration; own session adapter/runtime/server | HTTP keeps raw parsing/auth/factories/status translation; application uses semantic Orders/Inventory operations and pure shared protocol/message helpers |
-| Shared Google | Root OAuth/service-account auth, fixed integration-configuration reader and Drive upload factory | No business worksheet adapter or business storage fallback |
+| Shared Google | Root OAuth/service-account auth and Drive upload factory | No business worksheet adapter or business storage fallback |
 | Shared external | Root LINE/Loyverse client/protocol/factory files; original standalone LineRichMenuClient under root LINE transport | Old constructor names/signatures/error/retry behavior remain; scripts are opt-in and never run during verification |
-| Composition | `composition/postgres/service.ts` wires the 23 explicit native tables; `hr-payroll`, `salary-advance-shops`, `employee-directory`, `orders` own compatibility wiring | May wire concrete feature adapters; feature cores never depend on composition. No DI container or alternative registry |
-| Shared/runtime | Pure LINE DTO/enum/message builders and isRecord in shared; original stateful sortable ID generator in root infrastructure/runtime | No feature dependency; old helper names alias one implementation |
+| Composition | `composition/postgres/service.ts` wires the 23 explicit native tables; `hr-payroll`, `salary-advance-shops`, `employee-directory`, `orders` own cross-feature wiring | May wire concrete feature adapters; feature cores never depend on composition. No DI container or alternative registry |
+| Shared/runtime | Pure LINE DTO/enum/message builders and isRecord in shared; original stateful sortable ID generator in root infrastructure/runtime | No feature dependency; one canonical sortable ID implementation |
 | Workspace/Next shell | Existing app-owned home/navigation/layout and routes | No Workspace redesign, auth/product work or unrelated UI migration |
 
 ## Native business storage owners
@@ -49,8 +49,8 @@ The business Sheets aggregate, worksheet classes/headers, row/range helpers,
 PostgresRecords bridge, positional order lookup and raw-row LINE facades are
 retired from current source. Their old imports are audited with the pinned
 pre-native [source witness](../../tests/fixtures/native-postgres-before.json),
-not recreated as runtime forwards. Current HTTP routes and public DTO fields stay
-the same. The67 service aliases are retired after confirming no current source or script
+not recreated as runtime forwards. Current HTTP routes and DTOs retain their documented contracts; the approved
+PR101 field retirements are recorded below. The67 service aliases are retired after confirming no current source or script
 consumer; callers use semantic module servers and the canonical ID generator.
 The standalone rich-menu entrypoint remains. Undisclosed external
 imports of the removed private deep paths need to migrate; this private package
@@ -73,6 +73,13 @@ The browser creates orders from individually uploaded image references. Its unus
 multipart order-creation helper/type are retired; order submission uses JSON only.
 The server multipart endpoint, shared file fingerprints, pending-operation guards,
 revision negotiation and upload reconciliation remain supported for safe retries.
+
+The LINE public server exports only `parseLineWebhookPayload` and
+`processLineWebhook`, matching the live route's two imports. Unused session/event
+wrappers and re-exports are retired. The existing application functions—including
+movement resumption—remain active, and integration tests compose their real
+session adapters directly. This does not alter the webhook dispatcher or its
+transactional persistence, replies, signatures, cutoff or idempotency.
 
 ## Retired service forwards and inactive reference layout
 
@@ -98,7 +105,7 @@ Google auth/client/base/Drive imports now target root infrastructure; worksheet 
 
 Runtime module edges: LINE workflows→Orders/Inventory, Inventory→HR/Sales, Shipments→Orders. Public erased contracts additionally permit HR→Expenses and Sales→Expenses. Cross-feature edges use only registered public leaves; allowed directions never authorize private infrastructure. Root transport/shared have no feature/composition dependency. Runtime/type file cycles and browser→server/provider reachability are forbidden.
 
-Financial/stock formulas, quantities/coercion quirks, Bangkok dates, IDs, sorting, API routes, schemas, raw write modes, provider/auth configuration, retry/error phases and partial-write/concurrency limits are preserved. The exact route fixture remains 23 pages/35 APIs. Live permissions/delivery, production records, browser visuals and independent CI remain outside local evidence. See [verification](../refactoring/verification.md) and [deferred decisions](decisions.md#deferred-behavior-and-security-work).
+Financial/stock formulas, quantities/coercion quirks, Bangkok dates, IDs, sorting, API routes, schemas, raw write modes, provider/auth configuration, retry/error phases and partial-write/concurrency limits are preserved. Pinned route fixtures remain preserved; isolated builds verify the current route manifest. Live permissions/delivery, production records, browser visuals and independent CI remain outside local evidence. See [verification](../refactoring/verification.md) and [deferred decisions](decisions.md#deferred-behavior-and-security-work).
 
 ## Private Loyverse account configuration
 
@@ -109,8 +116,8 @@ only metadata or bound provider capabilities. The metadata SQL does not select
 tokens. The credential query uses the existing guarded transaction/connection.
 All account IDs and consumer contracts remain unchanged. There is no automatic
 fallback, credential endpoint or editor. Existing read-only deployments need only
-metadata column grants. The synchronous legacy factory supports env and rejects
-PostgreSQL, which requires the asynchronous server reader.
+metadata column grants. The asynchronous account reader supports explicit env and PostgreSQL sources.
+The unused synchronous factory and its barrel exports are retired.
 
 `infrastructure/external/google-auth` retains the exact shared Google auth classes
 for Drive; the Sheets HTTP client and account row reader are retired. No active
@@ -149,6 +156,6 @@ current acceptance revokes runtime EXECUTE on them to prove they are unused.
 `tools/migration` remains the historical import/operator/recovery owner. Do not
 remove its protected evidence or rerun old imports on production.
 
-The old operational `sales_receipt_payments` table is retained in production pending
-a separately approved retirement. Current runtime has no repository/fallback for
-it. `stock_migration.sales_receipt_payments` remains immutable recovery evidence.
+The operational `sales_receipt_payments` table was retired in PR99. Current runtime
+has no repository/fallback for it. `stock_migration.sales_receipt_payments` remains
+immutable recovery evidence.

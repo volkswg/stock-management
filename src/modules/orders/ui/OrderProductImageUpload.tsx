@@ -27,7 +27,7 @@ export function OrderProductImageUpload({
     setUploading(true);
     setError(undefined);
     try {
-      // Save sequentially because the API allocates item IDs from Sheets rows.
+      // Keep uploads sequential so selection order and per-image failure handling stay stable.
       for (const file of files) {
         try {
           if (!file.originFileObj) throw new Error("Select the image again.");

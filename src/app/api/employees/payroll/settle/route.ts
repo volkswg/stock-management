@@ -6,8 +6,8 @@ import { createPayrollReaders } from "@/composition/hr-payroll";
 export const runtime = "nodejs";
 async function POSTOperation(request: Request) {
   try {
-    const sheets = createBusinessDatabase();
-    const settlement = await settleEmployeePayroll(sheets, await request.json().catch(() => null), createPayrollReaders(sheets));
+    const storage = createBusinessDatabase();
+    const settlement = await settleEmployeePayroll(storage, await request.json().catch(() => null), createPayrollReaders(storage));
     return NextResponse.json({ ok: true, settlement });
   } catch (error) {
     return NextResponse.json({ ok: false, error: error instanceof SalaryAdvanceError ? error.message : "Could not settle payroll. Please retry." }, { status: error instanceof SalaryAdvanceError ? error.status : 500 });

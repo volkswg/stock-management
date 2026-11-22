@@ -17,11 +17,17 @@ def copy_previous(target):
     if target.exists() and any(target.iterdir()):
         raise ValueError('Destination must be empty')
     fixture = json.loads((ROOT / 'tests/fixtures/receipt-payment-retirement-before.json').read_text())
+    wrappers = json.loads((ROOT/'tests/fixtures/wrapper-cleanup-before.json').read_text())
     naming = json.loads((ROOT / 'tests/fixtures/sales-naming-before.json').read_text())
     shipment = json.loads((ROOT / 'tests/fixtures/order-detail-shipment-before.json').read_text())
     for name, expected in fixture['files'].items():
         source = ROOT / name
         data = source.read_bytes() if source.exists() else None
+        wrapper_edit = wrappers['edits'].get(name)
+        if wrapper_edit:
+            assert (hashlib.sha256(data).hexdigest() if data is not None else None) == wrapper_edit['afterSha256'], name
+            data = wrapper_edit['before'].encode()
+            assert hashlib.sha256(data).hexdigest() == wrapper_edit['beforeSha256'], name
         naming_edit = naming['edits'].get(name)
         if naming_edit:
             assert (hashlib.sha256(data).hexdigest() if data is not None else None) == naming_edit['afterSha256'], name

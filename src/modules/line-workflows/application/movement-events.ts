@@ -172,7 +172,7 @@ async function saveImage<Bytes>({ state, event, eventId, context, drive, line, c
     existingItems?: MovementJourneyItem[];
     imageUpload?: MovementImageUploadProgress;
 }): Promise<void> {
-    // A stable item ID makes a retry after an uncertain Sheets response idempotent.
+    // A stable item ID makes a retry after an uncertain save response idempotent.
     const existing = (existingItems ?? await context.inventory.items(state.masterId)).find((row) => row.id === state.itemId);
     const savedShop = String(existing?.shop || state.shop);
     if (imageUpload)

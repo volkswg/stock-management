@@ -142,7 +142,7 @@ test('historical source inverse preserves exact predecessor bytes and rejects un
   const fixture = JSON.parse(fs.readFileSync('tests/fixtures/sales-naming-before.json'));
   const hash = value => createHash('sha256').update(value).digest('hex');
   for (const [file, edit] of Object.entries(fixture.edits)) {
-    assert.equal(hash(fs.readFileSync(file)), edit.afterSha256, file);
+    assert.equal(hash(require('../helpers/wrapper-cleanup-history.cjs').beforeWrapperCleanup(file)), edit.afterSha256, file);
     assert.equal(hash(beforeSalesNaming(file)), edit.beforeSha256, file);
     assert.throws(() => beforeSalesNaming(file, Buffer.concat([fs.readFileSync(file), Buffer.from('\n')])), { code: 'ERR_ASSERTION' });
   }

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Isolated CJS loader must install the TypeScript require hook before loading actual owners. */
+const sessionPrimitives=require('../../tests/helpers/native-line-primitives.cjs');
 require('../../tests/helpers/postgres-runtime.cjs');
 global.fetch=()=>{throw new Error('Live provider network is forbidden in synthetic PostgreSQL tests');};
 const test=require('node:test');
@@ -199,10 +200,10 @@ test('LINE event idempotency survives regrouped redelivery; session clearing pre
  await line.processLineWebhook({...args,events:[{...event,replyToken:'redelivery-token',deliveryContext:{isRedelivery:true}}]});
  assert.equal(replies.length,1);
  await command(async()=>{
-  const session=await line.findLatestUserState({storage:service,userId:'line-synthetic',flowname:'OrderCreate'});
+  const session=await sessionPrimitives.findLatestUserState({storage:service,userId:'line-synthetic',flowname:'OrderCreate'});
   assert.ok(session,'actual create:order command must have created a workflow session');
-  await line.completeOrderTotalPrice({storage:service,orderId:session.referenceId,userStateId:session.id,userStateCreatedAt:session.createdAt,totalPrice:'25'});
-  assert.equal(await line.findLatestUserState({storage:service,userId:'line-synthetic',flowname:'OrderCreate'}),undefined);
+  await sessionPrimitives.completeOrderTotalPrice({storage:service,orderId:session.referenceId,userStateId:session.id,userStateCreatedAt:session.createdAt,totalPrice:'25'});
+  assert.equal(await sessionPrimitives.findLatestUserState({storage:service,userId:'line-synthetic',flowname:'OrderCreate'}),undefined);
   assert.equal((await currentTransaction().query('SELECT count(*) FROM stock_operational.orders WHERE "createdBy"=$1',['line-synthetic'])).rows[0].count,'1');
  });
  await transaction(false,async()=>{assert.equal((await currentTransaction().query('SELECT count(*) FROM stock_operational.commands WHERE kind=$1',['LINE'])).rows[0].count,'1');});

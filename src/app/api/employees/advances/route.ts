@@ -11,13 +11,13 @@ function service() { return createBusinessDatabase(); }
 function fail(error: unknown) { return NextResponse.json({ ok: false, error: error instanceof SalaryAdvanceError ? error.message : "Salary advance operation failed. Please retry." }, { status: error instanceof SalaryAdvanceError ? error.status : 500 }); }
 async function GETOperation() {
   try {
-    const sheets = service();
-    const [{ advances, settlements }, employees, shops] = await Promise.all([readSalaryLedger(sheets), listEmployees({ storage: sheets }), listExpenseShops(sheets)]);
+    const storage = service();
+    const [{ advances, settlements }, employees, shops] = await Promise.all([readSalaryLedger(storage), listEmployees({ storage: storage }), listExpenseShops(storage)]);
     return NextResponse.json({ ok: true, advances: advances.map(a => ({ ...a, recoveredAmount: recoveredAmount(a.id, settlements), outstandingAmount: a.status === "paid" ? money(Math.max(0, a.paidAmount - recoveredAmount(a.id, settlements))) : 0 })), employees: employees.map(({ id, name, status }) => ({ id, name, status })), shops: shops.map(({ id, name, active }) => ({ id, name, active })), settledMonths: settlements.map(({ employeeId, month }) => ({ employeeId, month })) });
   } catch (error) { return fail(error); }
 }
 async function POSTOperation(request: Request) {
-  try { const sheets = service(); const advance = await createSalaryAdvance(sheets, await request.json().catch(() => null), createPayrollReaders(sheets).employees, createSalaryAdvanceShops(sheets)); return NextResponse.json({ ok: true, advance }, { status: 201 }); } catch (error) { return fail(error); }
+  try { const storage = service(); const advance = await createSalaryAdvance(storage, await request.json().catch(() => null), createPayrollReaders(storage).employees, createSalaryAdvanceShops(storage)); return NextResponse.json({ ok: true, advance }, { status: 201 }); } catch (error) { return fail(error); }
 }
 async function PATCHOperation(request: Request) {
   try { const advance = await transitionSalaryAdvance(service(), await request.json().catch(() => null)); return NextResponse.json({ ok: true, advance }); } catch (error) { return fail(error); }
