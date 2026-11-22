@@ -433,6 +433,78 @@ GitHub. Attendance `employee_timesheets.shopId` refers to the external account I
 not the expense `shops.id`. Preserve opaque IDs and approved metadata mappings;
 do not invent accounts, employee IDs, relationships or missing historical dates.
 
+## Connection-pooling correction — prepared, production unchanged
+
+The November22 investigation found46 PostgreSQL `53300` FATAL events for the
+runtime role and46 HTTP503 responses across database-backed screens in the same
+incident window. The role has a six-connection limit; the app uses a two-client
+pool **per Vercel instance**, while session pooling retains a backend per connected
+client. Five runtime backends were idle in the later metadata snapshot, one for
+over16 minutes despite the app's five-second idle timeout. This establishes role
+connection exhaustion; suspension as the reason for that idle lifetime is an
+inference. Private logs and configuration stay on the Mac.
+
+The correction attaches the pinned official Vercel pool lifecycle helper and adds
+an explicit `transaction` release mode on the approved shared-pooler host/port6543.
+Direct/session mode still require5432; no automatic endpoint selection/fallback
+is added. TLS verification, exact target/source binding, the six-connection role
+guard, local role/timeouts, transaction-scoped advisory locks, record revisions,
+command replay and ambiguous-COMMIT handling stay intact. Driver messages and SQL
+remain private; connection diagnostics contain only phase and an allowlisted code.
+The runtime uses unnamed parameterized SQL and transaction-local state, with no
+named prepared statements, session advisory locks or cross-transaction state.
+
+### Activation requirements (separate owner approval)
+
+Merging alone does not change the live endpoint or solve every concurrency case.
+Do not raise the role limit alone: the runtime guard intentionally requires6.
+Do not deploy the transaction endpoint against an unchecked default server pool.
+
+1. Verify the existing production target/project/isolation/purpose and release
+   commit, current pool settings and every client using the runtime login.
+   Keep the shop-ID feature/PR104 paused. Reuse retained recovery evidence after
+   checking its applicability; no schema/data migration is part of this release.
+2. Obtain approval for the application release, the paired connection URL/release
+   binding change and the Supavisor server pool-size change. Plan a short supervised
+   write/LINE pause and drain for a mode change; do not terminate sessions or reset
+   a pool without explicit authorization. Account for in-flight saves/uploads.
+3. Set/verify a **four-backend runtime transaction pool**, leaving two slots below
+   the role limit6. Supabase's pool-size setting may apply to other user pools;
+   inspect its actual scope and all affected roles before approving that change.
+   Verify the combined session/direct/transaction connections for this login fit
+   within6, including old deployments and pooler instances. Four is the tested
+   initial budget, not an assertion that a per-role dashboard control exists.
+   Old session-mode server pools may keep backends after clients disconnect; a
+   client disconnect alone is not proof of a drain. If the approved configuration
+   cannot enforce this budget, stop before promotion and revise the packet.
+4. On the **new protected deployment only**, bind the existing verified pooler
+   host/project-suffixed login to port6543 and set release `connectionMode` to
+   `transaction`, with the new exact source commit. Preserve passwords, CA, all
+   target/role/access guards, read/write setting, LINE cutoff and protections.
+   Never use a direct owner/reader credential as an application workaround.
+5. After the approved old-runtime drain, test the bounded hosted pool with the
+   intended writer role but read-only transactions first: target/role/TLS,
+   transaction-local state, same-transaction backend affinity and representative
+   GETs. Any deployment-access change or business write canary needs its own
+   approval. Local PgBouncer acceptance is not hosted Supavisor acceptance.
+6. Promote only after those checks pass. Confirm route behavior and that runtime
+   backend counts stay inside the approved budget. Review HTTP503s and safe
+   `[postgres.connection]` codes; stop on `53300`, unexpected role/target/TLS,
+   state leakage or uncertain save/upload outcomes. Reopen after successful checks.
+
+Rollback is application/configuration-only: pause/drain the new writer, restore
+the prior deployment **with its matching original session URL/release binding**
+and the recorded pool settings, checking aggregate login connections before
+reopening. No business-data rollback or blind mutation replay is permitted.
+Returning to session mode also returns its capacity limitation; if that mode is
+still exhausted, keep writes paused and report the blocker rather than declaring
+recovery. No paid resources, schema/role-limit changes, provider invocation or live
+configuration changes are authorized by this document.
+
+References: [Vercel pool lifecycle](https://vercel.com/docs/functions/functions-api-reference/vercel-functions-package#attachdatabasepool),
+[Supabase connection modes](https://supabase.com/docs/guides/database/connecting-to-postgres),
+[server pool-size scope](https://supabase.com/docs/guides/database/connection-management).
+
 ## Production configuration and access
 
 The authoritative parser is

@@ -5,6 +5,7 @@ separately on fresh final-schema databases.
 """
 import hashlib,json,os,sys,subprocess
 from pathlib import Path
+from pooling_history import before_pooling
 ROOT=Path(__file__).resolve().parents[2]
 def digest(data):return hashlib.sha256(data).hexdigest()
 def copy_history(target):
@@ -32,6 +33,7 @@ def copy_history(target):
         edit=fixture['edits'].get(name)
         source=ROOT/name
         current=source.read_bytes() if source.exists() else None
+        current=before_pooling(name,current)
         product_edit=products['edits'].get(name)
         if product_edit:
             assert (hashlib.sha256(current).hexdigest() if current is not None else None)==product_edit['afterSha256'],name

@@ -46,12 +46,32 @@ Do not run rich-menu setup, production startup, imports or real providers as che
 ## Actual PostgreSQL and historical schemas
 
 ```sh
+# Fresh minimal synthetic PostgreSQL/PgBouncer; no hosted access.
+bash tools/native-postgres/verify-pooling.sh
+
 # Fresh disposable synthetic PostgreSQL only; Docker and existing browser tools.
 bash tools/native-postgres/verify-postgres.sh
 
 # Explicit older-schema evidence with the hash-pinned PR79 record adapter.
 bash tools/migration/verify-persistence-history.sh
 ```
+
+Pooling acceptance reproduces SQLSTATE53300 with six idle direct sessions, then
+holds24 client sockets across12 copies of the actual current transport behind a
+four-backend transaction pool. It verifies concurrent reads/writes, backend
+affinity, read-only enforcement, role reset, permission denial, rollback, exact
+command replay/conflict and lost-COMMIT recovery. The pinned Vercel helper is also
+exercised with a synthetic request context and real pg idle timers. Unit tests
+cover production endpoint/source/target/TLS/role guards and diagnostic redaction.
+The Docker verifier owns/removes only its fresh local container, passes no app
+env files and invokes no providers. PostgreSQL/PgBouncer exercise the transaction
+semantics locally; they do not certify hosted Supavisor settings or Vercel's
+actual suspension behavior. Those require the separately approved release checks.
+
+`connection-pooling-before.json` contains exact hashes and bounded line inverses
+for the changed historical witnesses. The historical copy/loader applies that
+inverse before the older fixture chain; no original migration fixture is updated.
+Current pooling tests always execute the current physical transport.
 
 `npm test` runs the immutable pre-native regression/type witnesses in an owned,
 credential-free, fully hash-pinned source copy, then current native source checks.

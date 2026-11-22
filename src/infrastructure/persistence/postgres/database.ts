@@ -1,6 +1,7 @@
 import "server-only";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { Pool, type PoolClient } from "pg";
+import { attachDatabasePool } from "@vercel/functions/db-connections";
 
 export class PersistenceFailure extends Error {
   constructor(public readonly status = 503, message = "PostgreSQL storage is unavailable; no fallback was attempted.") { super(message); }
@@ -9,6 +10,12 @@ type Context = { client: PoolClient; safe: PoolClient; mutation: boolean; open: 
 const active = new AsyncLocalStorage<Context>();
 let pool: Pool | undefined;
 let poolIdentity: string | undefined;
+// Log only allowlisted transport codes, never driver messages, SQL or credentials.
+function connectionFailure(phase: "connect" | "idle", error: unknown) {
+  const code = error && typeof error === "object" && "code" in error ? error.code : undefined;
+  const safe = typeof code === "string" && ["53300", "57P01", "57P02", "57P03", "08000", "08001", "08003", "08004", "08006", "08007", "08P01", "ECONNRESET", "ECONNREFUSED", "ETIMEDOUT"].includes(code) ? code : "unavailable";
+  console.error("[postgres.connection]", { phase, code: safe });
+}
 export function storageMode(): "supabase" {
   const mode = process.env.STOCK_STORAGE || "supabase";
   if (mode !== "supabase") throw new PersistenceFailure(503, "Business storage requires PostgreSQL.");
@@ -40,10 +47,11 @@ export function productionSettings() {
   if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(String(release.isolationId)) || release.isolationId === "160669bd-2f6f-4490-9259-bada5a1d02c4" || process.env.STOCK_TARGET_ISOLATION_ID !== release.isolationId) return fail();
   if (!/^stock_prod_[a-z0-9_]+$/.test(String(release.runtimeUser)) || !/^prj_[A-Za-z0-9]+$/.test(String(release.vercelProjectId)) || release.vercelProjectId !== process.env.VERCEL_PROJECT_ID || !/^[a-f0-9]{40}$/.test(String(release.sourceCommit)) || /^0+$/.test(String(release.sourceCommit)) || release.sourceCommit !== process.env.VERCEL_GIT_COMMIT_SHA) return fail();
   const direct = release.connectionMode === "direct" && release.databaseHost === "db." + release.projectRef + ".supabase.co";
-  const session = release.connectionMode === "session" && /^aws-[0-9]+-ap-northeast-1\.pooler\.supabase\.com$/.test(String(release.databaseHost));
+  const pooled = ["session", "transaction"].includes(String(release.connectionMode)) && /^aws-[0-9]+-ap-northeast-1\.pooler\.supabase\.com$/.test(String(release.databaseHost));
   let login: string; try { login = decodeURIComponent(parsed.username); } catch { return fail(); }
-  const username = session ? release.runtimeUser + "." + release.projectRef : release.runtimeUser;
-  if (!(direct || session) || !["postgres:", "postgresql:"].includes(parsed.protocol) || parsed.hostname !== release.databaseHost || Number(parsed.port || 5432) !== 5432 || parsed.pathname !== "/postgres" || parsed.search || parsed.hash || login !== username || !parsed.password) return fail();
+  const username = pooled ? release.runtimeUser + "." + release.projectRef : release.runtimeUser;
+  const port = release.connectionMode === "transaction" ? 6543 : 5432;
+  if (!(direct || pooled) || !["postgres:", "postgresql:"].includes(parsed.protocol) || parsed.hostname !== release.databaseHost || Number(parsed.port || 5432) !== port || parsed.pathname !== "/postgres" || parsed.search || parsed.hash || login !== username || !parsed.password) return fail();
   if (process.env.STOCK_PRODUCTION_READ_ONLY !== undefined && !["true", "false"].includes(process.env.STOCK_PRODUCTION_READ_ONLY)) return fail();
   return { url: process.env.STOCK_DATABASE_URL!, token: "", local: false, targetId: String(release.isolationId), purpose: "production", runtimeUser: String(release.runtimeUser) };
 }
@@ -61,8 +69,9 @@ export function connectionPool(): Pool {
       connectionTimeoutMillis: 5000, allowExitOnIdle: true,
       ssl: config.local ? false : { rejectUnauthorized: true, ca: process.env.STOCK_DATABASE_CA || undefined },
       application_name: config.purpose === "production" ? "stock-production" : "stock-isolated-staging" });
-    // Never propagate driver errors, SQL text, bind values or connection URLs to HTTP/logs.
-    pool.on("error", () => {});
+    // Keep the existing idle timeout running before a Vercel instance suspends.
+    attachDatabasePool(pool);
+    pool.on("error", error => connectionFailure("idle", error));
   }
   return pool;
 }
@@ -88,7 +97,7 @@ export async function transaction<T>(mutation: boolean, operation: () => Promise
   if (storageMode() !== "supabase") throw new PersistenceFailure();
   const settings = runtimeSettings();
   let client: PoolClient;
-  try { client = await connectionPool().connect(); } catch { throw new PersistenceFailure(); }
+  try { client = await connectionPool().connect(); } catch (error) { connectionFailure("connect", error); throw new PersistenceFailure(); }
   let destroy = false;
   let scope: Context | undefined;
   const onError = () => { destroy = true; };

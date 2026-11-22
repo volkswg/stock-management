@@ -56,6 +56,10 @@ jobs:
           bash tools/migration/verify-recovery-fingerprints.sh 2>&1 | tee "$GITHUB_WORKSPACE/evidence/recovery-fingerprints.log"
           bash tools/migration/verify-restricted-backup.sh 2>&1 | tee "$GITHUB_WORKSPACE/evidence/restricted-backup.log"
           STOCK_HA_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence" bash tools/migration/verify-persistence-history.sh --hosted-tooling 2>&1 | tee "$GITHUB_WORKSPACE/evidence/hosted-tooling-integration.log"
+      - name: Connection pooling and transaction safety on disposable PostgreSQL
+        run: |
+          set -euo pipefail
+          bash tools/native-postgres/verify-pooling.sh 2>&1 | tee evidence/connection-pooling.log
       - name: Private PostgreSQL account configuration acceptance
         run: |
           set -euo pipefail
