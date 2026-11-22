@@ -1121,3 +1121,24 @@ and gateway checks; browser UAT covers inline display, edits, cancellation, choo
 creation, duplicate review and reload-safe reconciliation on a disposable copy.
 Full validation passed: 827 Node tests plus three Python tests, lint, typecheck
 and isolated build; API routes and database/server contracts are unchanged.
+
+### Product Master workspace menu
+
+The Stock menu includes Product Master at `/products`, with search, photos, names,
+codes and variants. Editing opens on demand with a fresh revision; archive retains
+existing links and media. Creation continues from order items. The active search
+returns up to 30 matches and the page makes that limit explicit. The product-owned
+browser client reuses the original journal namespace and preserves pending item
+operations through the ownership move. Master-page pending changes have one
+recovery scope, including archives that disappear from active search. Only a
+protected product-detail GET and the new page are added; schema/data and production
+remain unchanged. Current UAT verification/evidence stays private on the Mac.
+
+Menu verification passed: 834 Node tests plus three Python tests, lint, typecheck
+and isolated build. Existing routes retain their baseline hash after exactly four
+feature additions (three APIs and `/products`); 112 client chunks contain no private
+database strings. Ten actual PostgreSQL feature tests plus the existing 32
+application/media/LINE tests pass on fresh local copies. Browser checks cover
+workspace navigation, search, edit/cancel, archive acknowledgement loss/reload/replay
+and preserved archived links. Hosted publication uses an application-only preview
+update and read-only checks; existing hosted records and production are preserved.

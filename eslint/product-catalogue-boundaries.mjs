@@ -3,6 +3,8 @@ import { noDynamicServerBypass } from './orders-boundaries.mjs';
 // Named Products public DTOs are consumed only by the order-item catalogue seam.
 const scopes = {
   'src/modules/products/contracts.ts': [],
+  'src/modules/products/browser.ts': ['./contracts'],
+  'src/modules/orders/ui/catalogue-api.ts': ['../product-catalogue-contracts', '@/modules/products/browser'],
   'src/modules/products/domain/validation.ts': ['../contracts'],
   'src/modules/products/application/catalogue.ts': ['../contracts', './ports/catalogue', '../domain/validation'],
   'src/modules/products/application/ports/catalogue.ts': ['../../contracts'],

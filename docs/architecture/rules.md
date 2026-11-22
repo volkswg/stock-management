@@ -176,3 +176,9 @@ without clocks, provider IO, DTO mutation or changes to business-date priorities
 this is not a general shared import exception. Current executable source loaders
 read the actual leaf, while bounded timestamp inverses preserve earlier historical
 fixtures and file inventories separately.
+
+Products exposes `browser.ts` as a named browser-safe client to its Product Master
+page and the Orders catalogue client. It owns the existing durable product-request
+identity/journal protocol. Orders retains its item-specific endpoint and DTOs;
+Products never imports Orders. The workspace links to `/products`, whose page
+composition renders Products-owned UI. No server dependency enters this browser leaf.

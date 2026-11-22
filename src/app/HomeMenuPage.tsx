@@ -16,6 +16,7 @@ import {
   ShopOutlined,
   ShoppingCartOutlined,
   SwapOutlined,
+  TagsOutlined,
   TeamOutlined,
   TruckOutlined,
 } from "@ant-design/icons";
@@ -51,6 +52,7 @@ const MENU_GROUPS: MenuGroup[] = [
   {
     id: "stock-menu", title: "Stock", description: "Purchasing and inventory", tone: "green", icon: <StockIcon />,
     items: [
+      { href: "/products", icon: <TagsOutlined />, title: "Product Master", description: "Browse and edit the product catalogue" },
       { href: "/orders", icon: <ShoppingCartOutlined />, title: "Orders", description: "Manage purchase orders" },
       { href: "/shipments", icon: <TruckOutlined />, title: "Shipments", description: "Track incoming stock" },
       { href: "/movements", icon: <SwapOutlined />, title: "Movements", description: "Review stock changes" },

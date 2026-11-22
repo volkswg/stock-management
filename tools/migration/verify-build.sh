@@ -20,7 +20,7 @@ for folder in ['src','public']:
    assert source.read_bytes()==Path(source.relative_to(root)).read_bytes(),source
 manifest=Path('.next/server/app-paths-manifest.json')
 routes=json.loads(manifest.read_bytes())
-additions=['/api/products/route','/api/products/[id]/route','/api/orders/[id]/items/[itemId]/product/route']
+additions=['/api/products/route','/api/products/[id]/route','/api/orders/[id]/items/[itemId]/product/route','/products/page']
 for route in additions:
  assert routes.pop(route,None)=='app'+route+'.js',route
 # All pre-existing route entries must still match the immutable baseline.
@@ -30,5 +30,5 @@ for path in chunks:
  text=path.read_text()
  for private in ['STOCK_DATABASE_URL','STOCK_STAGING_AUTH_TOKEN','STOCK_TARGET_ISOLATION_ID','stock_operational','postgres://','postgresql://']:
   assert private not in text,(path,private)
-print(json.dumps({'sourceMatches':True,'existingRoutesUnchanged':True,'approvedNewRoutes':3,'clientChunksChecked':len(chunks),'privateDatabaseStrings':0}))
+print(json.dumps({'sourceMatches':True,'existingRoutesUnchanged':True,'approvedNewRoutes':4,'clientChunksChecked':len(chunks),'privateDatabaseStrings':0}))
 PY

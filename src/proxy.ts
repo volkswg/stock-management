@@ -15,7 +15,7 @@ export function proxy(request:NextRequest){
   return NextResponse.json({error:'UAT target is unavailable.'},{status:503});
  }
  const path=request.nextUrl.pathname,method=request.method;
- const read=['GET','HEAD'].includes(method)&&/^(\/api\/orders(?:\/[^/]+)?|\/api\/shipments(?:\/[^/]+)?|\/api\/products|\/api\/orders\/[^/]+\/items\/[^/]+\/product)$/.test(path);
+ const read=['GET','HEAD'].includes(method)&&/^(\/api\/orders(?:\/[^/]+)?|\/api\/shipments(?:\/[^/]+)?|\/api\/products(?:\/[1-9][0-9]*)?|\/api\/orders\/[^/]+\/items\/[^/]+\/product)$/.test(path);
  const write=(method==='POST'&&/^\/api\/orders\/[^/]+\/items\/[^/]+\/product$/.test(path))||(['PATCH','DELETE'].includes(method)&&/^\/api\/products\/[1-9][0-9]*$/.test(path))||
   (method==='PATCH'&&/^\/api\/orders\/[^/]+\/items(?:\/[^/]+)?$/.test(path));
  if(!read&&!write)return NextResponse.json({error:'External integrations and unrelated operations are disabled in product UAT.'},{status:405});

@@ -171,3 +171,11 @@ composition. Orders owns the item-link port/use case, SQL adapter, public
 Orders dependency enters Products or generic PostgreSQL transport.
 `eslint/product-catalogue-boundaries.mjs` admits these exact named edges.
 The UAT migration is isolated-staging-only and is not a production release.
+
+The Product Master menu/page lives at `app/products/page.tsx` →
+`modules/products/ui/ProductMasterPage.tsx`. It searches the existing active
+catalogue, reads a fresh product revision for edits, and archives through existing
+mutation APIs. `modules/products/browser.ts` owns shared durable request handling;
+Orders' browser adapter delegates those named product operations while retaining
+its item read/link methods. Existing storage namespace, bodies and retry identities
+remain unchanged. `/api/products/[id]` adds protected GET for fresh/archived reads.

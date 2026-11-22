@@ -7,7 +7,7 @@ http.createServer((req,res)=>{
  const url=new URL(req.url,'http://127.0.0.1:'+listenPort);
  if(req.headers.host!=='127.0.0.1:'+listenPort|| (req.headers.origin&&req.headers.origin!=='http://127.0.0.1:'+listenPort)){res.writeHead(403);res.end();return;}
  if(url.pathname==='/product-uat-demo.svg'){res.writeHead(200,{'content-type':'image/svg+xml','cache-control':'no-store'});res.end(svg);return;}
- const safeRead=/^(\/api\/orders(?:\/[^/]+)?|\/api\/shipments|\/api\/products|\/api\/orders\/[^/]+\/items\/[^/]+\/product)$/.test(url.pathname);
+ const safeRead=/^(\/api\/orders(?:\/[^/]+)?|\/api\/shipments|\/api\/products(?:\/[1-9][0-9]*)?|\/api\/orders\/[^/]+\/items\/[^/]+\/product)$/.test(url.pathname);
  const safeWrite=/^\/api\/(orders\/[^/]+\/items\/[^/]+\/product|products\/[1-9][0-9]*)$/.test(url.pathname);
  if(url.pathname.startsWith('/api/')&&!(req.method==='GET'?safeRead:safeWrite&&['POST','PATCH','DELETE'].includes(req.method))){res.writeHead(403,{'content-type':'application/json'});res.end('{"error":"Provider and unrelated writes are disabled in local product UAT."}');return;}
  const headers={...req.headers,host:'127.0.0.1:'+upstreamPort,authorization:'Bearer '+process.env.STOCK_STAGING_AUTH_TOKEN};

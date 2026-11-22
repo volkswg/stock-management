@@ -11,6 +11,7 @@ const PATH_LABELS: Record<string, string> = {
   "/expenses": "Expenses",
   "/expenses/categories": "Categories",
   "/expenses/shops": "Shop master",
+  "/products": "Product Master",
   "/orders": "Orders",
   "/orders/create": "Create order",
   "/shipments": "Shipments",
@@ -31,6 +32,7 @@ const PATH_LABELS: Record<string, string> = {
 
 const NAVIGABLE_PATHS = new Set([
   "/",
+  "/products",
   "/stock-counts",
   "/expenses",
   "/orders",

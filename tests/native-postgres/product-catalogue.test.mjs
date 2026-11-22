@@ -3,17 +3,17 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
-import {webcrypto} from 'node:crypto';
+import {webcrypto,createHash} from 'node:crypto';
 import {ESLint} from 'eslint';
-function load(file,globals={},imports={}){
- const exports={};new vm.Script(ts.transpileModule(readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText).runInNewContext({exports,Error,Map,Set,Promise,JSON,BigInt,crypto:webcrypto,...globals,require(name){assert.ok(Object.hasOwn(imports,name),'Unexpected dependency '+name);return imports[name];}});return exports;
+function load(file,globals={},imports={},source=readFileSync(file,'utf8')){
+ const exports={};new vm.Script(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText).runInNewContext({exports,Error,Map,Set,Promise,JSON,BigInt,crypto:webcrypto,...globals,require(name){assert.ok(Object.hasOwn(imports,name),'Unexpected dependency '+name);return imports[name];}});return exports;
 }
 const plain=value=>JSON.parse(JSON.stringify(value));
 function storage(){const data=new Map();return{getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)};}
 const path='/api/orders/order-1/items/7/product';
 const input={mode:'create',expectedRevision:'1',product:{productCode:'P1',productName:'Chair',variant:'Blue'},useItemImage:true,confirmSimilar:false};
 const saved=()=>Response.json({item:{itemId:'7',orderId:'order-1',revision:'2',product:{id:'1'}}},{status:201});
-function browser(fetch,store=storage()){return{...load('src/modules/orders/ui/catalogue-api.ts',{fetch,sessionStorage:store}),store};}
+function browser(fetch,store=storage()){const globals={fetch,sessionStorage:store};const products=load('src/modules/products/browser.ts',globals);return{...load('src/modules/orders/ui/catalogue-api.ts',globals,{'@/modules/products/browser':products}),store};}
 test('success and double click share one durable key; a new intentional operation gets a new identity',async()=>{
  let finish;const wait=new Promise(resolve=>finish=resolve),posts=[];
  const b=browser(async(url,init)=>{posts.push(init);await wait;return saved();});
@@ -61,4 +61,21 @@ test('new owner boundaries reject server/provider imports and allow only the doc
  const eslint=new ESLint();const cases=[['src/modules/orders/application/product-catalogue.ts',"import type {X} from '@/modules/products/infrastructure/postgres/catalogue';"],['src/modules/products/application/catalogue.ts',"import {x} from '@/config';"],['src/modules/products/domain/validation.ts',"import {x} from 'node:fs';"]];
  for(const [filePath,source]of cases){const [result]=await eslint.lintText(source,{filePath});assert.ok(result.messages.some(m=>m.ruleId==='no-restricted-imports'),filePath);}
  const [ok]=await eslint.lintText("import type { Product } from '@/modules/products/contracts'; export type P = Product;",{filePath:'src/modules/orders/application/ports/product-catalogue.ts'});assert.equal(ok.errorCount,0);
+});
+
+test('Product Master shares durable identities while keeping pending operations independent of item forms',async()=>{
+ const store=storage(),posts=[];const original=load('src/modules/products/browser.ts',{sessionStorage:store,fetch:async(url,init)=>{posts.push(init);throw Error('lost');}});
+ await assert.rejects(original.updateCatalogueProduct({id:'1',revision:'3'},input.product,'product-master'));
+ const fresh=load('src/modules/products/browser.ts',{sessionStorage:store,fetch:async(url,init)=>{posts.push(init);return Response.json({product:{id:'1',revision:'4'}});}});
+ await assert.rejects(fresh.updateCatalogueProduct({id:'2',revision:'1'},input.product,'product-master'),/previous product operation/);
+ await fresh.retryCatalogueRequest('product-master');assert.equal(posts.length,2);assert.equal(posts[0].body,posts[1].body);assert.equal(posts[0].headers['Idempotency-Key'],posts[1].headers['Idempotency-Key']);assert.equal(fresh.pendingCatalogueRequest('product-master'),null);
+});
+
+
+test('a pending request from the pre-menu browser replays unchanged through the Products-owned client',async()=>{
+ const witness=JSON.parse(readFileSync('tests/fixtures/product-browser-owner-before.json','utf8'));assert.equal(createHash('sha256').update(witness.source).digest('hex'),witness.sha256);
+ const store=storage(),posts=[];const old=load('previous.ts',{sessionStorage:store,fetch:async(url,init)=>{posts.push(init);throw Error('lost');}},{},witness.source);
+ await assert.rejects(old.saveItemCatalogue('order-1','7',input));
+ const next=browser(async(url,init)=>{posts.push(init);return saved();},store);await next.retryItemCatalogue('order-1','7');
+ assert.equal(posts[0].body,posts[1].body);assert.equal(posts[0].headers['Idempotency-Key'],posts[1].headers['Idempotency-Key']);assert.equal(next.pendingCatalogueRequest(path),null);
 });

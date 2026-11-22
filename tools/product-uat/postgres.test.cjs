@@ -89,6 +89,13 @@ test('product edits protect product rows; archive keeps old links and rejects ne
  assert.equal((await productRoute.DELETE(request(target,'DELETE',{expectedRevision:updated.revision},'product:'+crypto.randomUUID()),ctx)).status,200);
  assert.ok((await get(a)).product.deletedAt);const other=await get(c);assert.equal((await post(c,{mode:'link',productId:product.id,expectedRevision:other.revision})).status,409);
 });
+test('master detail GET reads active/archived products, validates IDs and preserves authorization',async()=>{
+ const ctx={params:Promise.resolve({id:product.id})};
+ const response=await productRoute.GET(request('/api/products/'+product.id),ctx);assert.equal(response.status,200);const saved=await response.json();assert.equal(saved.product.id,product.id);assert.ok(saved.product.deletedAt);
+ assert.equal((await productRoute.GET(request('/api/products/9223372036854775807'),{params:Promise.resolve({id:'9223372036854775807'})})).status,404);
+ assert.equal((await productRoute.GET(request('/api/products/bad'),{params:Promise.resolve({id:'bad'})})).status,400);
+ assert.equal((await productRoute.GET(new Request('http://local.test/api/products/'+product.id),ctx)).status,401);
+});
 test('catalogue privileges are private and identities are lossless strings',async()=>{
  await read(async()=>{
   const r=(await currentTransaction().query("SELECT relrowsecurity FROM pg_class WHERE oid='stock_operational.products'::regclass")).rows[0];assert.equal(r.relrowsecurity,true);
