@@ -7,7 +7,7 @@ const A='a'.repeat(40),B='b'.repeat(40),TREE='c'.repeat(40);
 function fixture(){
  const binding={version:1,projectRef:TARGET.ref,isolationId:TARGET.isolation,vercelProjectId:TARGET.project,runtimeUser:'stock_prod_runtime',databaseHost:TARGET.host,connectionMode:'transaction',accessPolicy:'legacy-as-is',sourceCommit:A};
  const project={id:TARGET.project,accountId:TARGET.team,link:{org:'volkswg',repo:'stock-management',repoId:123},autoAssignCustomDomains:false,targets:{production:{id:'dpl_OLD'}},env:[{id:'binding',key:'STOCK_PRODUCTION_RELEASE_JSON',target:['production'],type:'plain',value:JSON.stringify(binding)},{id:'private',key:'SYNTHETIC_PRIVATE_ENV',target:['production'],type:'encrypted',value:'synthetic-ciphertext-never-output'}],security:{firewallConfigVersion:5}};
- return {project,binding,live:{id:'dpl_OLD',projectId:TARGET.project,readyState:'READY',meta:{githubCommitSha:A}},aliasDeploymentId:'dpl_OLD',firewall:{rules:[],firewallEnabled:true},source:{sha:B,tree:TREE,mainSha:B,changedPaths:['src/modules/orders/ui/api.ts']},ci:{status:'completed',conclusion:'success',repository:TARGET.repository,workflowPath:'.github/workflows/migration-acceptance.yml',sha:B,tree:TREE}};
+ return {project,binding,live:{id:'dpl_OLD',projectId:TARGET.project,readyState:'READY',meta:{githubCommitSha:A}},aliasDeploymentId:'dpl_OLD',firewall:{rules:[],firewallEnabled:true},source:{sha:B,tree:TREE,mainSha:B,baseSha:A,changedPaths:['src/modules/orders/ui/api.ts']},ci:{status:'completed',conclusion:'success',repository:TARGET.repository,workflowPath:'.github/workflows/migration-acceptance.yml',sha:B,tree:TREE}};
 }
 test('Cloud doctor treats denied child execution as blocked and never a passing test',()=>{
  assert.throws(()=>checkEnvironment(()=>({error:{code:'EPERM'},status:null})),/execution is denied.*Do not skip/);
@@ -24,7 +24,7 @@ test('application-only packet changes just source binding, stages without domain
  assert.ok(!JSON.stringify(p).includes('synthetic-ciphertext-never-output'));
 });
 test('wrong target, pending CI, unmerged source, schema changes and secret-bearing bindings refuse before planning writes',()=>{
- for(const change of [f=>f.project.accountId='other',f=>f.project.autoAssignCustomDomains=true,f=>f.ci.conclusion='failure',f=>f.ci.tree='d'.repeat(40),f=>f.source.mainSha=A,f=>f.source.changedPaths=['supabase/migrations/new.sql'],f=>f.source.changedPaths=['tools/migration/operator/change.sql'],f=>f.binding.password='synthetic-secret',f=>f.binding.connectionMode='session',f=>f.firewall.rules.push({name:'Existing maintenance'})]){
+ for(const change of [f=>f.project.accountId='other',f=>f.project.autoAssignCustomDomains=true,f=>f.ci.conclusion='failure',f=>f.ci.tree='d'.repeat(40),f=>f.source.mainSha=A,f=>f.source.baseSha=B,f=>f.source.changedPaths=['supabase/migrations/new.sql'],f=>f.source.changedPaths=['tools/migration/operator/change.sql'],f=>f.source.changedPaths=['tools/migration/change.py'],f=>f.source.changedPaths=['vercel.json'],f=>f.project.env[0].id='../other',f=>f.binding.password='synthetic-secret',f=>f.binding.connectionMode='session',f=>f.firewall.rules.push({name:'Existing maintenance'})]){
   const f=fixture();change(f);assert.throws(()=>stagePacket(f));
  }
 });

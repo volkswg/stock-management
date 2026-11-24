@@ -44,7 +44,7 @@
     },
     "docs/database-migration.md": {
       "beforeSha256": "d248cca5afef6726c01603e4d25b60f1d625caf17953b4f7b88f0bfb64c46989",
-      "afterSha256": "fa78d0fb3062ea2f1d3655bf284db58382f894223845d1f93d7016e0af5cf877",
+      "afterSha256": "421342290e332be71cd8b30ee3dce112e428d22651104615c0cdbabbef3d17b5",
       "inverse": [
         {
           "start": 1348,

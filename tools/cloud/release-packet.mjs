@@ -38,11 +38,12 @@ export function stagePacket(input) {
   snapshotGate(input);
   const {source,ci,project,binding,live,firewall}=input;
   requireGate(sha(source?.sha)&&source.sha===source.mainSha&&sha(source.tree),'Release source must be verified merged main.');
+  requireGate(source.baseSha===binding.sourceCommit,'Changed paths must compare from the actual live source.');
   requireGate(ci?.status==='completed'&&ci.conclusion==='success'&&ci.repository===TARGET.repository&&ci.workflowPath==='.github/workflows/migration-acceptance.yml'&&sha(ci.sha)&&ci.tree===source.tree,'Exact source/tree CI evidence is required.');
   requireGate(Array.isArray(source.changedPaths)&&source.changedPaths.length>0&&source.changedPaths.every(p=>typeof p==='string'&&!p.startsWith('/')&&!p.split('/').includes('..')),'Provide the complete comparison from live source to release source.');
-  requireGate(!source.changedPaths.some(p=>/^(supabase\/|tools\/migration\/(operator\/|.*\.sql$)|tools\/product-uat\/.*\.sql$|\.env)/.test(p)),'Database/environment changes require the Mac recovery and maintenance packet; application-only release refused.');
+  requireGate(!source.changedPaths.some(p=>/^(supabase\/|tools\/migration\/|tools\/product-uat\/.*\.sql$|\.env|vercel\.json$)/.test(p)),'Database/environment changes require the Mac recovery and maintenance packet; application-only release refused.');
   const variable=project.env.filter(e=>e.key==='STOCK_PRODUCTION_RELEASE_JSON'&&JSON.stringify(e.target)==='["production"]');
-  requireGate(variable.length===1&&typeof variable[0].id==='string','Expected one production source-binding variable.');
+  requireGate(variable.length===1&&/^[A-Za-z0-9_-]+$/.test(variable[0].id),'Expected one production source-binding variable.');
   const next={...binding,sourceCommit:source.sha};
   const manifest={version:1,target:TARGET,source:source.sha,tree:source.tree,ciSha:ci.sha,previousSource:binding.sourceCommit,previousDeployment:live.id,releaseVariableId:variable[0].id,baselineFingerprint:stateFingerprint(project,firewall),afterBinding:next,applicationOnly:true,ownerApprovalRequired:true,noTemporaryAccessLink:true,noBusinessRecordsOrCredentials:true};
   return {manifest,bindingPatch:{value:JSON.stringify(next)},rollbackBinding:{value:JSON.stringify(binding)},deploymentRequest:{name:'stock-management',project:TARGET.project,target:'production',autoAssignCustomDomains:false,regions:[TARGET.region],gitSource:{type:'github',repoId:String(project.link.repoId),sha:source.sha,ref:source.sha},meta:{releaseReason:'owner-approved-cloud-application-release',stockReleaseSource:source.sha,stockReleasePreviousDeployment:live.id}},requests:[{phase:'AFTER_OWNER_STAGE_APPROVAL',method:'PATCH',path:`/v9/projects/${TARGET.project}/env/${variable[0].id}`,bodyFile:'bindingPatch.json'},{phase:'AFTER_OWNER_STAGE_APPROVAL',method:'POST',path:'/v13/deployments?forceNew=1',bodyFile:'deploymentRequest.json'}]};

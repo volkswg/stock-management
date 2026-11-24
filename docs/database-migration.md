@@ -1397,7 +1397,7 @@ and [Vercel deployments](https://vercel.com/docs/deployments).
    `aliasDeploymentId`, `source` and `ci` from those verified tool results. The
    input contract is exported as the synthetic example in
    `tools/cloud/workflow.test.mjs`; example IDs/CI status are never production evidence.
-   `source` has `sha`, `tree`, `mainSha`, `changedPaths`; `ci` has `repository`,
+   `source` has `sha`, `tree`, `mainSha`, `baseSha` (the live source), `changedPaths`; `ci` has `repository`,
    `workflowPath`, `sha`, `tree`, `status`, `conclusion`.
 4. Run:
 
@@ -1455,8 +1455,8 @@ and [Vercel deployments](https://vercel.com/docs/deployments).
 - Run only the packet's **HEAD** checks and rejected probes. HEAD responses carry no
   business-record body. Invalid LINE signature must return401 and a missing
   Idempotency-Key must return428; neither request is allowed to write or invoke a
-  provider. Check the source static helper and deployment error metadata without
-  publishing private response/log contents. No accepted-write canary or fresh
+  provider. Check the source static helper and deployment error counts/allowlisted codes only;
+  do not fetch raw business/provider log values or publish private contents. No accepted-write canary or fresh
   business-record GET is included. Stop on unexpected responses; never weaken guards.
 - If any live check fails, invoke the approved `rollbackCommand`, restore the exact
   `rollbackBinding.json` via the same variable ID, and verify the previous domain,
