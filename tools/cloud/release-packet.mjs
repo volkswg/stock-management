@@ -7,7 +7,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 export const TARGET=Object.freeze({repository:'volkswg/stock-management',project:'prj_XH4nEje5cicuBuucGumuHgr73l1E',team:'team_bkDqHUBMbLyAXmwZqvCmovcu',ref:'hzynvirpedqnvtbifobx',isolation:'349b9289-f684-4ec5-ac22-924b2be1946b',host:'aws-1-ap-northeast-1.pooler.supabase.com',domain:'inventra-beta-one.vercel.app',region:'hnd1'});
-const requireGate=(condition,message)=>{if(!condition)throw new Error(message);};
+class PacketGate extends Error {}
+const requireGate=(condition,message)=>{if(!condition)throw new PacketGate(message);};
 const sha=value=>typeof value==='string'&&/^[a-f0-9]{40}$/.test(value);
 const deployment=value=>typeof value==='string'&&/^dpl_[A-Za-z0-9]+$/.test(value);
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,canonical(v)])):value;
@@ -68,5 +69,10 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href) {
     const out=resolve(flag('--out'));requireGate(!existsSync(out)||!lstatSync(out).isSymbolicLink(),'Output directory may not be a symlink.');mkdirSync(out,{recursive:true,mode:0o700});chmodSync(out,0o700);
     for(const [name,value] of Object.entries(result))writeFileSync(resolve(out,name+'.json'),JSON.stringify(value,null,2)+'\n',{flag:'wx',mode:0o600});
     console.log(JSON.stringify({prepared:true,phase,providerWrites:0,ownerApprovalRequired:true}));
-  } catch(error) {console.error(error.message);process.exitCode=1;}
+  } catch(error) {
+    // JSON parse errors can quote input contents. Never print malformed input,
+    // filesystem details or an unexpected provider-bearing exception.
+    console.error(error instanceof PacketGate ? error.message : 'Cannot read or write the private release packet. Check valid metadata JSON and private output permissions; no input contents were logged.');
+    process.exitCode=1;
+  }
 }

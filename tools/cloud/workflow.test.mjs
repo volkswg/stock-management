@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {checkEnvironment} from './check-environment.mjs';
 import {stagePacket,readyPacket,TARGET} from './release-packet.mjs';
-import {readFileSync} from 'node:fs';
+import {readFileSync,mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawnSync} from 'node:child_process';
 const A='a'.repeat(40),B='b'.repeat(40),TREE='c'.repeat(40);
 function fixture(){
  const binding={version:1,projectRef:TARGET.ref,isolationId:TARGET.isolation,vercelProjectId:TARGET.project,runtimeUser:'stock_prod_runtime',databaseHost:TARGET.host,connectionMode:'transaction',accessPolicy:'legacy-as-is',sourceCommit:A};
@@ -43,4 +46,12 @@ test('manual CI uses a validated SHA and isolated run concurrency, never a produ
  assert.match(yaml,/workflow_dispatch:/);assert.match(yaml,/\[\[ "\$SOURCE_SHA" =~ \^\[0-9a-f\]\{40\}\$ \]\]/);
  assert.match(yaml,/github\.event\.pull_request\.number \|\| github\.run_id/);
  assert.doesNotMatch(yaml,/secrets\.|VERCEL_TOKEN|SUPABASE_ACCESS_TOKEN|pull_request_target/);
+});
+test('CLI refusal never echoes malformed input contents',()=>{
+ const root=mkdtempSync(join(tmpdir(),'stock-cloud-packet-'));
+ try {
+  const input=join(root,'malformed.json'),sentinel='SYNTHETIC_PRIVATE_INPUT_DO_NOT_LOG';writeFileSync(input,sentinel,{mode:0o600});
+  const result=spawnSync(process.execPath,['tools/cloud/release-packet.mjs','stage-plan','--input',input,'--out',join(root,'packet')],{env:{PATH:process.env.PATH},encoding:'utf8'});
+  assert.ifError(result.error);assert.equal(result.status,1);assert.match(result.stderr,/no input contents were logged/);assert.ok(!(result.stdout+result.stderr).includes(sentinel));
+ } finally {rmSync(root,{recursive:true,force:true});}
 });
