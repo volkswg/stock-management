@@ -16,10 +16,46 @@ python3 -m unittest discover -s tools/migration -p 'test_*.py' -v
 
 Run the relevant characterization before a behavior-sensitive move, then final
 checks. Report introduced versus inherited failures and actual counts/skips.
-Built-in `node:test` uses `--test-isolation=none`. Closed source loaders execute
+The historical runner uses `--test-isolation=none` with its matching source.
+Current native files run separately; do not replace `npm test` with a current-source
+glob. Bill/item identity mocks have suite-scoped hooks, including for deliberately
+grouped diagnostics. Closed source loaders execute
 actual owners with fake ports/auth/fetch; TypeScript transpilation is not type
 checking or a security sandbox. Preserve exact allowlists, source witnesses and
 historical fixtures rather than regenerating expectations to make a change pass.
+
+### Codex Cloud
+
+Use Node24, Python3.9+ and the existing locked dependencies:
+
+```sh
+npm run cloud:doctor
+npm run cloud:test
+npm run lint
+npm run typecheck
+bash tools/migration/verify-build.sh
+```
+
+The doctor tests both Node and Python child-process execution with a credential-free
+environment. `EPERM`/`EACCES` is a blocked environment, not a failed SQL assertion or
+a passing check. Change execution permissions only through supported environment
+controls; do not disable security or edit tests to hide the denial. Configure and
+publish the reusable environment, then start a new task when necessary; existing
+Cloud tasks retain their own setup. See the [official environment guide](https://learn.chatgpt.com/docs/environments/cloud-environments).
+
+When local Cloud execution is blocked, publish the source and use the existing
+**Migration acceptance** workflow. Its new manual entrypoint takes a full40-character
+`source_sha` and checks out exactly that commit. The workflow contains no production
+credentials and never deploys. PR checks still run automatically. After this change
+is merged, an authenticated Cloud GitHub CLI can run:
+
+```sh
+gh workflow run migration-acceptance.yml --ref main -f source_sha=FULL_COMMIT_SHA
+```
+
+Read the resulting run's source SHA, conclusion and artifacts. Cancelled, stalled or
+permission-blocked runs remain incomplete. Use the [application release procedure](../database-migration.md#cloud-application-only-release)
+only after successful source/tree CI and separate owner release approval.
 
 ## Credential-free build
 

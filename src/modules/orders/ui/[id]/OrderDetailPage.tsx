@@ -298,7 +298,7 @@ function OrderContent({
         ? {
             ...current,
             status: update.status,
-            seller: update.seller,
+            seller: update.seller ?? current.seller,
             totalPrice: update.totalPrice,
             remark: update.remark,
             updatedAt: update.updatedAt,
@@ -686,6 +686,9 @@ function OrderSeller({
     setError(undefined);
     try {
       const response = await updateOrderDetails(order.id, { seller: seller.trim() });
+      if (typeof response.order.seller !== "string") {
+        throw new Error("The order details API returned an invalid response.");
+      }
       setSeller(response.order.seller);
       onUpdated(response.order);
       setEditing(false);

@@ -95,3 +95,29 @@ test('browser API sends seller to PATCH and accepts the saved seller in the resp
   assert.equal(result.order.seller, 'Edited from browser');
   assert.equal(s.record.seller, result.order.seller);
 });
+
+test('pre-release price and remark responses replay unchanged without inventing seller', async () => {
+  const exports = {}, requests = [];
+  const code = ts.transpileModule(fs.readFileSync('src/modules/orders/ui/api.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const oldResponse = { order: { id: 'order-one', status: 'complete', totalPrice: 42, remark: 'Saved', updatedAt: 'original-time' } };
+  vm.runInNewContext(code, { exports, JSON, Error, encodeURIComponent, fetch: async (url, init) => {
+    requests.push({ url, input: JSON.parse(init.body) });
+    return { ok: true, json: async () => oldResponse };
+  } });
+  for (const input of [{ remark: 'Saved' }, { totalPrice: 42 }]) {
+    const result = await exports.updateOrderDetails('order-one', input);
+    assert.equal(result, oldResponse, 'Keep the acknowledged payload; do not rewrite a cached result');
+    assert.equal(Object.hasOwn(result.order, 'seller'), false);
+  }
+  assert.equal(requests.length, 2, 'No blind resubmission or extra write');
+  await assert.rejects(exports.updateOrderDetails('order-one', { seller: 'New' }), /invalid response/);
+});
+
+test('a malformed seller in an acknowledged reply is still rejected', async () => {
+  for (const seller of [null, 42, {}, []]) {
+    const exports = {};
+    const code = ts.transpileModule(fs.readFileSync('src/modules/orders/ui/api.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+    vm.runInNewContext(code, { exports, JSON, Error, encodeURIComponent, fetch: async () => ({ ok: true, json: async () => ({ order: { id: 'o', status: 'complete', totalPrice: 1, remark: '', updatedAt: 'time', seller } }) }) });
+    await assert.rejects(exports.updateOrderDetails('o', { remark: 'x' }), /invalid response/);
+  }
+});

@@ -33,7 +33,8 @@ export type UpdateOrderDetailsInput = {
 
 export type UpdateOrderDetailsResponse = {
   order: {
-    seller: string;
+    // Completed pre-seller price/remark commands replay their original payload.
+    seller?: string;
     id: string;
     status: OrderStatus;
     totalPrice: number | null;
@@ -425,7 +426,8 @@ export async function updateOrderDetails(
   if (!response.ok) {
     throw new Error(getErrorMessage(body));
   }
-  if (!isUpdateOrderDetailsResponse(body)) {
+  if (!isUpdateOrderDetailsResponse(body) ||
+      (input.seller !== undefined && typeof body.order.seller !== "string")) {
     throw new Error("The order details API returned an invalid response.");
   }
 
@@ -586,7 +588,7 @@ function isUpdateOrderDetailsResponse(
     typeof value.order.status === "string" &&
     (value.order.totalPrice === null ||
       typeof value.order.totalPrice === "number") &&
-    typeof value.order.seller === "string" &&
+    (value.order.seller === undefined || typeof value.order.seller === "string") &&
     typeof value.order.remark === "string" &&
     typeof value.order.updatedAt === "string"
   );

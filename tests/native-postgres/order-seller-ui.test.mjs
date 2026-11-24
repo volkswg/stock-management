@@ -75,3 +75,16 @@ test('clearing the seller saves an empty string; overlength drafts cannot save',
  await flush();
  assert.equal(b.calls[0].input.seller, '');
 });
+
+test('an old completed price/remark reply preserves the current seller in the actual parent', () => {
+ let order={id:'o',seller:'Keep current seller',status:'complete',totalPrice:42,remark:'',createdAt:'2026-11-25T00:00:00Z',updatedAt:'2026-11-25T00:00:00Z',billImages:[],productImages:[]};
+ const h=componentHarness('src/modules/orders/ui/[id]/OrderDetailPage.tsx',{
+  load:(file,options)=>load(file,{...options,source:readFileSync(file,'utf8')+'\nexport { OrderContent };'}),
+ });
+ h.mount(h.module.OrderContent,{order,shipmentPicker:{},onOrderChange:update=>{order=update(order);}});
+ const child=elements(h.render(),'OrderRemark')[0];assert.ok(child);
+ child.props.onUpdated({status:'complete',totalPrice:50,remark:'Saved',updatedAt:'later'});
+ assert.equal(order.seller,'Keep current seller');assert.equal(order.remark,'Saved');
+ child.props.onUpdated({status:'complete',seller:'',totalPrice:50,remark:'Saved',updatedAt:'latest'});
+ assert.equal(order.seller,'','An explicit empty seller is still a deliberate clear');
+});

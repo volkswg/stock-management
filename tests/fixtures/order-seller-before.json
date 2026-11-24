@@ -1,5 +1,96 @@
 {
   "edits": {
+    ".github/workflows/migration-acceptance.yml": {
+      "beforeSha256": "17ec25038f1525e6e3dd812ddd4b2d5f4e6cda005ee44d62054046e5e917981a",
+      "afterSha256": "3325afc765fb2f3d1e7c35baf9a13240bb1bdc1bb101f285ca23980c555312b7",
+      "inverse": [
+        {
+          "start": 2,
+          "count": 6,
+          "before": ""
+        },
+        {
+          "start": 14,
+          "count": 1,
+          "before": "  group: migration-acceptance-${{ github.event.pull_request.number }}\n"
+        },
+        {
+          "start": 21,
+          "count": 6,
+          "before": ""
+        },
+        {
+          "start": 30,
+          "count": 1,
+          "before": "          ref: ${{ github.event.pull_request.head.sha }}\n"
+        },
+        {
+          "start": 86,
+          "count": 1,
+          "before": "          name: migration-synthetic-${{ github.event.pull_request.head.sha }}\n"
+        }
+      ]
+    },
+    "AGENTS.md": {
+      "beforeSha256": "c98f14f8026673eb10c47ba27291aa4e833aa22326b7296a1f59e0328f5f026c",
+      "afterSha256": "c9ac82cc9e7d92d66269a21619cc654a8a9507ca836388bb245fafec46be0460",
+      "inverse": [
+        {
+          "start": 40,
+          "count": 8,
+          "before": ""
+        }
+      ]
+    },
+    "docs/database-migration.md": {
+      "beforeSha256": "d248cca5afef6726c01603e4d25b60f1d625caf17953b4f7b88f0bfb64c46989",
+      "afterSha256": "fa78d0fb3062ea2f1d3655bf284db58382f894223845d1f93d7016e0af5cf877",
+      "inverse": [
+        {
+          "start": 1348,
+          "count": 124,
+          "before": ""
+        }
+      ]
+    },
+    "docs/refactoring/progress.md": {
+      "beforeSha256": "3ae18d218783dc433f2a3db05c17f0871539dca27c9b144ad78e90d9273daf88",
+      "afterSha256": "4ecaf861a68a8a67f86f4c6293ab289fd186d8fec64607a802cf7b178451d4f6",
+      "inverse": [
+        {
+          "start": 1236,
+          "count": 25,
+          "before": ""
+        }
+      ]
+    },
+    "docs/refactoring/verification.md": {
+      "beforeSha256": "a1c74d5fc4279e0d60bca7f29a8263d2a3c7e828e5b38427a641ece1a50a2a87",
+      "afterSha256": "e0425af10488e30fe9291e700cf3cd6c2b0407686c08c4d3089eecdfeaa1ada6",
+      "inverse": [
+        {
+          "start": 18,
+          "count": 4,
+          "before": "Built-in `node:test` uses `--test-isolation=none`. Closed source loaders execute\n"
+        },
+        {
+          "start": 25,
+          "count": 33,
+          "before": ""
+        }
+      ]
+    },
+    "package.json": {
+      "beforeSha256": "7631066ff481515e87071e4a4c0e90432fe207a5baf281dd6bce515c5497eb2f",
+      "afterSha256": "5c124bd6b3889dcd8b4ef51601e08717a19dc0a367855713932f4506f88aa838",
+      "inverse": [
+        {
+          "start": 11,
+          "count": 4,
+          "before": "    \"setup:rich-menu\": \"node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types src/scripts/setup-rich-menu.ts\"\n"
+        }
+      ]
+    },
     "src/app/api/orders/[id]/route.ts": {
       "beforeSha256": "78fd702b59c8bb409736cd20e7bc7846e5fa173e97eb3d1b23c9e7883a8ab748",
       "afterSha256": "e2828829926a528bb577978515729381c72e4c29385b0363c5676bb3e309c825",
@@ -111,7 +202,7 @@
     },
     "src/modules/orders/ui/[id]/OrderDetailPage.tsx": {
       "beforeSha256": "65168967436b65fb4ceaa0b2719aefd558bc9d567404655831810de599ebacd5",
-      "afterSha256": "59061c757692c3fd524b45b18e7971507889cc8da44990b3393b83b2b02d1e05",
+      "afterSha256": "74d50386901dd94c1c5bcf12928231f34968ddcd73706a45ce544df6636d2c7a",
       "inverse": [
         {
           "start": 300,
@@ -125,14 +216,14 @@
         },
         {
           "start": 668,
-          "count": 83,
+          "count": 86,
           "before": ""
         }
       ]
     },
     "src/modules/orders/ui/api.ts": {
       "beforeSha256": "11c7a29c4622a4c022db3e744b5df740bbf593821cc38a3a4781d1702d5a3bb7",
-      "afterSha256": "7e10877f6d3fbcc4010d99bc40405d505a318d39b693298f3f1d6551d47a966a",
+      "afterSha256": "f37876fe7d4e32fbfc530396f83464d3340fc787fa95c492dcd463acdff8d971",
       "inverse": [
         {
           "start": 28,
@@ -141,22 +232,48 @@
         },
         {
           "start": 35,
-          "count": 1,
+          "count": 2,
           "before": ""
         },
         {
-          "start": 588,
+          "start": 428,
+          "count": 2,
+          "before": "  if (!isUpdateOrderDetailsResponse(body)) {\n"
+        },
+        {
+          "start": 590,
           "count": 1,
           "before": ""
         }
       ]
     },
-    "tools/native-postgres/test.mjs": {
-      "beforeSha256": "586161bd794ff2012bdc597cf300665710efffd1b1c8a2e2b9db07ad616e2097",
-      "afterSha256": "5e9dac73ad427242c701e3be3add17de44da2155e3a3a4f3140680d7bbcaf849",
+    "tests/bill-identity.test.cjs": {
+      "beforeSha256": "d1df29c5659bcc5848132b77b38ca6209d3995a16fd5a8da1abaec5187b2712e",
+      "afterSha256": "4ba86bf743b9190b451383a7d97cc979ab900b8e10fe5aa567658e266b02bceb",
       "inverse": [
         {
-          "start": 14,
+          "start": 5,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 49,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tests/item-identity.test.cjs": {
+      "beforeSha256": "7bb93b4663c4d340b9089e45344ab5e78b9ff5842c352fda076b6d1ffd0c0299",
+      "afterSha256": "dd5ca96d2c636b584a82afd37299e9f8a25778937749942279dea9cffd8019b3",
+      "inverse": [
+        {
+          "start": 15,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 56,
           "count": 1,
           "before": ""
         }
@@ -178,18 +295,13 @@
         }
       ]
     },
-    "tools/native-postgres/reference-history-copy.py": {
-      "beforeSha256": "8b1cb63f94f5f775872df055dee61713116c81e1e6380f7918db4411db8b4237",
-      "afterSha256": "bba3ea4c217dda3208f5b815b76775d115702ba364d18e620f088a967f5ed809",
+    "tools/native-postgres/pooling_history.py": {
+      "beforeSha256": "5382acb7c5d9afb75d1014162c19acb1306d2619ad264f6d468e01443846f0f5",
+      "afterSha256": "8a79bb36987814e40e93737a6370929ec7b63c403e1a8c50764a29a4e4a2a56d",
       "inverse": [
         {
-          "start": 5,
-          "count": 1,
-          "before": "from pooling_history import before_pooling\n"
-        },
-        {
-          "start": 24,
-          "count": 1,
+          "start": 6,
+          "count": 12,
           "before": ""
         }
       ]
@@ -210,13 +322,29 @@
         }
       ]
     },
-    "tools/native-postgres/pooling_history.py": {
-      "beforeSha256": "5382acb7c5d9afb75d1014162c19acb1306d2619ad264f6d468e01443846f0f5",
-      "afterSha256": "8a79bb36987814e40e93737a6370929ec7b63c403e1a8c50764a29a4e4a2a56d",
+    "tools/native-postgres/reference-history-copy.py": {
+      "beforeSha256": "8b1cb63f94f5f775872df055dee61713116c81e1e6380f7918db4411db8b4237",
+      "afterSha256": "bba3ea4c217dda3208f5b815b76775d115702ba364d18e620f088a967f5ed809",
       "inverse": [
         {
-          "start": 6,
-          "count": 12,
+          "start": 5,
+          "count": 1,
+          "before": "from pooling_history import before_pooling\n"
+        },
+        {
+          "start": 24,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/test.mjs": {
+      "beforeSha256": "586161bd794ff2012bdc597cf300665710efffd1b1c8a2e2b9db07ad616e2097",
+      "afterSha256": "7fca4916ad21f270f07c61af57c11b2cb75d01c71b64cbe425155bfaa9073340",
+      "inverse": [
+        {
+          "start": 14,
+          "count": 2,
           "before": ""
         }
       ]
