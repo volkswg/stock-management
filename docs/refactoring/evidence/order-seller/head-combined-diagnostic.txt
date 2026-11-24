@@ -1,0 +1,75 @@
+✖ bigint reservation uses the owned sequence and preserves values beyond JavaScript number precision (3.280963ms)
+✖ the current text layout retains the existing shared MAX allocation during compatibility deployment (0.841085ms)
+✖ numeric lookup preserves canonical string identity and the existing text tie-break (0.953701ms)
+✖ bigint writes accept only canonical strings and keep stale/immutable-handle checks (2.137196ms)
+✔ unexpected identity/type layouts fail closed (0.981375ms)
+✔ operator SQL is reproducible, gated, outside automatic migrations, and has a schema-only inverse (824.668802ms)
+✔ actual item creation reserves a string ID without JavaScript precision loss (0.826289ms)
+✔ historical text references retain their original binds and nullable/blank behavior (2.470124ms)
+✔ historical bigint references use explicit casts but project the existing string API field (2.541045ms)
+✔ historical aliases, overflow and unsafe numeric references reject before any mutation query (1.425538ms)
+✔ historical reference layouts are scoped to transactions and unsupported/identity references fail closed (1.564019ms)
+✔ coupled operator SQL is reproducible, gated, outside discovery, and preserves earlier identities (994.256042ms)
+✔ current movement SQL never selects or writes the retired relationship (2.03811ms)
+✔ public movement response omits the retired field without reading the removed column (0.697546ms)
+✔ LINE movement journey reads and inserts omit the internal retired field (0.587295ms)
+✔ operator-only removal/inverse are reproducible and fail closed before dropping anything (720.718395ms)
+✔ LINE public surface contains only the two live webhook entrypoints (827.150277ms)
+✔ webhook composition adds only the lazy shop reader; historical cleanup callbacks stay exact (83.892504ms)
+✔ synchronous Loyverse factory is absent while canonical account sources stay available (38.712156ms)
+✔ historical cleanup controls retain exact bytes through the bounded shop-ID feature inverse (32.71248ms)
+✔ current source has no consumers of retired factory or public LINE wrappers (493.957297ms)
+✔ read-only session and photo snapshots never allocate an identity (1.220082ms)
+✔ new movement state awaits one precision-safe identity and preserves its exact context (0.733834ms)
+✔ updating or completing an existing movement retains its ID without reserving another (0.753533ms)
+✔ order and movement allocations share the database allocator and keep string precision (0.289929ms)
+✔ operator SQL is reproducible, gated, outside discovery, and preserves order-bill identity (1041.435227ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 22
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5850.300361
+
+✖ failing tests:
+
+test at tests/bill-identity.test.cjs:20:1
+✖ bigint reservation uses the owned sequence and preserves values beyond JavaScript number precision (3.280963ms)
+  PersistenceFailure [Error]: Unsupported record identity layout.
+      at /workspace/stock-management/src/infrastructure/persistence/postgres/native-records.ts:65:23 {
+    status: 503
+  }
+
+test at tests/bill-identity.test.cjs:25:1
+✖ the current text layout retains the existing shared MAX allocation during compatibility deployment (0.841085ms)
+  PersistenceFailure [Error]: Unsupported record identity layout.
+      at /workspace/stock-management/src/infrastructure/persistence/postgres/native-records.ts:65:23 {
+    status: 503
+  }
+
+test at tests/bill-identity.test.cjs:28:1
+✖ numeric lookup preserves canonical string identity and the existing text tie-break (0.953701ms)
+  PersistenceFailure [Error]: Unsupported record identity layout.
+      at /workspace/stock-management/src/infrastructure/persistence/postgres/native-records.ts:65:23 {
+    status: 503
+  }
+
+test at tests/bill-identity.test.cjs:34:1
+✖ bigint writes accept only canonical strings and keep stale/immutable-handle checks (2.137196ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  Error: Unsupported record identity layout.
+      at async TestContext.<anonymous> (/workspace/stock-management/tests/bill-identity.test.cjs:35:18)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [PersistenceFailure],
+    expected: [Function (anonymous)],
+    operator: 'rejects',
+    diff: 'simple'
+  }

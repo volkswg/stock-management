@@ -1,0 +1,92 @@
+
+> stock-management@0.1.0 build
+> next build
+
+⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+▲ Next.js 16.2.12 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 35.7s
+  Running TypeScript ...
+  Finished TypeScript in 12.6s ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/47) ...
+  Generating static pages using 4 workers (11/47) 
+  Generating static pages using 4 workers (23/47) 
+  Generating static pages using 4 workers (35/47) 
+✓ Generating static pages using 4 workers (47/47) in 3.2s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/employees
+├ ƒ /api/employees/[id]
+├ ƒ /api/employees/advances
+├ ƒ /api/employees/payroll
+├ ƒ /api/employees/payroll/settle
+├ ƒ /api/employees/timesheets
+├ ƒ /api/employees/timesheets/[id]
+├ ƒ /api/employees/timesheets/summary
+├ ƒ /api/expenses
+├ ƒ /api/expenses/masters/[kind]
+├ ƒ /api/line/webhook
+├ ƒ /api/loyverse/accounts
+├ ƒ /api/loyverse/daily-sales
+├ ƒ /api/loyverse/daily-sales/sync
+├ ƒ /api/movements
+├ ƒ /api/movements/[id]
+├ ƒ /api/movements/[id]/items/[itemId]
+├ ƒ /api/movements/[id]/items/[itemId]/image
+├ ƒ /api/orders
+├ ƒ /api/orders/[id]
+├ ƒ /api/orders/[id]/images
+├ ƒ /api/orders/[id]/items
+├ ƒ /api/orders/[id]/items/[itemId]
+├ ƒ /api/orders/[id]/items/[itemId]/image
+├ ƒ /api/orders/[id]/items/[itemId]/product
+├ ƒ /api/orders/with-images
+├ ƒ /api/products
+├ ƒ /api/products/[id]
+├ ƒ /api/sales/daily-sales
+├ ƒ /api/sales/dashboard
+├ ƒ /api/sales/profit-summary
+├ ƒ /api/sales/profit-summary/cost-overrides
+├ ƒ /api/sales/sync-status
+├ ƒ /api/shipments
+├ ƒ /api/shipments/[id]
+├ ƒ /api/shipments/[id]/orders
+├ ƒ /api/stock-adjustments
+├ ƒ /api/stock-counts
+├ ○ /employees
+├ ○ /employees/advances
+├ ○ /employees/payroll
+├ ƒ /expenses
+├ ○ /expenses/categories
+├ ○ /expenses/shops
+├ ○ /icon.svg
+├ ○ /loyverse/daily-sales
+├ ○ /movements
+├ ƒ /movements/[id]
+├ ○ /orders
+├ ƒ /orders/[id]
+├ ○ /orders/create
+├ ○ /products
+├ ○ /sales
+├ ○ /sales/daily-sales
+├ ○ /sales/dashboard
+├ ○ /sales/profit-summary
+├ ○ /sales/sync-status
+├ ○ /shipments
+├ ƒ /shipments/[id]
+├ ○ /stock-counts
+├ ○ /timesheets
+└ ƒ /timesheets/tracker
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+{"sourceMatches": true, "existingRoutesUnchanged": true, "approvedNewRoutes": 4, "clientChunksChecked": 112, "privateDatabaseStrings": 0}

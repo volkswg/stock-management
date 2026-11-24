@@ -60,13 +60,14 @@ export async function updateOrderItemProductCode({ storage, orderId, orderItemId
 }): Promise<UpdateOrderItemProductCodeResult> {
     return mutations.updateOrderItemProductCode({ store: createOrderMutationStore(storage), orderId, orderItemId, productCode, runtime: mutationRuntime });
 }
-export async function updateOrderDetails({ storage, orderId, remark, totalPrice, }: {
+export async function updateOrderDetails({ storage, orderId, seller, remark, totalPrice, }: {
     storage: Storage;
     orderId: string;
+    seller?: string;
     remark?: string;
     totalPrice?: number;
 }): Promise<UpdateOrderDetailsResult> {
-    return mutations.updateOrderDetails({ store: createOrderMutationStore(storage), orderId, remark, totalPrice, runtime: mutationRuntime });
+    return mutations.updateOrderDetails({ store: createOrderMutationStore(storage), orderId, seller, remark, totalPrice, runtime: mutationRuntime });
 }
 export async function completeWebOrderPrice({ storage, orderId, totalPrice, }: {
     storage: Storage;

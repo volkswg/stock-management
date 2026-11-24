@@ -61,7 +61,7 @@ async function PATCHOperation(
   const input = parseOrderUpdate(body);
   if (!input) {
     return NextResponse.json(
-      { error: "Enter a valid total price or remark." },
+      { error: "Enter a valid seller, total price or remark." },
       { status: 400 },
     );
   }
@@ -71,6 +71,7 @@ async function PATCHOperation(
     const result = await updateOrderDetails({
       storage,
       orderId,
+      seller: input.seller,
       remark: input.remark,
       totalPrice: input.totalPrice,
     });
@@ -111,6 +112,7 @@ async function readJsonBody(request: Request): Promise<unknown> {
 }
 
 function parseOrderUpdate(value: unknown): {
+  seller?: string;
   totalPrice?: number;
   remark?: string;
 } | undefined {
@@ -118,21 +120,25 @@ function parseOrderUpdate(value: unknown): {
     return undefined;
   }
 
+  const seller = value.seller;
   const totalPrice = value.totalPrice;
   const remark = value.remark;
   if (
+    (seller !== undefined &&
+      (typeof seller !== "string" || seller.trim().length > 100)) ||
     (totalPrice !== undefined &&
       (typeof totalPrice !== "number" ||
         !Number.isFinite(totalPrice) ||
         totalPrice < 0)) ||
     (remark !== undefined &&
       (typeof remark !== "string" || remark.length > 1000)) ||
-    (totalPrice === undefined && remark === undefined)
+    (seller === undefined && totalPrice === undefined && remark === undefined)
   ) {
     return undefined;
   }
 
   return {
+    seller: typeof seller === "string" ? seller.trim() : undefined,
     totalPrice: typeof totalPrice === "number" ? totalPrice : undefined,
     remark: typeof remark === "string" ? remark : undefined,
   };

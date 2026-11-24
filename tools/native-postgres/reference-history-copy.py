@@ -3,7 +3,7 @@ Current removal acceptance always runs actual current source on separate copies.
 """
 from pathlib import Path
 import hashlib,json,os,sys
-from pooling_history import before_pooling
+from pooling_history import before_pooling, before_seller
 ROOT=Path(__file__).resolve().parents[2]
 def copy_previous(target):
  target=Path(target)
@@ -22,6 +22,7 @@ def copy_previous(target):
  fixture=json.loads((ROOT/'tests/fixtures/movement-reference-before.json').read_text())
  for name,expected in fixture['files'].items():
   source=ROOT/name;data=source.read_bytes() if source.exists() else None;edit=fixture['edits'].get(name)
+  data=before_seller(name,data)
   movement_edit=json.loads((ROOT/'tests/fixtures/movement-shop-ids-before.json').read_text())['edits'].get(name)
   if movement_edit:
       assert (hashlib.sha256(data).hexdigest() if data is not None else None)==movement_edit['afterSha256'],name

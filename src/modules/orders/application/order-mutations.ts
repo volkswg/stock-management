@@ -39,10 +39,11 @@ export async function updateOrderItemProductCode({ store, orderId, orderItemId, 
     await store.writeProductCode(target, productCode, createdAt, updatedAt);
     return { outcome: "updated", productCode, updatedAt };
 }
-export async function updateOrderDetails({ store, orderId, remark, totalPrice, runtime, }: {
+export async function updateOrderDetails({ store, orderId, seller, remark, totalPrice, runtime, }: {
     store: OrderMutationStore;
     runtime: OrderMutationRuntime;
     orderId: string;
+    seller?: string;
     remark?: string;
     totalPrice?: number;
 }): Promise<UpdateOrderDetailsResult> {
@@ -50,7 +51,7 @@ export async function updateOrderDetails({ store, orderId, remark, totalPrice, r
     const target = snapshot.findActive(orderId);
     if (!target)
         return { outcome: "not_found" };
-    const { status: currentStatus, seller, totalPrice: currentTotalPrice, remark: currentRemark, createdAt, createdBy } = target.fields();
+    const { status: currentStatus, seller: currentSeller, totalPrice: currentTotalPrice, remark: currentRemark, createdAt, createdBy } = target.fields();
     const normalizedStatus = String(currentStatus ?? "").trim();
     if (!isOrderStatus(normalizedStatus)) {
         return { outcome: "invalid_status" };
@@ -64,12 +65,14 @@ export async function updateOrderDetails({ store, orderId, remark, totalPrice, r
     const updatedRemark = remark === undefined
         ? String(currentRemark ?? "").trim()
         : remark.trim();
+    const updatedSeller = seller === undefined ? String(currentSeller ?? "") : seller.trim();
     const updatedAt = runtime.now();
-    await store.writeDetails(target, () => ({ status, seller: seller ?? "", totalPrice: updatedTotalPrice, remark: updatedRemark, createdAt: createdAt ?? "", updatedAt }));
+    await store.writeDetails(target, () => ({ status, seller: updatedSeller, totalPrice: updatedTotalPrice, remark: updatedRemark, createdAt: createdAt ?? "", updatedAt }));
     return {
         outcome: "updated",
         order: {
             status,
+            seller: updatedSeller,
             totalPrice: updatedTotalPrice,
             remark: updatedRemark,
             updatedAt,

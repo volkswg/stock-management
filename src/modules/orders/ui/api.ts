@@ -26,12 +26,14 @@ export type CreateOrderResponse = {
 };
 
 export type UpdateOrderDetailsInput = {
+  seller?: string;
   totalPrice?: number;
   remark?: string;
 };
 
 export type UpdateOrderDetailsResponse = {
   order: {
+    seller: string;
     id: string;
     status: OrderStatus;
     totalPrice: number | null;
@@ -584,6 +586,7 @@ function isUpdateOrderDetailsResponse(
     typeof value.order.status === "string" &&
     (value.order.totalPrice === null ||
       typeof value.order.totalPrice === "number") &&
+    typeof value.order.seller === "string" &&
     typeof value.order.remark === "string" &&
     typeof value.order.updatedAt === "string"
   );
