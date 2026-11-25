@@ -38,6 +38,7 @@ import {
 import styles from "./orders.module.css";
 
 const { Text, Title } = Typography;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 function readPageFromUrl(): number {
   const value = new URL(window.location.href).searchParams.get("page");
@@ -46,10 +47,17 @@ function readPageFromUrl(): number {
   return Number.isSafeInteger(page) ? page : 1;
 }
 
-function writePageToUrl(page: number): void {
+function readPageSizeFromUrl(): number {
+  const value = new URL(window.location.href).searchParams.get("pageSize");
+  return PAGE_SIZE_OPTIONS.find((size) => String(size) === value) ?? 10;
+}
+
+function writePaginationToUrl(page: number, pageSize: number): void {
   const url = new URL(window.location.href);
   if (page === 1) url.searchParams.delete("page");
   else url.searchParams.set("page", String(page));
+  if (pageSize === 10) url.searchParams.delete("pageSize");
+  else url.searchParams.set("pageSize", String(pageSize));
   if (url.href !== window.location.href) {
     window.history.replaceState(window.history.state, "", url);
   }
@@ -127,15 +135,18 @@ export function OrderListPage() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<Key[]>([]);
 
   useEffect(() => {
-    const restorePage = () => setPage(readPageFromUrl());
+    const restorePage = () => {
+      setPage(readPageFromUrl());
+      setPageSize(readPageSizeFromUrl());
+    };
     restorePage();
     window.addEventListener("popstate", restorePage);
     return () => window.removeEventListener("popstate", restorePage);
   }, []);
 
-  const changePage = (value: number): void => {
+  const changePage = (value: number, nextPageSize = pageSize): void => {
     setPage(value);
-    writePageToUrl(value);
+    writePaginationToUrl(value, nextPageSize);
   };
 
   useEffect(() => {
@@ -192,8 +203,8 @@ export function OrderListPage() {
   const currentPage = Math.min(page, pageCount);
 
   useEffect(() => {
-    if (!loading && !error) writePageToUrl(currentPage);
-  }, [currentPage, error, loading, page]);
+    if (!loading && !error) writePaginationToUrl(currentPage, pageSize);
+  }, [currentPage, error, loading, page, pageSize]);
 
   const visibleOrders = filteredOrders.slice(
     (currentPage - 1) * pageSize,
@@ -360,10 +371,10 @@ export function OrderListPage() {
                 total={filteredOrders.length}
                 disabled={loading || filteredOrders.length === 0}
                 showSizeChanger={{ "aria-label": "Orders per page" }}
-                pageSizeOptions={[10, 20, 50, 100]}
+                pageSizeOptions={PAGE_SIZE_OPTIONS}
                 onChange={(nextPage, nextPageSize = pageSize) => {
                   setPageSize(nextPageSize);
-                  changePage(nextPageSize === pageSize ? nextPage : 1);
+                  changePage(nextPageSize === pageSize ? nextPage : 1, nextPageSize);
                 }}
               />
             </div>
