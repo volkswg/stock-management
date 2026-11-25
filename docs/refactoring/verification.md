@@ -44,10 +44,9 @@ publish the reusable environment, then start a new task when necessary; existing
 Cloud tasks retain their own setup. See the [official environment guide](https://learn.chatgpt.com/docs/environments/cloud-environments).
 
 When local Cloud execution is blocked, publish the source and use the existing
-**Migration acceptance** workflow. Its new manual entrypoint takes a full40-character
+**Migration acceptance** workflow. Its manual entrypoint takes a full40-character
 `source_sha` and checks out exactly that commit. The workflow contains no production
-credentials and never deploys. PR checks still run automatically. After this change
-is merged, an authenticated Cloud GitHub CLI can run:
+credentials and never deploys. PR checks still run automatically. An authenticated Cloud GitHub CLI can run:
 
 ```sh
 gh workflow run migration-acceptance.yml --ref main -f source_sha=FULL_COMMIT_SHA
@@ -92,73 +91,47 @@ bash tools/native-postgres/verify-postgres.sh
 bash tools/migration/verify-persistence-history.sh
 ```
 
-Pooling acceptance reproduces SQLSTATE53300 with six idle direct sessions, then
-holds24 client sockets across12 copies of the actual current transport behind a
-four-backend transaction pool. It verifies concurrent reads/writes, backend
-affinity, read-only enforcement, role reset, permission denial, rollback, exact
-command replay/conflict and lost-COMMIT recovery. The pinned Vercel helper is also
-exercised with a synthetic request context and real pg idle timers. Unit tests
-cover production endpoint/source/target/TLS/role guards and diagnostic redaction.
-The Docker verifier owns/removes only its fresh local container, passes no app
-env files and invokes no providers. PostgreSQL/PgBouncer exercise the transaction
-semantics locally; they do not certify hosted Supavisor settings or Vercel's
-actual suspension behavior. Those require the separately approved release checks.
 
-`connection-pooling-before.json` contains exact hashes and bounded line inverses
-for the changed historical witnesses. The historical copy/loader applies that
-inverse before the older fixture chain; no original migration fixture is updated.
-Current pooling tests always execute the current physical transport.
+Pooling acceptance reproduces 53300 using six idle direct sessions, then exercises
+24 client sockets/12 actual-transport copies behind a four-backend pool. It checks
+affinity, role reset, read-only enforcement, permissions, rollback/replay/conflict
+and lost-COMMIT recovery, with synthetic request context for the Vercel hook.
+Local PostgreSQL/PgBouncer does not certify hosted Supavisor/Vercel behavior.
 
-`npm test` runs the immutable pre-native regression/type witnesses in an owned,
-credential-free, fully hash-pinned source copy, then current native source checks.
-The root TypeScript config excludes only the old `tests/*.types.ts` signatures;
-those signatures still compile against their pinned predecessor during `npm test`.
-New native type checks live under `tests/native-postgres/` and compile with current
-source. Historical copy Git identity is synthetic and has no user hooks/credentials.
+`npm test` reconstructs immutable pre-native source/type witnesses in an owned
+credential-free copy, then runs current physical-source checks separately. Old
+`tests/*.types.ts` signatures compile against their predecessor; current types
+compile with current source. Do not substitute a glob, mock out SQL behavior or
+use an old overlay as evidence of current execution.
 
-The native PostgreSQL verifier independently proves the predecessor schema history,
-then runs **current physical source**, with no source overlay, against separate
-fresh final-schema copies. Runtime EXECUTE on all46 `typed_input_*`/`typed_project_*`
-functions is revoked. Owner-only projections are independent comparison oracles,
-never runtime dependencies. It checks all23 named projections and existing feature,
-media, LINE and browser flows. No hosted resources or real providers are used.
+The three historical Python copiers and CJS history loader validate exact current
+and restored hashes before earlier fixture chains. A docs cleanup can also affect
+those pins: add a bounded test-only inverse for the reviewed files, never rewrite
+existing fixtures, skip assertions or silently accept arbitrary documentation drift.
+Keep source witnesses compact; original human-readable history stays linked in Git.
 
-The pinned predecessor's typed verifier tests the released final schema, then the PR81 CHECK/
-shared-guard artifact on independent synthetic copies. Its constraints phase is
-[`verify-constraint-validation.sh`](../../tools/migration/verify-constraint-validation.sh),
-**sourced by the parent**, not a standalone production command. It checks exact
-51-table/15-metadata preservation, guarded refusals/atomic rollback, 23-table write
-parity, all 47 timestamp fields, permissions, real application/LINE owners, native
-times and browser lost-response/reload/replay. The same parent also creates a
-fresh final-schema copy for `concurrent-edits.test.cjs`: actual Order/Movement
-HTTP handlers, simultaneous isolated browser sessions, stale-record rejection,
-child/direct-write invalidation and upload replay. Providers are forbidden.
+Native acceptance independently proves historical schemas, then runs actual current
+owners on fresh synthetic final-schema databases. It revokes runtime execution of
+old typed row mappings, checks named projections, media, row edits, both LINE image
+flows, image retry/reload, Products and receipt JSONB with the operational payment
+table absent. Historical rebuild/inverse witnesses run only with matching source.
+Recovery checks retain archives, private configuration/permissions, Products and
+four sequence states. Known test-only canonicalizations of dropped column slots
+and exact equivalent media CHECK parentheses remain narrowly scoped in source;
+other definitions/validation flags stay exact. This does not change production
+fingerprint formats or authorize a DROP/restore.
 
-The final parent phase also sources `verify-media-catalog.sh` on fresh final-schema
-copies. It checks the guarded operator artifact and inverse, all five reference
-paths, eleven catalog columns, restricted reader permissions, browser/LINE uploads,
-retry/uncertainty behavior, 52-table recovery coverage and current-app operation
-after rollback. It uses synthetic URLs/bytes and fake providers only.
+`bash tools/native-postgres/verify-accounts.sh` separately checks synthetic private
+account configuration, metadata/token separation, runtime/reader denials, constraints,
+wrong-target/populated-target refusal, redaction and dump/restore permissions.
+No real tokens, records, providers or hosted resource are involved.
 
-The media phase also sources `verify-media-url-retirement.sh`. It uses new synthetic
-copies for the retained URL, ID-only and column-restored layouts. Actual feature
-ports, browser retry/reload, both LINE image workflows and the prior released app
-exercise ID persistence, canonical URL DTOs, clearing/revision conflicts, metadata,
-uncertainty/replay and rollback. Guard tests refuse missing approval, stale/wrong
-target, limited readers and external dependencies; a full52-table proof excludes
-only the five retired operational fields and retains import-schema evidence.
-
-Historical verifiers intentionally use the matching older adapter and hash-bound
-pre-scoped-token route/client in a disposable
-credential-free tracked-source copy. `--hosted-tooling` selects the inherited
-synthetic hosted-tooling campaign through that same wrapper; it is not hosted
-production acceptance. Keep the pinned adapter hash, original SQL and every old
-assertion. Do not introduce a production fallback to satisfy historical tests.
-
-The GitHub [acceptance workflow](../../.github/workflows/migration-acceptance.yml)
-also covers archive/recovery fingerprints, restricted backup and bundle boundaries.
-Reuse passing evidence when runtime/schema code is unchanged; broaden tests when
-the actual delta or a failure warrants it. Tests never authorize hosted execution.
+The [acceptance workflow](../../.github/workflows/migration-acceptance.yml) runs
+regression/lint/types, historical/current PostgreSQL, pooling, accounts, recovery
+and the credential-free production build. Parent-owned historical scripts may be
+sourced phases, not standalone production commands. Reuse passing evidence where
+the delta permits; a failure warrants investigating/rechecking the affected chain.
+Detailed older campaign counts are in the [archived verification guide](https://github.com/volkswg/stock-management/blob/950d31e9ce3e89dd6b76d98762112e4a0787829c/docs/refactoring/verification.md).
 
 ## Compatibility and boundaries
 
@@ -173,8 +146,7 @@ the actual delta or a failure warrants it. Tests never authorize hosted executio
 - Retain [`route-contracts.json`](../../tests/fixtures/route-contracts.json).
   Compare actual API/page paths and methods, response contracts and the build
   manifest; never regenerate fixtures merely to approve an accidental route change.
-  Current app-paths SHA-256 is
-  `32f92c7a1ef17213d7a8642ca89e3e71218984982bf1bdce66b560ef35893e1e`.
+
 - Audit packages/env/schema/assets and browser bundles for unintended changes or
   private database strings. Follow the [architecture rules](../architecture/rules.md).
 
@@ -200,72 +172,13 @@ and hosted evidence in the ledger. Production read checks are not a real busines
 write canary. Follow the separately approved
 [maintenance and recovery procedure](../database-migration.md) for live work.
 
-## Private PostgreSQL account configuration — local verification
-
-Current acceptance uses actual PostgreSQL configuration/metadata composition and
-the existing provider transport with synthetic credentials only. `npm test` retains
-all703 pinned historical regressions/type witnesses and runs current graph/account
-checks separately. `tests/fixtures/postgres-accounts-before.json` is a bounded,
-hash-checked source inverse; it contains source text, never private account rows.
-
-`bash tools/native-postgres/verify-accounts.sh` creates a fresh localhost-only
-PostgreSQL container and removes only that owned container afterward. It checks
-the actual migration/importer, wrong-identity rejection, populated-target refusal,
-exact metadata HTTP output, provider-bound token/store filters, runtime write
-denial, reader token denial, CHECK/UNIQUE behavior, timestamp updates and a
-configuration-only dump/restore with matching records/RLS/column permissions.
-Unit checks cover malformed/empty/all-disabled configuration, source selection,
-no fallback and secret redaction. Google auth files retain exact predecessor bytes
-at their shared path; Drive factory changes are import-only. No production token,
-source record, provider call, rich-menu operation or live database is used.
-
-Type checking, lint (one pre-existing unused `shipmentRow` warning) and the isolated
-credential-free build pass. The build retains the route manifest and113 browser
-chunks, with no private database strings. Local acceptance does not certify real
-Loyverse connectivity, browser visuals or the future production transfer; follow
-the [separate release packet](../database-migration.md#private-account-configuration-release).
-
-
-## Legacy payment table retirement compatibility
-
-Current runtime requires the released receipt JSONB layout. The old operational
-payment repository/fallback is removed; the original archive/catalog fixtures and
-operator rebuild/inverse are unchanged. `receipt-payment-retirement-before.json`
-binds PR98 source hashes and bounded source inverses. Older schema campaigns run
-only in their owned pinned copy. Current physical owners run separately with the
-operational table absent, using the operator-only schema-guard compatibility SQL.
-No production credentials, records or providers are used.
-
-The native acceptance adds exact report/split comparisons, zero/none entries,
-command replay, late transaction failure, schema-guard refusal and dependency/
-DDL atomicity checks. It dumps/restores the absent-table layout and compares all
-remaining recovery fingerprints,15 metadata sections, private configuration rows
-and all three sequence value/is_called states. This test-only comparison uses
-visible column positions because logical restore compacts dropped physical slots;
-all column names/order/types/defaults/ACLs stay exact. One pair of complete known
-`media_dates` CHECK definitions is also canonicalized for PostgreSQL reparse
-parentheses, with an independent343-case SQL equivalence check. Other definitions
-and validation flags stay exact. Actual current reports then run on
-the restore. The migration payment archive is always present and unchanged.
-This prepares removal but does not authorize a live DROP or certify provider IO.
 
 ## Product catalogue UAT
 
-`npm test` includes current catalogue browser/domain/port/boundary regressions.
-The PostgreSQL acceptance campaign adds a fresh `np_product_uat` clone only after
-the final schema is proven; it runs `tools/product-uat/postgres.test.cjs` against
-actual current Orders/Products/HTTP owners. Existing predecessor fixtures remain
-immutable behind a new exact test-only inverse; none of that inverse is runtime
-compatibility code. The isolated build allows only three new catalogue route
-entries and requires every previous route entry to retain its original hash.
-
-On the Mac, `tools/product-uat/local.py --snapshot <private-synthetic-fixture>
---artifacts <private-output> [--docker-host <existing-local-engine>] --serve` starts
-a sanitized synthetic browser target; see the [UAT runbook](../database-migration.md#product-master-uat).
-Use an existing Playwright installation through `NODE_PATH` and set
-`STOCK_CHROMIUM_EXECUTABLE`, then run
-`node tools/product-uat/browser.cjs <printed-localhost-order-url> <private-screenshot>`.
-It exercises create/link, duplicate review, a dropped post-commit response, page
-reload and exact-key replay against the real HTTP server/database. It refuses
-non-local URLs and aborts any external browser request. These tools are not hosted
-access adapters and must never receive production credentials or real snapshots.
+Current catalogue/domain/browser/boundary tests are part of `npm test`. The native
+PostgreSQL campaign runs `tools/product-uat/postgres.test.cjs` against actual
+Orders/Products/HTTP owners on a fresh synthetic clone. The existing
+`tools/product-uat/browser.cjs` exercises create/link, duplicate review, lost response,
+reload and exact-key replay against a localhost-only app. Use the
+[UAT procedure](../database-migration.md#product-master-uat) for target and privacy
+limits; Product Master is already released, not an unactivated production feature.

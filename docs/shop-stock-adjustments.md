@@ -1,6 +1,8 @@
 # Shop-level unit adjustments
 
-Production business records now use Supabase; the workflow remains unchanged. Sheets setup/row-verification instructions below apply to the optional Google Sheets backend. Use the [production runbook](database-migration.md) for current storage and approved maintenance.
+Business records use PostgreSQL. Use the [operations guide](database-migration.md)
+for storage, recovery and approved maintenance. There is no optional runtime
+Google Sheets backend; the [original setup notes](https://github.com/volkswg/stock-management/blob/950d31e9ce3e89dd6b76d98762112e4a0787829c/docs/shop-stock-adjustments.md) remain in Git.
 
 Use **Monthly stock count → Stock adjustments → Record adjustment**. The feature
 tracks total units for each configured stock-count/Loyverse shop, not SKU balances.
@@ -67,19 +69,18 @@ physical measurements or later opening counts. Review physical variances separat
 
 ## Storage and verification
 
-`GOOGLE_SHEETS_STOCK_ADJUSTMENTS_WORKSHEET_NAME` optionally overrides the default
-`stock_adjustments` worksheet. It is initialized on the first write, not ledger
-reads. Existing unexpected headers are rejected, not replaced. Inputs use RAW
-cell values to preserve dates/URLs and prevent notes being interpreted as formulas.
-No new environment setting is required when the default name is suitable.
+`stock_adjustments` is an append-only PostgreSQL business ledger. The shop/account
+identity in this flow remains account-based; the LINE destination migration does
+not convert it to a product/location balance system. Do not edit posted ledger
+rows directly; use the reviewed reversal/replacement workflow.
 
-Saves use a client-generated UUID retained across retries. Identical copies with
-one ID count once; conflicting payloads with the same ID fail closed. Reversals
-use a deterministic original-linked ID and are retry-safe. Invalid reversal and
-replacement references are rejected. Google Sheets does not offer cross-instance
-transactions/unique constraints: use a single owner workflow rather than
-concurrent edits to the same transaction, and never modify ledger rows manually.
+Saves preserve client-generated UUID request identity across retries. Identical
+replays reuse the confirmed outcome; conflicting input fails closed. Reversals use
+their original-linked identity; invalid reversal/replacement references are rejected.
+Current transaction, revision and command guards remain active. Do not remove
+them or infer that database storage makes external provider effects atomic.
 
-Checks are kept in temporary scripts outside this repository. Financial service
-and browser verification uses in-memory Sheets and intercepted application APIs;
-production Sheets writes are not exercised just to verify this feature.
+Run [canonical checks](refactoring/verification.md) using fake ports/intercepted
+APIs and fresh disposable SQL targets where needed. Cover totals, month boundaries,
+employment eligibility, reversal/replacement links, response loss and pending drafts.
+Do not write fixtures to production or reinitialize historical Sheets.

@@ -1,12 +1,19 @@
 """Exact pooling-release inverse for immutable historical checks only."""
 import hashlib
 import json
+import base64
+import gzip
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def before_seller(name, data):
+    docs = json.loads((ROOT / 'tests/fixtures/docs-consolidation-before.json').read_text())['edits'].get(name)
+    if docs:
+        assert data is not None and hashlib.sha256(data).hexdigest() == docs['afterSha256'], name
+        data = gzip.decompress(base64.b64decode(docs['beforeGzipBase64']))
+        assert hashlib.sha256(data).hexdigest() == docs['beforeSha256'], name
     cleanup = json.loads((ROOT / 'tests/fixtures/raw-test-evidence-before.json').read_text())['edits'].get(name)
     if cleanup:
         assert data is not None and hashlib.sha256(data).hexdigest() == cleanup['afterSha256'], name
