@@ -1,6 +1,6 @@
 # User authentication architecture and implementation roadmap
 
-Planning only. The Supabase migration and PR81 storage cleanup are complete; staff
+Planning only. The PostgreSQL business-storage migration is complete; staff
 authentication is the next major milestone. This roadmap authorizes no login
 implementation, identity-provider activation, schema deployment, invitations or
 production setting changes. See the [current project roadmap](../refactoring/roadmap.md).

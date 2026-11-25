@@ -1,15 +1,17 @@
 # Stock Management
 
-Next.js application for Orders, Shipments, inventory/movements, Sales, expenses and HR, using Supabase, Google Drive, LINE and Loyverse. The scoped modular refactor is complete through [PR #40](https://github.com/volkswg/stock-management/pull/40): active code uses canonical feature, infrastructure and composition owners; `src/externals/` is removed. Some other compatibility paths remain intentionally supported.
+Next.js application for Orders, Products, Shipments, inventory/movements, Sales,
+expenses and HR, using PostgreSQL/Supabase, Google Drive, LINE and Loyverse.
+Canonical feature modules own workflows; shared infrastructure and explicit
+composition connect them. Active retry/rollback compatibility remains intentional.
 
 **Production safety:** completion of the refactor does not certify authentication, authorization, live provider behavior or concurrent writes. [Issue #38](https://github.com/volkswg/stock-management/issues/38) tracks access-control verification, CI and isolated smoke tests. Check access restrictions before exposing employee/payroll or write-capable APIs; do not run mutating smoke tests against production.
 
-Production uses native PostgreSQL business storage (PR87/88, source `296529d`).
-Browser writes and LINE are open. The remaining private Sheets account source is
-being retired by the configuration migration in this branch; that change is not
-live until the schema/import/deployment steps receive separate approval. See
-[production operations](docs/database-migration.md#current-production) and
-[release evidence](docs/refactoring/progress.md#latest-production-release).
+Business records and private Loyverse configuration use PostgreSQL. Google Drive
+remains the image provider; no runtime business Sheets backend remains. See the
+[single release ledger](docs/refactoring/progress.md#latest-production-release)
+for the last verified deployment and merged-versus-deployed status. The
+[operations guide](docs/database-migration.md) owns recovery, maintenance and rollback.
 
 ## Start here
 
@@ -26,8 +28,8 @@ Use Node 24 (verified 24.22.1) and the repository's existing dependencies and ya
 Current source uses PostgreSQL-only business storage. Keep the existing
 `STOCK_STORAGE=supabase` production setting and strict private connection/release
 binding. Worksheet classes/ranges and the former Sheets business fallback are
-retired. Google Drive uploads remain. The private integration-account reader in
-this branch uses PostgreSQL; see the separately approved release procedure below.
+retired. Google Drive uploads remain. Private integration-account reads also use PostgreSQL; keep Drive credentials
+separate from retired Sheets business settings.
 
 ## Loyverse Configuration
 
@@ -35,8 +37,7 @@ this branch uses PostgreSQL; see the separately approved release procedure below
 `stock_configuration.loyverse_accounts` table using the existing verified
 PostgreSQL connection. `env` (also the unset/blank default) retains the existing
 `LOYVERSE_ACCOUNTS_JSON` alternative. There is no automatic fallback; `sheet` is
-no longer accepted by this source. The synchronous legacy factory supports only
-env; active routes use the server composition.
+no longer accepted by this source. The unused synchronous factory is retired; active routes use server composition.
 
 Account IDs, active flags, explicit sort order, default account and optional store
 filters retain their existing meaning. All-disabled configuration returns no
@@ -51,24 +52,22 @@ edit its configuration. The existing production reader can select metadata colum
 but not accessToken. Owner-approved SQL/administration handles future account edits.
 Keep tokens out of GitHub, browser bundles, ordinary logs and `NEXT_PUBLIC_*`.
 
-The [configuration release procedure](docs/database-migration.md#private-account-configuration-release)
-covers private export, empty-target import, exact reconciliation, deployment,
-rollback and configuration recovery. Merging this source does not authorize any
-of those live actions. Original workbook/configuration credentials remain private
-and untouched until the owner separately approves retirement.
-
-Historical worksheet-name settings are no longer read by current app code.
-Historical import/recovery tools and fixtures remain retained evidence. Google
-Drive's OAuth/service-account settings remain supported and must not be deleted
-as Sheets cleanup.
+The account transfer was released in PR89; its
+[original procedure](https://github.com/volkswg/stock-management/blob/950d31e9ce3e89dd6b76d98762112e4a0787829c/docs/database-migration.md#private-account-configuration-release)
+is historical evidence, not setup to rerun. Use the current
+[recovery/configuration safeguards](docs/database-migration.md#recovery-checkpoint)
+for future separately approved changes. Original credentials remain private;
+Google Drive's OAuth/service-account settings must not be deleted as Sheets cleanup.
 
 ## Movement creation mode
 
 Set `MOVEMENT_CREATE_MODE` in the deployment environment, then redeploy:
 
+A production setting change or deployment requires separate release approval.
+
 - `quantity_photo` (default, including when unset): existing LINE journey —
-  choose NJ/YY, enter quantity/breakdown, send photo, then repeat or close the bag.
-- `photo_only`: choose NJ/YY, send product photos, then Close Bag → Another Shop
+  choose an active shop master, enter quantity/breakdown, send photo, then repeat or close the bag.
+- `photo_only`: choose an active shop master, send product photos, then Close Bag → Another Shop
   or Summary. Forwarded text is not used as a quantity/note. Each photo is saved
   with an unset quantity; enter the note/quantity on the movement detail web page.
   Notes such as `ดำ 5` or `5` calculate quantity 5 and remain saved as entered.
@@ -105,8 +104,7 @@ Existing unpaid records from the earlier workflow remain **Not paid** and never
 become deductions automatically. The owner can **Record payment** directly,
 without approval, or **Remove unpaid entry** to retain its cancelled history.
 The API rejects the former approval action and cannot create new unpaid entries.
-The worksheet layout is preserved: old `requestedDate` and `requestedAmount`
-columns are compatibility metadata, set to the payment date and actual paid
+The stored `requestedDate` and `requestedAmount` fields remain compatibility metadata, set to the payment date and actual paid
 amount on new records. No migration or rewriting of existing history is needed.
 
 Example: ฿15,000 base + ฿2,000 commission − ฿3,000 advance − ฿2,000 advance =
@@ -122,22 +120,13 @@ attendance edits do not rewrite settled payroll. An employee with a paid advance
 balance remains visible in payroll even without attendance; dates outside their
 employment do not generate a new monthly base salary.
 
-Two worksheets are added lazily on the first corresponding write, preserving
-other sheets. Reads alone do not initialize these worksheets. Optional overrides:
-
-- `GOOGLE_SHEETS_EMPLOYEE_ADVANCES_WORKSHEET_NAME` (default `employee_advances`)
-- `GOOGLE_SHEETS_PAYROLL_SETTLEMENTS_WORKSHEET_NAME` (default `payroll_settlements`)
-
-The service account needs permission to add worksheets. Unexpected existing
-headers cause an error instead of being overwritten. Financial rows use RAW
-cell input to preserve dates, references, notes and JSON snapshots literally.
-A settlement and all its recovery allocations are stored in one row, avoiding
-partial writes across the advance and settlement sheets. Creation identifiers,
-state timestamps and payroll revisions protect ordinary retries/stale forms;
-identical settlement retries return the existing settlement. Google Sheets has
-no cross-instance transactions: process payroll/advance changes one operator at
-a time rather than concurrently from multiple sessions. Do not manually alter
-paid advances or settlement snapshots in Sheets.
+`employee_advances` and `payroll_settlements` are PostgreSQL business tables;
+reads do not create storage and no worksheet permission/header setup is required.
+Transactions, stable request identity and existing payroll revisions protect
+retries and stale forms; identical settlement retries reuse the confirmed result.
+Keep each settlement snapshot and recovery allocations immutable. Do not manually
+alter paid advances or settled payroll in the database. Earlier Sheets setup and
+partial-write constraints remain in the [archived README](https://github.com/volkswg/stock-management/blob/950d31e9ce3e89dd6b76d98762112e4a0787829c/README.md).
 
 ## Shop stock adjustments
 
@@ -146,4 +135,4 @@ Record employee gifts, damage, samples, personal use, returns and corrections in
 shop/month; physical counts and finances remain separate. Corrections retain
 history using reversals and linked replacements. See
 [the stock-adjustment workflow](docs/shop-stock-adjustments.md) for calculations,
-Loyverse duplicate prevention, warnings, optional photo links and worksheet setup.
+Loyverse duplicate prevention, warnings, optional photo links and current storage guidance.

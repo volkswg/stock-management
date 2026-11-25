@@ -12,7 +12,7 @@ Apply these rules to new and migrated code. `src/services/`, `src/externals/` an
 | `modules/<feature>/contracts.ts` | Named browser-safe public DTOs and runtime values with real consumers | Providers, server code, mixed barrels |
 | `modules/<feature>/domain` | Framework-independent models and deterministic rules, only when needed | React/Next, config, IO, storage formats, implicit clock/random |
 | `modules/<feature>/application` | Use cases and narrow consumer-owned ports | Concrete adapters, provider fetch, JSX, worksheet rows/ranges |
-| `modules/<feature>/infrastructure` | Port implementations, feature worksheets/headers and row/response mapping | Duplicated generic transports or other features' private adapters |
+| `modules/<feature>/infrastructure` | Port implementations, named PostgreSQL maps, provider adapters and response mapping | Duplicated generic transports or other features' private adapters |
 | `modules/<feature>/server.ts` | Guarded, explicit named server composition | Browser exports or broad all-layer barrels |
 | `modules/<feature>/ui` | Components/hooks, co-located CSS, formatters/PDFs and same-origin HTTP clients | Config, credentials, SDK/provider IO, server/application implementation imports |
 | `infrastructure/persistence/postgres` | Server-only pooled transactions, durable command/effect transport and named record projections supplied by feature bindings | Feature registries, business calculations, browser access or runtime fallback |
@@ -21,7 +21,7 @@ Apply these rules to new and migrated code. `src/services/`, `src/externals/` an
 | `infrastructure/external/{line,loyverse}` | Existing provider HTTP/signature/protocol/factory clients, including standalone operational LINE client | Feature journeys, worksheet reports and new providers |
 | `infrastructure/configuration/postgres` | Read-only private integration-account metadata/credential SQL | Operational registry, public credential APIs, business rules or credential writes |
 | `infrastructure/runtime` | Existing stateful sortable identifier implementation | Feature rules or duplicated sequence state |
-| `composition` | Concrete aggregate construction and compatibility consumer wiring outside feature cores | Business algorithms, browser contracts, generic DI frameworks |
+| `composition` | Concrete aggregate construction and named consumer wiring outside feature cores | Business algorithms, browser contracts, generic DI frameworks |
 | `shared/{ui,lib,types}` | Proven generic reuse, small explicit utilities/value contracts | Feature dumping ground, config/infrastructure/module/legacy dependencies |
 | `config` | Server configuration parsing/types | Feature rules, UI access, env renaming during moves |
 | `scripts` | Explicit opt-in operational entrypoints | Automatic execution during verification |
@@ -106,7 +106,7 @@ and product creation share the existing durable command transaction.
 
 ## Scoped enforcement
 
-[Root ESLint config](../../eslint.config.mjs) registers the following existing rule sets. Their actual exact-path allowlists and shape checks are authoritative; this guide does not grant a broad module allowance.
+[Root ESLint config](../../eslint.config.mjs) registers the following existing rule sets. Their exact-path allowlists and shape checks are authoritative; this guide grants no broad module allowance. Rules for retired worksheet/client scopes remain historical test safeguards, not live owners to recreate.
 
 | Rules | Protected boundary |
 | --- | --- |
@@ -130,9 +130,14 @@ Final scopes supplement the earlier exact guards: [Sales](../../eslint/sales-app
 
 ## Known legacy limits
 
-All current browser graphs are clean in both modes; the inherited payroll type cycle is removed. Historical fixtures and restored-original negative graphs retain evidence of the old cycle/registry/browser paths. Exact source/hash inverses reconcile later moves before earlier guards run; independent current graphs inspect actual source, not those overlays.
-
-The aggregate service/config interfaces live in the pure root `infrastructure/persistence/google-sheets/service-contracts.ts` leaf with identical declarations. Concrete construction lives only in explicit composition. Merged PR #40 removed all external indexes/forwards after the consumer audit; current tests load canonical owners and use test-only export projections for archived mixed-barrel identity evidence. Historical resolution is explicit and separate from strict physical current graphs. No generic repository, provider replacement, transaction/lock/retry/reconciliation policy or speculative Workspace redesign is introduced. Existing concurrency/partial-failure limitations remain; local graph/lint/fake-provider tests do not establish real provider availability, UI visuals, independent CI or authentication security.
+Current runtime/type browser graphs inspect physical canonical source; historical
+graphs restore exact predecessor bytes for old positive/negative evidence. Do not
+expand allowlists or recreate retired Sheets/service/feature paths to satisfy them.
+Root configuration/transport has no feature registry; concrete construction stays
+in composition. Current concurrency/retry/provider behavior is described in
+[decisions](decisions.md), not by historical nontransactional Sheets examples.
+Local lint/graph/fake-provider results do not certify hosted capacity, real provider
+availability, browser visuals or authentication security.
 
 ## Loyverse account source boundary
 
@@ -142,32 +147,23 @@ The aggregate service/config interfaces live in the pure root `infrastructure/pe
 
 [Feature retirement guards](../../eslint/features-retirement-boundaries.mjs) reject live `@/features`, `@/feature` and relative feature-path imports in production and active tests, including erased, re-export, dynamic, CommonJS, import-equals and import-type forms. Recreating `src/features/` is forbidden. These independent rules supplement existing feature/Google/external/account safeguards without widening exceptions. The obsolete forwarding scope and singular alias are removed.
 
-Historical graph hosts may resolve the seven archived paths for original/negative evidence only. Actual graph roots are physical current files; current import resolution, browser reachability, cycles, public module directions and canonical enum/function identities are verified separately. No application/domain or feature infrastructure dependency is added. Remaining service/script compatibility still requires its own consumer audit before retirement.
+Historical graph hosts may resolve the seven archived paths for original/negative evidence only. Actual graph roots are physical current files; current import resolution, browser reachability, cycles, public module directions and canonical enum/function identities are verified separately. No application/domain or feature infrastructure dependency is added. Retained script interfaces and active retry/rollback compatibility still require consumer audits before retirement.
 
 
-## Isolated PostgreSQL persistence
+## PostgreSQL persistence boundaries
 
-Application/domain ports and algorithms are unchanged. Feature-owned PostgreSQL
-bindings import their own canonical headers and shared server-only record
-transport; root infrastructure imports no feature registry. Composition chooses
-the complete storage engine and provides one request-wide transaction. The LINE
-server selects its own PostgreSQL event wrapper while retaining existing pure
-applications. No browser graph may reach pg, pooled credentials or private
-operational SQL. A staging-only public script retains operation keys and contains
-no credentials. Exact route-body/factory/LINE/layout witnesses reconcile prior
-history, while separate current-source, real-PostgreSQL and client-bundle checks
-verify the actual new branch. Historical Sheets harnesses explicitly select their
-original backend; they are not evidence of SQL behavior. Existing negative
-ownership rules and all prior fixtures remain enabled and unchanged.
+Feature-owned bindings supply explicit named column/type maps to shared server-only
+record transport. Root infrastructure imports no feature registry. Composition
+supplies the request-wide transaction; LINE owns per-event workflow coordination.
+No browser graph may reach pg, private SQL or credentials. The shared operation
+script contains no credentials and is active in production despite its historical
+staging label. Isolated staging retains its separate bearer/target/read-only guards.
 
-
-The stable-ID compatibility stage adds one exact root infrastructure bridge,
-`infrastructure/persistence/google-sheets/record-reference.ts`, consumed only by
-feature persistence adapters. It delegates identity/revision handling to PostgreSQL
-and preserves true Sheets range operations on the Sheets path. Application/domain
-ports and browser DTOs never receive a database key/revision handle or row position.
-This does not permit root infrastructure to import feature code or relax provider,
-browser, dynamic-import or cross-feature restrictions.
+The Sheets record-reference bridge and business backend are retired. Current
+acceptance executes actual physical source; only explicit hash-bound historical
+copies run old range/header/adapter contracts. Preserve original fixture hashes
+and negative assertions when adding a bounded inverse for a later source/doc move.
+Historical success never substitutes for current SQL/transaction acceptance.
 
 The pure `shared/lib/utc-timestamp.ts` comparison key has named HR compensation,
 attendance/advance and Inventory adjustment/count consumers. Their closed import

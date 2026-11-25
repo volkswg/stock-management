@@ -1,83 +1,51 @@
-# Movement migration
+# Movements and LINE workflow
 
-Production business records now use Supabase; the workflow remains unchanged. Sheets setup/row-verification instructions below apply to the optional Google Sheets backend. Use the [production runbook](database-migration.md) for current storage and approved maintenance.
-
-Movement creation and management are handled by `stock-management`. LINE
-creation uses `POST /api/line/webhook`; the movement summary and detail pages
-are available at `/movements`, backed by the native `/api/movements` routes.
+Business records use PostgreSQL; Drive remains the image provider. LINE enters
+through `POST /api/line/webhook`; summary/detail pages use `/movements` and the
+native `/api/movements` routes. Current release status is in the
+[ledger](refactoring/progress.md#latest-production-release).
 
 ## Configuration and rollout
 
-1. Configure stock-management with the same Google Sheets spreadsheet used by
-   the legacy movement pages. Grant its Google credentials access to that
-   spreadsheet and configure Google Drive uploads.
-2. The movement tabs default to `movements` and `movement_details`. Override
-   them with `GOOGLE_SHEETS_MOVEMENT_MASTER_WORKSHEET_NAME` and
-   `GOOGLE_SHEETS_MOVEMENT_DETAIL_WORKSHEET_NAME` if the legacy app uses other names.
-3. Set `MOVEMENT_PUBLIC_BASE_URL` to the public base URL of stock-management.
-   When omitted, summary links use `PUBLIC_BASE_URL`. Without either setting,
-   summaries are text-only.
-4. Deploy stock-management and point the LINE channel webhook to its
-   `/api/line/webhook` route. Orders and movements are handled locally; no
-   events are forwarded to the legacy webhook. Unrecognized text and photos
-   outside an active flow receive local guidance.
-5. Complete any partially entered legacy items before switching. Only the old
-   master and saved item rows can be recovered; shop/quantity values held solely
-   in the old process's memory cannot be imported.
-
-No live Google Sheet or LINE channel configuration is changed by these code edits.
-On first use, the application ensures the movement tabs and the `user_state`
-header exist. Existing movement columns stay in the same order, including
-`stockCounted` in movement-detail column M.
+`MOVEMENT_PUBLIC_BASE_URL` controls summary links, falling back to `PUBLIC_BASE_URL`;
+without either, summaries are text-only. Preserve the configured channel webhook,
+raw-body signature verification, migration cutoff and private Drive credentials.
+No runtime movement Sheet/tab/header setup exists. The old configuration and
+row-verification procedure remains in the
+[archived guide](https://github.com/volkswg/stock-management/blob/950d31e9ce3e89dd6b76d98762112e4a0787829c/docs/movement-migration.md).
+Documentation does not authorize changing LINE, Vercel, credentials or data.
 
 ## Persisted state
 
-`user_state` keeps its existing columns A–G and adds `context` in column H.
-Each user with an active movement has one row with
-`flowname = MovementCreate`. Accepted transitions update its current milestone
-and context instead of appending a history log.
-The JSON context contains the master/item IDs, user ID, selected shop, quantity,
-note, image URL, current step, and last processed LINE event ID. When the flow
-reaches `complete`, its `MovementCreate` row is deleted. Starting the next
-movement creates a new temporary row. OrderCreate rows are left intact.
+`user_state` stores the active `MovementCreate` milestone and JSON context:
+master/item/user IDs, selected shop identity/label, quantity, note, confirmed image,
+step and last event ID. Accepted transitions update the checkpoint. Completion
+clears that movement session through existing lifecycle handling; OrderCreate
+sessions retain their separate behavior. Session IDs are bigint internally and
+strings through business APIs; no worksheet columns/row position are identities.
 
-The steps are `shop`, `quantity`, `product_image`, `close_bag`, `bag_closed`, and
-`complete`. An unfinished flow has no in-memory timeout. `resume:movement`
-restores its exact checkpoint; if no active checkpoint exists, it can recover
-the latest legacy `in_progress` master and its saved items.
+Steps remain `shop`, `quantity`, `product_image`, `close_bag`, `bag_closed`,
+`complete`. `resume:movement` restores a saved checkpoint or the latest recoverable
+in-progress master/items. Commands, quantities, close-bag/another-shop/summary
+behavior and deferred state remain. Explicit new movement creation does not
+silently discard earlier resumable masters.
 
-The commands remain `create:movement`, `create:new-movement`, `resume:movement`,
-NJ/YY shop selection, quantity text, image upload, `close bag`, `another shop`,
-and `summary` / `movement summary`. Explicitly creating a new movement starts a
-new active draft; earlier unfinished masters remain available for later resume.
-
-Images upload to Drive before an item is written. A saved upload URL is reused
-on retry, stable item IDs avoid duplicating an already saved item, and the last
-event ID protects the current transition from an immediate redelivery. Sheet failures
-return HTTP 503 so LINE can retry the local movement handler.
-Enable LINE webhook redelivery for automatic retries; otherwise users can retry
-their last action. Drive and Sheets are separate services, so a failure before
-the upload URL checkpoint can still leave an orphaned Drive file. Sheets does
-not provide a cross-request lock: simultaneous messages from the same user
-should be avoided while an item is saving.
+Images upload before an item is saved. Stable item/event/operation identity and
+confirmed media are reused during reconciliation; failures/unknown commits must
+not cause blind re-upload. Durable SQL journals do not make Drive atomic with the
+database or guarantee exactly-once reply delivery. LINE redelivery is useful for
+normal retries, but is not a loss-safe maintenance inbox. Use the
+[operations guide](database-migration.md#maintenance-procedure) before pausing writers.
 
 ## Verification
 
-In `stock-management`, run:
-
-```bash
-yarn build
-```
-
-In `purchase-line-webhook`, run `yarn build:server`, then `yarn build`.
-
-For a manual integration check, start a movement, choose NJ, send a quantity,
-restart stock-management, and send `resume:movement`. It should ask for the
-product image and retain the quantity. Upload two items, close the bag, add a
-YY item, then request the summary. Verify totals and the new rows in Sheets;
-open the stock-management detail page and check Packed, Stock counted, and Delivered.
-Also verify a Drive failure leaves the draft waiting for an image and inserts
-no item, and that normal order creation still works after the movement completes.
+Use [canonical verification](refactoring/verification.md) with synthetic data and
+fake providers. An approved isolated integration check should cover movement
+start, active-master selection, quantity/photo, process restart/resume, repeat
+image/event reconciliation, bag close, another shop, summary and web Packed /
+Stock counted / Delivered behavior. Also verify provider failure preserves a
+resumable draft and ordinary Orders still work. No live write/provider canary or
+separate legacy-app build is authorized by this guide.
 
 ### Photo upload counts
 
@@ -108,9 +76,10 @@ requests comprising a LINE image set. Order-flow uploads are not counted as
 movement uploads. The HTTP JSON is not itself displayed by LINE; the chat text
 is sent through the existing reply flow.
 
-## Shop-master destination IDs — prepared, not deployed
 
-The next release replaces the fixed NJ/YY destination list with active, non-deleted
+## Shop-master destination IDs
+
+The released PR104 replaces the fixed NJ/YY destination list with active, non-deleted
 Shop master records. LINE shows names and sends a movement-bound postback carrying
 `shops.id`; a choice from another movement is rejected. Lists paginate within LINE's
 quick-reply limits. Existing quantities, images, remarks, Home origin, delivery,
@@ -137,6 +106,6 @@ records never fall back to their display name if the mapping is missing; the
 report warns that totals may be incomplete. Only unlinked legacy rows retain the
 former name lookup, without double counting linked rows.
 
-The guarded schema install and explicit old-data/session backfill require their
-own production release approval and supervised pause. See the
-[production procedure](database-migration.md#movement-shop-id-release--prepared-only).
+The schema and explicit historical/session backfill are complete. Do not rerun
+them. A later reconciliation/change needs its own approval and supervised packet;
+see [maintenance](database-migration.md#maintenance-procedure).

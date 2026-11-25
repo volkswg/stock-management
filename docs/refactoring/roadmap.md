@@ -2,76 +2,56 @@
 
 ## Completed database milestone
 
-The Supabase production cutover and storage cleanup are complete through
-[PR86](https://github.com/volkswg/stock-management/pull/86): stable IDs, native
-timestamps, operational sidecar retirement, typed mappings and shared validation.
-Browser writes and LINE are open. Old business Sheets remain read-only. Current
-storage contracts and release gates live in the [runbook](../database-migration.md);
-dated proof is in [progress](progress.md#latest-production-release).
+The Google Sheets-to-Supabase production migration is complete. Business records
+and private Loyverse configuration use PostgreSQL. Native IDs/timestamps/media,
+row-level edit protection, receipt-owned payments, Product Master and movement
+shop IDs are released. Runtime business Sheets adapters and unused integration
+wrappers are retired. See the [release ledger](progress.md#latest-production-release)
+for exact deployed versus merged status; old preparation headings are not pending work.
 
-Do not restart the migration, rerun import/retirement SQL or treat completed
-cutover plans as pending work. Retained import tables, journals, credentials,
-snapshots and recovery evidence remain protected. A later live change still needs
-its own exact scope, fresh recovery/freshness review and execution approval.
+Do not rerun imports, sidecar retirement, identity conversion or old rebuild SQL.
+Retained archives, command/effect journals, credentials, snapshots and recovery
+evidence remain protected. [Operations](../database-migration.md) owns future
+release/recovery gates; this roadmap grants no live execution authority.
 
-## Current scoped work: remove unused integration wrappers
+## Current scope
 
-PR99's operational payment-table retirement and PR101's Sales/API/browser cleanup
-are deployed. Remove only unused LINE server wrappers and the synchronous Loyverse
-factory, correct internal Sheets names/comments and stale current-status docs,
-and preserve current regression coverage through canonical session owners.
-
-Keep production, credentials, migration archives and recovery evidence unchanged.
-Browser pending-operation guards, multipart server support, upload reconciliation,
-identity rollback and active LINE session resumption remain supported. This is one
-application-only review PR, with no database migration or deployment authorization.
-
-## Product Master UAT (current approved feature scope)
-
-Use branch `uat/product-master-from-order-item` for both service and schema.
-Create a product from an active order item, reuse its media row, explicitly review
-similar products, or link an existing product. Catalogue edits protect the product
-row; linking protects the item row. Quantities, remarks, original product codes,
-order APIs and LINE journeys retain their existing behavior. No staff login,
-automatic historic backfill, stock aggregation or Loyverse SKU mapping is included.
-
-The local UAT uses only synthetic records. Hosted UAT must reuse the existing
-`stock-management` project (`orjnazrothkdgmzlsuto`), preserve its data, and fit its
-existing capacity. Do not create projects/paid branches, upgrade a plan or add paid
-services. Its previous operational schema is retained intact for recovery; the UAT
-dataset uses current native tables and synthetic records only. See the
-[UAT procedure](../database-migration.md#product-master-uat).
-Production remains unchanged until a separately approved release.
+Consolidate current documentation, link completed procedures to immutable history,
+and correct outdated status. Keep production and all existing user/LINE behavior
+unchanged. No new feature, authentication implementation, database migration,
+provider action, paid resource or deployment is included.
 
 ## Next major milestone: user authentication
 
-The [authentication roadmap](../architecture/user-authentication-roadmap.md)
-covers user login, secure sessions, roles, shop-level authorization, administration
-and API access control. It remains planning only until separately approved.
-Preserve current LINE signatures/cutoff, API restrictions, verified TLS and database
-permissions. The owner's `legacy-as-is` release policy does not mean access gaps
-are repaired or new exposure is authorized. [Issue38](https://github.com/volkswg/stock-management/issues/38)
-retains the historical security tracking context.
+The separate [architecture and implementation roadmap](../architecture/user-authentication-roadmap.md)
+covers login, secure sessions, roles, shop authorization, administration and API
+access. It is planning only until explicitly approved. The owner-retained
+`legacy-as-is` access policy does not mean those gaps are repaired or new exposure
+is authorized. Preserve LINE signatures/cutoff, current API restrictions, TLS,
+database grants/RLS and replay boundaries. Historical tracking remains in
+[issue38](https://github.com/volkswg/stock-management/issues/38).
 
 ## Deferred work and decisions
 
-- Backup automation/failure-alert activation remains deferred. Verified one-off
-  recovery checkpoints remain required for approved destructive maintenance.
-- The cross-table Order/Movement revision-conflict fix was released in PR83.
-  It uses record-scoped tokens and preserves same-record conflicts. See [evidence and release requirements](progress.md#concurrent-browser-edits-2026-11-18).
-  Broader conflict-merging UI and other feature scopes remain deferred.
-- Further removal of typed mapping functions needs an explicit adapter/consumer
-  migration. Their current count alone is not a removal approval.
-- Broader provider replacement, cross-provider transactions/queues, tenant/billing
-  features and Workspace redesign need separate product decisions.
-- Standalone script interfaces remain; business Sheets and positional adapter
-  retirement are complete.
+- Backup automation and failure alerts: deferred, not enabled by documentation.
+  One-off recovery remains required for approved destructive/schema maintenance.
+- Stock-by-product and warehouse/shop balances: a separate product/schema design;
+  Product Master links do not implement an on-hand inventory ledger.
+- Broader shop-master identity conversion: LINE movements use `shops.id`, but
+  stock-count/adjustment and other account-based consumers still retain Loyverse
+  identities/mappings. Do not treat the entire system as converted.
+- Further compatibility retirement: browser pending operations, multipart order
+  retries, cached command replies, LINE resumption and text-ID rollback support
+  need explicit consumer/data/rollback review. They are not blanket cleanup.
+- Provider replacement, cross-provider queues/transactions, tenant/billing features,
+  wider conflict-merging UI and Workspace redesign require separate requirements.
+- Cloud account connectivity must be established independently; repository tooling
+  cannot grant Vercel/GitHub permissions or inherit Mac credentials.
 
 ## Gates for future changes
 
-Follow the [architecture rules](../architecture/rules.md) and [verification guide](verification.md).
-Preserve financial/stock calculations, dates, IDs, routes/DTOs, LINE transitions,
-retry/idempotency and provider ordering. Keep changes focused, use one reviewable
-PR when practical, and distinguish implementation/merge from live execution.
-Record new evidence once in [progress](progress.md). Historical phase descriptions
-and prior local/CI results are indexed there rather than repeated as current plans.
+Use the [architecture rules](../architecture/rules.md), [behavior invariants](../architecture/decisions.md)
+and [verification guide](verification.md). Preserve calculations, Bangkok dates,
+IDs, ordering, routes/DTOs, LINE transitions and retry/provider outcomes. Prefer one
+focused PR; distinguish source implementation, merge, deployment and live schema
+execution. Keep new evidence in the ledger, not a second history document.
