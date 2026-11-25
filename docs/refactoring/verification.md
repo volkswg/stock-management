@@ -180,7 +180,10 @@ the actual delta or a failure warrants it. Tests never authorize hosted executio
 
 ## Documentation-only changes
 
-Verify the diff contains only intended Markdown changes. Audit every local link,
+Verify the diff contains only intended documentation and archived-log changes.
+Record commands, source SHA, results and immutable evidence links in the ledger;
+keep raw test output in CI artifacts or pinned history rather than growing docs.
+Audit every local link,
 fragment, renamed path and inbound repository reference, including `AGENTS.md` and
 README. Preserve original rules/invariants and map removed history to immutable
 commit URLs in [progress](progress.md#historical-document-index). Historical fixture
