@@ -51,6 +51,17 @@
           "before": ""
         }
       ]
+    },
+    "tools/native-postgres/pooling_history.py": {
+      "beforeSha256": "5550286d79c7ad1c7b1b4b2f8d9d89f42918456516ba476adb62899bfd477030",
+      "afterSha256": "c2930a20a61564bf01c8299b0c2be73cec46142684b134a7be601b207fb1730c",
+      "inverse": [
+        {
+          "start": 11,
+          "count": 8,
+          "before": ""
+        }
+      ]
     }
   }
 }
