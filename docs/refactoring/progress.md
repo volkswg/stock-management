@@ -1259,3 +1259,52 @@ unmerged/wrong targets, schema/secret-bearing inputs, protection drift, READY
 builds and rollback. The Cloud connection itself still needs confirmation; packet
 preparation does not prove that account access. Full CI is reported in the PR.
 No production change.
+
+## Archived raw test evidence — PR106
+
+The raw seller-investigation logs and their command manifest are retained at
+`a299920d3b14246dd7819cb58123d5d49e028fc6`, rather than copied into current docs.
+Before removal, all 14 files were byte-compared with that commit and all 13 log
+SHA-256 values matched the original manifest. The links below replace each removed
+working-tree path under `docs/refactoring/evidence/order-seller/`.
+
+Working docs shrink from 27 files / 12,915 lines to 13 files / 4,330 lines
+(approximately 1.19 MB to 0.38 MB). Application and test files are unchanged.
+
+The [original commands and hashes](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/commands.json)
+preserve exact invocations, working directories, execution restrictions and results.
+Those records describe the initial seller implementation: baseline
+`ffde7cb147e29824f5ff7d9fffe017379712f1c9`, seller source
+`a299920d3b14246dd7819cb58123d5d49e028fc6`. They are not final-head test counts.
+
+| Original file (immutable copy) | Command / recorded result |
+| --- | --- |
+| [base-bill-id.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/base-bill-id.txt) | Isolated `node --test --test-isolation=none tests/bill-identity.test.cjs`: six passed on baseline. |
+| [head-bill-id.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/head-bill-id.txt) | Same isolated bill-ID command: six passed on initial seller source. |
+| [base-combined-diagnostic.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/base-combined-diagnostic.txt) | Grouped wrapper/bill/user-state/item/reference diagnostic: four failures from shared mock hooks. |
+| [head-combined-diagnostic.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/head-combined-diagnostic.txt) | Same grouped diagnostic: reproduced the baseline hook interference. |
+| [base-npm-test.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/base-npm-test.txt) | Canonical `npm test`: 875 Node +3 Python passed; no failed/cancelled/skipped tests. |
+| [head-npm-test.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/head-npm-test.txt) | Canonical `npm test`: 885 Node +3 Python passed; no failed/cancelled/skipped tests. |
+| [lint.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/lint.txt) | `npm run lint`: zero errors, two inherited warnings. |
+| [typecheck.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/typecheck.txt) | `npm run typecheck`: passed. |
+| [isolated-build.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/isolated-build.txt) | `bash tools/migration/verify-build.sh`: passed; unchanged routes, 112 client chunks checked. |
+| [order-regressions.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/order-regressions.txt) | Focused seller/UI/shipment/image tests: 33 passed. |
+| [prior-sandbox-combined.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/prior-sandbox-combined.txt) | Earlier sandbox diagnostic: execution denied/intermediate failures; not passing evidence. |
+| [prior-sandbox-base-npm-test-aborted.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/prior-sandbox-base-npm-test-aborted.txt) | Earlier baseline `npm test`: aborted with SIGTERM; not a completed baseline. |
+| [prior-sandbox-head-npm-test-aborted.txt](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/prior-sandbox-head-npm-test-aborted.txt) | Earlier head `npm test`: aborted with SIGTERM; not a completed regression run. |
+
+Final PR106 source `115e4e14d85dfea7f375e04113fc5a3195f96b8f` subsequently
+scoped mock hooks and fixed seller replay compatibility. It passed 894 Node +3
+Python tests via `npm run cloud:test`; the grouped diagnostic passed all 26 checks.
+[Migration acceptance run128](https://github.com/volkswg/stock-management/actions/runs/45484302973)
+and [run129](https://github.com/volkswg/stock-management/actions/runs/45533925363)
+both passed on that final head. [PR106](https://github.com/volkswg/stock-management/pull/106)
+merged as `1d2f9e93c3958ac2281d04e0ba38aeb1203d05ec` with the identical source tree
+and was released after the approved application-only checks. Earlier preparation
+notes above remain historical; Cloud service access is still separate from source
+verification. No new test run is claimed by this documentation cleanup.
+
+Raw files are removed only from the working docs, with no Git-history rewrite.
+Old default-branch links to these paths will no longer resolve; use the immutable
+links above. Historical PR text, test fixtures and private Mac recovery evidence
+remain unchanged. This reduces current checkout size, not existing Git history.
