@@ -1,0 +1,79 @@
+{
+  "baseCommit": "0f666edd1d845bd500310c51965ea214f5a3d255",
+  "scope": "Exact page-size URL-persistence source inverse; existing history fixtures and assertions are unchanged.",
+  "edits": {
+    "src/modules/orders/ui/OrderListPage.tsx": {
+      "beforeSha256": "1940c8837e77e4a659a23a4e1404fada6ad01b4bcaeccf3ed31fd200f354fb80",
+      "afterSha256": "8de1f5937e4cf11119c10b0379a091bed33954898d4c6104ea61ce1d35687d5b",
+      "inverse": [
+        {
+          "start": 40,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 49,
+          "count": 6,
+          "before": "function writePageToUrl(page: number): void {\n"
+        },
+        {
+          "start": 58,
+          "count": 2,
+          "before": ""
+        },
+        {
+          "start": 137,
+          "count": 4,
+          "before": "    const restorePage = () => setPage(readPageFromUrl());\n"
+        },
+        {
+          "start": 146,
+          "count": 1,
+          "before": "  const changePage = (value: number): void => {\n"
+        },
+        {
+          "start": 148,
+          "count": 1,
+          "before": "    writePageToUrl(value);\n"
+        },
+        {
+          "start": 205,
+          "count": 2,
+          "before": "    if (!loading && !error) writePageToUrl(currentPage);\n  }, [currentPage, error, loading, page]);\n"
+        },
+        {
+          "start": 373,
+          "count": 1,
+          "before": "                pageSizeOptions={[10, 20, 50, 100]}\n"
+        },
+        {
+          "start": 376,
+          "count": 1,
+          "before": "                  changePage(nextPageSize === pageSize ? nextPage : 1);\n"
+        }
+      ]
+    },
+    "tests/helpers/order-list-pagination-history.cjs": {
+      "beforeSha256": "18705071bcfd07468f84d4b30c7c84537465ea103031e64047fc8c364a18ec55",
+      "afterSha256": "c30f25c203046ade488e88888f8aaf04580fdbc8924605d76365c159fa67239a",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 6,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/pooling_history.py": {
+      "beforeSha256": "c2930a20a61564bf01c8299b0c2be73cec46142684b134a7be601b207fb1730c",
+      "afterSha256": "d4498ffbb3e322543667313d4221fe3a9a8b23a981953d5bedb34042723a9eeb",
+      "inverse": [
+        {
+          "start": 11,
+          "count": 8,
+          "before": ""
+        }
+      ]
+    }
+  }
+}

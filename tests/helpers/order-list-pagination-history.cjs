@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Hash-bound historical test source, never a runtime fallback. */
 const fs=require('node:fs'),{createHash}=require('node:crypto'),assert=require('node:assert/strict');
 exports.beforeOrderPagination=(name,data=fs.existsSync(name)?fs.readFileSync(name):null)=>{
+ const persistence=JSON.parse(fs.readFileSync('tests/fixtures/order-page-size-persistence-before.json')).edits[name];
+ if(persistence){
+  const hash=value=>createHash('sha256').update(value).digest('hex');assert.equal(data===null?null:hash(data),persistence.afterSha256,name);
+  const lines=data.toString().split(/(?<=\n)/);for(const delta of [...persistence.inverse].reverse())lines.splice(delta.start,delta.count,delta.before);
+  data=Buffer.from(lines.join(''));assert.equal(hash(data),persistence.beforeSha256,name);
+ }
  const sizeEdit=JSON.parse(fs.readFileSync('tests/fixtures/order-page-size-before.json')).edits[name];
  if(sizeEdit){
   const hash=value=>createHash('sha256').update(value).digest('hex');assert.equal(hash(data),sizeEdit.afterSha256,name);
