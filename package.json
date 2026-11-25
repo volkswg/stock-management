@@ -9,7 +9,10 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "node tools/native-postgres/test.mjs",
-    "setup:rich-menu": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types src/scripts/setup-rich-menu.ts"
+    "setup:rich-menu": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types src/scripts/setup-rich-menu.ts",
+    "cloud:doctor": "node tools/cloud/check-environment.mjs",
+    "cloud:test": "node tools/cloud/test.mjs",
+    "cloud:release": "node tools/cloud/release-packet.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "6.2.5",

@@ -38,4 +38,12 @@ Read [the architecture guide](docs/architecture/README.md), [folder ownership](d
 - Use the canonical architecture guide, one [roadmap](docs/refactoring/roadmap.md) and one [progress/evidence ledger](docs/refactoring/progress.md). Update existing sections instead of adding a Markdown file for every small PR.
 - Create standalone documentation only for a subject with lasting independent value and link it from the guide. Keep operational/user guides stable.
 - Distinguish actual current ownership from historical intermediate states and proposed work. Preserve original evidence through immutable PR/commit links and unchanged test fixtures, without repeating history across documents.
+
+## Codex Cloud
+
+- Start with `npm run cloud:doctor`, then `npm run cloud:test`. The canonical runner reconstructs historical source and runs native test files separately. Bill/item mock hooks are suite-scoped; do not replace the canonical runner with a glob against current source.
+- `EPERM`/`EACCES` while launching Node/Python means verification is blocked. Fix the environment setup/permissions through its supported controls or run **Migration acceptance** on the exact published SHA in GitHub Actions. Never skip checks, relax identity guards, bypass sandbox controls, or report an aborted run as passed.
+- Use existing connections to publish a branch/PR and inspect CI. Source changes and test success do not authorize merge or production activation.
+- After explicit owner approval, Cloud may execute an application-only Vercel release using the [portable release procedure](docs/database-migration.md#cloud-application-only-release). `npm run cloud:release` prepares guarded packets; it does not deploy or grant approval. Use an existing connected Vercel tool or a separately authenticated official CLI, never credentials copied from this Mac.
+- Keep DB credentials, business records, recovery snapshots and private evidence off Cloud/GitHub. No fresh business-record GETs, provider canaries, access links, schema/data migrations, traffic changes or paid resources are authorized by the portable application-only procedure. Those still need their separate approved operator/recovery process.
 - At cleanup milestones, audit repository/PR references, links, obsolete plans and duplicate content before removal. Keep precise safeguards, outstanding debt and prerequisites; provide an old-to-new evidence index and report historical URL tradeoffs.

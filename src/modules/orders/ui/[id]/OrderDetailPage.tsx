@@ -298,6 +298,7 @@ function OrderContent({
         ? {
             ...current,
             status: update.status,
+            seller: update.seller ?? current.seller,
             totalPrice: update.totalPrice,
             remark: update.remark,
             updatedAt: update.updatedAt,
@@ -326,7 +327,7 @@ function OrderContent({
             {
               key: "seller",
               label: "Seller",
-              children: order.seller || "—",
+              children: <OrderSeller order={order} onUpdated={handleDetailsUpdated} />,
             },
             {
               key: "totalPrice",
@@ -665,6 +666,92 @@ function parseQuantity(value: string): number | null {
 
   const quantity = Number(value);
   return Number.isInteger(quantity) && quantity > 0 ? quantity : null;
+}
+
+function OrderSeller({
+  order,
+  onUpdated,
+}: {
+  order: OrderDetail;
+  onUpdated: (update: UpdateOrderDetailsResponse["order"]) => void;
+}) {
+  const [seller, setSeller] = useState(order.seller);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>();
+
+  const saveSeller = async (): Promise<void> => {
+    if (saving || seller.trim() === order.seller || seller.trim().length > 100) return;
+    setSaving(true);
+    setError(undefined);
+    try {
+      const response = await updateOrderDetails(order.id, { seller: seller.trim() });
+      if (typeof response.order.seller !== "string") {
+        throw new Error("The order details API returned an invalid response.");
+      }
+      setSeller(response.order.seller);
+      onUpdated(response.order);
+      setEditing(false);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "Failed to update the seller.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!editing) {
+    return (
+      <div className={styles.fieldDisplay}>
+        <Text>{order.seller || "—"}</Text>
+        <Button
+          aria-label="Edit seller"
+          icon={<EditOutlined />}
+          type="text"
+          onClick={() => {
+            setSeller(order.seller);
+            setError(undefined);
+            setEditing(true);
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.priceEditor}>
+      <Space.Compact className={styles.priceControls}>
+        <Input
+          aria-label="Seller"
+          autoFocus
+          disabled={saving}
+          maxLength={100}
+          placeholder="Seller"
+          value={seller}
+          onChange={(event) => setSeller(event.target.value)}
+          onPressEnter={() => void saveSeller()}
+        />
+        <Button
+          aria-label="Save seller"
+          disabled={seller.trim() === order.seller || seller.trim().length > 100}
+          icon={<SaveOutlined />}
+          loading={saving}
+          type="primary"
+          onClick={() => void saveSeller()}
+        />
+        <Button
+          aria-label="Cancel seller edit"
+          disabled={saving}
+          icon={<CloseOutlined />}
+          onClick={() => {
+            setSeller(order.seller);
+            setError(undefined);
+            setEditing(false);
+          }}
+        />
+      </Space.Compact>
+      {error ? <Text type="danger">{error}</Text> : null}
+    </div>
+  );
 }
 
 function OrderTotalPrice({

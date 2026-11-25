@@ -1,0 +1,138 @@
+{
+  "base_commit": "ffde7cb147e29824f5ff7d9fffe017379712f1c9",
+  "head_branch": "feat/edit-order-seller",
+  "node": "v24.22.1",
+  "npm": "11.9.0",
+  "investigation": "Both base and head reproduce the same four bill-ID failures only in the nonstandard grouped diagnostic. Shared root beforeEach hooks overwrite the same database module mocks, including the item identity mock with no sequence and an empty identity attribute. Running the bill-ID file alone passes all six tests on both revisions. The normal repository runner executes these native CJS files separately. No identity validation or assertions were changed. Earlier aborted sandbox logs are retained verbatim and must not be interpreted as completed test runs.",
+  "commands": [
+    {
+      "revision": "base",
+      "cwd": "/workspace/order-seller-base",
+      "command": "env -i PATH=\"$PATH\" CI=1 node --test --test-isolation=none tests/bill-identity.test.cjs > /tmp/order-seller-review/base-bill-id.log 2>&1",
+      "exit_code": 0,
+      "full_output": "base-bill-id.txt",
+      "execution": "approved outside subprocess sandbox; synthetic test boundaries only"
+    },
+    {
+      "revision": "base",
+      "cwd": "/workspace/order-seller-base",
+      "command": "env -i PATH=\"$PATH\" CI=1 node --test --test-isolation=none tests/native-postgres/wrapper-cleanup.test.cjs tests/bill-identity.test.cjs tests/user-state-identity.test.cjs tests/item-identity.test.cjs tests/movement-reference-retirement.test.cjs > /tmp/order-seller-review/base-combined-diagnostic.log 2>&1",
+      "exit_code": 1,
+      "full_output": "base-combined-diagnostic.txt",
+      "execution": "approved outside subprocess sandbox; synthetic test boundaries only"
+    },
+    {
+      "revision": "head",
+      "cwd": "/workspace/stock-management",
+      "command": "env -i PATH=\"$PATH\" CI=1 node --test --test-isolation=none tests/bill-identity.test.cjs > /tmp/order-seller-review/head-bill-id.log 2>&1",
+      "exit_code": 0,
+      "full_output": "head-bill-id.txt",
+      "execution": "approved outside subprocess sandbox; synthetic test boundaries only"
+    },
+    {
+      "revision": "head",
+      "cwd": "/workspace/stock-management",
+      "command": "env -i PATH=\"$PATH\" CI=1 node --test --test-isolation=none tests/native-postgres/wrapper-cleanup.test.cjs tests/bill-identity.test.cjs tests/user-state-identity.test.cjs tests/item-identity.test.cjs tests/movement-reference-retirement.test.cjs > /tmp/order-seller-review/head-combined-diagnostic.log 2>&1",
+      "exit_code": 1,
+      "full_output": "head-combined-diagnostic.txt",
+      "execution": "approved outside subprocess sandbox; synthetic test boundaries only"
+    },
+    {
+      "revision": "prior head",
+      "cwd": "/workspace/stock-management",
+      "command": "node --test --test-isolation=none tests/native-postgres/wrapper-cleanup.test.cjs tests/bill-identity.test.cjs tests/user-state-identity.test.cjs tests/item-identity.test.cjs tests/movement-reference-retirement.test.cjs > /tmp/order-seller-native-failures.log 2>&1",
+      "exit_code": 1,
+      "full_output": "prior-sandbox-combined.txt",
+      "execution": "original sandboxed grouped diagnostic; includes EPERM and an intermediate historical hash failure subsequently fixed by the additive seller inverse"
+    },
+    {
+      "revision": "prior base",
+      "cwd": "/workspace/stock-management (base source reconstructed before edits)",
+      "command": "npm test > /tmp/order-seller-baseline-test.log 2>&1",
+      "full_output": "prior-sandbox-base-npm-test-aborted.txt",
+      "execution": "ABORTED: SIGTERM sent to historical test process and stalled Python child; subsequent cancellation failures are not baseline regressions"
+    },
+    {
+      "revision": "prior head",
+      "cwd": "/workspace/stock-management",
+      "command": "npm test > /tmp/order-seller-test.log 2>&1",
+      "full_output": "prior-sandbox-head-npm-test-aborted.txt",
+      "execution": "ABORTED: SIGTERM sent to historical test process and stalled Python child; subsequent cancellation failures are not branch regressions"
+    },
+    {
+      "revision": "head",
+      "cwd": "/workspace/stock-management",
+      "command": "npm run lint > /tmp/order-seller-lint.log 2>&1",
+      "exit_code": 0,
+      "full_output": "lint.txt",
+      "result": "0 errors; 2 existing unused-variable warnings"
+    },
+    {
+      "revision": "head",
+      "cwd": "/workspace/stock-management",
+      "command": "npm run typecheck > /tmp/order-seller-types.log 2>&1",
+      "exit_code": 0,
+      "full_output": "typecheck.txt"
+    },
+    {
+      "revision": "head",
+      "cwd": "/workspace/stock-management",
+      "command": "bash tools/migration/verify-build.sh > /tmp/order-seller-build.log 2>&1",
+      "exit_code": 0,
+      "full_output": "isolated-build.txt",
+      "result": "credential-free source copy; route manifest unchanged; 112 client chunks checked"
+    },
+    {
+      "revision": "head",
+      "cwd": "/workspace/stock-management",
+      "command": "node --test --test-isolation=none tests/native-postgres/order-seller.test.cjs tests/native-postgres/order-seller-ui.test.mjs tests/native-postgres/order-detail-shipment.test.cjs tests/native-postgres/order-image-uploads.test.mjs > /tmp/order-seller-related-tests.log 2>&1",
+      "exit_code": 0,
+      "full_output": "order-regressions.txt",
+      "result": "33 passed"
+    },
+    {
+      "revision": "base",
+      "cwd": "/workspace/order-seller-base",
+      "command": "env -i PATH=\"$PATH\" CI=1 npm test > /tmp/order-seller-review/base-npm-test.log 2>&1",
+      "exit_code": 0,
+      "full_output": "base-npm-test.txt",
+      "execution": "normal unmodified repository historical/current runner; approved outside subprocess sandbox; no early termination",
+      "result": "875 Node tests passed, 0 failed/cancelled/skipped; 3 Python tests passed; includes historical typecheck"
+    },
+    {
+      "revision": "head",
+      "cwd": "/workspace/stock-management",
+      "command": "env -i PATH=\"$PATH\" CI=1 npm test > /tmp/order-seller-review/head-npm-test.log 2>&1",
+      "exit_code": 0,
+      "full_output": "head-npm-test.txt",
+      "execution": "normal unmodified repository historical/current runner; approved outside subprocess sandbox; no early termination",
+      "result": "885 Node tests passed, 0 failed/cancelled/skipped; 3 Python tests passed; includes historical typecheck"
+    }
+  ],
+  "sha256": {
+    "base-bill-id.txt": "74d9fec223f5276218625361b839d809530c622dda4d79361efac5df805b6453",
+    "base-combined-diagnostic.txt": "3708ffe2b2e54a476254899680dfa531f57f9825145e526999e194a8db092874",
+    "base-npm-test.txt": "294894a82c8eb665d2316303e360433f2c0eb63db49683901288bc1338e3f7c1",
+    "head-bill-id.txt": "1e5dd4c1f77fc9186a68b350d4ec3f855d2ee811cf33ba40a1e178f476653a2e",
+    "head-combined-diagnostic.txt": "97f3bd946f717bd5fd46ff586ea1dbabe9b4f0f503a23b2f4656973d5f9a2c9b",
+    "head-npm-test.txt": "f9535c52443e0083936dbce0ca5731617d30583b9a569b138d26e309fa9f8ac1",
+    "isolated-build.txt": "390d48295c24bae02d8fbadd432ed6ed37bcd0a257087a3a15734e0113fc8520",
+    "lint.txt": "e0a85909d2cf8818d8d22bd299f190cd8faa2b19e18b42075274bd1df6f34e35",
+    "order-regressions.txt": "7e4b7b2fba50ad4757f7e00823b907d421291a9a0d4c1e577d0ff8893bfdf68a",
+    "prior-sandbox-base-npm-test-aborted.txt": "49f42f2d6ca54711917fcb216b925ac6bba7fd376ab7cb0f1a74870f776962a2",
+    "prior-sandbox-combined.txt": "7d30a4b685cd056007d364bd8a9b6eba11872431a10eec41c1d2e53b62d82d6f",
+    "prior-sandbox-head-npm-test-aborted.txt": "52a2ae6e964371ada3ed21d6f2a9a74392323dbd14945467f692d7bf50752f3f",
+    "typecheck.txt": "75d492006054e7be3760fe0f53fef7b32223f911590d6b684e507275bc9f6ba4"
+  },
+  "identity_source_comparison": {
+    "command": "git diff --exit-code ffde7cb147e29824f5ff7d9fffe017379712f1c9 -- tests/bill-identity.test.cjs tests/item-identity.test.cjs src/infrastructure/persistence/postgres/native-records.ts",
+    "exit_code": 0,
+    "result": "No changes to the bill-ID assertions, item-ID assertions or identity-validation implementation."
+  },
+  "reproduced_bill_id_failures_on_both_revisions": [
+    "bigint reservation uses the owned sequence and preserves values beyond JavaScript number precision",
+    "the current text layout retains the existing shared MAX allocation during compatibility deployment",
+    "numeric lookup preserves canonical string identity and the existing text tie-break",
+    "bigint writes accept only canonical strings and keep stale/immutable-handle checks"
+  ]
+}

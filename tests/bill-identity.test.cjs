@@ -3,6 +3,7 @@ require('./helpers/postgres-runtime.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),cp=require('node:child_process');
 const db=require('../src/infrastructure/persistence/postgres/database.ts');
 const {NativeRecords}=require('../src/infrastructure/persistence/postgres/native-records.ts');
+test.describe('order bill identity',()=>{
 let type,identity,sequence,client,queries,next;
 test.beforeEach(()=>{
  type='bigint';identity='d';sequence='stock_operational.order_bills_id_seq';next=100n;queries=[];
@@ -45,4 +46,5 @@ test('operator SQL is reproducible, gated, outside automatic migrations, and has
   const sql=cp.execFileSync('python3',['tools/migration/order-bill-identity.py',mode],{encoding:'utf8'});assert.equal(sql,fs.readFileSync('tools/migration/operator/'+file,'utf8'));assert.match(sql,/bill_identity_revision/);assert.match(sql,/business-and-config-v1/);assert.doesNotMatch(sql,/CASCADE|SECURITY DEFINER|DISABLE TRIGGER/);
  }
  assert.equal(fs.existsSync('supabase/migrations/20261120022134_order_bill_identity.sql'),false);
+});
 });

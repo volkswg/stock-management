@@ -1346,3 +1346,127 @@ old writer may lack `shopId` and require another approved explicit reconciliatio
 New staff auth, stock-by-product balances and backup automation remain deferred.
 The rollback application is the deployed PR105 baseline with its transaction
 endpoint/pool4, not a pre-pooling application or pool configuration.
+
+## Cloud application-only release
+
+This portable procedure lets an authorized Codex Cloud operator prepare and execute
+an application-only release in the **existing** Vercel project. It changes no schema,
+business records, traffic controls, access protection, pool settings or provider
+credentials. Private recovery/evidence stays on the Mac. A database change, fresh
+record export, provider canary or maintenance release still uses its separately
+approved operator packet above; do not adapt this procedure to bypass that gate.
+
+`npm run cloud:release` is a **token-free packet builder**, not a deployment client.
+It validates read-only metadata and emits exact requests for an authenticated
+operator. It does not grant approval, establish a connection or make an API call.
+No GitHub deployment secret, paid environment-review feature, new resource or
+production setting is configured by adding it. Source/CI must first be reviewed and
+merged; an unmerged source is refused even when its feature tests pass.
+
+### One-time Cloud access
+
+Use the existing connected Vercel tools and GitHub connection where their operations
+are sufficient. If the Vercel tool cannot explicitly preserve `autoAssignCustomDomains:
+false` and `hnd1`, use official Vercel CLI65.15.0, already used for the reviewed Mac
+releases. Install it in an owned Cloud tools directory, outside the repository, and
+have the owner approve a **new Cloud CLI session** through Vercel's official device
+sign-in. Read its `--help`; never extract a connector token or copy this Mac's CLI
+auth, DB profiles, passwords, `.env`, snapshots or cookies. Keep approval/setup
+separate from release execution. A missing connection or denied command is a blocker,
+not permission to weaken protection. Do not request a password/token in chat.
+
+The Cloud environment needs its supported GitHub/Vercel tools and access to the
+relevant HTTPS hosts/package registry. Allowing a host does not grant a service
+credential. Setup/access controls belong to the Cloud environment, not a repository
+sandbox-bypass option. See [Codex Cloud access](https://learn.chatgpt.com/docs/environments/cloud-environments)
+and [Vercel deployments](https://vercel.com/docs/deployments).
+
+### Prepare the packet without changing production
+
+1. Use connected read-only tools to obtain GitHub main/source commit and tree IDs,
+   complete changed-path comparison from the live source, and successful
+   `.github/workflows/migration-acceptance.yml` CI for the same source or exact tree.
+   Do not hand-author CI success. If needed run its manual exact-SHA entrypoint first.
+2. Inspect Vercel project `prj_XH4nEje5cicuBuucGumuHgr73l1E` in team
+   `team_bkDqHUBMbLyAXmwZqvCmovcu`, its current READY production deployment,
+   canonical alias `inventra-beta-one.vercel.app` and active firewall. Read only
+   **non-secret** `STOCK_PRODUCTION_RELEASE_JSON` and encrypted variable metadata;
+   never pull/decrypt runtime/provider credentials. Do not fetch business APIs.
+3. In an ignored private directory such as `migration-artifacts/cloud-release/`,
+   save `stage-input.json` containing `project`, `live`, `binding`, `firewall`,
+   `aliasDeploymentId`, `source` and `ci` from those verified tool results. The
+   input contract is exported as the synthetic example in
+   `tools/cloud/workflow.test.mjs`; example IDs/CI status are never production evidence.
+   `source` has `sha`, `tree`, `mainSha`, `baseSha` (the live source), `changedPaths`; `ci` has `repository`,
+   `workflowPath`, `sha`, `tree`, `status`, `conclusion`.
+4. Run:
+
+   ```sh
+   npm run cloud:release -- stage-plan \
+     --input migration-artifacts/cloud-release/stage-input.json \
+     --out migration-artifacts/cloud-release/stage-packet
+   ```
+
+   Existing live source/binding, exact project/isolation/runtime, transaction pooling,
+   disabled domain auto-assignment, CI/tree identity and absence of existing
+   maintenance must match. Changed SQL/migration/env files refuse this path. Plan
+   output contains only the non-secret binding, request bodies, rollback source
+   binding and hashes. Keep it private; upload no environment snapshot or records.
+5. Present that exact source, target, requests, HEAD-only checks, rollback deployment
+   and rollback binding for owner approval. Also recheck the retained recovery
+   reference with its Mac operator if required by the approved release scope. Do not
+   invent fresh recovery verification from Cloud or export a dump there. The same
+   explicit approval may cover staging/promotion/rollback when it names the complete
+   packet; do not ask again for actions already covered.
+
+### Execute only the approved application packet
+
+- Recheck all input metadata immediately before writes. A drift invalidates the
+  packet. Using the authenticated connection, apply only `bindingPatch.json` to the
+  one production source-binding variable, then POST `deploymentRequest.json` to
+  `/v13/deployments?forceNew=1` under the exact team. `requests.json` contains the
+  paths/methods; append the exact team query. When using CLI, pass bodies through
+  `vercel api ... --method ... --input FILE`; no tokens in arguments or logs.
+- Record the attempt before each request. On timeout, inspect committed state before
+  retrying. The build is target `production`, fixed reviewed Git SHA, `hnd1` and
+  `autoAssignCustomDomains:false`; the canonical domain must still point to the
+  previous deployment. Restore only the source binding if creation/build fails and
+  the old deployment remains active. Never resubmit an uncertain create blindly.
+- Poll that deployment until READY or failure. Check exact source, region, target,
+  protection and unchanged environment/firewall/alias. A HEAD request to its protected
+  host must be denied/redirected to Vercel; do not create a bypass or access link.
+- Save the refreshed `project`, `live`, `binding`, `firewall`, `aliasDeploymentId`,
+  `staged` and the observed `protectedDeploymentVerified:true` as `ready-input.json`.
+  The `live` entry remains the previous active deployment. Run:
+
+  ```sh
+  npm run cloud:release -- ready-plan \
+    --input migration-artifacts/cloud-release/ready-input.json \
+    --manifest migration-artifacts/cloud-release/stage-packet/manifest.json \
+    --out migration-artifacts/cloud-release/ready-packet
+  ```
+
+- After the packet's owner promotion approval, execute its exact `promotionCommand`
+  (`vercel promote DEPLOYMENT --yes`). Do not promote a preview/rebuilt substitute.
+  Verify project/canonical alias now identify this deployment and only the release
+  binding's source commit changed. This protocol uses promotion followed by immediate
+  status/guard checks and approved app rollback; it does not claim pre-promotion
+  business-data comparisons through a protected host.
+- Run only the packet's **HEAD** checks and rejected probes. HEAD responses carry no
+  business-record body. Invalid LINE signature must return401 and a missing
+  Idempotency-Key must return428; neither request is allowed to write or invoke a
+  provider. Check the source static helper and deployment error counts/allowlisted codes only;
+  do not fetch raw business/provider log values or publish private contents. No accepted-write canary or fresh
+  business-record GET is included. Stop on unexpected responses; never weaken guards.
+- If any live check fails, invoke the approved `rollbackCommand`, restore the exact
+  `rollbackBinding.json` via the same variable ID, and verify the previous domain,
+  binding and guards. Preserve all records and existing schema. If rollback is
+  uncertain, report the actual state immediately and use the approved operator;
+  do not restore a stale database snapshot or announce success.
+- Record source/deployment, check statuses, CI, preserved settings, rollback result
+  if used, and the private evidence reference. Announce release only after success.
+  Keep credentials/records/private artifacts out of PRs and CI artifacts.
+
+Installing this workflow is preparation only. Cloud may implement, test, open PRs
+and prepare packets autonomously; merge, production deployment and any database or
+traffic operation still require their explicit owner authorization.

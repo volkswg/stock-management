@@ -13,6 +13,7 @@ new vm.Script(ts.transpileModule(prior.before,{fileName:'native-records.ts',comp
 const {NativeRecords}=priorExports;
 const {createOrderAttachmentStore}=require('../src/modules/orders/infrastructure/postgres/order-attachments.ts');
 const {createOrderItem}=require('../src/modules/orders/application/order-attachments.ts');
+test.describe('order item identity',()=>{
 let client,type,identity,queries;
 function nextTransaction(){client={query:async(sql,values)=>{
  queries.push({sql,values});
@@ -52,4 +53,5 @@ test('coupled operator SQL is reproducible, gated, outside discovery, and preser
   assert.equal((sql.match(/DROP CONSTRAINT "movement_details_purchaseDetailId_fkey"/g)||[]).length,1);assert.equal((sql.match(/ADD CONSTRAINT "movement_details_purchaseDetailId_fkey"/g)||[]).length,1);assert.doesNotMatch(sql,/CASCADE|SECURITY DEFINER|DISABLE TRIGGER|ALTER TABLE stock_operational.(order_bills|user_state)/);
  }
  assert.equal(fs.existsSync('supabase/migrations/'+names[0]),false);
+});
 });

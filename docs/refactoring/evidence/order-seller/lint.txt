@@ -1,0 +1,13 @@
+
+> stock-management@0.1.0 lint
+> eslint
+
+
+/workspace/stock-management/tests/shipments-read-seam.test.mjs
+  7:48  warning  'shipmentRow' is defined but never used  @typescript-eslint/no-unused-vars
+
+/workspace/stock-management/tools/product-uat/postgres.test.cjs
+  17:8  warning  'createOrderItemCatalogue' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

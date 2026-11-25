@@ -1234,3 +1234,28 @@ the two inherited unused-variable warnings; type checking and a credential-free
 build preserve all routes and check 112 client chunks without private database
 strings. These local checks use no real provider or hosted database; final-commit
 CI and owner review remain required before merge/release.
+
+## Seller replay compatibility and Codex Cloud workflow — prepared only
+
+Follow-up on the unmerged seller-edit branch keeps old successful price/remark
+replay responses valid when `seller` is absent, preserves the current seller in the
+parent, and still requires a saved seller for an intentional seller edit. No server
+idempotency validation, command response snapshot or database contract is changed.
+Bill/item test mock hooks are scoped to their own suites so grouped diagnostics do
+not corrupt each other's identity metadata. Assertions are retained.
+
+Cloud preparation adds credential-free Node/Python execution probes, the canonical
+test command, manual exact-SHA GitHub acceptance and token-free application release
+packets for the existing Vercel target. Packets refuse source/target/CI/schema drift,
+retain transaction pooling and protection, stage without aliases, and preserve the
+previous deployment/source binding for approved rollback. They make no provider/API
+calls themselves and do not install credentials, change Cloud permission policies or
+authorize production. Existing historical before bytes/hashes remain pinned; the
+unmerged seller inverse tracks only this PR's changed after-source. Local verification passed893 Node tests and three Python tests, 26 grouped identity
+checks, typecheck, lint (two inherited warnings), workflow YAML parsing and the
+isolated build (unchanged routes,112 client chunks without private database
+strings). Five Cloud packet/environment tests cover denied execution, failed CI,
+unmerged/wrong targets, schema/secret-bearing inputs, protection drift, READY
+builds and rollback. The Cloud connection itself still needs confirmation; packet
+preparation does not prove that account access. Full CI is reported in the PR.
+No production change.

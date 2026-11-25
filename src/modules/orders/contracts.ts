@@ -148,6 +148,7 @@ export type UpdateOrderItemProductCodeResult =
 
 export type OrderDetailsUpdate = {
   status: OrderStatus;
+  seller: string;
   totalPrice: number | null;
   remark: string;
   updatedAt: string;
