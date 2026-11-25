@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Hash-bound historical test source, never a runtime fallback. */
 const fs=require('node:fs'),{createHash}=require('node:crypto'),assert=require('node:assert/strict');
 exports.beforeSeller=(name,data=fs.existsSync(name)?fs.readFileSync(name):null)=>{
+ data=require('./order-list-pagination-history.cjs').beforeOrderPagination(name,data);
  const docs=JSON.parse(fs.readFileSync('tests/fixtures/docs-consolidation-before.json')).edits[name];
  if(docs){
   const hash=value=>createHash('sha256').update(value).digest('hex');assert.equal(data===null?null:hash(data),docs.afterSha256,name);
