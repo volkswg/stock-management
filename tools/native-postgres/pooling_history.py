@@ -8,7 +8,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def before_order_pagination(name, data):
+    pagination_edit = json.loads((ROOT / 'tests/fixtures/order-list-pagination-before.json').read_text())['edits'].get(name)
+    if pagination_edit:
+        assert data is not None and hashlib.sha256(data).hexdigest() == pagination_edit['afterSha256'], name
+        lines = data.decode().splitlines(keepends=True)
+        for delta in reversed(pagination_edit['inverse']):
+            lines[delta['start']:delta['start'] + delta['count']] = [delta['before']]
+        data = ''.join(lines).encode()
+        assert hashlib.sha256(data).hexdigest() == pagination_edit['beforeSha256'], name
+    return data
+
+
 def before_seller(name, data):
+    data = before_order_pagination(name, data)
     docs = json.loads((ROOT / 'tests/fixtures/docs-consolidation-before.json').read_text())['edits'].get(name)
     if docs:
         assert data is not None and hashlib.sha256(data).hexdigest() == docs['afterSha256'], name

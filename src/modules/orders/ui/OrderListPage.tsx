@@ -40,6 +40,22 @@ import styles from "./orders.module.css";
 const { Text, Title } = Typography;
 const PAGE_SIZE = 10;
 
+function readPageFromUrl(): number {
+  const value = new URL(window.location.href).searchParams.get("page");
+  if (!value || !/^[1-9]\d*$/.test(value)) return 1;
+  const page = Number(value);
+  return Number.isSafeInteger(page) ? page : 1;
+}
+
+function writePageToUrl(page: number): void {
+  const url = new URL(window.location.href);
+  if (page === 1) url.searchParams.delete("page");
+  else url.searchParams.set("page", String(page));
+  if (url.href !== window.location.href) {
+    window.history.replaceState(window.history.state, "", url);
+  }
+}
+
 type ShipmentLinkFilter = "all" | "linked" | "not-linked";
 
 const COLUMNS: TableProps<OrderListItem>["columns"] = [
@@ -111,11 +127,27 @@ export function OrderListPage() {
   const [expandedRowKeys, setExpandedRowKeys] = useState<Key[]>([]);
 
   useEffect(() => {
+    const restorePage = () => setPage(readPageFromUrl());
+    restorePage();
+    window.addEventListener("popstate", restorePage);
+    return () => window.removeEventListener("popstate", restorePage);
+  }, []);
+
+  const changePage = (value: number): void => {
+    setPage(value);
+    writePageToUrl(value);
+  };
+
+  useEffect(() => {
     const controller = new AbortController();
 
     getOrders({ signal: controller.signal })
       .then((response) => {
         setOrders(response.orders);
+        setPage((current) => Math.min(
+          current,
+          Math.max(1, Math.ceil(response.orders.length / PAGE_SIZE)),
+        ));
         setExpandedRowKeys(
           response.orders
             .filter((order) => order.productImages.length > 0)
@@ -160,9 +192,16 @@ export function OrderListPage() {
     });
   }, [orders, query, shipmentLink, status]);
 
+  const pageCount = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+
+  useEffect(() => {
+    if (!loading && !error) writePageToUrl(currentPage);
+  }, [currentPage, error, loading, page]);
+
   const visibleOrders = filteredOrders.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE,
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
   );
 
   return (
@@ -218,7 +257,7 @@ export function OrderListPage() {
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
-                  setPage(1);
+                  changePage(1);
                 }}
               />
               <Select<ShipmentLinkFilter>
@@ -232,7 +271,7 @@ export function OrderListPage() {
                 value={shipmentLink}
                 onChange={(value) => {
                   setShipmentLink(value);
-                  setPage(1);
+                  changePage(1);
                 }}
               />
             </div>
@@ -243,7 +282,7 @@ export function OrderListPage() {
               items={STATUS_FILTERS}
               onChange={(value) => {
                 setStatus(value);
-                setPage(1);
+                changePage(1);
               }}
             />
 
@@ -320,12 +359,12 @@ export function OrderListPage() {
                 Showing {visibleOrders.length} of {filteredOrders.length} orders
               </Text>
               <Pagination
-                current={page}
+                current={currentPage}
                 pageSize={PAGE_SIZE}
                 total={filteredOrders.length}
                 disabled={loading || filteredOrders.length === 0}
                 showSizeChanger={false}
-                onChange={setPage}
+                onChange={changePage}
               />
             </div>
           </Card>

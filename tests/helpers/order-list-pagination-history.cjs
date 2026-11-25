@@ -1,0 +1,8 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Hash-bound historical test source, never a runtime fallback. */
+const fs=require('node:fs'),{createHash}=require('node:crypto'),assert=require('node:assert/strict');
+exports.beforeOrderPagination=(name,data=fs.existsSync(name)?fs.readFileSync(name):null)=>{
+ const edit=JSON.parse(fs.readFileSync('tests/fixtures/order-list-pagination-before.json')).edits[name];if(!edit)return data;
+ const hash=value=>createHash('sha256').update(value).digest('hex');assert.equal(data===null?null:hash(data),edit.afterSha256,name);
+ const lines=data.toString().split(/(?<=\n)/);for(const delta of [...edit.inverse].reverse())lines.splice(delta.start,delta.count,delta.before);
+ const before=Buffer.from(lines.join(''));assert.equal(hash(before),edit.beforeSha256,name);return before;
+};

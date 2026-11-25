@@ -1,0 +1,98 @@
+{
+  "edits": {
+    "src/modules/orders/ui/OrderListPage.tsx": {
+      "beforeSha256": "8a64d4344125aabb84b5315bbfdffb8c90406f8e6716f18e62b3c088d2357c41",
+      "afterSha256": "8dc85286d3544572b1b94be863d573b14b7dd78d1c6f6b06c05313bec26e6ff6",
+      "inverse": [
+        {
+          "start": 41,
+          "count": 16,
+          "before": ""
+        },
+        {
+          "start": 129,
+          "count": 12,
+          "before": ""
+        },
+        {
+          "start": 146,
+          "count": 4,
+          "before": ""
+        },
+        {
+          "start": 194,
+          "count": 7,
+          "before": ""
+        },
+        {
+          "start": 202,
+          "count": 2,
+          "before": "    (page - 1) * PAGE_SIZE,\n    page * PAGE_SIZE,\n"
+        },
+        {
+          "start": 259,
+          "count": 1,
+          "before": "                  setPage(1);\n"
+        },
+        {
+          "start": 273,
+          "count": 1,
+          "before": "                  setPage(1);\n"
+        },
+        {
+          "start": 284,
+          "count": 1,
+          "before": "                setPage(1);\n"
+        },
+        {
+          "start": 361,
+          "count": 1,
+          "before": "                current={page}\n"
+        },
+        {
+          "start": 366,
+          "count": 1,
+          "before": "                onChange={setPage}\n"
+        }
+      ]
+    },
+    "tests/helpers/order-seller-history.cjs": {
+      "beforeSha256": "c3f1bbfa10080bfd06e16e7a3e14eb7a157265aff7df6b5abdadee3fccd51a49",
+      "afterSha256": "cfcb52b8e560693d6b06efbb364450522fd98cf5f5d0476bf62eb98c783fe06b",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/pooling_history.py": {
+      "beforeSha256": "8e0a411ac6eccdd3b472d8360b47101050e68b920c2aad35612107dd51a7943a",
+      "afterSha256": "5550286d79c7ad1c7b1b4b2f8d9d89f42918456516ba476adb62899bfd477030",
+      "inverse": [
+        {
+          "start": 10,
+          "count": 12,
+          "before": ""
+        },
+        {
+          "start": 23,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/test.mjs": {
+      "beforeSha256": "7fca4916ad21f270f07c61af57c11b2cb75d01c71b64cbe425155bfaa9073340",
+      "afterSha256": "cf119d0e3df7a579a2e3d30b86f2d20295bb00e243f4de73301610ab2cee74ac",
+      "inverse": [
+        {
+          "start": 14,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    }
+  }
+}
