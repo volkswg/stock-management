@@ -38,7 +38,6 @@ import {
 import styles from "./orders.module.css";
 
 const { Text, Title } = Typography;
-const PAGE_SIZE = 10;
 
 function readPageFromUrl(): number {
   const value = new URL(window.location.href).searchParams.get("page");
@@ -123,6 +122,7 @@ export function OrderListPage() {
   const [shipmentLink, setShipmentLink] =
     useState<ShipmentLinkFilter>("all");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [requestId, setRequestId] = useState(0);
   const [expandedRowKeys, setExpandedRowKeys] = useState<Key[]>([]);
 
@@ -144,10 +144,6 @@ export function OrderListPage() {
     getOrders({ signal: controller.signal })
       .then((response) => {
         setOrders(response.orders);
-        setPage((current) => Math.min(
-          current,
-          Math.max(1, Math.ceil(response.orders.length / PAGE_SIZE)),
-        ));
         setExpandedRowKeys(
           response.orders
             .filter((order) => order.productImages.length > 0)
@@ -192,7 +188,7 @@ export function OrderListPage() {
     });
   }, [orders, query, shipmentLink, status]);
 
-  const pageCount = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
   const currentPage = Math.min(page, pageCount);
 
   useEffect(() => {
@@ -200,8 +196,8 @@ export function OrderListPage() {
   }, [currentPage, error, loading, page]);
 
   const visibleOrders = filteredOrders.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
   );
 
   return (
@@ -360,11 +356,15 @@ export function OrderListPage() {
               </Text>
               <Pagination
                 current={currentPage}
-                pageSize={PAGE_SIZE}
+                pageSize={pageSize}
                 total={filteredOrders.length}
                 disabled={loading || filteredOrders.length === 0}
-                showSizeChanger={false}
-                onChange={changePage}
+                showSizeChanger={{ "aria-label": "Orders per page" }}
+                pageSizeOptions={[10, 20, 50, 100]}
+                onChange={(nextPage, nextPageSize = pageSize) => {
+                  setPageSize(nextPageSize);
+                  changePage(nextPageSize === pageSize ? nextPage : 1);
+                }}
               />
             </div>
           </Card>

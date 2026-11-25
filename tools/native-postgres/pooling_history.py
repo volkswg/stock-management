@@ -9,6 +9,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def before_order_pagination(name, data):
+    size_edit = json.loads((ROOT / 'tests/fixtures/order-page-size-before.json').read_text())['edits'].get(name)
+    if size_edit:
+        assert hashlib.sha256(data).hexdigest() == size_edit['afterSha256'], name
+        lines = data.decode().splitlines(keepends=True)
+        for delta in reversed(size_edit['inverse']):
+            lines[delta['start']:delta['start'] + delta['count']] = [delta['before']]
+        data = ''.join(lines).encode()
+        assert hashlib.sha256(data).hexdigest() == size_edit['beforeSha256'], name
     pagination_edit = json.loads((ROOT / 'tests/fixtures/order-list-pagination-before.json').read_text())['edits'].get(name)
     if pagination_edit:
         assert data is not None and hashlib.sha256(data).hexdigest() == pagination_edit['afterSha256'], name

@@ -1,0 +1,56 @@
+{
+  "edits": {
+    "src/modules/orders/ui/OrderListPage.tsx": {
+      "beforeSha256": "8dc85286d3544572b1b94be863d573b14b7dd78d1c6f6b06c05313bec26e6ff6",
+      "afterSha256": "1940c8837e77e4a659a23a4e1404fada6ad01b4bcaeccf3ed31fd200f354fb80",
+      "inverse": [
+        {
+          "start": 40,
+          "count": 0,
+          "before": "const PAGE_SIZE = 10;\n"
+        },
+        {
+          "start": 124,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 146,
+          "count": 0,
+          "before": "        setPage((current) => Math.min(\n          current,\n          Math.max(1, Math.ceil(response.orders.length / PAGE_SIZE)),\n        ));\n"
+        },
+        {
+          "start": 190,
+          "count": 1,
+          "before": "  const pageCount = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));\n"
+        },
+        {
+          "start": 198,
+          "count": 2,
+          "before": "    (currentPage - 1) * PAGE_SIZE,\n    currentPage * PAGE_SIZE,\n"
+        },
+        {
+          "start": 358,
+          "count": 1,
+          "before": "                pageSize={PAGE_SIZE}\n"
+        },
+        {
+          "start": 361,
+          "count": 6,
+          "before": "                showSizeChanger={false}\n                onChange={changePage}\n"
+        }
+      ]
+    },
+    "tools/native-postgres/test.mjs": {
+      "beforeSha256": "cf119d0e3df7a579a2e3d30b86f2d20295bb00e243f4de73301610ab2cee74ac",
+      "afterSha256": "cce3ab5024535f35a65129b915e9fdf25970710bdc82da32c31feef5fec81f1c",
+      "inverse": [
+        {
+          "start": 14,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    }
+  }
+}
