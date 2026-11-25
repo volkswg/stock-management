@@ -1268,8 +1268,10 @@ Before removal, all 14 files were byte-compared with that commit and all 13 log
 SHA-256 values matched the original manifest. The links below replace each removed
 working-tree path under `docs/refactoring/evidence/order-seller/`.
 
-Working docs shrink from 27 files / 12,915 lines to 13 files / 4,330 lines
-(approximately 1.19 MB to 0.38 MB). Application and test files are unchanged.
+Working docs shrink from 27 files / 12,915 lines to 13 files / 4,332 lines
+(approximately 1.19 MB to 0.38 MB). Application and existing fixture bytes are unchanged.
+An exact, hash-bound test-only inverse restores the two prior docs and the history
+helper before historical verification; unrelated drift is still rejected.
 
 The [original commands and hashes](https://github.com/volkswg/stock-management/blob/a299920d3b14246dd7819cb58123d5d49e028fc6/docs/refactoring/evidence/order-seller/commands.json)
 preserve exact invocations, working directories, execution restrictions and results.
@@ -1302,7 +1304,7 @@ both passed on that final head. [PR106](https://github.com/volkswg/stock-managem
 merged as `1d2f9e93c3958ac2281d04e0ba38aeb1203d05ec` with the identical source tree
 and was released after the approved application-only checks. Earlier preparation
 notes above remain historical; Cloud service access is still separate from source
-verification. No new test run is claimed by this documentation cleanup.
+verification. Final cleanup CI must also pass; these older runs are retained evidence.
 
 Raw files are removed only from the working docs, with no Git-history rewrite.
 Old default-branch links to these paths will no longer resolve; use the immutable

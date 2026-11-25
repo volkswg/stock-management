@@ -1,0 +1,39 @@
+{
+  "baseCommit": "1d2f9e93c3958ac2281d04e0ba38aeb1203d05ec",
+  "scope": "Exact docs-cleanup inverse only; original historical fixtures and raw Git evidence stay immutable.",
+  "edits": {
+    "docs/refactoring/progress.md": {
+      "beforeSha256": "4ecaf861a68a8a67f86f4c6293ab289fd186d8fec64607a802cf7b178451d4f6",
+      "afterSha256": "8bb9a9a18a22aa43a0aec660203d20819422bf11369975405e5b0efed1668804",
+      "inverse": [
+        {
+          "start": 1261,
+          "count": 51,
+          "before": ""
+        }
+      ]
+    },
+    "docs/refactoring/verification.md": {
+      "beforeSha256": "e0425af10488e30fe9291e700cf3cd6c2b0407686c08c4d3089eecdfeaa1ada6",
+      "afterSha256": "541058699e59e69ab11fac033276709d46a276def2f4568a76d5905cd37f327f",
+      "inverse": [
+        {
+          "start": 182,
+          "count": 4,
+          "before": "Verify the diff contains only intended Markdown changes. Audit every local link,\n"
+        }
+      ]
+    },
+    "tools/native-postgres/pooling_history.py": {
+      "beforeSha256": "8a79bb36987814e40e93737a6370929ec7b63c403e1a8c50764a29a4e4a2a56d",
+      "afterSha256": "f9ea677f375e701a16ee00274b9d24f97a3983afd04d19f16044ba202c528645",
+      "inverse": [
+        {
+          "start": 9,
+          "count": 8,
+          "before": ""
+        }
+      ]
+    }
+  }
+}
