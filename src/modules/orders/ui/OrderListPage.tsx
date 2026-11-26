@@ -211,6 +211,27 @@ export function OrderListPage() {
     currentPage * pageSize,
   );
 
+  const renderPagination = (label: string) => (
+    <nav aria-label={label} className={styles.pagination}>
+      <Text type="secondary">
+        Showing {visibleOrders.length} of {filteredOrders.length} orders
+      </Text>
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={filteredOrders.length}
+        disabled={loading || filteredOrders.length === 0}
+        responsive
+        showSizeChanger={{ "aria-label": "Orders per page" }}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        onChange={(nextPage, nextPageSize = pageSize) => {
+          setPageSize(nextPageSize);
+          changePage(nextPageSize === pageSize ? nextPage : 1, nextPageSize);
+        }}
+      />
+    </nav>
+  );
+
   return (
     <ConfigProvider
       theme={{
@@ -293,6 +314,8 @@ export function OrderListPage() {
               }}
             />
 
+            {renderPagination("Orders pagination above list")}
+
             <div className={styles.desktopOrderTable}>
               <Table<OrderListItem>
                 columns={COLUMNS}
@@ -361,23 +384,7 @@ export function OrderListPage() {
               />
             ) : null}
 
-            <div className={styles.pagination}>
-              <Text type="secondary">
-                Showing {visibleOrders.length} of {filteredOrders.length} orders
-              </Text>
-              <Pagination
-                current={currentPage}
-                pageSize={pageSize}
-                total={filteredOrders.length}
-                disabled={loading || filteredOrders.length === 0}
-                showSizeChanger={{ "aria-label": "Orders per page" }}
-                pageSizeOptions={PAGE_SIZE_OPTIONS}
-                onChange={(nextPage, nextPageSize = pageSize) => {
-                  setPageSize(nextPageSize);
-                  changePage(nextPageSize === pageSize ? nextPage : 1, nextPageSize);
-                }}
-              />
-            </div>
+            {renderPagination("Orders pagination below list")}
           </Card>
         </main>
       </div>

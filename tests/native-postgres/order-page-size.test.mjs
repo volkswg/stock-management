@@ -196,3 +196,31 @@ test("loading and errors preserve the requested pair; successful loading clamps 
   assert.equal(failed.writes.length, 0);
   failed.h.unmount();
 });
+
+test("pagination above and below the results shares page, size and saved URL state", async () => {
+  const b = pageSizeHarness("https://example.test/orders?page=2&pageSize=20");
+  await b.ready();
+  const controls = () => elements(b.tree(), "Pagination");
+  assert.equal(controls().length, 2);
+  const card = elements(b.tree(), "Card").find(node => node.props.className === "orderList");
+  const children = card.props.children;
+  const top = children.findIndex(node => node?.props?.["aria-label"] === "Orders pagination above list");
+  const bottom = children.findIndex(node => node?.props?.["aria-label"] === "Orders pagination below list");
+  const desktop = children.findIndex(node => node?.props?.className === "desktopOrderTable");
+  const mobile = children.findIndex(node => node?.props?.className === "mobileOrderList");
+  assert.ok(top >= 0 && top < desktop && top < mobile);
+  assert.ok(bottom > desktop && bottom > mobile);
+  controls()[1].props.onChange(1, 50);
+  for (const control of controls()) {
+    assert.equal(control.props.current, 1);
+    assert.equal(control.props.pageSize, 50);
+    assert.equal(control.props.responsive, true);
+  }
+  assert.equal(b.rows().length, 50);
+  controls()[0].props.onChange(2, 50);
+  for (const control of controls()) assert.equal(control.props.current, 2);
+  assert.equal(new URL(b.href).searchParams.get("pageSize"), "50");
+  assert.equal(new URL(b.href).searchParams.get("page"), "2");
+  assert.equal(b.requests, 1);
+  b.h.unmount();
+});

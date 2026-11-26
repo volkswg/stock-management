@@ -1,0 +1,75 @@
+{
+  "baseCommit": "6ce6e4e4179d08425ef3a792f3e7b86924b275fc",
+  "scope": "Exact Orders mobile/top-bottom pagination source inverse; existing fixtures and assertions unchanged.",
+  "edits": {
+    "src/modules/orders/ui/OrderListPage.tsx": {
+      "beforeSha256": "8de1f5937e4cf11119c10b0379a091bed33954898d4c6104ea61ce1d35687d5b",
+      "afterSha256": "8489fd565411a7ca0831faef30af9e178b8f33c4c11b4341fd53f9574066ce54",
+      "inverse": [
+        {
+          "start": 213,
+          "count": 21,
+          "before": ""
+        },
+        {
+          "start": 316,
+          "count": 2,
+          "before": ""
+        },
+        {
+          "start": 386,
+          "count": 1,
+          "before": "            <div className={styles.pagination}>\n              <Text type=\"secondary\">\n                Showing {visibleOrders.length} of {filteredOrders.length} orders\n              </Text>\n              <Pagination\n                current={currentPage}\n                pageSize={pageSize}\n                total={filteredOrders.length}\n                disabled={loading || filteredOrders.length === 0}\n                showSizeChanger={{ \"aria-label\": \"Orders per page\" }}\n                pageSizeOptions={PAGE_SIZE_OPTIONS}\n                onChange={(nextPage, nextPageSize = pageSize) => {\n                  setPageSize(nextPageSize);\n                  changePage(nextPageSize === pageSize ? nextPage : 1, nextPageSize);\n                }}\n              />\n            </div>\n"
+        }
+      ]
+    },
+    "src/modules/orders/ui/orders.module.css": {
+      "beforeSha256": "96c61b1ec82e694c7f8abe919720b919414f0c0f997a484efe887c79e5962149",
+      "afterSha256": "8586ba8f1c192f1c6ac38eef55e7a2bac03d8fa540cf4e6394fef66c13fdef0f",
+      "inverse": [
+        {
+          "start": 317,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 323,
+          "count": 11,
+          "before": ""
+        },
+        {
+          "start": 382,
+          "count": 7,
+          "before": ""
+        },
+        {
+          "start": 424,
+          "count": 0,
+          "before": "\n  .pagination {\n    align-items: flex-start;\n    flex-direction: column;\n  }\n"
+        }
+      ]
+    },
+    "tests/helpers/order-list-pagination-history.cjs": {
+      "beforeSha256": "c30f25c203046ade488e88888f8aaf04580fdbc8924605d76365c159fa67239a",
+      "afterSha256": "e96ac8b932770f51f21e73461b4771a83e1f442918e8ff5b48a7899a20bb2416",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 6,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/pooling_history.py": {
+      "beforeSha256": "d4498ffbb3e322543667313d4221fe3a9a8b23a981953d5bedb34042723a9eeb",
+      "afterSha256": "e541488eaa1a2557c6fb2f506a2deeab235ae65bc7ee5616af1cd6ea4e415603",
+      "inverse": [
+        {
+          "start": 11,
+          "count": 8,
+          "before": ""
+        }
+      ]
+    }
+  }
+}
