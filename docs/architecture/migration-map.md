@@ -24,6 +24,30 @@ ID/revision handles and journals; it has no feature registry. Composition aggreg
 feature bindings. Ports expose business DTOs/operations, not SQL or row positions.
 Compensation's private synthetic identity and append-only histories are intentional.
 
+### Scoped reads
+
+Sales report ports supply date/year/account scopes to their PostgreSQL reader;
+receipt items are selected through matching receipt parents. Financial calculations,
+refund signs and payment-array projection remain in the existing report use cases.
+Movement lists retain the existing Bangkok date filter and fetch details only for
+matching masters. Movement edits and LINE reads select their parent/user/flow before projection;
+opaque row identities, revisions and session ordering remain unchanged.
+
+Orders supports opt-in `page`/`pageSize` reads with the existing search/status/link
+filters. The feature adapter counts and clamps page IDs in one SQL statement,
+then loads only that page's records and children. Search uses narrow candidate
+fields on the server to preserve JavaScript Unicode matching rather than relying
+on database-locale lowercasing. Unpaged API consumers retain their original shape.
+The browser keeps top/bottom controls, URL page-size persistence, and debounces
+search while rejecting stale responses. SQL stays in infrastructure; public
+Orders contracts contain only semantic query/result DTOs.
+
+`NativeRecords.select` reuses the existing explicit projection, ordering and
+tracked revisions with feature-owned, closed predicates and bound values. The
+root text helper preserves the ECMAScript trim set. Exact lint scopes permit only
+the named Orders/Sales transport imports; no schema, permission or pool change is
+required. Source presence does not mean this optimization is deployed.
+
 ## Composition and public boundaries
 
 | Consumer / owner | Contract |

@@ -42,8 +42,8 @@ export interface MovementMasters {
 export interface MovementStore {
     prepareMasters(): Promise<void>;
     prepareDetails(): Promise<void>;
-    readMasters(mode: 'list' | 'edit'): Promise<MovementMasters>;
-    readDetails(mode: 'list' | 'edit'): Promise<MovementDetails>;
+    readMasters(mode: 'list' | 'edit', masterId?: string): Promise<MovementMasters>;
+    readDetails(mode: 'list' | 'edit', masterId?: string | readonly string[]): Promise<MovementDetails>;
     exists(masterId: string): Promise<boolean>;
 }
 export type MovementRuntime = {

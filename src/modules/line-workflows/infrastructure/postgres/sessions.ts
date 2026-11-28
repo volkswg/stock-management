@@ -6,7 +6,7 @@ import { MOVEMENT_FLOW, UserStateFlowName, type UserState } from "../../contract
 import type { OrderSessionStore, MovementSessionStore, MovementSessionSnapshot, SessionEntry } from "../../application/ports/workflows";
 import type { Storage } from "./storage";
 type ItemSnapshot = { items(readId: () => string | undefined): MovementJourneyItem[] };
-export function createSessionAdapter(storage: Pick<Storage, "userState">, inventory: { itemSnapshot(): Promise<ItemSnapshot> }) {
+export function createSessionAdapter(storage: Pick<Storage, "userState">, inventory: { itemSnapshot(masterIds: string[]): Promise<ItemSnapshot> }) {
   type Record = Parameters<Storage["userState"]["update"]>[0];
   async function snapshot(records: Record[]): Promise<MovementSessionSnapshot> {
     const originals = new WeakMap<SessionEntry, Record>();
@@ -25,7 +25,7 @@ export function createSessionAdapter(storage: Pick<Storage, "userState">, invent
     };
   }
   const orders: OrderSessionStore = {
-    async findLatest(userId, flowname) { return (await storage.userState.all("descending")).map(mapUserStateRow).filter((v): v is UserState => Boolean(v)).find(v => v.userId === userId && v.flowname === flowname); },
+    async findLatest(userId, flowname) { return (await storage.userState.select('t."userId"=$1 AND t.flowname=$2',[userId,flowname],"descending")).map(mapUserStateRow).filter((v): v is UserState => Boolean(v)).find(v => v.userId === userId && v.flowname === flowname); },
     nextIdentifier: () => storage.userState.reserveIdentifier(),
     append: value => storage.userState.insert({ id: value.id, userId: value.userId, flowname: value.flowname, referenceId: value.referenceId, state: value.state, createdAt: value.createdAt, updatedAt: value.updatedAt }),
     reference(id) {
@@ -34,8 +34,12 @@ export function createSessionAdapter(storage: Pick<Storage, "userState">, invent
       return { update: async (state, createdAt, now) => storage.userState.update(await required(), { state, createdAt, updatedAt: now }), clear: async () => storage.userState.softDelete(await required()) };
     },
   };
-  const movements: MovementSessionStore = { async read() { return snapshot(await storage.userState.all("descending")); } };
-  return { orders, movements, async photoContext() { const [users, items] = await Promise.all([storage.userState.all("descending"), inventory.itemSnapshot()]); return { sessions: await snapshot(users), items: items.items }; } };
+  const movements: MovementSessionStore = { async read(userId) { return snapshot(await storage.userState.select('t."userId"=$1 AND t.flowname=$2',[userId,MOVEMENT_FLOW],"descending")); } };
+  return { orders, movements, async photoContext(userId: string) {
+    const users = await storage.userState.select('t."userId"=$1 AND t.flowname=$2',[userId,MOVEMENT_FLOW],"descending");
+    const items = await inventory.itemSnapshot(users.map(row => String(row.referenceId ?? "")));
+    return { sessions: await snapshot(users), items: items.items };
+  } };
 }
 function mapUserStateRow(row: NativeRecord): UserState | undefined {
     const { id, userId, flowname, referenceId, state, createdAt, updatedAt } = row;

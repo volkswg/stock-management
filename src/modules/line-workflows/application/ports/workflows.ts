@@ -28,7 +28,7 @@ export interface MovementSessionSnapshot {
     writeMovement(target: SessionEntry | undefined, value: MovementSessionWrite): Promise<void>;
 }
 export interface MovementSessionStore {
-    read(): Promise<MovementSessionSnapshot>;
+    read(userId: string): Promise<MovementSessionSnapshot>;
 }
 export interface OrderSessionReference {
     update(state: OrderStatus, createdAt: string, now: string): Promise<void>;
@@ -77,7 +77,7 @@ export interface WorkflowContext {
     movements: MovementSessionStore;
     orders: WorkflowOrders;
     inventory: WorkflowInventory;
-    photoContext(): Promise<{
+    photoContext(userId: string): Promise<{
         sessions: MovementSessionSnapshot;
         items(readMasterId: () => string | undefined): MovementJourneyItem[];
     }>;

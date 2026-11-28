@@ -19,13 +19,15 @@ export function createMovementStore(storage: Pick<Storage, "movementMasters" | "
   }
   return {
     prepareMasters: () => storage.movementMasters.prepare(), prepareDetails: () => storage.movementDetails.prepare(),
-    async exists(masterId) { return (await storage.movementMasters.all()).some(r => cell(r.id).toUpperCase() === masterId.toUpperCase()); },
-    async readMasters() {
-      const records = await storage.movementMasters.all();
+    async exists(masterId) { return (await storage.movementMasters.select('upper(t.id)=$1', [masterId.toUpperCase()])).some(r => cell(r.id).toUpperCase() === masterId.toUpperCase()); },
+    async readMasters(_mode, masterId) {
+      const records = masterId === undefined ? await storage.movementMasters.all() : await storage.movementMasters.select('upper(t.id)=$1', [masterId.toUpperCase()]);
       return { entries: () => records.map(record => ({ id: () => cell(record.id), project: (details: ProductMovementRecord[]) => rowToMovementMaster(record, details) })), find(id) { const record = records.find(r => cell(r.id).toUpperCase() === id.toUpperCase()); return record ? { edit: () => masterEdit(record) } : undefined; } };
     },
-    async readDetails() {
-      const records = await storage.movementDetails.all();
+    async readDetails(_mode, masterId) {
+      const records = masterId === undefined ? await storage.movementDetails.all()
+        : typeof masterId === "string" ? await storage.movementDetails.select('upper(t."movementMasterId")=$1', [masterId.toUpperCase()])
+        : await storage.movementDetails.select('t."movementMasterId"=ANY($1::text[])', [masterId]);
       return { records: () => records.map(rowToMovement), find(itemId, masterId) { const record = records.find(r => cell(r.id).toUpperCase() === itemId.toUpperCase() && cell(r.movementMasterId).toUpperCase() === masterId.toUpperCase()); return record ? itemReference(record) : undefined; }, matching(masterId) {
         const matches = records.filter(r => cell(r.movementMasterId).toUpperCase() === masterId.toUpperCase());
         return { hasItems: matches.length > 0, someQuantity: predicate => matches.some(r => predicate(cell(r.quantity))), async deliver(now) { for (const record of matches) await storage.movementDetails.update(record, { status: "delivered", updatedAt: now }); } };

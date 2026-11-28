@@ -48,6 +48,20 @@ export type OrderListItem = {
   productImages: OrderProductImage[];
 };
 
+export type OrderListQuery = {
+  page: number;
+  pageSize: number;
+  query: string;
+  status: "all" | "in-progress" | "completed";
+  shipmentLink: "all" | "linked" | "not-linked";
+};
+export type OrderListPageResult = {
+  orders: OrderListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
 export type OrderProductImage = {
   id: string;
   orderId: string;

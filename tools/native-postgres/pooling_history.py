@@ -9,6 +9,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def before_order_pagination(name, data):
+    scoped = json.loads((ROOT / 'tests/fixtures/scoped-reads-before.json').read_text())['edits'].get(name)
+    if scoped:
+        assert data is not None and hashlib.sha256(data).hexdigest() == scoped['afterSha256'], name
+        lines = data.decode().splitlines(keepends=True)
+        for delta in reversed(scoped['inverse']):
+            lines[delta['start']:delta['start'] + delta['count']] = [delta['before']]
+        data = ''.join(lines).encode()
+        assert hashlib.sha256(data).hexdigest() == scoped['beforeSha256'], name
     mobile = json.loads((ROOT / 'tests/fixtures/mobile-order-pagination-before.json').read_text())['edits'].get(name)
     if mobile:
         assert data is not None and hashlib.sha256(data).hexdigest() == mobile['afterSha256'], name

@@ -242,3 +242,8 @@ echo 'PASS: product catalogue rows, archived records and identity sequence indep
 # Actual guarded backfill and LINE destination IDs on a separate synthetic copy.
 pg createdb -U postgres -T np_product_uat np_movement_shops
 native_run np_movement_shops tools/movement-shops/postgres.test.cjs
+
+# Egress acceptance uses a fresh synthetic copy and current source, with full
+# predecessor-result comparisons and measured database-result reduction.
+pg createdb -U postgres -T np_movement_shops np_scoped_reads
+native_run np_scoped_reads tools/native-postgres/scoped-reads.test.cjs

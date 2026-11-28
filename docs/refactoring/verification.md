@@ -56,6 +56,24 @@ Read the resulting run's source SHA, conclusion and artifacts. Cancelled, stalle
 permission-blocked runs remain incomplete. Use the [application release procedure](../database-migration.md#cloud-application-only-release)
 only after successful source/tree CI and separate owner release approval.
 
+## Scoped-query acceptance
+
+Scoped-read acceptance is part of the canonical runner and PostgreSQL campaign.
+`tests/native-postgres/scoped-order-pagination.test.mjs` executes current UI
+callbacks/effects, including filter debounce, URL restore, server clamping, retries
+and response races. Older client-only pagination tests retain their exact
+pre-optimization source through the bounded scoped-read inverse; they are historical
+witnesses, not evidence for current server paging.
+
+`tools/native-postgres/scoped-reads.test.cjs` runs actual current adapters and HTTP
+owners on a fresh synthetic final-schema clone. It compares complete reports and
+movement/LINE projections with the pinned predecessors, checks split payments,
+Unicode search, stable ordering, scoped row tokens and stale-write rejection, and
+measures database result rows/serialized JSON bytes. These measurements demonstrate
+fixture reduction, not exact PostgreSQL wire bytes or a production billing forecast.
+The existing synthetic-only Product UAT local runner includes the same campaign;
+its hash-pinned synthetic fixture is never a production recovery checkpoint.
+
 ## Credential-free build
 
 Next can load `.env` files even with a cleared process environment. Prepare an

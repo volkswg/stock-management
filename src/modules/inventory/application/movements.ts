@@ -7,14 +7,16 @@ export async function listMovements({ filter, store }: {
     store: MovementStore;
 }): Promise<ProductMovementMasterRecord[]> {
     await Promise.all([store.prepareMasters(), store.prepareDetails()]);
-    const [masters, details] = await Promise.all([store.readMasters('list'), store.readDetails('list')]);
+    const masters = await store.readMasters('list');
+    const selected = masters.entries().filter(master => master.id() && matchesDateFilter(master.project([]), filter));
+    const details = await store.readDetails('list', selected.map(master => master.id()));
     const detailsByMaster = new Map<string, ProductMovementRecord[]>();
     for (const detail of details.records()) {
         if (!detail.movementId || !detail.movementMasterId)
             continue;
         detailsByMaster.set(detail.movementMasterId, [...(detailsByMaster.get(detail.movementMasterId) || []), detail]);
     }
-    return masters.entries().map(master => { const id = master.id(); return master.project(detailsByMaster.get(id) || []); }).filter(record => record.id && matchesDateFilter(record, filter));
+    return selected.map(master => { const id = master.id(); return master.project(detailsByMaster.get(id) || []); });
 }
 export async function getMovementItems({ store, movementMasterId }: {
     store: MovementStore;
@@ -22,7 +24,7 @@ export async function getMovementItems({ store, movementMasterId }: {
 }): Promise<ProductMovementRecord[]> {
     await store.prepareDetails();
     const normalizedId = movementMasterId.toUpperCase();
-    return (await store.readDetails('list')).records().filter(record => record.movementId && record.movementMasterId.toUpperCase() === normalizedId);
+    return (await store.readDetails('list', movementMasterId)).records().filter(record => record.movementId && record.movementMasterId.toUpperCase() === normalizedId);
 }
 export async function movementExists({ store, movementMasterId }: {
     store: MovementStore;
@@ -35,7 +37,7 @@ export async function deleteMovementItem({ store, movementId, movementMasterId, 
     runtime: MovementRuntime;
 }): Promise<ProductMovementRecord[]> {
     await store.prepareDetails();
-    const details = await store.readDetails('edit');
+    const details = await store.readDetails('edit', movementMasterId);
     const target = details.find(movementId, movementMasterId);
     if (target)
         await target.delete();
@@ -53,7 +55,7 @@ export async function updateMovementItem({ store, movementId, movementMasterId, 
     runtime: MovementRuntime;
 }): Promise<ProductMovementRecord[] | null> {
     await store.prepareDetails();
-    const details = await store.readDetails('edit');
+    const details = await store.readDetails('edit', movementMasterId);
     const target = details.find(movementId, movementMasterId);
     if (!target)
         return null;
@@ -85,7 +87,7 @@ export async function updateMovementImage({ store, imageUrl, movementId, movemen
     runtime: MovementRuntime;
 }): Promise<ProductMovementRecord[] | null> {
     await store.prepareDetails();
-    const details = await store.readDetails('edit');
+    const details = await store.readDetails('edit', movementMasterId);
     const target = details.find(movementId, movementMasterId);
     if (!target)
         return null;
@@ -105,7 +107,7 @@ export async function markMovementDelivered({ store, movementMasterId, runtime }
     records: ProductMovementRecord[];
 } | null> {
     await Promise.all([store.prepareMasters(), store.prepareDetails()]);
-    const [masters, details] = await Promise.all([store.readMasters('edit'), store.readDetails('edit')]);
+    const [masters, details] = await Promise.all([store.readMasters('edit', movementMasterId), store.readDetails('edit', movementMasterId)]);
     const normalizedId = movementMasterId.toUpperCase();
     const master = masters.find(normalizedId), selection = details.matching(normalizedId);
     if (!master || !selection.hasItems)
@@ -122,7 +124,7 @@ export async function markMovementDelivered({ store, movementMasterId, runtime }
 }
 async function refreshMovementMaster(store: MovementStore, movementMasterId: string, runtime: MovementRuntime): Promise<void> {
     await store.prepareMasters();
-    const [masters, items] = await Promise.all([store.readMasters('edit'), getMovementItems({ store, movementMasterId })]);
+    const [masters, items] = await Promise.all([store.readMasters('edit', movementMasterId), getMovementItems({ store, movementMasterId })]);
     const master = masters.find(movementMasterId);
     if (!master)
         return;
