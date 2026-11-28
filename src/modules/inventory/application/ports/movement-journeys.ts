@@ -5,8 +5,8 @@ export interface MovementJourneySnapshot {
     items(readId: () => string | undefined): MovementJourneyItem[];
 }
 export interface MovementJourneyStore {
-    readCombined(): Promise<MovementJourneySnapshot>;
-    readMasters(): Promise<MovementJourneyMasterReference[]>;
+    readCombined(masterId: string): Promise<MovementJourneySnapshot>;
+    readMasters(userId: string): Promise<MovementJourneyMasterReference[]>;
     readItems(masterId: string): Promise<MovementJourneyItem[]>;
     appendItem(readItem: () => MovementJourneyItem): Promise<void>;
     appendMaster(value: MovementJourneyMaster): Promise<void>;

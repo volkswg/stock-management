@@ -1,4 +1,6 @@
 import type {
+  OrderListQuery,
+  OrderListPageResult,
   CreatedOrder,
   UploadedOrderCreationImage,
   OrderDetail,
@@ -95,6 +97,16 @@ export async function getOrders({
   }
 
   return body;
+}
+
+export async function getOrderPage(query: OrderListQuery, signal?: AbortSignal): Promise<OrderListPageResult> {
+  const params = new URLSearchParams({page:String(query.page),pageSize:String(query.pageSize),query:query.query,status:query.status,shipmentLink:query.shipmentLink});
+  const response = await fetch(`/api/orders?${params}`, {method:"GET",headers:{Accept:"application/json","x-stock-edit-protocol":"row-v1"},cache:"no-store",signal});
+  const body: unknown = await response.json();
+  if (!response.ok) throw new Error(getErrorMessage(body));
+  if (!isOrdersResponse(body) || !("page" in body) || !("pageSize" in body) || !Number.isSafeInteger(body.page) || Number(body.page)<1 || body.pageSize !== query.pageSize ||
+    !Number.isSafeInteger(body.total) || body.total<0 || body.orders.length>query.pageSize || body.orders.length>body.total) throw new Error("The orders API returned an invalid response.");
+  return body as OrderListPageResult;
 }
 
 export async function getOrder(

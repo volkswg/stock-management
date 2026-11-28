@@ -6,6 +6,7 @@ import { createOrder as executeCreateOrder, type CreateOrderInput } from "./appl
 import { listOrders as executeListOrders } from "./application/list-orders";
 import { PostgresOrderListReader } from "./infrastructure/postgres/order-list-reader";
 import { PostgresOrderWriter } from "./infrastructure/postgres/order-writer";
+import type { OrderListQuery, OrderListPageResult } from "./contracts";
 
 import { getOrderDetail as executeGetOrderDetail } from "./application/get-order-detail";
 import type { OrderDetailShipmentProjectionReader } from "./application/ports/order-detail-shipment-projection";
@@ -16,6 +17,9 @@ export async function listOrders({
   storage,
 }: { storage: Storage }): Promise<OrderListItem[]> {
   return executeListOrders(new PostgresOrderListReader(storage));
+}
+export async function listOrderPage({storage,query}: {storage: Storage;query: OrderListQuery}): Promise<OrderListPageResult> {
+  return new PostgresOrderListReader(storage).readPage(query);
 }
 
 export async function createOrder({

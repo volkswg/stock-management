@@ -1,10 +1,12 @@
+// Historical client-only pagination witnesses. Current server paging is tested in scoped-order-pagination.test.mjs and real PostgreSQL acceptance.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import vm from 'node:vm';
 import ts from 'typescript';
-function load(file,{imports={},globals={},source=readFileSync(file,'utf8')}={}){const exports={};new vm.Script(ts.transpileModule(source,{fileName:file.replace(/\.mjs$/,'.ts'),compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText).runInNewContext({exports,Error,Promise,AbortController,JSON,...globals,require(name){assert.ok(Object.hasOwn(imports,name),'Unexpected dependency '+name);return imports[name];}});return exports;}
+import scopedHistory from '../helpers/scoped-reads-history.cjs';
+function load(file,{imports={},globals={},source=scopedHistory.beforeScopedReads(file).toString()}={}){const exports={};new vm.Script(ts.transpileModule(source,{fileName:file.replace(/\.mjs$/,'.ts'),compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText).runInNewContext({exports,Error,Promise,AbortController,JSON,...globals,require(name){assert.ok(Object.hasOwn(imports,name),'Unexpected dependency '+name);return imports[name];}});return exports;}
 const{componentHarness,elements}=load('tests/helpers/component-harness.mjs',{source:readFileSync('tests/helpers/component-harness.mjs','utf8').replace(/^import .*;\n/gm,'').replace('const imports = {','const imports = {\"next/link\":{__esModule:true,default:\"Link\"},'),globals:{readFileSync,dirname,resolve,ts,canonicalPath:path=>path,loadSource:load}});
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 

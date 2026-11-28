@@ -1,0 +1,650 @@
+{
+  "baseCommit": "60df2a1e530e1a0d71430a36ed07224195fae28c",
+  "scope": "Exact scoped-query source inverse for immutable historical witnesses; current acceptance uses physical current source.",
+  "edits": {
+    "docs/architecture/migration-map.md": {
+      "beforeSha256": "e9825adfe40e54a586323f2a3c76ac48bfe315c01b1431fdffe5d7e6aa25f7b8",
+      "afterSha256": "60050abf658c6a7ea0109a8cac21911af2dcf5a2a76477b38817eabc190ce4ee",
+      "inverse": [
+        {
+          "start": 25,
+          "count": 24,
+          "before": ""
+        }
+      ]
+    },
+    "docs/refactoring/progress.md": {
+      "beforeSha256": "ac83d84140ecdfe71b37412f70be76de601e6d77e432f7c71b973a463d14bd64",
+      "afterSha256": "753754c66a278c3a27a7f6607e9ce7540c8e0c2ae2ff921f7ffdc2d3bbef3341",
+      "inverse": [
+        {
+          "start": 9,
+          "count": 6,
+          "before": "Last independently verified application release: [PR106](https://github.com/volkswg/stock-management/pull/106),\nsource `1d2f9e93c3958ac2281d04e0ba38aeb1203d05ec`, deployment\n`dpl_9Cn3LvBZFTcLXk2z6oH6W1B9h2rm`, at\n`https://inventra-beta-one.vercel.app`. The private completion receipt was recorded\n25 November 2026, 09:45 Bangkok. The application and LINE were available for reopening.\nThis docs task has made no production query, deployment or setting/data change.\n"
+        },
+        {
+          "start": 16,
+          "count": 10,
+          "before": "The approved application-only release staged the exact merged tree in `hnd1`,\nverified protected-host denial without an access link, promoted it and passed five\nHEAD availability checks, missing-key 428 and invalid-LINE-signature 401 rejection,\nstatic-helper comparison and the settings/protection drift guard. The initial\nsafe error-count scan returned no error/fatal groups. Database/schema, pool settings,\nLINE cutoff, credentials and existing controls were preserved. No fresh business\nGET, accepted-write/provider canary or fresh database backup was claimed; retained\nrecovery hashes were reverified. This is not new end-to-end provider certification.\n"
+        },
+        {
+          "start": 27,
+          "count": 11,
+          "before": "Final tested PR106 head was `115e4e14d85dfea7f375e04113fc5a3195f96b8f`, identical\nin tree to the merge. Local `npm run cloud:test`: 894 Node + 3 Python passed;\n26 grouped identity checks, typecheck, lint (two inherited warnings) and the\nisolated build passed. GitHub\n[run128](https://github.com/volkswg/stock-management/actions/runs/45484302973) and\n[run129](https://github.com/volkswg/stock-management/actions/runs/45533925363) passed.\nCloud packet/environment tooling does not establish Cloud account permissions.\n"
+        },
+        {
+          "start": 65,
+          "count": 1,
+          "before": "| PR106 | Seller editing/replay compatibility and Cloud workflow released; exact current checkpoint above. |\n"
+        }
+      ]
+    },
+    "docs/refactoring/verification.md": {
+      "beforeSha256": "e3c46c0e05d6a1b2084d15da40b8c3a5e9cfb337b9b3fc2ce8a52ad9c9d84637",
+      "afterSha256": "fd640f7ac20adedf1485bff62b44fa080c1b71e1354e7454a9fb339c94c2f2e0",
+      "inverse": [
+        {
+          "start": 57,
+          "count": 18,
+          "before": ""
+        }
+      ]
+    },
+    "eslint/native-postgres-boundaries.mjs": {
+      "beforeSha256": "7c37a22b6ef623c7eecb9604cceace87930bca8f7b85a25e5dbdb2f072c1bff0",
+      "afterSha256": "6311469e87ac76740f5b77e4bf14ce0f9b4a5c91ead926f68e45f8697839a376",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 268,
+          "count": 2,
+          "before": ""
+        },
+        {
+          "start": 360,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "src/app/api/orders/route.ts": {
+      "beforeSha256": "ceff62876b125eba4e28f31b0e1483715edf489947573b1347099da98ea35e13",
+      "afterSha256": "7a4514d2154a919564e6799370a81f349c5f5ebf7cce27f37e41aef1ee1b122e",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 2,
+          "before": "import { createOrder, listOrders } from \"@/modules/orders/server\";\n"
+        },
+        {
+          "start": 8,
+          "count": 1,
+          "before": "async function GETOperation(): Promise<NextResponse> {\n"
+        },
+        {
+          "start": 10,
+          "count": 4,
+          "before": ""
+        },
+        {
+          "start": 15,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 29,
+          "count": 8,
+          "before": ""
+        }
+      ]
+    },
+    "src/infrastructure/persistence/postgres/native-records.ts": {
+      "beforeSha256": "e717700a73955636296c2ff4750aa9f817676754045b0f583a5c8bcf556c7b80",
+      "afterSha256": "4ac532fca8dbd1493ec4c4d6c1a8285fd93fa0f3d73f6292c6cf91b271748c97",
+      "inverse": [
+        {
+          "start": 11,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 97,
+          "count": 5,
+          "before": ""
+        },
+        {
+          "start": 104,
+          "count": 1,
+          "before": "    const result = await currentTransaction().query<NamedRecord<C> & { __id: string; __revision: string }>(`SELECT t.${quote(this.key)}::text AS __id,t.revision::text AS __revision,${this.projection()} FROM ${this.relation} t WHERE t.\"deletedAt\" IS NULL ORDER BY t.\"createdAt\" ${direction === \"descending\" ? \"DESC\" : \"ASC\"} NULLS LAST,t.${quote(this.key)}::text COLLATE \"C\" ASC`);\n"
+        }
+      ]
+    },
+    "src/modules/inventory/application/movement-journeys.ts": {
+      "beforeSha256": "9ee88f8f0e6dddd82df93f1db6a485c0106ad9565b8ef8202f37a53626c0f325",
+      "afterSha256": "13e72391e597a1571f2d069d9b76af4ec9e0968f5202bd2bd1e6ab4b089ced12",
+      "inverse": [
+        {
+          "start": 6,
+          "count": 1,
+          "before": "    const snapshot = await store.readCombined(), existing = snapshot.findMaster(() => state.masterId), items = snapshot.items(() => state.masterId);\n"
+        },
+        {
+          "start": 16,
+          "count": 1,
+          "before": "    const master = (await store.readMasters()).filter(row => row.userId === userId && row.status === \"in_progress\").sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];\n"
+        }
+      ]
+    },
+    "src/modules/inventory/application/movements.ts": {
+      "beforeSha256": "3b58060e70865f445bae1151e24ece03c3de029ec3d44ce93855dfbb90ada60a",
+      "afterSha256": "121a0638f2872352b22d4b04ab36f7b5b367df2719be11def4fd7b9ded5d23b2",
+      "inverse": [
+        {
+          "start": 9,
+          "count": 3,
+          "before": "    const [masters, details] = await Promise.all([store.readMasters('list'), store.readDetails('list')]);\n"
+        },
+        {
+          "start": 18,
+          "count": 1,
+          "before": "    return masters.entries().map(master => { const id = master.id(); return master.project(detailsByMaster.get(id) || []); }).filter(record => record.id && matchesDateFilter(record, filter));\n"
+        },
+        {
+          "start": 26,
+          "count": 1,
+          "before": "    return (await store.readDetails('list')).records().filter(record => record.movementId && record.movementMasterId.toUpperCase() === normalizedId);\n"
+        },
+        {
+          "start": 39,
+          "count": 1,
+          "before": "    const details = await store.readDetails('edit');\n"
+        },
+        {
+          "start": 57,
+          "count": 1,
+          "before": "    const details = await store.readDetails('edit');\n"
+        },
+        {
+          "start": 89,
+          "count": 1,
+          "before": "    const details = await store.readDetails('edit');\n"
+        },
+        {
+          "start": 109,
+          "count": 1,
+          "before": "    const [masters, details] = await Promise.all([store.readMasters('edit'), store.readDetails('edit')]);\n"
+        },
+        {
+          "start": 126,
+          "count": 1,
+          "before": "    const [masters, items] = await Promise.all([store.readMasters('edit'), getMovementItems({ store, movementMasterId })]);\n"
+        }
+      ]
+    },
+    "src/modules/inventory/application/ports/movement-journeys.ts": {
+      "beforeSha256": "d6799bb87f0cb0f424813672c4937cfc621e63e6f7ada53349756219d5127894",
+      "afterSha256": "07ede63d1252717643b507abc1e053aa16adaf73af15987747de033ce16d75cb",
+      "inverse": [
+        {
+          "start": 7,
+          "count": 2,
+          "before": "    readCombined(): Promise<MovementJourneySnapshot>;\n    readMasters(): Promise<MovementJourneyMasterReference[]>;\n"
+        }
+      ]
+    },
+    "src/modules/inventory/application/ports/movements.ts": {
+      "beforeSha256": "fedffe87ee2e7e0c0df788ecf9ae261f88dfd4a0de4bf17c71e305dbbb6780af",
+      "afterSha256": "a13a83e9df00946773053d102823c36770a40a22d97a962cfdae6eb78ef36486",
+      "inverse": [
+        {
+          "start": 44,
+          "count": 2,
+          "before": "    readMasters(mode: 'list' | 'edit'): Promise<MovementMasters>;\n    readDetails(mode: 'list' | 'edit'): Promise<MovementDetails>;\n"
+        }
+      ]
+    },
+    "src/modules/inventory/infrastructure/postgres/movement-journeys.ts": {
+      "beforeSha256": "f5052c93bbd1b15ce05c6855a418eae3611465ac372a214f873955905fae77c8",
+      "afterSha256": "e5f00306d4254a2e4ef33d9e56dacd4096b48771ad480640d1cd812da2a7178c",
+      "inverse": [
+        {
+          "start": 16,
+          "count": 3,
+          "before": "    async readCombined() { const [records, details] = await Promise.all([storage.movementMasters.all(), storage.movementDetails.all()]); return { findMaster(readId) { const record = records.find(r => r.id === readId()); return record ? master(record) : undefined; }, items: readId => itemsFor(details, readId) }; },\n    async readMasters() { return (await storage.movementMasters.all()).map(master); },\n    async readItems(masterId) { return itemsFor(await storage.movementDetails.all(), () => masterId); },\n"
+        },
+        {
+          "start": 21,
+          "count": 1,
+          "before": "  return { store, async itemSnapshot() { const records = await storage.movementDetails.all(); return { items: (readId: () => string | undefined) => itemsFor(records, readId) }; } };\n"
+        }
+      ]
+    },
+    "src/modules/inventory/infrastructure/postgres/movements.ts": {
+      "beforeSha256": "fb1e71451d692d6859313dcdcc76259cb6f5d1a1930d1d89826b8209f742fd8c",
+      "afterSha256": "bf83a2e3b4a46d506a89207db61a1622aad40f7a924eeee8845755d7ccb742ee",
+      "inverse": [
+        {
+          "start": 21,
+          "count": 3,
+          "before": "    async exists(masterId) { return (await storage.movementMasters.all()).some(r => cell(r.id).toUpperCase() === masterId.toUpperCase()); },\n    async readMasters() {\n      const records = await storage.movementMasters.all();\n"
+        },
+        {
+          "start": 26,
+          "count": 4,
+          "before": "    async readDetails() {\n      const records = await storage.movementDetails.all();\n"
+        }
+      ]
+    },
+    "src/modules/line-workflows/application/classify-event.ts": {
+      "beforeSha256": "a3c253e2944265d8b3043e55d42bf45da8135b46d63a8d5f218d733104532039",
+      "afterSha256": "86c9aacd85496aeb8b4f607898175626a82399d734cbf17daa19a07eeba61319",
+      "inverse": [
+        {
+          "start": 27,
+          "count": 1,
+          "before": "    const photoContext = message.type === LineMessageType.Image ? await context.photoContext() : undefined;\n"
+        }
+      ]
+    },
+    "src/modules/line-workflows/application/ports/workflows.ts": {
+      "beforeSha256": "fd2aea7db3f6737894baba41fdf7a3485a6a4081485c143b5183cec1997053a7",
+      "afterSha256": "03bededc66a15a40178d16cd2b96db14ec8c379285a7161bda9102e3f9ecd6a2",
+      "inverse": [
+        {
+          "start": 30,
+          "count": 1,
+          "before": "    read(): Promise<MovementSessionSnapshot>;\n"
+        },
+        {
+          "start": 79,
+          "count": 1,
+          "before": "    photoContext(): Promise<{\n"
+        }
+      ]
+    },
+    "src/modules/line-workflows/application/sessions.ts": {
+      "beforeSha256": "eee003d6b69d9ff10613f8405b7086e085a848c6255f61ab3cb61e800914f8f2",
+      "afterSha256": "04618fec2b8a483ade40645f8db90994bb6781d968fc8d326710ffd57448ac6c",
+      "inverse": [
+        {
+          "start": 8,
+          "count": 1,
+          "before": "    const snapshot = loaded ?? await store.read(), entry = snapshot.latestForReading(userId);\n"
+        },
+        {
+          "start": 33,
+          "count": 1,
+          "before": "    const snapshot = await store.read(), existing = snapshot.findForWriting(() => state.userId);\n"
+        }
+      ]
+    },
+    "src/modules/line-workflows/infrastructure/postgres/sessions.ts": {
+      "beforeSha256": "579f292d30648752808cb21481125126dc1698a8e5adeca785b2c995c0f46a31",
+      "afterSha256": "7ed13b5e7272af670fe55f8441f1b629f0834da2abd7a5bdbe7ad3d59083dab1",
+      "inverse": [
+        {
+          "start": 8,
+          "count": 1,
+          "before": "export function createSessionAdapter(storage: Pick<Storage, \"userState\">, inventory: { itemSnapshot(): Promise<ItemSnapshot> }) {\n"
+        },
+        {
+          "start": 27,
+          "count": 1,
+          "before": "    async findLatest(userId, flowname) { return (await storage.userState.all(\"descending\")).map(mapUserStateRow).filter((v): v is UserState => Boolean(v)).find(v => v.userId === userId && v.flowname === flowname); },\n"
+        },
+        {
+          "start": 36,
+          "count": 6,
+          "before": "  const movements: MovementSessionStore = { async read() { return snapshot(await storage.userState.all(\"descending\")); } };\n  return { orders, movements, async photoContext() { const [users, items] = await Promise.all([storage.userState.all(\"descending\"), inventory.itemSnapshot()]); return { sessions: await snapshot(users), items: items.items }; } };\n"
+        }
+      ]
+    },
+    "src/modules/orders/contracts.ts": {
+      "beforeSha256": "72b384885bc1e9674113036f83055ffa8ed28af1f1a9eba0cd5bee65105058b7",
+      "afterSha256": "0a081f14c5fbec12a8752bab5a3479d21b9e7cb50cfc7ac42452238704e2ad9f",
+      "inverse": [
+        {
+          "start": 48,
+          "count": 14,
+          "before": ""
+        }
+      ]
+    },
+    "src/modules/orders/infrastructure/postgres/order-list-reader.ts": {
+      "beforeSha256": "77eb51e5ee70d6a9a9b6801ceb22a472a5822a09435484a101788c4eb4016620",
+      "afterSha256": "38bcf709bf559cfbe7d4392920fc039925f9dbedbde8aa2f33020c9c284a1552",
+      "inverse": [
+        {
+          "start": 6,
+          "count": 3,
+          "before": ""
+        },
+        {
+          "start": 30,
+          "count": 44,
+          "before": ""
+        }
+      ]
+    },
+    "src/modules/orders/server.ts": {
+      "beforeSha256": "c877b3d94433033847f5eb0230cbcf849619e37855898966a523ebe19a3982d5",
+      "afterSha256": "dad45aea208b4b69f24da1a6ded2a350f5728e2158a925f30a540e38b88efb6f",
+      "inverse": [
+        {
+          "start": 8,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 19,
+          "count": 3,
+          "before": ""
+        }
+      ]
+    },
+    "src/modules/orders/ui/OrderListPage.tsx": {
+      "beforeSha256": "8489fd565411a7ca0831faef30af9e178b8f33c4c11b4341fd53f9574066ce54",
+      "afterSha256": "ff7ce3ababa899b01e2e2ac5a00c0cc908de5962373fadc73c2623e3777ddece",
+      "inverse": [
+        {
+          "start": 26,
+          "count": 1,
+          "before": "import { useEffect, useMemo, useState } from \"react\";\n"
+        },
+        {
+          "start": 28,
+          "count": 2,
+          "before": "import { OrderStatus, type OrderListItem } from \"@/modules/orders/contracts\";\nimport { getOrders } from \"./api\";\n"
+        },
+        {
+          "start": 124,
+          "count": 1,
+          "before": "  const [orders, setOrders] = useState<OrderListItem[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string>();\n"
+        },
+        {
+          "start": 126,
+          "count": 1,
+          "before": "  const [status, setStatus] = useState(\"all\");\n"
+        },
+        {
+          "start": 132,
+          "count": 9,
+          "before": ""
+        },
+        {
+          "start": 147,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 160,
+          "count": 6,
+          "before": ""
+        },
+        {
+          "start": 167,
+          "count": 2,
+          "before": "\n    getOrders({ signal: controller.signal })\n"
+        },
+        {
+          "start": 170,
+          "count": 4,
+          "before": "        setOrders(response.orders);\n        setExpandedRowKeys(\n          response.orders\n            .filter((order) => order.productImages.length > 0)\n            .map((order) => order.id),\n        );\n"
+        },
+        {
+          "start": 176,
+          "count": 1,
+          "before": "        if (!controller.signal.aborted) {\n          setError(\n            requestError instanceof Error\n              ? requestError.message\n              : \"Failed to load orders.\",\n          );\n        }\n      })\n      .finally(() => {\n        if (!controller.signal.aborted) {\n          setLoading(false);\n        }\n"
+        },
+        {
+          "start": 178,
+          "count": 2,
+          "before": "\n    return () => controller.abort();\n  }, [requestId]);\n\n  const filteredOrders = useMemo(() => {\n    const normalizedQuery = query.trim().toLowerCase();\n    return orders.filter((order) => {\n      const matchesQuery =\n        !normalizedQuery ||\n        order.id.toLowerCase().includes(normalizedQuery) ||\n        order.createdBy.toLowerCase().includes(normalizedQuery) ||\n        order.seller.toLowerCase().includes(normalizedQuery);\n      const matchesStatus =\n        status === \"all\" ||\n        (status === \"in-progress\" && isInProgress(order.status)) ||\n        (status === \"completed\" && order.status === OrderStatus.Complete);\n      const matchesShipmentLink =\n        shipmentLink === \"all\" ||\n        (shipmentLink === \"linked\" && Boolean(order.shipmentId)) ||\n        (shipmentLink === \"not-linked\" && !order.shipmentId);\n      return matchesQuery && matchesStatus && matchesShipmentLink;\n    });\n  }, [orders, query, shipmentLink, status]);\n\n  const pageCount = Math.max(1, Math.ceil(filteredOrders.length / pageSize));\n  const currentPage = Math.min(page, pageCount);\n\n  useEffect(() => {\n    if (!loading && !error) writePaginationToUrl(currentPage, pageSize);\n  }, [currentPage, error, loading, page, pageSize]);\n\n  const visibleOrders = filteredOrders.slice(\n    (currentPage - 1) * pageSize,\n    currentPage * pageSize,\n  );\n"
+        },
+        {
+          "start": 184,
+          "count": 1,
+          "before": "        Showing {visibleOrders.length} of {filteredOrders.length} orders\n"
+        },
+        {
+          "start": 189,
+          "count": 2,
+          "before": "        total={filteredOrders.length}\n        disabled={loading || filteredOrders.length === 0}\n"
+        },
+        {
+          "start": 279,
+          "count": 1,
+          "before": "                setStatus(value);\n"
+        },
+        {
+          "start": 343,
+          "count": 0,
+          "before": "                      setLoading(true);\n                      setError(undefined);\n"
+        },
+        {
+          "start": 357,
+          "count": 0,
+          "before": "  );\n}\n\nfunction isInProgress(status: OrderStatus): boolean {\n  return (\n    status === OrderStatus.Draft ||\n    status === OrderStatus.WaitingForBillImage ||\n    status === OrderStatus.WaitingForProductImage ||\n    status === OrderStatus.WaitingForTotalPrice\n"
+        }
+      ]
+    },
+    "src/modules/orders/ui/api.ts": {
+      "beforeSha256": "f37876fe7d4e32fbfc530396f83464d3340fc787fa95c492dcd463acdff8d971",
+      "afterSha256": "cd2f8f5e8189f8885d012c73d342489c557155e07c54141522764af07959f893",
+      "inverse": [
+        {
+          "start": 1,
+          "count": 2,
+          "before": ""
+        },
+        {
+          "start": 99,
+          "count": 10,
+          "before": ""
+        }
+      ]
+    },
+    "src/modules/sales/application/ports/sales-reader.ts": {
+      "beforeSha256": "49e964e9cacd493796ce1f082f0943a832cb7687f41c1f49eb844c2553c67dcb",
+      "afterSha256": "10bc12c213cbd41a63b7b39ee12168c4cb790f17957245c063e911b92c377b2b",
+      "inverse": [
+        {
+          "start": 2,
+          "count": 6,
+          "before": ""
+        }
+      ]
+    },
+    "src/modules/sales/application/reports.ts": {
+      "beforeSha256": "161bb6030ca07b1b172664c10b899cdb4ebaaeb90b98b4aeab185d002563df51",
+      "afterSha256": "0d5a35966adf2db43d580f5256bba569256c346e11fed737aae249215b7e0bfc",
+      "inverse": [
+        {
+          "start": 1,
+          "count": 1,
+          "before": "import type { SalesReader, SalesRecord, SalesValue } from \"./ports/sales-reader\";\n"
+        },
+        {
+          "start": 4,
+          "count": 1,
+          "before": "export function createSalesReports<Context>(createReader: (context: Context) => SalesReader) {\n"
+        },
+        {
+          "start": 14,
+          "count": 1,
+          "before": "  const reader = createReader(storage);\n"
+        },
+        {
+          "start": 41,
+          "count": 1,
+          "before": "  const reader = createReader(storage);\n"
+        },
+        {
+          "start": 122,
+          "count": 1,
+          "before": "  const reader = createReader(storage);\n"
+        }
+      ]
+    },
+    "src/modules/sales/infrastructure/postgres/sales-reader.ts": {
+      "beforeSha256": "5ef3f9ea6aec865e9a75452b8a716c4656d2fc02abb0329a619cc6b3cf846b2d",
+      "afterSha256": "14c9cab23cd41c9802ba4a672f4abc75ad764a64eb2636c61b209481f2b31995",
+      "inverse": [
+        {
+          "start": 4,
+          "count": 2,
+          "before": ""
+        },
+        {
+          "start": 10,
+          "count": 14,
+          "before": "export function createSalesReader(storage: SalesStorage): SalesReader {\n"
+        },
+        {
+          "start": 27,
+          "count": 1,
+          "before": "    if (!pending) { pending = requireReceiptPayments().then(() => paymentReceipts.all()).then(visible);snapshots.set(client,pending); }\n"
+        },
+        {
+          "start": 30,
+          "count": 1,
+          "before": "  return { receipts, items: () => storage.salesReceiptItems.all().then(visible), payments: async () => receiptPaymentRows(await receipts()), syncs: () => storage.salesReceiptSyncs.all().then(visible) };\n"
+        }
+      ]
+    },
+    "tests/helpers/order-list-pagination-history.cjs": {
+      "beforeSha256": "e96ac8b932770f51f21e73461b4771a83e1f442918e8ff5b48a7899a20bb2416",
+      "afterSha256": "52741433ce3c032e46f4c94109473b6f6d91964fa6cb5ba3750879acb2e6a223",
+      "inverse": [
+        {
+          "start": 3,
+          "count": 1,
+          "before": ""
+        }
+      ]
+    },
+    "tests/movement-reference-retirement.test.cjs": {
+      "beforeSha256": "4763160272d6794569505eb108e9e9ef5562c45a2ca9ef629da89254b6963e50",
+      "afterSha256": "996d891a18dcac9239e13679b07fd4ad554787a2738c8afce6a200408852cd51",
+      "inverse": [
+        {
+          "start": 23,
+          "count": 1,
+          "before": " const saved=[];const adapter=createMovementJourneyAdapter({movementDetails:{all:async()=>[{...record}],insert:async value=>saved.push(value)}});\n"
+        }
+      ]
+    },
+    "tests/native-postgres/api-fields.test.cjs": {
+      "beforeSha256": "8792b754a2c301f9a3f8b14dc8a580ea028cbd0ba74c7bf4f74037a62b10fcce",
+      "afterSha256": "2b4087a1475951adc21136da774f63b89a958de3dc0f5f5b3ebb003ef848b7f3",
+      "inverse": [
+        {
+          "start": 19,
+          "count": 1,
+          "before": " const writes=[];const storage=Object.fromEntries(Object.entries(rows).map(([table,records])=>[table,{prepare:async()=>{},all:async()=>records.filter(r=>!r.deletedAt),insert:async value=>{writes.push({table,operation:'insert',value});records.push({...value});},update:async(record,patch)=>{writes.push({table,operation:'update',patch});Object.assign(record,patch);},softDelete:async record=>{record.deletedAt=at;}}]));\n"
+        }
+      ]
+    },
+    "tests/native-postgres/order-list-pagination.test.mjs": {
+      "beforeSha256": "8b21681040d8609d1af0e37111896097dc7172388841cc80def644a42ab08181",
+      "afterSha256": "7161566a35d9cf82fb8258cfe45c89eb7931b8b5440486a0d0442b4bf3c33771",
+      "inverse": [
+        {
+          "start": 0,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 7,
+          "count": 2,
+          "before": "function load(file,{imports={},globals={},source=readFileSync(file,'utf8')}={}){\n"
+        }
+      ]
+    },
+    "tests/native-postgres/order-page-size.test.mjs": {
+      "beforeSha256": "669d5b9d9dd91fadcd29edde9ee5e5f820286411ba155dda64a255143be804ab",
+      "afterSha256": "37ad4eb96c1880db96a2bdab4402535b55fd942ca8de36359684042130868018",
+      "inverse": [
+        {
+          "start": 0,
+          "count": 1,
+          "before": ""
+        },
+        {
+          "start": 7,
+          "count": 2,
+          "before": "function load(file,{imports={},globals={},source=readFileSync(file,'utf8')}={}){const exports={};new vm.Script(ts.transpileModule(source,{fileName:file.replace(/\\.mjs$/,'.ts'),compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText).runInNewContext({exports,Error,Promise,AbortController,JSON,...globals,require(name){assert.ok(Object.hasOwn(imports,name),'Unexpected dependency '+name);return imports[name];}});return exports;}\n"
+        }
+      ]
+    },
+    "tests/user-state-identity.test.cjs": {
+      "beforeSha256": "d02ff774c0ea737df0dc18fe221bad80c5016622471e9571825867d43052820d",
+      "afterSha256": "a50b9f9757ddc329b64ce6ce0ebe106f502cd357ed2a098610f7b3eab760f6d4",
+      "inverse": [
+        {
+          "start": 8,
+          "count": 1,
+          "before": " const table={all:async()=>records,reserveIdentifier:async()=>{reservations++;await Promise.resolve();return String(9007199254740992n+BigInt(reservations));},insert:async value=>writes.push(value),update:async(record,value)=>writes.push({...value,id:record.id}),softDelete:async record=>erased.push(record.id)};\n"
+        },
+        {
+          "start": 15,
+          "count": 1,
+          "before": " const f=fixture();await f.adapter.movements.read();await f.adapter.photoContext();assert.deepEqual(await readMovementSession(f.adapter.movements,'synthetic','event-1'),{processed:false});assert.equal(f.reservations(),0);\n"
+        },
+        {
+          "start": 27,
+          "count": 1,
+          "before": " const f=fixture();assert.equal(await f.adapter.orders.nextIdentifier(),'9007199254740993');const snapshot=await f.adapter.movements.read();assert.equal(await snapshot.nextIdentifier(),'9007199254740994');assert.equal(f.reservations(),2);\n"
+        }
+      ]
+    },
+    "tools/native-postgres/acceptance.sh": {
+      "beforeSha256": "02df57e42d0306c6e4552cf56400a03a40e9bb403f9d811f1fc99353b33218c4",
+      "afterSha256": "759138aa990f1a8146eaa89467b70602bf6f87285756369b50407e4a86e424b0",
+      "inverse": [
+        {
+          "start": 244,
+          "count": 5,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/pooling_history.py": {
+      "beforeSha256": "e541488eaa1a2557c6fb2f506a2deeab235ae65bc7ee5616af1cd6ea4e415603",
+      "afterSha256": "fc021afe4e69da282d628d989dcac5e80e94be68a88f72409ba1e9866d601286",
+      "inverse": [
+        {
+          "start": 11,
+          "count": 8,
+          "before": ""
+        }
+      ]
+    },
+    "tools/native-postgres/test.mjs": {
+      "beforeSha256": "cce3ab5024535f35a65129b915e9fdf25970710bdc82da32c31feef5fec81f1c",
+      "afterSha256": "dabc2afea479dd6ff0261f182741c783d2ce12d8aa43e959ee6049b848cf2183",
+      "inverse": [
+        {
+          "start": 14,
+          "count": 2,
+          "before": ""
+        }
+      ]
+    },
+    "tools/product-uat/local.py": {
+      "beforeSha256": "79af59d77e1da92116ff726f24def37dbf73d66c3bdf3969201a7adaff8fba47",
+      "afterSha256": "4c7f079f3b780e486618bf9aa0ac80f1e7d3176f02e076323bc09e69ff38aef6",
+      "inverse": [
+        {
+          "start": 84,
+          "count": 1,
+          "before": " for testfile in ['tools/native-postgres/application.test.cjs','tools/native-postgres/media-line.test.cjs']:\n"
+        }
+      ]
+    }
+  }
+}

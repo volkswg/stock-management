@@ -24,10 +24,10 @@ import {
   Typography,
   type TableProps,
 } from "antd";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Key } from "react";
-import { OrderStatus, type OrderListItem } from "@/modules/orders/contracts";
-import { getOrders } from "./api";
+import type { OrderStatus, OrderListQuery, OrderListItem, OrderListPageResult } from "@/modules/orders/contracts";
+import { getOrderPage } from "./api";
 import { OrderImageGallery } from "./OrderImageGallery";
 import { OrderMobileCard } from "./OrderMobileCard";
 import {
@@ -122,22 +122,30 @@ const STATUS_FILTERS = [
 ];
 
 export function OrderListPage() {
-  const [orders, setOrders] = useState<OrderListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const [result, setResult] = useState<OrderListPageResult & {requestKey: string; error?: string}>();
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState<OrderListQuery["status"]>("all");
   const [shipmentLink, setShipmentLink] =
     useState<ShipmentLinkFilter>("all");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [requestId, setRequestId] = useState(0);
+  const [initialized, setInitialized] = useState(false);
+  const [search, setSearch] = useState("");
+  const requestKey = JSON.stringify([page,pageSize,search,status,shipmentLink,requestId]);
+  const current = query === search && result?.requestKey === requestKey ? result : undefined;
+  const loading = current === undefined;
+  const error = current?.error;
+  const total = current?.total ?? 0;
+  const currentPage = current?.page ?? page;
+  const visibleOrders = current?.orders ?? [];
   const [expandedRowKeys, setExpandedRowKeys] = useState<Key[]>([]);
 
   useEffect(() => {
     const restorePage = () => {
       setPage(readPageFromUrl());
       setPageSize(readPageSizeFromUrl());
+      setInitialized(true);
     };
     restorePage();
     window.addEventListener("popstate", restorePage);
@@ -150,77 +158,37 @@ export function OrderListPage() {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-
-    getOrders({ signal: controller.signal })
-      .then((response) => {
-        setOrders(response.orders);
-        setExpandedRowKeys(
-          response.orders
-            .filter((order) => order.productImages.length > 0)
-            .map((order) => order.id),
-        );
-      })
-      .catch((requestError: unknown) => {
-        if (!controller.signal.aborted) {
-          setError(
-            requestError instanceof Error
-              ? requestError.message
-              : "Failed to load orders.",
-          );
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      });
-
-    return () => controller.abort();
-  }, [requestId]);
-
-  const filteredOrders = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    return orders.filter((order) => {
-      const matchesQuery =
-        !normalizedQuery ||
-        order.id.toLowerCase().includes(normalizedQuery) ||
-        order.createdBy.toLowerCase().includes(normalizedQuery) ||
-        order.seller.toLowerCase().includes(normalizedQuery);
-      const matchesStatus =
-        status === "all" ||
-        (status === "in-progress" && isInProgress(order.status)) ||
-        (status === "completed" && order.status === OrderStatus.Complete);
-      const matchesShipmentLink =
-        shipmentLink === "all" ||
-        (shipmentLink === "linked" && Boolean(order.shipmentId)) ||
-        (shipmentLink === "not-linked" && !order.shipmentId);
-      return matchesQuery && matchesStatus && matchesShipmentLink;
-    });
-  }, [orders, query, shipmentLink, status]);
-
-  const pageCount = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
-  const currentPage = Math.min(page, pageCount);
+    const timer = setTimeout(() => setSearch(query), 250);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   useEffect(() => {
-    if (!loading && !error) writePaginationToUrl(currentPage, pageSize);
-  }, [currentPage, error, loading, page, pageSize]);
-
-  const visibleOrders = filteredOrders.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
+    if (!initialized || query !== search) return;
+    const controller = new AbortController();
+    let active = true;
+    getOrderPage({page,pageSize,query:search,status,shipmentLink},controller.signal)
+      .then((response) => {
+        if (!active) return;
+        setResult({...response,requestKey});
+        writePaginationToUrl(response.page,pageSize);
+        setExpandedRowKeys(response.orders.filter(order => order.productImages.length > 0).map(order => order.id));
+      })
+      .catch((requestError: unknown) => {
+        if (active) setResult({requestKey,orders:[],total:0,page,pageSize,error:requestError instanceof Error ? requestError.message : "Failed to load orders."});
+      });
+    return () => { active = false; controller.abort(); };
+  }, [initialized,page,pageSize,query,search,status,shipmentLink,requestId,requestKey]);
 
   const renderPagination = (label: string) => (
     <nav aria-label={label} className={styles.pagination}>
       <Text type="secondary">
-        Showing {visibleOrders.length} of {filteredOrders.length} orders
+        Showing {visibleOrders.length} of {total} orders
       </Text>
       <Pagination
         current={currentPage}
         pageSize={pageSize}
-        total={filteredOrders.length}
-        disabled={loading || filteredOrders.length === 0}
+        total={total}
+        disabled={loading || total === 0}
         responsive
         showSizeChanger={{ "aria-label": "Orders per page" }}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
@@ -309,7 +277,7 @@ export function OrderListPage() {
               className={styles.filterTabs}
               items={STATUS_FILTERS}
               onChange={(value) => {
-                setStatus(value);
+                setStatus(value as OrderListQuery["status"]);
                 changePage(1);
               }}
             />
@@ -373,8 +341,6 @@ export function OrderListPage() {
                   <Button
                     icon={<ReloadOutlined />}
                     onClick={() => {
-                      setLoading(true);
-                      setError(undefined);
                       setRequestId((value) => value + 1);
                     }}
                   >
@@ -389,15 +355,6 @@ export function OrderListPage() {
         </main>
       </div>
     </ConfigProvider>
-  );
-}
-
-function isInProgress(status: OrderStatus): boolean {
-  return (
-    status === OrderStatus.Draft ||
-    status === OrderStatus.WaitingForBillImage ||
-    status === OrderStatus.WaitingForProductImage ||
-    status === OrderStatus.WaitingForTotalPrice
   );
 }
 

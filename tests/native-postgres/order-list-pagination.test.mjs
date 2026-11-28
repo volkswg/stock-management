@@ -1,10 +1,12 @@
+// Historical client-only pagination witnesses. Current server paging is tested in scoped-order-pagination.test.mjs and real PostgreSQL acceptance.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {dirname,resolve} from 'node:path';
 import vm from 'node:vm';
 import ts from 'typescript';
-function load(file,{imports={},globals={},source=readFileSync(file,'utf8')}={}){
+import scopedHistory from '../helpers/scoped-reads-history.cjs';
+function load(file,{imports={},globals={},source=scopedHistory.beforeScopedReads(file).toString()}={}){
  const exports={};const code=ts.transpileModule(source,{fileName:file.replace(/\.mjs$/,'.ts'),compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;
  new vm.Script(code).runInNewContext({exports,Error,Promise,AbortController,JSON,...globals,require(name){assert.ok(Object.hasOwn(imports,name),'Unexpected dependency '+name);return imports[name];}});return exports;
 }

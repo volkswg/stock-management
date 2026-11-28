@@ -1,13 +1,19 @@
 import { withPersistence } from "@/composition/postgres/route";
 import { NextResponse } from "next/server";
 import { createBusinessDatabase } from "@/composition/postgres/service";
-import { createOrder, listOrders } from "@/modules/orders/server";
+import { createOrder, listOrders, listOrderPage } from "@/modules/orders/server";
+import type { OrderListQuery } from "@/modules/orders/contracts";
 
 export const runtime = "nodejs";
 
-async function GETOperation(): Promise<NextResponse> {
+async function GETOperation(request: Request): Promise<NextResponse> {
   try {
+    const params = new URL(request.url).searchParams;
+    const paged = params.has("page") || params.has("pageSize");
+    const query = paged ? parseOrderPage(params) : undefined;
+    if (paged && !query) return NextResponse.json({error:"Invalid order pagination or filters."},{status:400});
     const storage = createBusinessDatabase();
+    if (query) return NextResponse.json(await listOrderPage({storage,query}));
     const orders = await listOrders({ storage });
 
     return NextResponse.json({ orders, total: orders.length });
@@ -21,6 +27,14 @@ async function GETOperation(): Promise<NextResponse> {
       { status: 500 },
     );
   }
+}
+
+function parseOrderPage(params: URLSearchParams): OrderListQuery | undefined {
+  const page = params.get("page") ?? "1", pageSize = params.get("pageSize") ?? "10";
+  const status = params.get("status") ?? "all", shipmentLink = params.get("shipmentLink") ?? "all";
+  if (!/^[1-9]\d*$/.test(page) || !Number.isSafeInteger(Number(page)) || !["10","20","50","100"].includes(pageSize) ||
+    !["all","in-progress","completed"].includes(status) || !["all","linked","not-linked"].includes(shipmentLink)) return;
+  return {page:Number(page),pageSize:Number(pageSize),query:params.get("query") ?? "",status:status as OrderListQuery["status"],shipmentLink:shipmentLink as OrderListQuery["shipmentLink"]};
 }
 
 async function POSTOperation(request: Request): Promise<NextResponse> {

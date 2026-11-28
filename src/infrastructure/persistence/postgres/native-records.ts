@@ -9,6 +9,7 @@ export type NamedRecord<C extends Columns> = { readonly [K in keyof C]: RecordVa
 export interface RecordStore {
   prepare(): Promise<void>;
   all(direction?: "ascending" | "descending"): Promise<NativeRecord[]>;
+  select(predicate: string, values: readonly unknown[], direction?: "ascending" | "descending"): Promise<NativeRecord[]>;
   find(id: string): Promise<NativeRecord | undefined>;
   insert(value: Readonly<Record<string, RecordValue | undefined>>): Promise<void>;
   update(record: NativeRecord, patch: Readonly<Record<string, RecordValue | undefined>>): Promise<void>;
@@ -94,9 +95,14 @@ export class NativeRecords<C extends Columns> {
   }
   async prepare(): Promise<void> { await requireNativeSchema(); await this.identitySequence(); await currentTransaction().query(`SELECT ${this.projection()} FROM ${this.relation} t LIMIT 0`); }
   async all(direction: "ascending" | "descending" = "ascending"): Promise<NamedRecord<C>[]> {
+    return this.select("true", [], direction);
+  }
+  // Feature adapters supply closed SQL predicates; request values are always binds.
+  // Reuse the same projection, ordering and tracked revision for scoped writes.
+  async select(predicate: string, values: readonly unknown[], direction: "ascending" | "descending" = "ascending"): Promise<NamedRecord<C>[]> {
     await requireNativeSchema();
     await this.identitySequence();
-    const result = await currentTransaction().query<NamedRecord<C> & { __id: string; __revision: string }>(`SELECT t.${quote(this.key)}::text AS __id,t.revision::text AS __revision,${this.projection()} FROM ${this.relation} t WHERE t."deletedAt" IS NULL ORDER BY t."createdAt" ${direction === "descending" ? "DESC" : "ASC"} NULLS LAST,t.${quote(this.key)}::text COLLATE "C" ASC`);
+    const result = await currentTransaction().query<NamedRecord<C> & { __id: string; __revision: string }>(`SELECT t.${quote(this.key)}::text AS __id,t.revision::text AS __revision,${this.projection()} FROM ${this.relation} t WHERE t."deletedAt" IS NULL AND (${predicate}) ORDER BY t."createdAt" ${direction === "descending" ? "DESC" : "ASC"} NULLS LAST,t.${quote(this.key)}::text COLLATE "C" ASC`, [...values]);
     return result.rows.map(row => this.tracked(row));
   }
   async find(id: string): Promise<NamedRecord<C> | undefined> {

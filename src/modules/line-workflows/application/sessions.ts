@@ -6,7 +6,7 @@ export async function readMovementSession(store: MovementSessionStore, userId: s
     state?: MovementState;
     processed: boolean;
 }> {
-    const snapshot = loaded ?? await store.read(), entry = snapshot.latestForReading(userId);
+    const snapshot = loaded ?? await store.read(userId), entry = snapshot.latestForReading(userId);
     if (!entry)
         return { processed: false };
     if (!String(entry.context || "").trim()) {
@@ -31,7 +31,7 @@ export async function readMovementSession(store: MovementSessionStore, userId: s
     return { state, processed: state.lastEventId === eventId };
 }
 export async function saveMovementState(store: MovementSessionStore, state: MovementState, runtime: WorkflowRuntime): Promise<void> {
-    const snapshot = await store.read(), existing = snapshot.findForWriting(() => state.userId);
+    const snapshot = await store.read(state.userId), existing = snapshot.findForWriting(() => state.userId);
     if (state.step === "complete") {
         await snapshot.eraseMovement(state.userId);
         return;

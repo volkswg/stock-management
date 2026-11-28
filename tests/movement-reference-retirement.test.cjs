@@ -21,7 +21,7 @@ test('public movement response omits the retired field without reading the remov
  assert.equal(Object.hasOwn(result,'purchaseDetailId'),false);assert.equal(result.quantity,'3');assert.equal(result.remark,'note');
 });
 test('LINE movement journey reads and inserts omit the internal retired field',async()=>{
- const saved=[];const adapter=createMovementJourneyAdapter({movementDetails:{all:async()=>[{...record}],insert:async value=>saved.push(value)}});
+ const saved=[];const adapter=createMovementJourneyAdapter({movementDetails:{all:async()=>[{...record}],select:async(_sql,values)=>[record].filter(row=>row.movementMasterId===values[0]),insert:async value=>saved.push(value)}});
  const rows=await adapter.store.readItems('M');assert.equal(rows.length,1);assert.equal(Object.hasOwn(rows[0],'purchaseDetailId'),false);
  await adapter.store.appendItem(()=>({id:'MD2',masterId:'M',shop:'NJ',quantity:'5',remark:'new',fromLocation:'Home',toLocation:'NJ',imageUrl:'',status:'created',createdAt:'',updatedAt:'',stockCounted:false,isNewArrival:false}));
  assert.equal(Object.hasOwn(saved[0],'purchaseDetailId'),false);assert.equal(saved[0].quantity,'5');

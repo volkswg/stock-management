@@ -1,8 +1,8 @@
 import type { DailySalesItemRow, DailySalesPaymentRow, DailySalesReport, SalesDashboardDay, SalesDashboardReport, ProfitSummaryMetrics, ProfitSummaryShop, ProfitSummaryMonth, ProfitSummary, ProfitExpense, SalesProfitCostOverride } from "../contracts";
-import type { SalesReader, SalesRecord, SalesValue } from "./ports/sales-reader";
+import type { SalesReader, SalesRecord, SalesValue, SalesReadScope } from "./ports/sales-reader";
 
 // A single composed async function preserves the original rejection phase during parallel reads.
-export function createSalesReports<Context>(createReader: (context: Context) => SalesReader) {
+export function createSalesReports<Context>(createReader: (context: Context, scope: SalesReadScope) => SalesReader) {
 async function getDailySales({
   accountId,
   storage,
@@ -12,7 +12,7 @@ async function getDailySales({
   storage: Context;
   salesDate: string;
 }): Promise<DailySalesReport> {
-  const reader = createReader(storage);
+  const reader = createReader(storage, { fromDate: salesDate, toDate: salesDate, accountIds: [accountId] });
   const [receiptRecords, itemRecords, paymentRecords] = await Promise.all([
     reader.receipts(),
     reader.items(),
@@ -39,7 +39,7 @@ async function getSalesDashboard({
   storage: Context;
   toDate: string;
 }): Promise<SalesDashboardReport> {
-  const reader = createReader(storage);
+  const reader = createReader(storage, { fromDate, toDate, accountIds: accountIds?.length ? accountIds : undefined });
   const [receiptRecords, itemRecords, paymentRecords, syncRecords] =
     await Promise.all([
       reader.receipts(),
@@ -120,7 +120,7 @@ async function getProfitSummary({
   storage: Context;
   year: string;
 }): Promise<ProfitSummary> {
-  const reader = createReader(storage);
+  const reader = createReader(storage, { year, accountIds: accounts.map(account => account.id) });
   const [receiptRecords, itemRecords, syncRecords] = await Promise.all([
     reader.receipts(),
     reader.items(),

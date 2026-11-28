@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Hash-bound historical test source, never a runtime fallback. */
 const fs=require('node:fs'),{createHash}=require('node:crypto'),assert=require('node:assert/strict');
 exports.beforeOrderPagination=(name,data=fs.existsSync(name)?fs.readFileSync(name):null)=>{
+ data=require('./scoped-reads-history.cjs').beforeScopedReads(name,data);
  const mobile=JSON.parse(fs.readFileSync('tests/fixtures/mobile-order-pagination-before.json')).edits[name];
  if(mobile){
   const hash=value=>createHash('sha256').update(value).digest('hex');assert.equal(data===null?null:hash(data),mobile.afterSha256,name);

@@ -82,7 +82,7 @@ try:
  assert sql(proof,db='movement_shops').stdout==sql(proof,db='movement_shops_restore').stdout
  print(json.dumps({'movementShopLinksAndSessionsDumpRestoreVerified':True,'syntheticOnly':True}),flush=True)
  # Existing app and LINE/database behavior must remain usable with the added FK.
- for testfile in ['tools/native-postgres/application.test.cjs','tools/native-postgres/media-line.test.cjs']:
+ for testfile in ['tools/native-postgres/application.test.cjs','tools/native-postgres/media-line.test.cjs','tools/native-postgres/scoped-reads.test.cjs']:
   run(['exec',container,'createdb','-U','postgres','-T','uat','regression'])
   sql("DO $$DECLARE names text;BEGIN SELECT string_agg(format('%I.%I',schemaname,tablename),',') INTO names FROM pg_tables WHERE schemaname='stock_operational' AND tablename NOT IN ('environment','revision');EXECUTE 'TRUNCATE TABLE '||names||' RESTART IDENTITY CASCADE';END$$;",db='regression')
   install_movement_shops('regression')

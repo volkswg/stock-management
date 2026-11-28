@@ -7,29 +7,35 @@ a deployment, and a retained receipt is not a new live inspection.
 
 ## Latest production release
 
-Last independently verified application release: [PR106](https://github.com/volkswg/stock-management/pull/106),
-source `1d2f9e93c3958ac2281d04e0ba38aeb1203d05ec`, deployment
-`dpl_9Cn3LvBZFTcLXk2z6oH6W1B9h2rm`, at
-`https://inventra-beta-one.vercel.app`. The private completion receipt was recorded
-25 November 2026, 09:45 Bangkok. The application and LINE were available for reopening.
-This docs task has made no production query, deployment or setting/data change.
+Last independently verified application release: [PR112](https://github.com/volkswg/stock-management/pull/112),
+source `60df2a1e530e1a0d71430a36ed07224195fae28c`, deployment
+`dpl_9EoGzftxxTqoJRwmm1A9sb4kcBYJ`, at
+`https://inventra-beta-one.vercel.app`, completed 26 November 2026.
+The release added synchronized mobile/desktop pagination above and below Orders.
+Users were cleared to resume the app and LINE after successful checks.
 
-The approved application-only release staged the exact merged tree in `hnd1`,
-verified protected-host denial without an access link, promoted it and passed five
-HEAD availability checks, missing-key 428 and invalid-LINE-signature 401 rejection,
-static-helper comparison and the settings/protection drift guard. The initial
-safe error-count scan returned no error/fatal groups. Database/schema, pool settings,
-LINE cutoff, credentials and existing controls were preserved. No fresh business
-GET, accepted-write/provider canary or fresh database backup was claimed; retained
-recovery hashes were reverified. This is not new end-to-end provider certification.
+The exact merged tree matched tested head `7991f4c934a414dfc9144d5c7287f9e82e7fe880`;
+[CI run138](https://github.com/volkswg/stock-management/actions/runs/45691166176) passed.
+Local 909 Node + 3 Python tests, types/lint (two inherited warnings), isolated build
+and synthetic Chrome layouts at 320–1440 pixels passed. The protected production
+build in `hnd1` was promoted after source/settings checks, then passed six HEAD
+availability checks, missing-key 428, invalid-signature 401, static-helper comparison
+and configuration/protection drift guards. The initial error/fatal count scan was
+empty. Schema, records, pool settings, credentials, LINE cutoff and protections were
+preserved. Retained recovery was rehashed; no fresh database backup, accepted write
+or real-provider canary was claimed. Private receipts remain on the Mac.
 
-Final tested PR106 head was `115e4e14d85dfea7f375e04113fc5a3195f96b8f`, identical
-in tree to the merge. Local `npm run cloud:test`: 894 Node + 3 Python passed;
-26 grouped identity checks, typecheck, lint (two inherited warnings) and the
-isolated build passed. GitHub
-[run128](https://github.com/volkswg/stock-management/actions/runs/45484302973) and
-[run129](https://github.com/volkswg/stock-management/actions/runs/45533925363) passed.
-Cloud packet/environment tooling does not establish Cloud account permissions.
+### Scoped-query optimization — not deployed
+
+The review branch scopes sales by report date/account, movement/LINE reads by
+parent/user/flow, and Orders by page plus existing filters. It preserves financial
+calculations, payment splits, native projections, ordering, row revisions and the
+unpaged Orders response. Synthetic SQL acceptance compares complete predecessor
+results and measures reduced returned data; current UI tests cover pagination,
+filters, reload, debounce and request races. The
+[verification guide](verification.md#scoped-query-acceptance) records the test scope
+and measurement limits. This preparation makes no production change. Merge and
+application deployment require separate owner approval.
 
 ## Merged documentation baseline — PR107
 
@@ -57,7 +63,7 @@ Its exact-commit validation/CI belongs in its PR; it grants no live action.
 | PR103 | Product Master and order-item link/create released as `44ab4ac9e972b180c97fa431fb30bf679861f92c`; private completion receipt recorded 22 November 2026, 19:19 Bangkok. It is not a pending UAT-only feature. |
 | PR105 | Pooling fix released as `c66bd976c36f396309037aa3d56d439694598cbe`; transaction 6543/shared pool 4/runtime limit 6. Controlled HTTP/guard checks passed, old sessions drained, system reopened. |
 | PR104 (after PR105) | Shop-master IDs and explicit historical/session backfill released as `ffde7cb147e29824f5ff7d9fffe017379712f1c9`; private completion recorded 23 November 2026, 02:15 Bangkok. All53 tables/metadata/four sequences reconciled; original values/revisions/permissions preserved, system reopened. This is not a current data inventory. |
-| PR106 | Seller editing/replay compatibility and Cloud workflow released; exact current checkpoint above. |
+| PR106 | Seller editing/replay compatibility and Cloud workflow released; retained evidence is in its immutable PR and the historical ledger. |
 
 Private receipts remain on the Mac. Do not publish business values, mappings,
 tokens, hashes of private datasets, keys or dumps to substantiate this public index.

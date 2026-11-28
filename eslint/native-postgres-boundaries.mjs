@@ -1,6 +1,7 @@
 import { noDynamicServerBypass } from './orders-boundaries.mjs';
 // Exact named dependencies for the PostgreSQL-only owners; never wildcard feature access.
 const scopes = {
+  "src/infrastructure/persistence/postgres/text.ts": ["server-only"],
   "src/modules/expenses/infrastructure/postgres/movement-shop-directory.ts": ["server-only", "@/infrastructure/persistence/postgres/database"],
   "src/modules/inventory/infrastructure/postgres/movement-shop-aliases.ts": ["server-only", "@/infrastructure/persistence/postgres/database"],
   "src/composition/employee-directory.ts": [
@@ -265,6 +266,8 @@ const scopes = {
     "server-only"
   ],
   "src/modules/orders/infrastructure/postgres/order-list-reader.ts": [
+    "@/infrastructure/persistence/postgres/database",
+    "@/infrastructure/persistence/postgres/text",
     "../../application/ports/order-list-reader",
     "../../contracts",
     "./order-row-mapping",
@@ -355,6 +358,7 @@ const scopes = {
     "server-only"
   ],
   "src/modules/sales/infrastructure/postgres/sales-reader.ts": [
+    "@/infrastructure/persistence/postgres/text",
     "./receipt-payment",
     "@/infrastructure/persistence/postgres/database",
     "../../application/ports/sales-reader",

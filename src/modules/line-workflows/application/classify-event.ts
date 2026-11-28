@@ -25,7 +25,7 @@ export async function classifyLineEvent({ event, getContext, }: {
         return { kind: EventKindEnum.Order };
     }
     const context = getContext();
-    const photoContext = message.type === LineMessageType.Image ? await context.photoContext() : undefined;
+    const photoContext = message.type === LineMessageType.Image ? await context.photoContext(userId) : undefined;
     const session = await readMovementSession(context.movements, userId, event.webhookEventId || message.id, photoContext?.sessions);
     const command = message.text?.trim().toLowerCase() || "";
     // Check retries before completed state so they still reach movement recovery.
